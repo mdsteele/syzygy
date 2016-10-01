@@ -3,5 +3,8 @@ name = "syzygy"
 version = "0.1.0"
 authors = ["Matthew D. Steele <mdsteele@alum.mit.edu>"]
 license = "GPL-3.0+"
+build = "build.rs"
 
 [dependencies]
+getopts = "0.2"
+sdl2 = { version = "0.22", features = ["use_mac_framework"] }

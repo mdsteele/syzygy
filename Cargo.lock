@@ -2,9 +2,15 @@
 name = "syzygy"
 version = "0.1.0"
 dependencies = [
+ "ahi 0.1.0 (git+https://github.com/mdsteele/ahi?rev=8dfd2b39ba35d77a3260d95d53369c149e875ecf)",
  "getopts 0.2.14 (registry+https://github.com/rust-lang/crates.io-index)",
  "sdl2 0.22.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
+
+[[package]]
+name = "ahi"
+version = "0.1.0"
+source = "git+https://github.com/mdsteele/ahi?rev=8dfd2b39ba35d77a3260d95d53369c149e875ecf#8dfd2b39ba35d77a3260d95d53369c149e875ecf"
 
 [[package]]
 name = "bitflags"
@@ -127,6 +133,7 @@ dependencies = [
 ]
 
 [metadata]
+"checksum ahi 0.1.0 (git+https://github.com/mdsteele/ahi?rev=8dfd2b39ba35d77a3260d95d53369c149e875ecf)" = "<none>"
 "checksum bitflags 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)" = "72cd7314bd4ee024071241147222c706e80385a1605ac7d4cd2fcc339da2ae46"
 "checksum getopts 0.2.14 (registry+https://github.com/rust-lang/crates.io-index)" = "d9047cfbd08a437050b363d35ef160452c5fe8ea5187ae0a624708c91581d685"
 "checksum lazy_static 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "49247ec2a285bb3dcb23cbd9c35193c025e7251bfce77c1d5da97e6362dffe7f"

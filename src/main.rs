@@ -17,6 +17,7 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
+extern crate ahi;
 extern crate getopts;
 extern crate sdl2;
 
@@ -79,8 +80,10 @@ fn main() {
         });
         timer_subsystem.add_timer(FRAME_DELAY_MILLIS, callback)
     };
+    let font = window.load_font("data/fonts/roman.ahf");
+    let sprites = window.load_sprites("data/sprites/chars.ahi");
     let mut state = ();
-    let mut view = title::TitleView::new();
+    let mut view = title::TitleView::new(font, sprites);
     window.render(&state, &view);
     let mut event_queue = gui::EventQueue::new(&sdl_context);
     loop {

@@ -17,21 +17,54 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod action;
-mod canvas;
-mod element;
-mod event;
-mod font;
-mod sprite;
-mod window;
+use ahi;
+use sdl2::pixels::PixelFormatEnum;
+use sdl2::render::{Renderer, Texture};
+use sdl2::surface::Surface;
 
-pub use sdl2::rect::{Point, Rect};
-pub use self::action::{Action, ActionBuilder};
-pub use self::canvas::{Align, Canvas};
-pub use self::element::{Element, GroupElement, SubrectElement};
-pub use self::event::{Event, EventQueue};
-pub use self::font::Font;
-pub use self::sprite::Sprite;
-pub use self::window::Window;
+// ========================================================================= //
+
+pub struct Sprite {
+    width: u32,
+    height: u32,
+    texture: Texture,
+}
+
+impl Sprite {
+    pub fn new(renderer: &Renderer, image: &ahi::Image) -> Sprite {
+        let width = image.width();
+        let height = image.height();
+        let mut data = image.rgba_data();
+        let bytes_per_pixel = 4;
+        let format = if cfg!(target_endian = "big") {
+            PixelFormatEnum::RGBA8888
+        } else {
+            PixelFormatEnum::ABGR8888
+        };
+        let surface = Surface::from_data(&mut data,
+                                         width,
+                                         height,
+                                         width * bytes_per_pixel,
+                                         format)
+                          .unwrap();
+        Sprite {
+            width: width,
+            height: height,
+            texture: renderer.create_texture_from_surface(&surface).unwrap(),
+        }
+    }
+
+    pub fn width(&self) -> u32 {
+        self.width
+    }
+
+    pub fn height(&self) -> u32 {
+        self.height
+    }
+
+    pub fn sdl2_texture(&self) -> &Texture {
+        &self.texture
+    }
+}
 
 // ========================================================================= //

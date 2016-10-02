@@ -18,8 +18,10 @@
 // +--------------------------------------------------------------------------+
 
 use sdl2::pixels::Color;
-use sdl2::rect::Rect;
+use sdl2::rect::{Point, Rect};
 use sdl2::render::Renderer;
+use super::font::Font;
+use super::sprite::Sprite;
 
 // ========================================================================= //
 
@@ -92,12 +94,51 @@ impl<'a> Canvas<'a> {
         }
         self.renderer.fill_rect(rect).unwrap();
     }
+
+    pub fn draw_sprite(&mut self, sprite: &Sprite, mut top_left: Point) {
+        top_left = top_left.offset(self.offset_rect.x(), self.offset_rect.y());
+        self.renderer.copy(&sprite.sdl2_texture(),
+                           None,
+                           Some(Rect::new(top_left.x(),
+                                          top_left.y(),
+                                          sprite.width(),
+                                          sprite.height())));
+    }
+
+    pub fn draw_text(&mut self,
+                     font: &Font,
+                     alignment: Align,
+                     start: Point,
+                     text: &str) {
+        let top = start.y() - font.baseline();
+        let mut left = match alignment {
+            Align::Left => start.x(),
+            Align::Center => start.x() - font.text_width(text) / 2,
+            Align::Right => start.x() - font.text_width(text),
+        };
+        for chr in text.chars() {
+            let glyph = font.glyph(chr);
+            left -= glyph.left_edge();
+            self.draw_sprite(glyph.sprite(), Point::new(left, top));
+            left += glyph.right_edge();
+        }
+    }
 }
 
 impl<'a> Drop for Canvas<'a> {
     fn drop(&mut self) {
         self.renderer.set_clip_rect(self.prev_clip_rect);
     }
+}
+
+// ========================================================================= //
+
+#[allow(dead_code)]
+#[derive(Clone, Copy, Eq, PartialEq)]
+pub enum Align {
+    Left,
+    Center,
+    Right,
 }
 
 // ========================================================================= //

@@ -17,18 +17,23 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use super::super::gui::{Action, Canvas, Element, Event, Rect};
+use super::super::gui::{Action, Align, Canvas, Element, Event, Font, Point,
+                        Rect, Sprite};
 
 // ========================================================================= //
 
 pub struct TitleView {
+    font: Font,
+    sprites: Vec<Sprite>,
     counter: i32,
     blink: bool,
 }
 
 impl TitleView {
-    pub fn new() -> TitleView {
+    pub fn new(font: Font, sprites: Vec<Sprite>) -> TitleView {
         TitleView {
+            font: font,
+            sprites: sprites,
             counter: 0,
             blink: false,
         }
@@ -49,6 +54,15 @@ impl Element<()> for TitleView {
         } else {
             canvas.fill_rect((0, 192, 0), rect);
         }
+        for i in 0..6 {
+            canvas.draw_sprite(&self.sprites[i as usize],
+                               Point::new(150 + 40 * i, 150));
+        }
+        let center_x = canvas.rect().width() as i32 / 2;
+        canvas.draw_text(&self.font,
+                         Align::Center,
+                         Point::new(center_x, 250),
+                         "Hello, world!");
     }
 
     fn handle_event(&mut self, event: &Event, _: &mut ()) -> Action {

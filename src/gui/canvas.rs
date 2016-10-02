@@ -105,10 +105,7 @@ impl<'a> Canvas<'a> {
                                           sprite.height())));
     }
 
-    pub fn draw_text(&mut self,
-                     font: &Font,
-                     alignment: Align,
-                     start: Point,
+    pub fn draw_text(&mut self, font: &Font, alignment: Align, start: Point,
                      text: &str) {
         let top = start.y() - font.baseline();
         let mut left = match alignment {
@@ -126,9 +123,7 @@ impl<'a> Canvas<'a> {
 }
 
 impl<'a> Drop for Canvas<'a> {
-    fn drop(&mut self) {
-        self.renderer.set_clip_rect(self.prev_clip_rect);
-    }
+    fn drop(&mut self) { self.renderer.set_clip_rect(self.prev_clip_rect); }
 }
 
 // ========================================================================= //

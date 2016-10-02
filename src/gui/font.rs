@@ -43,9 +43,7 @@ impl Font {
         }
     }
 
-    pub fn baseline(&self) -> i32 {
-        self.baseline
-    }
+    pub fn baseline(&self) -> i32 { self.baseline }
 
     pub fn text_width(&self, text: &str) -> i32 {
         let mut width = 0;
@@ -78,17 +76,11 @@ impl Glyph {
         }
     }
 
-    pub fn sprite(&self) -> &Sprite {
-        &self.sprite
-    }
+    pub fn sprite(&self) -> &Sprite { &self.sprite }
 
-    pub fn left_edge(&self) -> i32 {
-        self.left_edge
-    }
+    pub fn left_edge(&self) -> i32 { self.left_edge }
 
-    pub fn right_edge(&self) -> i32 {
-        self.right_edge
-    }
+    pub fn right_edge(&self) -> i32 { self.right_edge }
 }
 
 // ========================================================================= //

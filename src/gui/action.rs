@@ -28,21 +28,13 @@ pub struct Action {
 }
 
 impl Action {
-    pub fn ignore() -> ActionBuilder {
-        ActionBuilder { redraw: false }
-    }
+    pub fn ignore() -> ActionBuilder { ActionBuilder { redraw: false } }
 
-    pub fn redraw() -> ActionBuilder {
-        ActionBuilder { redraw: true }
-    }
+    pub fn redraw() -> ActionBuilder { ActionBuilder { redraw: true } }
 
-    pub fn should_redraw(&self) -> bool {
-        self.redraw
-    }
+    pub fn should_redraw(&self) -> bool { self.redraw }
 
-    pub fn should_stop(&self) -> bool {
-        self.stop
-    }
+    pub fn should_stop(&self) -> bool { self.stop }
 }
 
 impl BitOr for Action {

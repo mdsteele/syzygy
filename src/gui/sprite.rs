@@ -54,17 +54,11 @@ impl Sprite {
         }
     }
 
-    pub fn width(&self) -> u32 {
-        self.width
-    }
+    pub fn width(&self) -> u32 { self.width }
 
-    pub fn height(&self) -> u32 {
-        self.height
-    }
+    pub fn height(&self) -> u32 { self.height }
 
-    pub fn sdl2_texture(&self) -> &Texture {
-        &self.texture
-    }
+    pub fn sdl2_texture(&self) -> &Texture { &self.texture }
 }
 
 // ========================================================================= //

@@ -53,9 +53,7 @@ impl Flags {
         Flags { fullscreen: fullscreen }
     }
 
-    fn fullscreen(&self) -> bool {
-        self.fullscreen.unwrap_or(false)
-    }
+    fn fullscreen(&self) -> bool { self.fullscreen.unwrap_or(false) }
 }
 
 // ========================================================================= //

@@ -1,2 +1,4 @@
+fn_args_density = "Compressed"
+fn_single_line = true
 max_width = 79
 report_fixme = "Always"

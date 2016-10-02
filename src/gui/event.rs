@@ -155,9 +155,7 @@ impl BitOr for KeyMod {
 }
 
 impl BitOrAssign for KeyMod {
-    fn bitor_assign(&mut self, rhs: KeyMod) {
-        self.bits |= rhs.bits;
-    }
+    fn bitor_assign(&mut self, rhs: KeyMod) { self.bits |= rhs.bits; }
 }
 
 pub const NONE: KeyMod = KeyMod { bits: 0x0 };

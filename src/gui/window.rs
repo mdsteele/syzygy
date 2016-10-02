@@ -37,11 +37,8 @@ pub struct Window {
 }
 
 impl Window {
-    pub fn new(sdl_context: &Sdl,
-               title: &str,
-               full_size: (u32, u32),
-               ideal_size: (u32, u32),
-               fullscreen: bool)
+    pub fn new(sdl_context: &Sdl, title: &str, full_size: (u32, u32),
+               ideal_size: (u32, u32), fullscreen: bool)
                -> Window {
         let (full_width, full_height) = full_size;
         let (ideal_width, ideal_height) = ideal_size;

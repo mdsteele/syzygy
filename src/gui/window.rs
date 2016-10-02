@@ -38,7 +38,7 @@ pub struct Window {
 
 impl Window {
     pub fn new(sdl_context: &Sdl, title: &str, full_size: (u32, u32),
-               ideal_size: (u32, u32), fullscreen: bool)
+               ideal_size: (u32, u32), force_ideal: bool, fullscreen: bool)
                -> Window {
         let (full_width, full_height) = full_size;
         let (ideal_width, ideal_height) = ideal_size;
@@ -55,17 +55,21 @@ impl Window {
                            .build()
                            .unwrap()
         };
-        let (native_width, native_height) = sdl_window.size();
-        let aspect_ratio = (native_width as f64) / (native_height as f64);
-        let ideal_ratio = (ideal_width as f64) / (ideal_height as f64);
-        let (actual_width, actual_height) = if aspect_ratio > ideal_ratio {
-            let actual_width =
-                (aspect_ratio * (ideal_height as f64)).round() as u32;
-            (actual_width, ideal_height)
+        let (actual_width, actual_height) = if force_ideal {
+            ideal_size
         } else {
-            let actual_height =
-                ((ideal_width as f64) / aspect_ratio).round() as u32;
-            (ideal_width, actual_height)
+            let (native_width, native_height) = sdl_window.size();
+            let aspect_ratio = (native_width as f64) / (native_height as f64);
+            let ideal_ratio = (ideal_width as f64) / (ideal_height as f64);
+            if aspect_ratio > ideal_ratio {
+                let actual_width =
+                    (aspect_ratio * (ideal_height as f64)).round() as u32;
+                (actual_width, ideal_height)
+            } else {
+                let actual_height =
+                    ((ideal_width as f64) / aspect_ratio).round() as u32;
+                (ideal_width, actual_height)
+            }
         };
         let mut renderer = sdl_window.renderer()
                                      .present_vsync()

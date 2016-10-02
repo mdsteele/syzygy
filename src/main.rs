@@ -30,6 +30,7 @@ use gui::Element;
 
 struct Flags {
     fullscreen: Option<bool>,
+    window_size: Option<(u32, u32)>,
 }
 
 impl Flags {
@@ -38,6 +39,7 @@ impl Flags {
         let mut opts = getopts::Options::new();
         opts.optflag("h", "help", "print this help menu");
         opts.optopt("", "fullscreen", "override fullscreen setting", "BOOL");
+        opts.optopt("", "window_size", "override window size", "WxH");
         let matches = opts.parse(&args[1..]).unwrap_or_else(|failure| {
             println!("Error: {:?}", failure);
             println!("Run with --help to see available flags.");
@@ -46,12 +48,32 @@ impl Flags {
         if matches.opt_present("help") {
             let brief = format!("Usage: {} [options]", &args[0]);
             print!("{}", opts.usage(&brief));
-            std::process::exit(1);
+            std::process::exit(0);
         }
         let fullscreen = matches.opt_str("fullscreen")
                                 .and_then(|value| value.parse().ok());
-        Flags { fullscreen: fullscreen }
+        let window_size = matches.opt_str("window_size").and_then(|value| {
+            let pieces: Vec<&str> = value.split('x').collect();
+            if pieces.len() != 2 {
+                return None;
+            }
+            pieces[0].parse::<u32>().ok().and_then(|width| {
+                pieces[1].parse::<u32>().ok().and_then(|height| {
+                    return Some((width, height));
+                })
+            })
+        });
+        Flags {
+            fullscreen: fullscreen,
+            window_size: window_size,
+        }
     }
+
+    fn ideal_size(&self) -> (u32, u32) {
+        self.window_size.unwrap_or((480, 320))
+    }
+
+    fn force_ideal(&self) -> bool { self.window_size.is_some() }
 
     fn fullscreen(&self) -> bool { self.fullscreen.unwrap_or(false) }
 }
@@ -68,7 +90,8 @@ fn main() {
     let mut window = gui::Window::new(&sdl_context,
                                       "System Syzygy",
                                       (576, 384),
-                                      (480, 320),
+                                      flags.ideal_size(),
+                                      flags.force_ideal(),
                                       flags.fullscreen());
     let _timer = {
         gui::Event::register_clock_ticks(&event_subsystem);

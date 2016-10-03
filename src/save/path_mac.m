@@ -17,20 +17,28 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-extern crate gcc;
+#include <Foundation/Foundation.h>
 
 // ========================================================================= //
 
-fn main() {
-    let target = std::env::var("TARGET").unwrap();
-    if target.ends_with("-apple-darwin") {
-        gcc::compile_library("libsyzygysys.a", &["src/save/path_mac.m"]);
-        println!("cargo:rustc-link-search=framework=/Library/Frameworks");
-        println!("cargo:rustc-link-lib=framework=Foundation");
-    } else {
-        println!("cargo:warning=System Syzygy doesn't support {} yet",
-                 target);
-    }
+const char *syzygy_save_dir(char *buffer, unsigned int size) {
+  // Get the path to the user's Application Support directory.
+  NSArray *array =
+    NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory,
+                                        NSUserDomainMask, YES);
+  if ([array count] <= 0) {
+    return "couldn't find app support directory";
+  }
+  // Append the name of our subdirectory.
+  NSString *path_string =
+    [[array objectAtIndex: 0] stringByAppendingString: @"/System Syzygy"];
+  // Copy the directory path into the buffer.
+  if (![path_string getCString: buffer
+                     maxLength: size
+                      encoding: NSUTF8StringEncoding]) {
+    return "couldn't store path in buffer";
+  }
+  return "";
 }
 
 // ========================================================================= //

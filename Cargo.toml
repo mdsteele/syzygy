@@ -5,9 +5,13 @@ authors = ["Matthew D. Steele <mdsteele@alum.mit.edu>"]
 license = "GPL-3.0+"
 build = "build.rs"
 
+[build-dependencies]
+gcc = "0.3"
+
 [dependencies]
 getopts = "0.2"
 sdl2 = { version = "0.22", features = ["use_mac_framework"] }
+toml = { version = "0.2", features = [] }
 
 [dependencies.ahi]
 git = "https://github.com/mdsteele/ahi"

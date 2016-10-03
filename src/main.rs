@@ -20,16 +20,20 @@
 extern crate ahi;
 extern crate getopts;
 extern crate sdl2;
+extern crate toml;
 
 mod gui;
+mod save;
 mod title;
 
-use gui::Element;
+use self::gui::Element;
+use std::path::PathBuf;
 
 // ========================================================================= //
 
 struct Flags {
     fullscreen: Option<bool>,
+    save_file: Option<PathBuf>,
     window_size: Option<(u32, u32)>,
 }
 
@@ -39,6 +43,7 @@ impl Flags {
         let mut opts = getopts::Options::new();
         opts.optflag("h", "help", "print this help menu");
         opts.optopt("", "fullscreen", "override fullscreen setting", "BOOL");
+        opts.optopt("", "save_file", "override save file path", "FILE");
         opts.optopt("", "window_size", "override window size", "WxH");
         let matches = opts.parse(&args[1..]).unwrap_or_else(|failure| {
             println!("Error: {:?}", failure);
@@ -52,6 +57,7 @@ impl Flags {
         }
         let fullscreen = matches.opt_str("fullscreen")
                                 .and_then(|value| value.parse().ok());
+        let save_file = matches.opt_str("save_file").map(PathBuf::from);
         let window_size = matches.opt_str("window_size").and_then(|value| {
             let pieces: Vec<&str> = value.split('x').collect();
             if pieces.len() != 2 {
@@ -65,6 +71,7 @@ impl Flags {
         });
         Flags {
             fullscreen: fullscreen,
+            save_file: save_file,
             window_size: window_size,
         }
     }
@@ -75,7 +82,16 @@ impl Flags {
 
     fn force_ideal(&self) -> bool { self.window_size.is_some() }
 
-    fn fullscreen(&self) -> bool { self.fullscreen.unwrap_or(false) }
+    fn fullscreen(&self, prefs: &save::Prefs) -> bool {
+        self.fullscreen.unwrap_or(prefs.fullscreen())
+    }
+
+    fn save_file(&self) -> PathBuf {
+        match self.save_file {
+            Some(ref path) => path.clone(),
+            None => save::get_default_save_file_path().unwrap(),
+        }
+    }
 }
 
 // ========================================================================= //
@@ -84,6 +100,7 @@ const FRAME_DELAY_MILLIS: u32 = 50;
 
 fn main() {
     let flags = Flags::parse_or_exit();
+    let save_data = save::SaveData::load_or_create(flags.save_file()).unwrap();
     let sdl_context = sdl2::init().unwrap();
     let event_subsystem = sdl_context.event().unwrap();
     let timer_subsystem = sdl_context.timer().unwrap();
@@ -92,7 +109,7 @@ fn main() {
                                       (576, 384),
                                       flags.ideal_size(),
                                       flags.force_ideal(),
-                                      flags.fullscreen());
+                                      flags.fullscreen(save_data.prefs()));
     let _timer = {
         gui::Event::register_clock_ticks(&event_subsystem);
         let callback = Box::new(|| {

@@ -17,20 +17,38 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-extern crate gcc;
+use toml;
 
 // ========================================================================= //
 
-fn main() {
-    let target = std::env::var("TARGET").unwrap();
-    if target.ends_with("-apple-darwin") {
-        gcc::compile_library("libsyzygysys.a", &["src/save/path_mac.m"]);
-        println!("cargo:rustc-link-search=framework=/Library/Frameworks");
-        println!("cargo:rustc-link-lib=framework=Foundation");
-    } else {
-        println!("cargo:warning=System Syzygy doesn't support {} yet",
-                 target);
-    }
+pub struct Prefs {
+    fullscreen: bool,
 }
+
+impl Prefs {
+    pub fn with_defaults() -> Prefs { Prefs { fullscreen: true } }
+
+    pub fn from_toml(value: &toml::Value) -> Prefs {
+        let mut prefs = Prefs::with_defaults();
+        if let Some(table) = value.as_table() {
+            if let Some(fullscreen) = table.get(FULLSCREEN_KEY)
+                                           .and_then(toml::Value::as_bool) {
+                prefs.fullscreen = fullscreen;
+            }
+        }
+        prefs
+    }
+
+    pub fn to_toml(&self) -> toml::Value {
+        let mut table = toml::Table::new();
+        table.insert(FULLSCREEN_KEY.to_string(),
+                     toml::Value::Boolean(self.fullscreen));
+        toml::Value::Table(table)
+    }
+
+    pub fn fullscreen(&self) -> bool { self.fullscreen }
+}
+
+const FULLSCREEN_KEY: &'static str = "fullscreen";
 
 // ========================================================================= //

@@ -22,6 +22,7 @@ mod canvas;
 mod element;
 mod event;
 mod font;
+mod resources;
 mod sprite;
 mod window;
 
@@ -29,8 +30,9 @@ pub use sdl2::rect::{Point, Rect};
 pub use self::action::{Action, ActionBuilder};
 pub use self::canvas::{Align, Canvas};
 pub use self::element::{Element, GroupElement, SubrectElement};
-pub use self::event::{Event, EventQueue};
+pub use self::event::{Event, KeyMod};
 pub use self::font::Font;
+pub use self::resources::Resources;
 pub use self::sprite::Sprite;
 pub use self::window::Window;
 

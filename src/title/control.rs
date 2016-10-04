@@ -17,10 +17,24 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod control;
-mod view;
+use super::super::gui::{Element, Event, Window};
+use super::super::save::SaveData;
+use super::view::TitleView;
 
-pub use self::control::run_title_screen;
-pub use self::view::TitleView;
+// ========================================================================= //
+
+pub fn run_title_screen(window: &mut Window, save_data: &mut SaveData) {
+    let mut view = TitleView::new(&mut window.resources());
+    window.render(save_data, &view);
+    loop {
+        let action = match window.next_event() {
+            Event::Quit => break,
+            event => view.handle_event(&event, save_data),
+        };
+        if action.should_redraw() {
+            window.render(save_data, &view);
+        }
+    }
+}
 
 // ========================================================================= //

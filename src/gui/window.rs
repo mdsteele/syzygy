@@ -17,16 +17,13 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use ahi;
-use sdl2::{Sdl, VideoSubsystem};
+use sdl2::{EventPump, Sdl, VideoSubsystem};
 use sdl2::rect::Rect;
 use sdl2::render::Renderer;
-use std::fs::File;
-use std::io;
 use super::canvas::Canvas;
 use super::element::Element;
-use super::font::Font;
-use super::sprite::Sprite;
+use super::event::Event;
+use super::resources::{Resources, ResourceCache};
 
 // ========================================================================= //
 
@@ -34,6 +31,8 @@ pub struct Window {
     _video_subsystem: VideoSubsystem,
     renderer: Renderer<'static>,
     full_rect: Rect,
+    event_pump: EventPump,
+    resource_cache: ResourceCache,
 }
 
 impl Window {
@@ -82,17 +81,9 @@ impl Window {
             _video_subsystem: video_subsystem,
             renderer: renderer,
             full_rect: Rect::new(offset_x, offset_y, full_width, full_height),
+            event_pump: sdl_context.event_pump().unwrap(),
+            resource_cache: ResourceCache::new(),
         }
-    }
-
-    pub fn load_font(&self, path: &str) -> Font {
-        let ahf = load_ahf_from_file(path).unwrap();
-        Font::new(&self.renderer, &ahf)
-    }
-
-    pub fn load_sprites(&self, path: &str) -> Vec<Sprite> {
-        let images = load_ahi_from_file(path).unwrap();
-        images.iter().map(|image| Sprite::new(&self.renderer, image)).collect()
     }
 
     pub fn render<S, E: Element<S>>(&mut self, state: &S, view: &E) {
@@ -102,18 +93,20 @@ impl Window {
         }
         self.renderer.present();
     }
-}
 
-// ========================================================================= //
+    /// Blocks until the next event is available.
+    pub fn next_event(&mut self) -> Event {
+        loop {
+            match Event::from_sdl2(&self.event_pump.wait_event()) {
+                Some(event) => return event,
+                None => {}
+            }
+        }
+    }
 
-pub fn load_ahf_from_file(path: &str) -> io::Result<ahi::Font> {
-    let mut file = try!(File::open(path));
-    ahi::Font::read(&mut file)
-}
-
-pub fn load_ahi_from_file(path: &str) -> io::Result<Vec<ahi::Image>> {
-    let mut file = try!(File::open(path));
-    ahi::Image::read_all(&mut file)
+    pub fn resources(&mut self) -> Resources {
+        Resources::new(&self.renderer, &mut self.resource_cache)
+    }
 }
 
 // ========================================================================= //

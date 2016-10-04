@@ -48,7 +48,7 @@ impl Event {
         subsystem.push_custom_event(ClockTick).unwrap();
     }
 
-    fn from_sdl2(event: &sdl2::event::Event) -> Option<Event> {
+    pub fn from_sdl2(event: &sdl2::event::Event) -> Option<Event> {
         match event {
             &sdl2::event::Event::Quit { .. } => Some(Event::Quit),
             &sdl2::event::Event::MouseMotion { x, y, mousestate, .. } => {
@@ -86,28 +86,6 @@ impl Event {
             &Event::MouseDrag(pt) => Event::MouseDrag(pt.offset(dx, dy)),
             &Event::MouseDown(pt) => Event::MouseDown(pt.offset(dx, dy)),
             _ => self.clone(),
-        }
-    }
-}
-
-// ========================================================================= //
-
-pub struct EventQueue {
-    pump: sdl2::EventPump,
-}
-
-impl EventQueue {
-    pub fn new(sdl_context: &sdl2::Sdl) -> EventQueue {
-        EventQueue { pump: sdl_context.event_pump().unwrap() }
-    }
-
-    /// Blocks until the next event is available.
-    pub fn next(&mut self) -> Event {
-        loop {
-            match Event::from_sdl2(&self.pump.wait_event()) {
-                Some(event) => return event,
-                None => {}
-            }
         }
     }
 }

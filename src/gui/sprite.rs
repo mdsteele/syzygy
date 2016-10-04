@@ -21,13 +21,15 @@ use ahi;
 use sdl2::pixels::PixelFormatEnum;
 use sdl2::render::{Renderer, Texture};
 use sdl2::surface::Surface;
+use std::rc::Rc;
 
 // ========================================================================= //
 
+#[derive(Clone)]
 pub struct Sprite {
     width: u32,
     height: u32,
-    texture: Texture,
+    texture: Rc<Texture>,
 }
 
 impl Sprite {
@@ -50,7 +52,8 @@ impl Sprite {
         Sprite {
             width: width,
             height: height,
-            texture: renderer.create_texture_from_surface(&surface).unwrap(),
+            texture: Rc::new(renderer.create_texture_from_surface(&surface)
+                                     .unwrap()),
         }
     }
 

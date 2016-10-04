@@ -17,20 +17,24 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
+use std::rc::Rc;
 use super::super::gui::{Action, Align, Canvas, Element, Event, Font, Point,
-                        Rect, Sprite};
+                        Rect, Resources, Sprite};
+use super::super::save::SaveData;
 
 // ========================================================================= //
 
 pub struct TitleView {
-    font: Font,
+    font: Rc<Font>,
     sprites: Vec<Sprite>,
     counter: i32,
     blink: bool,
 }
 
 impl TitleView {
-    pub fn new(font: Font, sprites: Vec<Sprite>) -> TitleView {
+    pub fn new(resources: &mut Resources) -> TitleView {
+        let font = resources.get_font("roman");
+        let sprites = resources.get_sprites("chars");
         TitleView {
             font: font,
             sprites: sprites,
@@ -40,8 +44,8 @@ impl TitleView {
     }
 }
 
-impl Element<()> for TitleView {
-    fn draw(&self, _: &(), canvas: &mut Canvas) {
+impl Element<SaveData> for TitleView {
+    fn draw(&self, _: &SaveData, canvas: &mut Canvas) {
         canvas.clear((64, 64, 128));
         let rect = canvas.rect();
         let margin: u32 = 100;
@@ -65,7 +69,7 @@ impl Element<()> for TitleView {
                          "Hello, world!");
     }
 
-    fn handle_event(&mut self, event: &Event, _: &mut ()) -> Action {
+    fn handle_event(&mut self, event: &Event, _: &mut SaveData) -> Action {
         match event {
             &Event::ClockTick => {
                 self.counter += 1;

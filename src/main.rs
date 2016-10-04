@@ -26,7 +26,8 @@ mod gui;
 mod save;
 mod title;
 
-use self::gui::Element;
+use self::gui::{Event, Window};
+use self::save::SaveData;
 use std::path::PathBuf;
 
 // ========================================================================= //
@@ -100,39 +101,25 @@ const FRAME_DELAY_MILLIS: u32 = 50;
 
 fn main() {
     let flags = Flags::parse_or_exit();
-    let save_data = save::SaveData::load_or_create(flags.save_file()).unwrap();
+    let mut save_data = SaveData::load_or_create(flags.save_file()).unwrap();
     let sdl_context = sdl2::init().unwrap();
     let event_subsystem = sdl_context.event().unwrap();
     let timer_subsystem = sdl_context.timer().unwrap();
-    let mut window = gui::Window::new(&sdl_context,
-                                      "System Syzygy",
-                                      (576, 384),
-                                      flags.ideal_size(),
-                                      flags.force_ideal(),
-                                      flags.fullscreen(save_data.prefs()));
+    let mut window = Window::new(&sdl_context,
+                                 "System Syzygy",
+                                 (576, 384),
+                                 flags.ideal_size(),
+                                 flags.force_ideal(),
+                                 flags.fullscreen(save_data.prefs()));
     let _timer = {
-        gui::Event::register_clock_ticks(&event_subsystem);
+        Event::register_clock_ticks(&event_subsystem);
         let callback = Box::new(|| {
-            gui::Event::push_clock_tick(&event_subsystem);
+            Event::push_clock_tick(&event_subsystem);
             FRAME_DELAY_MILLIS
         });
         timer_subsystem.add_timer(FRAME_DELAY_MILLIS, callback)
     };
-    let font = window.load_font("data/fonts/roman.ahf");
-    let sprites = window.load_sprites("data/sprites/chars.ahi");
-    let mut state = ();
-    let mut view = title::TitleView::new(font, sprites);
-    window.render(&state, &view);
-    let mut event_queue = gui::EventQueue::new(&sdl_context);
-    loop {
-        let action = match event_queue.next() {
-            gui::Event::Quit => break,
-            event => view.handle_event(&event, &mut state),
-        };
-        if action.should_redraw() {
-            window.render(&state, &view);
-        }
-    }
+    title::run_title_screen(&mut window, &mut save_data);
 }
 
 // ========================================================================= //

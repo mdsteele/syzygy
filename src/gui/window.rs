@@ -20,6 +20,7 @@
 use sdl2::{EventPump, Sdl, VideoSubsystem};
 use sdl2::rect::Rect;
 use sdl2::render::Renderer;
+use sdl2::video::FullscreenType;
 use super::canvas::Canvas;
 use super::element::Element;
 use super::event::Event;
@@ -86,6 +87,30 @@ impl Window {
         }
     }
 
+    pub fn visible_rect(&self) -> Rect {
+        let (width, height) = self.renderer.logical_size();
+        Rect::new(-self.full_rect.x(), -self.full_rect.y(), width, height)
+    }
+
+    pub fn is_fullscreen(&self) -> bool {
+        self.renderer.window().unwrap().fullscreen_state() !=
+        FullscreenType::Off
+    }
+
+    pub fn set_fullscreen(&mut self, fullscreen: bool) {
+        if fullscreen != self.is_fullscreen() {
+            let state = if fullscreen {
+                FullscreenType::Desktop
+            } else {
+                FullscreenType::Off
+            };
+            if cfg!(debug_assertions) {
+                println!("Setting fullscreen to {:?}.", state);
+            }
+            self.renderer.window_mut().unwrap().set_fullscreen(state).unwrap();
+        }
+    }
+
     pub fn render<S, E: Element<S>>(&mut self, state: &S, view: &E) {
         {
             let mut canvas = Canvas::new(&mut self.renderer, self.full_rect);
@@ -98,7 +123,10 @@ impl Window {
     pub fn next_event(&mut self) -> Event {
         loop {
             match Event::from_sdl2(&self.event_pump.wait_event()) {
-                Some(event) => return event,
+                Some(event) => {
+                    return event.translate(-self.full_rect.x(),
+                                           -self.full_rect.y())
+                }
                 None => {}
             }
         }

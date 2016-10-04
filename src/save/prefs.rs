@@ -47,6 +47,10 @@ impl Prefs {
     }
 
     pub fn fullscreen(&self) -> bool { self.fullscreen }
+
+    pub fn set_fullscreen(&mut self, fullscreen: bool) {
+        self.fullscreen = fullscreen;
+    }
 }
 
 const FULLSCREEN_KEY: &'static str = "fullscreen";

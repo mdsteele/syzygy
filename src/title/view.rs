@@ -18,34 +18,50 @@
 // +--------------------------------------------------------------------------+
 
 use std::rc::Rc;
-use super::super::gui::{Action, Align, Canvas, Element, Event, Font, Point,
-                        Rect, Resources, Sprite};
+use super::super::gui::{Action, Align, Canvas, Element, Event, Font,
+                        GroupElement, Point, Rect, Resources, Sprite,
+                        SubrectElement};
 use super::super::save::SaveData;
 
 // ========================================================================= //
 
+const BOTTOM_BUTTONS_MARGIN: i32 = 20;
+const FULLSCREEN_BUTTON_WIDTH: u32 = 32;
+const FULLSCREEN_BUTTON_HEIGHT: u32 = 32;
+
+// ========================================================================= //
+
 pub struct TitleView {
+    elements: GroupElement<SaveData>,
     font: Rc<Font>,
     sprites: Vec<Sprite>,
-    counter: i32,
-    blink: bool,
 }
 
 impl TitleView {
-    pub fn new(resources: &mut Resources) -> TitleView {
+    pub fn new(resources: &mut Resources, visible: Rect) -> TitleView {
         let font = resources.get_font("roman");
         let sprites = resources.get_sprites("chars");
+        let fullscreen_button = {
+            let rect = Rect::new(visible.left() + BOTTOM_BUTTONS_MARGIN,
+                                 visible.bottom() -
+                                 FULLSCREEN_BUTTON_HEIGHT as i32 -
+                                 BOTTOM_BUTTONS_MARGIN,
+                                 FULLSCREEN_BUTTON_WIDTH,
+                                 FULLSCREEN_BUTTON_HEIGHT);
+            SubrectElement::new(FullscreenButton::new(resources), rect)
+        };
         TitleView {
+            elements: GroupElement::new(vec![
+                Box::new(fullscreen_button),
+            ]),
             font: font,
             sprites: sprites,
-            counter: 0,
-            blink: false,
         }
     }
 }
 
 impl Element<SaveData> for TitleView {
-    fn draw(&self, _: &SaveData, canvas: &mut Canvas) {
+    fn draw(&self, data: &SaveData, canvas: &mut Canvas) {
         canvas.clear((64, 64, 128));
         let rect = canvas.rect();
         let margin: u32 = 100;
@@ -53,11 +69,7 @@ impl Element<SaveData> for TitleView {
                              rect.y() + margin as i32,
                              rect.width() - 2 * margin,
                              rect.height() - 2 * margin);
-        if self.blink {
-            canvas.fill_rect((192, 0, 0), rect);
-        } else {
-            canvas.fill_rect((0, 192, 0), rect);
-        }
+        canvas.fill_rect((0, 192, 0), rect);
         for i in 0..6 {
             canvas.draw_sprite(&self.sprites[i as usize],
                                Point::new(150 + 40 * i, 150));
@@ -67,23 +79,47 @@ impl Element<SaveData> for TitleView {
                          Align::Center,
                          Point::new(center_x, 250),
                          "Hello, world!");
+        self.elements.draw(data, canvas);
     }
 
-    fn handle_event(&mut self, event: &Event, _: &mut SaveData) -> Action {
+    fn handle_event(&mut self, event: &Event, data: &mut SaveData) -> Action {
+        self.elements.handle_event(event, data)
+    }
+}
+
+// ========================================================================= //
+
+struct FullscreenButton {
+    to_fullscreen_icon: Sprite,
+    to_windowed_icon: Sprite,
+}
+
+impl FullscreenButton {
+    fn new(resources: &mut Resources) -> FullscreenButton {
+        let sprites = resources.get_sprites("fullscreen");
+        FullscreenButton {
+            to_fullscreen_icon: sprites[0].clone(),
+            to_windowed_icon: sprites[1].clone(),
+        }
+    }
+}
+
+impl Element<SaveData> for FullscreenButton {
+    fn draw(&self, data: &SaveData, canvas: &mut Canvas) {
+        let icon = if data.prefs().fullscreen() {
+            &self.to_windowed_icon
+        } else {
+            &self.to_fullscreen_icon
+        };
+        canvas.draw_sprite(icon, Point::new(0, 0));
+    }
+
+    fn handle_event(&mut self, event: &Event, data: &mut SaveData) -> Action {
         match event {
-            &Event::ClockTick => {
-                self.counter += 1;
-                if self.counter >= 10 {
-                    self.counter = 0;
-                    self.blink = !self.blink;
-                    Action::redraw().and_continue()
-                } else {
-                    Action::ignore().and_continue()
-                }
-            }
             &Event::MouseDown(_) => {
-                self.counter = 0;
-                self.blink = !self.blink;
+                let prefs = data.prefs_mut();
+                let fullscreen = prefs.fullscreen();
+                prefs.set_fullscreen(!fullscreen);
                 Action::redraw().and_stop()
             }
             _ => Action::ignore().and_continue(),

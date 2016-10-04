@@ -28,6 +28,7 @@ use toml;
 pub struct SaveData {
     path: PathBuf,
     prefs: Prefs,
+    unsaved: bool,
 }
 
 impl SaveData {
@@ -35,11 +36,13 @@ impl SaveData {
         SaveData {
             path: path,
             prefs: Prefs::with_defaults(),
+            unsaved: true,
         }
     }
 
     fn from_toml(path: PathBuf, table: &toml::Table) -> SaveData {
         let mut data = SaveData::new(path);
+        data.unsaved = false;
         if let Some(prefs) = table.get(PREFS_KEY) {
             data.prefs = Prefs::from_toml(prefs);
         }
@@ -52,15 +55,21 @@ impl SaveData {
         toml::Value::Table(table)
     }
 
-    pub fn save_to_disk(&self) -> io::Result<()> {
-        try!(fs::create_dir_all(self.path.parent().unwrap()));
-        let mut file = try!(fs::File::create(&self.path));
-        let string = self.to_toml().to_string();
-        try!(file.write_all(string.as_bytes()));
+    pub fn save_if_needed(&mut self) -> io::Result<()> {
+        if self.unsaved {
+            try!(fs::create_dir_all(self.path.parent().unwrap()));
+            let mut file = try!(fs::File::create(&self.path));
+            let string = self.to_toml().to_string();
+            try!(file.write_all(string.as_bytes()));
+            self.unsaved = false;
+            if cfg!(debug_assertions) {
+                println!("Saved game to disk.");
+            }
+        }
         Ok(())
     }
 
-    pub fn load_from_disk(path: PathBuf) -> io::Result<SaveData> {
+    fn load_from_disk(path: PathBuf) -> io::Result<SaveData> {
         let mut file = try!(fs::File::open(&path));
         let mut string = String::new();
         try!(file.read_to_string(&mut string));
@@ -77,13 +86,18 @@ impl SaveData {
         if path.is_file() {
             SaveData::load_from_disk(path)
         } else {
-            let data = SaveData::new(path);
-            try!(data.save_to_disk());
+            let mut data = SaveData::new(path);
+            try!(data.save_if_needed());
             Ok(data)
         }
     }
 
     pub fn prefs(&self) -> &Prefs { &self.prefs }
+
+    pub fn prefs_mut(&mut self) -> &mut Prefs {
+        self.unsaved = true;
+        &mut self.prefs
+    }
 }
 
 const PREFS_KEY: &'static str = "prefs";

@@ -111,7 +111,7 @@ impl Window {
         }
     }
 
-    pub fn render<S, E: Element<S>>(&mut self, state: &S, view: &E) {
+    pub fn render<S, A, E: Element<S, A>>(&mut self, state: &S, view: &E) {
         {
             let mut canvas = Canvas::new(&mut self.renderer, self.full_rect);
             view.draw(state, &mut canvas);

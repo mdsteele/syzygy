@@ -20,14 +20,21 @@
 use std::fs;
 use std::io::{self, Read, Write};
 use std::path::PathBuf;
+use super::game::Game;
 use super::prefs::Prefs;
 use toml;
+
+// ========================================================================= //
+
+const GAME_KEY: &'static str = "game";
+const PREFS_KEY: &'static str = "prefs";
 
 // ========================================================================= //
 
 pub struct SaveData {
     path: PathBuf,
     prefs: Prefs,
+    game: Option<Game>,
     unsaved: bool,
 }
 
@@ -36,6 +43,7 @@ impl SaveData {
         SaveData {
             path: path,
             prefs: Prefs::with_defaults(),
+            game: None,
             unsaved: true,
         }
     }
@@ -43,8 +51,13 @@ impl SaveData {
     fn from_toml(path: PathBuf, table: &toml::Table) -> SaveData {
         let mut data = SaveData::new(path);
         data.unsaved = false;
-        if let Some(prefs) = table.get(PREFS_KEY) {
+        if let Some(prefs) = table.get(PREFS_KEY)
+                                  .and_then(toml::Value::as_table) {
             data.prefs = Prefs::from_toml(prefs);
+        }
+        if let Some(game) = table.get(GAME_KEY)
+                                 .and_then(toml::Value::as_table) {
+            data.game = Some(Game::from_toml(game));
         }
         data
     }
@@ -52,6 +65,9 @@ impl SaveData {
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::Table::new();
         table.insert(PREFS_KEY.to_string(), self.prefs.to_toml());
+        if let Some(ref game) = self.game {
+            table.insert(GAME_KEY.to_string(), game.to_toml());
+        }
         toml::Value::Table(table)
     }
 
@@ -98,8 +114,18 @@ impl SaveData {
         self.unsaved = true;
         &mut self.prefs
     }
-}
 
-const PREFS_KEY: &'static str = "prefs";
+    pub fn game(&self) -> Option<&Game> {
+        match self.game {
+            Some(ref game) => Some(game),
+            None => None,
+        }
+    }
+
+    pub fn start_new_game(&mut self) {
+        self.unsaved = true;
+        self.game = Some(Game::new());
+    }
+}
 
 // ========================================================================= //

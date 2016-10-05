@@ -28,13 +28,11 @@ pub struct Prefs {
 impl Prefs {
     pub fn with_defaults() -> Prefs { Prefs { fullscreen: true } }
 
-    pub fn from_toml(value: &toml::Value) -> Prefs {
+    pub fn from_toml(table: &toml::Table) -> Prefs {
         let mut prefs = Prefs::with_defaults();
-        if let Some(table) = value.as_table() {
-            if let Some(fullscreen) = table.get(FULLSCREEN_KEY)
-                                           .and_then(toml::Value::as_bool) {
-                prefs.fullscreen = fullscreen;
-            }
+        if let Some(fullscreen) = table.get(FULLSCREEN_KEY)
+                                       .and_then(toml::Value::as_bool) {
+            prefs.fullscreen = fullscreen;
         }
         prefs
     }

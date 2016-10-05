@@ -17,16 +17,33 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod data;
-mod game;
-mod location;
-mod path;
-mod prefs;
+use std::default::Default;
+use super::location::Location;
+use toml;
 
-pub use self::data::SaveData;
-pub use self::game::Game;
-pub use self::location::Location;
-pub use self::path::get_default_save_file_path;
-pub use self::prefs::Prefs;
+// ========================================================================= //
+
+const LOCATION_KEY: &'static str = "location";
+
+// ========================================================================= //
+
+#[derive(Default)]
+pub struct Game {
+    location: Location,
+}
+
+impl Game {
+    pub fn new() -> Game { Default::default() }
+
+    pub fn from_toml(table: &toml::Table) -> Game {
+        Game { location: Location::from_toml(table.get(LOCATION_KEY)) }
+    }
+
+    pub fn to_toml(&self) -> toml::Value {
+        let mut table = toml::Table::new();
+        table.insert(LOCATION_KEY.to_string(), self.location.to_toml());
+        toml::Value::Table(table)
+    }
+}
 
 // ========================================================================= //

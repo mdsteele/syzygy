@@ -17,62 +17,45 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use std::ops::{BitOr, BitOrAssign};
-
 // ========================================================================= //
 
-#[derive(Clone, Copy, Eq, PartialEq)]
-pub struct Action {
+pub struct Action<A> {
     redraw: bool,
-    stop: bool,
+    value: Option<A>,
 }
 
-impl Action {
-    pub fn ignore() -> ActionBuilder { ActionBuilder { redraw: false } }
+impl<A> Action<A> {
+    pub fn ignore() -> Action<A> {
+        Action {
+            redraw: false,
+            value: None,
+        }
+    }
 
-    pub fn redraw() -> ActionBuilder { ActionBuilder { redraw: true } }
+    pub fn redraw() -> Action<A> {
+        Action {
+            redraw: true,
+            value: None,
+        }
+    }
+
+    pub fn and_return(self, value: A) -> Action<A> {
+        Action {
+            redraw: self.redraw,
+            value: Some(value),
+        }
+    }
 
     pub fn should_redraw(&self) -> bool { self.redraw }
 
-    pub fn should_stop(&self) -> bool { self.stop }
-}
+    pub fn should_stop(&self) -> bool { self.value.is_some() }
 
-impl BitOr for Action {
-    type Output = Action;
-    fn bitor(self, rhs: Action) -> Action {
-        Action {
-            redraw: self.redraw | rhs.redraw,
-            stop: self.stop | rhs.stop,
-        }
-    }
-}
+    pub fn value(&self) -> &Option<A> { &self.value }
 
-impl BitOrAssign for Action {
-    fn bitor_assign(&mut self, rhs: Action) {
-        self.redraw |= rhs.redraw;
-        self.stop |= rhs.stop;
-    }
-}
-
-// ========================================================================= //
-
-#[derive(Clone, Copy)]
-pub struct ActionBuilder {
-    redraw: bool,
-}
-
-impl ActionBuilder {
-    pub fn and_continue(&self) -> Action {
-        Action {
-            redraw: self.redraw,
-            stop: false,
-        }
-    }
-
-    pub fn and_stop(&self) -> Action {
-        Action {
-            redraw: self.redraw,
-            stop: true,
+    pub fn merge(&mut self, action: Action<A>) {
+        self.redraw |= action.redraw;
+        if action.value.is_some() {
+            self.value = action.value;
         }
     }
 }

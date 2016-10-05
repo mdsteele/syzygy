@@ -27,7 +27,7 @@ mod sprite;
 mod window;
 
 pub use sdl2::rect::{Point, Rect};
-pub use self::action::{Action, ActionBuilder};
+pub use self::action::Action;
 pub use self::canvas::{Align, Canvas};
 pub use self::element::{Element, GroupElement, SubrectElement};
 pub use self::event::{Event, KeyMod};

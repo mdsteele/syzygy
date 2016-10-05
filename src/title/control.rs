@@ -19,7 +19,7 @@
 
 use super::super::gui::{Element, Event, Window};
 use super::super::save::SaveData;
-use super::view::TitleView;
+use super::view::{TitleAction, TitleView};
 
 // ========================================================================= //
 
@@ -37,7 +37,17 @@ pub fn run_title_screen(window: &mut Window, save_data: &mut SaveData) {
         if let Err(error) = save_data.save_if_needed() {
             println!("Failed to save game: {}", error);
         }
-        window.set_fullscreen(save_data.prefs().fullscreen());
+        match action.value() {
+            &Some(TitleAction::SetFullscreen(full)) => {
+                window.set_fullscreen(full);
+            }
+            &Some(TitleAction::StartGame) => {
+                save_data.start_new_game();
+                // TODO: Switch modes
+            }
+            &Some(TitleAction::Quit) => break,
+            &None => {}
+        }
         if action.should_redraw() {
             window.render(save_data, &view);
         }

@@ -17,16 +17,60 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod data;
-mod game;
-mod location;
-mod path;
-mod prefs;
+use std::default::Default;
+use toml;
 
-pub use self::data::SaveData;
-pub use self::game::Game;
-pub use self::location::Location;
-pub use self::path::get_default_save_file_path;
-pub use self::prefs::Prefs;
+// ========================================================================= //
+
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Location {
+    Map,
+    ALightInTheAttic,
+}
+
+impl Location {
+    pub fn key(self) -> &'static str {
+        match self {
+            Location::Map => "map",
+            Location::ALightInTheAttic => "a_light_in_the_attic",
+        }
+    }
+
+    pub fn from_toml(value: Option<&toml::Value>) -> Location {
+        if let Some(string) = value.and_then(toml::Value::as_str) {
+            match string {
+                "map" => return Location::Map,
+                "a_light_in_the_attic" => return Location::ALightInTheAttic,
+                _ => {}
+            }
+        }
+        Default::default()
+    }
+
+    pub fn to_toml(self) -> toml::Value {
+        toml::Value::String(self.key().to_string())
+    }
+}
+
+impl Default for Location {
+    fn default() -> Location { Location::Map }
+}
+
+// ========================================================================= //
+
+#[cfg(test)]
+mod tests {
+    use super::Location;
+
+    #[test]
+    fn toml_round_trip() {
+        let locations = &[Location::Map, Location::ALightInTheAttic];
+        for original in locations {
+            let result = Location::from_toml(&original.to_toml());
+            assert_eq!(result, *original);
+        }
+    }
+}
 
 // ========================================================================= //

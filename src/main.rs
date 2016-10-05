@@ -23,11 +23,14 @@ extern crate sdl2;
 extern crate toml;
 
 mod gui;
+mod map;
+mod mode;
 mod save;
 mod title;
 
 use self::gui::{Event, Window};
-use self::save::SaveData;
+use self::mode::Mode;
+use self::save::{Location, SaveData};
 use std::path::PathBuf;
 
 // ========================================================================= //
@@ -119,7 +122,33 @@ fn main() {
         });
         timer_subsystem.add_timer(FRAME_DELAY_MILLIS, callback)
     };
-    title::run_title_screen(&mut window, &mut save_data);
+    let mut mode = Mode::Title;
+    loop {
+        match mode {
+            Mode::Title => {
+                mode = title::run_title_screen(&mut window, &mut save_data);
+            }
+            Mode::Location(loc) => {
+                if let Some(game) = save_data.game_mut() {
+                    match loc {
+                        Location::Map => {
+                            mode = map::run_map_screen(&mut window, game);
+                        }
+                        Location::ALightInTheAttic => {
+                            // TODO: Implement ALightInTheAttic puzzle
+                            mode = Mode::Title;
+                        }
+                    }
+                } else {
+                    if cfg!(debug_assertions) {
+                        println!("WARNING: no game, can't go to {:?}", loc);
+                    }
+                    mode = Mode::Title;
+                }
+            }
+            Mode::Quit => break,
+        }
+    }
 }
 
 // ========================================================================= //

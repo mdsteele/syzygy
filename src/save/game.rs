@@ -44,6 +44,8 @@ impl Game {
         table.insert(LOCATION_KEY.to_string(), self.location.to_toml());
         toml::Value::Table(table)
     }
+
+    pub fn location(&self) -> Location { self.location }
 }
 
 // ========================================================================= //

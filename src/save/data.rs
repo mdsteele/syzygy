@@ -122,9 +122,17 @@ impl SaveData {
         }
     }
 
-    pub fn start_new_game(&mut self) {
+    pub fn game_mut(&mut self) -> Option<&mut Game> {
+        match self.game {
+            Some(ref mut game) => Some(game),
+            None => None,
+        }
+    }
+
+    pub fn start_new_game(&mut self) -> &Game {
         self.unsaved = true;
         self.game = Some(Game::new());
+        self.game.as_ref().unwrap()
     }
 }
 

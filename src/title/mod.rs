@@ -21,6 +21,5 @@ mod control;
 mod view;
 
 pub use self::control::run_title_screen;
-pub use self::view::TitleView;
 
 // ========================================================================= //

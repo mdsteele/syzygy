@@ -17,59 +17,14 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use std::default::Default;
-use toml;
+use super::save::Location;
 
 // ========================================================================= //
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum Location {
-    Map,
-    ALightInTheAttic,
-}
-
-impl Location {
-    pub fn key(self) -> &'static str {
-        match self {
-            Location::Map => "map",
-            Location::ALightInTheAttic => "a_light_in_the_attic",
-        }
-    }
-
-    pub fn from_toml(value: Option<&toml::Value>) -> Location {
-        if let Some(string) = value.and_then(toml::Value::as_str) {
-            match string {
-                "map" => return Location::Map,
-                "a_light_in_the_attic" => return Location::ALightInTheAttic,
-                _ => {}
-            }
-        }
-        Default::default()
-    }
-
-    pub fn to_toml(self) -> toml::Value {
-        toml::Value::String(self.key().to_string())
-    }
-}
-
-impl Default for Location {
-    fn default() -> Location { Location::Map }
-}
-
-// ========================================================================= //
-
-#[cfg(test)]
-mod tests {
-    use super::Location;
-
-    #[test]
-    fn toml_round_trip() {
-        let locations = &[Location::Map, Location::ALightInTheAttic];
-        for original in locations {
-            let result = Location::from_toml(Some(&original.to_toml()));
-            assert_eq!(result, *original);
-        }
-    }
+pub enum Mode {
+    Title,
+    Location(Location),
+    Quit,
 }
 
 // ========================================================================= //

@@ -21,6 +21,7 @@ use std::rc::Rc;
 use super::super::gui::{Action, Align, Canvas, Element, Event, Font,
                         GroupElement, Point, Rect, Resources, Sprite,
                         SubrectElement};
+use super::super::elements::DialogBox;
 use super::super::save::SaveData;
 
 // ========================================================================= //
@@ -31,6 +32,7 @@ const START_BUTTON_HEIGHT: u32 = 32;
 const BOTTOM_BUTTONS_MARGIN: i32 = 20;
 const BOTTOM_BUTTONS_HEIGHT: u32 = 32;
 const FULLSCREEN_BUTTON_WIDTH: u32 = 32;
+const ERASE_BUTTON_WIDTH: u32 = 96;
 const QUIT_BUTTON_WIDTH: u32 = 64;
 
 // ========================================================================= //
@@ -38,6 +40,7 @@ const QUIT_BUTTON_WIDTH: u32 = 64;
 pub enum TitleAction {
     SetFullscreen(bool),
     StartGame,
+    EraseGame,
     Quit,
 }
 
@@ -51,39 +54,50 @@ pub struct TitleView {
 impl TitleView {
     pub fn new(resources: &mut Resources, visible: Rect) -> TitleView {
         let sprites = resources.get_sprites("chars");
-        let start_button = {
+        let mut elements: Vec<Box<Element<SaveData, TitleAction>>> = vec![];
+        elements.push(Box::new({
             let mut rect = Rect::new(0,
                                      0,
                                      START_BUTTON_WIDTH,
                                      START_BUTTON_HEIGHT);
             rect.center_on(visible.center());
             SubrectElement::new(StartGameButton::new(resources), rect)
-        };
-        let fullscreen_button = {
-            let rect = Rect::new(visible.left() + BOTTOM_BUTTONS_MARGIN,
+        }));
+        if !cfg!(any(target_os = "android", target_os = "ios")) {
+            elements.push(Box::new({
+                let rect = Rect::new(visible.left() + BOTTOM_BUTTONS_MARGIN,
+                                     visible.bottom() -
+                                     BOTTOM_BUTTONS_HEIGHT as i32 -
+                                     BOTTOM_BUTTONS_MARGIN,
+                                     FULLSCREEN_BUTTON_WIDTH,
+                                     BOTTOM_BUTTONS_HEIGHT);
+                SubrectElement::new(FullscreenButton::new(resources), rect)
+            }));
+            elements.push(Box::new({
+                let rect = Rect::new(visible.right() - BOTTOM_BUTTONS_MARGIN -
+                                     QUIT_BUTTON_WIDTH as i32,
+                                     visible.bottom() -
+                                     BOTTOM_BUTTONS_HEIGHT as i32 -
+                                     BOTTOM_BUTTONS_MARGIN,
+                                     QUIT_BUTTON_WIDTH,
+                                     BOTTOM_BUTTONS_HEIGHT);
+                SubrectElement::new(QuitButton::new(resources), rect)
+            }));
+        }
+        elements.push(Box::new({
+            let rect = Rect::new(visible.left() +
+                                 (visible.width() as i32 -
+                                  ERASE_BUTTON_WIDTH as i32) /
+                                 2,
                                  visible.bottom() -
                                  BOTTOM_BUTTONS_HEIGHT as i32 -
                                  BOTTOM_BUTTONS_MARGIN,
-                                 FULLSCREEN_BUTTON_WIDTH,
+                                 ERASE_BUTTON_WIDTH,
                                  BOTTOM_BUTTONS_HEIGHT);
-            SubrectElement::new(FullscreenButton::new(resources), rect)
-        };
-        let quit_button = {
-            let rect = Rect::new(visible.right() - BOTTOM_BUTTONS_MARGIN -
-                                 QUIT_BUTTON_WIDTH as i32,
-                                 visible.bottom() -
-                                 BOTTOM_BUTTONS_HEIGHT as i32 -
-                                 BOTTOM_BUTTONS_MARGIN,
-                                 QUIT_BUTTON_WIDTH,
-                                 BOTTOM_BUTTONS_HEIGHT);
-            SubrectElement::new(QuitButton::new(resources), rect)
-        };
+            SubrectElement::new(EraseGameButton::new(resources), rect)
+        }));
         TitleView {
-            elements: GroupElement::new(vec![
-                Box::new(start_button),
-                Box::new(fullscreen_button),
-                Box::new(quit_button),
-            ]),
+            elements: GroupElement::new(elements),
             sprites: sprites,
         }
     }
@@ -143,9 +157,7 @@ impl Element<SaveData, TitleAction> for FullscreenButton {
                     -> Action<TitleAction> {
         match event {
             &Event::MouseDown(_) => {
-                let prefs = data.prefs_mut();
-                let full = !prefs.fullscreen();
-                prefs.set_fullscreen(full);
+                let full = !data.prefs().fullscreen();
                 Action::redraw().and_return(TitleAction::SetFullscreen(full))
             }
             _ => Action::ignore(),
@@ -189,6 +201,40 @@ impl Element<SaveData, TitleAction> for StartGameButton {
 
 // ========================================================================= //
 
+struct EraseGameButton {
+    font: Rc<Font>,
+}
+
+impl EraseGameButton {
+    fn new(resources: &mut Resources) -> EraseGameButton {
+        EraseGameButton { font: resources.get_font("roman") }
+    }
+}
+
+impl Element<SaveData, TitleAction> for EraseGameButton {
+    fn draw(&self, data: &SaveData, canvas: &mut Canvas) {
+        if data.game().is_some() {
+            let rect = canvas.rect();
+            canvas.draw_text(&self.font,
+                             Align::Center,
+                             rect.center(),
+                             "Erase Game");
+        }
+    }
+
+    fn handle_event(&mut self, event: &Event, data: &mut SaveData)
+                    -> Action<TitleAction> {
+        match event {
+            &Event::MouseDown(_) if data.game().is_some() => {
+                Action::redraw().and_return(TitleAction::EraseGame)
+            }
+            _ => Action::ignore(),
+        }
+    }
+}
+
+// ========================================================================= //
+
 struct QuitButton {
     font: Rc<Font>,
 }
@@ -213,6 +259,40 @@ impl Element<SaveData, TitleAction> for QuitButton {
             }
             _ => Action::ignore(),
         }
+    }
+}
+
+// ========================================================================= //
+
+pub struct ConfirmEraseView<'a> {
+    title_view: &'a TitleView,
+    dialog: DialogBox<bool>,
+}
+
+impl<'a> ConfirmEraseView<'a> {
+    pub fn new(resources: &mut Resources, visible: Rect,
+               title_view: &'a TitleView)
+               -> ConfirmEraseView<'a> {
+        let text = "Really clear game data?\nAll progress will be lost.";
+        let buttons = vec![("Cancel".to_string(), false),
+                           ("Confirm".to_string(), true)];
+        let dialog = DialogBox::new(resources, visible, text, buttons);
+        ConfirmEraseView {
+            title_view: title_view,
+            dialog: dialog,
+        }
+    }
+}
+
+impl<'a> Element<SaveData, bool> for ConfirmEraseView<'a> {
+    fn draw(&self, data: &SaveData, canvas: &mut Canvas) {
+        self.title_view.draw(data, canvas);
+        self.dialog.draw(&(), canvas);
+    }
+
+    fn handle_event(&mut self, event: &Event, _data: &mut SaveData)
+                    -> Action<bool> {
+        self.dialog.handle_event(event, &mut ())
     }
 }
 

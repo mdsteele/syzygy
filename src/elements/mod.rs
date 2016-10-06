@@ -17,37 +17,8 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use super::super::gui::{Element, Event, Window};
-use super::super::mode::Mode;
-use super::super::save::Game;
-use super::view::{MapAction, MapView};
+mod dialog;
 
-// ========================================================================= //
-
-pub fn run_map_screen(window: &mut Window, game: &mut Game) -> Mode {
-    let mut view = {
-        let visible_rect = window.visible_rect();
-        MapView::new(&mut window.resources(), visible_rect)
-    };
-    window.render(game, &view);
-    loop {
-        let action = match window.next_event() {
-            Event::Quit => return Mode::Quit,
-            event => view.handle_event(&event, game),
-        };
-        match action.value() {
-            Some(&MapAction::ReturnToTitle) => {
-                return Mode::Title;
-            }
-            Some(&MapAction::GoToPuzzle(loc)) => {
-                return Mode::Location(loc);
-            }
-            None => {}
-        }
-        if action.should_redraw() {
-            window.render(game, &view);
-        }
-    }
-}
+pub use self::dialog::DialogBox;
 
 // ========================================================================= //

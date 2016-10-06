@@ -22,6 +22,7 @@ extern crate getopts;
 extern crate sdl2;
 extern crate toml;
 
+mod elements;
 mod gui;
 mod map;
 mod mode;

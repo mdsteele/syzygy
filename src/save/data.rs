@@ -35,7 +35,6 @@ pub struct SaveData {
     path: PathBuf,
     prefs: Prefs,
     game: Option<Game>,
-    unsaved: bool,
 }
 
 impl SaveData {
@@ -44,13 +43,11 @@ impl SaveData {
             path: path,
             prefs: Prefs::with_defaults(),
             game: None,
-            unsaved: true,
         }
     }
 
     fn from_toml(path: PathBuf, table: &toml::Table) -> SaveData {
         let mut data = SaveData::new(path);
-        data.unsaved = false;
         if let Some(prefs) = table.get(PREFS_KEY)
                                   .and_then(toml::Value::as_table) {
             data.prefs = Prefs::from_toml(prefs);
@@ -71,16 +68,13 @@ impl SaveData {
         toml::Value::Table(table)
     }
 
-    pub fn save_if_needed(&mut self) -> io::Result<()> {
-        if self.unsaved {
-            try!(fs::create_dir_all(self.path.parent().unwrap()));
-            let mut file = try!(fs::File::create(&self.path));
-            let string = self.to_toml().to_string();
-            try!(file.write_all(string.as_bytes()));
-            self.unsaved = false;
-            if cfg!(debug_assertions) {
-                println!("Saved game to disk.");
-            }
+    pub fn save_to_disk(&mut self) -> io::Result<()> {
+        try!(fs::create_dir_all(self.path.parent().unwrap()));
+        let mut file = try!(fs::File::create(&self.path));
+        let string = self.to_toml().to_string();
+        try!(file.write_all(string.as_bytes()));
+        if cfg!(debug_assertions) {
+            println!("Saved game to disk.");
         }
         Ok(())
     }
@@ -103,17 +97,14 @@ impl SaveData {
             SaveData::load_from_disk(path)
         } else {
             let mut data = SaveData::new(path);
-            try!(data.save_if_needed());
+            try!(data.save_to_disk());
             Ok(data)
         }
     }
 
     pub fn prefs(&self) -> &Prefs { &self.prefs }
 
-    pub fn prefs_mut(&mut self) -> &mut Prefs {
-        self.unsaved = true;
-        &mut self.prefs
-    }
+    pub fn prefs_mut(&mut self) -> &mut Prefs { &mut self.prefs }
 
     pub fn game(&self) -> Option<&Game> {
         match self.game {
@@ -129,11 +120,12 @@ impl SaveData {
         }
     }
 
-    pub fn start_new_game(&mut self) -> &Game {
-        self.unsaved = true;
+    pub fn start_new_game(&mut self) -> &mut Game {
         self.game = Some(Game::new());
-        self.game.as_ref().unwrap()
+        self.game.as_mut().unwrap()
     }
+
+    pub fn erase_game(&mut self) { self.game = None; }
 }
 
 // ========================================================================= //

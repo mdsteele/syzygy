@@ -20,14 +20,14 @@
 use super::super::gui::{Element, Event, Window};
 use super::super::mode::Mode;
 use super::super::save::SaveData;
-use super::view::{TitleAction, TitleView};
+use super::view::{ConfirmEraseView, TitleAction, TitleView};
 
 // ========================================================================= //
 
 pub fn run_title_screen(window: &mut Window, data: &mut SaveData) -> Mode {
     let mut view = {
-        let visible_rect = window.visible_rect();
-        TitleView::new(&mut window.resources(), visible_rect)
+        let visible = window.visible_rect();
+        TitleView::new(&mut window.resources(), visible)
     };
     window.render(data, &view);
     loop {
@@ -35,24 +35,68 @@ pub fn run_title_screen(window: &mut Window, data: &mut SaveData) -> Mode {
             Event::Quit => return Mode::Quit,
             event => view.handle_event(&event, data),
         };
-        if let Err(error) = data.save_if_needed() {
-            println!("Failed to save game: {}", error);
-        }
         match action.value() {
-            &Some(TitleAction::SetFullscreen(full)) => {
+            Some(&TitleAction::SetFullscreen(full)) => {
+                data.prefs_mut().set_fullscreen(full);
                 window.set_fullscreen(full);
+                if let Err(error) = data.save_to_disk() {
+                    println!("Failed to save game: {}", error);
+                }
             }
-            &Some(TitleAction::StartGame) => {
+            Some(&TitleAction::StartGame) => {
                 if let Some(game) = data.game() {
                     return Mode::Location(game.location());
                 }
-                let game = data.start_new_game();
-                return Mode::Location(game.location());
+                let location = data.start_new_game().location();
+                if let Err(error) = data.save_to_disk() {
+                    println!("Failed to save game: {}", error);
+                }
+                return Mode::Location(location);
             }
-            &Some(TitleAction::Quit) => return Mode::Quit,
-            &None => {}
+            Some(&TitleAction::EraseGame) => {
+                let confirmed = match confirm_erase(window, &view, data) {
+                    Confirmation::Confirm(value) => value,
+                    Confirmation::Quit => return Mode::Quit,
+                };
+                if confirmed {
+                    data.erase_game();
+                    if let Err(error) = data.save_to_disk() {
+                        println!("Failed to save game: {}", error);
+                    }
+                }
+            }
+            Some(&TitleAction::Quit) => return Mode::Quit,
+            None => {}
         }
         if action.should_redraw() {
+            window.render(data, &view);
+        }
+    }
+}
+
+// ========================================================================= //
+
+enum Confirmation {
+    Confirm(bool),
+    Quit,
+}
+
+fn confirm_erase(window: &mut Window, title_view: &TitleView,
+                 data: &mut SaveData)
+                 -> Confirmation {
+    let mut view = {
+        let visible = window.visible_rect();
+        ConfirmEraseView::new(&mut window.resources(), visible, title_view)
+    };
+    window.render(data, &view);
+    loop {
+        let action = match window.next_event() {
+            Event::Quit => return Confirmation::Quit,
+            event => view.handle_event(&event, data),
+        };
+        if let Some(&value) = action.value() {
+            return Confirmation::Confirm(value);
+        } else if action.should_redraw() {
             window.render(data, &view);
         }
     }

@@ -50,7 +50,7 @@ impl<A> Action<A> {
 
     pub fn should_stop(&self) -> bool { self.value.is_some() }
 
-    pub fn value(&self) -> &Option<A> { &self.value }
+    pub fn value(&self) -> Option<&A> { self.value.as_ref() }
 
     pub fn merge(&mut self, action: Action<A>) {
         self.redraw |= action.redraw;

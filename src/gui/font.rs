@@ -45,6 +45,8 @@ impl Font {
 
     pub fn baseline(&self) -> i32 { self.baseline }
 
+    pub fn height(&self) -> u32 { self.default_glyph.sprite().height() }
+
     pub fn text_width(&self, text: &str) -> i32 {
         let mut width = 0;
         for chr in text.chars() {

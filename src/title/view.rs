@@ -32,6 +32,7 @@ const START_BUTTON_HEIGHT: u32 = 32;
 const BOTTOM_BUTTONS_MARGIN: i32 = 20;
 const BOTTOM_BUTTONS_HEIGHT: u32 = 32;
 const FULLSCREEN_BUTTON_WIDTH: u32 = 32;
+const ABOUT_BUTTON_WIDTH: u32 = 64;
 const ERASE_BUTTON_WIDTH: u32 = 96;
 const QUIT_BUTTON_WIDTH: u32 = 64;
 
@@ -41,6 +42,7 @@ pub enum TitleAction {
     SetFullscreen(bool),
     StartGame,
     EraseGame,
+    ShowAboutBox,
     Quit,
 }
 
@@ -52,6 +54,11 @@ pub struct TitleView {
 
 impl TitleView {
     pub fn new(resources: &mut Resources, visible: Rect) -> TitleView {
+        let spacing = (visible.width() as i32 - 2 * BOTTOM_BUTTONS_MARGIN -
+                       FULLSCREEN_BUTTON_WIDTH as i32 -
+                       ABOUT_BUTTON_WIDTH as i32 -
+                       ERASE_BUTTON_WIDTH as i32 -
+                       QUIT_BUTTON_WIDTH as i32) / 3;
         let mut elements: Vec<Box<Element<SaveData, TitleAction>>> = vec![];
         elements.push(Box::new({
             let mut rect = Rect::new(0,
@@ -83,10 +90,21 @@ impl TitleView {
             }));
         }
         elements.push(Box::new({
-            let rect = Rect::new(visible.left() +
-                                 (visible.width() as i32 -
-                                  ERASE_BUTTON_WIDTH as i32) /
-                                 2,
+            let rect = Rect::new(visible.left() + BOTTOM_BUTTONS_MARGIN +
+                                 FULLSCREEN_BUTTON_WIDTH as i32 +
+                                 spacing,
+                                 visible.bottom() -
+                                 BOTTOM_BUTTONS_HEIGHT as i32 -
+                                 BOTTOM_BUTTONS_MARGIN,
+                                 ABOUT_BUTTON_WIDTH,
+                                 BOTTOM_BUTTONS_HEIGHT);
+            SubrectElement::new(AboutButton::new(resources), rect)
+        }));
+        elements.push(Box::new({
+            let rect = Rect::new(visible.left() + BOTTOM_BUTTONS_MARGIN +
+                                 FULLSCREEN_BUTTON_WIDTH as i32 +
+                                 ABOUT_BUTTON_WIDTH as i32 +
+                                 2 * spacing,
                                  visible.bottom() -
                                  BOTTOM_BUTTONS_HEIGHT as i32 -
                                  BOTTOM_BUTTONS_MARGIN,
@@ -219,6 +237,35 @@ impl Element<SaveData, TitleAction> for EraseGameButton {
 
 // ========================================================================= //
 
+struct AboutButton {
+    font: Rc<Font>,
+}
+
+impl AboutButton {
+    fn new(resources: &mut Resources) -> AboutButton {
+        AboutButton { font: resources.get_font("roman") }
+    }
+}
+
+impl Element<SaveData, TitleAction> for AboutButton {
+    fn draw(&self, _: &SaveData, canvas: &mut Canvas) {
+        let rect = canvas.rect();
+        canvas.draw_text(&self.font, Align::Center, rect.center(), "About");
+    }
+
+    fn handle_event(&mut self, event: &Event, _: &mut SaveData)
+                    -> Action<TitleAction> {
+        match event {
+            &Event::MouseDown(_) => {
+                Action::redraw().and_return(TitleAction::ShowAboutBox)
+            }
+            _ => Action::ignore(),
+        }
+    }
+}
+
+// ========================================================================= //
+
 struct QuitButton {
     font: Rc<Font>,
 }
@@ -245,6 +292,54 @@ impl Element<SaveData, TitleAction> for QuitButton {
         }
     }
 }
+
+// ========================================================================= //
+
+pub struct AboutBoxView<'a> {
+    title_view: &'a TitleView,
+    dialog: DialogBox<()>,
+}
+
+impl<'a> AboutBoxView<'a> {
+    pub fn new(resources: &mut Resources, visible: Rect,
+               title_view: &'a TitleView)
+               -> AboutBoxView<'a> {
+        let text = ABOUT_BOX_TEXT;
+        let buttons = vec![("OK".to_string(), ())];
+        let dialog = DialogBox::new(resources, visible, text, buttons);
+        AboutBoxView {
+            title_view: title_view,
+            dialog: dialog,
+        }
+    }
+}
+
+impl<'a> Element<SaveData, ()> for AboutBoxView<'a> {
+    fn draw(&self, data: &SaveData, canvas: &mut Canvas) {
+        self.title_view.draw(data, canvas);
+        self.dialog.draw(&(), canvas);
+    }
+
+    fn handle_event(&mut self, event: &Event, _data: &mut SaveData)
+                    -> Action<()> {
+        self.dialog.handle_event(event, &mut ())
+    }
+}
+
+const ABOUT_BOX_TEXT: &'static str = "\
+System Syzygy\n\
+\n\
+Copyright 2012 Matthew D. Steele <mdsteele@alum.mit.edu>\n\
+\n\
+Source code: https://github.com/mdsteele/syzygy/\n\
+\n\
+System Syzygy comes with ABSOLUTELY NO WARRANTY.\n\
+System Syzygy is free software: you can redistribute it and/or\n\
+modify it under the terms of the GNU General Public License as\n\
+published by the Free Software Foundation, either version 3 of\n\
+the License, or (at your option) any later version.\n\
+\n\
+Thanks for playing!";
 
 // ========================================================================= //
 

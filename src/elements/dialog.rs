@@ -28,7 +28,7 @@ use super::super::gui::{Action, Align, Canvas, Element, Event, Font,
 const BUTTON_WIDTH: u32 = 50;
 const BUTTON_HEIGHT: u32 = 20;
 const BUTTON_SPACING: i32 = 6;
-const LINE_SPACING: i32 = 18;
+const LINE_SPACING: i32 = 16;
 const MARGIN: i32 = 20;
 
 // ========================================================================= //
@@ -50,17 +50,27 @@ impl<A: 'static + Clone> DialogBox<A> {
                                      .map(str::to_string)
                                      .collect();
         let rect = {
-            let mut inner_width = buttons.len() as i32 *
-                                  (BUTTON_WIDTH as i32 + BUTTON_SPACING) -
-                                  BUTTON_SPACING;
-            for line in lines.iter() {
-                inner_width = cmp::max(inner_width, font.text_width(&line));
-            }
-            let width = round_up_to_16(2 * MARGIN + inner_width);
-            let height = round_up_to_16(2 * MARGIN +
-                                        LINE_SPACING * lines.len() as i32 +
-                                        BUTTON_SPACING +
-                                        BUTTON_HEIGHT as i32);
+            let buttons_width = buttons.len() as i32 *
+                                (BUTTON_WIDTH as i32 + BUTTON_SPACING) -
+                                BUTTON_SPACING;
+            let mut last_line_width = 0;
+            let width = {
+                let mut inner_width = buttons_width;
+                for line in lines.iter() {
+                    last_line_width = font.text_width(&line);
+                    inner_width = cmp::max(inner_width, last_line_width);
+                }
+                round_up_to_16(2 * MARGIN + inner_width)
+            };
+            let height = {
+                let mut num_lines = lines.len() as i32;
+                if width as i32 - last_line_width > buttons_width {
+                    num_lines -= 1;
+                }
+                round_up_to_16(2 * MARGIN + LINE_SPACING * num_lines +
+                               BUTTON_SPACING +
+                               BUTTON_HEIGHT as i32)
+            };
             let mut rect = Rect::new(0, 0, width, height);
             rect.center_on(visible.center());
             rect

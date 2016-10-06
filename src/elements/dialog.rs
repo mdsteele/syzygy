@@ -20,20 +20,22 @@
 use std::cmp;
 use std::rc::Rc;
 use super::super::gui::{Action, Align, Canvas, Element, Event, Font,
-                        GroupElement, Point, Rect, Resources, SubrectElement};
+                        GroupElement, Point, Rect, Resources, Sprite,
+                        SubrectElement};
 
 // ========================================================================= //
 
-const BUTTON_WIDTH: u32 = 64;
-const BUTTON_HEIGHT: u32 = 24;
-const BUTTON_SPACING: i32 = 12;
-const LINE_SPACING: i32 = 20;
-const MARGIN: i32 = 24;
+const BUTTON_WIDTH: u32 = 50;
+const BUTTON_HEIGHT: u32 = 20;
+const BUTTON_SPACING: i32 = 6;
+const LINE_SPACING: i32 = 18;
+const MARGIN: i32 = 20;
 
 // ========================================================================= //
 
 pub struct DialogBox<A> {
     rect: Rect,
+    bg_sprites: Vec<Sprite>,
     font: Rc<Font>,
     lines: Vec<String>,
     elements: GroupElement<(), A>,
@@ -54,10 +56,11 @@ impl<A: 'static + Clone> DialogBox<A> {
             for line in lines.iter() {
                 inner_width = cmp::max(inner_width, font.text_width(&line));
             }
-            let width = (2 * MARGIN + inner_width) as u32;
-            let height =
-                (2 * MARGIN + LINE_SPACING * lines.len() as i32 +
-                 BUTTON_SPACING + BUTTON_HEIGHT as i32) as u32;
+            let width = round_up_to_16(2 * MARGIN + inner_width);
+            let height = round_up_to_16(2 * MARGIN +
+                                        LINE_SPACING * lines.len() as i32 +
+                                        BUTTON_SPACING +
+                                        BUTTON_HEIGHT as i32);
             let mut rect = Rect::new(0, 0, width, height);
             rect.center_on(visible.center());
             rect
@@ -76,6 +79,7 @@ impl<A: 'static + Clone> DialogBox<A> {
         };
         DialogBox {
             rect: rect,
+            bg_sprites: resources.get_sprites("dialog_box"),
             font: font,
             lines: lines,
             elements: GroupElement::new(elements),
@@ -85,9 +89,32 @@ impl<A: 'static + Clone> DialogBox<A> {
 
 impl<A> Element<(), A> for DialogBox<A> {
     fn draw(&self, state: &(), canvas: &mut Canvas) {
+        if cfg!(debug_assertions) {
+            println!("Drawing dialog box.");
+        }
         {
             let mut canvas = canvas.subcanvas(self.rect);
-            canvas.clear((192, 128, 128));
+            canvas.fill_rect((200, 200, 200),
+                             Rect::new(12,
+                                       12,
+                                       self.rect.width() - 24,
+                                       self.rect.height() - 24));
+            let right = self.rect.width() as i32 - 16;
+            let bottom = self.rect.height() as i32 - 16;
+            canvas.draw_sprite(&self.bg_sprites[0], Point::new(0, 0));
+            canvas.draw_sprite(&self.bg_sprites[2], Point::new(right, 0));
+            canvas.draw_sprite(&self.bg_sprites[5], Point::new(0, bottom));
+            canvas.draw_sprite(&self.bg_sprites[7], Point::new(right, bottom));
+            for col in 1..(right / 16) {
+                let x = 16 * col;
+                canvas.draw_sprite(&self.bg_sprites[1], Point::new(x, 0));
+                canvas.draw_sprite(&self.bg_sprites[6], Point::new(x, bottom));
+            }
+            for row in 1..(bottom / 16) {
+                let y = 16 * row;
+                canvas.draw_sprite(&self.bg_sprites[3], Point::new(0, y));
+                canvas.draw_sprite(&self.bg_sprites[4], Point::new(right, y));
+            }
             for (i, line) in self.lines.iter().enumerate() {
                 canvas.draw_text(&self.font,
                                  Align::Left,
@@ -108,6 +135,7 @@ impl<A> Element<(), A> for DialogBox<A> {
 // ========================================================================= //
 
 struct DialogButton<A> {
+    sprite: Sprite,
     font: Rc<Font>,
     label: String,
     value: A,
@@ -117,6 +145,7 @@ impl<A> DialogButton<A> {
     fn new(resources: &mut Resources, label: String, value: A)
            -> DialogButton<A> {
         DialogButton {
+            sprite: resources.get_sprites("dialog_button")[0].clone(),
             font: resources.get_font("roman"),
             label: label,
             value: value,
@@ -126,12 +155,8 @@ impl<A> DialogButton<A> {
 
 impl<A: Clone> Element<(), A> for DialogButton<A> {
     fn draw(&self, _: &(), canvas: &mut Canvas) {
-        canvas.clear((32, 192, 192));
-        let (width, height) = canvas.size();
-        let start = Point::new(width as i32 / 2,
-                               (height as i32 - self.font.height() as i32) /
-                               2 +
-                               self.font.baseline());
+        canvas.draw_sprite(&self.sprite, Point::new(0, 0));
+        let start = Point::new(self.sprite.width() as i32 / 2, 13);
         canvas.draw_text(&self.font, Align::Center, start, &self.label);
     }
 
@@ -143,6 +168,16 @@ impl<A: Clone> Element<(), A> for DialogButton<A> {
             _ => Action::ignore(),
         }
     }
+}
+
+// ========================================================================= //
+
+fn round_up_to_16(mut size: i32) -> u32 {
+    let remainder = size % 16;
+    if remainder != 0 {
+        size += 16 - remainder;
+    }
+    size as u32
 }
 
 // ========================================================================= //

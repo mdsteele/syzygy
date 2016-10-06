@@ -48,12 +48,10 @@ pub enum TitleAction {
 
 pub struct TitleView {
     elements: GroupElement<SaveData, TitleAction>,
-    sprites: Vec<Sprite>,
 }
 
 impl TitleView {
     pub fn new(resources: &mut Resources, visible: Rect) -> TitleView {
-        let sprites = resources.get_sprites("chars");
         let mut elements: Vec<Box<Element<SaveData, TitleAction>>> = vec![];
         elements.push(Box::new({
             let mut rect = Rect::new(0,
@@ -96,27 +94,13 @@ impl TitleView {
                                  BOTTOM_BUTTONS_HEIGHT);
             SubrectElement::new(EraseGameButton::new(resources), rect)
         }));
-        TitleView {
-            elements: GroupElement::new(elements),
-            sprites: sprites,
-        }
+        TitleView { elements: GroupElement::new(elements) }
     }
 }
 
 impl Element<SaveData, TitleAction> for TitleView {
     fn draw(&self, data: &SaveData, canvas: &mut Canvas) {
         canvas.clear((64, 64, 128));
-        let rect = canvas.rect();
-        let margin: u32 = 100;
-        let rect = Rect::new(rect.x() + margin as i32,
-                             rect.y() + margin as i32,
-                             rect.width() - 2 * margin,
-                             rect.height() - 2 * margin);
-        canvas.fill_rect((0, 192, 0), rect);
-        for i in 0..6 {
-            canvas.draw_sprite(&self.sprites[i as usize],
-                               Point::new(150 + 40 * i, 150));
-        }
         self.elements.draw(data, canvas);
     }
 
@@ -273,9 +257,9 @@ impl<'a> ConfirmEraseView<'a> {
     pub fn new(resources: &mut Resources, visible: Rect,
                title_view: &'a TitleView)
                -> ConfirmEraseView<'a> {
-        let text = "Really clear game data?\nAll progress will be lost.";
+        let text = "Really erase game data?\nAll progress will be lost!";
         let buttons = vec![("Cancel".to_string(), false),
-                           ("Confirm".to_string(), true)];
+                           ("Erase".to_string(), true)];
         let dialog = DialogBox::new(resources, visible, text, buttons);
         ConfirmEraseView {
             title_view: title_view,

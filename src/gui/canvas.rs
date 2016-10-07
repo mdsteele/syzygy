@@ -42,14 +42,11 @@ impl<'a> Canvas<'a> {
         }
     }
 
-    pub fn size(&self) -> (u32, u32) {
-        (self.offset_rect.width(), self.offset_rect.height())
-    }
+    pub fn width(&self) -> u32 { self.offset_rect.width() }
 
-    pub fn rect(&self) -> Rect {
-        let (width, height) = self.size();
-        Rect::new(0, 0, width, height)
-    }
+    pub fn height(&self) -> u32 { self.offset_rect.height() }
+
+    pub fn rect(&self) -> Rect { Rect::new(0, 0, self.width(), self.height()) }
 
     pub fn subcanvas(&mut self, mut rect: Rect) -> Canvas {
         rect.offset(self.offset_rect.x(), self.offset_rect.y());

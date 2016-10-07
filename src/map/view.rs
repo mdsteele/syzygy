@@ -17,6 +17,7 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
+use super::super::elements::{Hud, HudAction, HudInput};
 use super::super::gui::{Action, Canvas, Element, Event, GroupElement, Point,
                         Rect, Resources, Sprite, SubrectElement};
 use super::super::save::{Game, Location};
@@ -31,6 +32,7 @@ const PUZZLE_NODE_HEIGHT: u32 = 24;
 #[allow(dead_code)]
 pub enum MapAction {
     ReturnToTitle,
+    ShowInfoBox,
     GoToPuzzle(Location),
 }
 
@@ -38,14 +40,16 @@ pub enum MapAction {
 
 pub struct MapView {
     nodes: GroupElement<Game, MapAction>,
+    hud: Hud,
 }
 
 impl MapView {
-    pub fn new(resources: &mut Resources, _visible: Rect) -> MapView {
+    pub fn new(resources: &mut Resources, visible: Rect) -> MapView {
         MapView {
             nodes: GroupElement::new(vec![
                 MapView::node(resources, Location::ALightInTheAttic, 100, 50),
             ]),
+            hud: Hud::new(resources, visible, Location::Map),
         }
     }
 
@@ -54,17 +58,38 @@ impl MapView {
         let rect = Rect::new(x, y, PUZZLE_NODE_WIDTH, PUZZLE_NODE_HEIGHT);
         Box::new(SubrectElement::new(PuzzleNode::new(resources, loc), rect))
     }
+
+    fn hud_input(&self) -> HudInput {
+        HudInput {
+            name: "The Map",
+            can_undo: false,
+            can_redo: false,
+            can_reset: false,
+        }
+    }
 }
 
 impl Element<Game, MapAction> for MapView {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
         canvas.clear((64, 128, 64));
         self.nodes.draw(game, canvas);
+        self.hud.draw(&self.hud_input(), canvas);
     }
 
     fn handle_event(&mut self, event: &Event, game: &mut Game)
                     -> Action<MapAction> {
-        self.nodes.handle_event(event, game)
+        let mut input = self.hud_input();
+        let mut action = self.hud.handle_event(event, &mut input).map(|act| {
+            if act == HudAction::Back {
+                MapAction::ReturnToTitle
+            } else {
+                MapAction::ShowInfoBox
+            }
+        });
+        if !action.should_stop() {
+            action.merge(self.nodes.handle_event(event, game));
+        }
+        action
     }
 }
 

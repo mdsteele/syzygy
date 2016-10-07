@@ -39,6 +39,9 @@ pub fn run_map_screen(window: &mut Window, game: &mut Game) -> Mode {
             Some(&MapAction::ReturnToTitle) => {
                 return Mode::Title;
             }
+            Some(&MapAction::ShowInfoBox) => {
+                // TODO: Show map screen info box
+            }
             Some(&MapAction::GoToPuzzle(loc)) => {
                 return Mode::Location(loc);
             }

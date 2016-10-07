@@ -58,6 +58,13 @@ impl<A> Action<A> {
             self.value = action.value;
         }
     }
+
+    pub fn map<B, F: FnOnce(A) -> B>(self, f: F) -> Action<B> {
+        Action {
+            redraw: self.redraw,
+            value: self.value.map(f),
+        }
+    }
 }
 
 // ========================================================================= //

@@ -46,14 +46,13 @@ impl SaveData {
         }
     }
 
-    fn from_toml(path: PathBuf, table: &toml::Table) -> SaveData {
+    fn from_toml(path: PathBuf, mut table: toml::Table) -> SaveData {
         let mut data = SaveData::new(path);
         if let Some(prefs) = table.get(PREFS_KEY)
                                   .and_then(toml::Value::as_table) {
             data.prefs = Prefs::from_toml(prefs);
         }
-        if let Some(game) = table.get(GAME_KEY)
-                                 .and_then(toml::Value::as_table) {
+        if let Some(game) = table.remove(GAME_KEY) {
             data.game = Some(Game::from_toml(game));
         }
         data
@@ -84,7 +83,7 @@ impl SaveData {
         let mut string = String::new();
         try!(file.read_to_string(&mut string));
         match toml::Parser::new(&string).parse() {
-            Some(value) => Ok(SaveData::from_toml(path, &value)),
+            Some(value) => Ok(SaveData::from_toml(path, value)),
             None => {
                 Err(io::Error::new(io::ErrorKind::InvalidData,
                                    "failed to parse toml"))

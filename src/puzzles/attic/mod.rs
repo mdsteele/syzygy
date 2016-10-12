@@ -17,18 +17,9 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod access;
-mod data;
-mod game;
-mod location;
-mod path;
-mod prefs;
+mod control;
+mod view;
 
-pub use self::access::Access;
-pub use self::data::SaveData;
-pub use self::game::{AtticState, Game};
-pub use self::location::Location;
-pub use self::path::get_default_save_file_path;
-pub use self::prefs::Prefs;
+pub use self::control::run_a_light_in_the_attic;
 
 // ========================================================================= //

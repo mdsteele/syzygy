@@ -17,62 +17,37 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use std::default::Default;
-use toml;
+use elements::HudAction;
+use gui::{Element, Event, Window};
+use mode::Mode;
+use save::{Game, Location};
+
+use super::view::{View, Cmd};
 
 // ========================================================================= //
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum Location {
-    Map,
-    Prolog,
-    ALightInTheAttic,
-}
-
-impl Location {
-    pub fn key(self) -> &'static str {
-        match self {
-            Location::Map => "map",
-            Location::Prolog => "prolog",
-            Location::ALightInTheAttic => "a_light_in_the_attic",
-        }
-    }
-
-    pub fn from_toml(value: Option<&toml::Value>) -> Location {
-        if let Some(string) = value.and_then(toml::Value::as_str) {
-            match string {
-                "map" => return Location::Map,
-                "prolog" => return Location::Prolog,
-                "a_light_in_the_attic" => return Location::ALightInTheAttic,
-                _ => {}
+pub fn run_a_light_in_the_attic(window: &mut Window, game: &mut Game) -> Mode {
+    game.a_light_in_the_attic.visit();
+    let mut view = {
+        let visible_rect = window.visible_rect();
+        View::new(&mut window.resources(),
+                  visible_rect,
+                  &game.a_light_in_the_attic)
+    };
+    window.render(game, &view);
+    loop {
+        let action = match window.next_event() {
+            Event::Quit => return Mode::Quit,
+            event => view.handle_event(&event, game),
+        };
+        match action.value() {
+            Some(&Cmd::Hud(HudAction::Back)) => {
+                return Mode::Location(Location::Map);
             }
+            _ => {}
         }
-        Default::default()
-    }
-
-    pub fn to_toml(self) -> toml::Value {
-        toml::Value::String(self.key().to_string())
-    }
-}
-
-impl Default for Location {
-    fn default() -> Location { Location::Map }
-}
-
-// ========================================================================= //
-
-#[cfg(test)]
-mod tests {
-    use super::Location;
-
-    #[test]
-    fn toml_round_trip() {
-        let locations = &[Location::Map,
-                          Location::Prolog,
-                          Location::ALightInTheAttic];
-        for original in locations {
-            let result = Location::from_toml(Some(&original.to_toml()));
-            assert_eq!(result, *original);
+        if action.should_redraw() {
+            window.render(game, &view);
         }
     }
 }

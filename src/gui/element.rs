@@ -29,6 +29,25 @@ pub trait Element<S, A> {
     fn handle_event(&mut self, event: &Event, state: &mut S) -> Action<A>;
 }
 
+impl<S, A, E: Element<S, A>> Element<S, A> for Vec<E> {
+    fn draw(&self, state: &S, canvas: &mut Canvas) {
+        for element in self.iter().rev() {
+            element.draw(state, canvas);
+        }
+    }
+
+    fn handle_event(&mut self, event: &Event, state: &mut S) -> Action<A> {
+        let mut action = Action::ignore();
+        for element in self.iter_mut() {
+            action.merge(element.handle_event(event, state));
+            if action.should_stop() {
+                break;
+            }
+        }
+        action
+    }
+}
+
 // ========================================================================= //
 
 pub struct GroupElement<S, A> {

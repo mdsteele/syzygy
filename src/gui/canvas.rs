@@ -102,6 +102,12 @@ impl<'a> Canvas<'a> {
                                           sprite.height())));
     }
 
+    pub fn draw_sprite_centered(&mut self, sprite: &Sprite, center: Point) {
+        let top_left = Point::new(center.x() - sprite.width() as i32 / 2,
+                                  center.y() - sprite.height() as i32 / 2);
+        self.draw_sprite(sprite, top_left);
+    }
+
     pub fn draw_text(&mut self, font: &Font, alignment: Align, start: Point,
                      text: &str) {
         let top = start.y() - font.baseline();

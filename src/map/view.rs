@@ -29,7 +29,6 @@ const PUZZLE_NODE_HEIGHT: u32 = 24;
 
 // ========================================================================= //
 
-#[allow(dead_code)]
 pub enum MapAction {
     ReturnToTitle,
     ShowInfoBox,
@@ -110,16 +109,21 @@ impl PuzzleNode {
 }
 
 impl Element<Game, MapAction> for PuzzleNode {
-    fn draw(&self, _game: &Game, canvas: &mut Canvas) {
-        // TODO: pick icon based on location access
-        canvas.draw_sprite(&self.icons[0], Point::new(0, 0));
+    fn draw(&self, game: &Game, canvas: &mut Canvas) {
+        if game.is_unlocked(self.loc) {
+            let icon = if game.is_solved(self.loc) {
+                &self.icons[1]
+            } else {
+                &self.icons[0]
+            };
+            canvas.draw_sprite(icon, Point::new(0, 0));
+        }
     }
 
-    fn handle_event(&mut self, event: &Event, _game: &mut Game)
+    fn handle_event(&mut self, event: &Event, game: &mut Game)
                     -> Action<MapAction> {
-        // TODO: ignore clicks for locked locations
         match event {
-            &Event::MouseDown(_) => {
+            &Event::MouseDown(_) if game.is_unlocked(self.loc) => {
                 Action::redraw().and_return(MapAction::GoToPuzzle(self.loc))
             }
             _ => Action::ignore(),

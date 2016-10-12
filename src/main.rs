@@ -24,6 +24,7 @@ extern crate toml;
 
 mod elements;
 mod gui;
+mod puzzles;
 mod map;
 mod mode;
 mod save;
@@ -125,30 +126,36 @@ fn main() {
     };
     let mut mode = Mode::Title;
     loop {
-        match mode {
+        mode = match mode {
             Mode::Title => {
-                mode = title::run_title_screen(&mut window, &mut save_data);
+                title::run_title_screen(&mut window, &mut save_data)
             }
             Mode::Location(loc) => {
                 if let Some(game) = save_data.game_mut() {
                     match loc {
                         Location::Map => {
-                            mode = map::run_map_screen(&mut window, game);
+                            map::run_map_screen(&mut window, game)
+                        }
+                        Location::Prolog => {
+                            Mode::Title // TODO: implement prolog
                         }
                         Location::ALightInTheAttic => {
-                            // TODO: Implement ALightInTheAttic puzzle
-                            mode = Mode::Title;
+                            puzzles::run_a_light_in_the_attic(&mut window,
+                                                              game)
                         }
                     }
                 } else {
                     if cfg!(debug_assertions) {
                         println!("WARNING: no game, can't go to {:?}", loc);
                     }
-                    mode = Mode::Title;
+                    Mode::Title
                 }
             }
             Mode::Quit => break,
-        }
+        };
+    }
+    if let Err(error) = save_data.save_to_disk() {
+        println!("Failed to save game: {}", error);
     }
 }
 

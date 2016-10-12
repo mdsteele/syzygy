@@ -22,28 +22,22 @@ use toml;
 
 // ========================================================================= //
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum Location {
-    Map,
-    Prolog,
-    ALightInTheAttic,
+#[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
+pub enum Access {
+    Unvisited,
+    Unsolved,
+    Solved,
+    Replay,
 }
 
-impl Location {
-    pub fn key(self) -> &'static str {
-        match self {
-            Location::Map => "map",
-            Location::Prolog => "prolog",
-            Location::ALightInTheAttic => "a_light_in_the_attic",
-        }
-    }
-
-    pub fn from_toml(value: Option<&toml::Value>) -> Location {
+impl Access {
+    pub fn from_toml(value: Option<&toml::Value>) -> Access {
         if let Some(string) = value.and_then(toml::Value::as_str) {
             match string {
-                "map" => return Location::Map,
-                "prolog" => return Location::Prolog,
-                "a_light_in_the_attic" => return Location::ALightInTheAttic,
+                "unvisited" => return Access::Unvisited,
+                "unsolved" => return Access::Unsolved,
+                "solved" => return Access::Solved,
+                "replay" => return Access::Replay,
                 _ => {}
             }
         }
@@ -51,27 +45,40 @@ impl Location {
     }
 
     pub fn to_toml(self) -> toml::Value {
-        toml::Value::String(self.key().to_string())
+        let string = match self {
+            Access::Unvisited => "unvisited",
+            Access::Unsolved => "unsolved",
+            Access::Solved => "solved",
+            Access::Replay => "replay",
+        };
+        toml::Value::String(string.to_string())
+    }
+
+    pub fn visit(&mut self) {
+        if *self < Access::Unsolved {
+            *self = Access::Unsolved;
+        }
     }
 }
 
-impl Default for Location {
-    fn default() -> Location { Location::Map }
+impl Default for Access {
+    fn default() -> Access { Access::Unvisited }
 }
 
 // ========================================================================= //
 
 #[cfg(test)]
 mod tests {
-    use super::Location;
+    use super::Access;
 
     #[test]
     fn toml_round_trip() {
-        let locations = &[Location::Map,
-                          Location::Prolog,
-                          Location::ALightInTheAttic];
-        for original in locations {
-            let result = Location::from_toml(Some(&original.to_toml()));
+        let all = &[Access::Unvisited,
+                    Access::Unsolved,
+                    Access::Solved,
+                    Access::Replay];
+        for original in all {
+            let result = Access::from_toml(Some(&original.to_toml()));
             assert_eq!(result, *original);
         }
     }

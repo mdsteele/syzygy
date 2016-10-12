@@ -46,7 +46,10 @@ impl Flags {
         let args: Vec<String> = std::env::args().collect();
         let mut opts = getopts::Options::new();
         opts.optflag("h", "help", "print this help menu");
-        opts.optopt("", "fullscreen", "override fullscreen setting", "BOOL");
+        opts.optflagopt("",
+                        "fullscreen",
+                        "override fullscreen setting",
+                        "BOOL");
         opts.optopt("", "save_file", "override save file path", "FILE");
         opts.optopt("", "window_size", "override window size", "WxH");
         let matches = opts.parse(&args[1..]).unwrap_or_else(|failure| {
@@ -59,7 +62,7 @@ impl Flags {
             print!("{}", opts.usage(&brief));
             std::process::exit(0);
         }
-        let fullscreen = matches.opt_str("fullscreen")
+        let fullscreen = matches.opt_default("fullscreen", "true")
                                 .and_then(|value| value.parse().ok());
         let save_file = matches.opt_str("save_file").map(PathBuf::from);
         let window_size = matches.opt_str("window_size").and_then(|value| {

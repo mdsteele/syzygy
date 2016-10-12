@@ -17,17 +17,22 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use super::super::gui::{Element, Event, Window};
-use super::super::mode::Mode;
-use super::super::save::Game;
-use super::view::{MapAction, MapView};
+use elements::HudAction;
+use gui::{Element, Event, Window};
+use modes::Mode;
+use save::{Game, Location};
+
+use super::view::{View, Cmd};
 
 // ========================================================================= //
 
-pub fn run_map_screen(window: &mut Window, game: &mut Game) -> Mode {
+pub fn run_a_light_in_the_attic(window: &mut Window, game: &mut Game) -> Mode {
+    game.a_light_in_the_attic.visit();
     let mut view = {
         let visible_rect = window.visible_rect();
-        MapView::new(&mut window.resources(), visible_rect)
+        View::new(&mut window.resources(),
+                  visible_rect,
+                  &game.a_light_in_the_attic)
     };
     window.render(game, &view);
     loop {
@@ -36,16 +41,10 @@ pub fn run_map_screen(window: &mut Window, game: &mut Game) -> Mode {
             event => view.handle_event(&event, game),
         };
         match action.value() {
-            Some(&MapAction::ReturnToTitle) => {
-                return Mode::Title;
+            Some(&Cmd::Hud(HudAction::Back)) => {
+                return Mode::Location(Location::Map);
             }
-            Some(&MapAction::ShowInfoBox) => {
-                // TODO: Show map screen info box
-            }
-            Some(&MapAction::GoToPuzzle(loc)) => {
-                return Mode::Location(loc);
-            }
-            None => {}
+            _ => {}
         }
         if action.should_redraw() {
             window.render(game, &view);

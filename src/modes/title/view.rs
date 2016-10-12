@@ -18,11 +18,11 @@
 // +--------------------------------------------------------------------------+
 
 use std::rc::Rc;
-use super::super::gui::{Action, Align, Canvas, Element, Event, Font,
-                        GroupElement, Point, Rect, Resources, Sprite,
-                        SubrectElement};
-use super::super::elements::DialogBox;
-use super::super::save::SaveData;
+
+use gui::{Action, Align, Canvas, Element, Event, Font, GroupElement, Point,
+          Rect, Resources, Sprite, SubrectElement};
+use elements::DialogBox;
+use save::SaveData;
 
 // ========================================================================= //
 

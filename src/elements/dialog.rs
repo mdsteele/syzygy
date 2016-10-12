@@ -19,9 +19,9 @@
 
 use std::cmp;
 use std::rc::Rc;
-use super::super::gui::{Action, Align, Canvas, Element, Event, Font,
-                        GroupElement, Point, Rect, Resources, Sprite,
-                        SubrectElement};
+
+use gui::{Action, Align, Canvas, Element, Event, Font, GroupElement, Point,
+          Rect, Resources, Sprite, SubrectElement};
 
 // ========================================================================= //
 

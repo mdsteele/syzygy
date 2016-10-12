@@ -17,9 +17,10 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use super::super::gui::{Element, Event, Window};
-use super::super::mode::Mode;
-use super::super::save::SaveData;
+use gui::{Element, Event, Window};
+use modes::Mode;
+use save::SaveData;
+
 use super::view::{AboutBoxView, ConfirmEraseView, TitleAction, TitleView};
 
 // ========================================================================= //

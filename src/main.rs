@@ -24,16 +24,14 @@ extern crate toml;
 
 mod elements;
 mod gui;
-mod puzzles;
-mod map;
-mod mode;
+mod modes;
 mod save;
-mod title;
+
+use std::path::PathBuf;
 
 use self::gui::{Event, Window};
-use self::mode::Mode;
+use self::modes::Mode;
 use self::save::{Location, SaveData};
-use std::path::PathBuf;
 
 // ========================================================================= //
 
@@ -128,20 +126,19 @@ fn main() {
     loop {
         mode = match mode {
             Mode::Title => {
-                title::run_title_screen(&mut window, &mut save_data)
+                modes::run_title_screen(&mut window, &mut save_data)
             }
             Mode::Location(loc) => {
                 if let Some(game) = save_data.game_mut() {
                     match loc {
                         Location::Map => {
-                            map::run_map_screen(&mut window, game)
+                            modes::run_map_screen(&mut window, game)
                         }
                         Location::Prolog => {
                             Mode::Title // TODO: implement prolog
                         }
                         Location::ALightInTheAttic => {
-                            puzzles::run_a_light_in_the_attic(&mut window,
-                                                              game)
+                            modes::run_a_light_in_the_attic(&mut window, game)
                         }
                     }
                 } else {

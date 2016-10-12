@@ -17,10 +17,11 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
+use std::cmp;
+
 use elements::{Hud, HudAction, HudInput};
 use gui::{Action, Canvas, Element, Event, Rect, Resources, Sprite};
 use save::{AtticState, Game, Location};
-use std::cmp;
 
 // ========================================================================= //
 

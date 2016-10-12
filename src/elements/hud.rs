@@ -18,10 +18,10 @@
 // +--------------------------------------------------------------------------+
 
 use std::rc::Rc;
-use super::super::gui::{Action, Align, Canvas, Element, Event, Font,
-                        GroupElement, Point, Rect, Resources, Sprite,
-                        SubrectElement};
-use super::super::save::Location;
+
+use gui::{Action, Align, Canvas, Element, Event, Font, GroupElement, Point,
+          Rect, Resources, Sprite, SubrectElement};
+use save::Location;
 
 // ========================================================================= //
 

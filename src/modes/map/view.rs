@@ -17,10 +17,10 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use super::super::elements::{Hud, HudAction, HudInput};
-use super::super::gui::{Action, Canvas, Element, Event, GroupElement, Point,
-                        Rect, Resources, Sprite, SubrectElement};
-use super::super::save::{Game, Location};
+use elements::{Hud, HudAction, HudInput};
+use gui::{Action, Canvas, Element, Event, GroupElement, Point, Rect,
+          Resources, Sprite, SubrectElement};
+use save::{Game, Location};
 
 // ========================================================================= //
 

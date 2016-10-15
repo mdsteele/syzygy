@@ -66,15 +66,23 @@ impl Flags {
                                 .and_then(|value| value.parse().ok());
         let save_file = matches.opt_str("save_file").map(PathBuf::from);
         let window_size = matches.opt_str("window_size").and_then(|value| {
-            let pieces: Vec<&str> = value.split('x').collect();
-            if pieces.len() != 2 {
-                return None;
+            match &value as &str {
+                "full" => Some((576, 384)),
+                "small" => Some((480, 320)),
+                "tall" => Some((480, 384)),
+                "wide" => Some((576, 320)),
+                _ => {
+                    let pieces: Vec<&str> = value.split('x').collect();
+                    if pieces.len() != 2 {
+                        return None;
+                    }
+                    pieces[0].parse::<u32>().ok().and_then(|width| {
+                        pieces[1].parse::<u32>().ok().and_then(|height| {
+                            return Some((width, height));
+                        })
+                    })
+                }
             }
-            pieces[0].parse::<u32>().ok().and_then(|width| {
-                pieces[1].parse::<u32>().ok().and_then(|height| {
-                    return Some((width, height));
-                })
-            })
         });
         Flags {
             fullscreen: fullscreen,

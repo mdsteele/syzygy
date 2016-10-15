@@ -20,6 +20,7 @@
 use sdl2::pixels::Color;
 use sdl2::rect::{Point, Rect};
 use sdl2::render::Renderer;
+use super::background::Background;
 use super::font::Font;
 use super::sprite::Sprite;
 
@@ -90,6 +91,13 @@ impl<'a> Canvas<'a> {
             }
         }
         self.renderer.fill_rect(rect).unwrap();
+    }
+
+    pub fn draw_background(&mut self, background: &Background) {
+        self.clear(background.color());
+        for (sprite, point) in background.tiles() {
+            self.draw_sprite(sprite, point);
+        }
     }
 
     pub fn draw_sprite(&mut self, sprite: &Sprite, mut top_left: Point) {

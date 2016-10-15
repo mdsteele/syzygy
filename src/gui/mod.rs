@@ -18,6 +18,7 @@
 // +--------------------------------------------------------------------------+
 
 mod action;
+mod background;
 mod canvas;
 mod element;
 mod event;
@@ -28,6 +29,7 @@ mod window;
 
 pub use sdl2::rect::{Point, Rect};
 pub use self::action::Action;
+pub use self::background::Background;
 pub use self::canvas::{Align, Canvas};
 pub use self::element::{Element, GroupElement, SubrectElement};
 pub use self::event::{Event, KeyMod};

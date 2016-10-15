@@ -25,6 +25,8 @@ use std::io;
 use std::mem;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
+
+use super::background::Background;
 use super::font::Font;
 use super::sprite::Sprite;
 
@@ -44,6 +46,10 @@ impl<'a> Resources<'a> {
         }
     }
 
+    pub fn get_background(&mut self, name: &str) -> Rc<Background> {
+        self.cache.get_background(self.renderer, name)
+    }
+
     pub fn get_font(&mut self, name: &str) -> Rc<Font> {
         self.cache.get_font(self.renderer, name)
     }
@@ -60,6 +66,7 @@ impl<'a> Drop for Resources<'a> {
 // ========================================================================= //
 
 pub struct ResourceCache {
+    backgrounds: BTreeMap<String, Rc<Background>>,
     fonts: BTreeMap<String, Rc<Font>>,
     sprites: BTreeMap<String, Vec<Sprite>>,
 }
@@ -67,9 +74,31 @@ pub struct ResourceCache {
 impl ResourceCache {
     pub fn new() -> ResourceCache {
         ResourceCache {
+            backgrounds: BTreeMap::new(),
             fonts: BTreeMap::new(),
             sprites: BTreeMap::new(),
         }
+    }
+
+    fn get_background(&mut self, renderer: &Renderer, name: &str)
+                      -> Rc<Background> {
+        if let Some(background) = self.backgrounds.get(name) {
+            return background.clone();
+        }
+        if cfg!(debug_assertions) {
+            println!("Loading background: {}", name);
+        }
+        let path = PathBuf::from("data/backgrounds")
+                       .join(name)
+                       .with_extension("bg");
+        let background = Rc::new(Background::load(&path, |name| {
+                                     self.get_sprites(renderer,
+                                                      &format!("tiles/{}",
+                                                               name))
+                                 })
+                                     .expect(name));
+        self.backgrounds.insert(name.to_string(), background.clone());
+        background
     }
 
     fn get_font(&mut self, renderer: &Renderer, name: &str) -> Rc<Font> {
@@ -82,7 +111,7 @@ impl ResourceCache {
         let path = PathBuf::from("data/fonts")
                        .join(name)
                        .with_extension("ahf");
-        let ahf = load_ahf_from_file(&path).unwrap();
+        let ahf = load_ahf_from_file(&path).expect(name);
         let font = Rc::new(Font::new(renderer, &ahf));
         self.fonts.insert(name.to_string(), font.clone());
         font
@@ -98,7 +127,7 @@ impl ResourceCache {
         let path = PathBuf::from("data/sprites")
                        .join(name)
                        .with_extension("ahi");
-        let ahi = load_ahi_from_file(&path).unwrap();
+        let ahi = load_ahi_from_file(&path).expect(name);
         let vec: Vec<Sprite> = ahi.iter()
                                   .map(|image| Sprite::new(renderer, image))
                                   .collect();

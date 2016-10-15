@@ -18,9 +18,10 @@
 // +--------------------------------------------------------------------------+
 
 use std::cmp;
+use std::rc::Rc;
 
 use elements::{Hud, HudAction, HudInput};
-use gui::{Action, Canvas, Element, Event, Rect, Resources, Sprite};
+use gui::{Action, Background, Canvas, Element, Event, Rect, Resources, Sprite};
 use save::{AtticState, Game, Location};
 
 // ========================================================================= //
@@ -32,6 +33,7 @@ pub enum Cmd {
 // ========================================================================= //
 
 pub struct View {
+    background: Rc<Background>,
     hud: Hud,
     toggles: Vec<ToggleLight>,
     passives: Vec<PassiveLight>,
@@ -41,6 +43,7 @@ impl View {
     pub fn new(resources: &mut Resources, visible: Rect, attic: &AtticState)
                -> View {
         View {
+            background: resources.get_background("a_light_in_the_attic"),
             hud: Hud::new(resources, visible, Location::ALightInTheAttic),
             toggles: vec![
                 ToggleLight::new(resources, attic, (1, 1), 'C'),
@@ -93,7 +96,7 @@ impl View {
 
 impl Element<Game, Cmd> for View {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
-        canvas.clear((0, 0, 32));
+        canvas.draw_background(&self.background);
         self.passives.draw(&game.a_light_in_the_attic, canvas);
         self.toggles.draw(&game.a_light_in_the_attic, canvas);
         self.hud.draw(&self.hud_input(), canvas);
@@ -117,6 +120,8 @@ impl Element<Game, Cmd> for View {
 
 // ========================================================================= //
 
+const LIGHTS_TOP: i32 = 56;
+const LIGHTS_LEFT: i32 = 312;
 const TOGGLE_MAX_LIGHT_RADIUS: i32 = 12;
 
 pub struct ToggleLight {
@@ -147,7 +152,7 @@ impl ToggleLight {
 
     fn rect(&self) -> Rect {
         let (col, row) = self.position;
-        Rect::new(150 + 32 * col, 75 + 32 * row, 32, 32)
+        Rect::new(LIGHTS_LEFT + 32 * col, LIGHTS_TOP + 32 * row, 32, 32)
     }
 }
 
@@ -220,7 +225,7 @@ impl PassiveLight {
 
     fn rect(&self) -> Rect {
         let (col, row) = self.position;
-        Rect::new(150 + 32 * col, 75 + 32 * row, 32, 32)
+        Rect::new(LIGHTS_LEFT + 32 * col, LIGHTS_TOP + 32 * row, 32, 32)
     }
 }
 

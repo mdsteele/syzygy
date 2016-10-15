@@ -27,7 +27,8 @@ use save::{AtticState, Game, Location};
 // ========================================================================= //
 
 pub enum Cmd {
-    Hud(HudAction),
+    ReturnToMap,
+    ShowInfoBox,
 }
 
 // ========================================================================= //
@@ -37,6 +38,8 @@ pub struct View {
     hud: Hud,
     toggles: Vec<ToggleLight>,
     passives: Vec<PassiveLight>,
+    undo_stack: Vec<(i32, i32)>,
+    redo_stack: Vec<(i32, i32)>,
 }
 
 impl View {
@@ -81,38 +84,88 @@ impl View {
                 PassiveLight::new(resources, attic, (5, 3)),
                 PassiveLight::new(resources, attic, (5, 4)),
             ],
+            undo_stack: Vec::new(),
+            redo_stack: Vec::new(),
         }
     }
 
-    fn hud_input(&self) -> HudInput {
+    fn hud_input(&self, state: &AtticState) -> HudInput {
         HudInput {
             name: "A Light in the Attic",
-            can_undo: false,
-            can_redo: false,
-            can_reset: false,
+            can_undo: !self.undo_stack.is_empty(),
+            can_redo: !self.redo_stack.is_empty(),
+            can_reset: state.any_toggled(),
         }
+    }
+
+    fn undo(&mut self, state: &mut AtticState) {
+        if let Some(position) = self.undo_stack.pop() {
+            self.redo_stack.push(position);
+            state.toggle(position);
+        }
+    }
+
+    fn redo(&mut self, state: &mut AtticState) {
+        if let Some(position) = self.redo_stack.pop() {
+            self.undo_stack.push(position);
+            state.toggle(position);
+        }
+    }
+
+    fn reset(&mut self, state: &mut AtticState) {
+        self.undo_stack.clear();
+        self.redo_stack.clear();
+        state.reset();
     }
 }
 
 impl Element<Game, Cmd> for View {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
+        let state = &game.a_light_in_the_attic;
         canvas.draw_background(&self.background);
-        self.passives.draw(&game.a_light_in_the_attic, canvas);
-        self.toggles.draw(&game.a_light_in_the_attic, canvas);
-        self.hud.draw(&self.hud_input(), canvas);
+        self.passives.draw(state, canvas);
+        self.toggles.draw(state, canvas);
+        self.hud.draw(&self.hud_input(state), canvas);
     }
 
     fn handle_event(&mut self, event: &Event, game: &mut Game) -> Action<Cmd> {
-        let mut input = self.hud_input();
-        let mut action = self.hud
-                             .handle_event(event, &mut input)
-                             .map(Cmd::Hud);
-        let attic = &mut game.a_light_in_the_attic;
+        let state = &mut game.a_light_in_the_attic;
+        let mut action = {
+            let mut input = self.hud_input(state);
+            let action = self.hud.handle_event(event, &mut input);
+            match action.value() {
+                Some(&HudAction::Back) => action.but_return(Cmd::ReturnToMap),
+                Some(&HudAction::Info) => action.but_return(Cmd::ShowInfoBox),
+                Some(&HudAction::Undo) => {
+                    self.undo(state);
+                    action.but_no_value()
+                }
+                Some(&HudAction::Redo) => {
+                    self.redo(state);
+                    action.but_no_value()
+                }
+                Some(&HudAction::Reset) => {
+                    self.reset(state);
+                    action.but_no_value()
+                }
+                None => action.but_no_value(),
+            }
+        };
         if !action.should_stop() {
-            action.merge(self.toggles.handle_event(event, attic));
+            let subaction = self.toggles.handle_event(event, state);
+            if let Some(&position) = subaction.value() {
+                state.toggle(position);
+                if state.is_solved() {
+                    self.undo_stack.clear();
+                } else {
+                    self.undo_stack.push(position);
+                }
+                self.redo_stack.clear();
+            }
+            action.merge(subaction.but_no_value());
         }
         if !action.should_stop() {
-            action.merge(self.passives.handle_event(event, attic));
+            action.merge(self.passives.handle_event(event, state));
         }
         action
     }
@@ -133,7 +186,7 @@ pub struct ToggleLight {
 }
 
 impl ToggleLight {
-    fn new(resources: &mut Resources, attic: &AtticState,
+    fn new(resources: &mut Resources, state: &AtticState,
            position: (i32, i32), label: char)
            -> ToggleLight {
         let sprites = resources.get_sprites("toggle_light");
@@ -142,7 +195,7 @@ impl ToggleLight {
             frame_on: sprites[1].clone(),
             label: resources.get_font("block").glyph(label).sprite().clone(),
             position: position,
-            light_radius: if attic.is_lit(position) {
+            light_radius: if state.is_lit(position) {
                 TOGGLE_MAX_LIGHT_RADIUS
             } else {
                 0
@@ -156,7 +209,7 @@ impl ToggleLight {
     }
 }
 
-impl Element<AtticState, Cmd> for ToggleLight {
+impl Element<AtticState, (i32, i32)> for ToggleLight {
     fn draw(&self, state: &AtticState, canvas: &mut Canvas) {
         let mut canvas = canvas.subcanvas(self.rect());
         draw_light(&mut canvas, self.light_radius, TOGGLE_MAX_LIGHT_RADIUS);
@@ -171,7 +224,7 @@ impl Element<AtticState, Cmd> for ToggleLight {
     }
 
     fn handle_event(&mut self, event: &Event, state: &mut AtticState)
-                    -> Action<Cmd> {
+                    -> Action<(i32, i32)> {
         match event {
             &Event::ClockTick => {
                 tick_radius(state.is_lit(self.position),
@@ -180,8 +233,7 @@ impl Element<AtticState, Cmd> for ToggleLight {
             }
             &Event::MouseDown(pt) if self.rect().contains(pt) &&
                                      !state.is_solved() => {
-                state.toggle(self.position);
-                Action::redraw()
+                Action::redraw().and_return(self.position)
             }
             _ => Action::ignore(),
         }
@@ -199,7 +251,7 @@ pub struct PassiveLight {
 }
 
 impl PassiveLight {
-    fn new(resources: &mut Resources, attic: &AtticState, position: (i32, i32))
+    fn new(resources: &mut Resources, state: &AtticState, position: (i32, i32))
            -> PassiveLight {
         let sprites = resources.get_sprites("toggle_light");
         let (col, row) = position;
@@ -215,7 +267,7 @@ impl PassiveLight {
         PassiveLight {
             frame: sprites[sprite_index].clone(),
             position: position,
-            light_radius: if attic.is_lit(position) {
+            light_radius: if state.is_lit(position) {
                 PASSIVE_MAX_LIGHT_RADIUS
             } else {
                 0
@@ -270,7 +322,7 @@ fn draw_light(canvas: &mut Canvas, radius: i32, max: i32) {
     }
 }
 
-fn tick_radius(lit: bool, radius: &mut i32, max: i32) -> Action<Cmd> {
+fn tick_radius<A>(lit: bool, radius: &mut i32, max: i32) -> Action<A> {
     if lit {
         if *radius < max {
             *radius = cmp::min(max, *radius + 3);

@@ -17,7 +17,6 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use elements::HudAction;
 use gui::{Element, Event, Window};
 use modes::Mode;
 use save::{Game, Location};
@@ -41,7 +40,7 @@ pub fn run_a_light_in_the_attic(window: &mut Window, game: &mut Game) -> Mode {
             event => view.handle_event(&event, game),
         };
         match action.value() {
-            Some(&Cmd::Hud(HudAction::Back)) => {
+            Some(&Cmd::ReturnToMap) => {
                 return Mode::Location(Location::Map);
             }
             _ => {}

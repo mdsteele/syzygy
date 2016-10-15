@@ -21,48 +21,100 @@
 
 pub struct Action<A> {
     redraw: bool,
-    value: Option<A>,
+    value: Value<A>,
 }
 
 impl<A> Action<A> {
     pub fn ignore() -> Action<A> {
         Action {
             redraw: false,
-            value: None,
+            value: Value::Continue,
         }
     }
 
     pub fn redraw() -> Action<A> {
         Action {
             redraw: true,
-            value: None,
+            value: Value::Continue,
         }
     }
 
     pub fn and_return(self, value: A) -> Action<A> {
         Action {
             redraw: self.redraw,
-            value: Some(value),
+            value: Value::Return(value),
+        }
+    }
+
+    pub fn but_return<B>(self, value: B) -> Action<B> {
+        Action {
+            redraw: self.redraw,
+            value: Value::Return(value),
+        }
+    }
+
+    pub fn but_no_value<B>(self) -> Action<B> {
+        Action {
+            redraw: self.redraw,
+            value: match self.value {
+                Value::Continue => Value::Continue,
+                _ => Value::Stop,
+            },
         }
     }
 
     pub fn should_redraw(&self) -> bool { self.redraw }
 
-    pub fn should_stop(&self) -> bool { self.value.is_some() }
+    pub fn should_stop(&self) -> bool {
+        match self.value {
+            Value::Continue => false,
+            _ => true,
+        }
+    }
 
-    pub fn value(&self) -> Option<&A> { self.value.as_ref() }
+    pub fn value(&self) -> Option<&A> {
+        match self.value {
+            Value::Return(ref value) => Some(value),
+            _ => None,
+        }
+    }
 
     pub fn merge(&mut self, action: Action<A>) {
         self.redraw |= action.redraw;
-        if action.value.is_some() {
-            self.value = action.value;
-        }
+        self.value.merge(action.value);
     }
 
     pub fn map<B, F: FnOnce(A) -> B>(self, f: F) -> Action<B> {
         Action {
             redraw: self.redraw,
             value: self.value.map(f),
+        }
+    }
+}
+
+// ========================================================================= //
+
+enum Value<A> {
+    Continue,
+    Stop,
+    Return(A),
+}
+
+impl<A> Value<A> {
+    fn merge(&mut self, other: Value<A>) {
+        match other {
+            Value::Continue => {}
+            _ => {
+                *self = other;
+            }
+        }
+    }
+
+    fn map<B, F: FnOnce(A) -> B>(self, f: F) -> Value<B> {
+        match self {
+            Value::Continue => Value::Continue,
+            Value::Stop => Value::Stop,
+            Value::Return(a) => Value::Return(f(a)),
         }
     }
 }

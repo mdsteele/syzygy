@@ -236,6 +236,8 @@ impl AtticState {
         self.toggled.contains(&((row - 1) * 4 + (col - 1)))
     }
 
+    pub fn any_toggled(&self) -> bool { !self.toggled.is_empty() }
+
     pub fn toggle(&mut self, pos: (i32, i32)) {
         let (col, row) = pos;
         if col >= 1 && col <= 4 && row >= 1 && row <= 4 {
@@ -252,6 +254,8 @@ impl AtticState {
             }
         }
     }
+
+    pub fn reset(&mut self) { self.toggled.clear(); }
 }
 
 // ========================================================================= //

@@ -21,14 +21,14 @@ use gui::{Element, Event, Window};
 use modes::Mode;
 use save::Game;
 
-use super::view::{MapAction, MapView};
+use super::view::{Cmd, View};
 
 // ========================================================================= //
 
 pub fn run_map_screen(window: &mut Window, game: &mut Game) -> Mode {
     let mut view = {
         let visible_rect = window.visible_rect();
-        MapView::new(&mut window.resources(), visible_rect)
+        View::new(&mut window.resources(), visible_rect)
     };
     window.render(game, &view);
     loop {
@@ -37,13 +37,13 @@ pub fn run_map_screen(window: &mut Window, game: &mut Game) -> Mode {
             event => view.handle_event(&event, game),
         };
         match action.value() {
-            Some(&MapAction::ReturnToTitle) => {
+            Some(&Cmd::ReturnToTitle) => {
                 return Mode::Title;
             }
-            Some(&MapAction::ShowInfoBox) => {
+            Some(&Cmd::ShowInfoBox) => {
                 // TODO: Show map screen info box
             }
-            Some(&MapAction::GoToPuzzle(loc)) => {
+            Some(&Cmd::GoToPuzzle(loc)) => {
                 return Mode::Location(loc);
             }
             None => {}

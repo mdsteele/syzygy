@@ -21,7 +21,7 @@ use gui::{Element, Event, Window};
 use modes::Mode;
 use save::{Game, Location};
 
-use super::view::{View, Cmd};
+use super::view::{Cmd, View};
 
 // ========================================================================= //
 

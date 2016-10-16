@@ -18,9 +18,11 @@
 // +--------------------------------------------------------------------------+
 
 mod dialog;
+mod fade;
 mod hud;
 
 pub use self::dialog::DialogBox;
+pub use self::fade::ScreenFade;
 pub use self::hud::{Hud, HudAction, HudInput};
 
 // ========================================================================= //

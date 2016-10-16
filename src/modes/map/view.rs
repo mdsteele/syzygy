@@ -17,9 +17,9 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use elements::{Hud, HudAction, HudInput};
-use gui::{Action, Canvas, Element, Event, GroupElement, Point, Rect,
-          Resources, Sprite, SubrectElement};
+use elements::{Hud, HudAction, HudInput, ScreenFade};
+use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sprite,
+          SubrectElement};
 use save::{Game, Location};
 
 // ========================================================================= //
@@ -29,7 +29,8 @@ const PUZZLE_NODE_HEIGHT: u32 = 24;
 
 // ========================================================================= //
 
-pub enum MapAction {
+#[derive(Clone, Copy)]
+pub enum Cmd {
     ReturnToTitle,
     ShowInfoBox,
     GoToPuzzle(Location),
@@ -37,25 +38,29 @@ pub enum MapAction {
 
 // ========================================================================= //
 
-pub struct MapView {
-    nodes: GroupElement<Game, MapAction>,
+pub struct View {
+    screen_fade: ScreenFade,
+    fade_command: Cmd,
     hud: Hud,
+    nodes: Vec<SubrectElement<PuzzleNode>>,
 }
 
-impl MapView {
-    pub fn new(resources: &mut Resources, visible: Rect) -> MapView {
-        MapView {
-            nodes: GroupElement::new(vec![
-                MapView::node(resources, Location::ALightInTheAttic, 100, 50),
-            ]),
+impl View {
+    pub fn new(resources: &mut Resources, visible: Rect) -> View {
+        View {
+            screen_fade: ScreenFade::new(resources),
+            fade_command: Cmd::ReturnToTitle,
             hud: Hud::new(resources, visible, Location::Map),
+            nodes: vec![
+                View::node(resources, Location::ALightInTheAttic, 100, 50),
+            ],
         }
     }
 
     fn node(resources: &mut Resources, loc: Location, x: i32, y: i32)
-            -> Box<Element<Game, MapAction>> {
+            -> SubrectElement<PuzzleNode> {
         let rect = Rect::new(x, y, PUZZLE_NODE_WIDTH, PUZZLE_NODE_HEIGHT);
-        Box::new(SubrectElement::new(PuzzleNode::new(resources, loc), rect))
+        SubrectElement::new(PuzzleNode::new(resources, loc), rect)
     }
 
     fn hud_input(&self) -> HudInput {
@@ -68,25 +73,44 @@ impl MapView {
     }
 }
 
-impl Element<Game, MapAction> for MapView {
+impl Element<Game, Cmd> for View {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
         canvas.clear((64, 128, 64));
         self.nodes.draw(game, canvas);
         self.hud.draw(&self.hud_input(), canvas);
+        self.screen_fade.draw(&(), canvas);
     }
 
-    fn handle_event(&mut self, event: &Event, game: &mut Game)
-                    -> Action<MapAction> {
-        let mut input = self.hud_input();
-        let mut action = self.hud.handle_event(event, &mut input).map(|act| {
-            if act == HudAction::Back {
-                MapAction::ReturnToTitle
-            } else {
-                MapAction::ShowInfoBox
+    fn handle_event(&mut self, event: &Event, game: &mut Game) -> Action<Cmd> {
+        let mut action = {
+            let subaction = self.screen_fade.handle_event(event, &mut ());
+            match subaction.value() {
+                Some(&true) => subaction.but_return(self.fade_command),
+                _ => subaction.but_continue(),
             }
-        });
+        };
         if !action.should_stop() {
-            action.merge(self.nodes.handle_event(event, game));
+            let mut input = self.hud_input();
+            let subaction = self.hud.handle_event(event, &mut input);
+            action.merge(match subaction.value() {
+                Some(&HudAction::Back) => {
+                    self.screen_fade.set_should_be_opaque(true);
+                    self.fade_command = Cmd::ReturnToTitle;
+                    subaction.but_no_value()
+                }
+                Some(&HudAction::Info) => {
+                    subaction.but_return(Cmd::ShowInfoBox)
+                }
+                _ => subaction.but_no_value(),
+            });
+        }
+        if !action.should_stop() {
+            let subaction = self.nodes.handle_event(event, game);
+            if let Some(&location) = subaction.value() {
+                self.screen_fade.set_should_be_opaque(true);
+                self.fade_command = Cmd::GoToPuzzle(location);
+            }
+            action.merge(subaction.but_no_value());
         }
         action
     }
@@ -108,7 +132,7 @@ impl PuzzleNode {
     }
 }
 
-impl Element<Game, MapAction> for PuzzleNode {
+impl Element<Game, Location> for PuzzleNode {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
         if game.is_unlocked(self.loc) {
             let icon = if game.is_solved(self.loc) {
@@ -121,10 +145,10 @@ impl Element<Game, MapAction> for PuzzleNode {
     }
 
     fn handle_event(&mut self, event: &Event, game: &mut Game)
-                    -> Action<MapAction> {
+                    -> Action<Location> {
         match event {
             &Event::MouseDown(_) if game.is_unlocked(self.loc) => {
-                Action::redraw().and_return(MapAction::GoToPuzzle(self.loc))
+                Action::redraw().and_return(self.loc)
             }
             _ => Action::ignore(),
         }

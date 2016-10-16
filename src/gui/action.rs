@@ -39,10 +39,24 @@ impl<A> Action<A> {
         }
     }
 
+    pub fn and_stop(self) -> Action<A> {
+        Action {
+            redraw: self.redraw,
+            value: Value::Stop,
+        }
+    }
+
     pub fn and_return(self, value: A) -> Action<A> {
         Action {
             redraw: self.redraw,
             value: Value::Return(value),
+        }
+    }
+
+    pub fn but_continue<B>(self) -> Action<B> {
+        Action {
+            redraw: self.redraw,
+            value: Value::Continue,
         }
     }
 
@@ -84,6 +98,7 @@ impl<A> Action<A> {
         self.value.merge(action.value);
     }
 
+    #[allow(dead_code)]
     pub fn map<B, F: FnOnce(A) -> B>(self, f: F) -> Action<B> {
         Action {
             redraw: self.redraw,

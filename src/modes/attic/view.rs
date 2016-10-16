@@ -20,7 +20,7 @@
 use std::cmp;
 use std::rc::Rc;
 
-use elements::{Hud, HudAction, HudInput};
+use elements::{Hud, HudAction, HudInput, ScreenFade};
 use gui::{Action, Background, Canvas, Element, Event, Rect, Resources, Sprite};
 use save::{AtticState, Game, Location};
 
@@ -35,6 +35,7 @@ pub enum Cmd {
 
 pub struct View {
     background: Rc<Background>,
+    screen_fade: ScreenFade,
     hud: Hud,
     toggles: Vec<ToggleLight>,
     passives: Vec<PassiveLight>,
@@ -47,6 +48,7 @@ impl View {
                -> View {
         View {
             background: resources.get_background("a_light_in_the_attic"),
+            screen_fade: ScreenFade::new(resources),
             hud: Hud::new(resources, visible, Location::ALightInTheAttic),
             toggles: vec![
                 ToggleLight::new(resources, attic, (1, 1), 'C'),
@@ -126,31 +128,44 @@ impl Element<Game, Cmd> for View {
         self.passives.draw(state, canvas);
         self.toggles.draw(state, canvas);
         self.hud.draw(&self.hud_input(state), canvas);
+        self.screen_fade.draw(&(), canvas);
     }
 
     fn handle_event(&mut self, event: &Event, game: &mut Game) -> Action<Cmd> {
         let state = &mut game.a_light_in_the_attic;
         let mut action = {
+            let subaction = self.screen_fade.handle_event(event, &mut ());
+            match subaction.value() {
+                Some(&true) => subaction.but_return(Cmd::ReturnToMap),
+                _ => subaction.but_continue(),
+            }
+        };
+        if !action.should_stop() {
             let mut input = self.hud_input(state);
-            let action = self.hud.handle_event(event, &mut input);
-            match action.value() {
-                Some(&HudAction::Back) => action.but_return(Cmd::ReturnToMap),
-                Some(&HudAction::Info) => action.but_return(Cmd::ShowInfoBox),
+            let subaction = self.hud.handle_event(event, &mut input);
+            action.merge(match subaction.value() {
+                Some(&HudAction::Back) => {
+                    self.screen_fade.set_should_be_opaque(true);
+                    subaction.but_no_value()
+                }
+                Some(&HudAction::Info) => {
+                    subaction.but_return(Cmd::ShowInfoBox)
+                }
                 Some(&HudAction::Undo) => {
                     self.undo(state);
-                    action.but_no_value()
+                    subaction.but_no_value()
                 }
                 Some(&HudAction::Redo) => {
                     self.redo(state);
-                    action.but_no_value()
+                    subaction.but_no_value()
                 }
                 Some(&HudAction::Reset) => {
                     self.reset(state);
-                    action.but_no_value()
+                    subaction.but_no_value()
                 }
-                None => action.but_no_value(),
-            }
-        };
+                None => subaction.but_no_value(),
+            });
+        }
         if !action.should_stop() {
             let subaction = self.toggles.handle_event(event, state);
             if let Some(&position) = subaction.value() {

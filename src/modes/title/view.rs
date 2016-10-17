@@ -38,7 +38,7 @@ const QUIT_BUTTON_WIDTH: u32 = 64;
 
 // ========================================================================= //
 
-pub enum TitleAction {
+pub enum Cmd {
     SetFullscreen(bool),
     StartGame,
     EraseGame,
@@ -48,18 +48,18 @@ pub enum TitleAction {
 
 // ========================================================================= //
 
-pub struct TitleView {
-    elements: GroupElement<SaveData, TitleAction>,
+pub struct View {
+    elements: GroupElement<SaveData, Cmd>,
 }
 
-impl TitleView {
-    pub fn new(resources: &mut Resources, visible: Rect) -> TitleView {
+impl View {
+    pub fn new(resources: &mut Resources, visible: Rect) -> View {
         let spacing = (visible.width() as i32 - 2 * BOTTOM_BUTTONS_MARGIN -
                        FULLSCREEN_BUTTON_WIDTH as i32 -
                        ABOUT_BUTTON_WIDTH as i32 -
                        ERASE_BUTTON_WIDTH as i32 -
                        QUIT_BUTTON_WIDTH as i32) / 3;
-        let mut elements: Vec<Box<Element<SaveData, TitleAction>>> = vec![];
+        let mut elements: Vec<Box<Element<SaveData, Cmd>>> = vec![];
         elements.push(Box::new({
             let mut rect = Rect::new(0,
                                      0,
@@ -112,18 +112,18 @@ impl TitleView {
                                  BOTTOM_BUTTONS_HEIGHT);
             SubrectElement::new(EraseGameButton::new(resources), rect)
         }));
-        TitleView { elements: GroupElement::new(elements) }
+        View { elements: GroupElement::new(elements) }
     }
 }
 
-impl Element<SaveData, TitleAction> for TitleView {
+impl Element<SaveData, Cmd> for View {
     fn draw(&self, data: &SaveData, canvas: &mut Canvas) {
         canvas.clear((64, 64, 128));
         self.elements.draw(data, canvas);
     }
 
     fn handle_event(&mut self, event: &Event, data: &mut SaveData)
-                    -> Action<TitleAction> {
+                    -> Action<Cmd> {
         self.elements.handle_event(event, data)
     }
 }
@@ -145,7 +145,7 @@ impl FullscreenButton {
     }
 }
 
-impl Element<SaveData, TitleAction> for FullscreenButton {
+impl Element<SaveData, Cmd> for FullscreenButton {
     fn draw(&self, data: &SaveData, canvas: &mut Canvas) {
         let icon = if data.prefs().fullscreen() {
             &self.to_windowed_icon
@@ -156,11 +156,11 @@ impl Element<SaveData, TitleAction> for FullscreenButton {
     }
 
     fn handle_event(&mut self, event: &Event, data: &mut SaveData)
-                    -> Action<TitleAction> {
+                    -> Action<Cmd> {
         match event {
             &Event::MouseDown(_) => {
                 let full = !data.prefs().fullscreen();
-                Action::redraw().and_return(TitleAction::SetFullscreen(full))
+                Action::redraw().and_return(Cmd::SetFullscreen(full))
             }
             _ => Action::ignore(),
         }
@@ -179,7 +179,7 @@ impl StartGameButton {
     }
 }
 
-impl Element<SaveData, TitleAction> for StartGameButton {
+impl Element<SaveData, Cmd> for StartGameButton {
     fn draw(&self, data: &SaveData, canvas: &mut Canvas) {
         let rect = canvas.rect();
         let label = if data.game().is_some() {
@@ -190,11 +190,11 @@ impl Element<SaveData, TitleAction> for StartGameButton {
         canvas.draw_text(&self.font, Align::Center, rect.center(), label);
     }
 
-    fn handle_event(&mut self, event: &Event, _: &mut SaveData)
-                    -> Action<TitleAction> {
+    fn handle_event(&mut self, event: &Event, _data: &mut SaveData)
+                    -> Action<Cmd> {
         match event {
             &Event::MouseDown(_) => {
-                Action::redraw().and_return(TitleAction::StartGame)
+                Action::redraw().and_return(Cmd::StartGame)
             }
             _ => Action::ignore(),
         }
@@ -213,7 +213,7 @@ impl EraseGameButton {
     }
 }
 
-impl Element<SaveData, TitleAction> for EraseGameButton {
+impl Element<SaveData, Cmd> for EraseGameButton {
     fn draw(&self, data: &SaveData, canvas: &mut Canvas) {
         if data.game().is_some() {
             let rect = canvas.rect();
@@ -225,10 +225,10 @@ impl Element<SaveData, TitleAction> for EraseGameButton {
     }
 
     fn handle_event(&mut self, event: &Event, data: &mut SaveData)
-                    -> Action<TitleAction> {
+                    -> Action<Cmd> {
         match event {
             &Event::MouseDown(_) if data.game().is_some() => {
-                Action::redraw().and_return(TitleAction::EraseGame)
+                Action::redraw().and_return(Cmd::EraseGame)
             }
             _ => Action::ignore(),
         }
@@ -247,17 +247,17 @@ impl AboutButton {
     }
 }
 
-impl Element<SaveData, TitleAction> for AboutButton {
+impl Element<SaveData, Cmd> for AboutButton {
     fn draw(&self, _: &SaveData, canvas: &mut Canvas) {
         let rect = canvas.rect();
         canvas.draw_text(&self.font, Align::Center, rect.center(), "About");
     }
 
-    fn handle_event(&mut self, event: &Event, _: &mut SaveData)
-                    -> Action<TitleAction> {
+    fn handle_event(&mut self, event: &Event, _data: &mut SaveData)
+                    -> Action<Cmd> {
         match event {
             &Event::MouseDown(_) => {
-                Action::redraw().and_return(TitleAction::ShowAboutBox)
+                Action::redraw().and_return(Cmd::ShowAboutBox)
             }
             _ => Action::ignore(),
         }
@@ -276,18 +276,16 @@ impl QuitButton {
     }
 }
 
-impl Element<SaveData, TitleAction> for QuitButton {
+impl Element<SaveData, Cmd> for QuitButton {
     fn draw(&self, _: &SaveData, canvas: &mut Canvas) {
         let rect = canvas.rect();
         canvas.draw_text(&self.font, Align::Center, rect.center(), "Quit");
     }
 
-    fn handle_event(&mut self, event: &Event, _: &mut SaveData)
-                    -> Action<TitleAction> {
+    fn handle_event(&mut self, event: &Event, _data: &mut SaveData)
+                    -> Action<Cmd> {
         match event {
-            &Event::MouseDown(_) => {
-                Action::redraw().and_return(TitleAction::Quit)
-            }
+            &Event::MouseDown(_) => Action::redraw().and_return(Cmd::Quit),
             _ => Action::ignore(),
         }
     }
@@ -313,13 +311,12 @@ $CThanks for playing!";
 // ========================================================================= //
 
 pub struct ConfirmEraseView<'a> {
-    title_view: &'a TitleView,
+    title_view: &'a View,
     dialog: DialogBox<bool>,
 }
 
 impl<'a> ConfirmEraseView<'a> {
-    pub fn new(resources: &mut Resources, visible: Rect,
-               title_view: &'a TitleView)
+    pub fn new(resources: &mut Resources, visible: Rect, title_view: &'a View)
                -> ConfirmEraseView<'a> {
         let text = "Really erase game data?\nAll progress will be lost!";
         let buttons = vec![("Cancel".to_string(), false),

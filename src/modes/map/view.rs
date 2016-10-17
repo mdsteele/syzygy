@@ -17,7 +17,7 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use elements::{Hud, HudAction, HudInput, ScreenFade};
+use elements::{Hud, HudCmd, HudInput, ScreenFade};
 use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sprite,
           SubrectElement};
 use save::{Game, Location};
@@ -93,14 +93,12 @@ impl Element<Game, Cmd> for View {
             let mut input = self.hud_input();
             let subaction = self.hud.handle_event(event, &mut input);
             action.merge(match subaction.value() {
-                Some(&HudAction::Back) => {
+                Some(&HudCmd::Back) => {
                     self.screen_fade.set_should_be_opaque(true);
                     self.fade_command = Cmd::ReturnToTitle;
                     subaction.but_no_value()
                 }
-                Some(&HudAction::Info) => {
-                    subaction.but_return(Cmd::ShowInfoBox)
-                }
+                Some(&HudCmd::Info) => subaction.but_return(Cmd::ShowInfoBox),
                 _ => subaction.but_no_value(),
             });
         }

@@ -43,7 +43,7 @@ pub struct HudInput {
 }
 
 #[derive(Clone, Copy, Eq, PartialEq)]
-pub enum HudAction {
+pub enum HudCmd {
     Back,
     Info,
     Undo,
@@ -55,7 +55,7 @@ pub enum HudAction {
 
 pub struct Hud {
     rect: Rect,
-    elements: GroupElement<HudInput, HudAction>,
+    elements: GroupElement<HudInput, HudCmd>,
 }
 
 impl Hud {
@@ -81,11 +81,11 @@ impl Hud {
             let yb = rect.top() + MARGIN_VERT;
             let ynb = yb + (BUTTON_HEIGHT as i32 - NAMEBOX_HEIGHT as i32) / 2;
             vec![
-                Hud::button(resources, location, HudAction::Back, xb1, yb),
-                Hud::button(resources, location, HudAction::Info, xb2, yb),
-                Hud::button(resources, location, HudAction::Undo, xb3, yb),
-                Hud::button(resources, location, HudAction::Redo, xb4, yb),
-                Hud::button(resources, location, HudAction::Reset, xb5, yb),
+                Hud::button(resources, location, HudCmd::Back, xb1, yb),
+                Hud::button(resources, location, HudCmd::Info, xb2, yb),
+                Hud::button(resources, location, HudCmd::Undo, xb3, yb),
+                Hud::button(resources, location, HudCmd::Redo, xb4, yb),
+                Hud::button(resources, location, HudCmd::Reset, xb5, yb),
                 Hud::namebox(resources, xnb, ynb),
             ]
         };
@@ -95,30 +95,30 @@ impl Hud {
         }
     }
 
-    fn button(resources: &mut Resources, location: Location, value: HudAction,
+    fn button(resources: &mut Resources, location: Location, value: HudCmd,
               left: i32, top: i32)
-              -> Box<Element<HudInput, HudAction>> {
+              -> Box<Element<HudInput, HudCmd>> {
         let button = HudButton::new(resources, location, value);
         let rect = Rect::new(left, top, BUTTON_WIDTH, BUTTON_HEIGHT);
         Box::new(SubrectElement::new(button, rect))
     }
 
     fn namebox(resources: &mut Resources, left: i32, top: i32)
-               -> Box<Element<HudInput, HudAction>> {
+               -> Box<Element<HudInput, HudCmd>> {
         let namebox = HudNamebox::new(resources);
         let rect = Rect::new(left, top, NAMEBOX_WIDTH, NAMEBOX_HEIGHT);
         Box::new(SubrectElement::new(namebox, rect))
     }
 }
 
-impl Element<HudInput, HudAction> for Hud {
+impl Element<HudInput, HudCmd> for Hud {
     fn draw(&self, input: &HudInput, canvas: &mut Canvas) {
         canvas.fill_rect((64, 64, 64), self.rect);
         self.elements.draw(input, canvas);
     }
 
     fn handle_event(&mut self, event: &Event, input: &mut HudInput)
-                    -> Action<HudAction> {
+                    -> Action<HudCmd> {
         self.elements.handle_event(event, input)
     }
 }
@@ -128,20 +128,20 @@ impl Element<HudInput, HudAction> for Hud {
 struct HudButton {
     disabled_sprite: Sprite,
     enabled_sprite: Sprite,
-    value: HudAction,
+    value: HudCmd,
 }
 
 impl HudButton {
-    fn new(resources: &mut Resources, location: Location, value: HudAction)
+    fn new(resources: &mut Resources, location: Location, value: HudCmd)
            -> HudButton {
         let sprites = resources.get_sprites("hud_buttons");
         let index = match value {
-            HudAction::Back if location == Location::Map => 1,
-            HudAction::Back => 2,
-            HudAction::Info => 3,
-            HudAction::Undo => 4,
-            HudAction::Redo => 5,
-            HudAction::Reset => 6,
+            HudCmd::Back if location == Location::Map => 1,
+            HudCmd::Back => 2,
+            HudCmd::Info => 3,
+            HudCmd::Undo => 4,
+            HudCmd::Redo => 5,
+            HudCmd::Reset => 6,
         };
         HudButton {
             disabled_sprite: sprites[0].clone(),
@@ -152,16 +152,16 @@ impl HudButton {
 
     fn enabled(&self, input: &HudInput) -> bool {
         match self.value {
-            HudAction::Back => true,
-            HudAction::Info => true,
-            HudAction::Undo => input.can_undo,
-            HudAction::Redo => input.can_redo,
-            HudAction::Reset => input.can_reset,
+            HudCmd::Back => true,
+            HudCmd::Info => true,
+            HudCmd::Undo => input.can_undo,
+            HudCmd::Redo => input.can_redo,
+            HudCmd::Reset => input.can_reset,
         }
     }
 }
 
-impl Element<HudInput, HudAction> for HudButton {
+impl Element<HudInput, HudCmd> for HudButton {
     fn draw(&self, input: &HudInput, canvas: &mut Canvas) {
         let sprite = if self.enabled(input) {
             &self.enabled_sprite
@@ -172,7 +172,7 @@ impl Element<HudInput, HudAction> for HudButton {
     }
 
     fn handle_event(&mut self, event: &Event, input: &mut HudInput)
-                    -> Action<HudAction> {
+                    -> Action<HudCmd> {
         match event {
             &Event::MouseDown(_) if self.enabled(input) => {
                 Action::redraw().and_return(self.value)
@@ -194,7 +194,7 @@ impl HudNamebox {
     }
 }
 
-impl Element<HudInput, HudAction> for HudNamebox {
+impl Element<HudInput, HudCmd> for HudNamebox {
     fn draw(&self, input: &HudInput, canvas: &mut Canvas) {
         canvas.clear((200, 200, 200));
         let start = Point::new(canvas.width() as i32 / 2, 12);
@@ -202,7 +202,7 @@ impl Element<HudInput, HudAction> for HudNamebox {
     }
 
     fn handle_event(&mut self, _event: &Event, _input: &mut HudInput)
-                    -> Action<HudAction> {
+                    -> Action<HudCmd> {
         Action::ignore()
     }
 }

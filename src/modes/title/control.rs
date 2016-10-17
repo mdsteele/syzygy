@@ -21,14 +21,14 @@ use gui::{Element, Event, Window};
 use modes::{Mode, run_info_box};
 use save::SaveData;
 
-use super::view::{ABOUT_BOX_TEXT, ConfirmEraseView, TitleAction, TitleView};
+use super::view::{ABOUT_BOX_TEXT, ConfirmEraseView, Cmd, View};
 
 // ========================================================================= //
 
 pub fn run_title_screen(window: &mut Window, data: &mut SaveData) -> Mode {
     let mut view = {
         let visible = window.visible_rect();
-        TitleView::new(&mut window.resources(), visible)
+        View::new(&mut window.resources(), visible)
     };
     window.render(data, &view);
     loop {
@@ -37,14 +37,14 @@ pub fn run_title_screen(window: &mut Window, data: &mut SaveData) -> Mode {
             event => view.handle_event(&event, data),
         };
         match action.value() {
-            Some(&TitleAction::SetFullscreen(full)) => {
+            Some(&Cmd::SetFullscreen(full)) => {
                 data.prefs_mut().set_fullscreen(full);
                 window.set_fullscreen(full);
                 if let Err(error) = data.save_to_disk() {
                     println!("Failed to save game: {}", error);
                 }
             }
-            Some(&TitleAction::StartGame) => {
+            Some(&Cmd::StartGame) => {
                 if let Some(game) = data.game() {
                     return Mode::Location(game.location());
                 }
@@ -54,7 +54,7 @@ pub fn run_title_screen(window: &mut Window, data: &mut SaveData) -> Mode {
                 }
                 return Mode::Location(location);
             }
-            Some(&TitleAction::EraseGame) => {
+            Some(&Cmd::EraseGame) => {
                 let confirmed = match confirm_erase(window, &view, data) {
                     Confirmation::Confirm(value) => value,
                     Confirmation::Quit => return Mode::Quit,
@@ -66,12 +66,12 @@ pub fn run_title_screen(window: &mut Window, data: &mut SaveData) -> Mode {
                     }
                 }
             }
-            Some(&TitleAction::ShowAboutBox) => {
+            Some(&Cmd::ShowAboutBox) => {
                 if !run_info_box(window, &view, data, ABOUT_BOX_TEXT) {
                     return Mode::Quit;
                 }
             }
-            Some(&TitleAction::Quit) => return Mode::Quit,
+            Some(&Cmd::Quit) => return Mode::Quit,
             None => {}
         }
         if action.should_redraw() {
@@ -87,8 +87,7 @@ enum Confirmation {
     Quit,
 }
 
-fn confirm_erase(window: &mut Window, title_view: &TitleView,
-                 data: &mut SaveData)
+fn confirm_erase(window: &mut Window, title_view: &View, data: &mut SaveData)
                  -> Confirmation {
     let mut view = {
         let visible = window.visible_rect();

@@ -20,7 +20,7 @@
 use std::cmp;
 use std::rc::Rc;
 
-use elements::{Hud, HudAction, HudInput, ScreenFade};
+use elements::{Hud, HudCmd, HudInput, ScreenFade};
 use gui::{Action, Background, Canvas, Element, Event, Rect, Resources, Sprite};
 use save::{AtticState, Game, Location};
 
@@ -144,22 +144,20 @@ impl Element<Game, Cmd> for View {
             let mut input = self.hud_input(state);
             let subaction = self.hud.handle_event(event, &mut input);
             action.merge(match subaction.value() {
-                Some(&HudAction::Back) => {
+                Some(&HudCmd::Back) => {
                     self.screen_fade.set_should_be_opaque(true);
                     subaction.but_no_value()
                 }
-                Some(&HudAction::Info) => {
-                    subaction.but_return(Cmd::ShowInfoBox)
-                }
-                Some(&HudAction::Undo) => {
+                Some(&HudCmd::Info) => subaction.but_return(Cmd::ShowInfoBox),
+                Some(&HudCmd::Undo) => {
                     self.undo(state);
                     subaction.but_no_value()
                 }
-                Some(&HudAction::Redo) => {
+                Some(&HudCmd::Redo) => {
                     self.redo(state);
                     subaction.but_no_value()
                 }
-                Some(&HudAction::Reset) => {
+                Some(&HudCmd::Reset) => {
                     self.reset(state);
                     subaction.but_no_value()
                 }

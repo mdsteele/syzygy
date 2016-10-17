@@ -20,9 +20,11 @@
 mod dialog;
 mod fade;
 mod hud;
+mod paragraph;
 
 pub use self::dialog::DialogBox;
 pub use self::fade::ScreenFade;
 pub use self::hud::{Hud, HudAction, HudInput};
+pub use self::paragraph::Paragraph;
 
 // ========================================================================= //

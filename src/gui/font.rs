@@ -45,7 +45,6 @@ impl Font {
 
     pub fn baseline(&self) -> i32 { self.baseline }
 
-    #[allow(dead_code)]
     pub fn height(&self) -> u32 { self.default_glyph.sprite().height() }
 
     pub fn text_width(&self, text: &str) -> i32 {

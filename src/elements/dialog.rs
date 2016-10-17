@@ -22,13 +22,13 @@ use std::rc::Rc;
 
 use gui::{Action, Align, Canvas, Element, Event, Font, GroupElement, Point,
           Rect, Resources, Sprite, SubrectElement};
+use super::paragraph::Paragraph;
 
 // ========================================================================= //
 
 const BUTTON_WIDTH: u32 = 50;
 const BUTTON_HEIGHT: u32 = 20;
 const BUTTON_SPACING: i32 = 6;
-const LINE_SPACING: i32 = 16;
 const MARGIN: i32 = 20;
 
 // ========================================================================= //
@@ -36,8 +36,7 @@ const MARGIN: i32 = 20;
 pub struct DialogBox<A> {
     rect: Rect,
     bg_sprites: Vec<Sprite>,
-    font: Rc<Font>,
-    lines: Vec<String>,
+    paragraph: Paragraph,
     elements: GroupElement<(), A>,
 }
 
@@ -45,29 +44,18 @@ impl<A: 'static + Clone> DialogBox<A> {
     pub fn new(resources: &mut Resources, visible: Rect, text: &str,
                buttons: Vec<(String, A)>)
                -> DialogBox<A> {
-        let font = resources.get_font("roman");
-        let lines: Vec<String> = text.split('\n')
-                                     .map(str::to_string)
-                                     .collect();
+        let paragraph = Paragraph::new(resources, text);
         let rect = {
             let buttons_width = buttons.len() as i32 *
                                 (BUTTON_WIDTH as i32 + BUTTON_SPACING) -
                                 BUTTON_SPACING;
-            let mut last_line_width = 0;
             let width = {
-                let mut inner_width = buttons_width;
-                for line in lines.iter() {
-                    last_line_width = font.text_width(&line);
-                    inner_width = cmp::max(inner_width, last_line_width);
-                }
+                let inner_width = cmp::max(buttons_width,
+                                           paragraph.min_width());
                 round_up_to_16(2 * MARGIN + inner_width)
             };
             let height = {
-                let mut num_lines = lines.len() as i32;
-                if width as i32 - last_line_width > buttons_width {
-                    num_lines -= 1;
-                }
-                round_up_to_16(2 * MARGIN + LINE_SPACING * num_lines +
+                round_up_to_16(2 * MARGIN + paragraph.height() as i32 +
                                BUTTON_SPACING +
                                BUTTON_HEIGHT as i32)
             };
@@ -90,8 +78,7 @@ impl<A: 'static + Clone> DialogBox<A> {
         DialogBox {
             rect: rect,
             bg_sprites: resources.get_sprites("dialog_box"),
-            font: font,
-            lines: lines,
+            paragraph: paragraph,
             elements: GroupElement::new(elements),
         }
     }
@@ -125,13 +112,13 @@ impl<A> Element<(), A> for DialogBox<A> {
                 canvas.draw_sprite(&self.bg_sprites[3], Point::new(0, y));
                 canvas.draw_sprite(&self.bg_sprites[4], Point::new(right, y));
             }
-            for (i, line) in self.lines.iter().enumerate() {
-                canvas.draw_text(&self.font,
-                                 Align::Left,
-                                 Point::new(MARGIN,
-                                            MARGIN + self.font.baseline() +
-                                            LINE_SPACING * i as i32),
-                                 line);
+            {
+                let rect = Rect::new(MARGIN,
+                                     MARGIN,
+                                     self.rect.width() - 2 * MARGIN as u32,
+                                     self.rect.height() - 2 * MARGIN as u32);
+                let mut canvas = canvas.subcanvas(rect);
+                self.paragraph.draw(&mut canvas);
             }
         }
         self.elements.draw(state, canvas);

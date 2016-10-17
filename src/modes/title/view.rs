@@ -327,19 +327,19 @@ impl<'a> Element<SaveData, ()> for AboutBoxView<'a> {
 }
 
 const ABOUT_BOX_TEXT: &'static str = "\
-System Syzygy\n\
+$C$f{block}SYSTEM SYZYGY$r$L\n\
 \n\
 Copyright 2012 Matthew D. Steele <mdsteele@alum.mit.edu>\n\
 \n\
-Source code: https://github.com/mdsteele/syzygy/\n\
+Source code:$Rhttps://github.com/mdsteele/syzygy/$L\n\
 \n\
-System Syzygy comes with ABSOLUTELY NO WARRANTY.\n\
-System Syzygy is free software: you can redistribute it and/or\n\
+$iSystem Syzygy$r  comes with ABSOLUTELY NO WARRANTY.\n\
+$iSystem Syzygy$r  is free software: you can redistribute it and/or\n\
 modify it under the terms of the GNU General Public License as\n\
 published by the Free Software Foundation, either version 3 of\n\
 the License, or (at your option) any later version.\n\
 \n\
-Thanks for playing!";
+$CThanks for playing!";
 
 // ========================================================================= //
 

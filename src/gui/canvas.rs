@@ -139,7 +139,6 @@ impl<'a> Drop for Canvas<'a> {
 
 // ========================================================================= //
 
-#[allow(dead_code)]
 #[derive(Clone, Copy, Eq, PartialEq)]
 pub enum Align {
     Left,

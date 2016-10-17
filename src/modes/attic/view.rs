@@ -353,3 +353,14 @@ fn tick_radius<A>(lit: bool, radius: &mut i32, max: i32) -> Action<A> {
 }
 
 // ========================================================================= //
+
+pub const INFO_BOX_TEXT: &'static str = "\
+Your goal is to turn all thirty-two lights on.
+
+$M{Tapp}{Click}ing on one of the lights labelled with a letter
+will toggle some of the nearby lights.
+
+The letter labels give a hint as to which other lights
+will be toggled by $M{tapp}{click}ing on that light.";
+
+// ========================================================================= //

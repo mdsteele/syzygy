@@ -17,43 +17,9 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use gui::{Element, Event, Window};
-use modes::{Mode, run_info_box};
-use save::{Game, Location};
+mod control;
+mod view;
 
-use super::view::{Cmd, INFO_BOX_TEXT, View};
-
-// ========================================================================= //
-
-pub fn run_a_light_in_the_attic(window: &mut Window, game: &mut Game) -> Mode {
-    game.a_light_in_the_attic.visit();
-    let mut view = {
-        let visible_rect = window.visible_rect();
-        View::new(&mut window.resources(),
-                  visible_rect,
-                  &game.a_light_in_the_attic)
-    };
-    window.render(game, &view);
-    loop {
-        let action = match window.next_event() {
-            Event::Quit => return Mode::Quit,
-            event => view.handle_event(&event, game),
-        };
-        match action.value() {
-            Some(&Cmd::ReturnToMap) => {
-                return Mode::Location(Location::Map);
-            }
-            Some(&Cmd::ShowInfoBox) => {
-                if !run_info_box(window, &view, game, INFO_BOX_TEXT) {
-                    return Mode::Quit;
-                }
-            }
-            None => {}
-        }
-        if action.should_redraw() {
-            window.render(game, &view);
-        }
-    }
-}
+pub use self::control::run_info_box;
 
 // ========================================================================= //

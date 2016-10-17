@@ -295,38 +295,7 @@ impl Element<SaveData, TitleAction> for QuitButton {
 
 // ========================================================================= //
 
-pub struct AboutBoxView<'a> {
-    title_view: &'a TitleView,
-    dialog: DialogBox<()>,
-}
-
-impl<'a> AboutBoxView<'a> {
-    pub fn new(resources: &mut Resources, visible: Rect,
-               title_view: &'a TitleView)
-               -> AboutBoxView<'a> {
-        let text = ABOUT_BOX_TEXT;
-        let buttons = vec![("OK".to_string(), ())];
-        let dialog = DialogBox::new(resources, visible, text, buttons);
-        AboutBoxView {
-            title_view: title_view,
-            dialog: dialog,
-        }
-    }
-}
-
-impl<'a> Element<SaveData, ()> for AboutBoxView<'a> {
-    fn draw(&self, data: &SaveData, canvas: &mut Canvas) {
-        self.title_view.draw(data, canvas);
-        self.dialog.draw(&(), canvas);
-    }
-
-    fn handle_event(&mut self, event: &Event, _data: &mut SaveData)
-                    -> Action<()> {
-        self.dialog.handle_event(event, &mut ())
-    }
-}
-
-const ABOUT_BOX_TEXT: &'static str = "\
+pub const ABOUT_BOX_TEXT: &'static str = "\
 $C$f{block}SYSTEM SYZYGY$r$L\n\
 \n\
 Copyright 2012 Matthew D. Steele <mdsteele@alum.mit.edu>\n\

@@ -18,10 +18,10 @@
 // +--------------------------------------------------------------------------+
 
 use gui::{Element, Event, Window};
-use modes::Mode;
+use modes::{Mode, run_info_box};
 use save::SaveData;
 
-use super::view::{AboutBoxView, ConfirmEraseView, TitleAction, TitleView};
+use super::view::{ABOUT_BOX_TEXT, ConfirmEraseView, TitleAction, TitleView};
 
 // ========================================================================= //
 
@@ -67,43 +67,14 @@ pub fn run_title_screen(window: &mut Window, data: &mut SaveData) -> Mode {
                 }
             }
             Some(&TitleAction::ShowAboutBox) => {
-                match show_about_box(window, &view, data) {
-                    About::OK => {}
-                    About::Quit => return Mode::Quit,
+                if !run_info_box(window, &view, data, ABOUT_BOX_TEXT) {
+                    return Mode::Quit;
                 }
             }
             Some(&TitleAction::Quit) => return Mode::Quit,
             None => {}
         }
         if action.should_redraw() {
-            window.render(data, &view);
-        }
-    }
-}
-
-// ========================================================================= //
-
-enum About {
-    OK,
-    Quit,
-}
-
-fn show_about_box(window: &mut Window, title_view: &TitleView,
-                  data: &mut SaveData)
-                  -> About {
-    let mut view = {
-        let visible = window.visible_rect();
-        AboutBoxView::new(&mut window.resources(), visible, title_view)
-    };
-    window.render(data, &view);
-    loop {
-        let action = match window.next_event() {
-            Event::Quit => return About::Quit,
-            event => view.handle_event(&event, data),
-        };
-        if action.value().is_some() {
-            return About::OK;
-        } else if action.should_redraw() {
             window.render(data, &view);
         }
     }

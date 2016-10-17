@@ -17,42 +17,41 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use gui::{Element, Event, Window};
-use modes::{Mode, run_info_box};
-use save::{Game, Location};
+use std::marker::PhantomData;
 
-use super::view::{Cmd, INFO_BOX_TEXT, View};
+use gui::{Action, Canvas, Element, Event, Rect, Resources};
+use elements::DialogBox;
 
 // ========================================================================= //
 
-pub fn run_a_light_in_the_attic(window: &mut Window, game: &mut Game) -> Mode {
-    game.a_light_in_the_attic.visit();
-    let mut view = {
-        let visible_rect = window.visible_rect();
-        View::new(&mut window.resources(),
-                  visible_rect,
-                  &game.a_light_in_the_attic)
-    };
-    window.render(game, &view);
-    loop {
-        let action = match window.next_event() {
-            Event::Quit => return Mode::Quit,
-            event => view.handle_event(&event, game),
-        };
-        match action.value() {
-            Some(&Cmd::ReturnToMap) => {
-                return Mode::Location(Location::Map);
-            }
-            Some(&Cmd::ShowInfoBox) => {
-                if !run_info_box(window, &view, game, INFO_BOX_TEXT) {
-                    return Mode::Quit;
-                }
-            }
-            None => {}
+pub struct View<'a, A, E: 'a> {
+    original_view: &'a E,
+    dialog: DialogBox<()>,
+    phantom: PhantomData<A>,
+}
+
+impl<'a, A, E> View<'a, A, E> {
+    pub fn new(resources: &mut Resources, visible: Rect, original_view: &'a E,
+               text: &str)
+               -> View<'a, A, E> {
+        let buttons = vec![("OK".to_string(), ())];
+        let dialog = DialogBox::new(resources, visible, text, buttons);
+        View {
+            original_view: original_view,
+            dialog: dialog,
+            phantom: PhantomData,
         }
-        if action.should_redraw() {
-            window.render(game, &view);
-        }
+    }
+}
+
+impl<'a, S, A, E: Element<S, A>> Element<S, ()> for View<'a, A, E> {
+    fn draw(&self, state: &S, canvas: &mut Canvas) {
+        self.original_view.draw(state, canvas);
+        self.dialog.draw(&(), canvas);
+    }
+
+    fn handle_event(&mut self, event: &Event, _: &mut S) -> Action<()> {
+        self.dialog.handle_event(event, &mut ())
     }
 }
 

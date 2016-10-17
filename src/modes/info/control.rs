@@ -18,40 +18,29 @@
 // +--------------------------------------------------------------------------+
 
 use gui::{Element, Event, Window};
-use modes::{Mode, run_info_box};
-use save::{Game, Location};
 
-use super::view::{Cmd, INFO_BOX_TEXT, View};
+use super::view::View;
 
 // ========================================================================= //
 
-pub fn run_a_light_in_the_attic(window: &mut Window, game: &mut Game) -> Mode {
-    game.a_light_in_the_attic.visit();
+pub fn run_info_box<S, A, E: Element<S, A>>(window: &mut Window,
+                                            original_view: &E,
+                                            original_input: &mut S, text: &str)
+                                            -> bool {
     let mut view = {
-        let visible_rect = window.visible_rect();
-        View::new(&mut window.resources(),
-                  visible_rect,
-                  &game.a_light_in_the_attic)
+        let visible = window.visible_rect();
+        View::new(&mut window.resources(), visible, original_view, text)
     };
-    window.render(game, &view);
+    window.render(original_input, &view);
     loop {
         let action = match window.next_event() {
-            Event::Quit => return Mode::Quit,
-            event => view.handle_event(&event, game),
+            Event::Quit => return false,
+            event => view.handle_event(&event, original_input),
         };
-        match action.value() {
-            Some(&Cmd::ReturnToMap) => {
-                return Mode::Location(Location::Map);
-            }
-            Some(&Cmd::ShowInfoBox) => {
-                if !run_info_box(window, &view, game, INFO_BOX_TEXT) {
-                    return Mode::Quit;
-                }
-            }
-            None => {}
-        }
-        if action.should_redraw() {
-            window.render(game, &view);
+        if action.value().is_some() {
+            return true;
+        } else if action.should_redraw() {
+            window.render(original_input, &view);
         }
     }
 }

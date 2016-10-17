@@ -18,10 +18,10 @@
 // +--------------------------------------------------------------------------+
 
 use gui::{Element, Event, Window};
-use modes::Mode;
+use modes::{Mode, run_info_box};
 use save::Game;
 
-use super::view::{Cmd, View};
+use super::view::{Cmd, INFO_BOX_TEXT, View};
 
 // ========================================================================= //
 
@@ -41,7 +41,9 @@ pub fn run_map_screen(window: &mut Window, game: &mut Game) -> Mode {
                 return Mode::Title;
             }
             Some(&Cmd::ShowInfoBox) => {
-                // TODO: Show map screen info box
+                if !run_info_box(window, &view, game, INFO_BOX_TEXT) {
+                    return Mode::Quit;
+                }
             }
             Some(&Cmd::GoToPuzzle(loc)) => {
                 return Mode::Location(loc);

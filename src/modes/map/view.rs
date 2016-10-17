@@ -154,3 +154,11 @@ impl Element<Game, Location> for PuzzleNode {
 }
 
 // ========================================================================= //
+
+pub const INFO_BOX_TEXT: &'static str = "\
+$M{Tap}{Click} on a system node to travel there.
+
+Systems that still need to be repaired are marked in red.
+Repaired systems are marked in green.";
+
+// ========================================================================= //

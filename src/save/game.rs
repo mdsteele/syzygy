@@ -135,6 +135,8 @@ impl AtticState {
         toml::Value::Table(table)
     }
 
+    pub fn is_visited(&self) -> bool { self.access > Access::Unvisited }
+
     pub fn visit(&mut self) { self.access.visit(); }
 
     pub fn is_solved(&self) -> bool { self.access == Access::Solved }

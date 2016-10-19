@@ -26,13 +26,13 @@ use super::view::{Cmd, INFO_BOX_TEXT, View};
 // ========================================================================= //
 
 pub fn run_a_light_in_the_attic(window: &mut Window, game: &mut Game) -> Mode {
-    game.a_light_in_the_attic.visit();
     let mut view = {
         let visible_rect = window.visible_rect();
         View::new(&mut window.resources(),
                   visible_rect,
                   &game.a_light_in_the_attic)
     };
+    game.a_light_in_the_attic.visit();
     window.render(game, &view);
     loop {
         let action = match window.next_event() {

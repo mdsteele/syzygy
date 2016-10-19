@@ -18,11 +18,11 @@
 // +--------------------------------------------------------------------------+
 
 use std::cmp;
-use std::rc::Rc;
 
-use elements::{Hud, HudCmd, HudInput, ScreenFade};
-use gui::{Action, Background, Canvas, Element, Event, Rect, Resources, Sprite};
+use elements::{Hud, HudCmd, HudInput, Scene, ScreenFade, Theater};
+use gui::{Action, Canvas, Element, Event, Rect, Resources, Sprite};
 use save::{AtticState, Game, Location};
+use super::scenes::intro_scene;
 
 // ========================================================================= //
 
@@ -34,7 +34,8 @@ pub enum Cmd {
 // ========================================================================= //
 
 pub struct View {
-    background: Rc<Background>,
+    theater: Theater,
+    cutscene: Scene,
     screen_fade: ScreenFade,
     hud: Hud,
     toggles: Vec<ToggleLight>,
@@ -46,8 +47,17 @@ pub struct View {
 impl View {
     pub fn new(resources: &mut Resources, visible: Rect, attic: &AtticState)
                -> View {
+        let background = resources.get_background("a_light_in_the_attic");
+        let mut theater = Theater::new(background);
+        let mut cutscene = intro_scene(resources);
+        if attic.is_visited() {
+            cutscene.skip(&mut theater);
+        } else {
+            cutscene.begin(&mut theater);
+        }
         View {
-            background: resources.get_background("a_light_in_the_attic"),
+            theater: theater,
+            cutscene: cutscene,
             screen_fade: ScreenFade::new(resources),
             hud: Hud::new(resources, visible, Location::ALightInTheAttic),
             toggles: vec![
@@ -124,7 +134,8 @@ impl View {
 impl Element<Game, Cmd> for View {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
         let state = &game.a_light_in_the_attic;
-        canvas.draw_background(&self.background);
+        self.theater.draw_background(canvas);
+        self.theater.draw_foreground(canvas);
         self.passives.draw(state, canvas);
         self.toggles.draw(state, canvas);
         self.hud.draw(&self.hud_input(state), canvas);
@@ -140,6 +151,11 @@ impl Element<Game, Cmd> for View {
                 _ => subaction.but_continue(),
             }
         };
+        if !action.should_stop() {
+            let subaction = self.cutscene
+                                .handle_event(event, &mut self.theater);
+            action.merge(subaction.but_no_value());
+        }
         if !action.should_stop() {
             let mut input = self.hud_input(state);
             let subaction = self.hud.handle_event(event, &mut input);

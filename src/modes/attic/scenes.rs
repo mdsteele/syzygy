@@ -17,16 +17,36 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod cutscene;
-mod dialog;
-mod fade;
-mod hud;
-mod paragraph;
+use elements::{Ast, Scene};
+use gui::Resources;
 
-pub use self::cutscene::{Ast, Scene, Theater};
-pub use self::dialog::DialogBox;
-pub use self::fade::ScreenFade;
-pub use self::hud::{Hud, HudCmd, HudInput};
-pub use self::paragraph::Paragraph;
+// ========================================================================= //
+
+pub fn intro_scene(resources: &mut Resources) -> Scene {
+    let ast = vec![
+        Ast::Par(vec![
+            Ast::Dark(true),
+            Ast::Seq(vec![
+                Ast::Wait(0.5),
+                Ast::Place(1, "Argony", (-16, 112)),
+                Ast::Light(1, true),
+                Ast::Slide(1, (130, 112), false, false, 1.0),
+                Ast::Slide(1, (170, 112), false, true, 1.0),
+            ]),
+            Ast::Seq(vec![
+                Ast::Place(0, "Tezure", (-16, 320)),
+                Ast::Light(0, true),
+                Ast::Slide(0, (176, 320), true, false, 1.0),
+                Ast::Wait(1.0),
+                Ast::Loop(3, 3, Box::new(Ast::Seq(vec![
+                    Ast::Slide(0, (90, 320), true, true, 1.0),
+                    Ast::Slide(0, (130, 320), true, true, 1.0),
+                ]))),
+                Ast::Dark(false),
+            ]),
+        ]),
+    ];
+    Ast::compile_scene(resources, ast)
+}
 
 // ========================================================================= //

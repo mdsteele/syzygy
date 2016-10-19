@@ -18,6 +18,7 @@
 // +--------------------------------------------------------------------------+
 
 mod control;
+mod scenes;
 mod view;
 
 pub use self::control::run_a_light_in_the_attic;

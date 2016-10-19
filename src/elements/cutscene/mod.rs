@@ -17,16 +17,12 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod cutscene;
-mod dialog;
-mod fade;
-mod hud;
-mod paragraph;
+mod ast;
+mod scene;
+mod theater;
 
-pub use self::cutscene::{Ast, Scene, Theater};
-pub use self::dialog::DialogBox;
-pub use self::fade::ScreenFade;
-pub use self::hud::{Hud, HudCmd, HudInput};
-pub use self::paragraph::Paragraph;
+pub use self::ast::Ast;
+pub use self::scene::Scene;
+pub use self::theater::Theater;
 
 // ========================================================================= //

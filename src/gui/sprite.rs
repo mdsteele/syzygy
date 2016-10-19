@@ -19,6 +19,7 @@
 
 use ahi;
 use sdl2::pixels::PixelFormatEnum;
+use sdl2::rect::Rect;
 use sdl2::render::{Renderer, Texture};
 use sdl2::surface::Surface;
 use std::rc::Rc;
@@ -60,6 +61,8 @@ impl Sprite {
     pub fn width(&self) -> u32 { self.width }
 
     pub fn height(&self) -> u32 { self.height }
+
+    pub fn rect(&self) -> Rect { Rect::new(0, 0, self.width, self.height) }
 
     pub fn sdl2_texture(&self) -> &Texture { &self.texture }
 }

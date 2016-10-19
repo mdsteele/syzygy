@@ -38,4 +38,6 @@ pub use self::resources::Resources;
 pub use self::sprite::Sprite;
 pub use self::window::Window;
 
+pub const FRAME_DELAY_MILLIS: u32 = 40;
+
 // ========================================================================= //

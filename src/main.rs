@@ -29,7 +29,7 @@ mod save;
 
 use std::path::PathBuf;
 
-use self::gui::{Event, Window};
+use self::gui::{Event, FRAME_DELAY_MILLIS, Window};
 use self::modes::Mode;
 use self::save::{Location, SaveData};
 
@@ -110,8 +110,6 @@ impl Flags {
 }
 
 // ========================================================================= //
-
-const FRAME_DELAY_MILLIS: u32 = 50;
 
 fn main() {
     let flags = Flags::parse_or_exit();

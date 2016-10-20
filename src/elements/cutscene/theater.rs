@@ -20,6 +20,7 @@
 use std::collections::BTreeMap;
 use std::rc::Rc;
 
+use elements::Paragraph;
 use gui::{Background, Canvas, Point, Rect, Sprite};
 
 // ========================================================================= //
@@ -53,6 +54,13 @@ impl Theater {
         }
     }
 
+    pub fn set_actor_speech(&mut self, slot: i32,
+                            speech: Option<Rc<Paragraph>>) {
+        if let Some(actor) = self.actors.get_mut(&slot) {
+            actor.set_speech(speech);
+        }
+    }
+
     pub fn set_actor_light(&mut self, slot: i32, light: Option<Sprite>) {
         if let Some(actor) = self.actors.get_mut(&slot) {
             actor.light = light;
@@ -66,7 +74,7 @@ impl Theater {
             if index >= 0 {
                 break;
             }
-            actor.draw(canvas);
+            actor.draw_actor(canvas);
         }
         canvas.draw_background(&self.background);
     }
@@ -74,13 +82,13 @@ impl Theater {
     pub fn draw_foreground(&self, canvas: &mut Canvas) {
         for (&index, actor) in self.actors.iter() {
             if index >= 0 {
-                actor.draw(canvas);
+                actor.draw_actor(canvas);
             }
         }
         if self.dark {
             let mut rects = vec![canvas.rect()];
             for actor in self.actors.values() {
-                if let Some(sprite) = actor.light() {
+                if let Some(ref sprite) = actor.light {
                     let mut rect = sprite.rect();
                     rect.center_on(actor.rect().center());
                     canvas.draw_sprite(&sprite, rect.top_left());
@@ -90,6 +98,9 @@ impl Theater {
             for rect in rects {
                 canvas.fill_rect((0, 0, 0), rect);
             }
+        }
+        for actor in self.actors.values() {
+            actor.draw_speech(canvas);
         }
     }
 }
@@ -134,6 +145,7 @@ struct Actor {
     sprite: Sprite,
     position: Point,
     light: Option<Sprite>,
+    speech: Option<SpeechBubble>,
 }
 
 impl Actor {
@@ -142,6 +154,7 @@ impl Actor {
             sprite: sprite,
             position: position,
             light: None,
+            speech: None,
         }
     }
 
@@ -152,10 +165,50 @@ impl Actor {
                   self.sprite.height())
     }
 
-    fn light(&self) -> Option<Sprite> { self.light.clone() }
+    fn set_speech(&mut self, paragraph: Option<Rc<Paragraph>>) {
+        self.speech = paragraph.map(|p| SpeechBubble::new(p, self.rect()));
+    }
+
+    fn draw_actor(&self, canvas: &mut Canvas) {
+        canvas.draw_sprite(&self.sprite, self.rect().top_left());
+    }
+
+    fn draw_speech(&self, canvas: &mut Canvas) {
+        if let Some(ref speech) = self.speech {
+            speech.draw(canvas);
+        }
+    }
+}
+
+// ========================================================================= //
+
+const SPEECH_MARGIN: i32 = 8;
+
+struct SpeechBubble {
+    paragraph: Rc<Paragraph>,
+    rect: Rect,
+}
+
+impl SpeechBubble {
+    fn new(paragraph: Rc<Paragraph>, actor_rect: Rect) -> SpeechBubble {
+        let width = paragraph.min_width() + 2 * SPEECH_MARGIN;
+        let height = paragraph.height() as i32 + 2 * SPEECH_MARGIN;
+        let left = actor_rect.left() - (width - actor_rect.width() as i32) / 2;
+        let top = actor_rect.top() - height - 8;
+        SpeechBubble {
+            paragraph: paragraph,
+            rect: Rect::new(left, top, width as u32, height as u32),
+        }
+    }
 
     fn draw(&self, canvas: &mut Canvas) {
-        canvas.draw_sprite(&self.sprite, self.rect().top_left());
+        let mut canvas = canvas.subcanvas(self.rect);
+        canvas.clear((255, 255, 255));
+        let subrect = Rect::new(SPEECH_MARGIN,
+                                SPEECH_MARGIN,
+                                self.rect.width() - 2 * SPEECH_MARGIN as u32,
+                                self.rect.height() - 2 * SPEECH_MARGIN as u32);
+        self.paragraph.draw(&mut canvas.subcanvas(subrect));
     }
 }
 

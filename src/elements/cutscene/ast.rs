@@ -17,9 +17,11 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
+use elements::Paragraph;
 use gui::{Point, Resources};
 use super::scene::{DarkNode, LightNode, LoopNode, ParallelNode, PlaceNode,
-                   Scene, SceneNode, SequenceNode, SlideNode, WaitNode};
+                   Scene, SceneNode, SequenceNode, SlideNode, TalkNode,
+                   WaitNode};
 
 // ========================================================================= //
 
@@ -31,6 +33,7 @@ pub enum Ast {
     Light(i32, bool),
     Place(i32, &'static str, (i32, i32)),
     Slide(i32, (i32, i32), bool, bool, f64),
+    Talk(i32, &'static str),
     Wait(f64),
 }
 
@@ -94,6 +97,9 @@ impl Ast {
                                         accel,
                                         decel,
                                         duration))
+            }
+            &Ast::Talk(slot, text) => {
+                Box::new(TalkNode::new(slot, Paragraph::new(resources, text)))
             }
             &Ast::Wait(duration) => Box::new(WaitNode::new(duration)),
         }

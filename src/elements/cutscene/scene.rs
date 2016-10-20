@@ -18,7 +18,9 @@
 // +--------------------------------------------------------------------------+
 
 use std::cmp;
+use std::rc::Rc;
 
+use elements::Paragraph;
 use gui::{Action, Canvas, Element, Event, FRAME_DELAY_MILLIS, Point, Sprite};
 use super::theater::Theater;
 
@@ -38,18 +40,21 @@ impl Scene {
     }
 
     pub fn begin(&mut self, theater: &mut Theater) {
+        if cfg!(debug_assertions) {
+            println!("Beginning cutscene.");
+        }
         if !self.nodes.is_empty() {
-            self.nodes[0].begin(theater);
+            self.nodes[0].begin(theater, true);
         }
     }
 
     pub fn tick(&mut self, theater: &mut Theater) {
         if self.index < self.nodes.len() {
-            self.nodes[self.index].tick(theater, true, false);
+            self.nodes[self.index].tick(theater, false);
             while self.nodes[self.index].status() == Status::Done {
                 self.index += 1;
                 if self.index < self.nodes.len() {
-                    self.nodes[self.index].begin(theater);
+                    self.nodes[self.index].begin(theater, true);
                 } else {
                     break;
                 }
@@ -58,6 +63,9 @@ impl Scene {
     }
 
     pub fn skip(&mut self, theater: &mut Theater) {
+        if cfg!(debug_assertions) {
+            println!("Skipping cutscene.");
+        }
         while self.index < self.nodes.len() {
             self.nodes[self.index].skip(theater);
             self.index += 1;
@@ -123,11 +131,9 @@ pub enum Status {
 pub trait SceneNode {
     fn status(&self) -> Status { Status::Done }
 
-    fn begin(&mut self, _theater: &mut Theater) {}
+    fn begin(&mut self, _theater: &mut Theater, _terminated_by_pause: bool) {}
 
-    fn tick(&mut self, _theater: &mut Theater, _terminated_by_pause: bool,
-            _keep_twiddling: bool) {
-    }
+    fn tick(&mut self, _theater: &mut Theater, _keep_twiddling: bool) {}
 
     fn skip(&mut self, _theater: &mut Theater) {}
 
@@ -141,6 +147,7 @@ pub trait SceneNode {
 pub struct SequenceNode {
     nodes: Vec<Box<SceneNode>>,
     index: usize,
+    terminated_by_pause: bool,
 }
 
 impl SequenceNode {
@@ -148,38 +155,42 @@ impl SequenceNode {
         SequenceNode {
             nodes: nodes,
             index: 0,
+            terminated_by_pause: false,
         }
     }
+
+    fn on_last_node(&self) -> bool { self.index + 1 == self.nodes.len() }
 }
 
 impl SceneNode for SequenceNode {
     fn status(&self) -> Status {
-        if self.index + 1 < self.nodes.len() {
-            Status::Active
-        } else if self.index < self.nodes.len() {
+        if self.on_last_node() {
             self.nodes[self.index].status()
+        } else if self.index < self.nodes.len() {
+            Status::Active
         } else {
             Status::Done
         }
     }
 
-    fn begin(&mut self, theater: &mut Theater) {
-        if !self.nodes.is_empty() {
-            self.nodes[0].begin(theater);
+    fn begin(&mut self, theater: &mut Theater, terminated_by_pause: bool) {
+        self.terminated_by_pause = terminated_by_pause;
+        let len = self.nodes.len();
+        if len > 0 {
+            self.nodes[0].begin(theater, terminated_by_pause && len == 1);
         }
     }
 
-    fn tick(&mut self, theater: &mut Theater, terminated_by_pause: bool,
-            keep_twiddling: bool) {
+    fn tick(&mut self, theater: &mut Theater, keep_twiddling: bool) {
         if self.index < self.nodes.len() {
-            let last = self.index + 1 == self.nodes.len();
-            self.nodes[self.index].tick(theater,
-                                        terminated_by_pause && last,
-                                        keep_twiddling && last);
+            let twiddle = keep_twiddling && self.on_last_node();
+            self.nodes[self.index].tick(theater, twiddle);
             while self.nodes[self.index].status() == Status::Done {
                 self.index += 1;
                 if self.index < self.nodes.len() {
-                    self.nodes[self.index].begin(theater);
+                    let pause = self.terminated_by_pause &&
+                                self.on_last_node();
+                    self.nodes[self.index].begin(theater, pause);
                 } else {
                     break;
                 }
@@ -229,17 +240,13 @@ impl SceneNode for ParallelNode {
         status
     }
 
-    fn begin(&mut self, theater: &mut Theater) {
-        if cfg!(debug_assertions) {
-            println!("Beginning cutscene.");
-        }
+    fn begin(&mut self, theater: &mut Theater, terminated_by_pause: bool) {
         for node in self.nodes.iter_mut() {
-            node.begin(theater);
+            node.begin(theater, terminated_by_pause);
         }
     }
 
-    fn tick(&mut self, theater: &mut Theater, terminated_by_pause: bool,
-            mut keep_twiddling: bool) {
+    fn tick(&mut self, theater: &mut Theater, mut keep_twiddling: bool) {
         if !keep_twiddling {
             for node in self.nodes.iter() {
                 if node.status() <= Status::Paused {
@@ -249,14 +256,11 @@ impl SceneNode for ParallelNode {
             }
         }
         for node in self.nodes.iter_mut() {
-            node.tick(theater, terminated_by_pause, keep_twiddling);
+            node.tick(theater, keep_twiddling);
         }
     }
 
     fn skip(&mut self, theater: &mut Theater) {
-        if cfg!(debug_assertions) {
-            println!("Skipping cutscene.");
-        }
         for node in self.nodes.iter_mut() {
             node.skip(theater);
         }
@@ -316,11 +320,13 @@ impl SceneNode for LoopNode {
         }
     }
 
-    fn begin(&mut self, theater: &mut Theater) { self.node.begin(theater); }
+    fn begin(&mut self, theater: &mut Theater, _: bool) {
+        self.node.begin(theater, false);
+    }
 
-    fn tick(&mut self, theater: &mut Theater, _: bool, keep_twiddling: bool) {
+    fn tick(&mut self, theater: &mut Theater, keep_twiddling: bool) {
         if self.node.status() == Status::Active {
-            self.node.tick(theater, false, false);
+            self.node.tick(theater, false);
             if self.node.status() == Status::Done {
                 if self.iteration < self.min_iterations ||
                    self.max_iterations.is_some() {
@@ -329,7 +335,7 @@ impl SceneNode for LoopNode {
                 if self.iteration < self.min_iterations ||
                    (keep_twiddling && self.can_continue()) {
                     self.node.reset();
-                    self.node.begin(theater);
+                    self.node.begin(theater, false);
                 }
             }
         }
@@ -359,9 +365,9 @@ impl DarkNode {
 }
 
 impl SceneNode for DarkNode {
-    fn begin(&mut self, theater: &mut Theater) { theater.set_dark(self.dark); }
+    fn begin(&mut self, theater: &mut Theater, _: bool) { self.skip(theater); }
 
-    fn skip(&mut self, theater: &mut Theater) { self.begin(theater); }
+    fn skip(&mut self, theater: &mut Theater) { theater.set_dark(self.dark); }
 }
 
 // ========================================================================= //
@@ -381,11 +387,11 @@ impl LightNode {
 }
 
 impl SceneNode for LightNode {
-    fn begin(&mut self, theater: &mut Theater) {
+    fn begin(&mut self, theater: &mut Theater, _: bool) { self.skip(theater); }
+
+    fn skip(&mut self, theater: &mut Theater) {
         theater.set_actor_light(self.slot, self.light.clone());
     }
-
-    fn skip(&mut self, theater: &mut Theater) { self.begin(theater); }
 }
 
 // ========================================================================= //
@@ -407,11 +413,11 @@ impl PlaceNode {
 }
 
 impl SceneNode for PlaceNode {
-    fn begin(&mut self, theater: &mut Theater) {
+    fn begin(&mut self, theater: &mut Theater, _: bool) { self.skip(theater); }
+
+    fn skip(&mut self, theater: &mut Theater) {
         theater.place_actor(self.slot, self.sprite.clone(), self.position);
     }
-
-    fn skip(&mut self, theater: &mut Theater) { self.begin(theater); }
 }
 
 // ========================================================================= //
@@ -451,13 +457,13 @@ impl SceneNode for SlideNode {
         }
     }
 
-    fn begin(&mut self, theater: &mut Theater) {
+    fn begin(&mut self, theater: &mut Theater, _: bool) {
         if let Some(position) = theater.get_actor_position(self.slot) {
             self.start = position;
         }
     }
 
-    fn tick(&mut self, theater: &mut Theater, _: bool, _: bool) {
+    fn tick(&mut self, theater: &mut Theater, _: bool) {
         if self.progress < self.duration {
             self.progress += 1;
             let param = self.progress as f64 / self.duration as f64;
@@ -494,6 +500,56 @@ impl SceneNode for SlideNode {
 
 // ========================================================================= //
 
+pub struct TalkNode {
+    slot: i32,
+    paragraph: Rc<Paragraph>,
+    status: Status,
+}
+
+impl TalkNode {
+    pub fn new(slot: i32, paragraph: Paragraph) -> TalkNode {
+        TalkNode {
+            slot: slot,
+            paragraph: Rc::new(paragraph),
+            status: Status::Active,
+        }
+    }
+}
+
+impl SceneNode for TalkNode {
+    fn status(&self) -> Status { self.status }
+
+    fn begin(&mut self, theater: &mut Theater, terminated_by_pause: bool) {
+        if terminated_by_pause {
+            self.status = Status::Paused;
+            theater.set_actor_speech(self.slot, Some(self.paragraph.clone()));
+        } else {
+            self.skip(theater);
+        }
+    }
+
+    fn tick(&mut self, theater: &mut Theater, _: bool) {
+        if self.status == Status::Twiddling {
+            self.skip(theater);
+        }
+    }
+
+    fn skip(&mut self, theater: &mut Theater) {
+        theater.set_actor_speech(self.slot, None);
+        self.status = Status::Done;
+    }
+
+    fn reset(&mut self) { self.status = Status::Active; }
+
+    fn unpause(&mut self) {
+        if self.status == Status::Paused {
+            self.status = Status::Twiddling;
+        }
+    }
+}
+
+// ========================================================================= //
+
 pub struct WaitNode {
     progress: i32,
     duration: i32,
@@ -517,11 +573,13 @@ impl SceneNode for WaitNode {
         }
     }
 
-    fn tick(&mut self, _: &mut Theater, _: bool, _: bool) {
+    fn tick(&mut self, _: &mut Theater, _: bool) {
         if self.progress < self.duration {
             self.progress += 1;
         }
     }
+
+    fn skip(&mut self, _: &mut Theater) { self.progress = self.duration; }
 
     fn reset(&mut self) { self.progress = 0; }
 }

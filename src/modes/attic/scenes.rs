@@ -33,14 +33,14 @@ pub fn intro_scene(resources: &mut Resources) -> Scene {
                 Ast::Slide(1, (130, 112), false, false, 1.0),
                 Ast::Slide(1, (170, 112), false, true, 1.0),
                 Ast::Loop(1, -1, Box::new(Ast::Seq(vec![
-                    Ast::Slide(1, (170, 96), false, true, 0.25),
-                    Ast::Slide(1, (170, 112), true, false, 0.25),
+                    Ast::Jump(1, (170, 112), 0.5),
                 ]))),
             ]),
             Ast::Seq(vec![
                 Ast::Place(0, "Tezure", (-16, 320)),
                 Ast::Light(0, true),
                 Ast::Slide(0, (176, 320), true, false, 1.0),
+                Ast::Jump(0, (160, 320), 0.5),
                 Ast::Talk(0, "Ouch!  I ran into\nthat wall.")
             ]),
         ]),
@@ -49,11 +49,12 @@ pub fn intro_scene(resources: &mut Resources) -> Scene {
             Ast::Talk(1, "Yes.  Yes you did."),
         ]),
         Ast::Seq(vec![
-            Ast::Loop(3, 3, Box::new(Ast::Seq(vec![
-                Ast::Slide(0, (90, 320), true, true, 1.0),
-                Ast::Slide(0, (130, 320), true, true, 1.0),
-            ]))),
             Ast::Dark(false),
+            Ast::Wait(0.5),
+            Ast::Jump(0, (208, 304), 0.5),
+            Ast::Slide(0, (256, 304), false, false, 0.25),
+            Ast::Jump(0, (304, 288), 0.4),
+            Ast::Slide(0, (592, 288), false, false, 1.0),
         ]),
     ];
     Ast::compile_scene(resources, ast)

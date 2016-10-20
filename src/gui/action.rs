@@ -39,6 +39,13 @@ impl<A> Action<A> {
         }
     }
 
+    pub fn redraw_if(redraw: bool) -> Action<A> {
+        Action {
+            redraw: redraw,
+            value: Value::Continue,
+        }
+    }
+
     pub fn and_stop(self) -> Action<A> {
         Action {
             redraw: self.redraw,

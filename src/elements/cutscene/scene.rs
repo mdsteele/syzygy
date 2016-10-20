@@ -48,18 +48,21 @@ impl Scene {
         }
     }
 
-    pub fn tick(&mut self, theater: &mut Theater) {
+    pub fn tick(&mut self, theater: &mut Theater) -> bool {
+        let mut changed = false;
         if self.index < self.nodes.len() {
-            self.nodes[self.index].tick(theater, false);
+            changed |= self.nodes[self.index].tick(theater, false);
             while self.nodes[self.index].status() == Status::Done {
                 self.index += 1;
                 if self.index < self.nodes.len() {
                     self.nodes[self.index].begin(theater, true);
+                    changed = true;
                 } else {
                     break;
                 }
             }
         }
+        changed
     }
 
     pub fn skip(&mut self, theater: &mut Theater) {
@@ -96,10 +99,7 @@ impl Element<Theater, ()> for Scene {
                     -> Action<()> {
         match event {
             &Event::Quit => Action::ignore(),
-            &Event::ClockTick => {
-                self.tick(theater);
-                Action::redraw()
-            }
+            &Event::ClockTick => Action::redraw_if(self.tick(theater)),
             &Event::MouseDown(_) if self.is_paused() => {
                 self.unpause();
                 Action::redraw().and_stop()
@@ -133,7 +133,9 @@ pub trait SceneNode {
 
     fn begin(&mut self, _theater: &mut Theater, _terminated_by_pause: bool) {}
 
-    fn tick(&mut self, _theater: &mut Theater, _keep_twiddling: bool) {}
+    fn tick(&mut self, _theater: &mut Theater, _keep_twiddling: bool) -> bool {
+        false
+    }
 
     fn skip(&mut self, _theater: &mut Theater) {}
 
@@ -181,21 +183,24 @@ impl SceneNode for SequenceNode {
         }
     }
 
-    fn tick(&mut self, theater: &mut Theater, keep_twiddling: bool) {
+    fn tick(&mut self, theater: &mut Theater, keep_twiddling: bool) -> bool {
+        let mut changed = false;
         if self.index < self.nodes.len() {
             let twiddle = keep_twiddling && self.on_last_node();
-            self.nodes[self.index].tick(theater, twiddle);
+            changed |= self.nodes[self.index].tick(theater, twiddle);
             while self.nodes[self.index].status() == Status::Done {
                 self.index += 1;
                 if self.index < self.nodes.len() {
                     let pause = self.terminated_by_pause &&
                                 self.on_last_node();
                     self.nodes[self.index].begin(theater, pause);
+                    changed = true;
                 } else {
                     break;
                 }
             }
         }
+        changed
     }
 
     fn skip(&mut self, theater: &mut Theater) {
@@ -246,7 +251,8 @@ impl SceneNode for ParallelNode {
         }
     }
 
-    fn tick(&mut self, theater: &mut Theater, mut keep_twiddling: bool) {
+    fn tick(&mut self, theater: &mut Theater, keep_twiddling: bool) -> bool {
+        let mut keep_twiddling = keep_twiddling;
         if !keep_twiddling {
             for node in self.nodes.iter() {
                 if node.status() <= Status::Paused {
@@ -255,9 +261,11 @@ impl SceneNode for ParallelNode {
                 }
             }
         }
+        let mut changed = false;
         for node in self.nodes.iter_mut() {
-            node.tick(theater, keep_twiddling);
+            changed |= node.tick(theater, keep_twiddling);
         }
+        changed
     }
 
     fn skip(&mut self, theater: &mut Theater) {
@@ -324,9 +332,10 @@ impl SceneNode for LoopNode {
         self.node.begin(theater, false);
     }
 
-    fn tick(&mut self, theater: &mut Theater, keep_twiddling: bool) {
+    fn tick(&mut self, theater: &mut Theater, keep_twiddling: bool) -> bool {
+        let mut changed = false;
         if self.node.status() == Status::Active {
-            self.node.tick(theater, false);
+            changed |= self.node.tick(theater, false);
             if self.node.status() == Status::Done {
                 if self.iteration < self.min_iterations ||
                    self.max_iterations.is_some() {
@@ -336,9 +345,11 @@ impl SceneNode for LoopNode {
                    (keep_twiddling && self.can_continue()) {
                     self.node.reset();
                     self.node.begin(theater, false);
+                    changed = true;
                 }
             }
         }
+        changed
     }
 
     fn skip(&mut self, theater: &mut Theater) {
@@ -368,6 +379,69 @@ impl SceneNode for DarkNode {
     fn begin(&mut self, theater: &mut Theater, _: bool) { self.skip(theater); }
 
     fn skip(&mut self, theater: &mut Theater) { theater.set_dark(self.dark); }
+}
+
+// ========================================================================= //
+
+const GRAVITY: f64 = 480.0;
+
+pub struct JumpNode {
+    progress: i32,
+    duration: i32,
+    slot: i32,
+    start: Point,
+    end: Point,
+}
+
+impl JumpNode {
+    pub fn new(slot: i32, end: Point, duration_seconds: f64) -> JumpNode {
+        JumpNode {
+            progress: 0,
+            duration: seconds_to_frames(duration_seconds),
+            slot: slot,
+            start: end,
+            end: end,
+        }
+    }
+}
+
+impl SceneNode for JumpNode {
+    fn status(&self) -> Status {
+        if self.progress < self.duration {
+            Status::Active
+        } else {
+            Status::Done
+        }
+    }
+
+    fn begin(&mut self, theater: &mut Theater, _: bool) {
+        if let Some(position) = theater.get_actor_position(self.slot) {
+            self.start = position;
+        }
+    }
+
+    fn tick(&mut self, theater: &mut Theater, _: bool) -> bool {
+        if self.progress < self.duration {
+            self.progress += 1;
+            let frac = self.progress as f64 / self.duration as f64;
+            let delta = self.end - self.start;
+            let dx = delta.x() as f64 * frac;
+            let dy = delta.y() as f64 * frac -
+                     0.5 * GRAVITY * frames_to_seconds(self.progress) *
+                     frames_to_seconds(self.duration - self.progress);
+            let delta = Point::new(dx.round() as i32, dy.round() as i32);
+            theater.set_actor_position(self.slot, self.start + delta);
+            true
+        } else {
+            false
+        }
+    }
+
+    fn skip(&mut self, theater: &mut Theater) {
+        theater.set_actor_position(self.slot, self.end);
+    }
+
+    fn reset(&mut self) { self.progress = 0; }
 }
 
 // ========================================================================= //
@@ -463,7 +537,7 @@ impl SceneNode for SlideNode {
         }
     }
 
-    fn tick(&mut self, theater: &mut Theater, _: bool) {
+    fn tick(&mut self, theater: &mut Theater, _: bool) -> bool {
         if self.progress < self.duration {
             self.progress += 1;
             let param = self.progress as f64 / self.duration as f64;
@@ -488,6 +562,9 @@ impl SceneNode for SlideNode {
             let delta = Point::new((delta.x() as f64 * frac).round() as i32,
                                    (delta.y() as f64 * frac).round() as i32);
             theater.set_actor_position(self.slot, self.start + delta);
+            true
+        } else {
+            false
         }
     }
 
@@ -528,9 +605,12 @@ impl SceneNode for TalkNode {
         }
     }
 
-    fn tick(&mut self, theater: &mut Theater, _: bool) {
+    fn tick(&mut self, theater: &mut Theater, _: bool) -> bool {
         if self.status == Status::Twiddling {
             self.skip(theater);
+            true
+        } else {
+            false
         }
     }
 
@@ -573,10 +653,11 @@ impl SceneNode for WaitNode {
         }
     }
 
-    fn tick(&mut self, _: &mut Theater, _: bool) {
+    fn tick(&mut self, _: &mut Theater, _: bool) -> bool {
         if self.progress < self.duration {
             self.progress += 1;
         }
+        false
     }
 
     fn skip(&mut self, _: &mut Theater) { self.progress = self.duration; }
@@ -585,6 +666,10 @@ impl SceneNode for WaitNode {
 }
 
 // ========================================================================= //
+
+fn frames_to_seconds(frames: i32) -> f64 {
+    0.001 * FRAME_DELAY_MILLIS as f64 * frames as f64
+}
 
 fn seconds_to_frames(seconds: f64) -> i32 {
     (seconds / (0.001 * FRAME_DELAY_MILLIS as f64)).floor() as i32

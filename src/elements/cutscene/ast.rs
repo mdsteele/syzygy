@@ -19,9 +19,9 @@
 
 use elements::Paragraph;
 use gui::{Point, Resources};
-use super::scene::{DarkNode, LightNode, LoopNode, ParallelNode, PlaceNode,
-                   Scene, SceneNode, SequenceNode, SlideNode, TalkNode,
-                   WaitNode};
+use super::scene::{DarkNode, JumpNode, LightNode, LoopNode, ParallelNode,
+                   PlaceNode, Scene, SceneNode, SequenceNode, SlideNode,
+                   TalkNode, WaitNode};
 
 // ========================================================================= //
 
@@ -30,6 +30,7 @@ pub enum Ast {
     Par(Vec<Ast>),
     Loop(i32, i32, Box<Ast>),
     Dark(bool),
+    Jump(i32, (i32, i32), f64),
     Light(i32, bool),
     Place(i32, &'static str, (i32, i32)),
     Slide(i32, (i32, i32), bool, bool, f64),
@@ -67,6 +68,9 @@ impl Ast {
                 Box::new(LoopNode::new(ast.to_scene_node(resources), min, max))
             }
             &Ast::Dark(dark) => Box::new(DarkNode::new(dark)),
+            &Ast::Jump(slot, (x, y), duration) => {
+                Box::new(JumpNode::new(slot, Point::new(x, y), duration))
+            }
             &Ast::Light(slot, light) => {
                 let sprite = if light {
                     Some(resources.get_sprites("halo")[0].clone())

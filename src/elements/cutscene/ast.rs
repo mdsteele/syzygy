@@ -20,8 +20,8 @@
 use elements::Paragraph;
 use gui::{Point, Resources};
 use super::scene::{DarkNode, JumpNode, LightNode, LoopNode, ParallelNode,
-                   PlaceNode, Scene, SceneNode, SequenceNode, SlideNode,
-                   TalkNode, WaitNode};
+                   PlaceNode, RemoveNode, Scene, SceneNode, SequenceNode,
+                   SlideNode, TalkNode, WaitNode};
 
 // ========================================================================= //
 
@@ -33,6 +33,7 @@ pub enum Ast {
     Jump(i32, (i32, i32), f64),
     Light(i32, bool),
     Place(i32, &'static str, (i32, i32)),
+    Remove(i32),
     Slide(i32, (i32, i32), bool, bool, f64),
     Talk(i32, &'static str),
     Wait(f64),
@@ -95,6 +96,7 @@ impl Ast {
                                         sprite.clone(),
                                         Point::new(x, y)))
             }
+            &Ast::Remove(slot) => Box::new(RemoveNode::new(slot)),
             &Ast::Slide(slot, (x, y), accel, decel, duration) => {
                 Box::new(SlideNode::new(slot,
                                         Point::new(x, y),

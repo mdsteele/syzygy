@@ -44,6 +44,8 @@ impl Theater {
         self.actors.insert(slot, Actor::new(sprite, position));
     }
 
+    pub fn remove_actor(&mut self, slot: i32) { self.actors.remove(&slot); }
+
     pub fn get_actor_position(&mut self, slot: i32) -> Option<Point> {
         self.actors.get(&slot).map(|actor| actor.position)
     }

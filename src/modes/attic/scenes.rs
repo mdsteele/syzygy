@@ -55,6 +55,7 @@ pub fn intro_scene(resources: &mut Resources) -> Scene {
             Ast::Slide(0, (256, 304), false, false, 0.25),
             Ast::Jump(0, (304, 288), 0.4),
             Ast::Slide(0, (592, 288), false, false, 1.0),
+            Ast::Remove(0),
         ]),
     ];
     Ast::compile_scene(resources, ast)

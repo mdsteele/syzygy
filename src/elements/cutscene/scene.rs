@@ -496,6 +496,24 @@ impl SceneNode for PlaceNode {
 
 // ========================================================================= //
 
+pub struct RemoveNode {
+    slot: i32,
+}
+
+impl RemoveNode {
+    pub fn new(slot: i32) -> RemoveNode { RemoveNode { slot: slot } }
+}
+
+impl SceneNode for RemoveNode {
+    fn begin(&mut self, theater: &mut Theater, _: bool) { self.skip(theater); }
+
+    fn skip(&mut self, theater: &mut Theater) {
+        theater.remove_actor(self.slot);
+    }
+}
+
+// ========================================================================= //
+
 pub struct SlideNode {
     progress: i32,
     duration: i32,

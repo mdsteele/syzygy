@@ -18,12 +18,15 @@
 // +--------------------------------------------------------------------------+
 
 use sdl2::{EventPump, Sdl, VideoSubsystem};
-use sdl2::rect::Rect;
+use sdl2::rect::{Point, Rect};
 use sdl2::render::Renderer;
 use sdl2::video::FullscreenType;
-use super::canvas::Canvas;
+use std::rc::Rc;
+
+use super::canvas::{Align, Canvas};
 use super::element::Element;
 use super::event::Event;
+use super::font::Font;
 use super::resources::{Resources, ResourceCache};
 
 // ========================================================================= //
@@ -34,6 +37,8 @@ pub struct Window {
     full_rect: Rect,
     event_pump: EventPump,
     resource_cache: ResourceCache,
+    debug_font: Option<Rc<Font>>,
+    debug_counter: i32,
 }
 
 impl Window {
@@ -78,12 +83,21 @@ impl Window {
         renderer.set_logical_size(actual_width, actual_height).unwrap();
         let offset_x = (actual_width as i32 - full_width as i32) / 2;
         let offset_y = (actual_height as i32 - full_height as i32) / 2;
+        let mut resource_cache = ResourceCache::new();
+        let debug_font = if cfg!(debug_assertions) {
+            let mut resources = Resources::new(&renderer, &mut resource_cache);
+            Some(resources.get_font("debug"))
+        } else {
+            None
+        };
         Window {
             _video_subsystem: video_subsystem,
             renderer: renderer,
             full_rect: Rect::new(offset_x, offset_y, full_width, full_height),
             event_pump: sdl_context.event_pump().unwrap(),
-            resource_cache: ResourceCache::new(),
+            resource_cache: resource_cache,
+            debug_font: debug_font,
+            debug_counter: 0,
         }
     }
 
@@ -115,6 +129,23 @@ impl Window {
         {
             let mut canvas = Canvas::new(&mut self.renderer, self.full_rect);
             view.draw(state, &mut canvas);
+        }
+        if cfg!(debug_assertions) {
+            let visible = self.visible_rect();
+            let mut canvas = Canvas::new(&mut self.renderer, self.full_rect);
+            if let Some(ref font) = self.debug_font {
+                canvas.fill_rect((0, 0, 0),
+                                 Rect::new(visible.right() - 24,
+                                           visible.bottom() - 12,
+                                           22,
+                                           10));
+                canvas.draw_text(&font,
+                                 Align::Right,
+                                 Point::new(visible.right() - 2,
+                                            visible.bottom() - 3),
+                                 &format!("{:03}", self.debug_counter));
+                self.debug_counter = (self.debug_counter + 1) % 1000;
+            }
         }
         self.renderer.present();
     }

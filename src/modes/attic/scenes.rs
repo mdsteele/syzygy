@@ -22,7 +22,7 @@ use gui::Resources;
 
 // ========================================================================= //
 
-pub fn intro_scene(resources: &mut Resources) -> Scene {
+pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Par(vec![
             Ast::Dark(true),
@@ -32,7 +32,7 @@ pub fn intro_scene(resources: &mut Resources) -> Scene {
                 Ast::Light(1, true),
                 Ast::Slide(1, (130, 112), false, false, 1.0),
                 Ast::Slide(1, (170, 112), false, true, 1.0),
-                Ast::Loop(1, -1, Box::new(Ast::Seq(vec![
+                Ast::Loop(0, -1, Box::new(Ast::Seq(vec![
                     Ast::Jump(1, (170, 112), 0.5),
                 ]))),
             ]),
@@ -45,11 +45,37 @@ pub fn intro_scene(resources: &mut Resources) -> Scene {
             ]),
         ]),
         Ast::Seq(vec![
-            Ast::Wait(1.0),
+            Ast::Wait(0.5),
             Ast::Talk(1, "Yes.  Yes you did."),
         ]),
+    ];
+    Ast::compile_scene(resources, ast)
+}
+
+// ========================================================================= //
+
+pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
+    let ast = vec![
         Ast::Seq(vec![
+            Ast::Wait(0.5),
             Ast::Dark(false),
+            Ast::Queue(0, 1),
+            Ast::Wait(0.1),
+            Ast::Queue(3, 1),
+            Ast::Wait(0.1),
+            Ast::Queue(4, 1),
+            Ast::Wait(0.1),
+            Ast::Queue(9, 1),
+            Ast::Wait(0.1),
+            Ast::Queue(10, 1),
+            Ast::Wait(0.1),
+            Ast::Queue(13, 1),
+            Ast::Wait(0.1),
+            Ast::Queue(15, 1),
+            Ast::Wait(0.1),
+            Ast::Talk(0, "Oh, it says CAUTION."),
+        ]),
+        Ast::Seq(vec![
             Ast::Wait(0.5),
             Ast::Jump(0, (208, 304), 0.5),
             Ast::Slide(0, (256, 304), false, false, 0.25),

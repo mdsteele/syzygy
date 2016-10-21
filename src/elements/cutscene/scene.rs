@@ -49,6 +49,7 @@ impl Scene {
     }
 
     pub fn tick(&mut self, theater: &mut Theater) -> bool {
+        theater.drain_queue();
         let mut changed = false;
         if self.index < self.nodes.len() {
             changed |= self.nodes[self.index].tick(theater, false);
@@ -492,6 +493,22 @@ impl SceneNode for PlaceNode {
     fn skip(&mut self, theater: &mut Theater) {
         theater.place_actor(self.slot, self.sprite.clone(), self.position);
     }
+}
+
+// ========================================================================= //
+
+pub struct QueueNode {
+    entry: (i32, i32),
+}
+
+impl QueueNode {
+    pub fn new(entry: (i32, i32)) -> QueueNode { QueueNode { entry: entry } }
+}
+
+impl SceneNode for QueueNode {
+    fn begin(&mut self, theater: &mut Theater, _: bool) { self.skip(theater); }
+
+    fn skip(&mut self, theater: &mut Theater) { theater.enqueue(self.entry); }
 }
 
 // ========================================================================= //

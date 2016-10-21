@@ -18,6 +18,7 @@
 // +--------------------------------------------------------------------------+
 
 use std::collections::BTreeMap;
+use std::mem;
 use std::rc::Rc;
 
 use elements::Paragraph;
@@ -28,6 +29,7 @@ use gui::{Background, Canvas, Point, Rect, Sprite};
 pub struct Theater {
     background: Rc<Background>,
     actors: BTreeMap<i32, Actor>,
+    queue: Vec<(i32, i32)>,
     dark: bool,
 }
 
@@ -36,6 +38,7 @@ impl Theater {
         Theater {
             background: background,
             actors: BTreeMap::new(),
+            queue: Vec::new(),
             dark: false,
         }
     }
@@ -67,6 +70,12 @@ impl Theater {
         if let Some(actor) = self.actors.get_mut(&slot) {
             actor.light = light;
         }
+    }
+
+    pub fn enqueue(&mut self, entry: (i32, i32)) { self.queue.push(entry); }
+
+    pub fn drain_queue(&mut self) -> Vec<(i32, i32)> {
+        mem::replace(&mut self.queue, Vec::new())
     }
 
     pub fn set_dark(&mut self, dark: bool) { self.dark = dark; }

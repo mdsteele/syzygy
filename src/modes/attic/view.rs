@@ -20,9 +20,9 @@
 use std::cmp;
 
 use elements::{Hud, HudCmd, HudInput, Scene, ScreenFade, Theater};
-use gui::{Action, Canvas, Element, Event, Rect, Resources, Sprite};
+use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sprite};
 use save::{AtticState, Game, Location};
-use super::scenes::intro_scene;
+use super::scenes::{compile_intro_scene, compile_outro_scene};
 
 // ========================================================================= //
 
@@ -35,7 +35,8 @@ pub enum Cmd {
 
 pub struct View {
     theater: Theater,
-    cutscene: Scene,
+    intro_scene: Scene,
+    outro_scene: Scene,
     screen_fade: ScreenFade,
     hud: Hud,
     toggles: Vec<ToggleLight>,
@@ -49,15 +50,20 @@ impl View {
                -> View {
         let background = resources.get_background("a_light_in_the_attic");
         let mut theater = Theater::new(background);
-        let mut cutscene = intro_scene(resources);
+        let mut intro_scene = compile_intro_scene(resources);
+        let mut outro_scene = compile_outro_scene(resources);
         if attic.is_visited() {
-            cutscene.skip(&mut theater);
+            intro_scene.skip(&mut theater);
+            if attic.is_solved() {
+                outro_scene.skip(&mut theater);
+            }
         } else {
-            cutscene.begin(&mut theater);
+            intro_scene.begin(&mut theater);
         }
-        View {
+        let mut view = View {
             theater: theater,
-            cutscene: cutscene,
+            intro_scene: intro_scene,
+            outro_scene: outro_scene,
             screen_fade: ScreenFade::new(resources),
             hud: Hud::new(resources, visible, Location::ALightInTheAttic),
             toggles: vec![
@@ -98,7 +104,9 @@ impl View {
             ],
             undo_stack: Vec::new(),
             redo_stack: Vec::new(),
-        }
+        };
+        view.drain_queue();
+        view
     }
 
     fn hud_input(&self, state: &AtticState) -> HudInput {
@@ -129,6 +137,12 @@ impl View {
         self.redo_stack.clear();
         state.reset();
     }
+
+    fn drain_queue(&mut self) {
+        for (index, enable) in self.theater.drain_queue() {
+            self.toggles[index as usize].set_hilight(enable != 0);
+        }
+    }
 }
 
 impl Element<Game, Cmd> for View {
@@ -152,9 +166,13 @@ impl Element<Game, Cmd> for View {
             }
         };
         if !action.should_stop() {
-            let subaction = self.cutscene
-                                .handle_event(event, &mut self.theater);
+            let subaction = if state.is_solved() {
+                self.outro_scene.handle_event(event, &mut self.theater)
+            } else {
+                self.intro_scene.handle_event(event, &mut self.theater)
+            };
             action.merge(subaction.but_no_value());
+            self.drain_queue();
         }
         if !action.should_stop() {
             let mut input = self.hud_input(state);
@@ -185,6 +203,10 @@ impl Element<Game, Cmd> for View {
             if let Some(&position) = subaction.value() {
                 state.toggle(position);
                 if state.is_solved() {
+                    if cfg!(debug_assertions) {
+                        println!("Puzzle solved, beginning outro.");
+                    }
+                    self.outro_scene.begin(&mut self.theater);
                     self.undo_stack.clear();
                 } else {
                     self.undo_stack.push(position);
@@ -212,6 +234,7 @@ pub struct ToggleLight {
     label: Sprite,
     position: (i32, i32),
     light_radius: i32,
+    hilight: bool,
 }
 
 impl ToggleLight {
@@ -229,6 +252,7 @@ impl ToggleLight {
             } else {
                 0
             },
+            hilight: false,
         }
     }
 
@@ -236,12 +260,17 @@ impl ToggleLight {
         let (col, row) = self.position;
         Rect::new(LIGHTS_LEFT + 32 * col, LIGHTS_TOP + 32 * row, 32, 32)
     }
+
+    fn set_hilight(&mut self, hilight: bool) { self.hilight = hilight; }
 }
 
 impl Element<AtticState, (i32, i32)> for ToggleLight {
     fn draw(&self, state: &AtticState, canvas: &mut Canvas) {
         let mut canvas = canvas.subcanvas(self.rect());
-        draw_light(&mut canvas, self.light_radius, TOGGLE_MAX_LIGHT_RADIUS);
+        draw_light(&mut canvas,
+                   self.light_radius,
+                   TOGGLE_MAX_LIGHT_RADIUS,
+                   self.hilight);
         let center = canvas.rect().center();
         canvas.draw_sprite_centered(&self.label, center);
         let frame = if state.is_toggled(self.position) {
@@ -313,7 +342,10 @@ impl PassiveLight {
 impl Element<AtticState, Cmd> for PassiveLight {
     fn draw(&self, _: &AtticState, canvas: &mut Canvas) {
         let mut canvas = canvas.subcanvas(self.rect());
-        draw_light(&mut canvas, self.light_radius, PASSIVE_MAX_LIGHT_RADIUS);
+        draw_light(&mut canvas,
+                   self.light_radius,
+                   PASSIVE_MAX_LIGHT_RADIUS,
+                   false);
         let center = canvas.rect().center();
         canvas.draw_sprite_centered(&self.frame, center);
     }
@@ -333,21 +365,24 @@ impl Element<AtticState, Cmd> for PassiveLight {
 
 // ========================================================================= //
 
-fn draw_light(canvas: &mut Canvas, radius: i32, max: i32) {
+fn light_rect(center: Point, radius: i32) -> Rect {
+    Rect::new(center.x() - radius,
+              center.y() - radius,
+              2 * radius as u32,
+              2 * radius as u32)
+}
+
+fn draw_light(canvas: &mut Canvas, radius: i32, max: i32, hilight: bool) {
     let center = canvas.rect().center();
-    if radius < max {
-        let dark_rect = Rect::new(center.x() - max,
-                                  center.y() - max,
-                                  2 * max as u32,
-                                  2 * max as u32);
-        canvas.fill_rect((0, 0, 32), dark_rect);
-    }
-    if radius > 0 {
-        let light_rect = Rect::new(center.x() - radius,
-                                   center.y() - radius,
-                                   2 * radius as u32,
-                                   2 * radius as u32);
-        canvas.fill_rect((255, 255, 192), light_rect);
+    if hilight {
+        canvas.fill_rect((255, 64, 255), light_rect(center, max));
+    } else {
+        if radius < max {
+            canvas.fill_rect((0, 0, 32), light_rect(center, max));
+        }
+        if radius > 0 {
+            canvas.fill_rect((255, 255, 192), light_rect(center, radius));
+        }
     }
 }
 

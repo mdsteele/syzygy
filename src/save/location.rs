@@ -27,6 +27,7 @@ pub enum Location {
     Map,
     Prolog,
     ALightInTheAttic,
+    Disconnected,
 }
 
 impl Location {
@@ -35,6 +36,7 @@ impl Location {
             Location::Map => "map",
             Location::Prolog => "prolog",
             Location::ALightInTheAttic => "a_light_in_the_attic",
+            Location::Disconnected => "disconnected",
         }
     }
 
@@ -44,6 +46,7 @@ impl Location {
                 "map" => return Location::Map,
                 "prolog" => return Location::Prolog,
                 "a_light_in_the_attic" => return Location::ALightInTheAttic,
+                "disconnected" => return Location::Disconnected,
                 _ => {}
             }
         }
@@ -69,7 +72,8 @@ mod tests {
     fn toml_round_trip() {
         let locations = &[Location::Map,
                           Location::Prolog,
-                          Location::ALightInTheAttic];
+                          Location::ALightInTheAttic,
+                          Location::Disconnected];
         for original in locations {
             let result = Location::from_toml(Some(&original.to_toml()));
             assert_eq!(result, *original);

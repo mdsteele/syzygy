@@ -17,21 +17,41 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod access;
-mod data;
-mod game;
-mod location;
-mod path;
-mod prefs;
-mod puzzles;
-mod util;
+use gui::{Element, Event, Window};
+use modes::{Mode, run_info_box};
+use save::{Game, Location};
 
-pub use self::access::Access;
-pub use self::data::SaveData;
-pub use self::game::Game;
-pub use self::location::Location;
-pub use self::path::get_default_save_file_path;
-pub use self::prefs::Prefs;
-pub use self::puzzles::{AtticState, DisconState, PrologState};
+use super::view::{Cmd, INFO_BOX_TEXT, View};
+
+// ========================================================================= //
+
+pub fn run_disconnected(window: &mut Window, game: &mut Game) -> Mode {
+    let mut view = {
+        let visible = window.visible_rect();
+        View::new(&mut window.resources(), visible, &game.disconnected)
+    };
+    game.disconnected.visit();
+    window.render(game, &view);
+    loop {
+        let action = match window.next_event() {
+            Event::Quit => return Mode::Quit,
+            event => view.handle_event(&event, game),
+        };
+        match action.value() {
+            Some(&Cmd::ReturnToMap) => {
+                return Mode::Location(Location::Map);
+            }
+            Some(&Cmd::ShowInfoBox) => {
+                if !run_info_box(window, &view, game, INFO_BOX_TEXT) {
+                    return Mode::Quit;
+                }
+            }
+            None => {}
+        }
+        if action.should_redraw() {
+            window.render(game, &view);
+        }
+    }
+}
 
 // ========================================================================= //

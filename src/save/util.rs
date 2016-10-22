@@ -17,21 +17,40 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod access;
-mod data;
-mod game;
-mod location;
-mod path;
-mod prefs;
-mod puzzles;
-mod util;
+use toml;
 
-pub use self::access::Access;
-pub use self::data::SaveData;
-pub use self::game::Game;
-pub use self::location::Location;
-pub use self::path::get_default_save_file_path;
-pub use self::prefs::Prefs;
-pub use self::puzzles::{AtticState, DisconState, PrologState};
+// ========================================================================= //
+
+pub const ACCESS_KEY: &'static str = "access";
+
+pub fn pop_array(table: &mut toml::Table, key: &str) -> toml::Array {
+    if let Some(value) = table.remove(key) {
+        to_array(value)
+    } else {
+        toml::Array::new()
+    }
+}
+
+pub fn pop_table(table: &mut toml::Table, key: &str) -> toml::Table {
+    if let Some(value) = table.remove(key) {
+        to_table(value)
+    } else {
+        toml::Table::new()
+    }
+}
+
+pub fn to_array(value: toml::Value) -> toml::Array {
+    match value {
+        toml::Value::Array(array) => array,
+        _ => toml::Array::new(),
+    }
+}
+
+pub fn to_table(value: toml::Value) -> toml::Table {
+    match value {
+        toml::Value::Table(table) => table,
+        _ => toml::Table::new(),
+    }
+}
 
 // ========================================================================= //

@@ -17,21 +17,36 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod access;
-mod data;
-mod game;
-mod location;
-mod path;
-mod prefs;
-mod puzzles;
-mod util;
+use toml;
 
-pub use self::access::Access;
-pub use self::data::SaveData;
-pub use self::game::Game;
-pub use self::location::Location;
-pub use self::path::get_default_save_file_path;
-pub use self::prefs::Prefs;
-pub use self::puzzles::{AtticState, DisconState, PrologState};
+use save::Access;
+use super::super::util::ACCESS_KEY;
+
+// ========================================================================= //
+
+#[derive(Default)]
+pub struct DisconState {
+    access: Access,
+}
+
+impl DisconState {
+    pub fn from_toml(table: toml::Table) -> DisconState {
+        DisconState { access: Access::from_toml(table.get(ACCESS_KEY)) }
+    }
+
+    pub fn to_toml(&self) -> toml::Value {
+        let mut table = toml::Table::new();
+        table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
+        toml::Value::Table(table)
+    }
+
+    pub fn access(&self) -> Access { self.access }
+
+    pub fn is_visited(&self) -> bool { self.access.is_visited() }
+
+    pub fn visit(&mut self) { self.access.visit(); }
+
+    pub fn is_solved(&self) -> bool { self.access == Access::Solved }
+}
 
 // ========================================================================= //

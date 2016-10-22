@@ -52,7 +52,9 @@ impl View {
             fade_command: Cmd::ReturnToTitle,
             hud: Hud::new(resources, visible, Location::Map),
             nodes: vec![
+                View::node(resources, Location::Prolog, 50, 100),
                 View::node(resources, Location::ALightInTheAttic, 100, 50),
+                View::node(resources, Location::Disconnected, 100, 150),
             ],
         }
     }

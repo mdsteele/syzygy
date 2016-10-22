@@ -18,12 +18,14 @@
 // +--------------------------------------------------------------------------+
 
 mod attic;
+mod discon;
 mod info;
 mod map;
 mod mode;
 mod title;
 
 pub use self::attic::run_a_light_in_the_attic;
+pub use self::discon::run_disconnected;
 pub use self::info::run_info_box;
 pub use self::map::run_map_screen;
 pub use self::mode::Mode;

@@ -54,6 +54,8 @@ impl Access {
         toml::Value::String(string.to_string())
     }
 
+    pub fn is_visited(&self) -> bool { *self > Access::Unvisited }
+
     pub fn visit(&mut self) {
         if *self < Access::Unsolved {
             *self = Access::Unsolved;

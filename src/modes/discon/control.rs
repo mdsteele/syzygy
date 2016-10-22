@@ -18,7 +18,7 @@
 // +--------------------------------------------------------------------------+
 
 use gui::{Element, Event, Window};
-use modes::{Mode, run_info_box};
+use modes::{Mode, SOLVED_INFO_TEXT, run_info_box};
 use save::{Game, Location};
 
 use super::view::{Cmd, INFO_BOX_TEXT, View};
@@ -42,7 +42,12 @@ pub fn run_disconnected(window: &mut Window, game: &mut Game) -> Mode {
                 return Mode::Location(Location::Map);
             }
             Some(&Cmd::ShowInfoBox) => {
-                if !run_info_box(window, &view, game, INFO_BOX_TEXT) {
+                let text = if game.disconnected.is_solved() {
+                    SOLVED_INFO_TEXT
+                } else {
+                    INFO_BOX_TEXT
+                };
+                if !run_info_box(window, &view, game, text) {
                     return Mode::Quit;
                 }
             }

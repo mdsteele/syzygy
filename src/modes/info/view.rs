@@ -56,3 +56,10 @@ impl<'a, S, A, E: Element<S, A>> Element<S, ()> for View<'a, A, E> {
 }
 
 // ========================================================================= //
+
+pub const SOLVED_INFO_TEXT: &'static str = "\
+This system has been repaired.
+
+Return to the map to select another scene.";
+
+// ========================================================================= //

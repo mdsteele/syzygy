@@ -21,5 +21,6 @@ mod control;
 mod view;
 
 pub use self::control::run_info_box;
+pub use self::view::SOLVED_INFO_TEXT;
 
 // ========================================================================= //

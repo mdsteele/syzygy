@@ -54,6 +54,8 @@ impl DisconState {
 
     pub fn is_solved(&self) -> bool { self.access == Access::Solved }
 
+    pub fn mark_solved(&mut self) { self.access = Access::Solved; }
+
     pub fn grid(&self) -> &DeviceGrid { &self.grid }
 
     pub fn grid_mut(&mut self) -> &mut DeviceGrid { &mut self.grid }
@@ -136,6 +138,17 @@ impl DeviceGrid {
             if let Some((device, ref mut dir)) = self.grid[index] {
                 if device.is_moveable() {
                     *dir = dir.rotated_cw();
+                }
+            }
+        }
+    }
+
+    pub fn unrotate(&mut self, col: i32, row: i32) {
+        if col >= 0 && col < self.num_cols && row >= 0 && row < self.num_rows {
+            let index = (row * self.num_cols + col) as usize;
+            if let Some((device, ref mut dir)) = self.grid[index] {
+                if device.is_moveable() {
+                    *dir = dir.rotated_ccw();
                 }
             }
         }
@@ -236,6 +249,15 @@ impl Direction {
             Direction::North => Direction::East,
         }
     }
+
+    pub fn rotated_ccw(self) -> Direction {
+        match self {
+            Direction::East => Direction::North,
+            Direction::South => Direction::East,
+            Direction::West => Direction::South,
+            Direction::North => Direction::West,
+        }
+    }
 }
 
 // ========================================================================= //
@@ -288,6 +310,7 @@ mod tests {
             assert!(!original.is_parallel_to(rotated));
             assert!(!rotated.is_parallel_to(*original));
             assert_eq!(rotated.rotated_cw(), original.opposite());
+            assert_eq!(rotated.rotated_ccw(), *original);
         }
     }
 }

@@ -28,7 +28,7 @@ pub use self::cutscene::{Ast, Scene, Theater};
 pub use self::dialog::DialogBox;
 pub use self::fade::ScreenFade;
 pub use self::hud::{Hud, HudCmd, HudInput};
-pub use self::lasers::LaserField;
+pub use self::lasers::{LaserCmd, LaserField};
 pub use self::paragraph::Paragraph;
 
 // ========================================================================= //

@@ -17,7 +17,8 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use elements::{Hud, HudCmd, HudInput, LaserField, Scene, ScreenFade, Theater};
+use elements::{Hud, HudCmd, HudInput, LaserCmd, LaserField, Scene,
+               ScreenFade, Theater};
 use gui::{Action, Canvas, Element, Event, Rect, Resources};
 use save::{DisconState, Game, Location};
 use super::scenes::{compile_intro_scene, compile_outro_scene};
@@ -38,6 +39,8 @@ pub struct View {
     screen_fade: ScreenFade,
     hud: Hud,
     laser_field: LaserField,
+    undo_stack: Vec<LaserCmd>,
+    redo_stack: Vec<LaserCmd>,
 }
 
 impl View {
@@ -62,6 +65,8 @@ impl View {
             screen_fade: ScreenFade::new(resources),
             hud: Hud::new(resources, visible, Location::Disconnected),
             laser_field: LaserField::new(resources, 120, 72, state.grid()),
+            undo_stack: Vec::new(),
+            redo_stack: Vec::new(),
         };
         view.drain_queue();
         view
@@ -70,9 +75,39 @@ impl View {
     fn hud_input(&self, _state: &DisconState) -> HudInput {
         HudInput {
             name: "Disconnected",
-            can_undo: false,
-            can_redo: false,
+            can_undo: !self.undo_stack.is_empty(),
+            can_redo: !self.redo_stack.is_empty(),
             can_reset: false,
+        }
+    }
+
+    fn undo(&mut self, state: &mut DisconState) {
+        if let Some(cmd) = self.undo_stack.pop() {
+            self.redo_stack.push(cmd);
+            match cmd {
+                LaserCmd::Moved(col1, row1, col2, row2) => {
+                    state.grid_mut().move_to(col2, row2, col1, row1);
+                }
+                LaserCmd::Rotated(col, row) => {
+                    state.grid_mut().unrotate(col, row);
+                }
+            }
+            self.laser_field.recalculate_lasers(state.grid_mut());
+        }
+    }
+
+    fn redo(&mut self, state: &mut DisconState) {
+        if let Some(cmd) = self.redo_stack.pop() {
+            self.undo_stack.push(cmd);
+            match cmd {
+                LaserCmd::Moved(col1, row1, col2, row2) => {
+                    state.grid_mut().move_to(col1, row1, col2, row2);
+                }
+                LaserCmd::Rotated(col, row) => {
+                    state.grid_mut().rotate(col, row);
+                }
+            }
+            self.laser_field.recalculate_lasers(state.grid_mut());
         }
     }
 
@@ -121,11 +156,11 @@ impl Element<Game, Cmd> for View {
                 }
                 Some(&HudCmd::Info) => subaction.but_return(Cmd::ShowInfoBox),
                 Some(&HudCmd::Undo) => {
-                    // TODO undo
+                    self.undo(state);
                     subaction.but_no_value()
                 }
                 Some(&HudCmd::Redo) => {
-                    // TODO redo
+                    self.redo(state);
                     subaction.but_no_value()
                 }
                 Some(&HudCmd::Reset) => {
@@ -135,9 +170,23 @@ impl Element<Game, Cmd> for View {
                 None => subaction.but_no_value(),
             });
         }
-        if !action.should_stop() {
-            let grid = state.grid_mut();
-            let subaction = self.laser_field.handle_event(event, grid);
+        if !action.should_stop() &&
+           (event == &Event::ClockTick || !state.is_solved()) {
+            let subaction = self.laser_field
+                                .handle_event(event, state.grid_mut());
+            if let Some(&cmd) = subaction.value() {
+                if self.laser_field.all_detectors_satisfied(state.grid()) {
+                    state.mark_solved();
+                    if cfg!(debug_assertions) {
+                        println!("Puzzle solved, beginning outro.");
+                    }
+                    self.outro_scene.begin(&mut self.theater);
+                    self.undo_stack.clear();
+                } else {
+                    self.undo_stack.push(cmd);
+                }
+                self.redo_stack.clear();
+            }
             action.merge(subaction.but_no_value());
         }
         action

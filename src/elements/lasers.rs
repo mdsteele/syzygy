@@ -31,6 +31,16 @@ const DRAG_MIN_MILLIS: u32 = 200;
 const LASER_THICKNESS: i32 = 4;
 const ANIM_SLOWDOWN: i32 = 5;
 
+// ========================================================================= //
+
+#[derive(Clone, Copy)]
+pub enum LaserCmd {
+    Moved(i32, i32, i32, i32),
+    Rotated(i32, i32),
+}
+
+// ========================================================================= //
+
 struct GridDrag {
     device: Device,
     dir: Direction,
@@ -40,6 +50,8 @@ struct GridDrag {
     to_pt: Point,
     millis: u32,
 }
+
+// ========================================================================= //
 
 pub struct LaserField {
     rect: Rect,
@@ -74,6 +86,25 @@ impl LaserField {
         };
         laser_field.recalculate_lasers(grid);
         laser_field
+    }
+
+    pub fn all_detectors_satisfied(&self, grid: &DeviceGrid) -> bool {
+        let (num_cols, num_rows) = grid.size();
+        for row in 0..num_rows {
+            for col in 0..num_cols {
+                match grid.get(col, row) {
+                    Some((Device::Detector(color), dir)) => {
+                        let coords = Point::new(col, row);
+                        match self.lasers.get(&(coords, dir)) {
+                            Some(&(laser, _)) if laser == color => {}
+                            _ => return false,
+                        }
+                    }
+                    _ => {}
+                }
+            }
+        }
+        true
     }
 
     fn draw_device_bg(&self, canvas: &mut Canvas, center: Point,
@@ -142,7 +173,7 @@ impl LaserField {
         self.sparks.clear();
     }
 
-    fn recalculate_lasers(&mut self, grid: &DeviceGrid) {
+    pub fn recalculate_lasers(&mut self, grid: &DeviceGrid) {
         self.clear_lasers();
         let (num_cols, num_rows) = grid.size();
         let mut queue: VecDeque<(Point, Direction, LaserColor)> =
@@ -217,7 +248,7 @@ impl LaserField {
     }
 }
 
-impl Element<DeviceGrid, ()> for LaserField {
+impl Element<DeviceGrid, LaserCmd> for LaserField {
     fn draw(&self, grid: &DeviceGrid, canvas: &mut Canvas) {
         let (num_cols, num_rows) = grid.size();
         {
@@ -319,7 +350,7 @@ impl Element<DeviceGrid, ()> for LaserField {
     }
 
     fn handle_event(&mut self, event: &Event, grid: &mut DeviceGrid)
-                    -> Action<()> {
+                    -> Action<LaserCmd> {
         match event {
             &Event::ClockTick => {
                 if let Some(ref mut drag) = self.drag {
@@ -365,10 +396,15 @@ impl Element<DeviceGrid, ()> for LaserField {
                 if let Some(drag) = self.drag.take() {
                     let to_col = drag.to_pt.x() / GRID_CELL_SIZE;
                     let to_row = drag.to_pt.y() / GRID_CELL_SIZE;
-                    if drag.millis < DRAG_MIN_MILLIS {
+                    return if drag.millis < DRAG_MIN_MILLIS {
                         if to_col == drag.from_col && to_row == drag.from_row {
                             grid.rotate(drag.from_col, drag.from_row);
                             self.recalculate_lasers(grid);
+                            Action::redraw()
+                                .and_return(LaserCmd::Rotated(drag.from_col,
+                                                              drag.from_row))
+                        } else {
+                            Action::redraw()
                         }
                     } else {
                         grid.move_to(drag.from_col,
@@ -376,8 +412,12 @@ impl Element<DeviceGrid, ()> for LaserField {
                                      to_col,
                                      to_row);
                         self.recalculate_lasers(grid);
-                    }
-                    return Action::redraw();
+                        Action::redraw()
+                            .and_return(LaserCmd::Moved(drag.from_col,
+                                                        drag.from_row,
+                                                        to_col,
+                                                        to_row))
+                    };
                 }
             }
             _ => {}

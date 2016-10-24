@@ -24,7 +24,8 @@ use gui::Resources;
 
 pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
-        Ast::Wait(0.5),
+        Ast::Place(0, "Tezure", (-16, 304)),
+        Ast::Slide(0, (304, 304), true, true, 1.0),
     ];
     Ast::compile_scene(resources, ast)
 }
@@ -33,7 +34,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
 
 pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
-        Ast::Wait(0.5),
+        Ast::Slide(0, (592, 304), true, false, 1.0),
     ];
     Ast::compile_scene(resources, ast)
 }

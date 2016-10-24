@@ -116,6 +116,30 @@ impl<'a> Canvas<'a> {
         self.draw_sprite(sprite, top_left);
     }
 
+    pub fn draw_sprite_rotated(&mut self, sprite: &Sprite, center: Point,
+                               degrees: i32) {
+        self.draw_sprite_transformed(sprite, center, degrees, false, false);
+    }
+
+    pub fn draw_sprite_transformed(&mut self, sprite: &Sprite,
+                                   mut center: Point, degrees: i32,
+                                   flip_horz: bool, flip_vert: bool) {
+        center = center.offset(self.offset_rect.x(), self.offset_rect.y());
+        let dest = Rect::new(center.x() - sprite.width() as i32 / 2,
+                             center.y() - sprite.height() as i32 / 2,
+                             sprite.width(),
+                             sprite.height());
+        self.renderer
+            .copy_ex(&sprite.sdl2_texture(),
+                     None,
+                     Some(dest),
+                     degrees as f64,
+                     None,
+                     flip_horz,
+                     flip_vert)
+            .unwrap();
+    }
+
     pub fn draw_text(&mut self, font: &Font, alignment: Align, start: Point,
                      text: &str) {
         let top = start.y() - font.baseline();

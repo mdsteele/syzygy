@@ -17,7 +17,7 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use elements::{Hud, HudCmd, HudInput, Scene, ScreenFade, Theater};
+use elements::{Hud, HudCmd, HudInput, LaserField, Scene, ScreenFade, Theater};
 use gui::{Action, Canvas, Element, Event, Rect, Resources};
 use save::{DisconState, Game, Location};
 use super::scenes::{compile_intro_scene, compile_outro_scene};
@@ -37,6 +37,7 @@ pub struct View {
     outro_scene: Scene,
     screen_fade: ScreenFade,
     hud: Hud,
+    laser_field: LaserField,
 }
 
 impl View {
@@ -60,6 +61,7 @@ impl View {
             outro_scene: outro_scene,
             screen_fade: ScreenFade::new(resources),
             hud: Hud::new(resources, visible, Location::Disconnected),
+            laser_field: LaserField::new(resources, 120, 72, state.grid()),
         };
         view.drain_queue();
         view
@@ -76,7 +78,7 @@ impl View {
 
     fn drain_queue(&mut self) {
         for (_, _) in self.theater.drain_queue() {
-            // TODO
+            // TODO drain queue
         }
     }
 }
@@ -85,6 +87,7 @@ impl Element<Game, Cmd> for View {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
         let state = &game.disconnected;
         self.theater.draw_background(canvas);
+        self.laser_field.draw(state.grid(), canvas);
         self.theater.draw_foreground(canvas);
         self.hud.draw(&self.hud_input(state), canvas);
         self.screen_fade.draw(&(), canvas);
@@ -118,19 +121,24 @@ impl Element<Game, Cmd> for View {
                 }
                 Some(&HudCmd::Info) => subaction.but_return(Cmd::ShowInfoBox),
                 Some(&HudCmd::Undo) => {
-                    // TODO
+                    // TODO undo
                     subaction.but_no_value()
                 }
                 Some(&HudCmd::Redo) => {
-                    // TODO
+                    // TODO redo
                     subaction.but_no_value()
                 }
                 Some(&HudCmd::Reset) => {
-                    // TODO
+                    // TODO reset
                     subaction.but_no_value()
                 }
                 None => subaction.but_no_value(),
             });
+        }
+        if !action.should_stop() {
+            let grid = state.grid_mut();
+            let subaction = self.laser_field.handle_event(event, grid);
+            action.merge(subaction.but_no_value());
         }
         action
     }
@@ -142,7 +150,7 @@ pub const INFO_BOX_TEXT: &'static str = "\
 Your goal is to activate each detector on the right with
 the appropriate color of laser.
 
-Drag mirrors with $M{your finger}{the mouse} to swap their positions in
+Drag mirrors with $M{your finger}{the mouse} to move their positions in
 the grid.  $M{Tap}{Click} mirrors to rotate them.";
 
 // ========================================================================= //

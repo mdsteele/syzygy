@@ -17,12 +17,20 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
+use std::collections::HashMap;
 use std::default::Default;
 use toml;
 
-use gui::Point;
-use save::Access;
-use super::super::util::ACCESS_KEY;
+use save::{Access, Direction};
+use super::super::util::{ACCESS_KEY, pop_array, to_i32, to_table};
+
+// ========================================================================= //
+
+const GRID_KEY: &'static str = "grid";
+
+const COORDS_KEY: &'static str = "coords";
+const DEVICE_KEY: &'static str = "device";
+const DIRECTION_KEY: &'static str = "direction";
 
 // ========================================================================= //
 
@@ -32,17 +40,18 @@ pub struct DisconState {
 }
 
 impl DisconState {
-    pub fn from_toml(table: toml::Table) -> DisconState {
+    pub fn from_toml(mut table: toml::Table) -> DisconState {
         let mut state: DisconState = Default::default();
         state.access = Access::from_toml(table.get(ACCESS_KEY));
-        // TODO parse grid
+        let grid = pop_array(&mut table, GRID_KEY);
+        state.grid = DeviceGrid::from_toml(grid, &state.grid);
         state
     }
 
     pub fn to_toml(&self) -> toml::Value {
         let mut table = toml::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
-        // TODO serialize grid
+        table.insert(GRID_KEY.to_string(), self.grid.to_toml());
         toml::Value::Table(table)
     }
 
@@ -101,6 +110,7 @@ impl Default for DisconState {
 
 // ========================================================================= //
 
+#[derive(Clone)]
 pub struct DeviceGrid {
     num_cols: i32,
     num_rows: i32,
@@ -114,6 +124,72 @@ impl DeviceGrid {
             num_rows: num_rows as i32,
             grid: vec![None; num_cols * num_rows],
         }
+    }
+
+    pub fn from_toml(array: toml::Array, default: &DeviceGrid) -> DeviceGrid {
+        let mut grid = default.clone();
+        let mut default_device_counts: HashMap<Device, i32> = HashMap::new();
+        for row in 0..grid.num_rows {
+            for col in 0..grid.num_cols {
+                let index = (row * grid.num_cols + col) as usize;
+                if let Some((device, _)) = grid.grid[index] {
+                    if device.is_moveable() {
+                        *default_device_counts.entry(device).or_insert(0) += 1;
+                        grid.grid[index] = None;
+                    }
+                }
+            }
+        }
+        let mut actual_device_counts: HashMap<Device, i32> = HashMap::new();
+        for value in array.into_iter() {
+            let mut table = to_table(value);
+            let mut coords = pop_array(&mut table, COORDS_KEY);
+            if coords.len() != 2 {
+                return default.clone();
+            }
+            let row = to_i32(coords.pop().unwrap());
+            let col = to_i32(coords.pop().unwrap());
+            if (col < 0 || col >= grid.num_cols) ||
+               (row < 0 || row >= grid.num_rows) {
+                return default.clone();
+            }
+            let index = (row * grid.num_cols + col) as usize;
+            if grid.grid[index].is_some() {
+                return default.clone();
+            }
+            let device = Device::from_toml(table.get(DEVICE_KEY));
+            let dir = Direction::from_toml(table.get(DIRECTION_KEY));
+            grid.grid[index] = Some((device, dir));
+            *actual_device_counts.entry(device).or_insert(0) += 1;
+        }
+        if actual_device_counts == default_device_counts {
+            grid
+        } else {
+            default.clone()
+        }
+    }
+
+    pub fn to_toml(&self) -> toml::Value {
+        let mut array = toml::Array::new();
+        for row in 0..self.num_rows {
+            for col in 0..self.num_cols {
+                let index = (row * self.num_cols + col) as usize;
+                if let Some((device, dir)) = self.grid[index] {
+                    if device.is_moveable() {
+                        let mut table = toml::Table::new();
+                        let mut coords = toml::Array::new();
+                        coords.push(toml::Value::Integer(col as i64));
+                        coords.push(toml::Value::Integer(row as i64));
+                        table.insert(COORDS_KEY.to_string(),
+                                     toml::Value::Array(coords));
+                        table.insert(DEVICE_KEY.to_string(), device.to_toml());
+                        table.insert(DIRECTION_KEY.to_string(), dir.to_toml());
+                        array.push(toml::Value::Table(table));
+                    }
+                }
+            }
+        }
+        toml::Value::Array(array)
     }
 
     pub fn size(&self) -> (i32, i32) { (self.num_cols, self.num_rows) }
@@ -185,7 +261,7 @@ impl DeviceGrid {
 
 // ========================================================================= //
 
-#[derive(Clone, Copy, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum LaserColor {
     Red,
     Green,
@@ -195,74 +271,6 @@ pub enum LaserColor {
 // ========================================================================= //
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
-pub enum Direction {
-    East,
-    South,
-    West,
-    North,
-}
-
-impl Direction {
-    pub fn degrees(self) -> i32 {
-        match self {
-            Direction::East => 0,
-            Direction::South => 90,
-            Direction::West => 180,
-            Direction::North => -90,
-        }
-    }
-
-    pub fn is_vertical(self) -> bool {
-        match self {
-            Direction::East | Direction::West => false,
-            Direction::South | Direction::North => true,
-        }
-    }
-
-    pub fn is_parallel_to(self, other: Direction) -> bool {
-        self.is_vertical() == other.is_vertical()
-    }
-
-    pub fn delta(self) -> Point {
-        match self {
-            Direction::East => Point::new(1, 0),
-            Direction::South => Point::new(0, 1),
-            Direction::West => Point::new(-1, 0),
-            Direction::North => Point::new(0, -1),
-        }
-    }
-
-    pub fn opposite(self) -> Direction {
-        match self {
-            Direction::East => Direction::West,
-            Direction::South => Direction::North,
-            Direction::West => Direction::East,
-            Direction::North => Direction::South,
-        }
-    }
-
-    pub fn rotated_cw(self) -> Direction {
-        match self {
-            Direction::East => Direction::South,
-            Direction::South => Direction::West,
-            Direction::West => Direction::North,
-            Direction::North => Direction::East,
-        }
-    }
-
-    pub fn rotated_ccw(self) -> Direction {
-        match self {
-            Direction::East => Direction::North,
-            Direction::South => Direction::East,
-            Direction::West => Direction::South,
-            Direction::North => Direction::West,
-        }
-    }
-}
-
-// ========================================================================= //
-
-#[derive(Clone, Copy)]
 pub enum Device {
     Wall,
     Channel,
@@ -272,6 +280,39 @@ pub enum Device {
 }
 
 impl Device {
+    pub fn from_toml(value: Option<&toml::Value>) -> Device {
+        if let Some(string) = value.and_then(toml::Value::as_str) {
+            match string {
+                "O" => return Device::Wall,
+                "=" => return Device::Channel,
+                "Er" => return Device::Emitter(LaserColor::Red),
+                "Eg" => return Device::Emitter(LaserColor::Green),
+                "Eb" => return Device::Emitter(LaserColor::Blue),
+                "Dr" => return Device::Detector(LaserColor::Red),
+                "Dg" => return Device::Detector(LaserColor::Green),
+                "Db" => return Device::Detector(LaserColor::Blue),
+                "/" => return Device::Mirror,
+                _ => {}
+            }
+        }
+        Device::Wall
+    }
+
+    pub fn to_toml(self) -> toml::Value {
+        let string = match self {
+            Device::Wall => "O",
+            Device::Channel => "=",
+            Device::Emitter(LaserColor::Red) => "Er",
+            Device::Emitter(LaserColor::Green) => "Eg",
+            Device::Emitter(LaserColor::Blue) => "Eb",
+            Device::Detector(LaserColor::Red) => "Dr",
+            Device::Detector(LaserColor::Green) => "Dg",
+            Device::Detector(LaserColor::Blue) => "Db",
+            Device::Mirror => "/",
+        };
+        toml::Value::String(string.to_string())
+    }
+
     pub fn is_moveable(self) -> bool {
         match self {
             Device::Mirror => true,
@@ -284,34 +325,37 @@ impl Device {
 
 #[cfg(test)]
 mod tests {
-    use gui::Point;
-    use super::Direction;
-
-    const ALL_DIRECTIONS: &'static [Direction] = &[Direction::East,
-                                                   Direction::South,
-                                                   Direction::West,
-                                                   Direction::North];
+    use save::Direction;
+    use super::{Device, DeviceGrid, LaserColor};
+    use super::super::super::util::to_array;
 
     #[test]
-    fn opposites() {
-        for original in ALL_DIRECTIONS {
-            let opposite = original.opposite();
-            assert!(original.is_parallel_to(opposite));
-            assert!(opposite.is_parallel_to(*original));
-            assert_eq!(opposite.opposite(), *original);
-            assert_eq!(original.delta() + opposite.delta(), Point::new(0, 0));
+    fn device_toml_round_trip() {
+        let all = &[Device::Wall,
+                    Device::Channel,
+                    Device::Emitter(LaserColor::Red),
+                    Device::Emitter(LaserColor::Green),
+                    Device::Emitter(LaserColor::Blue),
+                    Device::Detector(LaserColor::Red),
+                    Device::Detector(LaserColor::Green),
+                    Device::Detector(LaserColor::Blue),
+                    Device::Mirror];
+        for original in all {
+            let result = Device::from_toml(Some(&original.to_toml()));
+            assert_eq!(result, *original);
         }
     }
 
     #[test]
-    fn rotated() {
-        for original in ALL_DIRECTIONS {
-            let rotated = original.rotated_cw();
-            assert!(!original.is_parallel_to(rotated));
-            assert!(!rotated.is_parallel_to(*original));
-            assert_eq!(rotated.rotated_cw(), original.opposite());
-            assert_eq!(rotated.rotated_ccw(), *original);
-        }
+    fn grid_toml_round_trip() {
+        let mut default = DeviceGrid::new(2, 3);
+        default.set(0, 0, Device::Mirror, Direction::East);
+        default.set(1, 0, Device::Mirror, Direction::South);
+        default.set(2, 1, Device::Wall, Direction::East);
+        let mut grid = default.clone();
+        grid.move_to(1, 0, 1, 1);
+        let result = DeviceGrid::from_toml(to_array(grid.to_toml()), &default);
+        assert_eq!(result.grid, grid.grid);
     }
 }
 

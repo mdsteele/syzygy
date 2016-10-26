@@ -22,7 +22,7 @@ mod discon;
 mod prolog;
 
 pub use self::attic::AtticState;
-pub use self::discon::{Device, DeviceGrid, Direction, DisconState, LaserColor};
+pub use self::discon::{Device, DeviceGrid, DisconState, LaserColor};
 pub use self::prolog::PrologState;
 
 // ========================================================================= //

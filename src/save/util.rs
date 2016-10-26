@@ -17,6 +17,7 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
+use std::i32;
 use toml;
 
 // ========================================================================= //
@@ -43,6 +44,21 @@ pub fn to_array(value: toml::Value) -> toml::Array {
     match value {
         toml::Value::Array(array) => array,
         _ => toml::Array::new(),
+    }
+}
+
+pub fn to_i32(value: toml::Value) -> i32 {
+    match value {
+        toml::Value::Integer(integer) => {
+            if integer > (i32::MAX as i64) {
+                i32::MAX
+            } else if integer < (i32::MIN as i64) {
+                i32::MIN
+            } else {
+                integer as i32
+            }
+        }
+        _ => 0,
     }
 }
 

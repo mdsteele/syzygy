@@ -17,6 +17,7 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
+use std::cmp;
 use std::rc::Rc;
 
 use gui::{Action, Align, Canvas, Element, Event, Font, GroupElement, Point,
@@ -25,18 +26,16 @@ use save::Location;
 
 // ========================================================================= //
 
-const NAMEBOX_WIDTH: u32 = 120;
+const NAMEBOX_WIDTH: u32 = 114;
 const NAMEBOX_HEIGHT: u32 = 16;
-const BUTTON_WIDTH: u32 = 24;
-const BUTTON_HEIGHT: u32 = 24;
-const BUTTON_SPACING: i32 = 3;
-const MARGIN_HORZ: i32 = 6;
-const MARGIN_VERT: i32 = 4;
+const BUTTON_HEIGHT: u32 = 16;
+const SCROLL_SPEED: i32 = 2;
 
 // ========================================================================= //
 
 pub struct HudInput {
     pub name: &'static str,
+    pub can_back: bool,
     pub can_undo: bool,
     pub can_redo: bool,
     pub can_reset: bool,
@@ -54,58 +53,36 @@ pub enum HudCmd {
 // ========================================================================= //
 
 pub struct Hud {
-    rect: Rect,
     elements: GroupElement<HudInput, HudCmd>,
 }
 
 impl Hud {
     pub fn new(resources: &mut Resources, visible: Rect, location: Location)
                -> Hud {
-        let rect = {
-            let width = (2 * MARGIN_HORZ + 5 * BUTTON_WIDTH as i32 +
-                         NAMEBOX_WIDTH as i32 +
-                         5 * BUTTON_SPACING) as u32;
-            let height = (2 * MARGIN_VERT + BUTTON_HEIGHT as i32) as u32;
-            let left = visible.left() +
-                       (visible.width() as i32 - width as i32) / 2;
-            let top = visible.bottom() - height as i32;
-            Rect::new(left, top, width, height)
-        };
-        let buttons = {
-            let xb1 = rect.left() + MARGIN_HORZ;
-            let xb2 = xb1 + BUTTON_WIDTH as i32 + BUTTON_SPACING;
-            let xnb = xb2 + BUTTON_WIDTH as i32 + BUTTON_SPACING;
-            let xb3 = xnb + NAMEBOX_WIDTH as i32 + BUTTON_SPACING;
-            let xb4 = xb3 + BUTTON_WIDTH as i32 + BUTTON_SPACING;
-            let xb5 = xb4 + BUTTON_WIDTH as i32 + BUTTON_SPACING;
-            let yb = rect.top() + MARGIN_VERT;
-            let ynb = yb + (BUTTON_HEIGHT as i32 - NAMEBOX_HEIGHT as i32) / 2;
-            vec![
-                Hud::button(resources, location, HudCmd::Back, xb1, yb),
-                Hud::button(resources, location, HudCmd::Info, xb2, yb),
-                Hud::button(resources, location, HudCmd::Undo, xb3, yb),
-                Hud::button(resources, location, HudCmd::Redo, xb4, yb),
-                Hud::button(resources, location, HudCmd::Reset, xb5, yb),
-                Hud::namebox(resources, xnb, ynb),
-            ]
-        };
-        Hud {
-            rect: rect,
-            elements: GroupElement::new(buttons),
-        }
+        let bot = visible.bottom();
+        let cx = visible.left() + visible.width() as i32 / 2;
+        let elements = vec![
+            Hud::button(resources, location, HudCmd::Back, cx - 160, bot),
+            Hud::button(resources, location, HudCmd::Info, cx - 95, bot),
+            Hud::button(resources, location, HudCmd::Undo, cx + 96, bot),
+            Hud::button(resources, location, HudCmd::Redo, cx + 149, bot),
+            Hud::button(resources, location, HudCmd::Reset, cx + 210, bot),
+            Hud::namebox(resources, cx, bot),
+        ];
+        Hud { elements: GroupElement::new(elements) }
     }
 
     fn button(resources: &mut Resources, location: Location, value: HudCmd,
-              left: i32, top: i32)
+              center_x: i32, bottom: i32)
               -> Box<Element<HudInput, HudCmd>> {
-        let button = HudButton::new(resources, location, value);
-        let rect = Rect::new(left, top, BUTTON_WIDTH, BUTTON_HEIGHT);
-        Box::new(SubrectElement::new(button, rect))
+        Box::new(HudButton::new(resources, location, value, center_x, bottom))
     }
 
-    fn namebox(resources: &mut Resources, left: i32, top: i32)
+    fn namebox(resources: &mut Resources, center_x: i32, bottom: i32)
                -> Box<Element<HudInput, HudCmd>> {
         let namebox = HudNamebox::new(resources);
+        let left = center_x - NAMEBOX_WIDTH as i32 / 2;
+        let top = bottom - NAMEBOX_HEIGHT as i32;
         let rect = Rect::new(left, top, NAMEBOX_WIDTH, NAMEBOX_HEIGHT);
         Box::new(SubrectElement::new(namebox, rect))
     }
@@ -113,7 +90,6 @@ impl Hud {
 
 impl Element<HudInput, HudCmd> for Hud {
     fn draw(&self, input: &HudInput, canvas: &mut Canvas) {
-        canvas.fill_rect((64, 64, 64), self.rect);
         self.elements.draw(input, canvas);
     }
 
@@ -126,34 +102,42 @@ impl Element<HudInput, HudCmd> for Hud {
 // ========================================================================= //
 
 struct HudButton {
-    disabled_sprite: Sprite,
-    enabled_sprite: Sprite,
+    sprite: Sprite,
+    rect: Rect,
     value: HudCmd,
+    scroll: i32,
 }
 
 impl HudButton {
-    fn new(resources: &mut Resources, location: Location, value: HudCmd)
+    fn new(resources: &mut Resources, location: Location, value: HudCmd,
+           center_x: i32, bottom: i32)
            -> HudButton {
         let sprites = resources.get_sprites("hud_buttons");
         let index = match value {
-            HudCmd::Back if location == Location::Map => 1,
-            HudCmd::Back => 2,
-            HudCmd::Info => 3,
-            HudCmd::Undo => 4,
-            HudCmd::Redo => 5,
-            HudCmd::Reset => 6,
+            HudCmd::Back if location == Location::Map => 0,
+            HudCmd::Back => 1,
+            HudCmd::Info => 2,
+            HudCmd::Undo => 3,
+            HudCmd::Redo => 4,
+            HudCmd::Reset => 5,
         };
+        let sprite = sprites[index].clone();
+        let rect = Rect::new(center_x - sprite.width() as i32 / 2,
+                             bottom - sprite.height() as i32,
+                             sprite.width(),
+                             sprite.height());
         HudButton {
-            disabled_sprite: sprites[0].clone(),
-            enabled_sprite: sprites[index].clone(),
+            sprite: sprite,
+            rect: rect,
             value: value,
+            scroll: BUTTON_HEIGHT as i32,
         }
     }
 
     fn enabled(&self, input: &HudInput) -> bool {
         match self.value {
-            HudCmd::Back => true,
-            HudCmd::Info => true,
+            HudCmd::Back => input.can_back,
+            HudCmd::Info => input.can_back,
             HudCmd::Undo => input.can_undo,
             HudCmd::Redo => input.can_redo,
             HudCmd::Reset => input.can_reset,
@@ -162,19 +146,29 @@ impl HudButton {
 }
 
 impl Element<HudInput, HudCmd> for HudButton {
-    fn draw(&self, input: &HudInput, canvas: &mut Canvas) {
-        let sprite = if self.enabled(input) {
-            &self.enabled_sprite
-        } else {
-            &self.disabled_sprite
-        };
-        canvas.draw_sprite(sprite, Point::new(0, 0));
+    fn draw(&self, _: &HudInput, canvas: &mut Canvas) {
+        let top_left = Point::new(self.rect.x(), self.rect.y() + self.scroll);
+        canvas.draw_sprite(&self.sprite, top_left);
     }
 
     fn handle_event(&mut self, event: &Event, input: &mut HudInput)
                     -> Action<HudCmd> {
         match event {
-            &Event::MouseDown(_) if self.enabled(input) => {
+            &Event::ClockTick => {
+                let enabled = self.enabled(input);
+                if enabled && self.scroll > 0 {
+                    self.scroll = cmp::max(0, self.scroll - SCROLL_SPEED);
+                    Action::redraw()
+                } else if !enabled && self.scroll < BUTTON_HEIGHT as i32 {
+                    self.scroll = cmp::min(BUTTON_HEIGHT as i32,
+                                           self.scroll + SCROLL_SPEED);
+                    Action::redraw()
+                } else {
+                    Action::ignore()
+                }
+            }
+            &Event::MouseDown(pt) if self.scroll == 0 && self.enabled(input) &&
+                                     self.rect.contains(pt) => {
                 Action::redraw().and_return(self.value)
             }
             _ => Action::ignore(),

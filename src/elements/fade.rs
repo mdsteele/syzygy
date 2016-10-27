@@ -39,6 +39,8 @@ impl<A> ScreenFade<A> {
         }
     }
 
+    pub fn is_transparent(&self) -> bool { self.opacity == 0 }
+
     pub fn fade_out_and_return(&mut self, command: A) {
         self.fade_out_command = Some(command);
     }

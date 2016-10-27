@@ -136,13 +136,13 @@ impl Window {
             if let Some(ref font) = self.debug_font {
                 canvas.fill_rect((0, 0, 0),
                                  Rect::new(visible.right() - 24,
-                                           visible.bottom() - 12,
+                                           visible.top() + 2,
                                            22,
                                            10));
                 canvas.draw_text(&font,
                                  Align::Right,
                                  Point::new(visible.right() - 2,
-                                            visible.bottom() - 3),
+                                            visible.top() + 11),
                                  &format!("{:03}", self.debug_counter));
                 self.debug_counter = (self.debug_counter + 1) % 1000;
             }

@@ -72,9 +72,15 @@ impl View {
         view
     }
 
-    fn hud_input(&self, _state: &DisconState) -> HudInput {
+    fn hud_input(&self, state: &DisconState) -> HudInput {
         HudInput {
             name: "Disconnected",
+            can_back: self.screen_fade.is_transparent() &&
+                      if state.is_solved() {
+                self.outro_scene.is_finished()
+            } else {
+                self.intro_scene.is_finished()
+            },
             can_undo: !self.undo_stack.is_empty(),
             can_redo: !self.redo_stack.is_empty(),
             can_reset: false,

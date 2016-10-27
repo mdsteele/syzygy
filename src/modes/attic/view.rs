@@ -112,6 +112,12 @@ impl View {
     fn hud_input(&self, state: &AtticState) -> HudInput {
         HudInput {
             name: "A Light in the Attic",
+            can_back: self.screen_fade.is_transparent() &&
+                      if state.is_solved() {
+                self.outro_scene.is_finished()
+            } else {
+                self.intro_scene.is_finished()
+            },
             can_undo: !self.undo_stack.is_empty(),
             can_redo: !self.redo_stack.is_empty(),
             can_reset: state.any_toggled(),

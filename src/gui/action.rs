@@ -60,13 +60,6 @@ impl<A> Action<A> {
         }
     }
 
-    pub fn but_continue<B>(self) -> Action<B> {
-        Action {
-            redraw: self.redraw,
-            value: Value::Continue,
-        }
-    }
-
     pub fn but_return<B>(self, value: B) -> Action<B> {
         Action {
             redraw: self.redraw,

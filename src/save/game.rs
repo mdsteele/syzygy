@@ -33,14 +33,18 @@ const LOCATION_KEY: &'static str = "location";
 
 #[derive(Default)]
 pub struct Game {
-    location: Location,
+    pub location: Location,
     pub prolog: PrologState,
     pub a_light_in_the_attic: AtticState,
     pub disconnected: DisconState,
 }
 
 impl Game {
-    pub fn new() -> Game { Default::default() }
+    pub fn new() -> Game {
+        let mut game: Game = Default::default();
+        game.location = Location::Prolog;
+        game
+    }
 
     pub fn from_toml(value: toml::Value) -> Game {
         let mut table = to_table(value);
@@ -66,8 +70,6 @@ impl Game {
                      self.disconnected.to_toml());
         toml::Value::Table(table)
     }
-
-    pub fn location(&self) -> Location { self.location }
 
     pub fn is_unlocked(&self, location: Location) -> bool {
         match location {

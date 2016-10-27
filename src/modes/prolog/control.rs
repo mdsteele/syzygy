@@ -17,20 +17,44 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod attic;
-mod discon;
-mod info;
-mod map;
-mod mode;
-mod prolog;
-mod title;
+use gui::{Element, Event, Window};
+use modes::{Mode, run_info_box};
+use save::{Game, Location};
 
-pub use self::attic::run_a_light_in_the_attic;
-pub use self::discon::run_disconnected;
-pub use self::info::{SOLVED_INFO_TEXT, run_info_box};
-pub use self::map::run_map_screen;
-pub use self::mode::Mode;
-pub use self::prolog::run_prolog;
-pub use self::title::run_title_screen;
+use super::view::{Cmd, INFO_BOX_TEXT, View};
+
+// ========================================================================= //
+
+pub fn run_prolog(window: &mut Window, game: &mut Game) -> Mode {
+    let mut view = {
+        let visible_rect = window.visible_rect();
+        View::new(&mut window.resources(), visible_rect, &game.prolog)
+    };
+    game.prolog.visit();
+    window.render(game, &view);
+    loop {
+        let action = match window.next_event() {
+            Event::Quit => return Mode::Quit,
+            event => view.handle_event(&event, game),
+        };
+        match action.value() {
+            Some(&Cmd::ReturnToMap) => {
+                return Mode::Location(Location::Map);
+            }
+            Some(&Cmd::ShowInfoBox) => {
+                if !run_info_box(window, &view, game, INFO_BOX_TEXT) {
+                    return Mode::Quit;
+                }
+            }
+            Some(&Cmd::GoToNextPuzzle) => {
+                return Mode::Location(Location::Disconnected);
+            }
+            None => {}
+        }
+        if action.should_redraw() {
+            window.render(game, &view);
+        }
+    }
+}
 
 // ========================================================================= //

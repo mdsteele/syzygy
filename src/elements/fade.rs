@@ -24,27 +24,27 @@ use gui::{Action, Canvas, Element, Event, Point, Resources, Sprite};
 const MAX_OPACITY: i32 = 7;
 const TILE_SIZE: i32 = 24;
 
-pub struct ScreenFade {
+pub struct ScreenFade<A> {
     sprites: Vec<Sprite>,
     opacity: i32,
-    should_be_opaque: bool,
+    fade_out_command: Option<A>,
 }
 
-impl ScreenFade {
-    pub fn new(resources: &mut Resources) -> ScreenFade {
+impl<A> ScreenFade<A> {
+    pub fn new(resources: &mut Resources) -> ScreenFade<A> {
         ScreenFade {
             sprites: resources.get_sprites("screen_fade"),
             opacity: MAX_OPACITY,
-            should_be_opaque: false,
+            fade_out_command: None,
         }
     }
 
-    pub fn set_should_be_opaque(&mut self, opaque: bool) {
-        self.should_be_opaque = opaque;
+    pub fn fade_out_and_return(&mut self, command: A) {
+        self.fade_out_command = Some(command);
     }
 }
 
-impl Element<(), bool> for ScreenFade {
+impl<A> Element<(), A> for ScreenFade<A> {
     fn draw(&self, _: &(), canvas: &mut Canvas) {
         if self.opacity >= MAX_OPACITY {
             canvas.clear((0, 0, 0));
@@ -64,24 +64,22 @@ impl Element<(), bool> for ScreenFade {
         }
     }
 
-    fn handle_event(&mut self, event: &Event, _: &mut ()) -> Action<bool> {
+    fn handle_event(&mut self, event: &Event, _: &mut ()) -> Action<A> {
         match event {
             &Event::Quit => Action::ignore(),
             &Event::ClockTick => {
-                if self.should_be_opaque && self.opacity < MAX_OPACITY {
+                let should_be_opaque = self.fade_out_command.is_some();
+                if should_be_opaque && self.opacity < MAX_OPACITY {
                     self.opacity += 1;
                     if self.opacity == MAX_OPACITY {
-                        Action::redraw().and_return(true)
+                        let command = self.fade_out_command.take().unwrap();
+                        Action::redraw().and_return(command)
                     } else {
                         Action::redraw()
                     }
-                } else if !self.should_be_opaque && self.opacity > 0 {
+                } else if !should_be_opaque && self.opacity > 0 {
                     self.opacity -= 1;
-                    if self.opacity == 0 {
-                        Action::redraw().and_return(false)
-                    } else {
-                        Action::redraw()
-                    }
+                    Action::redraw()
                 } else {
                     Action::ignore()
                 }

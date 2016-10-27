@@ -17,20 +17,10 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod attic;
-mod discon;
-mod info;
-mod map;
-mod mode;
-mod prolog;
-mod title;
+mod control;
+mod scenes;
+mod view;
 
-pub use self::attic::run_a_light_in_the_attic;
-pub use self::discon::run_disconnected;
-pub use self::info::{SOLVED_INFO_TEXT, run_info_box};
-pub use self::map::run_map_screen;
-pub use self::mode::Mode;
-pub use self::prolog::run_prolog;
-pub use self::title::run_title_screen;
+pub use self::control::run_prolog;
 
 // ========================================================================= //

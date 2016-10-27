@@ -37,7 +37,7 @@ pub struct View {
     theater: Theater,
     intro_scene: Scene,
     outro_scene: Scene,
-    screen_fade: ScreenFade,
+    screen_fade: ScreenFade<Cmd>,
     hud: Hud,
     toggles: Vec<ToggleLight>,
     passives: Vec<PassiveLight>,
@@ -158,13 +158,7 @@ impl Element<Game, Cmd> for View {
 
     fn handle_event(&mut self, event: &Event, game: &mut Game) -> Action<Cmd> {
         let state = &mut game.a_light_in_the_attic;
-        let mut action = {
-            let subaction = self.screen_fade.handle_event(event, &mut ());
-            match subaction.value() {
-                Some(&true) => subaction.but_return(Cmd::ReturnToMap),
-                _ => subaction.but_continue(),
-            }
-        };
+        let mut action = self.screen_fade.handle_event(event, &mut ());
         if !action.should_stop() {
             let subaction = if state.is_solved() {
                 self.outro_scene.handle_event(event, &mut self.theater)
@@ -179,7 +173,7 @@ impl Element<Game, Cmd> for View {
             let subaction = self.hud.handle_event(event, &mut input);
             action.merge(match subaction.value() {
                 Some(&HudCmd::Back) => {
-                    self.screen_fade.set_should_be_opaque(true);
+                    self.screen_fade.fade_out_and_return(Cmd::ReturnToMap);
                     subaction.but_no_value()
                 }
                 Some(&HudCmd::Info) => subaction.but_return(Cmd::ShowInfoBox),

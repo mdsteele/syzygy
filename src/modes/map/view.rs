@@ -39,8 +39,7 @@ pub enum Cmd {
 // ========================================================================= //
 
 pub struct View {
-    screen_fade: ScreenFade,
-    fade_command: Cmd,
+    screen_fade: ScreenFade<Cmd>,
     hud: Hud,
     nodes: Vec<SubrectElement<PuzzleNode>>,
 }
@@ -49,7 +48,6 @@ impl View {
     pub fn new(resources: &mut Resources, visible: Rect) -> View {
         View {
             screen_fade: ScreenFade::new(resources),
-            fade_command: Cmd::ReturnToTitle,
             hud: Hud::new(resources, visible, Location::Map),
             nodes: vec![
                 View::node(resources, Location::Prolog, 50, 100),
@@ -84,20 +82,13 @@ impl Element<Game, Cmd> for View {
     }
 
     fn handle_event(&mut self, event: &Event, game: &mut Game) -> Action<Cmd> {
-        let mut action = {
-            let subaction = self.screen_fade.handle_event(event, &mut ());
-            match subaction.value() {
-                Some(&true) => subaction.but_return(self.fade_command),
-                _ => subaction.but_continue(),
-            }
-        };
+        let mut action = self.screen_fade.handle_event(event, &mut ());
         if !action.should_stop() {
             let mut input = self.hud_input();
             let subaction = self.hud.handle_event(event, &mut input);
             action.merge(match subaction.value() {
                 Some(&HudCmd::Back) => {
-                    self.screen_fade.set_should_be_opaque(true);
-                    self.fade_command = Cmd::ReturnToTitle;
+                    self.screen_fade.fade_out_and_return(Cmd::ReturnToTitle);
                     subaction.but_no_value()
                 }
                 Some(&HudCmd::Info) => subaction.but_return(Cmd::ShowInfoBox),
@@ -106,9 +97,8 @@ impl Element<Game, Cmd> for View {
         }
         if !action.should_stop() {
             let subaction = self.nodes.handle_event(event, game);
-            if let Some(&location) = subaction.value() {
-                self.screen_fade.set_should_be_opaque(true);
-                self.fade_command = Cmd::GoToPuzzle(location);
+            if let Some(&loc) = subaction.value() {
+                self.screen_fade.fade_out_and_return(Cmd::GoToPuzzle(loc));
             }
             action.merge(subaction.but_no_value());
         }

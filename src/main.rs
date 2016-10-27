@@ -139,12 +139,13 @@ fn main() {
             }
             Mode::Location(loc) => {
                 if let Some(game) = save_data.game_mut() {
+                    game.location = loc;
                     match loc {
                         Location::Map => {
                             modes::run_map_screen(&mut window, game)
                         }
                         Location::Prolog => {
-                            Mode::Title // TODO: implement prolog
+                            modes::run_prolog(&mut window, game)
                         }
                         Location::ALightInTheAttic => {
                             modes::run_a_light_in_the_attic(&mut window, game)

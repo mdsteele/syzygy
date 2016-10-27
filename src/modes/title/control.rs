@@ -46,9 +46,9 @@ pub fn run_title_screen(window: &mut Window, data: &mut SaveData) -> Mode {
             }
             Some(&Cmd::StartGame) => {
                 if let Some(game) = data.game() {
-                    return Mode::Location(game.location());
+                    return Mode::Location(game.location);
                 }
-                let location = data.start_new_game().location();
+                let location = data.start_new_game().location;
                 if let Err(error) = data.save_to_disk() {
                     println!("Failed to save game: {}", error);
                 }

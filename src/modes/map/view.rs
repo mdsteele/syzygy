@@ -66,6 +66,7 @@ impl View {
     fn hud_input(&self) -> HudInput {
         HudInput {
             name: "The Map",
+            is_paused: false,
             can_back: self.screen_fade.is_transparent(),
             can_undo: false,
             can_redo: false,

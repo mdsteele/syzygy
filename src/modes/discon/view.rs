@@ -72,15 +72,20 @@ impl View {
         view
     }
 
+    fn current_scene(&self, state: &DisconState) -> &Scene {
+        if state.is_solved() {
+            &self.outro_scene
+        } else {
+            &self.intro_scene
+        }
+    }
+
     fn hud_input(&self, state: &DisconState) -> HudInput {
+        let scene = self.current_scene(state);
         HudInput {
             name: "Disconnected",
-            can_back: self.screen_fade.is_transparent() &&
-                      if state.is_solved() {
-                self.outro_scene.is_finished()
-            } else {
-                self.intro_scene.is_finished()
-            },
+            is_paused: scene.is_paused(),
+            can_back: self.screen_fade.is_transparent() && scene.is_finished(),
             can_undo: !self.undo_stack.is_empty(),
             can_redo: !self.redo_stack.is_empty(),
             can_reset: false,

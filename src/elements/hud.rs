@@ -20,21 +20,25 @@
 use std::cmp;
 use std::rc::Rc;
 
+use elements::Paragraph;
 use gui::{Action, Align, Canvas, Element, Event, Font, GroupElement, Point,
           Rect, Resources, Sprite, SubrectElement};
 use save::Location;
 
 // ========================================================================= //
 
+const BUTTON_HEIGHT: u32 = 16;
 const NAMEBOX_WIDTH: u32 = 114;
 const NAMEBOX_HEIGHT: u32 = 16;
-const BUTTON_HEIGHT: u32 = 16;
 const SCROLL_SPEED: i32 = 2;
+const PAUSE_TEXT: &'static str = "$M{Tap}{Click} anywhere to continue";
+const PAUSE_TEXT_MARGIN: i32 = 2;
 
 // ========================================================================= //
 
 pub struct HudInput {
     pub name: &'static str,
+    pub is_paused: bool,
     pub can_back: bool,
     pub can_undo: bool,
     pub can_redo: bool,
@@ -61,7 +65,8 @@ impl Hud {
                -> Hud {
         let bot = visible.bottom();
         let cx = visible.left() + visible.width() as i32 / 2;
-        let elements = vec![
+        let elements: Vec<Box<Element<HudInput, HudCmd>>> = vec![
+            Box::new(PauseIndicator::new(resources, visible)),
             Hud::button(resources, location, HudCmd::Back, cx - 160, bot),
             Hud::button(resources, location, HudCmd::Info, cx - 95, bot),
             Hud::button(resources, location, HudCmd::Undo, cx + 96, bot),
@@ -197,6 +202,52 @@ impl Element<HudInput, HudCmd> for HudNamebox {
 
     fn handle_event(&mut self, _event: &Event, _input: &mut HudInput)
                     -> Action<HudCmd> {
+        Action::ignore()
+    }
+}
+
+// ========================================================================= //
+
+struct PauseIndicator {
+    paragraph: Paragraph,
+    outer_rect: Rect,
+    inner_rect: Rect,
+}
+
+impl PauseIndicator {
+    fn new(resources: &mut Resources, visible: Rect) -> PauseIndicator {
+        let paragraph = Paragraph::new(resources, PAUSE_TEXT);
+        let inner_width = paragraph.min_width();
+        let outer_width = inner_width + 2 * PAUSE_TEXT_MARGIN;
+        let inner_height = paragraph.height();
+        let outer_height = inner_height + 2 * PAUSE_TEXT_MARGIN as u32;
+        let outer_rect = Rect::new(visible.x() +
+                                   (visible.width() as i32 - outer_width) / 2,
+                                   visible.top(),
+                                   outer_width as u32,
+                                   outer_height);
+        let inner_rect = Rect::new(outer_rect.x() + PAUSE_TEXT_MARGIN,
+                                   outer_rect.y() + PAUSE_TEXT_MARGIN,
+                                   inner_width as u32,
+                                   inner_height);
+        PauseIndicator {
+            paragraph: paragraph,
+            outer_rect: outer_rect,
+            inner_rect: inner_rect,
+        }
+    }
+}
+
+impl Element<HudInput, HudCmd> for PauseIndicator {
+    fn draw(&self, input: &HudInput, canvas: &mut Canvas) {
+        if input.is_paused {
+            canvas.fill_rect((255, 255, 255), self.outer_rect);
+            let mut canvas = canvas.subcanvas(self.inner_rect);
+            self.paragraph.draw(&mut canvas);
+        }
+    }
+
+    fn handle_event(&mut self, _: &Event, _: &mut HudInput) -> Action<HudCmd> {
         Action::ignore()
     }
 }

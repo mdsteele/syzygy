@@ -17,21 +17,27 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use sdl2::{EventPump, Sdl, VideoSubsystem};
+use sdl2::{AudioSubsystem, EventPump, Sdl, VideoSubsystem};
+use sdl2::audio::AudioDevice;
 use sdl2::rect::{Point, Rect};
 use sdl2::render::Renderer;
 use sdl2::video::FullscreenType;
 use std::rc::Rc;
+use std::sync::Arc;
 
 use super::canvas::{Align, Canvas};
 use super::element::Element;
 use super::event::Event;
 use super::font::Font;
 use super::resources::{Resources, ResourceCache};
+use super::sound::{Sound, SoundMixer, SoundQueue};
 
 // ========================================================================= //
 
 pub struct Window {
+    _audio_subsystem: AudioSubsystem,
+    _audio_device: AudioDevice<SoundMixer>,
+    sound_queue: Arc<SoundQueue>,
     _video_subsystem: VideoSubsystem,
     renderer: Renderer<'static>,
     full_rect: Rect,
@@ -45,6 +51,7 @@ impl Window {
     pub fn new(sdl_context: &Sdl, title: &str, full_size: (u32, u32),
                ideal_size: (u32, u32), force_ideal: bool, fullscreen: bool)
                -> Window {
+        // Init video:
         let (full_width, full_height) = full_size;
         let (ideal_width, ideal_height) = ideal_size;
         let video_subsystem = sdl_context.video().unwrap();
@@ -90,7 +97,18 @@ impl Window {
         } else {
             None
         };
+
+        // Init audio:
+        let audio_subsystem = sdl_context.audio().unwrap();
+        let sound_queue = Arc::new(SoundQueue::new());
+        let audio_device = SoundMixer::audio_device(&audio_subsystem,
+                                                    sound_queue.clone());
+        audio_device.resume();
+
         Window {
+            _audio_subsystem: audio_subsystem,
+            _audio_device: audio_device,
+            sound_queue: sound_queue,
             _video_subsystem: video_subsystem,
             renderer: renderer,
             full_rect: Rect::new(offset_x, offset_y, full_width, full_height),
@@ -165,6 +183,14 @@ impl Window {
 
     pub fn resources(&mut self) -> Resources {
         Resources::new(&self.renderer, &mut self.resource_cache)
+    }
+
+    pub fn play_sound(&mut self, sound: Sound) {
+        self.play_sounds(vec![sound]);
+    }
+
+    pub fn play_sounds(&mut self, sounds: Vec<Sound>) {
+        self.sound_queue.enqueue(sounds);
     }
 }
 

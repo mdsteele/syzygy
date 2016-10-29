@@ -19,6 +19,7 @@
 
 extern crate ahi;
 extern crate getopts;
+extern crate itersynth;
 extern crate sdl2;
 extern crate toml;
 

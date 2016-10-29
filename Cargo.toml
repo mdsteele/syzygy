@@ -16,3 +16,7 @@ toml = { version = "0.2", features = [] }
 [dependencies.ahi]
 git = "https://github.com/mdsteele/ahi"
 rev = "8dfd2b39ba35d77a3260d95d53369c149e875ecf"
+
+[dependencies.itersynth]
+git = "https://github.com/mdsteele/itersynth"
+rev = "471235a25a1146730abbae01986563df4269f55b"

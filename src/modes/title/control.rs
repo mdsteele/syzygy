@@ -17,7 +17,7 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use gui::{Element, Event, Window};
+use gui::{Element, Event, Sound, Window};
 use modes::{Mode, run_info_box};
 use save::SaveData;
 
@@ -55,6 +55,7 @@ pub fn run_title_screen(window: &mut Window, data: &mut SaveData) -> Mode {
                 return Mode::Location(location);
             }
             Some(&Cmd::EraseGame) => {
+                window.play_sound(Sound::beep());
                 let confirmed = match confirm_erase(window, &view, data) {
                     Confirmation::Confirm(value) => value,
                     Confirmation::Quit => return Mode::Quit,

@@ -24,6 +24,7 @@ mod element;
 mod event;
 mod font;
 mod resources;
+mod sound;
 mod sprite;
 mod window;
 
@@ -35,6 +36,7 @@ pub use self::element::{Element, GroupElement, SubrectElement};
 pub use self::event::{Event, KeyMod};
 pub use self::font::Font;
 pub use self::resources::Resources;
+pub use self::sound::Sound;
 pub use self::sprite::Sprite;
 pub use self::window::Window;
 

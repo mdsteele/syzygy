@@ -33,10 +33,11 @@ pub fn run_info_box<S, A, E: Element<S, A>>(window: &mut Window,
     };
     window.render(original_input, &view);
     loop {
-        let action = match window.next_event() {
+        let mut action = match window.next_event() {
             Event::Quit => return false,
             event => view.handle_event(&event, original_input),
         };
+        window.play_sounds(action.drain_sounds());
         if action.value().is_some() {
             return true;
         } else if action.should_redraw() {

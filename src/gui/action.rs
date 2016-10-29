@@ -17,10 +17,15 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
+use std::mem;
+
+use super::sound::Sound;
+
 // ========================================================================= //
 
 pub struct Action<A> {
     redraw: bool,
+    sounds: Vec<Sound>,
     value: Value<A>,
 }
 
@@ -28,6 +33,7 @@ impl<A> Action<A> {
     pub fn ignore() -> Action<A> {
         Action {
             redraw: false,
+            sounds: Vec::new(),
             value: Value::Continue,
         }
     }
@@ -35,6 +41,7 @@ impl<A> Action<A> {
     pub fn redraw() -> Action<A> {
         Action {
             redraw: true,
+            sounds: Vec::new(),
             value: Value::Continue,
         }
     }
@@ -42,27 +49,30 @@ impl<A> Action<A> {
     pub fn redraw_if(redraw: bool) -> Action<A> {
         Action {
             redraw: redraw,
+            sounds: Vec::new(),
             value: Value::Continue,
         }
     }
 
-    pub fn and_stop(self) -> Action<A> {
-        Action {
-            redraw: self.redraw,
-            value: Value::Stop,
-        }
+    pub fn and_play_sound(mut self, sound: Sound) -> Action<A> {
+        self.sounds.push(sound);
+        self
     }
 
-    pub fn and_return(self, value: A) -> Action<A> {
-        Action {
-            redraw: self.redraw,
-            value: Value::Return(value),
-        }
+    pub fn and_stop(mut self) -> Action<A> {
+        self.value = Value::Stop;
+        self
+    }
+
+    pub fn and_return(mut self, value: A) -> Action<A> {
+        self.value = Value::Return(value);
+        self
     }
 
     pub fn but_return<B>(self, value: B) -> Action<B> {
         Action {
             redraw: self.redraw,
+            sounds: self.sounds,
             value: Value::Return(value),
         }
     }
@@ -70,6 +80,7 @@ impl<A> Action<A> {
     pub fn but_no_value<B>(self) -> Action<B> {
         Action {
             redraw: self.redraw,
+            sounds: self.sounds,
             value: match self.value {
                 Value::Continue => Value::Continue,
                 _ => Value::Stop,
@@ -93,8 +104,9 @@ impl<A> Action<A> {
         }
     }
 
-    pub fn merge(&mut self, action: Action<A>) {
+    pub fn merge(&mut self, mut action: Action<A>) {
         self.redraw |= action.redraw;
+        self.sounds.append(&mut action.sounds);
         self.value.merge(action.value);
     }
 
@@ -102,8 +114,13 @@ impl<A> Action<A> {
     pub fn map<B, F: FnOnce(A) -> B>(self, f: F) -> Action<B> {
         Action {
             redraw: self.redraw,
+            sounds: self.sounds,
             value: self.value.map(f),
         }
+    }
+
+    pub fn drain_sounds(&mut self) -> Vec<Sound> {
+        mem::replace(&mut self.sounds, Vec::new())
     }
 }
 

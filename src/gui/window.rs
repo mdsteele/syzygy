@@ -185,10 +185,6 @@ impl Window {
         Resources::new(&self.renderer, &mut self.resource_cache)
     }
 
-    pub fn play_sound(&mut self, sound: Sound) {
-        self.play_sounds(vec![sound]);
-    }
-
     pub fn play_sounds(&mut self, sounds: Vec<Sound>) {
         self.sound_queue.enqueue(sounds);
     }

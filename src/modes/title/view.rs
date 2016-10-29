@@ -20,7 +20,7 @@
 use std::rc::Rc;
 
 use gui::{Action, Align, Canvas, Element, Event, Font, GroupElement, Point,
-          Rect, Resources, Sprite, SubrectElement};
+          Rect, Resources, Sound, Sprite, SubrectElement};
 use elements::DialogBox;
 use save::SaveData;
 
@@ -228,7 +228,9 @@ impl Element<SaveData, Cmd> for EraseGameButton {
                     -> Action<Cmd> {
         match event {
             &Event::MouseDown(_) if data.game().is_some() => {
-                Action::redraw().and_return(Cmd::EraseGame)
+                Action::redraw()
+                    .and_play_sound(Sound::beep())
+                    .and_return(Cmd::EraseGame)
             }
             _ => Action::ignore(),
         }

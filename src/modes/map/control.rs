@@ -32,10 +32,11 @@ pub fn run_map_screen(window: &mut Window, game: &mut Game) -> Mode {
     };
     window.render(game, &view);
     loop {
-        let action = match window.next_event() {
+        let mut action = match window.next_event() {
             Event::Quit => return Mode::Quit,
             event => view.handle_event(&event, game),
         };
+        window.play_sounds(action.drain_sounds());
         match action.value() {
             Some(&Cmd::ReturnToTitle) => {
                 return Mode::Title;

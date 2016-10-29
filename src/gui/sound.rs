@@ -54,8 +54,10 @@ impl SoundQueue {
     pub fn new() -> SoundQueue { SoundQueue { queue: Mutex::new(Vec::new()) } }
 
     pub fn enqueue(&self, mut sounds: Vec<Sound>) {
-        let mut vec = self.queue.lock().unwrap();
-        vec.append(&mut sounds);
+        if !sounds.is_empty() {
+            let mut vec = self.queue.lock().unwrap();
+            vec.append(&mut sounds);
+        }
     }
 
     pub fn drain(&self) -> Vec<Sound> {

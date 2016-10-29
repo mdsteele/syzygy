@@ -33,10 +33,11 @@ pub fn run_prolog(window: &mut Window, game: &mut Game) -> Mode {
     game.prolog.visit();
     window.render(game, &view);
     loop {
-        let action = match window.next_event() {
+        let mut action = match window.next_event() {
             Event::Quit => return Mode::Quit,
             event => view.handle_event(&event, game),
         };
+        window.play_sounds(action.drain_sounds());
         match action.value() {
             Some(&Cmd::ReturnToMap) => {
                 return Mode::Location(Location::Map);

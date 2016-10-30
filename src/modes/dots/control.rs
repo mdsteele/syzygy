@@ -17,22 +17,47 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod attic;
-mod discon;
-mod dots;
-mod info;
-mod map;
-mod mode;
-mod prolog;
-mod title;
+use gui::{Element, Event, Window};
+use modes::{Mode, SOLVED_INFO_TEXT, run_info_box};
+use save::{Game, Location};
 
-pub use self::attic::run_a_light_in_the_attic;
-pub use self::discon::run_disconnected;
-pub use self::dots::run_connect_the_dots;
-pub use self::info::{SOLVED_INFO_TEXT, run_info_box};
-pub use self::map::run_map_screen;
-pub use self::mode::Mode;
-pub use self::prolog::run_prolog;
-pub use self::title::run_title_screen;
+use super::view::{Cmd, INFO_BOX_TEXT, View};
+
+// ========================================================================= //
+
+pub fn run_connect_the_dots(window: &mut Window, game: &mut Game) -> Mode {
+    let mut view = {
+        let visible = window.visible_rect();
+        View::new(&mut window.resources(), visible, &game.connect_the_dots)
+    };
+    game.connect_the_dots.visit();
+    window.render(game, &view);
+    loop {
+        let mut action = match window.next_event() {
+            Event::Quit => return Mode::Quit,
+            event => view.handle_event(&event, game),
+        };
+        window.play_sounds(action.drain_sounds());
+        match action.value() {
+            Some(&Cmd::ReturnToMap) => {
+                return Mode::Location(Location::Map);
+            }
+            Some(&Cmd::ShowInfoBox) => {
+                let text = if game.connect_the_dots.is_solved() {
+                    SOLVED_INFO_TEXT
+                } else {
+                    INFO_BOX_TEXT
+                };
+                if !run_info_box(window, &view, game, text) {
+                    return Mode::Quit;
+                }
+            }
+            None => {}
+        }
+        if action.should_redraw() {
+            window.render(game, &view);
+        }
+    }
+}
 
 // ========================================================================= //

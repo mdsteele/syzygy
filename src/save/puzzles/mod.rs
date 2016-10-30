@@ -19,10 +19,12 @@
 
 mod attic;
 mod discon;
+mod dots;
 mod prolog;
 
 pub use self::attic::AtticState;
-pub use self::discon::{Device, DeviceGrid, DisconState, LaserColor};
+pub use self::discon::DisconState;
+pub use self::dots::DotsState;
 pub use self::prolog::PrologState;
 
 // ========================================================================= //

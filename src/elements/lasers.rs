@@ -120,8 +120,11 @@ impl LaserField {
                                                dir.is_vertical(),
                                                false);
             }
+            Device::CrossChannel => {
+                canvas.draw_sprite_centered(&self.wall_sprites[2], center);
+            }
             Device::Emitter(color) => {
-                canvas.draw_sprite_transformed(&self.wall_sprites[2],
+                canvas.draw_sprite_transformed(&self.wall_sprites[3],
                                                center,
                                                dir.degrees(),
                                                dir.is_vertical(),
@@ -134,7 +137,7 @@ impl LaserField {
                 canvas.draw_sprite_centered(&self.gem_sprites[i], center);
             }
             Device::Detector(color) => {
-                canvas.draw_sprite_transformed(&self.wall_sprites[2],
+                canvas.draw_sprite_transformed(&self.wall_sprites[3],
                                                center,
                                                dir.degrees(),
                                                dir.is_vertical(),
@@ -150,6 +153,11 @@ impl LaserField {
             }
             Device::Mirror => {
                 canvas.draw_sprite_rotated(&self.gate_sprites[0],
+                                           center,
+                                           dir.degrees());
+            }
+            Device::Splitter => {
+                canvas.draw_sprite_rotated(&self.gate_sprites[2],
                                            center,
                                            dir.degrees());
             }
@@ -209,6 +217,7 @@ impl LaserField {
                     self.sparks.insert((coords, laser_dir), 0);
                 }
                 Some((Device::Channel, _)) |
+                Some((Device::CrossChannel, _)) |
                 None => {
                     let perp_dir = laser_dir.rotated_cw();
                     let mut dist = GRID_CELL_SIZE / 2;
@@ -242,6 +251,25 @@ impl LaserField {
                     self.lasers.insert((next, anti_dir), (color, 15));
                     self.lasers.insert((next, reflect_dir), (color, 15));
                     queue.push_back((next, reflect_dir, color));
+                }
+                Some((Device::Splitter, split_dir)) => {
+                    if split_dir == laser_dir {
+                        self.lasers.insert((next, anti_dir), (color, 6));
+                        let left_dir = laser_dir.rotated_ccw();
+                        let right_dir = laser_dir.rotated_cw();
+                        self.lasers.insert((next, left_dir), (color, 6));
+                        self.lasers.insert((next, right_dir), (color, 6));
+                        self.sparks.remove(&(next, left_dir));
+                        self.sparks.remove(&(next, right_dir));
+                        queue.push_back((next, left_dir, color));
+                        queue.push_back((next, right_dir, color));
+                    } else if split_dir == anti_dir {
+                        self.lasers.insert((next, anti_dir), (color, 3));
+                        self.sparks.insert((next, anti_dir), 3);
+                    } else {
+                        self.lasers.insert((next, anti_dir), (color, 6));
+                        self.sparks.insert((next, anti_dir), 6);
+                    }
                 }
             }
         }

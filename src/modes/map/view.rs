@@ -52,6 +52,7 @@ impl View {
             nodes: vec![
                 View::node(resources, Location::Prolog, 50, 100),
                 View::node(resources, Location::ALightInTheAttic, 100, 50),
+                View::node(resources, Location::ConnectTheDots, 150, 150),
                 View::node(resources, Location::Disconnected, 100, 150),
             ],
         }

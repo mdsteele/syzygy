@@ -27,6 +27,7 @@ pub enum Location {
     Map,
     Prolog,
     ALightInTheAttic,
+    ConnectTheDots,
     Disconnected,
 }
 
@@ -36,6 +37,7 @@ impl Location {
             Location::Map => "map",
             Location::Prolog => "prolog",
             Location::ALightInTheAttic => "a_light_in_the_attic",
+            Location::ConnectTheDots => "connect_the_dots",
             Location::Disconnected => "disconnected",
         }
     }
@@ -46,6 +48,7 @@ impl Location {
                 "map" => return Location::Map,
                 "prolog" => return Location::Prolog,
                 "a_light_in_the_attic" => return Location::ALightInTheAttic,
+                "connect_the_dots" => return Location::ConnectTheDots,
                 "disconnected" => return Location::Disconnected,
                 _ => {}
             }
@@ -73,6 +76,7 @@ mod tests {
         let locations = &[Location::Map,
                           Location::Prolog,
                           Location::ALightInTheAttic,
+                          Location::ConnectTheDots,
                           Location::Disconnected];
         for original in locations {
             let result = Location::from_toml(Some(&original.to_toml()));

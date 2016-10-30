@@ -22,7 +22,7 @@ use toml;
 
 use super::access::Access;
 use super::location::Location;
-use super::puzzles::{AtticState, DisconState, PrologState};
+use super::puzzles::{AtticState, DisconState, DotsState, PrologState};
 use super::util::{pop_table, to_table};
 
 // ========================================================================= //
@@ -36,6 +36,7 @@ pub struct Game {
     pub location: Location,
     pub prolog: PrologState,
     pub a_light_in_the_attic: AtticState,
+    pub connect_the_dots: DotsState,
     pub disconnected: DisconState,
 }
 
@@ -50,11 +51,13 @@ impl Game {
         let mut table = to_table(value);
         let prolog = pop_table(&mut table, Location::Prolog.key());
         let attic = pop_table(&mut table, Location::ALightInTheAttic.key());
+        let dots = pop_table(&mut table, Location::ConnectTheDots.key());
         let discon = pop_table(&mut table, Location::Disconnected.key());
         Game {
             location: Location::from_toml(table.get(LOCATION_KEY)),
             prolog: PrologState::from_toml(prolog),
             a_light_in_the_attic: AtticState::from_toml(attic),
+            connect_the_dots: DotsState::from_toml(dots),
             disconnected: DisconState::from_toml(discon),
         }
     }
@@ -66,6 +69,8 @@ impl Game {
                      self.prolog.to_toml());
         table.insert(Location::ALightInTheAttic.key().to_string(),
                      self.a_light_in_the_attic.to_toml());
+        table.insert(Location::ConnectTheDots.key().to_string(),
+                     self.connect_the_dots.to_toml());
         table.insert(Location::Disconnected.key().to_string(),
                      self.disconnected.to_toml());
         toml::Value::Table(table)
@@ -76,6 +81,7 @@ impl Game {
             Location::Map => true,
             Location::Prolog => true,
             Location::ALightInTheAttic => self.is_solved(Location::Prolog),
+            Location::ConnectTheDots => self.is_solved(Location::Disconnected),
             Location::Disconnected => self.is_solved(Location::Prolog),
         }
     }
@@ -89,6 +95,7 @@ impl Game {
             Location::Map => Access::Solved,
             Location::Prolog => self.prolog.access(),
             Location::ALightInTheAttic => self.a_light_in_the_attic.access(),
+            Location::ConnectTheDots => self.connect_the_dots.access(),
             Location::Disconnected => self.disconnected.access(),
         }
     }

@@ -151,6 +151,9 @@ fn main() {
                         Location::ALightInTheAttic => {
                             modes::run_a_light_in_the_attic(&mut window, game)
                         }
+                        Location::ConnectTheDots => {
+                            modes::run_connect_the_dots(&mut window, game)
+                        }
                         Location::Disconnected => {
                             modes::run_disconnected(&mut window, game)
                         }

@@ -19,6 +19,7 @@
 
 mod access;
 mod data;
+mod device;
 mod direction;
 mod game;
 mod location;
@@ -29,12 +30,12 @@ mod util;
 
 pub use self::access::Access;
 pub use self::data::SaveData;
+pub use self::device::{Device, DeviceGrid, LaserColor};
 pub use self::direction::Direction;
 pub use self::game::Game;
 pub use self::location::Location;
 pub use self::path::get_default_save_file_path;
 pub use self::prefs::Prefs;
-pub use self::puzzles::{AtticState, Device, DeviceGrid, DisconState,
-                        LaserColor, PrologState};
+pub use self::puzzles::{AtticState, DotsState, DisconState, PrologState};
 
 // ========================================================================= //

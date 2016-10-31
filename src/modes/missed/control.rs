@@ -17,16 +17,47 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod attic;
-mod discon;
-mod dots;
-mod missed;
-mod prolog;
+use gui::{Element, Event, Window};
+use modes::{Mode, SOLVED_INFO_TEXT, run_info_box};
+use save::{Game, Location};
 
-pub use self::attic::AtticState;
-pub use self::discon::DisconState;
-pub use self::dots::DotsState;
-pub use self::missed::MissedState;
-pub use self::prolog::PrologState;
+use super::view::{Cmd, INFO_BOX_TEXT, View};
+
+// ========================================================================= //
+
+pub fn run_missed_connections(window: &mut Window, game: &mut Game) -> Mode {
+    let mut view = {
+        let visible = window.visible_rect();
+        View::new(&mut window.resources(), visible, &game.missed_connections)
+    };
+    game.missed_connections.visit();
+    window.render(game, &view);
+    loop {
+        let mut action = match window.next_event() {
+            Event::Quit => return Mode::Quit,
+            event => view.handle_event(&event, game),
+        };
+        window.play_sounds(action.drain_sounds());
+        match action.value() {
+            Some(&Cmd::ReturnToMap) => {
+                return Mode::Location(Location::Map);
+            }
+            Some(&Cmd::ShowInfoBox) => {
+                let text = if game.missed_connections.is_solved() {
+                    SOLVED_INFO_TEXT
+                } else {
+                    INFO_BOX_TEXT
+                };
+                if !run_info_box(window, &view, game, text) {
+                    return Mode::Quit;
+                }
+            }
+            None => {}
+        }
+        if action.should_redraw() {
+            window.render(game, &view);
+        }
+    }
+}
 
 // ========================================================================= //

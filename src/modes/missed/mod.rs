@@ -17,16 +17,10 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod attic;
-mod discon;
-mod dots;
-mod missed;
-mod prolog;
+mod control;
+mod scenes;
+mod view;
 
-pub use self::attic::AtticState;
-pub use self::discon::DisconState;
-pub use self::dots::DotsState;
-pub use self::missed::MissedState;
-pub use self::prolog::PrologState;
+pub use self::control::run_missed_connections;
 
 // ========================================================================= //

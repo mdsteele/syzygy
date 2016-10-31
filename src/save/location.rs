@@ -29,6 +29,7 @@ pub enum Location {
     ALightInTheAttic,
     ConnectTheDots,
     Disconnected,
+    MissedConnections,
 }
 
 impl Location {
@@ -39,6 +40,7 @@ impl Location {
             Location::ALightInTheAttic => "a_light_in_the_attic",
             Location::ConnectTheDots => "connect_the_dots",
             Location::Disconnected => "disconnected",
+            Location::MissedConnections => "missed_connections",
         }
     }
 
@@ -50,6 +52,7 @@ impl Location {
                 "a_light_in_the_attic" => return Location::ALightInTheAttic,
                 "connect_the_dots" => return Location::ConnectTheDots,
                 "disconnected" => return Location::Disconnected,
+                "missed_connections" => return Location::MissedConnections,
                 _ => {}
             }
         }
@@ -77,7 +80,8 @@ mod tests {
                           Location::Prolog,
                           Location::ALightInTheAttic,
                           Location::ConnectTheDots,
-                          Location::Disconnected];
+                          Location::Disconnected,
+                          Location::MissedConnections];
         for original in locations {
             let result = Location::from_toml(Some(&original.to_toml()));
             assert_eq!(result, *original);

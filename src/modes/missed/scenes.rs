@@ -17,16 +17,26 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod attic;
-mod discon;
-mod dots;
-mod missed;
-mod prolog;
+use elements::{Ast, Scene};
+use gui::Resources;
 
-pub use self::attic::AtticState;
-pub use self::discon::DisconState;
-pub use self::dots::DotsState;
-pub use self::missed::MissedState;
-pub use self::prolog::PrologState;
+// ========================================================================= //
+
+pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
+    let ast = vec![
+        Ast::Place(0, "Tezure", (-16, 304)),
+        Ast::Slide(0, (304, 304), true, true, 1.0),
+    ];
+    Ast::compile_scene(resources, ast)
+}
+
+// ========================================================================= //
+
+pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
+    let ast = vec![
+        Ast::Slide(0, (592, 304), true, false, 1.0),
+    ];
+    Ast::compile_scene(resources, ast)
+}
 
 // ========================================================================= //

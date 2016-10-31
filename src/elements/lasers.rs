@@ -161,6 +161,11 @@ impl LaserField {
                                            center,
                                            dir.degrees());
             }
+            Device::Mixer => {
+                canvas.draw_sprite_rotated(&self.gate_sprites[3],
+                                           center,
+                                           dir.degrees());
+            }
         }
     }
 
@@ -269,6 +274,24 @@ impl LaserField {
                     } else {
                         self.lasers.insert((next, anti_dir), (color, 6));
                         self.sparks.insert((next, anti_dir), 6);
+                    }
+                }
+                Some((Device::Mixer, mixer_dir)) => {
+                    if mixer_dir == laser_dir {
+                        self.lasers.insert((next, anti_dir), (color, 1));
+                        self.sparks.insert((next, anti_dir), 1);
+                    } else if mixer_dir == anti_dir {
+                        self.lasers.insert((next, anti_dir), (color, 3));
+                        self.sparks.insert((next, anti_dir), 3);
+                    } else {
+                        self.lasers.insert((next, anti_dir), (color, 3));
+                        if let Some(&(other, _)) =
+                               self.lasers.get(&(next, laser_dir)) {
+                            let output = mixer_output(color, other);
+                            self.lasers.insert((next, mixer_dir), (output, 3));
+                            self.sparks.remove(&(next, mixer_dir));
+                            queue.push_back((next, mixer_dir, output));
+                        }
                     }
                 }
             }
@@ -451,6 +474,22 @@ impl Element<DeviceGrid, LaserCmd> for LaserField {
             _ => {}
         }
         Action::ignore()
+    }
+}
+
+// ========================================================================= //
+
+fn mixer_output(color1: LaserColor, color2: LaserColor) -> LaserColor {
+    match (color1, color2) {
+        (LaserColor::Red, LaserColor::Red) => LaserColor::Red,
+        (LaserColor::Red, LaserColor::Green) => LaserColor::Blue,
+        (LaserColor::Red, LaserColor::Blue) => LaserColor::Green,
+        (LaserColor::Green, LaserColor::Red) => LaserColor::Blue,
+        (LaserColor::Green, LaserColor::Green) => LaserColor::Green,
+        (LaserColor::Green, LaserColor::Blue) => LaserColor::Red,
+        (LaserColor::Blue, LaserColor::Red) => LaserColor::Green,
+        (LaserColor::Blue, LaserColor::Green) => LaserColor::Red,
+        (LaserColor::Blue, LaserColor::Blue) => LaserColor::Blue,
     }
 }
 

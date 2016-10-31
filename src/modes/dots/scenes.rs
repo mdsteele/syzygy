@@ -26,6 +26,8 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Place(0, "Tezure", (-16, 304)),
         Ast::Slide(0, (304, 304), true, true, 1.0),
+        Ast::Wait(0.5),
+        Ast::Talk(0, "Well, at least this one is\nalready two thirds done."),
     ];
     Ast::compile_scene(resources, ast)
 }

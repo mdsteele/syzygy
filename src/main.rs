@@ -157,6 +157,9 @@ fn main() {
                         Location::Disconnected => {
                             modes::run_disconnected(&mut window, game)
                         }
+                        Location::MissedConnections => {
+                            modes::run_missed_connections(&mut window, game)
+                        }
                     }
                 } else {
                     if cfg!(debug_assertions) {

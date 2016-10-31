@@ -200,6 +200,7 @@ pub enum Device {
     Detector(LaserColor),
     Mirror,
     Splitter,
+    Mixer,
 }
 
 impl Device {
@@ -217,6 +218,7 @@ impl Device {
                 "Db" => return Device::Detector(LaserColor::Blue),
                 "/" => return Device::Mirror,
                 "T" => return Device::Splitter,
+                "M" => return Device::Mixer,
                 _ => {}
             }
         }
@@ -236,13 +238,14 @@ impl Device {
             Device::Detector(LaserColor::Blue) => "Db",
             Device::Mirror => "/",
             Device::Splitter => "T",
+            Device::Mixer => "M",
         };
         toml::Value::String(string.to_string())
     }
 
     pub fn is_moveable(self) -> bool {
         match self {
-            Device::Mirror | Device::Splitter => true,
+            Device::Mirror | Device::Splitter | Device::Mixer => true,
             _ => false,
         }
     }
@@ -268,7 +271,8 @@ mod tests {
                     Device::Detector(LaserColor::Green),
                     Device::Detector(LaserColor::Blue),
                     Device::Mirror,
-                    Device::Splitter];
+                    Device::Splitter,
+                    Device::Mixer];
         for original in all {
             let result = Device::from_toml(Some(&original.to_toml()));
             assert_eq!(result, *original);

@@ -17,7 +17,7 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use elements::{Ast, Scene};
+use elements::{Ast, Scene, TalkPos, TalkStyle};
 use gui::Resources;
 
 // ========================================================================= //
@@ -27,7 +27,8 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Place(0, "Tezure", (-16, 304)),
         Ast::Slide(0, (304, 304), true, true, 1.0),
         Ast::Wait(0.5),
-        Ast::Talk(0, "Well, at least this one is\nalready two thirds done."),
+        Ast::Talk(0, TalkStyle::Normal, TalkPos::NE,
+                  "Well, at least this one is\nalready two thirds done."),
     ];
     Ast::compile_scene(resources, ast)
 }

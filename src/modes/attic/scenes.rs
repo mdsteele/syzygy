@@ -17,7 +17,7 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use elements::{Ast, Scene};
+use elements::{Ast, Scene, TalkPos, TalkStyle};
 use gui::Resources;
 
 // ========================================================================= //
@@ -41,12 +41,14 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
                 Ast::Light(0, true),
                 Ast::Slide(0, (176, 320), true, false, 1.0),
                 Ast::Jump(0, (160, 320), 0.5),
-                Ast::Talk(0, "Ouch!  I ran into\nthat wall.")
+                Ast::Talk(0, TalkStyle::Normal, TalkPos::NE,
+                          "Ouch!  I ran into\nthat wall.")
             ]),
         ]),
         Ast::Seq(vec![
             Ast::Wait(0.5),
-            Ast::Talk(1, "Yes.  Yes you did."),
+            Ast::Talk(1, TalkStyle::Thought, TalkPos::SE,
+                      "Yes.  Yes you did."),
         ]),
     ];
     Ast::compile_scene(resources, ast)
@@ -73,7 +75,8 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
             Ast::Wait(0.1),
             Ast::Queue(15, 1),
             Ast::Wait(0.1),
-            Ast::Talk(0, "Oh, it says CAUTION."),
+            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE,
+                      "Oh, it says CAUTION."),
         ]),
         Ast::Seq(vec![
             Ast::Wait(0.5),

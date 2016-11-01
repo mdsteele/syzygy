@@ -24,7 +24,7 @@ mod hud;
 mod lasers;
 mod paragraph;
 
-pub use self::cutscene::{Ast, Scene, Theater};
+pub use self::cutscene::{Ast, Scene, TalkPos, TalkStyle, Theater};
 pub use self::dialog::DialogBox;
 pub use self::fade::ScreenFade;
 pub use self::hud::{Hud, HudCmd, HudInput};

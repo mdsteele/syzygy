@@ -110,6 +110,24 @@ impl<'a> Canvas<'a> {
                                           sprite.height())));
     }
 
+    pub fn draw_sprite_flipped(&mut self, sprite: &Sprite,
+                               mut top_left: Point, flip_horz: bool,
+                               flip_vert: bool) {
+        top_left = top_left.offset(self.offset_rect.x(), self.offset_rect.y());
+        self.renderer
+            .copy_ex(&sprite.sdl2_texture(),
+                     None,
+                     Some(Rect::new(top_left.x(),
+                                    top_left.y(),
+                                    sprite.width(),
+                                    sprite.height())),
+                     0.0,
+                     None,
+                     flip_horz,
+                     flip_vert)
+            .unwrap();
+    }
+
     pub fn draw_sprite_centered(&mut self, sprite: &Sprite, center: Point) {
         let top_left = Point::new(center.x() - sprite.width() as i32 / 2,
                                   center.y() - sprite.height() as i32 / 2);

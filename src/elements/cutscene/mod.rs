@@ -21,8 +21,8 @@ mod ast;
 mod scene;
 mod theater;
 
-pub use self::ast::Ast;
+pub use self::ast::{Ast, TalkStyle};
 pub use self::scene::Scene;
-pub use self::theater::Theater;
+pub use self::theater::{TalkPos, Theater};
 
 // ========================================================================= //

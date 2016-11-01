@@ -17,6 +17,7 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
+use std::cmp;
 use std::collections::BTreeMap;
 use std::mem;
 use std::rc::Rc;
@@ -60,7 +61,9 @@ impl Theater {
     }
 
     pub fn set_actor_speech(&mut self, slot: i32,
-                            speech: Option<Rc<Paragraph>>) {
+                            speech: Option<(Vec<Sprite>,
+                                            TalkPos,
+                                            Rc<Paragraph>)>) {
         if let Some(actor) = self.actors.get_mut(&slot) {
             actor.set_speech(speech);
         }
@@ -176,8 +179,11 @@ impl Actor {
                   self.sprite.height())
     }
 
-    fn set_speech(&mut self, paragraph: Option<Rc<Paragraph>>) {
-        self.speech = paragraph.map(|p| SpeechBubble::new(p, self.rect()));
+    fn set_speech(&mut self,
+                  speech: Option<(Vec<Sprite>, TalkPos, Rc<Paragraph>)>) {
+        self.speech = speech.map(|(bubble_sprites, pos, paragraph)| {
+            SpeechBubble::new(bubble_sprites, pos, paragraph, self.rect())
+        });
     }
 
     fn draw_actor(&self, canvas: &mut Canvas) {
@@ -196,31 +202,139 @@ impl Actor {
 const SPEECH_MARGIN: i32 = 8;
 
 struct SpeechBubble {
+    sprites: Vec<Sprite>,
     paragraph: Rc<Paragraph>,
     rect: Rect,
+    tail_x: i32,
+    east: bool,
+    south: bool,
 }
 
 impl SpeechBubble {
-    fn new(paragraph: Rc<Paragraph>, actor_rect: Rect) -> SpeechBubble {
-        let width = paragraph.min_width() + 2 * SPEECH_MARGIN;
-        let height = paragraph.height() as i32 + 2 * SPEECH_MARGIN;
-        let left = actor_rect.left() - (width - actor_rect.width() as i32) / 2;
-        let top = actor_rect.top() - height - 8;
+    fn new(bubble_sprites: Vec<Sprite>, positioning: TalkPos,
+           paragraph: Rc<Paragraph>, actor_rect: Rect)
+           -> SpeechBubble {
+        debug_assert_eq!(bubble_sprites.len(), 5);
+        let width = round_up_to_16(cmp::max(48,
+                                            paragraph.min_width() +
+                                            2 * SPEECH_MARGIN));
+        let height = round_up_to_16(cmp::max(32,
+                                             paragraph.height() as i32 +
+                                             2 * SPEECH_MARGIN));
+        let tail_x = actor_rect.left() + actor_rect.width() as i32 / 2;
+        let (left, east) = match positioning {
+            TalkPos::NW | TalkPos::SW => (tail_x + 16 - width, false),
+            TalkPos::NE | TalkPos::SE => (tail_x - 16, true),
+        };
+        let (top, south) = match positioning {
+            TalkPos::NE | TalkPos::NW => {
+                (actor_rect.top() - height - 18, false)
+            }
+            TalkPos::SE | TalkPos::SW => (actor_rect.bottom() + 18, true),
+        };
         SpeechBubble {
+            sprites: bubble_sprites,
             paragraph: paragraph,
             rect: Rect::new(left, top, width as u32, height as u32),
+            tail_x: tail_x,
+            east: east,
+            south: south,
         }
     }
 
     fn draw(&self, canvas: &mut Canvas) {
-        let mut canvas = canvas.subcanvas(self.rect);
-        canvas.clear((255, 255, 255));
-        let subrect = Rect::new(SPEECH_MARGIN,
-                                SPEECH_MARGIN,
-                                self.rect.width() - 2 * SPEECH_MARGIN as u32,
-                                self.rect.height() - 2 * SPEECH_MARGIN as u32);
-        self.paragraph.draw(&mut canvas.subcanvas(subrect));
+        // Draw bubble:
+        {
+            let mut canvas = canvas.subcanvas(self.rect);
+            let right = self.rect.width() as i32 - 16;
+            let bottom = self.rect.height() as i32 - 16;
+            canvas.draw_sprite(&self.sprites[0], Point::new(0, 0));
+            canvas.draw_sprite(&self.sprites[1], Point::new(right, 0));
+            canvas.draw_sprite_flipped(&self.sprites[1],
+                                       Point::new(0, bottom),
+                                       true,
+                                       true);
+            canvas.draw_sprite_flipped(&self.sprites[0],
+                                       Point::new(right, bottom),
+                                       true,
+                                       true);
+            for col in 1..(right / 16) {
+                let x = 16 * col + 8;
+                canvas.draw_sprite_transformed(&self.sprites[2],
+                                               Point::new(x, 8),
+                                               90,
+                                               false,
+                                               true);
+                canvas.draw_sprite_transformed(&self.sprites[2],
+                                               Point::new(x, bottom + 8),
+                                               -90,
+                                               false,
+                                               true);
+            }
+            for row in 1..(bottom / 16) {
+                let y = 16 * row + 8;
+                canvas.draw_sprite_centered(&self.sprites[2],
+                                            Point::new(8, y));
+                canvas.draw_sprite_rotated(&self.sprites[2],
+                                           Point::new(right + 8, y),
+                                           180);
+            }
+            canvas.fill_rect((255, 255, 255),
+                             Rect::new(16,
+                                       16,
+                                       (right - 16) as u32,
+                                       (bottom - 16) as u32));
+        }
+        // Draw tail:
+        {
+            let (base_y, tail_y) = if self.south {
+                (self.rect.top() + 8, self.rect.top() - 8)
+            } else {
+                (self.rect.bottom() - 8, self.rect.bottom() + 8)
+            };
+            canvas.draw_sprite_transformed(&self.sprites[3],
+                                           Point::new(self.tail_x, base_y),
+                                           0,
+                                           self.east,
+                                           self.south);
+            canvas.draw_sprite_transformed(&self.sprites[4],
+                                           Point::new(self.tail_x, tail_y),
+                                           0,
+                                           self.east,
+                                           self.south);
+        }
+        // Draw text:
+        {
+            let width = self.paragraph.min_width();
+            let height = self.paragraph.height();
+            let subrect = Rect::new(self.rect.x() +
+                                    (self.rect.width() as i32 - width) / 2,
+                                    self.rect.y() +
+                                    (self.rect.height() - height) as i32 / 2,
+                                    width as u32,
+                                    height);
+            self.paragraph.draw(&mut canvas.subcanvas(subrect));
+        }
     }
+}
+
+fn round_up_to_16(mut size: i32) -> i32 {
+    let remainder = size % 16;
+    if remainder != 0 {
+        size += 16 - remainder;
+    }
+    size
+}
+
+// ========================================================================= //
+
+#[allow(dead_code)]
+#[derive(Clone, Copy)]
+pub enum TalkPos {
+    NE,
+    NW,
+    SE,
+    SW,
 }
 
 // ========================================================================= //

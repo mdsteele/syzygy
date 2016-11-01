@@ -22,6 +22,15 @@ use gui::{Point, Resources};
 use super::scene::{DarkNode, JumpNode, LightNode, LoopNode, ParallelNode,
                    PlaceNode, QueueNode, RemoveNode, Scene, SceneNode,
                    SequenceNode, SlideNode, TalkNode, WaitNode};
+use super::theater::TalkPos;
+
+// ========================================================================= //
+
+#[derive(Clone, Copy)]
+pub enum TalkStyle {
+    Normal,
+    Thought,
+}
 
 // ========================================================================= //
 
@@ -36,7 +45,7 @@ pub enum Ast {
     Queue(i32, i32),
     Remove(i32),
     Slide(i32, (i32, i32), bool, bool, f64),
-    Talk(i32, &'static str),
+    Talk(i32, TalkStyle, TalkPos, &'static str),
     Wait(f64),
 }
 
@@ -106,8 +115,16 @@ impl Ast {
                                         decel,
                                         duration))
             }
-            &Ast::Talk(slot, text) => {
-                Box::new(TalkNode::new(slot, Paragraph::new(resources, text)))
+            &Ast::Talk(slot, style, pos, text) => {
+                let bubble_name = match style {
+                    TalkStyle::Normal => "speech/normal",
+                    TalkStyle::Thought => "speech/thought",
+                };
+                let bubble_sprites = resources.get_sprites(bubble_name);
+                Box::new(TalkNode::new(slot,
+                                       bubble_sprites,
+                                       pos,
+                                       Paragraph::new(resources, text)))
             }
             &Ast::Wait(duration) => Box::new(WaitNode::new(duration)),
         }

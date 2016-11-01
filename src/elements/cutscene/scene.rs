@@ -22,7 +22,7 @@ use std::rc::Rc;
 
 use elements::Paragraph;
 use gui::{Action, Canvas, Element, Event, FRAME_DELAY_MILLIS, Point, Sprite};
-use super::theater::Theater;
+use super::theater::{TalkPos, Theater};
 
 // ========================================================================= //
 
@@ -614,14 +614,20 @@ impl SceneNode for SlideNode {
 
 pub struct TalkNode {
     slot: i32,
+    bubble_sprites: Vec<Sprite>,
+    talk_pos: TalkPos,
     paragraph: Rc<Paragraph>,
     status: Status,
 }
 
 impl TalkNode {
-    pub fn new(slot: i32, paragraph: Paragraph) -> TalkNode {
+    pub fn new(slot: i32, bubble_sprites: Vec<Sprite>, talk_pos: TalkPos,
+               paragraph: Paragraph)
+               -> TalkNode {
         TalkNode {
             slot: slot,
+            bubble_sprites: bubble_sprites,
+            talk_pos: talk_pos,
             paragraph: Rc::new(paragraph),
             status: Status::Active,
         }
@@ -634,7 +640,10 @@ impl SceneNode for TalkNode {
     fn begin(&mut self, theater: &mut Theater, terminated_by_pause: bool) {
         if terminated_by_pause {
             self.status = Status::Paused;
-            theater.set_actor_speech(self.slot, Some(self.paragraph.clone()));
+            theater.set_actor_speech(self.slot,
+                                     Some((self.bubble_sprites.clone(),
+                                           self.talk_pos,
+                                           self.paragraph.clone())));
         } else {
             self.skip(theater);
         }

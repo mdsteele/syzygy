@@ -95,6 +95,7 @@ impl Element<Game, Cmd> for View {
         let state = &game.prolog;
         self.theater.draw_background(canvas);
         self.theater.draw_foreground(canvas);
+        self.theater.draw_speech_bubbles(canvas);
         self.hud.draw(&self.hud_input(state), canvas);
         self.screen_fade.draw(&(), canvas);
     }

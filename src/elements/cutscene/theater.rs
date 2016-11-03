@@ -119,6 +119,9 @@ impl Theater {
                 canvas.fill_rect((0, 0, 0), rect);
             }
         }
+    }
+
+    pub fn draw_speech_bubbles(&self, canvas: &mut Canvas) {
         for actor in self.actors.values() {
             actor.draw_speech(canvas);
         }

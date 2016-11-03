@@ -177,6 +177,7 @@ impl Element<Game, Cmd> for View {
         self.theater.draw_foreground(canvas);
         self.passives.draw(state, canvas);
         self.toggles.draw(state, canvas);
+        self.theater.draw_speech_bubbles(canvas);
         self.hud.draw(&self.hud_input(state), canvas);
         self.screen_fade.draw(&(), canvas);
     }

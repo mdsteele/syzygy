@@ -104,6 +104,7 @@ impl Element<Theater, ()> for Scene {
     fn draw(&self, theater: &Theater, canvas: &mut Canvas) {
         theater.draw_background(canvas);
         theater.draw_foreground(canvas);
+        theater.draw_speech_bubbles(canvas);
     }
 
     fn handle_event(&mut self, event: &Event, theater: &mut Theater)

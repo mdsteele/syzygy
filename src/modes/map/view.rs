@@ -69,10 +69,11 @@ impl View {
         HudInput {
             name: "The Map",
             is_paused: false,
-            can_back: self.screen_fade.is_transparent(),
+            active: self.screen_fade.is_transparent(),
             can_undo: false,
             can_redo: false,
             can_reset: false,
+            can_replay: false,
         }
     }
 }

@@ -49,6 +49,8 @@ impl PrologState {
     pub fn is_solved(&self) -> bool { self.access == Access::Solved }
 
     pub fn mark_solved(&mut self) { self.access = Access::Solved; }
+
+    pub fn replay(&mut self) { self.access = Access::Replay; }
 }
 
 // ========================================================================= //

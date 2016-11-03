@@ -52,6 +52,9 @@ pub fn run_connect_the_dots(window: &mut Window, game: &mut Game) -> Mode {
                     return Mode::Quit;
                 }
             }
+            Some(&Cmd::Replay) => {
+                view.replay(game);
+            }
             None => {}
         }
         if action.should_redraw() {

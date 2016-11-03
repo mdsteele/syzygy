@@ -50,6 +50,9 @@ pub fn run_prolog(window: &mut Window, game: &mut Game) -> Mode {
             Some(&Cmd::GoToNextPuzzle) => {
                 return Mode::Location(Location::Disconnected);
             }
+            Some(&Cmd::Replay) => {
+                view.replay(game);
+            }
             None => {}
         }
         if action.should_redraw() {

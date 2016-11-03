@@ -54,6 +54,9 @@ pub fn run_a_light_in_the_attic(window: &mut Window, game: &mut Game) -> Mode {
                     return Mode::Quit;
                 }
             }
+            Some(&Cmd::Replay) => {
+                view.replay(game);
+            }
             None => {}
         }
         if action.should_redraw() {

@@ -60,13 +60,16 @@ impl MissedState {
 
     pub fn mark_solved(&mut self) { self.access = Access::Solved; }
 
+    pub fn replay(&mut self) {
+        self.access = Access::Replay;
+        self.grid = MissedState::default_grid();
+    }
+
     pub fn grid(&self) -> &DeviceGrid { &self.grid }
 
     pub fn grid_mut(&mut self) -> &mut DeviceGrid { &mut self.grid }
-}
 
-impl Default for MissedState {
-    fn default() -> MissedState {
+    fn default_grid() -> DeviceGrid {
         let mut grid = DeviceGrid::new(10, 5);
         grid.set(0, 0, Device::Emitter(LaserColor::Blue), Direction::East);
         grid.set(2, 0, Device::Wall, Direction::East);
@@ -102,9 +105,15 @@ impl Default for MissedState {
         grid.set(7, 4, Device::Wall, Direction::East);
         grid.set(8, 4, Device::Mirror, Direction::East);
         grid.set(9, 4, Device::Detector(LaserColor::Green), Direction::West);
+        grid
+    }
+}
+
+impl Default for MissedState {
+    fn default() -> MissedState {
         MissedState {
             access: Default::default(),
-            grid: grid,
+            grid: MissedState::default_grid(),
         }
     }
 }

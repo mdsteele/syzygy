@@ -29,6 +29,7 @@ use super::scenes::{compile_intro_scene, compile_outro_scene};
 pub enum Cmd {
     ReturnToMap,
     ShowInfoBox,
+    Replay,
 }
 
 // ========================================================================= //
@@ -109,6 +110,18 @@ impl View {
         view
     }
 
+    pub fn replay(&mut self, game: &mut Game) {
+        game.a_light_in_the_attic.replay();
+        for toggle in self.toggles.iter_mut() {
+            toggle.set_hilight(false);
+        }
+        self.theater.reset();
+        self.intro_scene.reset();
+        self.outro_scene.reset();
+        self.intro_scene.begin(&mut self.theater);
+        self.screen_fade.fade_in();
+    }
+
     fn current_scene(&self, state: &AtticState) -> &Scene {
         if state.is_solved() {
             &self.outro_scene
@@ -122,10 +135,11 @@ impl View {
         HudInput {
             name: "A Light in the Attic",
             is_paused: scene.is_paused(),
-            can_back: self.screen_fade.is_transparent() && scene.is_finished(),
+            active: self.screen_fade.is_transparent() && scene.is_finished(),
             can_undo: !self.undo_stack.is_empty(),
             can_redo: !self.redo_stack.is_empty(),
             can_reset: state.any_toggled(),
+            can_replay: state.is_solved(),
         }
     }
 
@@ -198,6 +212,10 @@ impl Element<Game, Cmd> for View {
                 }
                 Some(&HudCmd::Reset) => {
                     self.reset(state);
+                    subaction.but_no_value()
+                }
+                Some(&HudCmd::Replay) => {
+                    self.screen_fade.fade_out_and_return(Cmd::Replay);
                     subaction.but_no_value()
                 }
                 None => subaction.but_no_value(),

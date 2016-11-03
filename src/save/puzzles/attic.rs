@@ -63,6 +63,11 @@ impl AtticState {
 
     pub fn is_solved(&self) -> bool { self.access == Access::Solved }
 
+    pub fn replay(&mut self) {
+        self.access = Access::Replay;
+        self.toggled.clear();
+    }
+
     pub fn is_lit(&self, pos: (i32, i32)) -> bool {
         match pos {
             (1, 0) => self.is_toggled((1, 1)) ^ self.is_toggled((2, 1)),

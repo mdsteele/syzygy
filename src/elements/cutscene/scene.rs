@@ -48,6 +48,16 @@ impl Scene {
         }
     }
 
+    pub fn reset(&mut self) {
+        if cfg!(debug_assertions) {
+            println!("Resetting cutscene.");
+        }
+        for node in self.nodes.iter_mut() {
+            node.reset();
+        }
+        self.index = 0;
+    }
+
     pub fn tick(&mut self, theater: &mut Theater) -> bool {
         theater.drain_queue();
         let mut changed = false;

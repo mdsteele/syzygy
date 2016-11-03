@@ -28,6 +28,7 @@ use super::scenes::{compile_intro_scene, compile_outro_scene};
 pub enum Cmd {
     ReturnToMap,
     ShowInfoBox,
+    Replay,
 }
 
 // ========================================================================= //
@@ -72,6 +73,16 @@ impl View {
         view
     }
 
+    pub fn replay(&mut self, game: &mut Game) {
+        game.disconnected.replay();
+        self.laser_field.recalculate_lasers(game.disconnected.grid());
+        self.theater.reset();
+        self.intro_scene.reset();
+        self.outro_scene.reset();
+        self.intro_scene.begin(&mut self.theater);
+        self.screen_fade.fade_in();
+    }
+
     fn current_scene(&self, state: &DisconState) -> &Scene {
         if state.is_solved() {
             &self.outro_scene
@@ -85,10 +96,11 @@ impl View {
         HudInput {
             name: "Disconnected",
             is_paused: scene.is_paused(),
-            can_back: self.screen_fade.is_transparent() && scene.is_finished(),
+            active: self.screen_fade.is_transparent() && scene.is_finished(),
             can_undo: !self.undo_stack.is_empty(),
             can_redo: !self.redo_stack.is_empty(),
             can_reset: false,
+            can_replay: state.is_solved(),
         }
     }
 
@@ -103,7 +115,7 @@ impl View {
                     state.grid_mut().unrotate(col, row);
                 }
             }
-            self.laser_field.recalculate_lasers(state.grid_mut());
+            self.laser_field.recalculate_lasers(state.grid());
         }
     }
 
@@ -118,7 +130,7 @@ impl View {
                     state.grid_mut().rotate(col, row);
                 }
             }
-            self.laser_field.recalculate_lasers(state.grid_mut());
+            self.laser_field.recalculate_lasers(state.grid());
         }
     }
 
@@ -170,6 +182,10 @@ impl Element<Game, Cmd> for View {
                 }
                 Some(&HudCmd::Reset) => {
                     // TODO reset
+                    subaction.but_no_value()
+                }
+                Some(&HudCmd::Replay) => {
+                    self.screen_fade.fade_out_and_return(Cmd::Replay);
                     subaction.but_no_value()
                 }
                 None => subaction.but_no_value(),

@@ -60,13 +60,16 @@ impl DotsState {
 
     pub fn mark_solved(&mut self) { self.access = Access::Solved; }
 
+    pub fn replay(&mut self) {
+        self.access = Access::Replay;
+        self.grid = DotsState::default_grid();
+    }
+
     pub fn grid(&self) -> &DeviceGrid { &self.grid }
 
     pub fn grid_mut(&mut self) -> &mut DeviceGrid { &mut self.grid }
-}
 
-impl Default for DotsState {
-    fn default() -> DotsState {
+    fn default_grid() -> DeviceGrid {
         let mut grid = DeviceGrid::new(9, 5);
         grid.set(0, 0, Device::Emitter(LaserColor::Blue), Direction::East);
         grid.set(4, 0, Device::CrossChannel, Direction::East);
@@ -103,9 +106,15 @@ impl Default for DotsState {
         grid.set(6, 4, Device::Mirror, Direction::East);
         grid.set(7, 4, Device::Mirror, Direction::South);
         grid.set(8, 4, Device::Detector(LaserColor::Green), Direction::West);
+        grid
+    }
+}
+
+impl Default for DotsState {
+    fn default() -> DotsState {
         DotsState {
             access: Default::default(),
-            grid: grid,
+            grid: DotsState::default_grid(),
         }
     }
 }

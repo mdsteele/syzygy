@@ -44,6 +44,12 @@ impl Theater {
         }
     }
 
+    pub fn reset(&mut self) {
+        self.actors.clear();
+        self.queue.clear();
+        self.dark = false;
+    }
+
     pub fn place_actor(&mut self, slot: i32, sprite: Sprite, position: Point) {
         self.actors.insert(slot, Actor::new(sprite, position));
     }

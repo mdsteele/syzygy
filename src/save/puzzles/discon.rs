@@ -60,13 +60,16 @@ impl DisconState {
 
     pub fn mark_solved(&mut self) { self.access = Access::Solved; }
 
+    pub fn replay(&mut self) {
+        self.access = Access::Replay;
+        self.grid = DisconState::default_grid();
+    }
+
     pub fn grid(&self) -> &DeviceGrid { &self.grid }
 
     pub fn grid_mut(&mut self) -> &mut DeviceGrid { &mut self.grid }
-}
 
-impl Default for DisconState {
-    fn default() -> DisconState {
+    fn default_grid() -> DeviceGrid {
         let mut grid = DeviceGrid::new(9, 5);
         grid.set(0, 0, Device::Emitter(LaserColor::Red), Direction::East);
         grid.set(1, 0, Device::Mirror, Direction::East);
@@ -96,9 +99,15 @@ impl Default for DisconState {
         grid.set(4, 4, Device::Channel, Direction::East);
         grid.set(6, 4, Device::Mirror, Direction::South);
         grid.set(8, 4, Device::Detector(LaserColor::Red), Direction::West);
+        grid
+    }
+}
+
+impl Default for DisconState {
+    fn default() -> DisconState {
         DisconState {
             access: Default::default(),
-            grid: grid,
+            grid: DisconState::default_grid(),
         }
     }
 }

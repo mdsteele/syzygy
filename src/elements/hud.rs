@@ -39,10 +39,11 @@ const PAUSE_TEXT_MARGIN: i32 = 2;
 pub struct HudInput {
     pub name: &'static str,
     pub is_paused: bool,
-    pub can_back: bool,
+    pub active: bool,
     pub can_undo: bool,
     pub can_redo: bool,
     pub can_reset: bool,
+    pub can_replay: bool,
 }
 
 #[derive(Clone, Copy, Eq, PartialEq)]
@@ -52,6 +53,7 @@ pub enum HudCmd {
     Undo,
     Redo,
     Reset,
+    Replay,
 }
 
 // ========================================================================= //
@@ -72,6 +74,7 @@ impl Hud {
             Hud::button(resources, location, HudCmd::Undo, cx + 96, bot),
             Hud::button(resources, location, HudCmd::Redo, cx + 149, bot),
             Hud::button(resources, location, HudCmd::Reset, cx + 210, bot),
+            Hud::button(resources, location, HudCmd::Replay, cx + 160, bot),
             Hud::namebox(resources, cx, bot),
         ];
         Hud { elements: GroupElement::new(elements) }
@@ -125,6 +128,7 @@ impl HudButton {
             HudCmd::Undo => 3,
             HudCmd::Redo => 4,
             HudCmd::Reset => 5,
+            HudCmd::Replay => 6,
         };
         let sprite = sprites[index].clone();
         let rect = Rect::new(center_x - sprite.width() as i32 / 2,
@@ -140,12 +144,14 @@ impl HudButton {
     }
 
     fn enabled(&self, input: &HudInput) -> bool {
+        let active = input.active;
         match self.value {
-            HudCmd::Back => input.can_back,
-            HudCmd::Info => input.can_back,
-            HudCmd::Undo => input.can_undo,
-            HudCmd::Redo => input.can_redo,
-            HudCmd::Reset => input.can_reset,
+            HudCmd::Back => active,
+            HudCmd::Info => active,
+            HudCmd::Undo => active && input.can_undo && !input.can_replay,
+            HudCmd::Redo => active && input.can_redo && !input.can_replay,
+            HudCmd::Reset => active && input.can_reset && !input.can_replay,
+            HudCmd::Replay => active && input.can_replay,
         }
     }
 }

@@ -28,6 +28,7 @@ pub enum Cmd {
     ReturnToMap,
     ShowInfoBox,
     GoToNextPuzzle,
+    Replay,
 }
 
 // ========================================================================= //
@@ -61,15 +62,24 @@ impl View {
         view
     }
 
-    fn hud_input(&self, _state: &PrologState) -> HudInput {
+    pub fn replay(&mut self, game: &mut Game) {
+        game.prolog.replay();
+        self.theater.reset();
+        self.scene.reset();
+        self.scene.begin(&mut self.theater);
+        self.screen_fade.fade_in();
+    }
+
+    fn hud_input(&self, state: &PrologState) -> HudInput {
         HudInput {
             name: "Prolog",
             is_paused: self.scene.is_paused(),
-            can_back: self.screen_fade.is_transparent() &&
-                      self.scene.is_finished(),
+            active: self.screen_fade.is_transparent() &&
+                    self.scene.is_finished(),
             can_undo: false,
             can_redo: false,
             can_reset: false,
+            can_replay: state.is_solved(),
         }
     }
 
@@ -110,6 +120,10 @@ impl Element<Game, Cmd> for View {
                     subaction.but_no_value()
                 }
                 Some(&HudCmd::Info) => subaction.but_return(Cmd::ShowInfoBox),
+                Some(&HudCmd::Replay) => {
+                    self.screen_fade.fade_out_and_return(Cmd::Replay);
+                    subaction.but_no_value()
+                }
                 _ => subaction.but_no_value(),
             });
         }

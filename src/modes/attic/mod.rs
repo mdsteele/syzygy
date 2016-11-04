@@ -17,10 +17,25 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod control;
 mod scenes;
 mod view;
 
-pub use self::control::run_a_light_in_the_attic;
+use gui::Window;
+use modes::{Mode, run_puzzle};
+use save::Game;
+use self::view::View;
+
+// ========================================================================= //
+
+pub fn run_a_light_in_the_attic(window: &mut Window, game: &mut Game) -> Mode {
+    let view = {
+        let visible_rect = window.visible_rect();
+        View::new(&mut window.resources(),
+                  visible_rect,
+                  &game.a_light_in_the_attic)
+    };
+    game.a_light_in_the_attic.visit();
+    run_puzzle(window, game, view)
+}
 
 // ========================================================================= //

@@ -25,6 +25,7 @@ mod map;
 mod missed;
 mod mode;
 mod prolog;
+mod puzzle;
 mod title;
 
 pub use self::attic::run_a_light_in_the_attic;
@@ -35,6 +36,7 @@ pub use self::map::run_map_screen;
 pub use self::missed::run_missed_connections;
 pub use self::mode::Mode;
 pub use self::prolog::run_prolog;
+pub use self::puzzle::run_puzzle;
 pub use self::title::run_title_screen;
 
 // ========================================================================= //

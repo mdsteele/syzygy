@@ -19,18 +19,12 @@
 
 use std::cmp;
 
-use elements::{Hud, HudCmd, HudInput, Scene, ScreenFade, Theater};
+use elements::{Hud, HudCmd, HudInput, PuzzleCmd, PuzzleView, Scene,
+               ScreenFade, Theater};
 use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sprite};
+use modes::SOLVED_INFO_TEXT;
 use save::{AtticState, Game, Location};
 use super::scenes::{compile_intro_scene, compile_outro_scene};
-
-// ========================================================================= //
-
-pub enum Cmd {
-    ReturnToMap,
-    ShowInfoBox,
-    Replay,
-}
 
 // ========================================================================= //
 
@@ -38,7 +32,7 @@ pub struct View {
     theater: Theater,
     intro_scene: Scene,
     outro_scene: Scene,
-    screen_fade: ScreenFade<Cmd>,
+    screen_fade: ScreenFade<PuzzleCmd>,
     hud: Hud,
     toggles: Vec<ToggleLight>,
     passives: Vec<PassiveLight>,
@@ -110,18 +104,6 @@ impl View {
         view
     }
 
-    pub fn replay(&mut self, game: &mut Game) {
-        game.a_light_in_the_attic.replay();
-        for toggle in self.toggles.iter_mut() {
-            toggle.set_hilight(false);
-        }
-        self.theater.reset();
-        self.intro_scene.reset();
-        self.outro_scene.reset();
-        self.intro_scene.begin(&mut self.theater);
-        self.screen_fade.fade_in();
-    }
-
     fn current_scene(&self, state: &AtticState) -> &Scene {
         if state.is_solved() {
             &self.outro_scene
@@ -170,7 +152,7 @@ impl View {
     }
 }
 
-impl Element<Game, Cmd> for View {
+impl Element<Game, PuzzleCmd> for View {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
         let state = &game.a_light_in_the_attic;
         self.theater.draw_background(canvas);
@@ -182,7 +164,8 @@ impl Element<Game, Cmd> for View {
         self.screen_fade.draw(&(), canvas);
     }
 
-    fn handle_event(&mut self, event: &Event, game: &mut Game) -> Action<Cmd> {
+    fn handle_event(&mut self, event: &Event, game: &mut Game)
+                    -> Action<PuzzleCmd> {
         let state = &mut game.a_light_in_the_attic;
         let mut action = self.screen_fade.handle_event(event, &mut ());
         if !action.should_stop() {
@@ -199,10 +182,10 @@ impl Element<Game, Cmd> for View {
             let subaction = self.hud.handle_event(event, &mut input);
             action.merge(match subaction.value() {
                 Some(&HudCmd::Back) => {
-                    self.screen_fade.fade_out_and_return(Cmd::ReturnToMap);
+                    self.screen_fade.fade_out_and_return(PuzzleCmd::Back);
                     subaction.but_no_value()
                 }
-                Some(&HudCmd::Info) => subaction.but_return(Cmd::ShowInfoBox),
+                Some(&HudCmd::Info) => subaction.but_return(PuzzleCmd::Info),
                 Some(&HudCmd::Undo) => {
                     self.undo(state);
                     subaction.but_no_value()
@@ -216,7 +199,7 @@ impl Element<Game, Cmd> for View {
                     subaction.but_no_value()
                 }
                 Some(&HudCmd::Replay) => {
-                    self.screen_fade.fade_out_and_return(Cmd::Replay);
+                    self.screen_fade.fade_out_and_return(PuzzleCmd::Replay);
                     subaction.but_no_value()
                 }
                 None => subaction.but_no_value(),
@@ -243,6 +226,28 @@ impl Element<Game, Cmd> for View {
             action.merge(self.passives.handle_event(event, state));
         }
         action
+    }
+}
+
+impl PuzzleView for View {
+    fn info_text(&self, game: &Game) -> &'static str {
+        if game.a_light_in_the_attic.is_solved() {
+            SOLVED_INFO_TEXT
+        } else {
+            INFO_BOX_TEXT
+        }
+    }
+
+    fn replay(&mut self, game: &mut Game) {
+        game.a_light_in_the_attic.replay();
+        for toggle in self.toggles.iter_mut() {
+            toggle.set_hilight(false);
+        }
+        self.theater.reset();
+        self.intro_scene.reset();
+        self.outro_scene.reset();
+        self.intro_scene.begin(&mut self.theater);
+        self.screen_fade.fade_in();
     }
 }
 
@@ -363,7 +368,7 @@ impl PassiveLight {
     }
 }
 
-impl Element<AtticState, Cmd> for PassiveLight {
+impl Element<AtticState, PuzzleCmd> for PassiveLight {
     fn draw(&self, _: &AtticState, canvas: &mut Canvas) {
         let mut canvas = canvas.subcanvas(self.rect());
         draw_light(&mut canvas,
@@ -375,7 +380,7 @@ impl Element<AtticState, Cmd> for PassiveLight {
     }
 
     fn handle_event(&mut self, event: &Event, state: &mut AtticState)
-                    -> Action<Cmd> {
+                    -> Action<PuzzleCmd> {
         match event {
             &Event::ClockTick => {
                 tick_radius(state.is_lit(self.position),
@@ -427,7 +432,7 @@ fn tick_radius<A>(lit: bool, radius: &mut i32, max: i32) -> Action<A> {
 
 // ========================================================================= //
 
-pub const INFO_BOX_TEXT: &'static str = "\
+const INFO_BOX_TEXT: &'static str = "\
 Your goal is to turn all thirty-two lights on.
 
 $M{Tapp}{Click}ing on one of the lights labelled with a letter

@@ -17,20 +17,16 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use gui::{Element, Event, Window};
-use modes::{Mode, SOLVED_INFO_TEXT, run_info_box};
+use elements::{PuzzleCmd, PuzzleView};
+use gui::{Event, Window};
+use modes::{Mode, run_info_box};
 use save::{Game, Location};
-
-use super::view::{Cmd, INFO_BOX_TEXT, View};
 
 // ========================================================================= //
 
-pub fn run_missed_connections(window: &mut Window, game: &mut Game) -> Mode {
-    let mut view = {
-        let visible = window.visible_rect();
-        View::new(&mut window.resources(), visible, &game.missed_connections)
-    };
-    game.missed_connections.visit();
+pub fn run_puzzle<V: PuzzleView>(window: &mut Window, game: &mut Game,
+                                 mut view: V)
+                                 -> Mode {
     window.render(game, &view);
     loop {
         let mut action = match window.next_event() {
@@ -39,20 +35,16 @@ pub fn run_missed_connections(window: &mut Window, game: &mut Game) -> Mode {
         };
         window.play_sounds(action.drain_sounds());
         match action.value() {
-            Some(&Cmd::ReturnToMap) => {
+            Some(&PuzzleCmd::Back) => {
                 return Mode::Location(Location::Map);
             }
-            Some(&Cmd::ShowInfoBox) => {
-                let text = if game.missed_connections.is_solved() {
-                    SOLVED_INFO_TEXT
-                } else {
-                    INFO_BOX_TEXT
-                };
+            Some(&PuzzleCmd::Info) => {
+                let text = view.info_text(game);
                 if !run_info_box(window, &view, game, text) {
                     return Mode::Quit;
                 }
             }
-            Some(&Cmd::Replay) => {
+            Some(&PuzzleCmd::Replay) => {
                 view.replay(game);
             }
             None => {}

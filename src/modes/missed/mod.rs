@@ -17,10 +17,25 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod control;
 mod scenes;
 mod view;
 
-pub use self::control::run_missed_connections;
+use gui::Window;
+use modes::{Mode, run_puzzle};
+use save::Game;
+use self::view::View;
+
+// ========================================================================= //
+
+pub fn run_missed_connections(window: &mut Window, game: &mut Game) -> Mode {
+    let view = {
+        let visible_rect = window.visible_rect();
+        View::new(&mut window.resources(),
+                  visible_rect,
+                  &game.missed_connections)
+    };
+    game.missed_connections.visit();
+    run_puzzle(window, game, view)
+}
 
 // ========================================================================= //

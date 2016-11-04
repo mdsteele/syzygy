@@ -17,19 +17,12 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use elements::{Hud, HudCmd, HudInput, LaserCmd, LaserField, Scene,
-               ScreenFade, Theater};
+use elements::{Hud, HudCmd, HudInput, LaserCmd, LaserField, PuzzleCmd,
+               PuzzleView, Scene, ScreenFade, Theater};
 use gui::{Action, Canvas, Element, Event, Rect, Resources};
+use modes::SOLVED_INFO_TEXT;
 use save::{DotsState, Game, Location};
 use super::scenes::{compile_intro_scene, compile_outro_scene};
-
-// ========================================================================= //
-
-pub enum Cmd {
-    ReturnToMap,
-    ShowInfoBox,
-    Replay,
-}
 
 // ========================================================================= //
 
@@ -37,7 +30,7 @@ pub struct View {
     theater: Theater,
     intro_scene: Scene,
     outro_scene: Scene,
-    screen_fade: ScreenFade<Cmd>,
+    screen_fade: ScreenFade<PuzzleCmd>,
     hud: Hud,
     laser_field: LaserField,
     undo_stack: Vec<LaserCmd>,
@@ -72,16 +65,6 @@ impl View {
         };
         view.drain_queue();
         view
-    }
-
-    pub fn replay(&mut self, game: &mut Game) {
-        game.connect_the_dots.replay();
-        self.laser_field.recalculate_lasers(game.connect_the_dots.grid());
-        self.theater.reset();
-        self.intro_scene.reset();
-        self.outro_scene.reset();
-        self.intro_scene.begin(&mut self.theater);
-        self.screen_fade.fade_in();
     }
 
     fn current_scene(&self, state: &DotsState) -> &Scene {
@@ -142,7 +125,7 @@ impl View {
     }
 }
 
-impl Element<Game, Cmd> for View {
+impl Element<Game, PuzzleCmd> for View {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
         let state = &game.connect_the_dots;
         self.theater.draw_background(canvas);
@@ -153,7 +136,8 @@ impl Element<Game, Cmd> for View {
         self.screen_fade.draw(&(), canvas);
     }
 
-    fn handle_event(&mut self, event: &Event, game: &mut Game) -> Action<Cmd> {
+    fn handle_event(&mut self, event: &Event, game: &mut Game)
+                    -> Action<PuzzleCmd> {
         let state = &mut game.connect_the_dots;
         let mut action = self.screen_fade.handle_event(event, &mut ());
         if !action.should_stop() {
@@ -170,10 +154,10 @@ impl Element<Game, Cmd> for View {
             let subaction = self.hud.handle_event(event, &mut input);
             action.merge(match subaction.value() {
                 Some(&HudCmd::Back) => {
-                    self.screen_fade.fade_out_and_return(Cmd::ReturnToMap);
+                    self.screen_fade.fade_out_and_return(PuzzleCmd::Back);
                     subaction.but_no_value()
                 }
-                Some(&HudCmd::Info) => subaction.but_return(Cmd::ShowInfoBox),
+                Some(&HudCmd::Info) => subaction.but_return(PuzzleCmd::Info),
                 Some(&HudCmd::Undo) => {
                     self.undo(state);
                     subaction.but_no_value()
@@ -187,7 +171,7 @@ impl Element<Game, Cmd> for View {
                     subaction.but_no_value()
                 }
                 Some(&HudCmd::Replay) => {
-                    self.screen_fade.fade_out_and_return(Cmd::Replay);
+                    self.screen_fade.fade_out_and_return(PuzzleCmd::Replay);
                     subaction.but_no_value()
                 }
                 None => subaction.but_no_value(),
@@ -216,9 +200,29 @@ impl Element<Game, Cmd> for View {
     }
 }
 
+impl PuzzleView for View {
+    fn info_text(&self, game: &Game) -> &'static str {
+        if game.connect_the_dots.is_solved() {
+            SOLVED_INFO_TEXT
+        } else {
+            INFO_BOX_TEXT
+        }
+    }
+
+    fn replay(&mut self, game: &mut Game) {
+        game.connect_the_dots.replay();
+        self.laser_field.recalculate_lasers(game.connect_the_dots.grid());
+        self.theater.reset();
+        self.intro_scene.reset();
+        self.outro_scene.reset();
+        self.intro_scene.begin(&mut self.theater);
+        self.screen_fade.fade_in();
+    }
+}
+
 // ========================================================================= //
 
-pub const INFO_BOX_TEXT: &'static str = "\
+const INFO_BOX_TEXT: &'static str = "\
 Your goal is to activate each detector on the right with
 the appropriate color of laser.
 

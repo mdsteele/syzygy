@@ -69,7 +69,7 @@ impl SoundQueue {
 // ========================================================================= //
 
 pub struct SoundMixer {
-    audio_rate: f32,
+    time_step: f32,
     sound_queue: Arc<SoundQueue>,
     active_sounds: Vec<Sound>,
 }
@@ -77,7 +77,7 @@ pub struct SoundMixer {
 impl SoundMixer {
     fn new(audio_rate: i32, sound_queue: Arc<SoundQueue>) -> SoundMixer {
         SoundMixer {
-            audio_rate: audio_rate as f32,
+            time_step: 1.0 / audio_rate as f32,
             sound_queue: sound_queue,
             active_sounds: Vec::new(),
         }
@@ -110,7 +110,7 @@ impl AudioCallback for SoundMixer {
         debug_assert!(new_sounds.is_empty());
         'sounds: for mut sound in self.active_sounds.drain(..) {
             for sample in out.iter_mut() {
-                if let Some(value) = sound.wave.next(self.audio_rate) {
+                if let Some(value) = sound.wave.next(self.time_step) {
                     *sample += value;
                 } else {
                     continue 'sounds;

@@ -23,7 +23,7 @@ use std::mem;
 use std::rc::Rc;
 
 use elements::Paragraph;
-use gui::{Background, Canvas, Point, Rect, Sprite};
+use gui::{Background, Canvas, Point, Rect, Sound, Sprite};
 
 // ========================================================================= //
 
@@ -31,6 +31,7 @@ pub struct Theater {
     background: Rc<Background>,
     actors: BTreeMap<i32, Actor>,
     queue: Vec<(i32, i32)>,
+    sounds: Vec<Sound>,
     dark: bool,
 }
 
@@ -40,6 +41,7 @@ impl Theater {
             background: background,
             actors: BTreeMap::new(),
             queue: Vec::new(),
+            sounds: Vec::new(),
             dark: false,
         }
     }
@@ -85,6 +87,12 @@ impl Theater {
 
     pub fn drain_queue(&mut self) -> Vec<(i32, i32)> {
         mem::replace(&mut self.queue, Vec::new())
+    }
+
+    pub fn add_sound(&mut self, sound: Sound) { self.sounds.push(sound); }
+
+    pub fn drain_sounds(&mut self) -> Vec<Sound> {
+        mem::replace(&mut self.sounds, Vec::new())
     }
 
     pub fn set_dark(&mut self, dark: bool) { self.dark = dark; }

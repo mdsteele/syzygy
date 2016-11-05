@@ -18,7 +18,7 @@
 // +--------------------------------------------------------------------------+
 
 use elements::{Ast, Scene, TalkPos, TalkStyle};
-use gui::Resources;
+use gui::{Resources, Sound};
 
 // ========================================================================= //
 
@@ -50,6 +50,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Slide(0, (176, 320), true, false, 0.5),
             Ast::Par(vec![
+                Ast::Sound(Sound::character_collision()),
                 Ast::Talk(0, TalkStyle::Normal, TalkPos::NE, "Ow!"),
                 Ast::Jump(0, (160, 320), 0.5),
             ]),

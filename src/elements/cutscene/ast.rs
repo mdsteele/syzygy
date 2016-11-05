@@ -18,10 +18,10 @@
 // +--------------------------------------------------------------------------+
 
 use elements::Paragraph;
-use gui::{Point, Resources};
+use gui::{Point, Resources, Sound};
 use super::scene::{DarkNode, JumpNode, LightNode, LoopNode, ParallelNode,
                    PlaceNode, QueueNode, RemoveNode, Scene, SceneNode,
-                   SequenceNode, SlideNode, TalkNode, WaitNode};
+                   SequenceNode, SlideNode, SoundNode, TalkNode, WaitNode};
 use super::theater::TalkPos;
 
 // ========================================================================= //
@@ -46,32 +46,33 @@ pub enum Ast {
     Queue(i32, i32),
     Remove(i32),
     Slide(i32, (i32, i32), bool, bool, f64),
+    Sound(Sound),
     Talk(i32, TalkStyle, TalkPos, &'static str),
     Wait(f64),
 }
 
 impl Ast {
     pub fn compile_scene(resources: &mut Resources, nodes: Vec<Ast>) -> Scene {
-        Scene::new(nodes.iter()
+        Scene::new(nodes.into_iter()
                         .map(|ast| ast.to_scene_node(resources))
                         .collect())
     }
 
-    pub fn to_scene_node(&self, resources: &mut Resources) -> Box<SceneNode> {
+    fn to_scene_node(self, resources: &mut Resources) -> Box<SceneNode> {
         match self {
-            &Ast::Seq(ref asts) => {
-                let nodes = asts.iter()
+            Ast::Seq(asts) => {
+                let nodes = asts.into_iter()
                                 .map(|ast| ast.to_scene_node(resources))
                                 .collect();
                 Box::new(SequenceNode::new(nodes))
             }
-            &Ast::Par(ref asts) => {
-                let nodes = asts.iter()
+            Ast::Par(asts) => {
+                let nodes = asts.into_iter()
                                 .map(|ast| ast.to_scene_node(resources))
                                 .collect();
                 Box::new(ParallelNode::new(nodes))
             }
-            &Ast::Loop(min, max, ref ast) => {
+            Ast::Loop(min, max, ast) => {
                 let max = if max < 0 {
                     None
                 } else {
@@ -79,11 +80,11 @@ impl Ast {
                 };
                 Box::new(LoopNode::new(ast.to_scene_node(resources), min, max))
             }
-            &Ast::Dark(dark) => Box::new(DarkNode::new(dark)),
-            &Ast::Jump(slot, (x, y), duration) => {
+            Ast::Dark(dark) => Box::new(DarkNode::new(dark)),
+            Ast::Jump(slot, (x, y), duration) => {
                 Box::new(JumpNode::new(slot, Point::new(x, y), duration))
             }
-            &Ast::Light(slot, light) => {
+            Ast::Light(slot, light) => {
                 let sprite = if light {
                     Some(resources.get_sprites("halo")[0].clone())
                 } else {
@@ -91,7 +92,7 @@ impl Ast {
                 };
                 Box::new(LightNode::new(slot, sprite))
             }
-            &Ast::Place(slot, name, (x, y)) => {
+            Ast::Place(slot, name, (x, y)) => {
                 let sprite = match name {
                     "Argony" => resources.get_sprites("chars")[1].clone(),
                     "Elinsa" => resources.get_sprites("chars")[0].clone(),
@@ -107,16 +108,17 @@ impl Ast {
                                         sprite.clone(),
                                         Point::new(x, y)))
             }
-            &Ast::Queue(v1, v2) => Box::new(QueueNode::new((v1, v2))),
-            &Ast::Remove(slot) => Box::new(RemoveNode::new(slot)),
-            &Ast::Slide(slot, (x, y), accel, decel, duration) => {
+            Ast::Queue(v1, v2) => Box::new(QueueNode::new((v1, v2))),
+            Ast::Remove(slot) => Box::new(RemoveNode::new(slot)),
+            Ast::Slide(slot, (x, y), accel, decel, duration) => {
                 Box::new(SlideNode::new(slot,
                                         Point::new(x, y),
                                         accel,
                                         decel,
                                         duration))
             }
-            &Ast::Talk(slot, style, pos, text) => {
+            Ast::Sound(sound) => Box::new(SoundNode::new(sound)),
+            Ast::Talk(slot, style, pos, text) => {
                 let bubble_name = match style {
                     TalkStyle::Normal => "speech/normal",
                     TalkStyle::Thought => "speech/thought",
@@ -127,7 +129,7 @@ impl Ast {
                                        pos,
                                        Paragraph::new(resources, text)))
             }
-            &Ast::Wait(duration) => Box::new(WaitNode::new(duration)),
+            Ast::Wait(duration) => Box::new(WaitNode::new(duration)),
         }
     }
 }

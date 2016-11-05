@@ -59,6 +59,11 @@ impl<A> Action<A> {
         self
     }
 
+    pub fn and_play_sounds(mut self, mut sounds: Vec<Sound>) -> Action<A> {
+        self.sounds.append(&mut sounds);
+        self
+    }
+
     pub fn and_stop(mut self) -> Action<A> {
         self.value = Value::Stop;
         self

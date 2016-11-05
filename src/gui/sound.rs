@@ -31,16 +31,22 @@ const DESIRED_NUM_CHANNELS: u8 = 1; // mono
 
 // ========================================================================= //
 
+#[derive(Clone)]
 pub struct Sound {
     wave: itersynth::Wave,
 }
 
 impl Sound {
+    fn new(wave: itersynth::Wave) -> Sound { Sound { wave: wave } }
+
     pub fn beep() -> Sound {
-        Sound {
-            wave: itersynth::Wave::pulse(440.0, 0.5)
-                      .adshr(0.0, 0.0, 0.25, 0.3, 0.05),
-        }
+        Sound::new(itersynth::Wave::pulse(440.0, 0.5)
+                       .adshr(0.0, 0.0, 0.25, 0.3, 0.05))
+    }
+
+    pub fn character_collision() -> Sound {
+        Sound::new(itersynth::Wave::noise(2000.0)
+                       .adshr(0.0, 0.0, 1.0, 0.0, 0.25))
     }
 }
 

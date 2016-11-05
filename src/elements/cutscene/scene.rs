@@ -21,7 +21,8 @@ use std::cmp;
 use std::rc::Rc;
 
 use elements::Paragraph;
-use gui::{Action, Canvas, Element, Event, FRAME_DELAY_MILLIS, Point, Sprite};
+use gui::{Action, Canvas, Element, Event, FRAME_DELAY_MILLIS, Point, Sound,
+          Sprite};
 use super::theater::{TalkPos, Theater};
 
 // ========================================================================= //
@@ -109,7 +110,7 @@ impl Element<Theater, ()> for Scene {
 
     fn handle_event(&mut self, event: &Event, theater: &mut Theater)
                     -> Action<()> {
-        match event {
+        let action = match event {
             &Event::Quit => Action::ignore(),
             &Event::ClockTick => Action::redraw_if(self.tick(theater)),
             &Event::MouseDown(_) if self.is_paused() => {
@@ -123,8 +124,8 @@ impl Element<Theater, ()> for Scene {
                     Action::ignore().and_stop()
                 }
             }
-        }
-
+        };
+        action.and_play_sounds(theater.drain_sounds())
     }
 }
 
@@ -619,6 +620,22 @@ impl SceneNode for SlideNode {
     }
 
     fn reset(&mut self) { self.progress = 0; }
+}
+
+// ========================================================================= //
+
+pub struct SoundNode {
+    sound: Sound,
+}
+
+impl SoundNode {
+    pub fn new(sound: Sound) -> SoundNode { SoundNode { sound: sound } }
+}
+
+impl SceneNode for SoundNode {
+    fn begin(&mut self, theater: &mut Theater, _: bool) {
+        theater.add_sound(self.sound.clone());
+    }
 }
 
 // ========================================================================= //

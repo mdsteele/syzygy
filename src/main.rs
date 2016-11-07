@@ -160,6 +160,9 @@ fn main() {
                         Location::MissedConnections => {
                             modes::run_missed_connections(&mut window, game)
                         }
+                        Location::WreckedAngle => {
+                            modes::run_wrecked_angle(&mut window, game)
+                        }
                     }
                 } else {
                     if cfg!(debug_assertions) {

@@ -30,6 +30,7 @@ pub enum Location {
     ConnectTheDots,
     Disconnected,
     MissedConnections,
+    WreckedAngle,
 }
 
 impl Location {
@@ -41,6 +42,7 @@ impl Location {
             Location::ConnectTheDots => "connect_the_dots",
             Location::Disconnected => "disconnected",
             Location::MissedConnections => "missed_connections",
+            Location::WreckedAngle => "wrecked_angle",
         }
     }
 
@@ -53,6 +55,7 @@ impl Location {
                 "connect_the_dots" => return Location::ConnectTheDots,
                 "disconnected" => return Location::Disconnected,
                 "missed_connections" => return Location::MissedConnections,
+                "wrecked_angle" => return Location::WreckedAngle,
                 _ => {}
             }
         }
@@ -81,7 +84,8 @@ mod tests {
                           Location::ALightInTheAttic,
                           Location::ConnectTheDots,
                           Location::Disconnected,
-                          Location::MissedConnections];
+                          Location::MissedConnections,
+                          Location::WreckedAngle];
         for original in locations {
             let result = Location::from_toml(Some(&original.to_toml()));
             assert_eq!(result, *original);

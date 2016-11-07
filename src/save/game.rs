@@ -23,7 +23,7 @@ use toml;
 use super::access::Access;
 use super::location::Location;
 use super::puzzles::{AtticState, DisconState, DotsState, MissedState,
-                     PrologState};
+                     PrologState, WreckedState};
 use super::util::{pop_table, to_table};
 
 // ========================================================================= //
@@ -40,6 +40,7 @@ pub struct Game {
     pub connect_the_dots: DotsState,
     pub disconnected: DisconState,
     pub missed_connections: MissedState,
+    pub wrecked_angle: WreckedState,
 }
 
 impl Game {
@@ -56,6 +57,7 @@ impl Game {
         let dots = pop_table(&mut table, Location::ConnectTheDots.key());
         let discon = pop_table(&mut table, Location::Disconnected.key());
         let missed = pop_table(&mut table, Location::MissedConnections.key());
+        let wrecked = pop_table(&mut table, Location::WreckedAngle.key());
         Game {
             location: Location::from_toml(table.get(LOCATION_KEY)),
             prolog: PrologState::from_toml(prolog),
@@ -63,6 +65,7 @@ impl Game {
             connect_the_dots: DotsState::from_toml(dots),
             disconnected: DisconState::from_toml(discon),
             missed_connections: MissedState::from_toml(missed),
+            wrecked_angle: WreckedState::from_toml(wrecked),
         }
     }
 
@@ -79,6 +82,8 @@ impl Game {
                      self.disconnected.to_toml());
         table.insert(Location::MissedConnections.key().to_string(),
                      self.missed_connections.to_toml());
+        table.insert(Location::WreckedAngle.key().to_string(),
+                     self.wrecked_angle.to_toml());
         toml::Value::Table(table)
     }
 
@@ -92,6 +97,7 @@ impl Game {
             Location::MissedConnections => {
                 self.is_solved(Location::ConnectTheDots)
             }
+            Location::WreckedAngle => self.is_solved(Location::Prolog),
         }
     }
 
@@ -107,6 +113,7 @@ impl Game {
             Location::ConnectTheDots => self.connect_the_dots.access(),
             Location::Disconnected => self.disconnected.access(),
             Location::MissedConnections => self.missed_connections.access(),
+            Location::WreckedAngle => self.wrecked_angle.access(),
         }
     }
 }

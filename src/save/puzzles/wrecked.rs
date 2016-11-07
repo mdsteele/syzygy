@@ -17,28 +17,38 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod attic;
-mod discon;
-mod dots;
-mod info;
-mod map;
-mod missed;
-mod mode;
-mod prolog;
-mod puzzle;
-mod title;
-mod wrecked;
+use toml;
 
-pub use self::attic::run_a_light_in_the_attic;
-pub use self::discon::run_disconnected;
-pub use self::dots::run_connect_the_dots;
-pub use self::info::{SOLVED_INFO_TEXT, run_info_box};
-pub use self::map::run_map_screen;
-pub use self::missed::run_missed_connections;
-pub use self::mode::Mode;
-pub use self::prolog::run_prolog;
-pub use self::puzzle::run_puzzle;
-pub use self::title::run_title_screen;
-pub use self::wrecked::run_wrecked_angle;
+use save::Access;
+use super::super::util::ACCESS_KEY;
+
+// ========================================================================= //
+
+#[derive(Default)]
+pub struct WreckedState {
+    access: Access,
+}
+
+impl WreckedState {
+    pub fn from_toml(table: toml::Table) -> WreckedState {
+        WreckedState { access: Access::from_toml(table.get(ACCESS_KEY)) }
+    }
+
+    pub fn to_toml(&self) -> toml::Value {
+        let mut table = toml::Table::new();
+        table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
+        toml::Value::Table(table)
+    }
+
+    pub fn access(&self) -> Access { self.access }
+
+    pub fn is_visited(&self) -> bool { self.access.is_visited() }
+
+    pub fn visit(&mut self) { self.access.visit(); }
+
+    pub fn is_solved(&self) -> bool { self.access == Access::Solved }
+
+    pub fn replay(&mut self) { self.access = Access::Replay; }
+}
 
 // ========================================================================= //

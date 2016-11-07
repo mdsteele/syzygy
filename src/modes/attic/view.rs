@@ -41,15 +41,15 @@ pub struct View {
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect, attic: &AtticState)
+    pub fn new(resources: &mut Resources, visible: Rect, state: &AtticState)
                -> View {
         let background = resources.get_background("a_light_in_the_attic");
         let mut theater = Theater::new(background);
         let mut intro_scene = compile_intro_scene(resources);
         let mut outro_scene = compile_outro_scene(resources);
-        if attic.is_visited() {
+        if state.is_visited() {
             intro_scene.skip(&mut theater);
-            if attic.is_solved() {
+            if state.is_solved() {
                 outro_scene.skip(&mut theater);
             }
         } else {
@@ -62,40 +62,40 @@ impl View {
             screen_fade: ScreenFade::new(resources),
             hud: Hud::new(resources, visible, Location::ALightInTheAttic),
             toggles: vec![
-                ToggleLight::new(resources, attic, (1, 1), 'C'),
-                ToggleLight::new(resources, attic, (2, 1), 'Z'),
-                ToggleLight::new(resources, attic, (3, 1), 'H'),
-                ToggleLight::new(resources, attic, (4, 1), 'A'),
-                ToggleLight::new(resources, attic, (1, 2), 'U'),
-                ToggleLight::new(resources, attic, (2, 2), 'V'),
-                ToggleLight::new(resources, attic, (3, 2), 'X'),
-                ToggleLight::new(resources, attic, (4, 2), 'S'),
-                ToggleLight::new(resources, attic, (1, 3), 'J'),
-                ToggleLight::new(resources, attic, (2, 3), 'T'),
-                ToggleLight::new(resources, attic, (3, 3), 'I'),
-                ToggleLight::new(resources, attic, (4, 3), 'K'),
-                ToggleLight::new(resources, attic, (1, 4), 'Y'),
-                ToggleLight::new(resources, attic, (2, 4), 'O'),
-                ToggleLight::new(resources, attic, (3, 4), 'L'),
-                ToggleLight::new(resources, attic, (4, 4), 'N'),
+                ToggleLight::new(resources, state, (1, 1), 'C'),
+                ToggleLight::new(resources, state, (2, 1), 'Z'),
+                ToggleLight::new(resources, state, (3, 1), 'H'),
+                ToggleLight::new(resources, state, (4, 1), 'A'),
+                ToggleLight::new(resources, state, (1, 2), 'U'),
+                ToggleLight::new(resources, state, (2, 2), 'V'),
+                ToggleLight::new(resources, state, (3, 2), 'X'),
+                ToggleLight::new(resources, state, (4, 2), 'S'),
+                ToggleLight::new(resources, state, (1, 3), 'J'),
+                ToggleLight::new(resources, state, (2, 3), 'T'),
+                ToggleLight::new(resources, state, (3, 3), 'I'),
+                ToggleLight::new(resources, state, (4, 3), 'K'),
+                ToggleLight::new(resources, state, (1, 4), 'Y'),
+                ToggleLight::new(resources, state, (2, 4), 'O'),
+                ToggleLight::new(resources, state, (3, 4), 'L'),
+                ToggleLight::new(resources, state, (4, 4), 'N'),
             ],
             passives: vec![
-                PassiveLight::new(resources, attic, (1, 0)),
-                PassiveLight::new(resources, attic, (2, 0)),
-                PassiveLight::new(resources, attic, (3, 0)),
-                PassiveLight::new(resources, attic, (4, 0)),
-                PassiveLight::new(resources, attic, (1, 5)),
-                PassiveLight::new(resources, attic, (2, 5)),
-                PassiveLight::new(resources, attic, (3, 5)),
-                PassiveLight::new(resources, attic, (4, 5)),
-                PassiveLight::new(resources, attic, (0, 1)),
-                PassiveLight::new(resources, attic, (0, 2)),
-                PassiveLight::new(resources, attic, (0, 3)),
-                PassiveLight::new(resources, attic, (0, 4)),
-                PassiveLight::new(resources, attic, (5, 1)),
-                PassiveLight::new(resources, attic, (5, 2)),
-                PassiveLight::new(resources, attic, (5, 3)),
-                PassiveLight::new(resources, attic, (5, 4)),
+                PassiveLight::new(resources, state, (1, 0)),
+                PassiveLight::new(resources, state, (2, 0)),
+                PassiveLight::new(resources, state, (3, 0)),
+                PassiveLight::new(resources, state, (4, 0)),
+                PassiveLight::new(resources, state, (1, 5)),
+                PassiveLight::new(resources, state, (2, 5)),
+                PassiveLight::new(resources, state, (3, 5)),
+                PassiveLight::new(resources, state, (4, 5)),
+                PassiveLight::new(resources, state, (0, 1)),
+                PassiveLight::new(resources, state, (0, 2)),
+                PassiveLight::new(resources, state, (0, 3)),
+                PassiveLight::new(resources, state, (0, 4)),
+                PassiveLight::new(resources, state, (5, 1)),
+                PassiveLight::new(resources, state, (5, 2)),
+                PassiveLight::new(resources, state, (5, 3)),
+                PassiveLight::new(resources, state, (5, 4)),
             ],
             undo_stack: Vec::new(),
             redo_stack: Vec::new(),

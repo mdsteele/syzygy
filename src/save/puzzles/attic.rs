@@ -27,6 +27,8 @@ use super::super::util::{ACCESS_KEY, pop_array};
 
 const TOGGLED_KEY: &'static str = "toggled";
 
+const SOLVED_TOGGLED: &'static [i32] = &[0, 3, 4, 9, 10, 13, 15];
+
 // ========================================================================= //
 
 #[derive(Default)]
@@ -70,6 +72,11 @@ impl AtticState {
     pub fn replay(&mut self) {
         self.access = Access::Replay;
         self.toggled.clear();
+    }
+
+    pub fn solve(&mut self) {
+        self.access = Access::Solved;
+        self.toggled = SOLVED_TOGGLED.iter().cloned().collect();
     }
 
     pub fn is_lit(&self, pos: (i32, i32)) -> bool {
@@ -180,9 +187,8 @@ impl AtticState {
             } else {
                 self.toggled.insert(index);
             }
-            let correct: Vec<i32> = vec![0, 3, 4, 9, 10, 13, 15];
             let actual: Vec<i32> = self.toggled.iter().cloned().collect();
-            if actual == correct {
+            if &actual as &[i32] == SOLVED_TOGGLED {
                 self.access = Access::Solved;
             }
         }

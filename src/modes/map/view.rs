@@ -20,7 +20,7 @@
 use elements::{Hud, HudCmd, HudInput, ScreenFade};
 use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sprite,
           SubrectElement};
-use save::{Game, Location};
+use save::{Access, Game, Location};
 
 // ========================================================================= //
 
@@ -69,12 +69,12 @@ impl View {
     fn hud_input(&self) -> HudInput {
         HudInput {
             name: "The Map",
+            access: Access::Unvisited,
             is_paused: false,
             active: self.screen_fade.is_transparent(),
             can_undo: false,
             can_redo: false,
             can_reset: false,
-            can_replay: false,
         }
     }
 }

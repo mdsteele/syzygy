@@ -120,6 +120,12 @@ impl WreckedState {
         self.is_initial = true;
     }
 
+    pub fn solve(&mut self) {
+        self.access = Access::Solved;
+        self.grid = SOLVED_GRID.to_vec();
+        self.is_initial = false;
+    }
+
     pub fn tile_at(&self, col: i32, row: i32) -> Option<usize> {
         if col < 0 || col >= NUM_COLS || row < 0 || row >= NUM_ROWS {
             None

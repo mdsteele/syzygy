@@ -84,12 +84,12 @@ impl View {
         let scene = self.current_scene(state);
         HudInput {
             name: "Wrecked Angle",
+            access: state.access(),
             is_paused: scene.is_paused(),
             active: self.screen_fade.is_transparent() && scene.is_finished(),
             can_undo: !self.undo_stack.is_empty(),
             can_redo: !self.redo_stack.is_empty(),
             can_reset: !state.is_in_initial_configuration(),
-            can_replay: state.is_solved(),
         }
     }
 
@@ -111,6 +111,12 @@ impl View {
         self.undo_stack.clear();
         self.redo_stack.clear();
         state.reset();
+    }
+
+    fn solve(&mut self, state: &mut WreckedState) {
+        self.undo_stack.clear();
+        self.redo_stack.clear();
+        state.solve();
     }
 
     fn drain_queue(&mut self) {
@@ -168,6 +174,10 @@ impl Element<Game, PuzzleCmd> for View {
                 }
                 Some(&HudCmd::Replay) => {
                     self.screen_fade.fade_out_and_return(PuzzleCmd::Replay);
+                    subaction.but_no_value()
+                }
+                Some(&HudCmd::Solve) => {
+                    self.solve(state);
                     subaction.but_no_value()
                 }
                 None => subaction.but_no_value(),

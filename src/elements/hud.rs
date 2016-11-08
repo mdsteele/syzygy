@@ -23,7 +23,7 @@ use std::rc::Rc;
 use elements::Paragraph;
 use gui::{Action, Align, Canvas, Element, Event, Font, GroupElement, Point,
           Rect, Resources, Sprite, SubrectElement};
-use save::Location;
+use save::{Access, Location};
 
 // ========================================================================= //
 
@@ -38,12 +38,12 @@ const PAUSE_TEXT_MARGIN: i32 = 2;
 
 pub struct HudInput {
     pub name: &'static str,
+    pub access: Access,
     pub is_paused: bool,
     pub active: bool,
     pub can_undo: bool,
     pub can_redo: bool,
     pub can_reset: bool,
-    pub can_replay: bool,
 }
 
 #[derive(Clone, Copy, Eq, PartialEq)]
@@ -54,6 +54,7 @@ pub enum HudCmd {
     Redo,
     Reset,
     Replay,
+    Solve,
 }
 
 // ========================================================================= //
@@ -69,10 +70,11 @@ impl Hud {
         let cx = visible.left() + visible.width() as i32 / 2;
         let elements: Vec<Box<Element<HudInput, HudCmd>>> = vec![
             Box::new(PauseIndicator::new(resources, visible)),
-            Hud::button(resources, location, HudCmd::Back, cx - 160, bot),
-            Hud::button(resources, location, HudCmd::Info, cx - 95, bot),
-            Hud::button(resources, location, HudCmd::Undo, cx + 96, bot),
-            Hud::button(resources, location, HudCmd::Redo, cx + 149, bot),
+            Hud::button(resources, location, HudCmd::Solve, cx - 204, bot),
+            Hud::button(resources, location, HudCmd::Back, cx - 140, bot),
+            Hud::button(resources, location, HudCmd::Info, cx - 84, bot),
+            Hud::button(resources, location, HudCmd::Undo, cx + 97, bot),
+            Hud::button(resources, location, HudCmd::Redo, cx + 150, bot),
             Hud::button(resources, location, HudCmd::Reset, cx + 210, bot),
             Hud::button(resources, location, HudCmd::Replay, cx + 160, bot),
             Hud::namebox(resources, cx, bot),
@@ -129,6 +131,7 @@ impl HudButton {
             HudCmd::Redo => 4,
             HudCmd::Reset => 5,
             HudCmd::Replay => 6,
+            HudCmd::Solve => 7,
         };
         let sprite = sprites[index].clone();
         let rect = Rect::new(center_x - sprite.width() as i32 / 2,
@@ -145,13 +148,15 @@ impl HudButton {
 
     fn enabled(&self, input: &HudInput) -> bool {
         let active = input.active;
+        let solved = input.access == Access::Solved;
         match self.value {
             HudCmd::Back => active,
             HudCmd::Info => active,
-            HudCmd::Undo => active && input.can_undo && !input.can_replay,
-            HudCmd::Redo => active && input.can_redo && !input.can_replay,
-            HudCmd::Reset => active && input.can_reset && !input.can_replay,
-            HudCmd::Replay => active && input.can_replay,
+            HudCmd::Undo => active && input.can_undo && !solved,
+            HudCmd::Redo => active && input.can_redo && !solved,
+            HudCmd::Reset => active && input.can_reset && !solved,
+            HudCmd::Replay => active && solved,
+            HudCmd::Solve => active && input.access == Access::Replay,
         }
     }
 }

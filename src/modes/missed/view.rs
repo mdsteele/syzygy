@@ -79,12 +79,12 @@ impl View {
         let scene = self.current_scene(state);
         HudInput {
             name: "Missed Connections",
+            access: state.access(),
             is_paused: scene.is_paused(),
             active: self.screen_fade.is_transparent() && scene.is_finished(),
             can_undo: !self.undo_stack.is_empty(),
             can_redo: !self.redo_stack.is_empty(),
             can_reset: false,
-            can_replay: state.is_solved(),
         }
     }
 
@@ -172,6 +172,10 @@ impl Element<Game, PuzzleCmd> for View {
                 }
                 Some(&HudCmd::Replay) => {
                     self.screen_fade.fade_out_and_return(PuzzleCmd::Replay);
+                    subaction.but_no_value()
+                }
+                Some(&HudCmd::Solve) => {
+                    // TODO solve
                     subaction.but_no_value()
                 }
                 None => subaction.but_no_value(),

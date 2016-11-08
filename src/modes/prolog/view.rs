@@ -73,13 +73,13 @@ impl View {
     fn hud_input(&self, state: &PrologState) -> HudInput {
         HudInput {
             name: "Prolog",
+            access: state.access(),
             is_paused: self.scene.is_paused(),
             active: self.screen_fade.is_transparent() &&
                     self.scene.is_finished(),
             can_undo: false,
             can_redo: false,
             can_reset: false,
-            can_replay: state.is_solved(),
         }
     }
 

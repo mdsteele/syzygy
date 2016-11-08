@@ -25,6 +25,10 @@ use super::super::util::{ACCESS_KEY, pop_array};
 
 // ========================================================================= //
 
+const TOGGLED_KEY: &'static str = "toggled";
+
+// ========================================================================= //
+
 #[derive(Default)]
 pub struct AtticState {
     access: Access,
@@ -35,11 +39,11 @@ impl AtticState {
     pub fn from_toml(mut table: toml::Table) -> AtticState {
         AtticState {
             access: Access::from_toml(table.get(ACCESS_KEY)),
-            toggled: pop_array(&mut table, "toggled")
+            toggled: pop_array(&mut table, TOGGLED_KEY)
                          .iter()
                          .filter_map(|value| value.as_integer())
-                         .map(|idx| idx as i32)
                          .filter(|&idx| 0 <= idx && idx < 16)
+                         .map(|idx| idx as i32)
                          .collect(),
         }
     }
@@ -51,7 +55,7 @@ impl AtticState {
                           .iter()
                           .map(|&idx| toml::Value::Integer(idx as i64))
                           .collect();
-        table.insert("toggled".to_string(), toml::Value::Array(toggled));
+        table.insert(TOGGLED_KEY.to_string(), toml::Value::Array(toggled));
         toml::Value::Table(table)
     }
 

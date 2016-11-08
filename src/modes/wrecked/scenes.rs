@@ -24,8 +24,17 @@ use gui::Resources;
 
 pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
-        Ast::Place(0, "Tezure", (-16, 304)),
-        Ast::Slide(0, (304, 304), true, true, 1.0),
+        Ast::Seq(vec![
+            Ast::Place(1, "Elinsa", (348, 304)),
+            Ast::Place(0, "Tezure", (-16, 80)),
+            Ast::Slide(0, (140, 80), true, true, 1.0),
+            Ast::Wait(1.0),
+            Ast::Queue(0, 1),
+            Ast::Wait(1.0),
+            Ast::Queue(0, 2),
+            Ast::Wait(1.0),
+            Ast::Queue(0, -3),
+        ]),
     ];
     Ast::compile_scene(resources, ast)
 }
@@ -34,7 +43,12 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
 
 pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
-        Ast::Slide(0, (592, 304), true, false, 1.0),
+        Ast::Seq(vec![
+            Ast::Queue(0, 0),
+            Ast::Wait(1.0),
+            Ast::Slide(0, (-16, 80), true, false, 1.0),
+            Ast::Queue(0, -1),
+        ]),
     ];
     Ast::compile_scene(resources, ast)
 }

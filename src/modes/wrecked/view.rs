@@ -117,6 +117,7 @@ impl View {
         self.undo_stack.clear();
         self.redo_stack.clear();
         state.solve();
+        self.outro_scene.begin(&mut self.theater);
     }
 
     fn drain_queue(&mut self) {
@@ -186,9 +187,17 @@ impl Element<Game, PuzzleCmd> for View {
         if !action.should_stop() {
             let subaction = self.grid.handle_event(event, state);
             if let Some(&(dir, rank)) = subaction.value() {
-                self.undo_stack.push((dir, rank));
-                self.redo_stack.clear();
                 state.shift_tiles(dir, rank);
+                if state.is_solved() {
+                    if cfg!(debug_assertions) {
+                        println!("Puzzle solved, beginning outro.");
+                    }
+                    self.outro_scene.begin(&mut self.theater);
+                    self.undo_stack.clear();
+                } else {
+                    self.undo_stack.push((dir, rank));
+                }
+                self.redo_stack.clear();
             }
             action.merge(subaction.but_no_value());
         }
@@ -416,7 +425,7 @@ impl Element<WreckedState, PuzzleCmd> for SolutionDisplay {
                                         SOLUTION_TOP + 18),
                              "Status:");
             let status = if state.is_solved() {
-                "FIXED!"
+                "Fixed, sorta."
             } else {
                 "BORKEN"
             };

@@ -42,7 +42,7 @@ pub enum Ast {
     Dark(bool),
     Jump(i32, (i32, i32), f64),
     Light(i32, bool),
-    Place(i32, &'static str, (i32, i32)),
+    Place(i32, &'static str, usize, (i32, i32)),
     Queue(i32, i32),
     Remove(i32),
     Slide(i32, (i32, i32), bool, bool, f64),
@@ -92,21 +92,9 @@ impl Ast {
                 };
                 Box::new(LightNode::new(slot, sprite))
             }
-            Ast::Place(slot, name, (x, y)) => {
-                let sprite = match name {
-                    "Argony" => resources.get_sprites("chars")[1].clone(),
-                    "Elinsa" => resources.get_sprites("chars")[0].clone(),
-                    "Relyng" => resources.get_sprites("chars")[5].clone(),
-                    "Tezure" => resources.get_sprites("chars")[2].clone(),
-                    "Ugrent" => resources.get_sprites("chars")[4].clone(),
-                    "Yttris" => resources.get_sprites("chars")[3].clone(),
-                    _ => {
-                        resources.get_font("block").glyph('?').sprite().clone()
-                    }
-                };
-                Box::new(PlaceNode::new(slot,
-                                        sprite.clone(),
-                                        Point::new(x, y)))
+            Ast::Place(slot, name, index, (x, y)) => {
+                let sprite = resources.get_sprites(name)[index].clone();
+                Box::new(PlaceNode::new(slot, sprite, Point::new(x, y)))
             }
             Ast::Queue(v1, v2) => Box::new(QueueNode::new((v1, v2))),
             Ast::Remove(slot) => Box::new(RemoveNode::new(slot)),

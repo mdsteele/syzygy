@@ -99,6 +99,7 @@ impl Theater {
     pub fn set_dark(&mut self, dark: bool) { self.dark = dark; }
 
     pub fn draw_background(&self, canvas: &mut Canvas) {
+        canvas.clear(self.background.color());
         for (&index, actor) in self.actors.iter() {
             if index >= 0 {
                 break;

@@ -25,7 +25,7 @@ use gui::Resources;
 pub fn compile_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
-            Ast::Place(0, "Tezure", (-16, 320)),
+            Ast::Place(0, "chars/tezure", 0, (-16, 320)),
             Ast::Slide(0, (160, 320), true, false, 1.0),
             Ast::Jump(0, (208, 304), 0.5),
             Ast::Slide(0, (256, 304), false, false, 0.25),

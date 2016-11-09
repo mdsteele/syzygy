@@ -25,7 +25,8 @@ use gui::Resources;
 pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
-            Ast::Place(1, "Elinsa", (348, 304)),
+            Ast::Place(-1, "wrecked/bridge", 0, (432, 320)),
+            Ast::Place(1, "chars/elinsa", 0, (348, 304)),
             Ast::Wait(1.0),
             Ast::Talk(1, TalkStyle::Thought, TalkPos::NW,
                       "Ugh.  Stupid piece of junk.  Why\n\
@@ -33,7 +34,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         ]),
         Ast::Par(vec![
             Ast::Seq(vec![
-                Ast::Place(0, "Tezure", (-16, 80)),
+                Ast::Place(0, "chars/tezure", 0, (-16, 80)),
                 Ast::Slide(0, (140, 80), true, true, 1.0),
                 Ast::Talk(0, TalkStyle::Normal, TalkPos::SE,
                           "Oh, hi down there!"),
@@ -104,7 +105,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
                       "$CYou want to help?  Fine.  I'll\n\
                        tell you how you can help."),
         ]),
-        Ast::Par(vec![
+        Ast::Seq(vec![
             Ast::Talk(1, TalkStyle::Normal, TalkPos::NW,
                       "$CYou can fix this for me.  I've got\n\
                        more important things to be doing."),
@@ -177,7 +178,7 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
                       "Hey Elinsa, I did it!"),
         ]),
         Ast::Seq(vec![
-            Ast::Slide(1, (432, 304), false, true, 0.5),
+            Ast::Slide(1, (432, 306), false, true, 0.5),
             Ast::Talk(1, TalkStyle::Normal, TalkPos::NW,
                       "Huh?  You fixed it??"),
         ]),
@@ -199,10 +200,16 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
                        I can try to help fix?"),
         ]),
         Ast::Seq(vec![
-            Ast::Talk(0, TalkStyle::Normal, TalkPos::SE,
-                      "Er, like, maybe that support beam?"),
+            Ast::Place(-1, "wrecked/bridge", 1, (432, 320)),
+            Ast::Place(1, "chars/elinsa", 0, (432, 307)),
+            Ast::Talk(1, TalkStyle::Normal, TalkPos::NW, "!"),
         ]),
         Ast::Seq(vec![
+            Ast::Talk(0, TalkStyle::Normal, TalkPos::SE,
+                      "...maybe that support beam?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Place(-1, "wrecked/bridge", 2, (432, 320)),
             Ast::Jump(1, (432, 416), 0.75),
             Ast::Wait(0.25),
             Ast::Talk(1, TalkStyle::Normal, TalkPos::NW, "%#$$@&!!"),

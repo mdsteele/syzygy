@@ -94,7 +94,6 @@ impl<'a> Canvas<'a> {
     }
 
     pub fn draw_background(&mut self, background: &Background) {
-        self.clear(background.color());
         for (sprite, point) in background.tiles() {
             self.draw_sprite(sprite, point);
         }

@@ -26,7 +26,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
             Ast::Dark(true),
-            Ast::Place(0, "Tezure", (-16, 320)),
+            Ast::Place(0, "chars/tezure", 0, (-16, 320)),
             Ast::Light(0, true),
             Ast::Slide(0, (88, 320), true, true, 1.0),
             Ast::Talk(0, TalkStyle::Normal, TalkPos::NE,
@@ -56,7 +56,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             ]),
         ]),
         Ast::Seq(vec![
-            Ast::Place(1, "Argony", (-16, 112)),
+            Ast::Place(1, "chars/argony", 0, (-16, 112)),
             Ast::Light(1, true),
             Ast::Slide(1, (170, 112), false, true, 0.5),
             Ast::Talk(1, TalkStyle::Normal, TalkPos::SE,

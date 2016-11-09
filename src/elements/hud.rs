@@ -112,10 +112,12 @@ impl Element<HudInput, HudCmd> for Hud {
 // ========================================================================= //
 
 struct HudButton {
-    sprite: Sprite,
+    base_sprite: Sprite,
+    blink_sprite: Sprite,
     rect: Rect,
     value: HudCmd,
     scroll: i32,
+    blink_frames: i32,
 }
 
 impl HudButton {
@@ -125,13 +127,13 @@ impl HudButton {
         let sprites = resources.get_sprites("hud_buttons");
         let index = match value {
             HudCmd::Back if location == Location::Map => 0,
-            HudCmd::Back => 1,
-            HudCmd::Info => 2,
-            HudCmd::Undo => 3,
-            HudCmd::Redo => 4,
-            HudCmd::Reset => 5,
-            HudCmd::Replay => 6,
-            HudCmd::Solve => 7,
+            HudCmd::Back => 2,
+            HudCmd::Info => 4,
+            HudCmd::Undo => 6,
+            HudCmd::Redo => 8,
+            HudCmd::Reset => 10,
+            HudCmd::Replay => 12,
+            HudCmd::Solve => 14,
         };
         let sprite = sprites[index].clone();
         let rect = Rect::new(center_x - sprite.width() as i32 / 2,
@@ -139,10 +141,12 @@ impl HudButton {
                              sprite.width(),
                              sprite.height());
         HudButton {
-            sprite: sprite,
+            base_sprite: sprite,
+            blink_sprite: sprites[index + 1].clone(),
             rect: rect,
             value: value,
             scroll: BUTTON_HEIGHT as i32,
+            blink_frames: 0,
         }
     }
 
@@ -164,27 +168,38 @@ impl HudButton {
 impl Element<HudInput, HudCmd> for HudButton {
     fn draw(&self, _: &HudInput, canvas: &mut Canvas) {
         let top_left = Point::new(self.rect.x(), self.rect.y() + self.scroll);
-        canvas.draw_sprite(&self.sprite, top_left);
+        if self.blink_frames > 0 {
+            canvas.draw_sprite(&self.blink_sprite, top_left);
+        } else {
+            canvas.draw_sprite(&self.base_sprite, top_left);
+        }
     }
 
     fn handle_event(&mut self, event: &Event, input: &mut HudInput)
                     -> Action<HudCmd> {
         match event {
             &Event::ClockTick => {
+                let mut redraw = false;
+                if self.blink_frames > 0 {
+                    self.blink_frames -= 1;
+                    if self.blink_frames <= 0 {
+                        redraw = true;
+                    }
+                }
                 let enabled = self.enabled(input);
                 if enabled && self.scroll > 0 {
                     self.scroll = cmp::max(0, self.scroll - SCROLL_SPEED);
-                    Action::redraw()
+                    redraw = true;
                 } else if !enabled && self.scroll < BUTTON_HEIGHT as i32 {
                     self.scroll = cmp::min(BUTTON_HEIGHT as i32,
                                            self.scroll + SCROLL_SPEED);
-                    Action::redraw()
-                } else {
-                    Action::ignore()
+                    redraw = true;
                 }
+                Action::redraw_if(redraw)
             }
             &Event::MouseDown(pt) if self.scroll == 0 && self.enabled(input) &&
                                      self.rect.contains(pt) => {
+                self.blink_frames = 3;
                 Action::redraw().and_return(self.value)
             }
             _ => Action::ignore(),

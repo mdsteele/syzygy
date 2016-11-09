@@ -70,7 +70,8 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
                        for calibrating our attitude thrusters.\n\
                        At the moment, it happens to also be\n\
                        1) shot to hell, and therefore\n\
-                       2) a complete waste of my time."),
+                       2) a complete waste of my time.\n\
+                       Any other questions?"),
         ]),
         Ast::Seq(vec![
             Ast::Talk(0, TalkStyle::Normal, TalkPos::SE,
@@ -81,7 +82,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Talk(1, TalkStyle::Normal, TalkPos::NW,
                       "$COh, $isure$r.  Why don't you\n\
                        run down to the supply depot and\n\
-                       fetch me a can of elbow grease?\n\
+                       fetch me a jar of elbow grease?\n\
                        That would be a $ihuge$r help."),
         ]),
         Ast::Seq(vec![
@@ -118,12 +119,12 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Wait(0.75),
             Ast::Talk(0, TalkStyle::Normal, TalkPos::SE,
-                      "Wait, how will I know when it's fixed?"),
+                      "Er, how will I know when it's fixed?"),
         ]),
         Ast::Seq(vec![
             Ast::Slide(1, (480, 304), false, true, 0.5),
             Ast::Par(vec![
-                Ast::Talk(1, TalkStyle::Normal, TalkPos::NW,
+                Ast::Talk(1, TalkStyle::Normal, TalkPos::W,
                           "$C$iSigh.$r  See that big thing?\n\
                            You need to make it look like this."),
                 Ast::Jump(1, (480, 304), 0.5),
@@ -138,12 +139,12 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         ]),
         Ast::Seq(vec![
             Ast::Talk(0, TalkStyle::Normal, TalkPos::SE,
-                      "$CBut...the big thingy has a\n\
-                       bunch of giant holes in it."),
+                      "$CBut...this one has a bunch\n\
+                       of giant holes in it."),
         ]),
         Ast::Seq(vec![
             Ast::Par(vec![
-                Ast::Talk(1, TalkStyle::Normal, TalkPos::NW,
+                Ast::Talk(1, TalkStyle::Normal, TalkPos::W,
                           "Ugh, fine, make it look like this, then."),
                 Ast::Seq(vec![
                     Ast::Jump(1, (480, 304), 0.5),
@@ -202,9 +203,9 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
                       "Er, like, maybe that support beam?"),
         ]),
         Ast::Seq(vec![
-            Ast::Jump(1, (432, 416), 0.8),
+            Ast::Jump(1, (432, 416), 0.75),
             Ast::Wait(0.25),
-            Ast::Talk(1, TalkStyle::Normal, TalkPos::NW, "%#$@&!!"),
+            Ast::Talk(1, TalkStyle::Normal, TalkPos::NW, "%#$$@&!!"),
         ]),
     ];
     Ast::compile_scene(resources, ast)

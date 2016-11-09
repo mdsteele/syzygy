@@ -24,6 +24,7 @@ use std::rc::Rc;
 
 use elements::Paragraph;
 use gui::{Background, Canvas, Point, Rect, Sound, Sprite};
+use save::Direction;
 
 // ========================================================================= //
 
@@ -222,9 +223,9 @@ struct SpeechBubble {
     sprites: Vec<Sprite>,
     paragraph: Rc<Paragraph>,
     rect: Rect,
-    tail_x: i32,
-    east: bool,
-    south: bool,
+    tail_pos: Point,
+    tail_dir: Direction,
+    tail_flip_vert: bool,
 }
 
 impl SpeechBubble {
@@ -238,24 +239,48 @@ impl SpeechBubble {
         let height = round_up_to_16(cmp::max(32,
                                              paragraph.height() as i32 +
                                              2 * SPEECH_MARGIN));
-        let tail_x = actor_rect.left() + actor_rect.width() as i32 / 2;
-        let (left, east) = match positioning {
-            TalkPos::NW | TalkPos::SW => (tail_x + 16 - width, false),
-            TalkPos::NE | TalkPos::SE => (tail_x - 16, true),
-        };
-        let (top, south) = match positioning {
-            TalkPos::NE | TalkPos::NW => {
-                (actor_rect.top() - height - 18, false)
+        let tail_x = match positioning {
+            TalkPos::NW | TalkPos::NE | TalkPos::SW | TalkPos::SE => {
+                actor_rect.left() + actor_rect.width() as i32 / 2
             }
-            TalkPos::SE | TalkPos::SW => (actor_rect.bottom() + 18, true),
+            TalkPos::W => actor_rect.left() - 10,
+            TalkPos::E => actor_rect.right() + 10,
+        };
+        let tail_y = match positioning {
+            TalkPos::W | TalkPos::E => {
+                actor_rect.top() + actor_rect.height() as i32 / 2
+            }
+            TalkPos::NW | TalkPos::NE => actor_rect.top() - 10,
+            TalkPos::SW | TalkPos::SE => actor_rect.bottom() + 10,
+        };
+        let left = match positioning {
+            TalkPos::NW | TalkPos::SW => tail_x + 16 - width,
+            TalkPos::NE | TalkPos::SE => tail_x - 16,
+            TalkPos::W => tail_x - 8 - width,
+            TalkPos::E => tail_x + 8,
+        };
+        let top = match positioning {
+            TalkPos::NW | TalkPos::NE => tail_y - 8 - height,
+            TalkPos::SW | TalkPos::SE => tail_y + 8,
+            TalkPos::W | TalkPos::E => tail_y + 8 - height,
+        };
+        let tail_dir = match positioning {
+            TalkPos::E => Direction::East,
+            TalkPos::SW | TalkPos::SE => Direction::South,
+            TalkPos::W => Direction::West,
+            TalkPos::NW | TalkPos::NE => Direction::North,
+        };
+        let tail_flip_vert = match positioning {
+            TalkPos::NE | TalkPos::SW | TalkPos::W => true,
+            TalkPos::NW | TalkPos::SE | TalkPos::E => false,
         };
         SpeechBubble {
             sprites: bubble_sprites,
             paragraph: paragraph,
             rect: Rect::new(left, top, width as u32, height as u32),
-            tail_x: tail_x,
-            east: east,
-            south: south,
+            tail_pos: Point::new(tail_x, tail_y),
+            tail_dir: tail_dir,
+            tail_flip_vert: tail_flip_vert,
         }
     }
 
@@ -303,23 +328,17 @@ impl SpeechBubble {
                                        (bottom - 16) as u32));
         }
         // Draw tail:
-        {
-            let (base_y, tail_y) = if self.south {
-                (self.rect.top() + 8, self.rect.top() - 8)
-            } else {
-                (self.rect.bottom() - 8, self.rect.bottom() + 8)
-            };
-            canvas.draw_sprite_transformed(&self.sprites[3],
-                                           Point::new(self.tail_x, base_y),
-                                           0,
-                                           self.east,
-                                           self.south);
-            canvas.draw_sprite_transformed(&self.sprites[4],
-                                           Point::new(self.tail_x, tail_y),
-                                           0,
-                                           self.east,
-                                           self.south);
-        }
+        canvas.draw_sprite_transformed(&self.sprites[4],
+                                       self.tail_pos,
+                                       self.tail_dir.degrees(),
+                                       false,
+                                       self.tail_flip_vert);
+        canvas.draw_sprite_transformed(&self.sprites[3],
+                                       self.tail_pos +
+                                       self.tail_dir.delta() * 16,
+                                       self.tail_dir.degrees(),
+                                       false,
+                                       self.tail_flip_vert);
         // Draw text:
         {
             let width = self.paragraph.min_width();
@@ -350,6 +369,8 @@ fn round_up_to_16(mut size: i32) -> i32 {
 pub enum TalkPos {
     NE,
     NW,
+    E,
+    W,
     SE,
     SW,
 }

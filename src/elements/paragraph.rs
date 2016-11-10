@@ -49,8 +49,9 @@ pub struct Paragraph {
 }
 
 impl Paragraph {
-    pub fn new(resources: &mut Resources, text: &str) -> Paragraph {
-        let mut parser = Parser::new(resources);
+    pub fn new(resources: &mut Resources, init_align: Align, text: &str)
+               -> Paragraph {
+        let mut parser = Parser::new(resources, init_align);
         let mut chars = text.chars();
         while let Some(chr) = chars.next() {
             if chr == '$' {
@@ -229,11 +230,11 @@ struct Parser<'a, 'b: 'a> {
 }
 
 impl<'a, 'b> Parser<'a, 'b> {
-    fn new(resources: &'a mut Resources<'b>) -> Parser<'a, 'b> {
+    fn new(resources: &'a mut Resources<'b>, align: Align) -> Parser<'a, 'b> {
         Parser {
             resources: resources,
             current_font: "roman".to_string(),
-            current_align: Align::Left,
+            current_align: align,
             current_line: Line::new(),
             current_piece: String::new(),
             lines: Vec::new(),

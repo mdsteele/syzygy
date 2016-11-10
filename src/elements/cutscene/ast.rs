@@ -18,7 +18,7 @@
 // +--------------------------------------------------------------------------+
 
 use elements::Paragraph;
-use gui::{Point, Resources, Sound};
+use gui::{Align, Point, Resources, Sound};
 use super::scene::{DarkNode, JumpNode, LightNode, LoopNode, ParallelNode,
                    PlaceNode, QueueNode, RemoveNode, Scene, SceneNode,
                    SequenceNode, SlideNode, SoundNode, TalkNode, WaitNode};
@@ -112,10 +112,8 @@ impl Ast {
                     TalkStyle::Thought => "speech/thought",
                 };
                 let bubble_sprites = resources.get_sprites(bubble_name);
-                Box::new(TalkNode::new(slot,
-                                       bubble_sprites,
-                                       pos,
-                                       Paragraph::new(resources, text)))
+                let paragraph = Paragraph::new(resources, Align::Center, text);
+                Box::new(TalkNode::new(slot, bubble_sprites, pos, paragraph))
             }
             Ast::Wait(duration) => Box::new(WaitNode::new(duration)),
         }

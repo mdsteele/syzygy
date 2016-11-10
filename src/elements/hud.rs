@@ -242,7 +242,7 @@ struct PauseIndicator {
 
 impl PauseIndicator {
     fn new(resources: &mut Resources, visible: Rect) -> PauseIndicator {
-        let paragraph = Paragraph::new(resources, PAUSE_TEXT);
+        let paragraph = Paragraph::new(resources, Align::Center, PAUSE_TEXT);
         let inner_width = paragraph.min_width();
         let outer_width = inner_width + 2 * PAUSE_TEXT_MARGIN;
         let inner_height = paragraph.height();

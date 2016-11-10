@@ -68,7 +68,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         ]),
         Ast::Seq(vec![
             Ast::Talk(0, TalkStyle::Normal, TalkPos::NE,
-                      "$CI'm supposed to be helping to\n\
+                      "I'm supposed to be helping to\n\
                        repair the system, but I barely\n\
                        even know what I'm doing."),
         ]),
@@ -77,7 +77,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         ]),
         Ast::Seq(vec![
             Ast::Talk(1, TalkStyle::Normal, TalkPos::SE,
-                      "$CPerhaps I might offer\n\
+                      "Perhaps I might offer\n\
                        a suggestion, child?"),
         ]),
         Ast::Seq(vec![
@@ -86,7 +86,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         ]),
         Ast::Seq(vec![
             Ast::Talk(1, TalkStyle::Normal, TalkPos::SE,
-                      "$CPerhaps, instead of blundering\n\
+                      "Perhaps, instead of blundering\n\
                        around into walls like an idiot, you\n\
                        should turn the lights on first."),
         ]),
@@ -124,23 +124,23 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
         ]),
         Ast::Seq(vec![
             Ast::Talk(1, TalkStyle::Normal, TalkPos::SE,
-                      "$CAnd, once again, age and wisdom and\n\
+                      "And, once again, age and wisdom and\n\
                        patience triumph over...whatever it\n\
                        is that you kids are into these days."),
         ]),
         Ast::Seq(vec![
             Ast::Talk(0, TalkStyle::Normal, TalkPos::NE,
-                      "$CThank you, I appreciate\n\
+                      "Thank you, I appreciate\n\
                        the help, Ms-"),
         ]),
         Ast::Seq(vec![
             Ast::Talk(0, TalkStyle::Normal, TalkPos::NE,
-                      "$C...er, I don't think I\n\
+                      "...er, I don't think I\n\
                        caught your name, sorry."),
         ]),
         Ast::Seq(vec![
             Ast::Talk(1, TalkStyle::Normal, TalkPos::SE,
-                      "$CThat's because you didn't\n\
+                      "That's because you didn't\n\
                        think to ask before."),
         ]),
         Ast::Seq(vec![
@@ -153,7 +153,7 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
         ]),
         Ast::Seq(vec![
             Ast::Talk(1, TalkStyle::Normal, TalkPos::SE,
-                      "$CLikewise.  Now get back to work,\n\
+                      "Likewise.  Now get back to work,\n\
                        whippersnapper.  The system is a wreck."),
         ]),
         Ast::Par(vec![
@@ -169,7 +169,7 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
         ]),
         Ast::Seq(vec![
             Ast::Talk(1, TalkStyle::Thought, TalkPos::SE,
-                      "$CI wonder where Relyng's\n\
+                      "I wonder where Relyng's\n\
                        gone off to?"),
         ]),
         Ast::Seq(vec![

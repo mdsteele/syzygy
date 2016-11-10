@@ -46,27 +46,27 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         ]),
         Ast::Seq(vec![
             Ast::Talk(0, TalkStyle::Normal, TalkPos::SE,
-                      "$CI'm Tezure, the new administrator\n\
+                      "I'm Tezure, the new administrator\n\
                        process.  Who are you?"),
         ]),
         Ast::Seq(vec![
             Ast::Talk(1, TalkStyle::Normal, TalkPos::NW,
-                      "$CElinsa, chief engineer.\n\
+                      "Elinsa, chief engineer.\n\
                        And I'm extremely busy."),
         ]),
         Ast::Seq(vec![
             Ast::Talk(0, TalkStyle::Normal, TalkPos::SE,
-                      "$COh.  What's that thing you're\n\
+                      "Oh.  What's that thing you're\n\
                        working on?  It looks...broken."),
         ]),
         Ast::Seq(vec![
             Ast::Talk(1, TalkStyle::Normal, TalkPos::NW,
-                      "$CYes $ithank you$r, how\n\
+                      "Yes $ithank you$r, how\n\
                        observant of you."),
         ]),
         Ast::Seq(vec![
             Ast::Talk(1, TalkStyle::Normal, TalkPos::NW,
-                      "$CIt's a tri-state quantum ion\n\
+                      "It's a tri-state quantum ion\n\
                        transmission power alignment grid,\n\
                        for calibrating our attitude thrusters.\n\
                        At the moment, it happens to also be\n\
@@ -76,19 +76,19 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         ]),
         Ast::Seq(vec![
             Ast::Talk(0, TalkStyle::Normal, TalkPos::SE,
-                      "$CUm, any way I can help?  I'm\n\
+                      "Um, any way I can help?  I'm\n\
                        supposed to be helping."),
         ]),
         Ast::Seq(vec![
             Ast::Talk(1, TalkStyle::Normal, TalkPos::NW,
-                      "$COh, $isure$r.  Why don't you\n\
+                      "Oh, $isure$r.  Why don't you\n\
                        run down to the supply depot and\n\
                        fetch me a jar of elbow grease?\n\
                        That would be a $ihuge$r help."),
         ]),
         Ast::Seq(vec![
             Ast::Talk(0, TalkStyle::Normal, TalkPos::SE,
-                      "$CCome on, don't give me that.\n\
+                      "Come on, don't give me that.\n\
                        I wasn't born yesterday."),
         ]),
         Ast::Seq(vec![
@@ -97,24 +97,24 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         ]),
         Ast::Seq(vec![
             Ast::Talk(0, TalkStyle::Normal, TalkPos::SE,
-                      "$CAnyway, if you don't want my help,\n\
+                      "Anyway, if you don't want my help,\n\
                        just say so.  There's no need to be rude."),
         ]),
         Ast::Seq(vec![
             Ast::Talk(1, TalkStyle::Normal, TalkPos::NW,
-                      "$CYou want to help?  Fine.  I'll\n\
+                      "You want to help?  Fine.  I'll\n\
                        tell you how you can help."),
         ]),
         Ast::Seq(vec![
             Ast::Talk(1, TalkStyle::Normal, TalkPos::NW,
-                      "$CYou can fix this for me.  I've got\n\
+                      "You can fix this for me.  I've got\n\
                        more important things to be doing."),
         ]),
         Ast::Seq(vec![
             Ast::Slide(1, (592, 304), true, false, 0.5),
             Ast::Wait(0.25),
             Ast::Talk(0, TalkStyle::Normal, TalkPos::SE,
-                      "$COkay.  Yeah!  I can totally\n\
+                      "Okay.  Yeah!  I can totally\n\
                        figure this out."),
         ]),
         Ast::Seq(vec![
@@ -126,7 +126,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Slide(1, (480, 304), false, true, 0.5),
             Ast::Par(vec![
                 Ast::Talk(1, TalkStyle::Normal, TalkPos::W,
-                          "$C$iSigh.$r  See that big thing?\n\
+                          "$iSigh.$r  See that big thing?\n\
                            You need to make it look like this."),
                 Ast::Jump(1, (480, 304), 0.5),
                 Ast::Seq(vec![
@@ -140,7 +140,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         ]),
         Ast::Seq(vec![
             Ast::Talk(0, TalkStyle::Normal, TalkPos::SE,
-                      "$CBut...this one has a bunch\n\
+                      "But...this one has a bunch\n\
                        of giant holes in it."),
         ]),
         Ast::Seq(vec![
@@ -184,19 +184,19 @@ pub fn compile_outro_scene(resources: &mut Resources, visible: Rect) -> Scene {
         ]),
         Ast::Seq(vec![
             Ast::Talk(1, TalkStyle::Normal, TalkPos::NW,
-                      "$CI'm...impressed, actually.\n\
+                      "I'm...impressed, actually.\n\
                        This really is a big help.\n\
                        Sorry for being a jerk earlier."),
         ]),
         Ast::Seq(vec![
             Ast::Talk(0, TalkStyle::Normal, TalkPos::SE,
-                      "$CIt's okay.  I know you're probably\n\
+                      "It's okay.  I know you're probably\n\
                        under a lot of stress."),
         ]),
         Ast::Seq(vec![
             Ast::Wait(0.75),
             Ast::Talk(0, TalkStyle::Normal, TalkPos::SE,
-                      "$CWell, is there anything else\n\
+                      "Well, is there anything else\n\
                        I can try to help fix?"),
         ]),
         Ast::Seq(vec![
@@ -233,7 +233,7 @@ pub fn compile_outro_scene(resources: &mut Resources, visible: Rect) -> Scene {
         ]),
         Ast::Seq(vec![
             Ast::Talk(1, TalkStyle::Normal, TalkPos::NW,
-                      "$CI'll be fine.  Just...go find\n\
+                      "I'll be fine.  Just...go find\n\
                        something else to fix."),
         ]),
         Ast::Seq(vec![
@@ -241,7 +241,7 @@ pub fn compile_outro_scene(resources: &mut Resources, visible: Rect) -> Scene {
         ]),
         Ast::Seq(vec![
             Ast::Talk(1, TalkStyle::Normal, TalkPos::NW,
-                      "$CDo you actually have any way to\n\
+                      "Do you actually have any way to\n\
                        pull me back up from there?"),
         ]),
         Ast::Seq(vec![
@@ -250,7 +250,7 @@ pub fn compile_outro_scene(resources: &mut Resources, visible: Rect) -> Scene {
         ]),
         Ast::Seq(vec![
             Ast::Talk(1, TalkStyle::Normal, TalkPos::NW,
-                      "$CWell then, thank you very much\n\
+                      "Well then, thank you very much\n\
                        for your kind offer of $ibeing no\n\
                        help whatsover$r, but I'm sure\n\
                        I'll be just fine on my own."),

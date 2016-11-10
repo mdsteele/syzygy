@@ -48,7 +48,7 @@ impl View {
         let background = resources.get_background("wrecked_angle");
         let mut theater = Theater::new(background);
         let mut intro_scene = compile_intro_scene(resources);
-        let mut outro_scene = compile_outro_scene(resources);
+        let mut outro_scene = compile_outro_scene(resources, visible);
         if state.is_visited() {
             intro_scene.skip(&mut theater);
             if state.is_solved() {
@@ -118,6 +118,7 @@ impl View {
         self.redo_stack.clear();
         state.solve();
         self.outro_scene.begin(&mut self.theater);
+        self.drain_queue();
     }
 
     fn drain_queue(&mut self) {
@@ -193,6 +194,7 @@ impl Element<Game, PuzzleCmd> for View {
                         println!("Puzzle solved, beginning outro.");
                     }
                     self.outro_scene.begin(&mut self.theater);
+                    self.drain_queue();
                     self.undo_stack.clear();
                 } else {
                     self.undo_stack.push((dir, rank));

@@ -18,7 +18,7 @@
 // +--------------------------------------------------------------------------+
 
 use elements::{Ast, Scene, TalkPos, TalkStyle};
-use gui::Resources;
+use gui::{Rect, Resources};
 
 // ========================================================================= //
 
@@ -168,17 +168,17 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
 
 // ========================================================================= //
 
-pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
+pub fn compile_outro_scene(resources: &mut Resources, visible: Rect) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
             Ast::Queue(0, 0),
             Ast::Wait(0.75),
-            Ast::Queue(0, -1),
             Ast::Talk(0, TalkStyle::Normal, TalkPos::SE,
                       "Hey Elinsa, I did it!"),
         ]),
         Ast::Seq(vec![
             Ast::Slide(1, (432, 306), false, true, 0.5),
+            Ast::Queue(0, -1),
             Ast::Talk(1, TalkStyle::Normal, TalkPos::NW,
                       "Huh?  You fixed it??"),
         ]),
@@ -208,11 +208,66 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
             Ast::Talk(0, TalkStyle::Normal, TalkPos::SE,
                       "...maybe that support beam?"),
         ]),
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::Place(-1, "wrecked/bridge", 2, (432, 320)),
+                Ast::Jump(1, (432, 416), 0.75),
+                Ast::Wait(0.5),
+                Ast::Place(1, "chars/elinsa", 0, (432, visible.bottom() + 32)),
+                Ast::Talk(1, TalkStyle::Normal, TalkPos::NW, "%#$$@&!!"),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.25),
+                Ast::Talk(0, TalkStyle::Normal, TalkPos::SE, "Elinsa!"),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.75),
+                Ast::Jump(0, (224, 80), 0.25),
+                Ast::Slide(0, (368, 80), false, false, 0.5),
+                Ast::Jump(0, (416, 144), 0.75),
+                Ast::Jump(0, (384, 224), 0.75),
+            ]),
+        ]),
         Ast::Seq(vec![
-            Ast::Place(-1, "wrecked/bridge", 2, (432, 320)),
-            Ast::Jump(1, (432, 416), 0.75),
-            Ast::Wait(0.25),
-            Ast::Talk(1, TalkStyle::Normal, TalkPos::NW, "%#$$@&!!"),
+            Ast::Talk(0, TalkStyle::Normal, TalkPos::NW, "Are you okay!?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Talk(1, TalkStyle::Normal, TalkPos::NW,
+                      "$CI'll be fine.  Just...go find\n\
+                       something else to fix."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Talk(0, TalkStyle::Normal, TalkPos::NW, "Are you sure?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Talk(1, TalkStyle::Normal, TalkPos::NW,
+                      "$CDo you actually have any way to\n\
+                       pull me back up from there?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Talk(0, TalkStyle::Normal, TalkPos::NW,
+                      "Well...not as such, no."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Talk(1, TalkStyle::Normal, TalkPos::NW,
+                      "$CWell then, thank you very much\n\
+                       for your kind offer of $ibeing no\n\
+                       help whatsover$r, but I'm sure\n\
+                       I'll be just fine on my own."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Talk(0, TalkStyle::Normal, TalkPos::NW,
+                      "O...okay.  Good luck down there."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Jump(0, (368, 304), 0.75),
+            Ast::Slide(0, (400, 304), false, false, 0.125),
+            Ast::Jump(0, (464, 304), 0.5),
+            Ast::Slide(0, (592, 304), false, false, 0.5),
+            Ast::Remove(0),
+            Ast::Wait(1.0),
+            Ast::Talk(1, TalkStyle::Thought, TalkPos::NW,
+                      "This day is NOT going well."),
         ]),
     ];
     Ast::compile_scene(resources, ast)

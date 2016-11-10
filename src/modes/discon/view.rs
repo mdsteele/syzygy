@@ -83,7 +83,7 @@ impl View {
             active: self.screen_fade.is_transparent() && scene.is_finished(),
             can_undo: !self.undo_stack.is_empty(),
             can_redo: !self.redo_stack.is_empty(),
-            can_reset: false,
+            can_reset: state.can_reset(),
         }
     }
 
@@ -115,6 +115,13 @@ impl View {
             }
             self.laser_field.recalculate_lasers(state.grid());
         }
+    }
+
+    fn reset(&mut self, state: &mut DisconState) {
+        self.undo_stack.clear();
+        self.redo_stack.clear();
+        state.reset();
+        self.laser_field.recalculate_lasers(state.grid());
     }
 
     fn drain_queue(&mut self) {
@@ -166,7 +173,7 @@ impl Element<Game, PuzzleCmd> for View {
                     subaction.but_no_value()
                 }
                 Some(&HudCmd::Reset) => {
-                    // TODO reset
+                    self.reset(state);
                     subaction.but_no_value()
                 }
                 Some(&HudCmd::Replay) => {

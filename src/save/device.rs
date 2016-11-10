@@ -36,6 +36,7 @@ pub struct DeviceGrid {
     num_cols: i32,
     num_rows: i32,
     grid: Vec<Option<(Device, Direction)>>,
+    is_modified: bool,
 }
 
 impl DeviceGrid {
@@ -44,11 +45,13 @@ impl DeviceGrid {
             num_cols: num_cols as i32,
             num_rows: num_rows as i32,
             grid: vec![None; num_cols * num_rows],
+            is_modified: false,
         }
     }
 
     pub fn from_toml(array: toml::Array, default: &DeviceGrid) -> DeviceGrid {
         let mut grid = default.clone();
+        grid.is_modified = true;
         let mut default_device_counts: HashMap<Device, i32> = HashMap::new();
         for row in 0..grid.num_rows {
             for col in 0..grid.num_cols {
@@ -115,6 +118,8 @@ impl DeviceGrid {
 
     pub fn size(&self) -> (i32, i32) { (self.num_cols, self.num_rows) }
 
+    pub fn is_modified(&self) -> bool { self.is_modified }
+
     pub fn get(&self, col: i32, row: i32) -> Option<(Device, Direction)> {
         if col >= 0 && col < self.num_cols && row >= 0 && row < self.num_rows {
             self.grid[(row * self.num_cols + col) as usize]
@@ -135,6 +140,7 @@ impl DeviceGrid {
             if let Some((device, ref mut dir)) = self.grid[index] {
                 if device.is_moveable() {
                     *dir = dir.rotated_cw();
+                    self.is_modified = true;
                 }
             }
         }
@@ -146,6 +152,7 @@ impl DeviceGrid {
             if let Some((device, ref mut dir)) = self.grid[index] {
                 if device.is_moveable() {
                     *dir = dir.rotated_ccw();
+                    self.is_modified = true;
                 }
             }
         }
@@ -167,11 +174,13 @@ impl DeviceGrid {
                             if dev2.is_moveable() {
                                 self.grid[from] = Some((dev2, dir2));
                                 self.grid[to] = Some((dev1, dir1));
+                                self.is_modified = true;
                             }
                         }
                         None => {
                             self.grid[from] = None;
                             self.grid[to] = Some((dev1, dir1));
+                            self.is_modified = true;
                         }
                     }
                 }

@@ -46,7 +46,9 @@ impl DotsState {
     pub fn to_toml(&self) -> toml::Value {
         let mut table = toml::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
-        table.insert(GRID_KEY.to_string(), self.grid.to_toml());
+        if self.grid.is_modified() {
+            table.insert(GRID_KEY.to_string(), self.grid.to_toml());
+        }
         toml::Value::Table(table)
     }
 
@@ -59,6 +61,10 @@ impl DotsState {
     pub fn is_solved(&self) -> bool { self.access == Access::Solved }
 
     pub fn mark_solved(&mut self) { self.access = Access::Solved; }
+
+    pub fn can_reset(&self) -> bool { self.grid.is_modified() }
+
+    pub fn reset(&mut self) { self.grid = DotsState::default_grid(); }
 
     pub fn replay(&mut self) {
         self.access = Access::Replay;

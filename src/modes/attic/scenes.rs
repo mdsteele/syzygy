@@ -156,7 +156,7 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
                        caught your name, sorry."),
         ]),
         Ast::Seq(vec![
-            Ast::Sound(Sound::talk_lo()),
+            Ast::Sound(Sound::talk_hi()),
             Ast::Talk(1, TalkStyle::Normal, TalkPos::SE,
                       "That's because you didn't\n\
                        think to ask before."),
@@ -193,6 +193,7 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
             ]),
         ]),
         Ast::Seq(vec![
+            Ast::Sound(Sound::talk_thought()),
             Ast::Talk(1, TalkStyle::Thought, TalkPos::SE,
                       "I wonder where Relyng's\n\
                        gone off to?"),

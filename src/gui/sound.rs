@@ -52,6 +52,16 @@ impl Sound {
                        .adshr(0.0, 0.0, 0.25, 0.1, 0.1))
     }
 
+    pub fn talk_annoyed_hi() -> Sound {
+        Sound::new(Wave::pulse(Wave::slide(120.0, 200.0, -3000.0), 0.2)
+                       .adshr(0.0, 0.0, 0.25, 0.25, 0.2))
+    }
+
+    pub fn talk_annoyed_lo() -> Sound {
+        Sound::new(Wave::pulse(Wave::slide(100.0, 200.0, -3000.0), 0.2)
+                       .adshr(0.0, 0.0, 0.25, 0.25, 0.2))
+    }
+
     pub fn talk_hi() -> Sound {
         Sound::new(Wave::noise(Wave::slide(7000.0, 20000.0, 0.0))
                        .adshr(0.05, 0.0, 1.0, 0.0, 0.15) *
@@ -62,6 +72,11 @@ impl Sound {
         Sound::new(Wave::noise(Wave::slide(7000.0, -20000.0, 0.0))
                        .adshr(0.05, 0.0, 1.0, 0.0, 0.15) *
                    0.25)
+    }
+
+    pub fn talk_thought() -> Sound {
+        Sound::new((Wave::noise(5000.0) * Wave::sine(6.0))
+                       .adshr(0.0, 0.0, 0.08, 0.1, 0.2))
     }
 }
 

@@ -28,6 +28,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Place(-1, "wrecked/bridge", 0, (432, 320)),
             Ast::Place(1, "chars/elinsa", 0, (348, 304)),
             Ast::Wait(1.0),
+            Ast::Sound(Sound::talk_thought()),
             Ast::Talk(1, TalkStyle::Thought, TalkPos::NW,
                       "Ugh.  Stupid piece of junk.  Why\n\
                        am I even bothering fixing this?"),
@@ -42,6 +43,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             ]),
             Ast::Seq(vec![
                 Ast::Wait(0.5),
+                Ast::Sound(Sound::talk_thought()),
                 Ast::Talk(1, TalkStyle::Thought, TalkPos::NW, "Oh, great."),
             ]),
         ]),
@@ -64,6 +66,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
                        working on?  It looks...broken."),
         ]),
         Ast::Seq(vec![
+            Ast::Sound(Sound::talk_annoyed_hi()),
             Ast::Talk(1, TalkStyle::Normal, TalkPos::NW,
                       "Yes $ithank you$r, how\n\
                        observant of you."),
@@ -86,6 +89,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
                        supposed to be helping."),
         ]),
         Ast::Seq(vec![
+            Ast::Sound(Sound::talk_annoyed_lo()),
             Ast::Talk(1, TalkStyle::Normal, TalkPos::NW,
                       "Oh, $isure$r.  Why don't you\n\
                        run down to the supply depot and\n\
@@ -285,6 +289,7 @@ pub fn compile_outro_scene(resources: &mut Resources, visible: Rect) -> Scene {
                       "Well...not as such, no."),
         ]),
         Ast::Seq(vec![
+            Ast::Sound(Sound::talk_annoyed_hi()),
             Ast::Talk(1, TalkStyle::Normal, TalkPos::NW,
                       "Well then, thank you very much\n\
                        for your kind offer of $ibeing no\n\
@@ -305,6 +310,7 @@ pub fn compile_outro_scene(resources: &mut Resources, visible: Rect) -> Scene {
             Ast::Slide(0, (592, 304), false, false, 0.5),
             Ast::Remove(0),
             Ast::Wait(1.0),
+            Ast::Sound(Sound::talk_thought()),
             Ast::Talk(1, TalkStyle::Thought, TalkPos::NW,
                       "This day is NOT going well."),
         ]),

@@ -25,7 +25,7 @@ use elements::{Hud, HudCmd, HudInput, PuzzleCmd, PuzzleView, Scene,
 use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
           Resources, Sprite};
 use modes::SOLVED_INFO_TEXT;
-use save::{Direction, Game, Location, WreckedState};
+use save::{Direction, Game, Location, PuzzleState, WreckedState};
 use super::scenes::{compile_intro_scene, compile_outro_scene};
 
 // ========================================================================= //
@@ -89,7 +89,7 @@ impl View {
             active: self.screen_fade.is_transparent() && scene.is_finished(),
             can_undo: !self.undo_stack.is_empty(),
             can_redo: !self.redo_stack.is_empty(),
-            can_reset: !state.is_in_initial_configuration(),
+            can_reset: state.can_reset(),
         }
     }
 

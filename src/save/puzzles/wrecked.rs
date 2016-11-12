@@ -22,6 +22,7 @@ use std::default::Default;
 use toml;
 
 use save::{Access, Direction};
+use super::PuzzleState;
 use super::super::util::{ACCESS_KEY, pop_array};
 
 // ========================================================================= //
@@ -99,21 +100,13 @@ impl WreckedState {
         toml::Value::Table(table)
     }
 
-    pub fn access(&self) -> Access { self.access }
-
-    pub fn is_visited(&self) -> bool { self.access.is_visited() }
-
     pub fn visit(&mut self) { self.access.visit(); }
-
-    pub fn is_solved(&self) -> bool { self.access == Access::Solved }
 
     pub fn replay(&mut self) {
         self.access = Access::Replay;
         self.grid = INITIAL_GRID.to_vec();
         self.is_initial = true;
     }
-
-    pub fn is_in_initial_configuration(&self) -> bool { self.is_initial }
 
     pub fn reset(&mut self) {
         self.grid = INITIAL_GRID.to_vec();
@@ -208,6 +201,12 @@ impl Default for WreckedState {
             is_initial: true,
         }
     }
+}
+
+impl PuzzleState for WreckedState {
+    fn access(&self) -> Access { self.access }
+
+    fn can_reset(&self) -> bool { !self.is_initial }
 }
 
 // ========================================================================= //

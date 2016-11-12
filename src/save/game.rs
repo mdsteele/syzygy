@@ -23,7 +23,7 @@ use toml;
 use super::access::Access;
 use super::location::Location;
 use super::puzzles::{AtticState, DisconState, DotsState, MissedState,
-                     PrologState, WreckedState};
+                     PrologState, PuzzleState, WreckedState};
 use super::util::{pop_table, to_table};
 
 // ========================================================================= //

@@ -21,6 +21,7 @@ use std::collections::BTreeSet;
 use toml;
 
 use save::Access;
+use super::PuzzleState;
 use super::super::util::{ACCESS_KEY, pop_array};
 
 // ========================================================================= //
@@ -61,13 +62,9 @@ impl AtticState {
         toml::Value::Table(table)
     }
 
-    pub fn access(&self) -> Access { self.access }
-
-    pub fn is_visited(&self) -> bool { self.access.is_visited() }
-
     pub fn visit(&mut self) { self.access.visit(); }
 
-    pub fn is_solved(&self) -> bool { self.access == Access::Solved }
+    pub fn reset(&mut self) { self.toggled.clear(); }
 
     pub fn replay(&mut self) {
         self.access = Access::Replay;
@@ -176,8 +173,6 @@ impl AtticState {
         self.toggled.contains(&((row - 1) * 4 + (col - 1)))
     }
 
-    pub fn any_toggled(&self) -> bool { !self.toggled.is_empty() }
-
     pub fn toggle(&mut self, pos: (i32, i32)) {
         let (col, row) = pos;
         if col >= 1 && col <= 4 && row >= 1 && row <= 4 {
@@ -193,8 +188,12 @@ impl AtticState {
             }
         }
     }
+}
 
-    pub fn reset(&mut self) { self.toggled.clear(); }
+impl PuzzleState for AtticState {
+    fn access(&self) -> Access { self.access }
+
+    fn can_reset(&self) -> bool { !self.toggled.is_empty() }
 }
 
 // ========================================================================= //

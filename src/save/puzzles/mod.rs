@@ -22,6 +22,7 @@ mod discon;
 mod dots;
 mod missed;
 mod prolog;
+mod puzzle;
 mod wrecked;
 
 pub use self::attic::AtticState;
@@ -29,6 +30,7 @@ pub use self::discon::DisconState;
 pub use self::dots::DotsState;
 pub use self::missed::MissedState;
 pub use self::prolog::PrologState;
+pub use self::puzzle::PuzzleState;
 pub use self::wrecked::WreckedState;
 
 // ========================================================================= //

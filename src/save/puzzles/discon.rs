@@ -21,6 +21,7 @@ use std::default::Default;
 use toml;
 
 use save::{Access, Device, DeviceGrid, Direction, LaserColor};
+use super::PuzzleState;
 use super::super::util::{ACCESS_KEY, pop_array};
 
 // ========================================================================= //
@@ -52,17 +53,9 @@ impl DisconState {
         toml::Value::Table(table)
     }
 
-    pub fn access(&self) -> Access { self.access }
-
-    pub fn is_visited(&self) -> bool { self.access.is_visited() }
-
     pub fn visit(&mut self) { self.access.visit(); }
 
-    pub fn is_solved(&self) -> bool { self.access == Access::Solved }
-
     pub fn mark_solved(&mut self) { self.access = Access::Solved; }
-
-    pub fn can_reset(&self) -> bool { self.grid.is_modified() }
 
     pub fn reset(&mut self) { self.grid = DisconState::default_grid(); }
 
@@ -116,6 +109,12 @@ impl Default for DisconState {
             grid: DisconState::default_grid(),
         }
     }
+}
+
+impl PuzzleState for DisconState {
+    fn access(&self) -> Access { self.access }
+
+    fn can_reset(&self) -> bool { self.grid.is_modified() }
 }
 
 // ========================================================================= //

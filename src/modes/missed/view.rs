@@ -21,7 +21,7 @@ use elements::{Hud, HudCmd, HudInput, LaserCmd, LaserField, PuzzleCmd,
                PuzzleView, Scene, ScreenFade, Theater};
 use gui::{Action, Canvas, Element, Event, Rect, Resources};
 use modes::SOLVED_INFO_TEXT;
-use save::{Game, Location, MissedState};
+use save::{Game, Location, MissedState, PuzzleState};
 use super::scenes::{compile_intro_scene, compile_outro_scene};
 
 // ========================================================================= //

@@ -87,43 +87,6 @@ impl View {
         }
     }
 
-    fn undo(&mut self, state: &mut DisconState) {
-        if let Some(cmd) = self.undo_stack.pop() {
-            self.redo_stack.push(cmd);
-            match cmd {
-                LaserCmd::Moved(col1, row1, col2, row2) => {
-                    state.grid_mut().move_to(col2, row2, col1, row1);
-                }
-                LaserCmd::Rotated(col, row) => {
-                    state.grid_mut().unrotate(col, row);
-                }
-            }
-            self.laser_field.recalculate_lasers(state.grid());
-        }
-    }
-
-    fn redo(&mut self, state: &mut DisconState) {
-        if let Some(cmd) = self.redo_stack.pop() {
-            self.undo_stack.push(cmd);
-            match cmd {
-                LaserCmd::Moved(col1, row1, col2, row2) => {
-                    state.grid_mut().move_to(col1, row1, col2, row2);
-                }
-                LaserCmd::Rotated(col, row) => {
-                    state.grid_mut().rotate(col, row);
-                }
-            }
-            self.laser_field.recalculate_lasers(state.grid());
-        }
-    }
-
-    fn reset(&mut self, state: &mut DisconState) {
-        self.undo_stack.clear();
-        self.redo_stack.clear();
-        state.reset();
-        self.laser_field.recalculate_lasers(state.grid());
-    }
-
     fn drain_queue(&mut self) {
         for (_, _) in self.theater.drain_queue() {
             // TODO drain queue
@@ -164,26 +127,14 @@ impl Element<Game, PuzzleCmd> for View {
                     subaction.but_no_value()
                 }
                 Some(&HudCmd::Info) => subaction.but_return(PuzzleCmd::Info),
-                Some(&HudCmd::Undo) => {
-                    self.undo(state);
-                    subaction.but_no_value()
-                }
-                Some(&HudCmd::Redo) => {
-                    self.redo(state);
-                    subaction.but_no_value()
-                }
-                Some(&HudCmd::Reset) => {
-                    self.reset(state);
-                    subaction.but_no_value()
-                }
+                Some(&HudCmd::Undo) => subaction.but_return(PuzzleCmd::Undo),
+                Some(&HudCmd::Redo) => subaction.but_return(PuzzleCmd::Redo),
+                Some(&HudCmd::Reset) => subaction.but_return(PuzzleCmd::Reset),
                 Some(&HudCmd::Replay) => {
                     self.screen_fade.fade_out_and_return(PuzzleCmd::Replay);
                     subaction.but_no_value()
                 }
-                Some(&HudCmd::Solve) => {
-                    // TODO solve
-                    subaction.but_no_value()
-                }
+                Some(&HudCmd::Solve) => subaction.but_return(PuzzleCmd::Solve),
                 None => subaction.but_no_value(),
             });
         }
@@ -219,6 +170,46 @@ impl PuzzleView for View {
         }
     }
 
+    fn undo(&mut self, game: &mut Game) {
+        let state = &mut game.disconnected;
+        if let Some(cmd) = self.undo_stack.pop() {
+            self.redo_stack.push(cmd);
+            match cmd {
+                LaserCmd::Moved(col1, row1, col2, row2) => {
+                    state.grid_mut().move_to(col2, row2, col1, row1);
+                }
+                LaserCmd::Rotated(col, row) => {
+                    state.grid_mut().unrotate(col, row);
+                }
+            }
+            self.laser_field.recalculate_lasers(state.grid());
+        }
+    }
+
+    fn redo(&mut self, game: &mut Game) {
+        let state = &mut game.disconnected;
+        if let Some(cmd) = self.redo_stack.pop() {
+            self.undo_stack.push(cmd);
+            match cmd {
+                LaserCmd::Moved(col1, row1, col2, row2) => {
+                    state.grid_mut().move_to(col1, row1, col2, row2);
+                }
+                LaserCmd::Rotated(col, row) => {
+                    state.grid_mut().rotate(col, row);
+                }
+            }
+            self.laser_field.recalculate_lasers(state.grid());
+        }
+    }
+
+    fn reset(&mut self, game: &mut Game) {
+        let state = &mut game.disconnected;
+        self.undo_stack.clear();
+        self.redo_stack.clear();
+        state.reset();
+        self.laser_field.recalculate_lasers(state.grid());
+    }
+
     fn replay(&mut self, game: &mut Game) {
         game.disconnected.replay();
         self.laser_field.recalculate_lasers(game.disconnected.grid());
@@ -226,7 +217,12 @@ impl PuzzleView for View {
         self.intro_scene.reset();
         self.outro_scene.reset();
         self.intro_scene.begin(&mut self.theater);
+        self.drain_queue();
         self.screen_fade.fade_in();
+    }
+
+    fn solve(&mut self, _game: &mut Game) {
+        // TODO solve
     }
 }
 

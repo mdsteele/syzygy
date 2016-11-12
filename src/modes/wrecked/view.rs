@@ -93,34 +93,6 @@ impl View {
         }
     }
 
-    fn undo(&mut self, state: &mut WreckedState) {
-        if let Some((dir, rank)) = self.undo_stack.pop() {
-            self.redo_stack.push((dir, rank));
-            state.shift_tiles(dir.opposite(), rank);
-        }
-    }
-
-    fn redo(&mut self, state: &mut WreckedState) {
-        if let Some((dir, rank)) = self.redo_stack.pop() {
-            self.undo_stack.push((dir, rank));
-            state.shift_tiles(dir, rank);
-        }
-    }
-
-    fn reset(&mut self, state: &mut WreckedState) {
-        self.undo_stack.clear();
-        self.redo_stack.clear();
-        state.reset();
-    }
-
-    fn solve(&mut self, state: &mut WreckedState) {
-        self.undo_stack.clear();
-        self.redo_stack.clear();
-        state.solve();
-        self.outro_scene.begin(&mut self.theater);
-        self.drain_queue();
-    }
-
     fn drain_queue(&mut self) {
         for (_, index) in self.theater.drain_queue() {
             self.solution.set_index(index);
@@ -162,26 +134,14 @@ impl Element<Game, PuzzleCmd> for View {
                     subaction.but_no_value()
                 }
                 Some(&HudCmd::Info) => subaction.but_return(PuzzleCmd::Info),
-                Some(&HudCmd::Undo) => {
-                    self.undo(state);
-                    subaction.but_no_value()
-                }
-                Some(&HudCmd::Redo) => {
-                    self.redo(state);
-                    subaction.but_no_value()
-                }
-                Some(&HudCmd::Reset) => {
-                    self.reset(state);
-                    subaction.but_no_value()
-                }
+                Some(&HudCmd::Undo) => subaction.but_return(PuzzleCmd::Undo),
+                Some(&HudCmd::Redo) => subaction.but_return(PuzzleCmd::Redo),
+                Some(&HudCmd::Reset) => subaction.but_return(PuzzleCmd::Reset),
                 Some(&HudCmd::Replay) => {
                     self.screen_fade.fade_out_and_return(PuzzleCmd::Replay);
                     subaction.but_no_value()
                 }
-                Some(&HudCmd::Solve) => {
-                    self.solve(state);
-                    subaction.but_no_value()
-                }
+                Some(&HudCmd::Solve) => subaction.but_return(PuzzleCmd::Solve),
                 None => subaction.but_no_value(),
             });
         }
@@ -219,13 +179,42 @@ impl PuzzleView for View {
         }
     }
 
+    fn undo(&mut self, game: &mut Game) {
+        if let Some((dir, rank)) = self.undo_stack.pop() {
+            self.redo_stack.push((dir, rank));
+            game.wrecked_angle.shift_tiles(dir.opposite(), rank);
+        }
+    }
+
+    fn redo(&mut self, game: &mut Game) {
+        if let Some((dir, rank)) = self.redo_stack.pop() {
+            self.undo_stack.push((dir, rank));
+            game.wrecked_angle.shift_tiles(dir, rank);
+        }
+    }
+
+    fn reset(&mut self, game: &mut Game) {
+        self.undo_stack.clear();
+        self.redo_stack.clear();
+        game.wrecked_angle.reset();
+    }
+
     fn replay(&mut self, game: &mut Game) {
         game.wrecked_angle.replay();
         self.theater.reset();
         self.intro_scene.reset();
         self.outro_scene.reset();
         self.intro_scene.begin(&mut self.theater);
+        self.drain_queue();
         self.screen_fade.fade_in();
+    }
+
+    fn solve(&mut self, game: &mut Game) {
+        self.undo_stack.clear();
+        self.redo_stack.clear();
+        game.wrecked_angle.solve();
+        self.outro_scene.begin(&mut self.theater);
+        self.drain_queue();
     }
 }
 

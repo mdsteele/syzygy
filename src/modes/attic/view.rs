@@ -125,33 +125,6 @@ impl View {
         }
     }
 
-    fn undo(&mut self, state: &mut AtticState) {
-        if let Some(position) = self.undo_stack.pop() {
-            self.redo_stack.push(position);
-            state.toggle(position);
-        }
-    }
-
-    fn redo(&mut self, state: &mut AtticState) {
-        if let Some(position) = self.redo_stack.pop() {
-            self.undo_stack.push(position);
-            state.toggle(position);
-        }
-    }
-
-    fn reset(&mut self, state: &mut AtticState) {
-        self.undo_stack.clear();
-        self.redo_stack.clear();
-        state.reset();
-    }
-
-    fn solve(&mut self, state: &mut AtticState) {
-        self.undo_stack.clear();
-        self.redo_stack.clear();
-        state.solve();
-        self.outro_scene.begin(&mut self.theater);
-    }
-
     fn drain_queue(&mut self) {
         for (index, enable) in self.theater.drain_queue() {
             self.toggles[index as usize].set_hilight(enable != 0);
@@ -193,26 +166,14 @@ impl Element<Game, PuzzleCmd> for View {
                     subaction.but_no_value()
                 }
                 Some(&HudCmd::Info) => subaction.but_return(PuzzleCmd::Info),
-                Some(&HudCmd::Undo) => {
-                    self.undo(state);
-                    subaction.but_no_value()
-                }
-                Some(&HudCmd::Redo) => {
-                    self.redo(state);
-                    subaction.but_no_value()
-                }
-                Some(&HudCmd::Reset) => {
-                    self.reset(state);
-                    subaction.but_no_value()
-                }
+                Some(&HudCmd::Undo) => subaction.but_return(PuzzleCmd::Undo),
+                Some(&HudCmd::Redo) => subaction.but_return(PuzzleCmd::Redo),
+                Some(&HudCmd::Reset) => subaction.but_return(PuzzleCmd::Reset),
                 Some(&HudCmd::Replay) => {
                     self.screen_fade.fade_out_and_return(PuzzleCmd::Replay);
                     subaction.but_no_value()
                 }
-                Some(&HudCmd::Solve) => {
-                    self.solve(state);
-                    subaction.but_no_value()
-                }
+                Some(&HudCmd::Solve) => subaction.but_return(PuzzleCmd::Solve),
                 None => subaction.but_no_value(),
             });
         }
@@ -249,6 +210,26 @@ impl PuzzleView for View {
         }
     }
 
+    fn undo(&mut self, game: &mut Game) {
+        if let Some(position) = self.undo_stack.pop() {
+            self.redo_stack.push(position);
+            game.a_light_in_the_attic.toggle(position);
+        }
+    }
+
+    fn redo(&mut self, game: &mut Game) {
+        if let Some(position) = self.redo_stack.pop() {
+            self.undo_stack.push(position);
+            game.a_light_in_the_attic.toggle(position);
+        }
+    }
+
+    fn reset(&mut self, game: &mut Game) {
+        self.undo_stack.clear();
+        self.redo_stack.clear();
+        game.a_light_in_the_attic.reset();
+    }
+
     fn replay(&mut self, game: &mut Game) {
         game.a_light_in_the_attic.replay();
         for toggle in self.toggles.iter_mut() {
@@ -258,7 +239,15 @@ impl PuzzleView for View {
         self.intro_scene.reset();
         self.outro_scene.reset();
         self.intro_scene.begin(&mut self.theater);
+        self.drain_queue();
         self.screen_fade.fade_in();
+    }
+
+    fn solve(&mut self, game: &mut Game) {
+        self.undo_stack.clear();
+        self.redo_stack.clear();
+        game.a_light_in_the_attic.solve();
+        self.outro_scene.begin(&mut self.theater);
     }
 }
 

@@ -35,18 +35,18 @@ pub fn run_puzzle<V: PuzzleView>(window: &mut Window, game: &mut Game,
         };
         window.play_sounds(action.drain_sounds());
         match action.value() {
-            Some(&PuzzleCmd::Back) => {
-                return Mode::Location(Location::Map);
-            }
+            Some(&PuzzleCmd::Back) => return Mode::Location(Location::Map),
             Some(&PuzzleCmd::Info) => {
                 let text = view.info_text(game);
                 if !run_info_box(window, &view, game, text) {
                     return Mode::Quit;
                 }
             }
-            Some(&PuzzleCmd::Replay) => {
-                view.replay(game);
-            }
+            Some(&PuzzleCmd::Undo) => view.undo(game),
+            Some(&PuzzleCmd::Redo) => view.redo(game),
+            Some(&PuzzleCmd::Reset) => view.reset(game),
+            Some(&PuzzleCmd::Replay) => view.replay(game),
+            Some(&PuzzleCmd::Solve) => view.solve(game),
             None => {}
         }
         if action.should_redraw() {

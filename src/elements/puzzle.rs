@@ -25,7 +25,11 @@ use save::Game;
 pub enum PuzzleCmd {
     Back,
     Info,
+    Undo,
+    Redo,
+    Reset,
     Replay,
+    Solve,
 }
 
 // ========================================================================= //
@@ -33,7 +37,15 @@ pub enum PuzzleCmd {
 pub trait PuzzleView: Element<Game, PuzzleCmd> {
     fn info_text(&self, game: &Game) -> &'static str;
 
+    fn undo(&mut self, game: &mut Game);
+
+    fn redo(&mut self, game: &mut Game);
+
+    fn reset(&mut self, game: &mut Game);
+
     fn replay(&mut self, game: &mut Game);
+
+    fn solve(&mut self, game: &mut Game);
 }
 
 // ========================================================================= //

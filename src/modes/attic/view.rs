@@ -149,6 +149,7 @@ impl View {
         self.undo_stack.clear();
         self.redo_stack.clear();
         state.solve();
+        self.outro_scene.begin(&mut self.theater);
     }
 
     fn drain_queue(&mut self) {

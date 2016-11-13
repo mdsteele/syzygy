@@ -20,81 +20,43 @@
 use std::cmp;
 use std::rc::Rc;
 
-use elements::{Hud, HudCmd, HudInput, PuzzleCmd, PuzzleView, Scene,
-               ScreenFade, Theater};
+use elements::{PuzzleCmd, PuzzleCore, PuzzleView};
 use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
           Resources, Sprite};
 use modes::SOLVED_INFO_TEXT;
-use save::{Direction, Game, Location, PuzzleState, WreckedState};
+use save::{Direction, Game, PuzzleState, WreckedState};
 use super::scenes::{compile_intro_scene, compile_outro_scene};
 
 // ========================================================================= //
 
 pub struct View {
-    theater: Theater,
-    intro_scene: Scene,
-    outro_scene: Scene,
-    screen_fade: ScreenFade<PuzzleCmd>,
-    hud: Hud,
+    core: PuzzleCore<(Direction, i32)>,
     grid: WreckedGrid,
     solution: SolutionDisplay,
-    undo_stack: Vec<(Direction, i32)>,
-    redo_stack: Vec<(Direction, i32)>,
 }
 
 impl View {
     pub fn new(resources: &mut Resources, visible: Rect, state: &WreckedState)
                -> View {
-        let background = resources.get_background("wrecked_angle");
-        let mut theater = Theater::new(background);
-        let mut intro_scene = compile_intro_scene(resources);
-        let mut outro_scene = compile_outro_scene(resources, visible);
-        if state.is_visited() {
-            intro_scene.skip(&mut theater);
-            if state.is_solved() {
-                outro_scene.skip(&mut theater);
-            }
-        } else {
-            intro_scene.begin(&mut theater);
-        }
+        let intro_scene = compile_intro_scene(resources);
+        let outro_scene = compile_outro_scene(resources, visible);
+        let core = PuzzleCore::new(resources,
+                                   visible,
+                                   state,
+                                   "wrecked_angle",
+                                   intro_scene,
+                                   outro_scene);
         let mut view = View {
-            theater: theater,
-            intro_scene: intro_scene,
-            outro_scene: outro_scene,
-            screen_fade: ScreenFade::new(resources),
-            hud: Hud::new(resources, visible, Location::WreckedAngle),
+            core: core,
             grid: WreckedGrid::new(resources, 84, 132),
             solution: SolutionDisplay::new(resources),
-            undo_stack: Vec::new(),
-            redo_stack: Vec::new(),
         };
         view.drain_queue();
         view
     }
 
-    fn current_scene(&self, state: &WreckedState) -> &Scene {
-        if state.is_solved() {
-            &self.outro_scene
-        } else {
-            &self.intro_scene
-        }
-    }
-
-    fn hud_input(&self, state: &WreckedState) -> HudInput {
-        let scene = self.current_scene(state);
-        HudInput {
-            name: "Wrecked Angle",
-            access: state.access(),
-            is_paused: scene.is_paused(),
-            active: self.screen_fade.is_transparent() && scene.is_finished(),
-            can_undo: !self.undo_stack.is_empty(),
-            can_redo: !self.redo_stack.is_empty(),
-            can_reset: state.can_reset(),
-        }
-    }
-
     fn drain_queue(&mut self) {
-        for (_, index) in self.theater.drain_queue() {
+        for (_, index) in self.core.drain_queue() {
             self.solution.set_index(index);
         }
     }
@@ -103,48 +65,18 @@ impl View {
 impl Element<Game, PuzzleCmd> for View {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
         let state = &game.wrecked_angle;
-        self.theater.draw_background(canvas);
+        self.core.draw_back_layer(canvas);
         self.solution.draw(state, canvas);
         self.grid.draw(state, canvas);
-        self.theater.draw_foreground(canvas);
-        self.theater.draw_speech_bubbles(canvas);
-        self.hud.draw(&self.hud_input(state), canvas);
-        self.screen_fade.draw(&(), canvas);
+        self.core.draw_middle_layer(canvas);
+        self.core.draw_front_layer(canvas, state);
     }
 
     fn handle_event(&mut self, event: &Event, game: &mut Game)
                     -> Action<PuzzleCmd> {
         let state = &mut game.wrecked_angle;
-        let mut action = self.screen_fade.handle_event(event, &mut ());
-        if !action.should_stop() {
-            let subaction = if state.is_solved() {
-                self.outro_scene.handle_event(event, &mut self.theater)
-            } else {
-                self.intro_scene.handle_event(event, &mut self.theater)
-            };
-            action.merge(subaction.but_no_value());
-            self.drain_queue();
-        }
-        if !action.should_stop() {
-            let mut input = self.hud_input(state);
-            let subaction = self.hud.handle_event(event, &mut input);
-            action.merge(match subaction.value() {
-                Some(&HudCmd::Back) => {
-                    self.screen_fade.fade_out_and_return(PuzzleCmd::Back);
-                    subaction.but_no_value()
-                }
-                Some(&HudCmd::Info) => subaction.but_return(PuzzleCmd::Info),
-                Some(&HudCmd::Undo) => subaction.but_return(PuzzleCmd::Undo),
-                Some(&HudCmd::Redo) => subaction.but_return(PuzzleCmd::Redo),
-                Some(&HudCmd::Reset) => subaction.but_return(PuzzleCmd::Reset),
-                Some(&HudCmd::Replay) => {
-                    self.screen_fade.fade_out_and_return(PuzzleCmd::Replay);
-                    subaction.but_no_value()
-                }
-                Some(&HudCmd::Solve) => subaction.but_return(PuzzleCmd::Solve),
-                None => subaction.but_no_value(),
-            });
-        }
+        let mut action = self.core.handle_event(event, state);
+        self.drain_queue();
         if !action.should_stop() {
             let subaction = self.grid.handle_event(event, state);
             if let Some(&(dir, rank)) = subaction.value() {
@@ -153,13 +85,12 @@ impl Element<Game, PuzzleCmd> for View {
                     if cfg!(debug_assertions) {
                         println!("Puzzle solved, beginning outro.");
                     }
-                    self.outro_scene.begin(&mut self.theater);
+                    self.core.begin_outro_scene();
                     self.drain_queue();
-                    self.undo_stack.clear();
+                    self.core.clear_undo_redo();
                 } else {
-                    self.undo_stack.push((dir, rank));
+                    self.core.push_undo((dir, rank));
                 }
-                self.redo_stack.clear();
             }
             action.merge(subaction.but_no_value());
         }
@@ -180,40 +111,32 @@ impl PuzzleView for View {
     }
 
     fn undo(&mut self, game: &mut Game) {
-        if let Some((dir, rank)) = self.undo_stack.pop() {
-            self.redo_stack.push((dir, rank));
+        if let Some((dir, rank)) = self.core.pop_undo() {
             game.wrecked_angle.shift_tiles(dir.opposite(), rank);
         }
     }
 
     fn redo(&mut self, game: &mut Game) {
-        if let Some((dir, rank)) = self.redo_stack.pop() {
-            self.undo_stack.push((dir, rank));
+        if let Some((dir, rank)) = self.core.pop_redo() {
             game.wrecked_angle.shift_tiles(dir, rank);
         }
     }
 
     fn reset(&mut self, game: &mut Game) {
-        self.undo_stack.clear();
-        self.redo_stack.clear();
+        self.core.clear_undo_redo();
         game.wrecked_angle.reset();
     }
 
     fn replay(&mut self, game: &mut Game) {
         game.wrecked_angle.replay();
-        self.theater.reset();
-        self.intro_scene.reset();
-        self.outro_scene.reset();
-        self.intro_scene.begin(&mut self.theater);
+        self.core.replay();
         self.drain_queue();
-        self.screen_fade.fade_in();
     }
 
     fn solve(&mut self, game: &mut Game) {
-        self.undo_stack.clear();
-        self.redo_stack.clear();
+        self.core.clear_undo_redo();
         game.wrecked_angle.solve();
-        self.outro_scene.begin(&mut self.theater);
+        self.core.begin_outro_scene();
         self.drain_queue();
     }
 }

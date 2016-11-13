@@ -17,11 +17,13 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use save::Access;
+use save::{Access, Location};
 
 // ========================================================================= //
 
 pub trait PuzzleState {
+    fn location(&self) -> Location;
+
     fn access(&self) -> Access;
 
     fn is_visited(&self) -> bool { self.access().is_visited() }

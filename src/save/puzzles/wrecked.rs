@@ -21,7 +21,7 @@ use std::collections::VecDeque;
 use std::default::Default;
 use toml;
 
-use save::{Access, Direction};
+use save::{Access, Direction, Location};
 use super::PuzzleState;
 use super::super::util::{ACCESS_KEY, pop_array};
 
@@ -204,6 +204,8 @@ impl Default for WreckedState {
 }
 
 impl PuzzleState for WreckedState {
+    fn location(&self) -> Location { Location::WreckedAngle }
+
     fn access(&self) -> Access { self.access }
 
     fn can_reset(&self) -> bool { !self.is_initial }

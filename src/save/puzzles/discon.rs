@@ -20,7 +20,7 @@
 use std::default::Default;
 use toml;
 
-use save::{Access, Device, DeviceGrid, Direction, LaserColor};
+use save::{Access, Device, DeviceGrid, Direction, LaserColor, Location};
 use super::PuzzleState;
 use super::super::util::{ACCESS_KEY, pop_array};
 
@@ -112,6 +112,8 @@ impl Default for DisconState {
 }
 
 impl PuzzleState for DisconState {
+    fn location(&self) -> Location { Location::Disconnected }
+
     fn access(&self) -> Access { self.access }
 
     fn can_reset(&self) -> bool { self.grid.is_modified() }

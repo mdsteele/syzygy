@@ -20,7 +20,7 @@
 use std::collections::BTreeSet;
 use toml;
 
-use save::Access;
+use save::{Access, Location};
 use super::PuzzleState;
 use super::super::util::{ACCESS_KEY, pop_array};
 
@@ -191,6 +191,8 @@ impl AtticState {
 }
 
 impl PuzzleState for AtticState {
+    fn location(&self) -> Location { Location::ALightInTheAttic }
+
     fn access(&self) -> Access { self.access }
 
     fn can_reset(&self) -> bool { !self.toggled.is_empty() }

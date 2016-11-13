@@ -31,6 +31,6 @@ pub use self::fade::ScreenFade;
 pub use self::hud::{Hud, HudCmd, HudInput};
 pub use self::lasers::{LaserCmd, LaserField};
 pub use self::paragraph::Paragraph;
-pub use self::puzzle::{PuzzleCmd, PuzzleView};
+pub use self::puzzle::{PuzzleCmd, PuzzleCore, PuzzleView};
 
 // ========================================================================= //

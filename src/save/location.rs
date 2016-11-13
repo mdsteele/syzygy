@@ -34,6 +34,18 @@ pub enum Location {
 }
 
 impl Location {
+    pub fn name(self) -> &'static str {
+        match self {
+            Location::Map => "The Map",
+            Location::Prolog => "Prolog",
+            Location::ALightInTheAttic => "A Light in the Attic",
+            Location::ConnectTheDots => "Connect the Dots",
+            Location::Disconnected => "Disconnected",
+            Location::MissedConnections => "Missed Connections",
+            Location::WreckedAngle => "Wrecked Angle",
+        }
+    }
+
     pub fn key(self) -> &'static str {
         match self {
             Location::Map => "map",

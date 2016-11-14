@@ -22,8 +22,8 @@ use toml;
 
 use super::access::Access;
 use super::location::Location;
-use super::puzzles::{AtticState, DisconState, DotsState, MissedState,
-                     PrologState, PuzzleState, WreckedState};
+use super::puzzles::{AtticState, DisconState, DotsState, GroundState,
+                     MissedState, PrologState, PuzzleState, WreckedState};
 use super::util::{pop_table, to_table};
 
 // ========================================================================= //
@@ -40,6 +40,7 @@ pub struct Game {
     pub connect_the_dots: DotsState,
     pub disconnected: DisconState,
     pub missed_connections: MissedState,
+    pub shifting_ground: GroundState,
     pub wrecked_angle: WreckedState,
 }
 
@@ -57,6 +58,7 @@ impl Game {
         let dots = pop_table(&mut table, Location::ConnectTheDots.key());
         let discon = pop_table(&mut table, Location::Disconnected.key());
         let missed = pop_table(&mut table, Location::MissedConnections.key());
+        let ground = pop_table(&mut table, Location::ShiftingGround.key());
         let wrecked = pop_table(&mut table, Location::WreckedAngle.key());
         Game {
             location: Location::from_toml(table.get(LOCATION_KEY)),
@@ -65,6 +67,7 @@ impl Game {
             connect_the_dots: DotsState::from_toml(dots),
             disconnected: DisconState::from_toml(discon),
             missed_connections: MissedState::from_toml(missed),
+            shifting_ground: GroundState::from_toml(ground),
             wrecked_angle: WreckedState::from_toml(wrecked),
         }
     }
@@ -82,6 +85,8 @@ impl Game {
                      self.disconnected.to_toml());
         table.insert(Location::MissedConnections.key().to_string(),
                      self.missed_connections.to_toml());
+        table.insert(Location::ShiftingGround.key().to_string(),
+                     self.shifting_ground.to_toml());
         table.insert(Location::WreckedAngle.key().to_string(),
                      self.wrecked_angle.to_toml());
         toml::Value::Table(table)
@@ -97,6 +102,7 @@ impl Game {
             Location::MissedConnections => {
                 self.is_solved(Location::ConnectTheDots)
             }
+            Location::ShiftingGround => self.is_solved(Location::WreckedAngle),
             Location::WreckedAngle => self.is_solved(Location::Prolog),
         }
     }
@@ -113,6 +119,7 @@ impl Game {
             Location::ConnectTheDots => self.connect_the_dots.access(),
             Location::Disconnected => self.disconnected.access(),
             Location::MissedConnections => self.missed_connections.access(),
+            Location::ShiftingGround => self.shifting_ground.access(),
             Location::WreckedAngle => self.wrecked_angle.access(),
         }
     }

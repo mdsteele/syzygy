@@ -30,6 +30,7 @@ pub enum Location {
     ConnectTheDots,
     Disconnected,
     MissedConnections,
+    ShiftingGround,
     WreckedAngle,
 }
 
@@ -42,6 +43,7 @@ impl Location {
             Location::ConnectTheDots => "Connect the Dots",
             Location::Disconnected => "Disconnected",
             Location::MissedConnections => "Missed Connections",
+            Location::ShiftingGround => "Shifting Ground",
             Location::WreckedAngle => "Wrecked Angle",
         }
     }
@@ -54,6 +56,7 @@ impl Location {
             Location::ConnectTheDots => "connect_the_dots",
             Location::Disconnected => "disconnected",
             Location::MissedConnections => "missed_connections",
+            Location::ShiftingGround => "shifting_ground",
             Location::WreckedAngle => "wrecked_angle",
         }
     }
@@ -67,6 +70,7 @@ impl Location {
                 "connect_the_dots" => return Location::ConnectTheDots,
                 "disconnected" => return Location::Disconnected,
                 "missed_connections" => return Location::MissedConnections,
+                "shifting_ground" => return Location::ShiftingGround,
                 "wrecked_angle" => return Location::WreckedAngle,
                 _ => {}
             }
@@ -97,6 +101,7 @@ mod tests {
                           Location::ConnectTheDots,
                           Location::Disconnected,
                           Location::MissedConnections,
+                          Location::ShiftingGround,
                           Location::WreckedAngle];
         for original in locations {
             let result = Location::from_toml(Some(&original.to_toml()));

@@ -160,6 +160,9 @@ fn main() {
                         Location::MissedConnections => {
                             modes::run_missed_connections(&mut window, game)
                         }
+                        Location::ShiftingGround => {
+                            modes::run_shifting_ground(&mut window, game)
+                        }
                         Location::WreckedAngle => {
                             modes::run_wrecked_angle(&mut window, game)
                         }

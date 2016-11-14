@@ -17,30 +17,23 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod attic;
-mod discon;
-mod dots;
-mod ground;
-mod info;
-mod map;
-mod missed;
-mod mode;
-mod prolog;
-mod puzzle;
-mod title;
-mod wrecked;
+mod scenes;
+mod view;
 
-pub use self::attic::run_a_light_in_the_attic;
-pub use self::discon::run_disconnected;
-pub use self::dots::run_connect_the_dots;
-pub use self::ground::run_shifting_ground;
-pub use self::info::{SOLVED_INFO_TEXT, run_info_box};
-pub use self::map::run_map_screen;
-pub use self::missed::run_missed_connections;
-pub use self::mode::Mode;
-pub use self::prolog::run_prolog;
-pub use self::puzzle::run_puzzle;
-pub use self::title::run_title_screen;
-pub use self::wrecked::run_wrecked_angle;
+use gui::Window;
+use modes::{Mode, run_puzzle};
+use save::Game;
+use self::view::View;
+
+// ========================================================================= //
+
+pub fn run_shifting_ground(window: &mut Window, game: &mut Game) -> Mode {
+    let view = {
+        let visible_rect = window.visible_rect();
+        View::new(&mut window.resources(), visible_rect, &game.shifting_ground)
+    };
+    game.shifting_ground.visit();
+    run_puzzle(window, game, view)
+}
 
 // ========================================================================= //

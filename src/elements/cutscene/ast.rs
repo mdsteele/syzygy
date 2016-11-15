@@ -21,7 +21,8 @@ use elements::Paragraph;
 use gui::{Align, Point, Resources, Sound};
 use super::scene::{DarkNode, JumpNode, LightNode, LoopNode, ParallelNode,
                    PlaceNode, QueueNode, RemoveNode, Scene, SceneNode,
-                   SequenceNode, SlideNode, SoundNode, TalkNode, WaitNode};
+                   SequenceNode, SetBgNode, SlideNode, SoundNode, TalkNode,
+                   WaitNode};
 use super::theater::TalkPos;
 
 // ========================================================================= //
@@ -45,6 +46,7 @@ pub enum Ast {
     Place(i32, &'static str, usize, (i32, i32)),
     Queue(i32, i32),
     Remove(i32),
+    SetBg(&'static str),
     Slide(i32, (i32, i32), bool, bool, f64),
     Sound(Sound),
     Talk(i32, TalkStyle, TalkPos, &'static str),
@@ -98,6 +100,9 @@ impl Ast {
             }
             Ast::Queue(v1, v2) => Box::new(QueueNode::new((v1, v2))),
             Ast::Remove(slot) => Box::new(RemoveNode::new(slot)),
+            Ast::SetBg(name) => {
+                Box::new(SetBgNode::new(resources.get_background(name)))
+            }
             Ast::Slide(slot, (x, y), accel, decel, duration) => {
                 Box::new(SlideNode::new(slot,
                                         Point::new(x, y),

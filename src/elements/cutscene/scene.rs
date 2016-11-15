@@ -21,8 +21,8 @@ use std::cmp;
 use std::rc::Rc;
 
 use elements::Paragraph;
-use gui::{Action, Canvas, Element, Event, FRAME_DELAY_MILLIS, Point, Sound,
-          Sprite};
+use gui::{Action, Background, Canvas, Element, Event, FRAME_DELAY_MILLIS,
+          Point, Sound, Sprite};
 use super::theater::{TalkPos, Theater};
 
 // ========================================================================= //
@@ -538,6 +538,26 @@ impl SceneNode for RemoveNode {
 
     fn skip(&mut self, theater: &mut Theater) {
         theater.remove_actor(self.slot);
+    }
+}
+
+// ========================================================================= //
+
+pub struct SetBgNode {
+    background: Rc<Background>,
+}
+
+impl SetBgNode {
+    pub fn new(background: Rc<Background>) -> SetBgNode {
+        SetBgNode { background: background }
+    }
+}
+
+impl SceneNode for SetBgNode {
+    fn begin(&mut self, theater: &mut Theater, _: bool) { self.skip(theater); }
+
+    fn skip(&mut self, theater: &mut Theater) {
+        theater.set_background(self.background.clone());
     }
 }
 

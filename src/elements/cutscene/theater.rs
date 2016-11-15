@@ -29,6 +29,7 @@ use save::Direction;
 // ========================================================================= //
 
 pub struct Theater {
+    original_background: Rc<Background>,
     background: Rc<Background>,
     actors: BTreeMap<i32, Actor>,
     queue: Vec<(i32, i32)>,
@@ -39,6 +40,7 @@ pub struct Theater {
 impl Theater {
     pub fn new(background: Rc<Background>) -> Theater {
         Theater {
+            original_background: background.clone(),
             background: background,
             actors: BTreeMap::new(),
             queue: Vec::new(),
@@ -48,9 +50,14 @@ impl Theater {
     }
 
     pub fn reset(&mut self) {
+        self.background = self.original_background.clone();
         self.actors.clear();
         self.queue.clear();
         self.dark = false;
+    }
+
+    pub fn set_background(&mut self, background: Rc<Background>) {
+        self.background = background;
     }
 
     pub fn place_actor(&mut self, slot: i32, sprite: Sprite, position: Point) {

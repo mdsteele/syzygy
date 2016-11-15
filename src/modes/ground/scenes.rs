@@ -26,6 +26,12 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
             Ast::Place(0, "chars/elinsa", 0, (432, 320)),
+            Ast::Wait(1.0),
+            Ast::Slide(0, (592, 320), true, false, 1.0),
+            Ast::Place(0, "chars/elinsa", 0, (-16, 320)),
+            Ast::SetBg("shifting_ground_2"),
+            Ast::Place(1, "chars/yttris", 0, (112, 320)),
+            Ast::Slide(0, (80, 320), false, true, 0.5),
         ]),
     ];
     Ast::compile_scene(resources, ast)

@@ -47,6 +47,13 @@ pub fn run_puzzle<V: PuzzleView>(window: &mut Window, game: &mut Game,
             Some(&PuzzleCmd::Reset) => view.reset(game),
             Some(&PuzzleCmd::Replay) => view.replay(game),
             Some(&PuzzleCmd::Solve) => view.solve(game),
+            Some(&PuzzleCmd::Next) => {
+                let mut loc = game.location.next();
+                if !game.is_unlocked(loc) {
+                    loc = Location::Map;
+                }
+                return Mode::Location(loc);
+            }
             None => {}
         }
         if action.should_redraw() {

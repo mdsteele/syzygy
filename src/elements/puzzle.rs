@@ -19,7 +19,7 @@
 
 use elements::{Hud, HudCmd, HudInput, Scene, ScreenFade, Theater};
 use gui::{Action, Canvas, Element, Event, Rect, Resources};
-use save::{Game, PuzzleState};
+use save::{Access, Game, PuzzleState};
 
 // ========================================================================= //
 
@@ -31,6 +31,7 @@ pub enum PuzzleCmd {
     Reset,
     Replay,
     Solve,
+    Next,
 }
 
 // ========================================================================= //
@@ -59,6 +60,7 @@ pub struct PuzzleCore<U> {
     screen_fade: ScreenFade<PuzzleCmd>,
     undo_stack: Vec<U>,
     redo_stack: Vec<U>,
+    previously_solved: bool,
 }
 
 impl<U: Clone> PuzzleCore<U> {
@@ -83,6 +85,7 @@ impl<U: Clone> PuzzleCore<U> {
             screen_fade: ScreenFade::new(resources),
             undo_stack: Vec::new(),
             redo_stack: Vec::new(),
+            previously_solved: state.access() >= Access::Solved,
         }
     }
 
@@ -171,6 +174,10 @@ impl<U: Clone> PuzzleCore<U> {
             } else {
                 self.intro_scene.handle_event(event, &mut self.theater)
             };
+            if !self.previously_solved && self.outro_scene.is_finished() &&
+               self.screen_fade.is_transparent() {
+                self.screen_fade.fade_out_and_return(PuzzleCmd::Next);
+            }
             action.merge(subaction.but_no_value());
         }
         if !action.should_stop() {

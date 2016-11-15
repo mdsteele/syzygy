@@ -48,6 +48,19 @@ impl Location {
         }
     }
 
+    pub fn next(self) -> Location {
+        match self {
+            Location::Map => Location::Map,
+            Location::Prolog => Location::Disconnected,
+            Location::ALightInTheAttic => Location::Map,
+            Location::ConnectTheDots => Location::MissedConnections,
+            Location::Disconnected => Location::ConnectTheDots,
+            Location::MissedConnections => Location::Map,
+            Location::ShiftingGround => Location::Map,
+            Location::WreckedAngle => Location::ShiftingGround,
+        }
+    }
+
     pub fn key(self) -> &'static str {
         match self {
             Location::Map => "map",

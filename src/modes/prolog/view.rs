@@ -43,9 +43,7 @@ pub struct View {
 impl View {
     pub fn new(resources: &mut Resources, visible: Rect, state: &PrologState)
                -> View {
-        // TODO: create background(s) for prolog
-        let background = resources.get_background("a_light_in_the_attic");
-        let mut theater = Theater::new(background);
+        let mut theater = Theater::new();
         let mut scene = compile_scene(resources);
         if state.is_visited() {
             scene.skip(&mut theater);

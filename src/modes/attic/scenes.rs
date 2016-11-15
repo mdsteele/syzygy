@@ -25,6 +25,7 @@ use gui::{Resources, Sound};
 pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
+            Ast::SetBg("a_light_in_the_attic"),
             Ast::Dark(true),
             Ast::Place(0, "chars/tezure", 0, (-16, 320)),
             Ast::Light(0, true),

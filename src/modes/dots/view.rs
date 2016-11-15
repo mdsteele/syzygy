@@ -33,15 +33,9 @@ pub struct View {
 impl View {
     pub fn new(resources: &mut Resources, visible: Rect, state: &DotsState)
                -> View {
-        let intro_scene = compile_intro_scene(resources);
-        let outro_scene = compile_outro_scene(resources);
-        // TODO: Make a background for "Connect the Dots".
-        let core = PuzzleCore::new(resources,
-                                   visible,
-                                   state,
-                                   "disconnected",
-                                   intro_scene,
-                                   outro_scene);
+        let intro = compile_intro_scene(resources);
+        let outro = compile_outro_scene(resources);
+        let core = PuzzleCore::new(resources, visible, state, intro, outro);
         let mut view = View {
             core: core,
             laser_field: LaserField::new(resources, 120, 72, state.grid()),

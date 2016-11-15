@@ -63,11 +63,10 @@ pub struct PuzzleCore<U> {
 
 impl<U: Clone> PuzzleCore<U> {
     pub fn new<S: PuzzleState>(resources: &mut Resources, visible: Rect,
-                               state: &S, background_name: &str,
-                               mut intro_scene: Scene, mut outro_scene: Scene)
+                               state: &S, mut intro_scene: Scene,
+                               mut outro_scene: Scene)
                                -> PuzzleCore<U> {
-        let background = resources.get_background(background_name);
-        let mut theater = Theater::new(background);
+        let mut theater = Theater::new();
         if state.is_visited() {
             intro_scene.skip(&mut theater);
             if state.is_solved() {

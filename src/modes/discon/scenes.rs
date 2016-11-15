@@ -24,6 +24,7 @@ use gui::Resources;
 
 pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
+        Ast::SetBg("disconnected"),
         Ast::Place(0, "chars/tezure", 0, (-16, 304)),
         Ast::Slide(0, (304, 304), true, true, 1.0),
     ];

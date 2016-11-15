@@ -25,6 +25,7 @@ use gui::{Resources, Sound};
 pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
+            Ast::SetBg("shifting_ground_1"),
             Ast::Place(0, "chars/elinsa", 0, (432, 320)),
             Ast::Wait(1.0),
             Ast::Slide(0, (592, 320), true, false, 1.0),

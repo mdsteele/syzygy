@@ -32,14 +32,9 @@ pub struct View {
 impl View {
     pub fn new(resources: &mut Resources, visible: Rect, state: &GroundState)
                -> View {
-        let intro_scene = compile_intro_scene(resources);
-        let outro_scene = compile_outro_scene(resources);
-        let core = PuzzleCore::new(resources,
-                                   visible,
-                                   state,
-                                   "shifting_ground_1",
-                                   intro_scene,
-                                   outro_scene);
+        let intro = compile_intro_scene(resources);
+        let outro = compile_outro_scene(resources);
+        let core = PuzzleCore::new(resources, visible, state, intro, outro);
         let mut view = View { core: core };
         view.drain_queue();
         view

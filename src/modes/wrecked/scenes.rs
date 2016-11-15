@@ -25,6 +25,7 @@ use gui::{Rect, Resources, Sound};
 pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
+            Ast::SetBg("wrecked_angle"),
             Ast::Place(-1, "wrecked/bridge", 0, (432, 320)),
             Ast::Place(1, "chars/elinsa", 0, (348, 304)),
             Ast::Wait(1.0),

@@ -25,6 +25,8 @@ use gui::Resources;
 pub fn compile_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
+            // TODO: create background(s) for prolog
+            Ast::SetBg("a_light_in_the_attic"),
             Ast::Place(0, "chars/tezure", 0, (-16, 320)),
             Ast::Slide(0, (160, 320), true, false, 1.0),
             Ast::Jump(0, (208, 304), 0.5),

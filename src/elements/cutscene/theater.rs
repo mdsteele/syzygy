@@ -29,8 +29,7 @@ use save::Direction;
 // ========================================================================= //
 
 pub struct Theater {
-    original_background: Rc<Background>,
-    background: Rc<Background>,
+    background: Option<Rc<Background>>,
     actors: BTreeMap<i32, Actor>,
     queue: Vec<(i32, i32)>,
     sounds: Vec<Sound>,
@@ -38,10 +37,9 @@ pub struct Theater {
 }
 
 impl Theater {
-    pub fn new(background: Rc<Background>) -> Theater {
+    pub fn new() -> Theater {
         Theater {
-            original_background: background.clone(),
-            background: background,
+            background: None,
             actors: BTreeMap::new(),
             queue: Vec::new(),
             sounds: Vec::new(),
@@ -50,14 +48,14 @@ impl Theater {
     }
 
     pub fn reset(&mut self) {
-        self.background = self.original_background.clone();
+        self.background = None;
         self.actors.clear();
         self.queue.clear();
         self.dark = false;
     }
 
     pub fn set_background(&mut self, background: Rc<Background>) {
-        self.background = background;
+        self.background = Some(background);
     }
 
     pub fn place_actor(&mut self, slot: i32, sprite: Sprite, position: Point) {
@@ -106,14 +104,21 @@ impl Theater {
     pub fn set_dark(&mut self, dark: bool) { self.dark = dark; }
 
     pub fn draw_background(&self, canvas: &mut Canvas) {
-        canvas.clear(self.background.color());
+        let bg_color = if let Some(ref background) = self.background {
+            background.color()
+        } else {
+            (255, 255, 255)
+        };
+        canvas.clear(bg_color);
         for (&index, actor) in self.actors.iter() {
             if index >= 0 {
                 break;
             }
             actor.draw_actor(canvas);
         }
-        canvas.draw_background(&self.background);
+        if let Some(ref background) = self.background {
+            canvas.draw_background(background);
+        }
     }
 
     pub fn draw_foreground(&self, canvas: &mut Canvas) {

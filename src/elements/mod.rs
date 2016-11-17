@@ -17,7 +17,7 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod cutscene;
+pub mod cutscene;
 mod dialog;
 mod fade;
 mod hud;

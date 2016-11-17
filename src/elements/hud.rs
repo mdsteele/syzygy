@@ -111,6 +111,8 @@ impl Element<HudInput, HudCmd> for Hud {
 
 // ========================================================================= //
 
+const BLINK_FRAMES: i32 = 3;
+
 struct HudButton {
     base_sprite: Sprite,
     blink_sprite: Sprite,
@@ -199,7 +201,7 @@ impl Element<HudInput, HudCmd> for HudButton {
             }
             &Event::MouseDown(pt) if self.scroll == 0 && self.enabled(input) &&
                                      self.rect.contains(pt) => {
-                self.blink_frames = 3;
+                self.blink_frames = BLINK_FRAMES;
                 Action::redraw().and_return(self.value)
             }
             _ => Action::ignore(),

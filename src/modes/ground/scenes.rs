@@ -22,15 +22,21 @@ use gui::{Resources, Sound};
 
 // ========================================================================= //
 
+pub const ELINSA_SLOT: i32 = 0;
+
+// ========================================================================= //
+
 pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
             Ast::SetBg("shifting_ground_1"),
+            Ast::Queue(-1, 0), // Hide platforms/arrows
             Ast::Place(0, "chars/elinsa", 0, (432, 320)),
             Ast::Wait(1.0),
             Ast::Slide(0, (592, 320), true, false, 1.0),
             Ast::Place(0, "chars/elinsa", 0, (-16, 320)),
             Ast::SetBg("shifting_ground_2"),
+            Ast::Queue(-1, 1), // Show platforms/arrows
             Ast::Place(1, "chars/yttris", 0, (112, 320)),
             Ast::Slide(0, (80, 320), false, true, 0.5),
         ]),
@@ -44,7 +50,11 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE, "Hooray"),
+            Ast::Talk(0, TalkStyle::Normal, TalkPos::SW, "Hooray"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(0, (592, 64), true, false, 0.5),
+            Ast::Remove(0),
         ]),
     ];
     Ast::compile_scene(resources, ast)

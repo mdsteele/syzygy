@@ -58,7 +58,7 @@ impl WreckedState {
     pub fn from_toml(mut table: toml::Table) -> WreckedState {
         let mut grid: Vec<i8> = pop_array(&mut table, GRID_KEY)
                                     .iter()
-                                    .filter_map(|value| value.as_integer())
+                                    .filter_map(toml::Value::as_integer)
                                     .filter(|&tile| -1 <= tile && tile < 3)
                                     .map(|tile| tile as i8)
                                     .collect();

@@ -30,6 +30,7 @@ use super::theater::{TalkPos, Theater};
 pub struct Scene {
     nodes: Vec<Box<SceneNode>>,
     index: usize,
+    began: bool,
 }
 
 impl Scene {
@@ -37,30 +38,34 @@ impl Scene {
         Scene {
             nodes: nodes,
             index: 0,
+            began: false,
         }
     }
 
     pub fn begin(&mut self, theater: &mut Theater) {
-        if cfg!(debug_assertions) {
-            println!("Beginning cutscene.");
-        }
-        if !self.nodes.is_empty() {
-            self.nodes[0].begin(theater, true);
+        if !self.began {
+            if !self.nodes.is_empty() {
+                self.nodes[0].begin(theater, true);
+            }
+            self.began = true;
         }
     }
 
     pub fn reset(&mut self) {
-        if cfg!(debug_assertions) {
-            println!("Resetting cutscene.");
-        }
         for node in self.nodes.iter_mut() {
             node.reset();
         }
         self.index = 0;
+        self.began = false;
     }
 
     pub fn tick(&mut self, theater: &mut Theater) -> bool {
-        theater.drain_queue();
+        if !self.began {
+            return false;
+        }
+        if !theater.drain_queue().is_empty() {
+            debug_assert!(false, "Theater queue was not drained.");
+        }
         let mut changed = false;
         if self.index < self.nodes.len() {
             changed |= self.nodes[self.index].tick(theater, false);
@@ -85,6 +90,7 @@ impl Scene {
             self.nodes[self.index].skip(theater);
             self.index += 1;
         }
+        self.began = true;
     }
 
     pub fn is_finished(&self) -> bool { self.index == self.nodes.len() }
@@ -118,7 +124,7 @@ impl Element<Theater, ()> for Scene {
                 Action::redraw().and_stop()
             }
             _ => {
-                if self.is_finished() {
+                if !self.began || self.is_finished() {
                     Action::ignore()
                 } else {
                     Action::ignore().and_stop()
@@ -414,6 +420,14 @@ impl JumpNode {
             slot: slot,
             start: end,
             end: end,
+        }
+    }
+
+    pub fn time_to_fall(dist: i32) -> f64 {
+        if dist <= 0 {
+            0.0
+        } else {
+            ((2.0 / GRAVITY) * dist as f64).sqrt()
         }
     }
 }

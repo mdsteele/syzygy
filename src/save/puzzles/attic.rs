@@ -44,7 +44,7 @@ impl AtticState {
             access: Access::from_toml(table.get(ACCESS_KEY)),
             toggled: pop_array(&mut table, TOGGLED_KEY)
                          .iter()
-                         .filter_map(|value| value.as_integer())
+                         .filter_map(toml::Value::as_integer)
                          .filter(|&idx| 0 <= idx && idx < 16)
                          .map(|idx| idx as i32)
                          .collect(),

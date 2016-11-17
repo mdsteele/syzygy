@@ -22,9 +22,9 @@ use std::rc::Rc;
 
 use elements::{PuzzleCmd, PuzzleCore, PuzzleView, Scene};
 use elements::cutscene::{JumpNode, SceneNode, SequenceNode, SlideNode,
-                         ParallelNode, QueueNode, WaitNode};
+                         ParallelNode, QueueNode, SoundNode, WaitNode};
 use gui::{Action, Align, Canvas, Element, Event, FRAME_DELAY_MILLIS, Font,
-          Point, Rect, Resources, Sprite};
+          Point, Rect, Resources, Sound, Sprite};
 use modes::SOLVED_INFO_TEXT;
 use save::{GroundState, Game, PuzzleState};
 use super::scenes::{ELINSA_SLOT, compile_intro_scene, compile_outro_scene};
@@ -78,10 +78,14 @@ impl View {
 
     fn drain_queue(&mut self) {
         for (row, pos) in self.core.drain_queue() {
-            if row < 0 {
-                self.platforms_and_arrows_visible = pos != 0;
-            } else if row < self.platforms.len() as i32 {
+            if row >= 0 && row < self.platforms.len() as i32 {
                 self.platforms[row as usize].set_goal(pos);
+            } else if row == -1 {
+                self.platforms_and_arrows_visible = pos != 0;
+            } else if row == -2 {
+                for platform in self.platforms.iter_mut() {
+                    platform.move_to_goal();
+                }
             }
         }
     }
@@ -182,6 +186,8 @@ impl View {
                     let time_to_fall = JumpNode::time_to_fall(fall_dist + 5) +
                                        JumpNode::time_to_fall(5);
                     elinsa_seq.push(Box::new(WaitNode::new(time_to_hit)));
+                    let sound = Sound::character_collision();
+                    elinsa_seq.push(Box::new(SoundNode::new(sound)));
                     elinsa_seq.push(Box::new(JumpNode::new(ELINSA_SLOT,
                                                            dest,
                                                            time_to_fall)));
@@ -220,6 +226,8 @@ impl View {
                                                             false,
                                                             false,
                                                             time_to_hit)));
+                    let sound = Sound::character_collision();
+                    elinsa_seq.push(Box::new(SoundNode::new(sound)));
                     elinsa_seq.push(Box::new(JumpNode::new(ELINSA_SLOT,
                                                            jump_dest,
                                                            time_to_fall)));
@@ -249,6 +257,7 @@ impl View {
                                                  false,
                                                  slide_time)));
             let dest = self.platform_pt(state, elinsa_row);
+            top_seq.push(Box::new(SoundNode::new(Sound::small_jump())));
             top_seq.push(Box::new(JumpNode::new(ELINSA_SLOT, dest, 0.5)));
         }
 
@@ -257,6 +266,7 @@ impl View {
            state.get_position(num_rows - 2) != 0 {
             elinsa_row -= 1;
             let dest = self.platform_pt(state, elinsa_row);
+            top_seq.push(Box::new(SoundNode::new(Sound::small_jump())));
             top_seq.push(Box::new(JumpNode::new(ELINSA_SLOT, dest, 0.6)));
         }
         if elinsa_row < num_rows {
@@ -274,12 +284,14 @@ impl View {
                 }
                 elinsa_row -= 1;
                 let dest = self.platform_pt(state, elinsa_row);
+                top_seq.push(Box::new(SoundNode::new(Sound::small_jump())));
                 top_seq.push(Box::new(JumpNode::new(ELINSA_SLOT, dest, 0.6)));
             }
         }
         if elinsa_row == 0 && state.get_position(0) == max_pos {
             elinsa_row -= 1;
             let dest = self.platform_pt(state, elinsa_row);
+            top_seq.push(Box::new(SoundNode::new(Sound::small_jump())));
             top_seq.push(Box::new(JumpNode::new(ELINSA_SLOT, dest, 0.6)));
         }
         state.set_elinsa_row(elinsa_row);
@@ -435,6 +447,8 @@ impl Platform {
     fn set_goal(&mut self, pos: i32) {
         self.goal = Platform::pos_to_left(pos);
     }
+
+    fn move_to_goal(&mut self) { self.left = self.goal; }
 
     fn pos_to_left(pos: i32) -> i32 { 160 + 32 * pos }
 

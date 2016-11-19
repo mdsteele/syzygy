@@ -19,9 +19,10 @@
 
 use std::cmp;
 use std::collections::{HashMap, VecDeque};
+use std::rc::Rc;
 
-use gui::{Action, Canvas, Element, Event, FRAME_DELAY_MILLIS, Point, Rect,
-          Resources, Sprite};
+use gui::{Action, Align, Canvas, Element, Event, FRAME_DELAY_MILLIS, Font,
+          Point, Rect, Resources, Sprite};
 use save::{Device, DeviceGrid, Direction, LaserColor};
 
 // ========================================================================= //
@@ -474,6 +475,39 @@ impl Element<DeviceGrid, LaserCmd> for LaserField {
             _ => {}
         }
         Action::ignore()
+    }
+}
+
+// ========================================================================= //
+
+pub struct DangerSign {
+    font1: Rc<Font>,
+    font2: Rc<Font>,
+    string: String,
+    rect: Rect,
+}
+
+impl DangerSign {
+    pub fn new(resources: &mut Resources, left: i32, top: i32, string: &str)
+               -> DangerSign {
+        DangerSign {
+            font1: resources.get_font("danger"),
+            font2: resources.get_font("tiny"),
+            string: string.to_string(),
+            rect: Rect::new(left, top, 80, 32),
+        }
+    }
+
+    pub fn draw(&self, canvas: &mut Canvas) {
+        let mut canvas = canvas.subcanvas(self.rect);
+        canvas.draw_text(&self.font1,
+                         Align::Center,
+                         Point::new(40, 16),
+                         "%DANGER");
+        canvas.draw_text(&self.font2,
+                         Align::Center,
+                         Point::new(40, 26),
+                         &self.string);
     }
 }
 

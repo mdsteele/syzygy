@@ -17,7 +17,8 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use elements::{LaserCmd, LaserField, PuzzleCmd, PuzzleCore, PuzzleView};
+use elements::{DangerSign, LaserCmd, LaserField, PuzzleCmd, PuzzleCore,
+               PuzzleView};
 use gui::{Action, Canvas, Element, Event, Rect, Resources};
 use modes::SOLVED_INFO_TEXT;
 use save::{DisconState, Game, PuzzleState};
@@ -28,6 +29,8 @@ use super::scenes::{compile_intro_scene, compile_outro_scene};
 pub struct View {
     core: PuzzleCore<LaserCmd>,
     laser_field: LaserField,
+    danger_sign: DangerSign,
+    box_open: bool,
 }
 
 impl View {
@@ -39,14 +42,18 @@ impl View {
         let mut view = View {
             core: core,
             laser_field: LaserField::new(resources, 120, 72, state.grid()),
+            danger_sign: DangerSign::new(resources, 224, 160, "HIGH VOLTAGE"),
+            box_open: false,
         };
         view.drain_queue();
         view
     }
 
     fn drain_queue(&mut self) {
-        for (_, _) in self.core.drain_queue() {
-            // TODO drain queue
+        for (kind, value) in self.core.drain_queue() {
+            if kind == 0 {
+                self.box_open = value != 0;
+            }
         }
     }
 }
@@ -55,7 +62,11 @@ impl Element<Game, PuzzleCmd> for View {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
         let state = &game.disconnected;
         self.core.draw_back_layer(canvas);
-        self.laser_field.draw(state.grid(), canvas);
+        if self.box_open {
+            self.laser_field.draw(state.grid(), canvas);
+        } else {
+            self.danger_sign.draw(canvas);
+        }
         self.core.draw_middle_layer(canvas);
         self.core.draw_front_layer(canvas, state);
     }
@@ -65,7 +76,7 @@ impl Element<Game, PuzzleCmd> for View {
         let state = &mut game.disconnected;
         let mut action = self.core.handle_event(event, state);
         self.drain_queue();
-        if !action.should_stop() &&
+        if !action.should_stop() && self.box_open &&
            (event == &Event::ClockTick || !state.is_solved()) {
             let subaction = self.laser_field
                                 .handle_event(event, state.grid_mut());
@@ -136,6 +147,7 @@ impl PuzzleView for View {
     fn replay(&mut self, game: &mut Game) {
         game.disconnected.replay();
         self.laser_field.recalculate_lasers(game.disconnected.grid());
+        self.box_open = false;
         self.core.replay();
         self.drain_queue();
     }

@@ -17,16 +17,29 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use elements::{Ast, Scene};
-use gui::Resources;
+use elements::{Ast, Scene, TalkPos, TalkStyle};
+use gui::{Resources, Sound};
 
 // ========================================================================= //
 
 pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
-        Ast::SetBg("disconnected"),
-        Ast::Place(0, "chars/tezure", 0, (-16, 304)),
-        Ast::Slide(0, (304, 304), true, true, 1.0),
+        Ast::Seq(vec![
+            Ast::SetBg("disconnected"),
+            Ast::Place(0, "chars/tezure", 0, (-16, 304)),
+            Ast::Slide(0, (304, 304), true, true, 1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE,
+                      "Let's take a look."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Queue(0, 1), // Make laser field visible.
+            Ast::Wait(1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE,
+                      "Well, no wonder this\n\
+                       thing isn't working."),
+        ]),
     ];
     Ast::compile_scene(resources, ast)
 }

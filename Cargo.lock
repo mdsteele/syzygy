@@ -5,7 +5,7 @@ dependencies = [
  "ahi 0.1.0 (git+https://github.com/mdsteele/ahi?rev=8dfd2b39ba35d77a3260d95d53369c149e875ecf)",
  "gcc 0.3.35 (registry+https://github.com/rust-lang/crates.io-index)",
  "getopts 0.2.14 (registry+https://github.com/rust-lang/crates.io-index)",
- "itersynth 0.1.0 (git+https://github.com/mdsteele/itersynth?rev=eb825ffc3dd3375ff942a1a68653ed89dedc536f)",
+ "itersynth 0.1.0 (git+https://github.com/mdsteele/itersynth?rev=bc1e3ffe726c80e3a931bf9e58f4a98f213c2bf5)",
  "sdl2 0.22.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "toml 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -33,7 +33,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 [[package]]
 name = "itersynth"
 version = "0.1.0"
-source = "git+https://github.com/mdsteele/itersynth?rev=eb825ffc3dd3375ff942a1a68653ed89dedc536f#eb825ffc3dd3375ff942a1a68653ed89dedc536f"
+source = "git+https://github.com/mdsteele/itersynth?rev=bc1e3ffe726c80e3a931bf9e58f4a98f213c2bf5#bc1e3ffe726c80e3a931bf9e58f4a98f213c2bf5"
 
 [[package]]
 name = "lazy_static"
@@ -158,7 +158,7 @@ dependencies = [
 "checksum bitflags 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)" = "72cd7314bd4ee024071241147222c706e80385a1605ac7d4cd2fcc339da2ae46"
 "checksum gcc 0.3.35 (registry+https://github.com/rust-lang/crates.io-index)" = "91ecd03771effb0c968fd6950b37e89476a578aaf1c70297d8e92b6516ec3312"
 "checksum getopts 0.2.14 (registry+https://github.com/rust-lang/crates.io-index)" = "d9047cfbd08a437050b363d35ef160452c5fe8ea5187ae0a624708c91581d685"
-"checksum itersynth 0.1.0 (git+https://github.com/mdsteele/itersynth?rev=eb825ffc3dd3375ff942a1a68653ed89dedc536f)" = "<none>"
+"checksum itersynth 0.1.0 (git+https://github.com/mdsteele/itersynth?rev=bc1e3ffe726c80e3a931bf9e58f4a98f213c2bf5)" = "<none>"
 "checksum lazy_static 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "49247ec2a285bb3dcb23cbd9c35193c025e7251bfce77c1d5da97e6362dffe7f"
 "checksum libc 0.2.16 (registry+https://github.com/rust-lang/crates.io-index)" = "408014cace30ee0f767b1c4517980646a573ec61a57957aeeabcac8ac0a02e8d"
 "checksum num 0.1.36 (registry+https://github.com/rust-lang/crates.io-index)" = "bde7c03b09e7c6a301ee81f6ddf66d7a28ec305699e3d3b056d2fc56470e3120"

@@ -19,4 +19,4 @@ rev = "8dfd2b39ba35d77a3260d95d53369c149e875ecf"
 
 [dependencies.itersynth]
 git = "https://github.com/mdsteele/itersynth"
-rev = "eb825ffc3dd3375ff942a1a68653ed89dedc536f"
+rev = "bc1e3ffe726c80e3a931bf9e58f4a98f213c2bf5"

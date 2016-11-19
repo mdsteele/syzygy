@@ -244,6 +244,8 @@ pub fn compile_outro_scene(resources: &mut Resources, visible: Rect) -> Scene {
                 Ast::Place(-1, "wrecked/bridge", 2, (432, 320)),
                 Ast::Jump(1, (432, 416), 0.75),
                 Ast::Wait(0.5),
+                Ast::Sound(Sound::character_collision()),
+                Ast::Wait(0.5),
                 Ast::Place(1, "chars/elinsa", 0, (432, visible.bottom() + 32)),
                 Ast::Sound(Sound::talk_lo()),
                 Ast::Talk(1, TalkStyle::Normal, TalkPos::NW, "%#$$@&!!"),

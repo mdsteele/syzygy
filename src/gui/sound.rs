@@ -47,6 +47,12 @@ impl Sound {
         Sound::new(Wave::noise(2000.0).adshr(0.0, 0.0, 0.5, 0.0, 0.25))
     }
 
+    pub fn platform_shift(num_times: i32) -> Sound {
+        Sound::new(Wave::noise(800.0)
+                       .adshr(0.071, 0.0, 1.0, 0.0, 0.142)
+                       .repeated(num_times) * 0.25)
+    }
+
     pub fn small_jump() -> Sound {
         Sound::new(Wave::pulse(Wave::slide(200.0, 750.0, 1500.0), 0.25)
                        .adshr(0.0, 0.0, 0.25, 0.1, 0.1))

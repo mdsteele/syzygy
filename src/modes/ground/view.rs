@@ -159,6 +159,8 @@ impl View {
                 delta = 0;
             }
             let travel_time = Platform::travel_time(old_pos, pos);
+            let sound = Sound::platform_shift((pos - old_pos).abs());
+            platform_seq.push(Box::new(SoundNode::new(sound)));
             platform_seq.push(Box::new(QueueNode::new((row, pos))));
             platform_seq.push(Box::new(WaitNode::new(travel_time)));
             if elinsa_row >= 0 && elinsa_row < num_rows &&

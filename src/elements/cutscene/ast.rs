@@ -35,7 +35,6 @@ pub enum TalkStyle {
 
 // ========================================================================= //
 
-#[allow(dead_code)]
 pub enum Ast {
     Seq(Vec<Ast>),
     Par(Vec<Ast>),

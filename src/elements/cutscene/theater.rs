@@ -377,7 +377,6 @@ fn round_up_to_16(mut size: i32) -> i32 {
 
 // ========================================================================= //
 
-#[allow(dead_code)]
 #[derive(Clone, Copy)]
 pub enum TalkPos {
     NE,

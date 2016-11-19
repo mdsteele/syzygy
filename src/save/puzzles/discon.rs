@@ -37,17 +37,23 @@ pub struct DisconState {
 
 impl DisconState {
     pub fn from_toml(mut table: toml::Table) -> DisconState {
-        let mut state: DisconState = Default::default();
-        state.access = Access::from_toml(table.get(ACCESS_KEY));
-        let grid = pop_array(&mut table, GRID_KEY);
-        state.grid = DeviceGrid::from_toml(grid, &state.grid);
-        state
+        let access = Access::from_toml(table.get(ACCESS_KEY));
+        let grid = if access == Access::Solved {
+            DisconState::solved_grid()
+        } else {
+            let grid = pop_array(&mut table, GRID_KEY);
+            DeviceGrid::from_toml(grid, &DisconState::initial_grid())
+        };
+        DisconState {
+            access: access,
+            grid: grid,
+        }
     }
 
     pub fn to_toml(&self) -> toml::Value {
         let mut table = toml::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
-        if self.grid.is_modified() {
+        if self.grid.is_modified() && !self.is_solved() {
             table.insert(GRID_KEY.to_string(), self.grid.to_toml());
         }
         toml::Value::Table(table)
@@ -57,47 +63,73 @@ impl DisconState {
 
     pub fn mark_solved(&mut self) { self.access = Access::Solved; }
 
-    pub fn reset(&mut self) { self.grid = DisconState::default_grid(); }
+    pub fn reset(&mut self) { self.grid = DisconState::initial_grid(); }
 
     pub fn replay(&mut self) {
         self.access = Access::Replay;
-        self.grid = DisconState::default_grid();
+        self.grid = DisconState::initial_grid();
+    }
+
+    pub fn solve(&mut self) {
+        self.access = Access::Solved;
+        self.grid = DisconState::solved_grid();
     }
 
     pub fn grid(&self) -> &DeviceGrid { &self.grid }
 
     pub fn grid_mut(&mut self) -> &mut DeviceGrid { &mut self.grid }
 
-    fn default_grid() -> DeviceGrid {
+    fn base_grid() -> DeviceGrid {
         let mut grid = DeviceGrid::new(9, 5);
         grid.set(0, 0, Device::Emitter(LaserColor::Red), Direction::East);
-        grid.set(1, 0, Device::Mirror, Direction::East);
         grid.set(3, 0, Device::Wall, Direction::East);
         grid.set(4, 0, Device::Wall, Direction::East);
         grid.set(5, 0, Device::Wall, Direction::East);
-        grid.set(6, 0, Device::Mirror, Direction::South);
-        grid.set(7, 0, Device::Mirror, Direction::East);
         grid.set(8, 0, Device::Detector(LaserColor::Blue), Direction::West);
         grid.set(0, 1, Device::Wall, Direction::East);
         grid.set(1, 1, Device::Wall, Direction::East);
-        grid.set(2, 1, Device::Mirror, Direction::East);
-        grid.set(3, 1, Device::Mirror, Direction::South);
         grid.set(8, 1, Device::Wall, Direction::East);
         grid.set(0, 2, Device::Emitter(LaserColor::Green), Direction::East);
-        grid.set(2, 2, Device::Mirror, Direction::East);
         grid.set(4, 2, Device::Wall, Direction::East);
         grid.set(5, 2, Device::Wall, Direction::East);
-        grid.set(7, 2, Device::Mirror, Direction::East);
         grid.set(8, 2, Device::Detector(LaserColor::Green), Direction::West);
         grid.set(0, 3, Device::Wall, Direction::East);
-        grid.set(5, 3, Device::Mirror, Direction::East);
         grid.set(7, 3, Device::Wall, Direction::East);
         grid.set(8, 3, Device::Wall, Direction::East);
         grid.set(0, 4, Device::Emitter(LaserColor::Blue), Direction::East);
-        grid.set(3, 4, Device::Mirror, Direction::East);
         grid.set(4, 4, Device::Channel, Direction::East);
-        grid.set(6, 4, Device::Mirror, Direction::South);
         grid.set(8, 4, Device::Detector(LaserColor::Red), Direction::West);
+        grid
+    }
+
+    fn initial_grid() -> DeviceGrid {
+        let mut grid = DisconState::base_grid();
+        grid.set(1, 0, Device::Mirror, Direction::East);
+        grid.set(6, 0, Device::Mirror, Direction::South);
+        grid.set(7, 0, Device::Mirror, Direction::East);
+        grid.set(2, 1, Device::Mirror, Direction::East);
+        grid.set(3, 1, Device::Mirror, Direction::South);
+        grid.set(2, 2, Device::Mirror, Direction::East);
+        grid.set(7, 2, Device::Mirror, Direction::East);
+        grid.set(5, 3, Device::Mirror, Direction::East);
+        grid.set(3, 4, Device::Mirror, Direction::East);
+        grid.set(6, 4, Device::Mirror, Direction::South);
+        grid
+    }
+
+    fn solved_grid() -> DeviceGrid {
+        let mut grid = DisconState::base_grid();
+        grid.set(2, 0, Device::Mirror, Direction::South);
+        grid.set(6, 0, Device::Mirror, Direction::East);
+        grid.set(3, 1, Device::Mirror, Direction::East);
+        grid.set(7, 1, Device::Mirror, Direction::South);
+        grid.set(3, 2, Device::Mirror, Direction::East);
+        grid.set(7, 2, Device::Mirror, Direction::South);
+        grid.set(1, 3, Device::Mirror, Direction::East);
+        grid.set(6, 3, Device::Mirror, Direction::East);
+        grid.set(1, 4, Device::Mirror, Direction::East);
+        grid.set(2, 4, Device::Mirror, Direction::South);
+        grid.set_is_modified(true);
         grid
     }
 }
@@ -106,7 +138,7 @@ impl Default for DisconState {
     fn default() -> DisconState {
         DisconState {
             access: Default::default(),
-            grid: DisconState::default_grid(),
+            grid: DisconState::initial_grid(),
         }
     }
 }

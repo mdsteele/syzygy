@@ -120,6 +120,10 @@ impl DeviceGrid {
 
     pub fn is_modified(&self) -> bool { self.is_modified }
 
+    pub fn set_is_modified(&mut self, is_modified: bool) {
+        self.is_modified = is_modified;
+    }
+
     pub fn get(&self, col: i32, row: i32) -> Option<(Device, Direction)> {
         if col >= 0 && col < self.num_cols && row >= 0 && row < self.num_rows {
             self.grid[(row * self.num_cols + col) as usize]

@@ -37,17 +37,23 @@ pub struct DotsState {
 
 impl DotsState {
     pub fn from_toml(mut table: toml::Table) -> DotsState {
-        let mut state: DotsState = Default::default();
-        state.access = Access::from_toml(table.get(ACCESS_KEY));
-        let grid = pop_array(&mut table, GRID_KEY);
-        state.grid = DeviceGrid::from_toml(grid, &state.grid);
-        state
+        let access = Access::from_toml(table.get(ACCESS_KEY));
+        let grid = if access == Access::Solved {
+            DotsState::solved_grid()
+        } else {
+            let grid = pop_array(&mut table, GRID_KEY);
+            DeviceGrid::from_toml(grid, &DotsState::initial_grid())
+        };
+        DotsState {
+            access: access,
+            grid: grid,
+        }
     }
 
     pub fn to_toml(&self) -> toml::Value {
         let mut table = toml::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
-        if self.grid.is_modified() {
+        if self.grid.is_modified() && !self.is_solved() {
             table.insert(GRID_KEY.to_string(), self.grid.to_toml());
         }
         toml::Value::Table(table)
@@ -57,30 +63,32 @@ impl DotsState {
 
     pub fn mark_solved(&mut self) { self.access = Access::Solved; }
 
-    pub fn reset(&mut self) { self.grid = DotsState::default_grid(); }
+    pub fn reset(&mut self) { self.grid = DotsState::initial_grid(); }
 
     pub fn replay(&mut self) {
         self.access = Access::Replay;
-        self.grid = DotsState::default_grid();
+        self.grid = DotsState::initial_grid();
+    }
+
+    pub fn solve(&mut self) {
+        self.access = Access::Solved;
+        self.grid = DotsState::solved_grid();
     }
 
     pub fn grid(&self) -> &DeviceGrid { &self.grid }
 
     pub fn grid_mut(&mut self) -> &mut DeviceGrid { &mut self.grid }
 
-    fn default_grid() -> DeviceGrid {
+    fn base_grid() -> DeviceGrid {
         let mut grid = DeviceGrid::new(9, 5);
         grid.set(0, 0, Device::Emitter(LaserColor::Blue), Direction::East);
         grid.set(4, 0, Device::CrossChannel, Direction::East);
         grid.set(8, 0, Device::Detector(LaserColor::Blue), Direction::West);
         grid.set(0, 1, Device::Wall, Direction::East);
-        grid.set(1, 1, Device::Mirror, Direction::South);
         grid.set(2, 1, Device::Wall, Direction::East);
         grid.set(3, 1, Device::Channel, Direction::South);
-        grid.set(4, 1, Device::Mirror, Direction::South);
         grid.set(5, 1, Device::Channel, Direction::East);
         grid.set(6, 1, Device::CrossChannel, Direction::East);
-        grid.set(7, 1, Device::Mirror, Direction::South);
         grid.set(8, 1, Device::Wall, Direction::East);
         grid.set(0, 2, Device::Emitter(LaserColor::Green), Direction::East);
         grid.set(1, 2, Device::CrossChannel, Direction::East);
@@ -88,23 +96,49 @@ impl DotsState {
         grid.set(7, 2, Device::CrossChannel, Direction::East);
         grid.set(8, 2, Device::Detector(LaserColor::Green), Direction::West);
         grid.set(0, 3, Device::Wall, Direction::East);
-        grid.set(1, 3, Device::Mirror, Direction::East);
         grid.set(2, 3, Device::CrossChannel, Direction::East);
         grid.set(3, 3, Device::Channel, Direction::East);
-        grid.set(4, 3, Device::Mirror, Direction::East);
         grid.set(5, 3, Device::Channel, Direction::South);
         grid.set(6, 3, Device::Wall, Direction::East);
-        grid.set(7, 3, Device::Mirror, Direction::East);
         grid.set(8, 3, Device::Wall, Direction::East);
         grid.set(0, 4, Device::Emitter(LaserColor::Red), Direction::East);
+        grid.set(4, 4, Device::CrossChannel, Direction::East);
+        grid.set(8, 4, Device::Detector(LaserColor::Green), Direction::West);
+        grid
+    }
+
+    fn initial_grid() -> DeviceGrid {
+        let mut grid = DotsState::base_grid();
+        grid.set(1, 1, Device::Mirror, Direction::South);
+        grid.set(4, 1, Device::Mirror, Direction::South);
+        grid.set(7, 1, Device::Mirror, Direction::South);
+        grid.set(1, 3, Device::Mirror, Direction::East);
+        grid.set(4, 3, Device::Mirror, Direction::East);
+        grid.set(7, 3, Device::Mirror, Direction::East);
         grid.set(1, 4, Device::Mirror, Direction::South);
         grid.set(2, 4, Device::Splitter, Direction::East);
         grid.set(3, 4, Device::Mirror, Direction::South);
-        grid.set(4, 4, Device::CrossChannel, Direction::East);
         grid.set(5, 4, Device::Mirror, Direction::South);
         grid.set(6, 4, Device::Mirror, Direction::East);
         grid.set(7, 4, Device::Mirror, Direction::South);
-        grid.set(8, 4, Device::Detector(LaserColor::Green), Direction::West);
+        grid
+    }
+
+    fn solved_grid() -> DeviceGrid {
+        let mut grid = DotsState::base_grid();
+        grid.set(1, 0, Device::Mirror, Direction::South);
+        grid.set(3, 0, Device::Mirror, Direction::East);
+        grid.set(6, 0, Device::Mirror, Direction::South);
+        grid.set(7, 0, Device::Mirror, Direction::East);
+        grid.set(4, 1, Device::Mirror, Direction::East);
+        grid.set(7, 1, Device::Mirror, Direction::East);
+        grid.set(3, 2, Device::Mirror, Direction::East);
+        grid.set(5, 2, Device::Mirror, Direction::East);
+        grid.set(6, 2, Device::Splitter, Direction::South);
+        grid.set(1, 3, Device::Mirror, Direction::South);
+        grid.set(4, 3, Device::Mirror, Direction::East);
+        grid.set(5, 4, Device::Mirror, Direction::South);
+        grid.set_is_modified(true);
         grid
     }
 }
@@ -113,7 +147,7 @@ impl Default for DotsState {
     fn default() -> DotsState {
         DotsState {
             access: Default::default(),
-            grid: DotsState::default_grid(),
+            grid: DotsState::initial_grid(),
         }
     }
 }

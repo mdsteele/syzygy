@@ -134,14 +134,20 @@ impl PuzzleView for View {
     }
 
     fn replay(&mut self, game: &mut Game) {
-        game.connect_the_dots.replay();
-        self.laser_field.recalculate_lasers(game.connect_the_dots.grid());
+        let state = &mut game.connect_the_dots;
+        state.replay();
+        self.laser_field.recalculate_lasers(state.grid());
         self.core.replay();
         self.drain_queue();
     }
 
-    fn solve(&mut self, _game: &mut Game) {
-        // TODO solve
+    fn solve(&mut self, game: &mut Game) {
+        let state = &mut game.connect_the_dots;
+        self.core.clear_undo_redo();
+        state.solve();
+        self.laser_field.recalculate_lasers(state.grid());
+        self.core.begin_outro_scene();
+        self.drain_queue();
     }
 }
 

@@ -196,6 +196,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
 pub fn compile_outro_scene(resources: &mut Resources, visible: Rect) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
+            Ast::Sound(Sound::solve_puzzle_chime()),
             Ast::Queue(0, 0),
             Ast::Wait(0.75),
             Ast::Sound(Sound::talk_hi()),

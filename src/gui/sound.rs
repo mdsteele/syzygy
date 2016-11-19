@@ -58,6 +58,16 @@ impl Sound {
                        .adshr(0.0, 0.0, 0.25, 0.1, 0.1))
     }
 
+    pub fn solve_puzzle_chime() -> Sound {
+        let duty = Wave::sine(3.0) * 0.1 + 0.75;
+        let c5 = Wave::triangle(523.25, duty.clone());
+        let e5 = Wave::triangle(659.25, duty.clone());
+        let g5 = Wave::triangle(783.99, duty.clone());
+        let c6 = Wave::triangle(1046.50, duty);
+        let chord = c5 + e5 + g5 + c6;
+        Sound::new(chord.adshr(0.01, 0.1, 0.5, 0.0, 0.75) * 0.75)
+    }
+
     pub fn talk_annoyed_hi() -> Sound {
         Sound::new(Wave::pulse(Wave::slide(120.0, 200.0, -3000.0), 0.2)
                        .adshr(0.0, 0.0, 0.25, 0.25, 0.2))

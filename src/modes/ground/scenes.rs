@@ -204,6 +204,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
 pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
+            Ast::Sound(Sound::solve_puzzle_chime()),
             Ast::Wait(1.0),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(0, TalkStyle::Normal, TalkPos::SW, "Done and done."),
@@ -268,6 +269,8 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
             Ast::Jump(1, (464, 88), 0.5),
             Ast::Sound(Sound::small_jump()),
             Ast::Jump(1, (496, 64), 0.5),
+            Ast::Sound(Sound::solve_puzzle_chime()),
+            Ast::Wait(0.5),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(1, TalkStyle::Normal, TalkPos::SW, "Woohoo!"),
         ]),

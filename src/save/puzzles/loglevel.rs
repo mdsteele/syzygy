@@ -17,27 +17,53 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod access;
-mod data;
-mod device;
-mod direction;
-mod game;
-mod location;
-mod path;
-mod prefs;
-mod puzzles;
-mod util;
+use toml;
 
-pub use self::access::Access;
-pub use self::data::SaveData;
-pub use self::device::{Device, DeviceGrid, LaserColor};
-pub use self::direction::Direction;
-pub use self::game::Game;
-pub use self::location::Location;
-pub use self::path::get_default_save_file_path;
-pub use self::prefs::Prefs;
-pub use self::puzzles::{AtticState, DotsState, DisconState, GroundState,
-                        LogLevelState, MissedState, PrologState, PuzzleState,
-                        WreckedState};
+use save::{Access, Location};
+use super::PuzzleState;
+use super::super::util::ACCESS_KEY;
+
+// ========================================================================= //
+
+#[derive(Default)]
+pub struct LogLevelState {
+    access: Access,
+}
+
+impl LogLevelState {
+    pub fn from_toml(table: toml::Table) -> LogLevelState {
+        LogLevelState { access: Access::from_toml(table.get(ACCESS_KEY)) }
+    }
+
+    pub fn to_toml(&self) -> toml::Value {
+        let mut table = toml::Table::new();
+        table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
+        toml::Value::Table(table)
+    }
+
+    pub fn visit(&mut self) { self.access.visit(); }
+
+    pub fn reset(&mut self) {
+        // TODO reset
+    }
+
+    pub fn replay(&mut self) {
+        self.access = Access::Replay;
+        // TODO replay
+    }
+
+    pub fn solve(&mut self) {
+        self.access = Access::Solved;
+        // TODO solve
+    }
+}
+
+impl PuzzleState for LogLevelState {
+    fn location(&self) -> Location { Location::LogLevel }
+
+    fn access(&self) -> Access { self.access }
+
+    fn can_reset(&self) -> bool { false } // TODO
+}
 
 // ========================================================================= //

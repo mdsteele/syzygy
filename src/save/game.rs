@@ -23,7 +23,8 @@ use toml;
 use super::access::Access;
 use super::location::Location;
 use super::puzzles::{AtticState, DisconState, DotsState, GroundState,
-                     MissedState, PrologState, PuzzleState, WreckedState};
+                     LogLevelState, MissedState, PrologState, PuzzleState,
+                     WreckedState};
 use super::util::{pop_table, to_table};
 
 // ========================================================================= //
@@ -39,6 +40,7 @@ pub struct Game {
     pub a_light_in_the_attic: AtticState,
     pub connect_the_dots: DotsState,
     pub disconnected: DisconState,
+    pub log_level: LogLevelState,
     pub missed_connections: MissedState,
     pub shifting_ground: GroundState,
     pub wrecked_angle: WreckedState,
@@ -57,6 +59,7 @@ impl Game {
         let attic = pop_table(&mut table, Location::ALightInTheAttic.key());
         let dots = pop_table(&mut table, Location::ConnectTheDots.key());
         let discon = pop_table(&mut table, Location::Disconnected.key());
+        let loglevel = pop_table(&mut table, Location::LogLevel.key());
         let missed = pop_table(&mut table, Location::MissedConnections.key());
         let ground = pop_table(&mut table, Location::ShiftingGround.key());
         let wrecked = pop_table(&mut table, Location::WreckedAngle.key());
@@ -66,6 +69,7 @@ impl Game {
             a_light_in_the_attic: AtticState::from_toml(attic),
             connect_the_dots: DotsState::from_toml(dots),
             disconnected: DisconState::from_toml(discon),
+            log_level: LogLevelState::from_toml(loglevel),
             missed_connections: MissedState::from_toml(missed),
             shifting_ground: GroundState::from_toml(ground),
             wrecked_angle: WreckedState::from_toml(wrecked),
@@ -83,6 +87,8 @@ impl Game {
                      self.connect_the_dots.to_toml());
         table.insert(Location::Disconnected.key().to_string(),
                      self.disconnected.to_toml());
+        table.insert(Location::LogLevel.key().to_string(),
+                     self.log_level.to_toml());
         table.insert(Location::MissedConnections.key().to_string(),
                      self.missed_connections.to_toml());
         table.insert(Location::ShiftingGround.key().to_string(),
@@ -97,8 +103,9 @@ impl Game {
             Location::Map => true,
             Location::Prolog => true,
             Location::ALightInTheAttic => self.is_solved(Location::Prolog),
-            Location::ConnectTheDots => self.is_solved(Location::Disconnected),
+            Location::ConnectTheDots => self.is_solved(Location::LogLevel),
             Location::Disconnected => self.is_solved(Location::Prolog),
+            Location::LogLevel => self.is_solved(Location::Disconnected),
             Location::MissedConnections => {
                 self.is_solved(Location::ConnectTheDots)
             }
@@ -118,6 +125,7 @@ impl Game {
             Location::ALightInTheAttic => self.a_light_in_the_attic.access(),
             Location::ConnectTheDots => self.connect_the_dots.access(),
             Location::Disconnected => self.disconnected.access(),
+            Location::LogLevel => self.log_level.access(),
             Location::MissedConnections => self.missed_connections.access(),
             Location::ShiftingGround => self.shifting_ground.access(),
             Location::WreckedAngle => self.wrecked_angle.access(),

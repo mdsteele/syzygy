@@ -54,6 +54,7 @@ impl View {
                 View::node(resources, Location::ALightInTheAttic, 100, 50),
                 View::node(resources, Location::ConnectTheDots, 150, 150),
                 View::node(resources, Location::Disconnected, 100, 150),
+                View::node(resources, Location::LogLevel, 125, 175),
                 View::node(resources, Location::MissedConnections, 200, 150),
                 View::node(resources, Location::ShiftingGround, 150, 250),
                 View::node(resources, Location::WreckedAngle, 100, 250),

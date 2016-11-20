@@ -93,6 +93,13 @@ impl<'a> Canvas<'a> {
         self.renderer.fill_rect(rect).unwrap();
     }
 
+    pub fn draw_rect(&mut self, color: (u8, u8, u8), mut rect: Rect) {
+        let (r, g, b) = color;
+        self.renderer.set_draw_color(Color::RGB(r, g, b));
+        rect.offset(self.offset_rect.x(), self.offset_rect.y());
+        self.renderer.draw_rect(rect).unwrap();
+    }
+
     pub fn draw_background(&mut self, background: &Background) {
         for (sprite, point) in background.tiles() {
             self.draw_sprite(sprite, point);

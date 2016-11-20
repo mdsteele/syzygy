@@ -33,7 +33,7 @@ pub use self::action::Action;
 pub use self::background::Background;
 pub use self::canvas::{Align, Canvas};
 pub use self::element::{Element, GroupElement, SubrectElement};
-pub use self::event::{Event, KeyMod};
+pub use self::event::{Event, Keycode, KeyMod};
 pub use self::font::Font;
 pub use self::resources::Resources;
 pub use self::sound::Sound;

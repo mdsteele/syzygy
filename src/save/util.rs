@@ -62,6 +62,13 @@ pub fn to_i32(value: toml::Value) -> i32 {
     }
 }
 
+pub fn to_string(value: toml::Value) -> String {
+    match value {
+        toml::Value::String(string) => string,
+        _ => String::new(),
+    }
+}
+
 pub fn to_table(value: toml::Value) -> toml::Table {
     match value {
         toml::Value::Table(table) => table,

@@ -207,6 +207,7 @@ struct WreckedGrid {
     left: i32,
     top: i32,
     tile_sprites: Vec<Sprite>,
+    hole_sprites: Vec<Sprite>,
     drag: Option<Drag>,
 }
 
@@ -215,7 +216,8 @@ impl WreckedGrid {
         WreckedGrid {
             left: left,
             top: top,
-            tile_sprites: resources.get_sprites("wrecked/large"),
+            tile_sprites: resources.get_sprites("wrecked/tiles"),
+            hole_sprites: resources.get_sprites("wrecked/holes"),
             drag: None,
         }
     }
@@ -230,11 +232,20 @@ impl WreckedGrid {
 
 impl Element<WreckedState, (Direction, i32)> for WreckedGrid {
     fn draw(&self, state: &WreckedState, canvas: &mut Canvas) {
-        canvas.fill_rect((15, 20, 15),
-                         Rect::new(self.left,
-                                   self.top,
-                                   9 * LARGE_TILE_SIZE,
-                                   7 * LARGE_TILE_SIZE));
+        for row in 0..7 {
+            let top = self.top + row * LARGE_TILE_SIZE as i32;
+            for col in 0..9 {
+                if state.tile_at(col, row).is_none() {
+                    let left = self.left + col * LARGE_TILE_SIZE as i32;
+                    let rect = Rect::new(left,
+                                         top,
+                                         LARGE_TILE_SIZE,
+                                         LARGE_TILE_SIZE);
+                    canvas.fill_rect((15, 20, 15), rect);
+                    canvas.draw_sprite(&self.hole_sprites[0], rect.top_left());
+                }
+            }
+        }
         for row in 0..7 {
             let top = self.top + row * LARGE_TILE_SIZE as i32;
             for col in 0..9 {

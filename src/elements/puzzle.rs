@@ -89,6 +89,8 @@ impl<U: Clone> PuzzleCore<U> {
         }
     }
 
+    pub fn flash_info_button(&mut self) { self.hud.flash_info_button(); }
+
     pub fn theater_mut(&mut self) -> &mut Theater { &mut self.theater }
 
     pub fn drain_queue(&mut self) -> Vec<(i32, i32)> {

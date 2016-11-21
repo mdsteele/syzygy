@@ -29,6 +29,7 @@ use super::util::{pop_table, to_table};
 
 // ========================================================================= //
 
+const EVER_CLICKED_INFO_KEY: &'static str = "ever_clicked_info";
 const LOCATION_KEY: &'static str = "location";
 
 // ========================================================================= //
@@ -44,6 +45,7 @@ pub struct Game {
     pub missed_connections: MissedState,
     pub shifting_ground: GroundState,
     pub wrecked_angle: WreckedState,
+    pub ever_clicked_info: bool,
 }
 
 impl Game {
@@ -73,6 +75,9 @@ impl Game {
             missed_connections: MissedState::from_toml(missed),
             shifting_ground: GroundState::from_toml(ground),
             wrecked_angle: WreckedState::from_toml(wrecked),
+            ever_clicked_info: table.get(EVER_CLICKED_INFO_KEY)
+                                    .and_then(toml::Value::as_bool)
+                                    .unwrap_or(false),
         }
     }
 
@@ -95,6 +100,8 @@ impl Game {
                      self.shifting_ground.to_toml());
         table.insert(Location::WreckedAngle.key().to_string(),
                      self.wrecked_angle.to_toml());
+        table.insert(EVER_CLICKED_INFO_KEY.to_string(),
+                     toml::Value::Boolean(self.ever_clicked_info));
         toml::Value::Table(table)
     }
 

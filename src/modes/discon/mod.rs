@@ -28,10 +28,13 @@ use self::view::View;
 // ========================================================================= //
 
 pub fn run_disconnected(window: &mut Window, game: &mut Game) -> Mode {
-    let view = {
+    let mut view = {
         let visible_rect = window.visible_rect();
         View::new(&mut window.resources(), visible_rect, &game.disconnected)
     };
+    if !game.ever_clicked_info {
+        view.flash_info_button();
+    }
     game.disconnected.visit();
     run_puzzle(window, game, view)
 }

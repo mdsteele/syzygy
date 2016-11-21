@@ -37,6 +37,7 @@ pub fn run_puzzle<V: PuzzleView>(window: &mut Window, game: &mut Game,
         match action.value() {
             Some(&PuzzleCmd::Back) => return Mode::Location(Location::Map),
             Some(&PuzzleCmd::Info) => {
+                game.ever_clicked_info = true;
                 let text = view.info_text(game);
                 if !run_info_box(window, &view, game, text) {
                     return Mode::Quit;

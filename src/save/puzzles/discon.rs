@@ -108,9 +108,9 @@ impl DisconState {
         grid.set(6, 0, Device::Mirror, Direction::South);
         grid.set(7, 0, Device::Mirror, Direction::East);
         grid.set(2, 1, Device::Mirror, Direction::East);
-        grid.set(3, 1, Device::Mirror, Direction::South);
-        grid.set(2, 2, Device::Mirror, Direction::East);
+        grid.set(4, 1, Device::Mirror, Direction::South);
         grid.set(7, 2, Device::Mirror, Direction::East);
+        grid.set(2, 3, Device::Mirror, Direction::East);
         grid.set(5, 3, Device::Mirror, Direction::East);
         grid.set(3, 4, Device::Mirror, Direction::East);
         grid.set(6, 4, Device::Mirror, Direction::South);

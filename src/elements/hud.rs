@@ -60,6 +60,7 @@ pub enum HudCmd {
 // ========================================================================= //
 
 pub struct Hud {
+    buttons: Vec<HudButton>,
     elements: GroupElement<HudInput, HudCmd>,
 }
 
@@ -68,25 +69,26 @@ impl Hud {
                -> Hud {
         let bot = visible.bottom();
         let cx = visible.left() + visible.width() as i32 / 2;
+        let buttons = vec![
+            HudButton::new(resources, location, HudCmd::Solve, cx - 204, bot),
+            HudButton::new(resources, location, HudCmd::Back, cx - 140, bot),
+            HudButton::new(resources, location, HudCmd::Info, cx - 84, bot),
+            HudButton::new(resources, location, HudCmd::Undo, cx + 97, bot),
+            HudButton::new(resources, location, HudCmd::Redo, cx + 150, bot),
+            HudButton::new(resources, location, HudCmd::Reset, cx + 210, bot),
+            HudButton::new(resources, location, HudCmd::Replay, cx + 160, bot),
+        ];
         let elements: Vec<Box<Element<HudInput, HudCmd>>> = vec![
             Box::new(PauseIndicator::new(resources, visible)),
-            Hud::button(resources, location, HudCmd::Solve, cx - 204, bot),
-            Hud::button(resources, location, HudCmd::Back, cx - 140, bot),
-            Hud::button(resources, location, HudCmd::Info, cx - 84, bot),
-            Hud::button(resources, location, HudCmd::Undo, cx + 97, bot),
-            Hud::button(resources, location, HudCmd::Redo, cx + 150, bot),
-            Hud::button(resources, location, HudCmd::Reset, cx + 210, bot),
-            Hud::button(resources, location, HudCmd::Replay, cx + 160, bot),
             Hud::namebox(resources, cx, bot),
         ];
-        Hud { elements: GroupElement::new(elements) }
+        Hud {
+            buttons: buttons,
+            elements: GroupElement::new(elements),
+        }
     }
 
-    fn button(resources: &mut Resources, location: Location, value: HudCmd,
-              center_x: i32, bottom: i32)
-              -> Box<Element<HudInput, HudCmd>> {
-        Box::new(HudButton::new(resources, location, value, center_x, bottom))
-    }
+    pub fn flash_info_button(&mut self) { self.buttons[2].set_flashing(true); }
 
     fn namebox(resources: &mut Resources, center_x: i32, bottom: i32)
                -> Box<Element<HudInput, HudCmd>> {
@@ -101,11 +103,16 @@ impl Hud {
 impl Element<HudInput, HudCmd> for Hud {
     fn draw(&self, input: &HudInput, canvas: &mut Canvas) {
         self.elements.draw(input, canvas);
+        self.buttons.draw(input, canvas);
     }
 
     fn handle_event(&mut self, event: &Event, input: &mut HudInput)
                     -> Action<HudCmd> {
-        self.elements.handle_event(event, input)
+        let mut action = self.buttons.handle_event(event, input);
+        if !action.should_stop() {
+            action.merge(self.elements.handle_event(event, input));
+        }
+        action
     }
 }
 
@@ -120,6 +127,7 @@ struct HudButton {
     value: HudCmd,
     scroll: i32,
     blink_frames: i32,
+    flashing: bool,
 }
 
 impl HudButton {
@@ -149,10 +157,15 @@ impl HudButton {
             value: value,
             scroll: BUTTON_HEIGHT as i32,
             blink_frames: 0,
+            flashing: false,
         }
     }
 
-    fn enabled(&self, input: &HudInput) -> bool {
+    fn set_flashing(&mut self, flashing: bool) { self.flashing = flashing; }
+
+    fn is_visible(&self) -> bool { self.scroll < BUTTON_HEIGHT as i32 }
+
+    fn is_enabled(&self, input: &HudInput) -> bool {
         let active = input.active;
         let solved = input.access == Access::Solved;
         match self.value {
@@ -169,11 +182,13 @@ impl HudButton {
 
 impl Element<HudInput, HudCmd> for HudButton {
     fn draw(&self, _: &HudInput, canvas: &mut Canvas) {
-        let top_left = Point::new(self.rect.x(), self.rect.y() + self.scroll);
-        if self.blink_frames > 0 {
-            canvas.draw_sprite(&self.blink_sprite, top_left);
-        } else {
-            canvas.draw_sprite(&self.base_sprite, top_left);
+        if self.is_visible() {
+            let pt = Point::new(self.rect.x(), self.rect.y() + self.scroll);
+            if self.blink_frames > 0 && self.blink_frames <= BLINK_FRAMES {
+                canvas.draw_sprite(&self.blink_sprite, pt);
+            } else {
+                canvas.draw_sprite(&self.base_sprite, pt);
+            }
         }
     }
 
@@ -184,11 +199,14 @@ impl Element<HudInput, HudCmd> for HudButton {
                 let mut redraw = false;
                 if self.blink_frames > 0 {
                     self.blink_frames -= 1;
-                    if self.blink_frames <= 0 {
+                    if self.blink_frames == 0 ||
+                       self.blink_frames == BLINK_FRAMES {
                         redraw = true;
                     }
+                } else if self.flashing {
+                    self.blink_frames = 3 * BLINK_FRAMES;
                 }
-                let enabled = self.enabled(input);
+                let enabled = self.is_enabled(input);
                 if enabled && self.scroll > 0 {
                     self.scroll = cmp::max(0, self.scroll - SCROLL_SPEED);
                     redraw = true;
@@ -197,11 +215,13 @@ impl Element<HudInput, HudCmd> for HudButton {
                                            self.scroll + SCROLL_SPEED);
                     redraw = true;
                 }
-                Action::redraw_if(redraw)
+                Action::redraw_if(redraw && self.is_visible())
             }
-            &Event::MouseDown(pt) if self.scroll == 0 && self.enabled(input) &&
+            &Event::MouseDown(pt) if self.scroll == 0 &&
+                                     self.is_enabled(input) &&
                                      self.rect.contains(pt) => {
                 self.blink_frames = BLINK_FRAMES;
+                self.flashing = false;
                 Action::redraw().and_return(self.value)
             }
             _ => Action::ignore(),

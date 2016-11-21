@@ -49,6 +49,8 @@ impl View {
         view
     }
 
+    pub fn flash_info_button(&mut self) { self.core.flash_info_button(); }
+
     fn drain_queue(&mut self) {
         for (kind, value) in self.core.drain_queue() {
             if kind == 0 {

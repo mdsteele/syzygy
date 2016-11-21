@@ -30,7 +30,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
                 Ast::Place(-2, "tiles/caution_walls", 5, (472, 288)),
                 Ast::Place(-1, "tiles/caution_walls", 4, (472, 304)),
                 Ast::Place(1, "chars/ugrent", 0, (-16, 304)),
-                Ast::Slide(1, (344, 304), false, true, 1.0),
+                Ast::Slide(1, (346, 304), false, true, 1.0),
                 Ast::Sound(Sound::talk_hi()),
                 Ast::Talk(1, TalkStyle::Normal, TalkPos::NW,
                           "All right, first task for you:"),
@@ -38,7 +38,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Seq(vec![
                 Ast::Wait(0.75),
                 Ast::Place(0, "chars/tezure", 0, (-16, 304)),
-                Ast::Slide(0, (304, 304), false, true, 1.0),
+                Ast::Slide(0, (302, 304), false, true, 1.0),
             ]),
         ]),
         Ast::Seq(vec![
@@ -55,7 +55,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
                        on helping fix whatever's broken."),
         ]),
         Ast::Par(vec![
-            Ast::Slide(1, (176, 304), true, true, 1.0),
+            Ast::Slide(1, (178, 304), true, true, 1.0),
             Ast::Seq(vec![
                 Ast::Wait(0.5),
                 Ast::Sound(Sound::talk_hi()),
@@ -65,7 +65,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             ]),
         ]),
         Ast::Seq(vec![
-            Ast::Slide(1, (352, 304), true, true, 1.0),
+            Ast::Slide(1, (354, 304), true, true, 0.75),
             Ast::Sound(Sound::talk_lo()),
             Ast::Talk(1, TalkStyle::Normal, TalkPos::NW,
                       "I'd better show you.  Follow me."),
@@ -76,7 +76,8 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
                       "It's right this way-"),
             Ast::Seq(vec![
                 Ast::Slide(1, (448, 304), true, false, 0.5),
-                Ast::Slide(1, (432, 304), false, true, 0.25),
+                Ast::Sound(Sound::character_collision()),
+                Ast::Slide(1, (430, 304), false, true, 0.25),
             ]),
         ]),
         Ast::Par(vec![
@@ -84,7 +85,8 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Talk(1, TalkStyle::Normal, TalkPos::NW, "Um."),
             Ast::Seq(vec![
                 Ast::Slide(1, (448, 304), true, false, 0.25),
-                Ast::Slide(1, (440, 304), false, true, 0.25),
+                Ast::Sound(Sound::character_collision()),
+                Ast::Slide(1, (438, 304), false, true, 0.25),
             ]),
         ]),
         Ast::Seq(vec![
@@ -97,18 +99,19 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
                       "It's supposed to open automatically..."),
             Ast::Seq(vec![
                 Ast::Slide(1, (448, 304), true, false, 0.25),
-                Ast::Slide(1, (440, 304), false, true, 0.25),
+                Ast::Sound(Sound::character_collision()),
+                Ast::Slide(1, (438, 304), false, true, 0.25),
             ]),
         ]),
         Ast::Seq(vec![
-            Ast::Slide(1, (416, 304), true, true, 0.25),
+            Ast::Slide(1, (418, 304), true, true, 0.25),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(1, TalkStyle::Normal, TalkPos::NW,
                       "Change of plans.  Your first\n\
                        task is to fix this stupid door."),
         ]),
         Ast::Seq(vec![
-            Ast::Slide(1, (192, 304), true, true, 0.75),
+            Ast::Slide(1, (196, 304), true, true, 0.75),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(1, TalkStyle::Normal, TalkPos::NE,
                       "I'll check in on you later.\n\
@@ -131,14 +134,14 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
                        about fixing doors."),
         ]),
         Ast::Seq(vec![
-            Ast::Slide(0, (264, 304), true, true, 0.5),
+            Ast::Slide(0, (262, 304), true, true, 0.5),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(0, TalkStyle::Normal, TalkPos::NE,
                       "Maybe I should take a look\n\
                        inside this box up here?"),
         ]),
         Ast::Seq(vec![
-            Ast::Slide(0, (264, 304), true, true, 0.5),
+            Ast::Wait(0.5),
             Ast::Sound(Sound::talk_lo()),
             Ast::Talk(0, TalkStyle::Normal, TalkPos::NE,
                       "That seems safe."),

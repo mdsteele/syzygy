@@ -24,21 +24,138 @@ use gui::{Resources, Sound};
 
 pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::SetBg("disconnected"),
+                Ast::Place(-2, "tiles/caution_walls", 5, (472, 288)),
+                Ast::Place(-1, "tiles/caution_walls", 4, (472, 304)),
+                Ast::Place(1, "chars/ugrent", 0, (-16, 304)),
+                Ast::Slide(1, (344, 304), false, true, 1.0),
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(1, TalkStyle::Normal, TalkPos::NW,
+                          "All right, first task for you:"),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.75),
+                Ast::Place(0, "chars/tezure", 0, (-16, 304)),
+                Ast::Slide(0, (304, 304), false, true, 1.0),
+            ]),
+        ]),
         Ast::Seq(vec![
-            Ast::SetBg("disconnected"),
-            Ast::Place(0, "chars/tezure", 0, (-16, 304)),
-            Ast::Slide(0, (304, 304), true, true, 1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(1, TalkStyle::Normal, TalkPos::NW,
+                      "Past here is the storage node\n\
+                       where the system logs are kept."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(1, TalkStyle::Normal, TalkPos::NW,
+                      "Get back there and figure out\n\
+                       what happened.  Then get to work\n\
+                       on helping fix whatever's broken."),
+        ]),
+        Ast::Par(vec![
+            Ast::Slide(1, (176, 304), true, true, 1.0),
+            Ast::Seq(vec![
+                Ast::Wait(0.5),
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(0, TalkStyle::Normal, TalkPos::NE,
+                          "Um, sure.  Sorry, where exactly\n\
+                           is the logs storage node?"),
+            ]),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(1, (352, 304), true, true, 1.0),
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(1, TalkStyle::Normal, TalkPos::NW,
+                      "I'd better show you.  Follow me."),
+        ]),
+        Ast::Par(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(1, TalkStyle::Normal, TalkPos::NW,
+                      "It's right this way-"),
+            Ast::Seq(vec![
+                Ast::Slide(1, (448, 304), true, false, 0.5),
+                Ast::Slide(1, (432, 304), false, true, 0.25),
+            ]),
+        ]),
+        Ast::Par(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(1, TalkStyle::Normal, TalkPos::NW, "Um."),
+            Ast::Seq(vec![
+                Ast::Slide(1, (448, 304), true, false, 0.25),
+                Ast::Slide(1, (440, 304), false, true, 0.25),
+            ]),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(1, TalkStyle::Normal, TalkPos::NW, "Hmm."),
+        ]),
+        Ast::Par(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(1, TalkStyle::Normal, TalkPos::NW,
+                      "It's supposed to open automatically..."),
+            Ast::Seq(vec![
+                Ast::Slide(1, (448, 304), true, false, 0.25),
+                Ast::Slide(1, (440, 304), false, true, 0.25),
+            ]),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(1, (416, 304), true, true, 0.25),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(1, TalkStyle::Normal, TalkPos::NW,
+                      "Change of plans.  Your first\n\
+                       task is to fix this stupid door."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(1, (192, 304), true, true, 0.75),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(1, TalkStyle::Normal, TalkPos::NE,
+                      "I'll check in on you later.\n\
+                       Meanwhile I need to sweep the\n\
+                       perimeter and make sure there\n\
+                       hasn't been a security breach."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(1, (-16, 304), true, false, 0.5),
+            Ast::Remove(1),
+            Ast::Wait(1.0),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(0, TalkStyle::Normal, TalkPos::NE,
-                      "Let's take a look."),
+                      "Well."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE,
+                      "I...don't really know much\n\
+                       about fixing doors."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(0, (264, 304), true, true, 0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE,
+                      "Maybe I should take a look\n\
+                       inside this box up here?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(0, (264, 304), true, true, 0.5),
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE,
+                      "That seems safe."),
         ]),
         Ast::Seq(vec![
             Ast::Queue(0, 1), // Make laser field visible.
             Ast::Wait(1.0),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(0, TalkStyle::Normal, TalkPos::NE,
-                      "Well, no wonder this\n\
+                      "Huh.  No wonder this\n\
                        thing isn't working."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE,
+                      "I guess I'd better fix\n\
+                       up these connections."),
         ]),
     ];
     Ast::compile_scene(resources, ast)
@@ -48,7 +165,29 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
 
 pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
-        Ast::Slide(0, (592, 304), true, false, 1.0),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::solve_puzzle_chime()),
+            Ast::Wait(1.0),
+            Ast::Par(vec![
+                Ast::Slide(-2, (472, 272), true, false, 0.5),
+                Ast::Slide(-1, (472, 320), true, false, 0.5),
+            ]),
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE,
+                      "That's looking better."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE,
+                      "Maybe now I can get a look at\n\
+                       those system logs.  Gotta figure\n\
+                       out what's going on around here."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(0, (592, 304), true, false, 1.0),
+            Ast::Remove(0),
+        ]),
     ];
     Ast::compile_scene(resources, ast)
 }

@@ -238,7 +238,7 @@ impl Element<LogLevelState, (i32, i32, char)> for Crossword {
             let rect = Rect::new(CLUE_CENTER - width / 2,
                                  CLUE_TOP,
                                  width as u32,
-                                 16);
+                                 17);
             canvas.fill_rect((192, 192, 192), rect);
             canvas.draw_rect((128, 128, 128), rect);
             let pt = Point::new(CLUE_CENTER, CLUE_TOP + 12);

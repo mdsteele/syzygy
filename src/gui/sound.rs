@@ -43,6 +43,16 @@ impl Sound {
         Sound::new(Wave::pulse(440.0, 0.5).adshr(0.0, 0.0, 0.25, 0.3, 0.05))
     }
 
+    pub fn bridge_break() -> Sound {
+        Sound::new(Wave::noise(Wave::slide(400.0, -150.0, 0.0))
+                       .adshr(0.0, 0.0, 0.75, 0.0, 0.6) *
+                   Wave::sine(8.0))
+    }
+
+    pub fn bridge_crack() -> Sound {
+        Sound::new(Wave::noise(1000.0).adshr(0.0, 0.0, 0.5, 0.0, 0.1))
+    }
+
     pub fn character_collision() -> Sound {
         Sound::new(Wave::noise(2000.0).adshr(0.0, 0.0, 0.5, 0.0, 0.25))
     }

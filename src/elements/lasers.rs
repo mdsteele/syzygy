@@ -28,7 +28,7 @@ use save::{Device, DeviceGrid, Direction, LaserColor};
 // ========================================================================= //
 
 const GRID_CELL_SIZE: i32 = 32;
-const DRAG_MIN_MILLIS: u32 = 200;
+const ROTATE_MAX_MILLIS: u32 = 200;
 const LASER_THICKNESS: i32 = 4;
 const ANIM_SLOWDOWN: i32 = 5;
 
@@ -407,7 +407,7 @@ impl Element<DeviceGrid, LaserCmd> for LaserField {
             &Event::ClockTick => {
                 if let Some(ref mut drag) = self.drag {
                     drag.millis = cmp::min(drag.millis + FRAME_DELAY_MILLIS,
-                                           DRAG_MIN_MILLIS);
+                                           ROTATE_MAX_MILLIS + 1);
                 }
                 self.anim_counter += 1;
                 self.anim_counter %= 2 * ANIM_SLOWDOWN;
@@ -448,27 +448,33 @@ impl Element<DeviceGrid, LaserCmd> for LaserField {
                 if let Some(drag) = self.drag.take() {
                     let to_col = drag.to_pt.x() / GRID_CELL_SIZE;
                     let to_row = drag.to_pt.y() / GRID_CELL_SIZE;
-                    return if drag.millis < DRAG_MIN_MILLIS {
-                        if to_col == drag.from_col && to_row == drag.from_row {
+                    return if to_col == drag.from_col &&
+                              to_row == drag.from_row {
+                        if drag.millis <= ROTATE_MAX_MILLIS {
                             grid.rotate(drag.from_col, drag.from_row);
                             self.recalculate_lasers(grid);
                             Action::redraw()
                                 .and_return(LaserCmd::Rotated(drag.from_col,
                                                               drag.from_row))
                         } else {
+                            self.recalculate_lasers(grid);
                             Action::redraw()
                         }
                     } else {
-                        grid.move_to(drag.from_col,
-                                     drag.from_row,
-                                     to_col,
-                                     to_row);
+                        let success = grid.move_to(drag.from_col,
+                                                   drag.from_row,
+                                                   to_col,
+                                                   to_row);
                         self.recalculate_lasers(grid);
-                        Action::redraw()
-                            .and_return(LaserCmd::Moved(drag.from_col,
-                                                        drag.from_row,
-                                                        to_col,
-                                                        to_row))
+                        if success {
+                            Action::redraw()
+                                .and_return(LaserCmd::Moved(drag.from_col,
+                                                            drag.from_row,
+                                                            to_col,
+                                                            to_row))
+                        } else {
+                            Action::redraw()
+                        }
                     };
                 }
             }

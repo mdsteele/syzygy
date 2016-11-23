@@ -163,7 +163,8 @@ impl DeviceGrid {
     }
 
     pub fn move_to(&mut self, from_col: i32, from_row: i32, to_col: i32,
-                   to_row: i32) {
+                   to_row: i32)
+                   -> bool {
         if (from_col >= 0 && from_col < self.num_cols) &&
            (from_row >= 0 && from_row < self.num_rows) &&
            (to_col >= 0 && to_col < self.num_cols) &&
@@ -179,17 +180,20 @@ impl DeviceGrid {
                                 self.grid[from] = Some((dev2, dir2));
                                 self.grid[to] = Some((dev1, dir1));
                                 self.is_modified = true;
+                                return true;
                             }
                         }
                         None => {
                             self.grid[from] = None;
                             self.grid[to] = Some((dev1, dir1));
                             self.is_modified = true;
+                            return true;
                         }
                     }
                 }
             }
         }
+        false
     }
 }
 

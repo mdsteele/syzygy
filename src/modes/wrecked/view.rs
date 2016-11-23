@@ -285,8 +285,12 @@ impl Element<WreckedState, (Direction, i32)> for WreckedGrid {
                 }
             }
             &Event::MouseUp => {
-                if let Some(cmd) = self.drag.take().and_then(Drag::command) {
-                    Action::redraw().and_return(cmd)
+                if let Some(drag) = self.drag.take() {
+                    if let Some(cmd) = drag.command() {
+                        Action::redraw().and_return(cmd)
+                    } else {
+                        Action::redraw()
+                    }
                 } else {
                     Action::ignore()
                 }

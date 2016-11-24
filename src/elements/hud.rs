@@ -196,6 +196,7 @@ impl Element<HudInput, HudCmd> for HudButton {
                     -> Action<HudCmd> {
         match event {
             &Event::ClockTick => {
+                let was_visible = self.is_visible();
                 let mut redraw = false;
                 if self.blink_frames > 0 {
                     self.blink_frames -= 1;
@@ -215,7 +216,7 @@ impl Element<HudInput, HudCmd> for HudButton {
                                            self.scroll + SCROLL_SPEED);
                     redraw = true;
                 }
-                Action::redraw_if(redraw && self.is_visible())
+                Action::redraw_if(redraw && (was_visible || self.is_visible()))
             }
             &Event::MouseDown(pt) if self.scroll == 0 &&
                                      self.is_enabled(input) &&

@@ -133,7 +133,7 @@ impl WreckedState {
         }
     }
 
-    pub fn shift_tiles(&mut self, dir: Direction, rank: i32) {
+    pub fn shift_tiles(&mut self, dir: Direction, rank: i32, by: i32) {
         match dir {
             Direction::East | Direction::West => {
                 if rank >= 0 && rank < NUM_ROWS {
@@ -145,13 +145,7 @@ impl WreckedState {
                             tiles.push_back(value);
                         }
                     }
-                    if dir == Direction::East {
-                        let tile = tiles.pop_back().unwrap();
-                        tiles.push_front(tile);
-                    } else {
-                        let tile = tiles.pop_front().unwrap();
-                        tiles.push_back(tile);
-                    }
+                    rotate_deque(&mut tiles, dir.delta().x() * by);
                     for col in 0..NUM_COLS {
                         let index = (rank * NUM_COLS + col) as usize;
                         if self.grid[index] >= 0 {
@@ -170,13 +164,7 @@ impl WreckedState {
                             tiles.push_back(value);
                         }
                     }
-                    if dir == Direction::South {
-                        let tile = tiles.pop_back().unwrap();
-                        tiles.push_front(tile);
-                    } else {
-                        let tile = tiles.pop_front().unwrap();
-                        tiles.push_back(tile);
-                    }
+                    rotate_deque(&mut tiles, dir.delta().y() * by);
                     for row in 0..NUM_ROWS {
                         let index = (row * NUM_COLS + rank) as usize;
                         if self.grid[index] >= 0 {
@@ -213,15 +201,64 @@ impl PuzzleState for WreckedState {
 
 // ========================================================================= //
 
+fn rotate_deque<T>(deque: &mut VecDeque<T>, by: i32) {
+    let len = deque.len();
+    if by > 0 {
+        let by = (by as usize) % len;
+        if by > 0 {
+            let mut rest = deque.split_off(len - by);
+            rest.append(deque);
+            *deque = rest;
+        }
+    } else if by < 0 {
+        let by = ((-by) as usize) % len;
+        if by > 0 {
+            let mut rest = deque.split_off(by);
+            rest.append(deque);
+            *deque = rest;
+        }
+    }
+}
+
+// ========================================================================= //
+
 #[cfg(test)]
 mod tests {
+    use std::collections::VecDeque;
+
     use save::Direction;
-    use super::WreckedState;
+    use super::{WreckedState, rotate_deque};
+
+    #[test]
+    fn deque_rotation() {
+        let mut deque: VecDeque<i32> = [1, 2, 3, 4, 5]
+                                           .iter()
+                                           .cloned()
+                                           .collect();
+        rotate_deque(&mut deque, 0);
+        assert_eq!(deque.iter().cloned().collect::<Vec<i32>>(),
+                   vec![1, 2, 3, 4, 5]);
+        rotate_deque(&mut deque, 1);
+        assert_eq!(deque.iter().cloned().collect::<Vec<i32>>(),
+                   vec![5, 1, 2, 3, 4]);
+        rotate_deque(&mut deque, -2);
+        assert_eq!(deque.iter().cloned().collect::<Vec<i32>>(),
+                   vec![2, 3, 4, 5, 1]);
+        rotate_deque(&mut deque, 8);
+        assert_eq!(deque.iter().cloned().collect::<Vec<i32>>(),
+                   vec![4, 5, 1, 2, 3]);
+        rotate_deque(&mut deque, -14);
+        assert_eq!(deque.iter().cloned().collect::<Vec<i32>>(),
+                   vec![3, 4, 5, 1, 2]);
+        rotate_deque(&mut deque, 15);
+        assert_eq!(deque.iter().cloned().collect::<Vec<i32>>(),
+                   vec![3, 4, 5, 1, 2]);
+    }
 
     #[test]
     fn shift_east() {
         let mut state: WreckedState = Default::default();
-        state.shift_tiles(Direction::East, 0);
+        state.shift_tiles(Direction::East, 0, 1);
         assert_eq!(state.tile_at(0, 0), Some(1));
         assert_eq!(state.tile_at(5, 0), None);
         assert_eq!(state.tile_at(6, 0), Some(2));
@@ -230,7 +267,7 @@ mod tests {
     #[test]
     fn shift_west() {
         let mut state: WreckedState = Default::default();
-        state.shift_tiles(Direction::West, 1);
+        state.shift_tiles(Direction::West, 1, 1);
         assert_eq!(state.tile_at(1, 1), None);
         assert_eq!(state.tile_at(4, 1), Some(2));
         assert_eq!(state.tile_at(8, 1), Some(1));
@@ -239,7 +276,7 @@ mod tests {
     #[test]
     fn shift_south() {
         let mut state: WreckedState = Default::default();
-        state.shift_tiles(Direction::South, 0);
+        state.shift_tiles(Direction::South, 0, 1);
         assert_eq!(state.tile_at(0, 0), Some(1));
         assert_eq!(state.tile_at(0, 1), None);
         assert_eq!(state.tile_at(0, 2), Some(2));
@@ -248,7 +285,7 @@ mod tests {
     #[test]
     fn shift_north() {
         let mut state: WreckedState = Default::default();
-        state.shift_tiles(Direction::North, 8);
+        state.shift_tiles(Direction::North, 8, 1);
         assert_eq!(state.tile_at(8, 1), Some(2));
         assert_eq!(state.tile_at(8, 4), Some(1));
         assert_eq!(state.tile_at(8, 6), Some(1));

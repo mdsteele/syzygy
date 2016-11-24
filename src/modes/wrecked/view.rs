@@ -17,7 +17,6 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use std::cmp;
 use std::rc::Rc;
 
 use elements::{PuzzleCmd, PuzzleCore, PuzzleView};
@@ -30,7 +29,7 @@ use super::scenes::{compile_intro_scene, compile_outro_scene};
 // ========================================================================= //
 
 pub struct View {
-    core: PuzzleCore<(Direction, i32)>,
+    core: PuzzleCore<(Direction, i32, i32)>,
     grid: WreckedGrid,
     solution: SolutionDisplay,
 }
@@ -74,8 +73,7 @@ impl Element<Game, PuzzleCmd> for View {
         self.drain_queue();
         if !action.should_stop() {
             let subaction = self.grid.handle_event(event, state);
-            if let Some(&(dir, rank)) = subaction.value() {
-                state.shift_tiles(dir, rank);
+            if let Some(&(dir, rank, by)) = subaction.value() {
                 if state.is_solved() {
                     if cfg!(debug_assertions) {
                         println!("Puzzle solved, beginning outro.");
@@ -84,7 +82,7 @@ impl Element<Game, PuzzleCmd> for View {
                     self.drain_queue();
                     self.core.clear_undo_redo();
                 } else {
-                    self.core.push_undo((dir, rank));
+                    self.core.push_undo((dir, rank, by));
                 }
             }
             action.merge(subaction.but_no_value());
@@ -106,14 +104,14 @@ impl PuzzleView for View {
     }
 
     fn undo(&mut self, game: &mut Game) {
-        if let Some((dir, rank)) = self.core.pop_undo() {
-            game.wrecked_angle.shift_tiles(dir.opposite(), rank);
+        if let Some((dir, rank, by)) = self.core.pop_undo() {
+            game.wrecked_angle.shift_tiles(dir, rank, -by);
         }
     }
 
     fn redo(&mut self, game: &mut Game) {
-        if let Some((dir, rank)) = self.core.pop_redo() {
-            game.wrecked_angle.shift_tiles(dir, rank);
+        if let Some((dir, rank, by)) = self.core.pop_redo() {
+            game.wrecked_angle.shift_tiles(dir, rank, by);
         }
     }
 
@@ -138,46 +136,78 @@ impl PuzzleView for View {
 
 // ========================================================================= //
 
-const LARGE_TILE_SIZE: u32 = 24;
+const TILE_USIZE: u32 = 24;
+const TILE_SIZE: i32 = TILE_USIZE as i32;
 
 struct Drag {
     from: Point,
     to: Point,
+    accum: Option<(Direction, i32, i32)>,
 }
 
 impl Drag {
-    fn new(start: Point) -> Drag {
+    pub fn new(start: Point) -> Drag {
         Drag {
             from: start,
             to: start,
+            accum: None,
+        }
+    }
+
+    pub fn accum(self) -> Option<(Direction, i32, i32)> { self.accum }
+
+    pub fn set_to(&mut self, to: Point) -> Option<(Direction, i32, i32)> {
+        self.to = to;
+        let (dir, rank, dist) = self.dir_rank_dist();
+        if dist > TILE_SIZE / 2 {
+            let by = 1 + (dist - TILE_SIZE / 2) / TILE_SIZE;
+            self.from = self.from + dir.delta() * (by * TILE_SIZE);
+            if let Some((accum_dir, accum_rank, ref mut accum_by)) =
+                   self.accum {
+                assert_eq!(dir.is_vertical(), accum_dir.is_vertical());
+                assert_eq!(rank, accum_rank);
+                if dir == accum_dir {
+                    *accum_by += by;
+                } else {
+                    *accum_by -= by;
+                }
+            } else {
+                self.accum = Some((dir, rank, by));
+            }
+            Some((dir, rank, by))
+        } else {
+            None
         }
     }
 
     fn dir_rank_dist(&self) -> (Direction, i32, i32) {
         let delta = self.to - self.from;
-        let dir = if delta.x().abs() > delta.y().abs() {
-            if delta.x() >= 0 {
-                Direction::East
+        let vertical = match self.accum {
+            Some((dir, _, _)) => dir.is_vertical(),
+            None => delta.x().abs() <= delta.y().abs(),
+        };
+        let (dir, dist) = if vertical {
+            if delta.y() >= 0 {
+                (Direction::South, delta.y())
             } else {
-                Direction::West
+                (Direction::North, -delta.y())
             }
         } else {
-            if delta.y() >= 0 {
-                Direction::South
+            if delta.x() >= 0 {
+                (Direction::East, delta.x())
             } else {
-                Direction::North
+                (Direction::West, -delta.x())
             }
         };
         let rank = if dir.is_vertical() {
-            self.from.x() / LARGE_TILE_SIZE as i32
+            self.from.x() / TILE_SIZE
         } else {
-            self.from.y() / LARGE_TILE_SIZE as i32
+            self.from.y() / TILE_SIZE
         };
-        let dist = cmp::min(20, cmp::max(delta.x().abs(), delta.y().abs()));
         (dir, rank, dist)
     }
 
-    fn offset_for(&self, col: i32, row: i32) -> Point {
+    pub fn offset_for(&self, col: i32, row: i32) -> Point {
         let (dir, rank, dist) = self.dir_rank_dist();
         let for_rank = if dir.is_vertical() {
             col
@@ -188,15 +218,6 @@ impl Drag {
             dir.delta() * dist
         } else {
             Point::new(0, 0)
-        }
-    }
-
-    fn command(self) -> Option<(Direction, i32)> {
-        let (dir, rank, dist) = self.dir_rank_dist();
-        if dist > LARGE_TILE_SIZE as i32 / 2 {
-            Some((dir, rank))
-        } else {
-            None
         }
     }
 }
@@ -223,33 +244,27 @@ impl WreckedGrid {
     }
 
     fn rect(&self) -> Rect {
-        Rect::new(self.left,
-                  self.top,
-                  9 * LARGE_TILE_SIZE,
-                  7 * LARGE_TILE_SIZE)
+        Rect::new(self.left, self.top, 9 * TILE_USIZE, 7 * TILE_USIZE)
     }
 }
 
-impl Element<WreckedState, (Direction, i32)> for WreckedGrid {
+impl Element<WreckedState, (Direction, i32, i32)> for WreckedGrid {
     fn draw(&self, state: &WreckedState, canvas: &mut Canvas) {
         for row in 0..7 {
-            let top = self.top + row * LARGE_TILE_SIZE as i32;
+            let top = self.top + row * TILE_SIZE;
             for col in 0..9 {
                 if state.tile_at(col, row).is_none() {
-                    let left = self.left + col * LARGE_TILE_SIZE as i32;
-                    let rect = Rect::new(left,
-                                         top,
-                                         LARGE_TILE_SIZE,
-                                         LARGE_TILE_SIZE);
+                    let left = self.left + col * TILE_SIZE;
+                    let rect = Rect::new(left, top, TILE_USIZE, TILE_USIZE);
                     canvas.fill_rect((15, 20, 15), rect);
                     canvas.draw_sprite(&self.hole_sprites[0], rect.top_left());
                 }
             }
         }
         for row in 0..7 {
-            let top = self.top + row * LARGE_TILE_SIZE as i32;
+            let top = self.top + row * TILE_SIZE;
             for col in 0..9 {
-                let left = self.left + col * LARGE_TILE_SIZE as i32;
+                let left = self.left + col * TILE_SIZE;
                 let mut pt = Point::new(left, top);
                 if let Some(ref drag) = self.drag {
                     pt = pt + drag.offset_for(col, row);
@@ -262,14 +277,14 @@ impl Element<WreckedState, (Direction, i32)> for WreckedGrid {
     }
 
     fn handle_event(&mut self, event: &Event, state: &mut WreckedState)
-                    -> Action<(Direction, i32)> {
+                    -> Action<(Direction, i32, i32)> {
         let rect = self.rect();
         match event {
             &Event::MouseDown(pt) if !state.is_solved() => {
                 if rect.contains(pt) {
                     let rel_pt = pt - rect.top_left();
-                    let col = rel_pt.x() / LARGE_TILE_SIZE as i32;
-                    let row = rel_pt.y() / LARGE_TILE_SIZE as i32;
+                    let col = rel_pt.x() / TILE_SIZE;
+                    let row = rel_pt.y() / TILE_SIZE;
                     if state.tile_at(col, row).is_some() {
                         self.drag = Some(Drag::new(rel_pt));
                     }
@@ -277,8 +292,16 @@ impl Element<WreckedState, (Direction, i32)> for WreckedGrid {
                 Action::ignore()
             }
             &Event::MouseDrag(pt) => {
-                if let Some(ref mut drag) = self.drag {
-                    drag.to = pt - rect.top_left();
+                if let Some(mut drag) = self.drag.take() {
+                    if let Some((dir, rank, by)) =
+                           drag.set_to(pt - rect.top_left()) {
+                        state.shift_tiles(dir, rank, by);
+                        if state.is_solved() {
+                            return Action::redraw().and_return(drag.accum()
+                                                                   .unwrap());
+                        }
+                    }
+                    self.drag = Some(drag);
                     Action::redraw()
                 } else {
                     Action::ignore()
@@ -286,7 +309,7 @@ impl Element<WreckedState, (Direction, i32)> for WreckedGrid {
             }
             &Event::MouseUp => {
                 if let Some(drag) = self.drag.take() {
-                    if let Some(cmd) = drag.command() {
+                    if let Some(cmd) = drag.accum() {
                         Action::redraw().and_return(cmd)
                     } else {
                         Action::redraw()

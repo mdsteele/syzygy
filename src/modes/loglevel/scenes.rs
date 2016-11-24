@@ -17,8 +17,8 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use elements::{Ast, Scene};
-use gui::Resources;
+use elements::{Ast, Scene, TalkPos, TalkStyle};
+use gui::{Resources, Sound};
 
 // ========================================================================= //
 
@@ -26,6 +26,18 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
             Ast::SetBg("log_level"),
+            Ast::Place(0, "chars/tezure", 0, (-16, 160)),
+            Ast::Slide(0, (140, 160), false, true, 1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE,
+                      "System!  Please display log\n\
+                       data from the past six hours."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Place(1, "chars/invis", 0, (352, 144)),
+            Ast::Talk(1, TalkStyle::System, TalkPos::SW,
+                      "Fetching system\n\
+                       status..."),
         ]),
     ];
     Ast::compile_scene(resources, ast)
@@ -35,7 +47,12 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
 
 pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
-        Ast::Seq(vec![]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::solve_puzzle_chime()),
+            Ast::Wait(1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE, "Looks good!"),
+        ]),
     ];
     Ast::compile_scene(resources, ast)
 }

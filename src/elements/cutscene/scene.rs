@@ -677,18 +677,20 @@ impl SceneNode for SoundNode {
 pub struct TalkNode {
     slot: i32,
     bubble_sprites: Vec<Sprite>,
+    bg_color: (u8, u8, u8),
     talk_pos: TalkPos,
     paragraph: Rc<Paragraph>,
     status: Status,
 }
 
 impl TalkNode {
-    pub fn new(slot: i32, bubble_sprites: Vec<Sprite>, talk_pos: TalkPos,
-               paragraph: Paragraph)
+    pub fn new(slot: i32, bubble_sprites: Vec<Sprite>, bg_color: (u8, u8, u8),
+               talk_pos: TalkPos, paragraph: Paragraph)
                -> TalkNode {
         TalkNode {
             slot: slot,
             bubble_sprites: bubble_sprites,
+            bg_color: bg_color,
             talk_pos: talk_pos,
             paragraph: Rc::new(paragraph),
             status: Status::Active,
@@ -703,9 +705,10 @@ impl SceneNode for TalkNode {
         if terminated_by_pause {
             self.status = Status::Paused;
             theater.set_actor_speech(self.slot,
-                                     Some((self.bubble_sprites.clone(),
-                                           self.talk_pos,
-                                           self.paragraph.clone())));
+                                     self.bubble_sprites.clone(),
+                                     self.bg_color,
+                                     self.talk_pos,
+                                     self.paragraph.clone());
         } else {
             self.skip(theater);
         }
@@ -721,7 +724,7 @@ impl SceneNode for TalkNode {
     }
 
     fn skip(&mut self, theater: &mut Theater) {
-        theater.set_actor_speech(self.slot, None);
+        theater.clear_actor_speech(self.slot);
         self.status = Status::Done;
     }
 

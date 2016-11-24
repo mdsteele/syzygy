@@ -44,7 +44,7 @@ impl<A: 'static + Clone> DialogBox<A> {
     pub fn new(resources: &mut Resources, visible: Rect, text: &str,
                buttons: Vec<(String, A)>)
                -> DialogBox<A> {
-        let paragraph = Paragraph::new(resources, Align::Left, text);
+        let paragraph = Paragraph::new(resources, "roman", Align::Left, text);
         let rect = {
             let buttons_width = buttons.len() as i32 *
                                 (BUTTON_WIDTH as i32 + BUTTON_SPACING) -

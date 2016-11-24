@@ -30,6 +30,7 @@ use super::theater::TalkPos;
 #[derive(Clone, Copy)]
 pub enum TalkStyle {
     Normal,
+    System,
     Thought,
 }
 
@@ -111,17 +112,33 @@ impl Ast {
             }
             Ast::Sound(sound) => Box::new(SoundNode::new(sound)),
             Ast::Talk(slot, style, pos, text) => {
-                let bubble_name = match style {
-                    TalkStyle::Normal => "speech/normal",
-                    TalkStyle::Thought => "speech/thought",
-                };
-                let bubble_sprites = resources.get_sprites(bubble_name);
-                let paragraph = Paragraph::new(resources, Align::Center, text);
-                Box::new(TalkNode::new(slot, bubble_sprites, pos, paragraph))
+                let (bubble_name, color, init_font, init_align) =
+                    match style {
+                        TalkStyle::Normal => {
+                            ("speech/normal", WHITE, "roman", Align::Center)
+                        }
+                        TalkStyle::System => {
+                            ("speech/system", BLACK, "system", Align::Left)
+                        }
+                        TalkStyle::Thought => {
+                            ("speech/thought", WHITE, "roman", Align::Center)
+                        }
+                    };
+                let sprites = resources.get_sprites(bubble_name);
+                let paragraph = Paragraph::new(resources,
+                                               init_font,
+                                               init_align,
+                                               text);
+                Box::new(TalkNode::new(slot, sprites, color, pos, paragraph))
             }
             Ast::Wait(duration) => Box::new(WaitNode::new(duration)),
         }
     }
 }
+
+// ========================================================================= //
+
+const BLACK: (u8, u8, u8) = (0, 0, 0);
+const WHITE: (u8, u8, u8) = (255, 255, 255);
 
 // ========================================================================= //

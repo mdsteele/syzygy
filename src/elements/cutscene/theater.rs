@@ -74,12 +74,17 @@ impl Theater {
         }
     }
 
-    pub fn set_actor_speech(&mut self, slot: i32,
-                            speech: Option<(Vec<Sprite>,
-                                            TalkPos,
-                                            Rc<Paragraph>)>) {
+    pub fn set_actor_speech(&mut self, slot: i32, bubble_sprites: Vec<Sprite>,
+                            bg_color: (u8, u8, u8), talk_pos: TalkPos,
+                            paragraph: Rc<Paragraph>) {
         if let Some(actor) = self.actors.get_mut(&slot) {
-            actor.set_speech(speech);
+            actor.set_speech(bubble_sprites, bg_color, talk_pos, paragraph);
+        }
+    }
+
+    pub fn clear_actor_speech(&mut self, slot: i32) {
+        if let Some(actor) = self.actors.get_mut(&slot) {
+            actor.clear_speech();
         }
     }
 
@@ -210,12 +215,17 @@ impl Actor {
                   self.sprite.height())
     }
 
-    fn set_speech(&mut self,
-                  speech: Option<(Vec<Sprite>, TalkPos, Rc<Paragraph>)>) {
-        self.speech = speech.map(|(bubble_sprites, pos, paragraph)| {
-            SpeechBubble::new(bubble_sprites, pos, paragraph, self.rect())
-        });
+    fn set_speech(&mut self, bubble_sprites: Vec<Sprite>,
+                  bg_color: (u8, u8, u8), talk_pos: TalkPos,
+                  paragraph: Rc<Paragraph>) {
+        self.speech = Some(SpeechBubble::new(bubble_sprites,
+                                             bg_color,
+                                             talk_pos,
+                                             paragraph,
+                                             self.rect()));
     }
+
+    fn clear_speech(&mut self) { self.speech = None; }
 
     fn draw_actor(&self, canvas: &mut Canvas) {
         canvas.draw_sprite(&self.sprite, self.rect().top_left());
@@ -234,6 +244,7 @@ const SPEECH_MARGIN: i32 = 8;
 
 struct SpeechBubble {
     sprites: Vec<Sprite>,
+    bg_color: (u8, u8, u8),
     paragraph: Rc<Paragraph>,
     rect: Rect,
     tail_pos: Point,
@@ -242,8 +253,8 @@ struct SpeechBubble {
 }
 
 impl SpeechBubble {
-    fn new(bubble_sprites: Vec<Sprite>, positioning: TalkPos,
-           paragraph: Rc<Paragraph>, actor_rect: Rect)
+    fn new(bubble_sprites: Vec<Sprite>, bg_color: (u8, u8, u8),
+           positioning: TalkPos, paragraph: Rc<Paragraph>, actor_rect: Rect)
            -> SpeechBubble {
         debug_assert_eq!(bubble_sprites.len(), 5);
         let width = round_up_to_16(cmp::max(48,
@@ -289,6 +300,7 @@ impl SpeechBubble {
         };
         SpeechBubble {
             sprites: bubble_sprites,
+            bg_color: bg_color,
             paragraph: paragraph,
             rect: Rect::new(left, top, width as u32, height as u32),
             tail_pos: Point::new(tail_x, tail_y),
@@ -334,7 +346,7 @@ impl SpeechBubble {
                                            Point::new(right + 8, y),
                                            180);
             }
-            canvas.fill_rect((255, 255, 255),
+            canvas.fill_rect(self.bg_color,
                              Rect::new(16,
                                        16,
                                        (right - 16) as u32,

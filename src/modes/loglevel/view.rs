@@ -300,9 +300,9 @@ impl Element<LogLevelState, (i32, i32, char)> for Crossword {
 
 const WORD_CLUES: &'static [&'static str] = &["relaxed or casual in manner \
                                                or dress",
-                                              "e.g. ``la'' in Spanish or \
-                                               French",
-                                              "an animated film",
+                                              "in Spanish, ``la'' rather \
+                                               than ``el''",
+                                              "an animated TV show",
                                               "very good; marvelous",
                                               "crime-solving science",
                                               "to make holes in",
@@ -322,7 +322,7 @@ Click on a box to select it, then type in the
 word that matches the given clue, using the
 $M{on-screen }{}keyboard.
 
-If the word won't fit, you may need to get
-creative.";
+If the word won't fit, you may need to fudge
+the numbers.";
 
 // ========================================================================= //

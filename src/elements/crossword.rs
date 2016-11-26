@@ -89,6 +89,40 @@ impl CrosswordView {
             false
         }
     }
+
+    fn cursor_up(&mut self, state: &CrosswordState) -> bool {
+        if let Some((ref mut row, ref mut index)) = self.cursor {
+            let old_offset = self.offsets_and_clues[*row as usize].0;
+            *row -= 1;
+            if *row < 0 {
+                *row = state.words().len() as i32 - 1;
+            }
+            let new_offset = self.offsets_and_clues[*row as usize].0;
+            let len = state.words()[*row as usize].len() as i32 - 1;
+            *index = cmp::max(0,
+                              cmp::min(len, *index - old_offset + new_offset));
+            true
+        } else {
+            false
+        }
+    }
+
+    fn cursor_down(&mut self, state: &CrosswordState) -> bool {
+        if let Some((ref mut row, ref mut index)) = self.cursor {
+            let old_offset = self.offsets_and_clues[*row as usize].0;
+            *row += 1;
+            if *row >= state.words().len() as i32 {
+                *row = 0;
+            }
+            let new_offset = self.offsets_and_clues[*row as usize].0;
+            let len = state.words()[*row as usize].len() as i32 - 1;
+            *index = cmp::max(0,
+                              cmp::min(len, *index - old_offset + new_offset));
+            true
+        } else {
+            false
+        }
+    }
 }
 
 impl Element<CrosswordState, (i32, i32, char)> for CrosswordView {
@@ -173,11 +207,17 @@ impl Element<CrosswordState, (i32, i32, char)> for CrosswordView {
                     Action::ignore()
                 }
             }
+            &Event::KeyDown(Keycode::Down, _) => {
+                Action::redraw_if(self.cursor_down(state))
+            }
             &Event::KeyDown(Keycode::Left, _) => {
                 Action::redraw_if(self.cursor_prev(state))
             }
             &Event::KeyDown(Keycode::Right, _) => {
                 Action::redraw_if(self.cursor_next(state))
+            }
+            &Event::KeyDown(Keycode::Up, _) => {
+                Action::redraw_if(self.cursor_up(state))
             }
             &Event::TextInput(ref text) => {
                 if let Some((row, index)) = self.cursor {

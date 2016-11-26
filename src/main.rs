@@ -157,6 +157,9 @@ fn main() {
                         Location::Disconnected => {
                             modes::run_disconnected(&mut window, game)
                         }
+                        Location::LevelUp => {
+                            modes::run_level_up(&mut window, game)
+                        }
                         Location::LogLevel => {
                             modes::run_log_level(&mut window, game)
                         }

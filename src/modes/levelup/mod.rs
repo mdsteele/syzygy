@@ -17,22 +17,23 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod crossword;
-pub mod cutscene;
-mod dialog;
-mod fade;
-mod hud;
-mod lasers;
-mod paragraph;
-mod puzzle;
+mod scenes;
+mod view;
 
-pub use self::crossword::CrosswordView;
-pub use self::cutscene::{Ast, Scene, TalkPos, TalkStyle, Theater};
-pub use self::dialog::DialogBox;
-pub use self::fade::ScreenFade;
-pub use self::hud::{Hud, HudCmd, HudInput};
-pub use self::lasers::{DangerSign, LaserCmd, LaserField};
-pub use self::paragraph::Paragraph;
-pub use self::puzzle::{PuzzleCmd, PuzzleCore, PuzzleView};
+use gui::Window;
+use modes::{Mode, run_puzzle};
+use save::Game;
+use self::view::View;
+
+// ========================================================================= //
+
+pub fn run_level_up(window: &mut Window, game: &mut Game) -> Mode {
+    let view = {
+        let visible_rect = window.visible_rect();
+        View::new(&mut window.resources(), visible_rect, &game.level_up)
+    };
+    game.level_up.visit();
+    run_puzzle(window, game, view)
+}
 
 // ========================================================================= //

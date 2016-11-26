@@ -20,7 +20,7 @@
 use elements::{CrosswordView, PuzzleCmd, PuzzleCore, PuzzleView};
 use gui::{Action, Canvas, Element, Event, Rect, Resources};
 use modes::SOLVED_INFO_TEXT;
-use save::{Game, LogLevelState, PuzzleState};
+use save::{Game, LevelUpState, PuzzleState};
 use super::scenes::{compile_intro_scene, compile_outro_scene};
 
 // ========================================================================= //
@@ -31,7 +31,7 @@ pub struct View {
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect, state: &LogLevelState)
+    pub fn new(resources: &mut Resources, visible: Rect, state: &LevelUpState)
                -> View {
         let intro = compile_intro_scene(resources);
         let outro = compile_outro_scene(resources);
@@ -53,7 +53,7 @@ impl View {
 
 impl Element<Game, PuzzleCmd> for View {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
-        let state = &game.log_level;
+        let state = &game.level_up;
         self.core.draw_back_layer(canvas);
         self.crossword.draw(state.crossword(), canvas);
         self.core.draw_middle_layer(canvas);
@@ -62,7 +62,7 @@ impl Element<Game, PuzzleCmd> for View {
 
     fn handle_event(&mut self, event: &Event, game: &mut Game)
                     -> Action<PuzzleCmd> {
-        let state = &mut game.log_level;
+        let state = &mut game.level_up;
         let mut action = self.core.handle_event(event, state);
         self.drain_queue();
         if !action.should_stop() &&
@@ -89,7 +89,7 @@ impl Element<Game, PuzzleCmd> for View {
 
 impl PuzzleView for View {
     fn info_text(&self, game: &Game) -> &'static str {
-        if game.log_level.is_solved() {
+        if game.level_up.is_solved() {
             SOLVED_INFO_TEXT
         } else {
             INFO_BOX_TEXT
@@ -98,26 +98,26 @@ impl PuzzleView for View {
 
     fn undo(&mut self, game: &mut Game) {
         if let Some((row, index, chr, _)) = self.core.pop_undo() {
-            game.log_level.crossword_mut().set_char(row, index, chr);
+            game.level_up.crossword_mut().set_char(row, index, chr);
             self.crossword.reset_cursor();
         }
     }
 
     fn redo(&mut self, game: &mut Game) {
         if let Some((row, index, _, chr)) = self.core.pop_redo() {
-            game.log_level.crossword_mut().set_char(row, index, chr);
+            game.level_up.crossword_mut().set_char(row, index, chr);
             self.crossword.reset_cursor();
         }
     }
 
     fn reset(&mut self, game: &mut Game) {
         self.core.clear_undo_redo();
-        game.log_level.reset();
+        game.level_up.reset();
         self.crossword.reset_cursor();
     }
 
     fn replay(&mut self, game: &mut Game) {
-        game.log_level.replay();
+        game.level_up.replay();
         self.crossword.reset_cursor();
         self.core.replay();
         self.drain_queue();
@@ -125,7 +125,7 @@ impl PuzzleView for View {
 
     fn solve(&mut self, game: &mut Game) {
         self.core.clear_undo_redo();
-        game.log_level.solve();
+        game.level_up.solve();
         self.crossword.reset_cursor();
         self.core.begin_outro_scene();
         self.drain_queue();
@@ -136,16 +136,16 @@ impl PuzzleView for View {
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
 const OFFSETS_CLUES: &'static [(i32, &'static str)] = &[
-    (5, "relaxed or casual in manner or dress"),
-    (1, "in Spanish, ``la'' rather than ``el''"),
-    (1, "an animated TV show"),
-    (1, "very good; marvelous"),
-    (1, "crime-solving science"),
-    (2, "to make holes in"),
-    (6, "coincidental; serendipitous"),
-    (1, "the study of matter and energy"),
-    (2, "an ingredient in tonic water"),
-    (0, "to separate words with symbols"),
+    (2, "a substance made of multiple elements"),
+    (4, "perplexed; confounded"),
+    (1, "to suddenly suprise or alarm someone"),
+    (1, "to settle a distant land"),
+    (0, "a sweet, creamy pastry filling"),
+    (0, "somewhat rare"),
+    (2, "military officier just below a general"),
+    (2, "rod used by an orchastra conductor"),
+    (1, "a quantity beyond what is needed"),
+    (3, "authoritative orders"),
 ];
 
 const INFO_BOX_TEXT: &'static str = "\
@@ -155,7 +155,7 @@ Click on a box to select it, then type in the
 word that matches the given clue, using the
 $M{on-screen }{}keyboard.
 
-If the word won't fit, you may need to fudge
-the numbers.";
+If the word won't fit, you should at least take
+a moment to consider its symbolism.";
 
 // ========================================================================= //

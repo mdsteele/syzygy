@@ -17,22 +17,35 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod crossword;
-pub mod cutscene;
-mod dialog;
-mod fade;
-mod hud;
-mod lasers;
-mod paragraph;
-mod puzzle;
+use elements::{Ast, Scene, TalkPos, TalkStyle};
+use gui::{Resources, Sound};
 
-pub use self::crossword::CrosswordView;
-pub use self::cutscene::{Ast, Scene, TalkPos, TalkStyle, Theater};
-pub use self::dialog::DialogBox;
-pub use self::fade::ScreenFade;
-pub use self::hud::{Hud, HudCmd, HudInput};
-pub use self::lasers::{DangerSign, LaserCmd, LaserField};
-pub use self::paragraph::Paragraph;
-pub use self::puzzle::{PuzzleCmd, PuzzleCore, PuzzleView};
+// ========================================================================= //
+
+pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
+    let ast = vec![
+        Ast::Seq(vec![
+            // TODO: Make a background for "Level Up".
+            Ast::SetBg("log_level"),
+            Ast::Place(0, "chars/tezure", 0, (-16, 160)),
+            Ast::Slide(0, (140, 160), false, true, 1.0),
+        ]),
+    ];
+    Ast::compile_scene(resources, ast)
+}
+
+// ========================================================================= //
+
+pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::solve_puzzle_chime()),
+            Ast::Wait(1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE, "Looks good!"),
+        ]),
+    ];
+    Ast::compile_scene(resources, ast)
+}
 
 // ========================================================================= //

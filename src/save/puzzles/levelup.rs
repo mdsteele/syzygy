@@ -27,29 +27,28 @@ use super::super::util::{ACCESS_KEY, pop_array};
 
 const WORDS_KEY: &'static str = "words";
 
-const SOLVED_WORDS: &'static [&'static str] = &["IN4MAL", "FEMI9", "CAR2N",
-                                                "1DERFUL", "4EN6", "PER48",
-                                                "42ITOUS", "PHY6", "QUI9",
-                                                "PUNC28"];
+const SOLVED_WORDS: &'static [&'static str] = &["COM#", "NON+ED", "*TLE",
+                                                ":IZE", "CU*D", "UN,N",
+                                                ":EL", "B@ON", "SUR+", ",NDS"];
 
 // ========================================================================= //
 
-pub struct LogLevelState {
+pub struct LevelUpState {
     access: Access,
     words: CrosswordState,
 }
 
-impl LogLevelState {
-    pub fn from_toml(mut table: toml::Table) -> LogLevelState {
+impl LevelUpState {
+    pub fn from_toml(mut table: toml::Table) -> LevelUpState {
         let access = Access::from_toml(table.get(ACCESS_KEY));
         let words = if access == Access::Solved {
-            CrosswordState::new(ValidChars::LettersAndNumbers, SOLVED_WORDS)
+            CrosswordState::new(ValidChars::LettersAndSymbols, SOLVED_WORDS)
         } else {
             CrosswordState::from_toml(pop_array(&mut table, WORDS_KEY),
-                                      ValidChars::LettersAndNumbers,
+                                      ValidChars::LettersAndSymbols,
                                       SOLVED_WORDS)
         };
-        LogLevelState {
+        LevelUpState {
             access: access,
             words: words,
         }
@@ -75,7 +74,7 @@ impl LogLevelState {
 
     pub fn solve(&mut self) {
         self.access = Access::Solved;
-        self.words = CrosswordState::new(ValidChars::LettersAndNumbers,
+        self.words = CrosswordState::new(ValidChars::LettersAndSymbols,
                                          SOLVED_WORDS);
     }
 
@@ -96,20 +95,20 @@ impl LogLevelState {
     pub fn crossword_mut(&mut self) -> &mut CrosswordState { &mut self.words }
 }
 
-impl Default for LogLevelState {
-    fn default() -> LogLevelState {
-        let mut words = CrosswordState::new(ValidChars::LettersAndNumbers,
+impl Default for LevelUpState {
+    fn default() -> LevelUpState {
+        let mut words = CrosswordState::new(ValidChars::LettersAndSymbols,
                                             SOLVED_WORDS);
         words.reset();
-        LogLevelState {
+        LevelUpState {
             access: Default::default(),
             words: words,
         }
     }
 }
 
-impl PuzzleState for LogLevelState {
-    fn location(&self) -> Location { Location::LogLevel }
+impl PuzzleState for LevelUpState {
+    fn location(&self) -> Location { Location::LevelUp }
 
     fn access(&self) -> Access { self.access }
 

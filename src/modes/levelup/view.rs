@@ -138,7 +138,7 @@ impl PuzzleView for View {
 const OFFSETS_CLUES: &'static [(i32, &'static str)] = &[
     (2, "a substance made of multiple elements"),
     (4, "perplexed; confounded"),
-    (1, "to suddenly suprise or alarm someone"),
+    (1, "to suddenly surprise or alarm someone"),
     (1, "to settle a distant land"),
     (0, "a sweet, creamy pastry filling"),
     (0, "somewhat rare"),

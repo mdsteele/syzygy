@@ -80,13 +80,7 @@ impl LogLevelState {
     }
 
     pub fn check_if_solved(&mut self) {
-        let solved_words: Vec<Vec<char>> = SOLVED_WORDS.iter()
-                                                       .map(|word| {
-                                                           word.chars()
-                                                               .collect()
-                                                       })
-                                                       .collect();
-        if self.words.words() == &solved_words {
+        if self.words.words_are(SOLVED_WORDS) {
             self.access = Access::Solved;
         }
     }
@@ -98,12 +92,10 @@ impl LogLevelState {
 
 impl Default for LogLevelState {
     fn default() -> LogLevelState {
-        let mut words = CrosswordState::new(ValidChars::LettersAndNumbers,
-                                            SOLVED_WORDS);
-        words.reset();
         LogLevelState {
             access: Default::default(),
-            words: words,
+            words: CrosswordState::blank(ValidChars::LettersAndNumbers,
+                                         SOLVED_WORDS),
         }
     }
 }

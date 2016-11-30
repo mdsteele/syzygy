@@ -79,13 +79,7 @@ impl LevelUpState {
     }
 
     pub fn check_if_solved(&mut self) {
-        let solved_words: Vec<Vec<char>> = SOLVED_WORDS.iter()
-                                                       .map(|word| {
-                                                           word.chars()
-                                                               .collect()
-                                                       })
-                                                       .collect();
-        if self.words.words() == &solved_words {
+        if self.words.words_are(SOLVED_WORDS) {
             self.access = Access::Solved;
         }
     }
@@ -97,12 +91,10 @@ impl LevelUpState {
 
 impl Default for LevelUpState {
     fn default() -> LevelUpState {
-        let mut words = CrosswordState::new(ValidChars::LettersAndSymbols,
-                                            SOLVED_WORDS);
-        words.reset();
         LevelUpState {
             access: Default::default(),
-            words: words,
+            words: CrosswordState::blank(ValidChars::LettersAndSymbols,
+                                         SOLVED_WORDS),
         }
     }
 }

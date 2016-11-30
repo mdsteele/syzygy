@@ -166,17 +166,19 @@ impl Element<CrosswordState, (i32, i32, char)> for CrosswordView {
         }
         if let Some((row, _)) = self.cursor {
             let clue = self.offsets_and_clues[row as usize].1;
-            let width = cmp::max(0, self.clue_font.text_width(clue)) + 8;
-            let rect = Rect::new(self.center_x - width / 2,
-                                 self.top +
-                                 BOX_SIZE * state.words().len() as i32 +
-                                 CLUE_MARGIN_VERT,
-                                 width as u32,
-                                 17);
-            canvas.fill_rect((192, 192, 192), rect);
-            canvas.draw_rect((128, 128, 128), rect);
-            let pt = Point::new(self.center_x, rect.top() + 12);
-            canvas.draw_text(&self.clue_font, Align::Center, pt, clue);
+            if !clue.is_empty() {
+                let width = cmp::max(0, self.clue_font.text_width(clue)) + 8;
+                let rect = Rect::new(self.center_x - width / 2,
+                                     self.top +
+                                     BOX_SIZE * state.words().len() as i32 +
+                                     CLUE_MARGIN_VERT,
+                                     width as u32,
+                                     17);
+                canvas.fill_rect((192, 192, 192), rect);
+                canvas.draw_rect((128, 128, 128), rect);
+                let pt = Point::new(self.center_x, rect.top() + 12);
+                canvas.draw_text(&self.clue_font, Align::Center, pt, clue);
+            }
         }
     }
 

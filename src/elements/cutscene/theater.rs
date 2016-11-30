@@ -94,6 +94,15 @@ impl Theater {
         }
     }
 
+    pub fn actor_at_point(&self, point: Point) -> Option<i32> {
+        for (&slot, actor) in self.actors.iter().rev() {
+            if actor.rect().contains(point) {
+                return Some(slot);
+            }
+        }
+        None
+    }
+
     pub fn enqueue(&mut self, entry: (i32, i32)) { self.queue.push(entry); }
 
     pub fn drain_queue(&mut self) -> Vec<(i32, i32)> {

@@ -23,8 +23,8 @@ use toml;
 use super::access::Access;
 use super::location::Location;
 use super::puzzles::{AtticState, DisconState, DotsState, GroundState,
-                     LevelUpState, LogLevelState, MissedState, PrologState,
-                     PuzzleState, WreckedState};
+                     LevelUpState, LogLevelState, MissedState, PasswordState,
+                     PrologState, PuzzleState, WreckedState};
 use super::util::{pop_table, to_table};
 
 // ========================================================================= //
@@ -44,6 +44,7 @@ pub struct Game {
     pub level_up: LevelUpState,
     pub log_level: LogLevelState,
     pub missed_connections: MissedState,
+    pub password_file: PasswordState,
     pub shifting_ground: GroundState,
     pub wrecked_angle: WreckedState,
     pub ever_clicked_info: bool,
@@ -65,6 +66,7 @@ impl Game {
         let levelup = pop_table(&mut table, Location::LevelUp.key());
         let loglevel = pop_table(&mut table, Location::LogLevel.key());
         let missed = pop_table(&mut table, Location::MissedConnections.key());
+        let password = pop_table(&mut table, Location::PasswordFile.key());
         let ground = pop_table(&mut table, Location::ShiftingGround.key());
         let wrecked = pop_table(&mut table, Location::WreckedAngle.key());
         Game {
@@ -76,6 +78,7 @@ impl Game {
             level_up: LevelUpState::from_toml(levelup),
             log_level: LogLevelState::from_toml(loglevel),
             missed_connections: MissedState::from_toml(missed),
+            password_file: PasswordState::from_toml(password),
             shifting_ground: GroundState::from_toml(ground),
             wrecked_angle: WreckedState::from_toml(wrecked),
             ever_clicked_info: table.get(EVER_CLICKED_INFO_KEY)
@@ -101,6 +104,8 @@ impl Game {
                      self.log_level.to_toml());
         table.insert(Location::MissedConnections.key().to_string(),
                      self.missed_connections.to_toml());
+        table.insert(Location::PasswordFile.key().to_string(),
+                     self.password_file.to_toml());
         table.insert(Location::ShiftingGround.key().to_string(),
                      self.shifting_ground.to_toml());
         table.insert(Location::WreckedAngle.key().to_string(),
@@ -122,6 +127,7 @@ impl Game {
             Location::MissedConnections => {
                 self.is_solved(Location::ConnectTheDots)
             }
+            Location::PasswordFile => true, // TODO: is_solved(SystemFailure)
             Location::ShiftingGround => self.is_solved(Location::WreckedAngle),
             Location::WreckedAngle => self.is_solved(Location::Prolog),
         }
@@ -141,6 +147,7 @@ impl Game {
             Location::LevelUp => self.level_up.access(),
             Location::LogLevel => self.log_level.access(),
             Location::MissedConnections => self.missed_connections.access(),
+            Location::PasswordFile => self.password_file.access(),
             Location::ShiftingGround => self.shifting_ground.access(),
             Location::WreckedAngle => self.wrecked_angle.access(),
         }

@@ -32,6 +32,7 @@ pub enum Location {
     LevelUp,
     LogLevel,
     MissedConnections,
+    PasswordFile,
     ShiftingGround,
     WreckedAngle,
 }
@@ -47,6 +48,7 @@ impl Location {
             Location::LevelUp => "Level Up",
             Location::LogLevel => "Log Level",
             Location::MissedConnections => "Missed Connections",
+            Location::PasswordFile => "Password File",
             Location::ShiftingGround => "Shifting Ground",
             Location::WreckedAngle => "Wrecked Angle",
         }
@@ -62,6 +64,7 @@ impl Location {
             Location::LevelUp => Location::Map,
             Location::LogLevel => Location::ConnectTheDots,
             Location::MissedConnections => Location::Map,
+            Location::PasswordFile => Location::Map,
             Location::ShiftingGround => Location::Map,
             Location::WreckedAngle => Location::ShiftingGround,
         }
@@ -77,6 +80,7 @@ impl Location {
             Location::LevelUp => "level_up",
             Location::LogLevel => "log_level",
             Location::MissedConnections => "missed_connections",
+            Location::PasswordFile => "password_file",
             Location::ShiftingGround => "shifting_ground",
             Location::WreckedAngle => "wrecked_angle",
         }
@@ -93,6 +97,7 @@ impl Location {
                 "level_up" => return Location::LevelUp,
                 "log_level" => return Location::LogLevel,
                 "missed_connections" => return Location::MissedConnections,
+                "password_file" => return Location::PasswordFile,
                 "shifting_ground" => return Location::ShiftingGround,
                 "wrecked_angle" => return Location::WreckedAngle,
                 _ => {}
@@ -126,6 +131,7 @@ mod tests {
                           Location::LevelUp,
                           Location::LogLevel,
                           Location::MissedConnections,
+                          Location::PasswordFile,
                           Location::ShiftingGround,
                           Location::WreckedAngle];
         for original in locations {

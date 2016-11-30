@@ -166,6 +166,9 @@ fn main() {
                         Location::MissedConnections => {
                             modes::run_missed_connections(&mut window, game)
                         }
+                        Location::PasswordFile => {
+                            modes::run_password_file(&mut window, game)
+                        }
                         Location::ShiftingGround => {
                             modes::run_shifting_ground(&mut window, game)
                         }

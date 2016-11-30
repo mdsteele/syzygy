@@ -151,7 +151,7 @@ const OFFSETS_CLUES: &'static [(i32, &'static str)] = &[
 const INFO_BOX_TEXT: &'static str = "\
 Your goal is to fill in the crossword.
 
-Click on a box to select it, then type in the
+$M{Tap}{Click} on a box to select it, then type in the
 word that matches the given clue, using the
 $M{on-screen }{}keyboard.
 

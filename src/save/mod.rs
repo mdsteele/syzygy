@@ -40,6 +40,6 @@ pub use self::path::get_default_save_file_path;
 pub use self::prefs::Prefs;
 pub use self::puzzles::{AtticState, DotsState, DisconState, GroundState,
                         LevelUpState, LogLevelState, MissedState,
-                        PrologState, PuzzleState, WreckedState};
+                        PasswordState, PrologState, PuzzleState, WreckedState};
 
 // ========================================================================= //

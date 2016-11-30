@@ -25,6 +25,7 @@ use super::util::to_string;
 
 #[derive(Clone, Copy, Eq, PartialEq)]
 pub enum ValidChars {
+    Letters,
     LettersAndNumbers,
     LettersAndSymbols,
 }
@@ -59,6 +60,12 @@ impl CrosswordState {
             valid: valid,
             is_initial: is_initial,
         }
+    }
+
+    pub fn blank(valid: ValidChars, solved_words: &[&str]) -> CrosswordState {
+        let mut crossword = CrosswordState::new(valid, solved_words);
+        crossword.reset();
+        crossword
     }
 
     pub fn from_toml(array: toml::Array, valid: ValidChars, solved: &[&str])
@@ -109,6 +116,13 @@ impl CrosswordState {
     pub fn valid_chars(&self) -> ValidChars { self.valid }
 
     pub fn words(&self) -> &Vec<Vec<char>> { &self.words }
+
+    pub fn words_are(&self, words: &[&str]) -> bool {
+        let words: Vec<Vec<char>> = words.iter()
+                                         .map(|word| word.chars().collect())
+                                         .collect();
+        self.words == words
+    }
 
     pub fn get_char(&self, row: i32, index: i32) -> char {
         assert!(row >= 0 && row < self.words.len() as i32);

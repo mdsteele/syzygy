@@ -18,7 +18,7 @@
 // +--------------------------------------------------------------------------+
 
 use std::ascii::AsciiExt;
-use std::cmp;
+use std::cmp::{max, min};
 use std::rc::Rc;
 
 use gui::{Action, Align, Canvas, Element, Event, Font, Keycode, Point, Rect,
@@ -30,6 +30,8 @@ use save::CrosswordState;
 const BOX_USIZE: u32 = 24;
 const BOX_SIZE: i32 = BOX_USIZE as i32;
 const CLUE_MARGIN_VERT: i32 = 8;
+const ANIM_WORD_DELAY_FRAMES: i32 = 1;
+const ANIM_FADE_FRAMES: i32 = 5;
 
 // ========================================================================= //
 
@@ -40,12 +42,14 @@ pub struct CrosswordView {
     top: i32,
     offsets_and_clues: &'static [(i32, &'static str)],
     cursor: Option<(i32, i32)>,
+    animation: Option<i32>,
 }
 
 impl CrosswordView {
     pub fn new(resources: &mut Resources, center_x: i32, top: i32,
                offsets_and_clues: &'static [(i32, &'static str)])
                -> CrosswordView {
+        assert!(!offsets_and_clues.is_empty());
         CrosswordView {
             block_font: resources.get_font("block"),
             clue_font: resources.get_font("roman"),
@@ -53,10 +57,27 @@ impl CrosswordView {
             top: top,
             offsets_and_clues: offsets_and_clues,
             cursor: None,
+            animation: None,
         }
     }
 
     pub fn reset_cursor(&mut self) { self.cursor = None; }
+
+    pub fn animate_center_word(&mut self) { self.animation = Some(0); }
+
+    pub fn set_center_word_hilighted(&mut self, hilight: bool) {
+        self.animation = if hilight {
+            Some(self.anim_max())
+        } else {
+            None
+        }
+    }
+
+    fn anim_max(&self) -> i32 {
+        let num_words = self.offsets_and_clues.len() as i32;
+        debug_assert!(num_words > 0);
+        (num_words - 1) * ANIM_WORD_DELAY_FRAMES + ANIM_FADE_FRAMES
+    }
 
     fn cursor_next(&mut self, state: &CrosswordState) -> bool {
         if let Some((ref mut row, ref mut index)) = self.cursor {
@@ -99,8 +120,7 @@ impl CrosswordView {
             }
             let new_offset = self.offsets_and_clues[*row as usize].0;
             let len = state.words()[*row as usize].len() as i32 - 1;
-            *index = cmp::max(0,
-                              cmp::min(len, *index - old_offset + new_offset));
+            *index = max(0, min(len, *index - old_offset + new_offset));
             true
         } else {
             false
@@ -116,11 +136,40 @@ impl CrosswordView {
             }
             let new_offset = self.offsets_and_clues[*row as usize].0;
             let len = state.words()[*row as usize].len() as i32 - 1;
-            *index = cmp::max(0,
-                              cmp::min(len, *index - old_offset + new_offset));
+            *index = max(0, min(len, *index - old_offset + new_offset));
             true
         } else {
             false
+        }
+    }
+
+    fn box_color(&self, row: usize, index: i32, chr: char) -> (u8, u8, u8) {
+        let offset = self.offsets_and_clues[row].0;
+        let row = row as i32;
+        let under_cursor = Some((row, index)) == self.cursor;
+        if index == offset {
+            if let Some(frames) = self.animation {
+                let lower = row * ANIM_WORD_DELAY_FRAMES;
+                if frames >= lower {
+                    let progress = min(ANIM_FADE_FRAMES, frames - lower);
+                    let red_blue = 255 - progress * (144 / ANIM_FADE_FRAMES);
+                    let green = 255 - progress * (224 / ANIM_FADE_FRAMES);
+                    return (red_blue as u8, green as u8, red_blue as u8);
+                }
+            }
+            if under_cursor {
+                (255, 128, 255)
+            } else if chr == ' ' {
+                (0, 0, 0)
+            } else {
+                (63, 31, 63)
+            }
+        } else if under_cursor {
+            (192, 192, 128)
+        } else if chr == ' ' {
+            (0, 0, 0)
+        } else {
+            (63, 63, 31)
         }
     }
 }
@@ -135,22 +184,7 @@ impl Element<CrosswordState, (i32, i32, char)> for CrosswordView {
                 let index = index as i32;
                 let left = word_left + BOX_SIZE * index;
                 let rect = Rect::new(left, top, BOX_USIZE + 1, BOX_USIZE + 1);
-                let color = if Some((row as i32, index)) == self.cursor {
-                    if index == offset {
-                        (255, 128, 255)
-                    } else {
-                        (192, 192, 128)
-                    }
-                } else {
-                    if chr == ' ' {
-                        (0, 0, 0)
-                    } else if index == offset {
-                        (63, 31, 63)
-                    } else {
-                        (63, 63, 31)
-                    }
-                };
-                canvas.fill_rect(color, rect);
+                canvas.fill_rect(self.box_color(row, index, chr), rect);
                 if chr != ' ' {
                     let pt = Point::new(left + BOX_SIZE / 2,
                                         top + BOX_SIZE - 3);
@@ -167,7 +201,7 @@ impl Element<CrosswordState, (i32, i32, char)> for CrosswordView {
         if let Some((row, _)) = self.cursor {
             let clue = self.offsets_and_clues[row as usize].1;
             if !clue.is_empty() {
-                let width = cmp::max(0, self.clue_font.text_width(clue)) + 8;
+                let width = max(0, self.clue_font.text_width(clue)) + 8;
                 let rect = Rect::new(self.center_x - width / 2,
                                      self.top +
                                      BOX_SIZE * state.words().len() as i32 +
@@ -185,6 +219,15 @@ impl Element<CrosswordState, (i32, i32, char)> for CrosswordView {
     fn handle_event(&mut self, event: &Event, state: &mut CrosswordState)
                     -> Action<(i32, i32, char)> {
         match event {
+            &Event::ClockTick => {
+                if let Some(frames) = self.animation {
+                    let limit = self.anim_max();
+                    if frames < limit {
+                        self.animation = Some(frames + 1);
+                        return Action::redraw();
+                    }
+                }
+            }
             &Event::MouseDown(pt) => {
                 let row = (pt.y() - self.top) / BOX_SIZE;
                 if row < 0 || row >= state.words().len() as i32 {
@@ -199,27 +242,25 @@ impl Element<CrosswordState, (i32, i32, char)> for CrosswordView {
                     return Action::ignore();
                 }
                 self.cursor = Some((row, index));
-                Action::redraw().and_stop()
+                return Action::redraw().and_stop();
             }
             &Event::KeyDown(Keycode::Backspace, _) => {
                 self.cursor_prev(state);
                 if let Some((row, index)) = self.cursor {
-                    Action::redraw().and_return((row, index, ' '))
-                } else {
-                    Action::ignore()
+                    return Action::redraw().and_return((row, index, ' '));
                 }
             }
             &Event::KeyDown(Keycode::Down, _) => {
-                Action::redraw_if(self.cursor_down(state))
+                return Action::redraw_if(self.cursor_down(state));
             }
             &Event::KeyDown(Keycode::Left, _) => {
-                Action::redraw_if(self.cursor_prev(state))
+                return Action::redraw_if(self.cursor_prev(state));
             }
             &Event::KeyDown(Keycode::Right, _) => {
-                Action::redraw_if(self.cursor_next(state))
+                return Action::redraw_if(self.cursor_next(state));
             }
             &Event::KeyDown(Keycode::Up, _) => {
-                Action::redraw_if(self.cursor_up(state))
+                return Action::redraw_if(self.cursor_up(state));
             }
             &Event::TextInput(ref text) => {
                 if let Some((row, index)) = self.cursor {
@@ -232,10 +273,10 @@ impl Element<CrosswordState, (i32, i32, char)> for CrosswordView {
                         }
                     }
                 }
-                Action::ignore()
             }
-            _ => Action::ignore(),
+            _ => {}
         }
+        Action::ignore()
     }
 }
 

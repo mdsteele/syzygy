@@ -45,8 +45,12 @@ impl View {
     }
 
     fn drain_queue(&mut self) {
-        for (_, _) in self.core.drain_queue() {
-            // TODO drain queue
+        for entry in self.core.drain_queue() {
+            match entry {
+                (0, 0) => self.crossword.animate_center_word(),
+                (0, 1) => self.crossword.set_center_word_hilighted(true),
+                _ => {}
+            }
         }
     }
 }
@@ -119,6 +123,7 @@ impl PuzzleView for View {
     fn replay(&mut self, game: &mut Game) {
         game.log_level.replay();
         self.crossword.reset_cursor();
+        self.crossword.set_center_word_hilighted(false);
         self.core.replay();
         self.drain_queue();
     }

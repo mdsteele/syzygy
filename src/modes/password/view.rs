@@ -59,6 +59,11 @@ impl View {
                          CrosswordView::new(resources, 276, 130, RELYNG_OFFS)],
             slider: PasswordSlider::new(resources),
         };
+        for (slot, crossword) in view.crosswords.iter_mut().enumerate() {
+            if state.crossword_is_done(slot as i32) {
+                crossword.set_center_word_hilighted(true);
+            }
+        }
         view.drain_queue();
         view
     }
@@ -122,7 +127,7 @@ impl Element<Game, PuzzleCmd> for View {
                         state.crossword_mut(slot).set_char(row, index, chr);
                         if state.check_crossword(slot) {
                             crossword_view.reset_cursor();
-                            // TODO: animate crossword center word
+                            crossword_view.animate_center_word();
                             let sound = Sound::solve_puzzle_chime();
                             action = action.and_play_sound(sound);
                             self.core.clear_undo_redo();

@@ -40,9 +40,13 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
             Ast::Sound(Sound::solve_puzzle_chime()),
+            Ast::Queue(0, 0), // animate crossword center word
             Ast::Wait(1.0),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(0, TalkStyle::Normal, TalkPos::NE, "Looks good!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Queue(0, 1), // hilight crossword center word
         ]),
     ];
     Ast::compile_scene(resources, ast)

@@ -2,6 +2,8 @@
 >blue_ells
 >green_pipes
 >teal_struts
+>gray_blocks
+>miniblocks
 
         BBBBBB                CICNCE                CJCMCF
         BBBBBB                CJCMCF                CICNCE
@@ -13,17 +15,17 @@ BABABABABE                    CJCMCF                CICNCQCGCHCGCHCGCHCG
                               CJCMCPCLCKCLCKCLCKCLCKCOCNCE
                               CICNCQCGCHCGCHCGCHCGCHCRCMCF
                               CJCMCF                CICNCE
-ACACACACACACACACACAG          CICNCE                CJCMCF
-AAAAAAAAAAAAAAAAAAAB          CJCMCF                CICNCE
-AAAAAAAAAAAAAAAAAAAB          CICNCE                CJCMCF  AFACACACACAC
-AAAAAAAAAAAAALAEAEAH          CJCMCF                CICNCE  AIAMAAAAAAAA
-AAAAAAAAAAAAAB                CICNCE                CJCMCF    ADAAAAAAAA
-AAAAAAALAEAEAH                CJCMCF                CICNCE    AIAMAAAAAA
-AAAAAAAB                      CICNCE                CJCMCF      ADAAAAAA
-AEAEAEAH                      CJCMCF                CICNCE      AIAEAEAE
-                  CACKCLCKCLCKCOCNCE                CJCMCF
-BABABABABD        CJCQCGCHCGCHCRCMCF                CICNCE  BCBGBABABABA
-        BFBD      CICF        CICNCE                CJCMCF  BBBB
-          BB      CJCE        CJCMCF                CICNCE  BBBB
-          BB      CICF        CICNCE                CJCMCF  BBBJBD
-          BB      CJCE        CJCMCF                CICNCE  BBBBBB
+ACACACACACACACACACAG          CICNCE    EKEOEOEL    CJCMCF
+AAAAAAAAAAAAAAAAAAAB          CJCMCF    EODEDFEO    CICNCE
+AAAAAAAAAAAAAAAAAAAB          CICNCE    EODGDHEO    CJCMCF  AFACACACACAC
+AAAAAAAAAAAAALAEAEAH          CJCMCF    EMEOEOEN    CICNCE  AIAMAAAAAAAA
+AAAAAAAAAAAAAB                CICNCE      BBBB      CJCMCF    ADAAAAAAAA
+AAAAAAALAEAEAH                CJCMCF      BBBB      CICNCE    AIAMAAAAAA
+AAAAAAAB                      CICNCE      BBBB      CJCMCF      ADAAAAAA
+AEAEAEAH                      CJCMCF      BBBB      CICNCE      AIAEAEAE
+                  CACKCLCKCLCKCOCNCE      BBBB      CJCMCF
+BABABABABD        CJCQCGCHCGCHCRCMCF      BBBFBD    CICNCE  BCBGBABABABA
+        BFBD      CICF        CICNCE  BCBABE  BB    CJCMCF  BBBB
+          BB      CJCE        CJCMCF  BB      BB    CICNCE  BBBB
+          BB      CICF        CICNCE  BB      BB    CJCMCF  BBBJBD
+          BB      CJCE        CJCMCF  BB      BB    CICNCE  BBBBBB

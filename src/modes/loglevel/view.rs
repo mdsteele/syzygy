@@ -28,6 +28,7 @@ use super::scenes::{compile_intro_scene, compile_outro_scene};
 pub struct View {
     core: PuzzleCore<(i32, i32, char, char)>,
     crossword: CrosswordView,
+    crossword_visible: bool,
 }
 
 impl View {
@@ -39,6 +40,7 @@ impl View {
         let mut view = View {
             core: core,
             crossword: CrosswordView::new(resources, 364, 56, OFFSETS_CLUES),
+            crossword_visible: false,
         };
         view.drain_queue();
         view
@@ -49,6 +51,7 @@ impl View {
             match entry {
                 (0, 0) => self.crossword.animate_center_word(),
                 (0, 1) => self.crossword.set_center_word_hilighted(true),
+                (1, visible) => self.crossword_visible = visible != 0,
                 _ => {}
             }
         }
@@ -59,7 +62,9 @@ impl Element<Game, PuzzleCmd> for View {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
         let state = &game.log_level;
         self.core.draw_back_layer(canvas);
-        self.crossword.draw(state.crossword(), canvas);
+        if self.crossword_visible {
+            self.crossword.draw(state.crossword(), canvas);
+        }
         self.core.draw_middle_layer(canvas);
         self.core.draw_front_layer(canvas, state);
     }
@@ -69,7 +74,7 @@ impl Element<Game, PuzzleCmd> for View {
         let state = &mut game.log_level;
         let mut action = self.core.handle_event(event, state);
         self.drain_queue();
-        if !action.should_stop() &&
+        if !action.should_stop() && self.crossword_visible &&
            (event == &Event::ClockTick || !state.is_solved()) {
             let subaction = self.crossword
                                 .handle_event(event, state.crossword_mut());
@@ -124,6 +129,7 @@ impl PuzzleView for View {
         game.log_level.replay();
         self.crossword.reset_cursor();
         self.crossword.set_center_word_hilighted(false);
+        self.crossword_visible = false;
         self.core.replay();
         self.drain_queue();
     }

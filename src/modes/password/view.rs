@@ -215,6 +215,7 @@ impl PuzzleView for View {
         game.password_file.replay();
         for crossword in &mut self.crosswords {
             crossword.reset_cursor();
+            crossword.set_center_word_hilighted(false);
         }
         self.core.replay();
         self.drain_queue();

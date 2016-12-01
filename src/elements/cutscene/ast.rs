@@ -75,7 +75,7 @@ impl Ast {
                 Box::new(ParallelNode::new(nodes))
             }
             Ast::Loop(min, max, ast) => {
-                let max = if max < 0 {
+                let max = if max <= 0 {
                     None
                 } else {
                     Some(max)

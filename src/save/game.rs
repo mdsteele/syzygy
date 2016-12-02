@@ -116,21 +116,7 @@ impl Game {
     }
 
     pub fn is_unlocked(&self, location: Location) -> bool {
-        match location {
-            Location::Map => true,
-            Location::Prolog => true,
-            Location::ALightInTheAttic => self.is_solved(Location::Prolog),
-            Location::ConnectTheDots => self.is_solved(Location::LogLevel),
-            Location::Disconnected => self.is_solved(Location::Prolog),
-            Location::LevelUp => self.is_solved(Location::MissedConnections),
-            Location::LogLevel => self.is_solved(Location::Disconnected),
-            Location::MissedConnections => {
-                self.is_solved(Location::ConnectTheDots)
-            }
-            Location::PasswordFile => true, // TODO: is_solved(SystemFailure)
-            Location::ShiftingGround => self.is_solved(Location::WreckedAngle),
-            Location::WreckedAngle => self.is_solved(Location::Prolog),
-        }
+        location.prereqs().iter().all(|&prereq| self.is_solved(prereq))
     }
 
     pub fn is_solved(&self, location: Location) -> bool {

@@ -28,7 +28,7 @@ use super::view::{Cmd, INFO_BOX_TEXT, View};
 pub fn run_map_screen(window: &mut Window, game: &mut Game) -> Mode {
     let mut view = {
         let visible_rect = window.visible_rect();
-        View::new(&mut window.resources(), visible_rect)
+        View::new(&mut window.resources(), visible_rect, game)
     };
     window.render(game, &view);
     loop {

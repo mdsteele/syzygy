@@ -22,7 +22,7 @@ use toml;
 
 // ========================================================================= //
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Location {
     Map,
     Prolog,
@@ -67,6 +67,22 @@ impl Location {
             Location::PasswordFile => Location::Map,
             Location::ShiftingGround => Location::Map,
             Location::WreckedAngle => Location::ShiftingGround,
+        }
+    }
+
+    pub fn prereqs(self) -> Vec<Location> {
+        match self {
+            Location::Map => vec![],
+            Location::Prolog => vec![],
+            Location::ALightInTheAttic => vec![Location::Prolog],
+            Location::ConnectTheDots => vec![Location::LogLevel],
+            Location::Disconnected => vec![Location::Prolog],
+            Location::LevelUp => vec![Location::MissedConnections],
+            Location::LogLevel => vec![Location::Disconnected],
+            Location::MissedConnections => vec![Location::ConnectTheDots],
+            Location::PasswordFile => vec![], // TODO: vec![SystemFailure]
+            Location::ShiftingGround => vec![Location::WreckedAngle],
+            Location::WreckedAngle => vec![Location::Prolog],
         }
     }
 

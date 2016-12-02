@@ -17,6 +17,9 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
+use std::cmp::min;
+use std::collections::HashMap;
+
 use elements::{Hud, HudCmd, HudInput, ScreenFade};
 use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sprite,
           SubrectElement};
@@ -24,8 +27,22 @@ use save::{Access, Game, Location};
 
 // ========================================================================= //
 
-const PUZZLE_NODE_WIDTH: u32 = 24;
-const PUZZLE_NODE_HEIGHT: u32 = 24;
+const NODE_WIDTH: u32 = 24;
+const NODE_HEIGHT: u32 = 24;
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+const NODES: &'static [(Location, (i32, i32))] = &[
+    (Location::Prolog, (75, 100)),
+    (Location::ALightInTheAttic, (200, 50)),
+    (Location::ConnectTheDots, (150, 150)),
+    (Location::Disconnected, (100, 150)),
+    (Location::LevelUp, (225, 175)),
+    (Location::LogLevel, (125, 175)),
+    (Location::MissedConnections, (200, 150)),
+    (Location::PasswordFile, (400, 200)),
+    (Location::ShiftingGround, (150, 250)),
+    (Location::WreckedAngle, (100, 250)),
+];
 
 // ========================================================================= //
 
@@ -42,37 +59,58 @@ pub struct View {
     screen_fade: ScreenFade<Cmd>,
     hud: Hud,
     nodes: Vec<SubrectElement<PuzzleNode>>,
+    paths: Vec<Rect>,
+    selected: Option<Location>,
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect) -> View {
+    pub fn new(resources: &mut Resources, visible: Rect, game: &Game) -> View {
+        let locations: HashMap<Location, (i32, i32)> = NODES.iter()
+                                                            .cloned()
+                                                            .collect();
+        let mut nodes = Vec::new();
+        let mut paths = Vec::new();
+        for &(location, (x, y)) in NODES {
+            if game.is_unlocked(location) {
+                let solved = game.is_solved(location);
+                let node = PuzzleNode::new(resources, location, solved);
+                let left = x - NODE_WIDTH as i32 / 2;
+                let top = y - NODE_HEIGHT as i32 / 2;
+                let rect = Rect::new(left, top, NODE_WIDTH, NODE_HEIGHT);
+                nodes.push(SubrectElement::new(node, rect));
+                for prereq in &location.prereqs() {
+                    if let Some(&(px, py)) = locations.get(prereq) {
+                        let w = (px - x).abs() as u32;
+                        let h = (py - y).abs() as u32;
+                        if w < h {
+                            paths.push(Rect::new(min(x, px) - 2,
+                                                 y - 2,
+                                                 w + 4,
+                                                 4));
+                            paths.push(Rect::new(px - 2, min(y, py), 4, h));
+                        } else {
+                            paths.push(Rect::new(x - 2,
+                                                 min(y, py) - 2,
+                                                 4,
+                                                 h + 4));
+                            paths.push(Rect::new(min(x, px), py - 2, w, 4));
+                        }
+                    }
+                }
+            }
+        }
         View {
             screen_fade: ScreenFade::new(resources),
             hud: Hud::new(resources, visible, Location::Map),
-            nodes: vec![
-                View::node(resources, Location::Prolog, 50, 100),
-                View::node(resources, Location::ALightInTheAttic, 100, 50),
-                View::node(resources, Location::ConnectTheDots, 150, 150),
-                View::node(resources, Location::Disconnected, 100, 150),
-                View::node(resources, Location::LevelUp, 225, 175),
-                View::node(resources, Location::LogLevel, 125, 175),
-                View::node(resources, Location::MissedConnections, 200, 150),
-                View::node(resources, Location::PasswordFile, 400, 200),
-                View::node(resources, Location::ShiftingGround, 150, 250),
-                View::node(resources, Location::WreckedAngle, 100, 250),
-            ],
+            nodes: nodes,
+            paths: paths,
+            selected: None,
         }
-    }
-
-    fn node(resources: &mut Resources, loc: Location, x: i32, y: i32)
-            -> SubrectElement<PuzzleNode> {
-        let rect = Rect::new(x, y, PUZZLE_NODE_WIDTH, PUZZLE_NODE_HEIGHT);
-        SubrectElement::new(PuzzleNode::new(resources, loc), rect)
     }
 
     fn hud_input(&self) -> HudInput {
         HudInput {
-            name: "The Map",
+            name: self.selected.unwrap_or(Location::Map).name(),
             access: Access::Unvisited,
             is_paused: false,
             active: self.screen_fade.is_transparent(),
@@ -84,14 +122,17 @@ impl View {
 }
 
 impl Element<Game, Cmd> for View {
-    fn draw(&self, game: &Game, canvas: &mut Canvas) {
+    fn draw(&self, _: &Game, canvas: &mut Canvas) {
         canvas.clear((64, 128, 64));
-        self.nodes.draw(game, canvas);
+        for &rect in &self.paths {
+            canvas.fill_rect((128, 0, 128), rect);
+        }
+        self.nodes.draw(&self.selected, canvas);
         self.hud.draw(&self.hud_input(), canvas);
         self.screen_fade.draw(&(), canvas);
     }
 
-    fn handle_event(&mut self, event: &Event, game: &mut Game) -> Action<Cmd> {
+    fn handle_event(&mut self, event: &Event, _: &mut Game) -> Action<Cmd> {
         let mut action = self.screen_fade.handle_event(event, &mut ());
         if !action.should_stop() {
             let mut input = self.hud_input();
@@ -106,11 +147,17 @@ impl Element<Game, Cmd> for View {
             });
         }
         if !action.should_stop() {
-            let subaction = self.nodes.handle_event(event, game);
+            let subaction = self.nodes.handle_event(event, &mut self.selected);
             if let Some(&loc) = subaction.value() {
                 self.screen_fade.fade_out_and_return(Cmd::GoToPuzzle(loc));
             }
             action.merge(subaction.but_no_value());
+        }
+        if !action.should_stop() {
+            if let &Event::MouseDown(_) = event {
+                self.selected = None;
+                action.merge(Action::redraw().and_stop());
+            }
         }
         action
     }
@@ -119,36 +166,44 @@ impl Element<Game, Cmd> for View {
 // ========================================================================= //
 
 struct PuzzleNode {
-    icons: Vec<Sprite>,
+    icon: Sprite,
     loc: Location,
 }
 
 impl PuzzleNode {
-    fn new(resources: &mut Resources, loc: Location) -> PuzzleNode {
+    fn new(resources: &mut Resources, location: Location, solved: bool)
+           -> PuzzleNode {
+        let index = if solved {
+            1
+        } else {
+            0
+        };
         PuzzleNode {
-            icons: resources.get_sprites("puzzle_nodes"),
-            loc: loc,
+            icon: resources.get_sprites("puzzle_nodes")[index].clone(),
+            loc: location,
         }
     }
 }
 
-impl Element<Game, Location> for PuzzleNode {
-    fn draw(&self, game: &Game, canvas: &mut Canvas) {
-        if game.is_unlocked(self.loc) {
-            let icon = if game.is_solved(self.loc) {
-                &self.icons[1]
-            } else {
-                &self.icons[0]
-            };
-            canvas.draw_sprite(icon, Point::new(0, 0));
+impl Element<Option<Location>, Location> for PuzzleNode {
+    fn draw(&self, selected: &Option<Location>, canvas: &mut Canvas) {
+        canvas.draw_sprite(&self.icon, Point::new(0, 0));
+        if *selected == Some(self.loc) {
+            let rect = canvas.rect();
+            canvas.draw_rect((255, 255, 255), rect);
         }
     }
 
-    fn handle_event(&mut self, event: &Event, game: &mut Game)
+    fn handle_event(&mut self, event: &Event, selected: &mut Option<Location>)
                     -> Action<Location> {
         match event {
-            &Event::MouseDown(_) if game.is_unlocked(self.loc) => {
-                Action::redraw().and_return(self.loc)
+            &Event::MouseDown(_) => {
+                if *selected == Some(self.loc) {
+                    Action::redraw().and_return(self.loc)
+                } else {
+                    *selected = Some(self.loc);
+                    Action::redraw().and_stop()
+                }
             }
             _ => Action::ignore(),
         }
@@ -158,9 +213,10 @@ impl Element<Game, Location> for PuzzleNode {
 // ========================================================================= //
 
 pub const INFO_BOX_TEXT: &'static str = "\
-$M{Tap}{Click} on a system node to travel there.
+$M{Tap}{Click} on a system node to select it; $M{tap}{click} on it again to
+travel there.
 
-Systems that still need to be repaired are marked in red.
-Repaired systems are marked in green.";
+Nodes that still need to be repaired are marked in red.
+Repaired nodes are marked in green.";
 
 // ========================================================================= //

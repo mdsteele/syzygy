@@ -17,50 +17,44 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use std::rc::Rc;
-
 use elements::{PuzzleCmd, PuzzleCore, PuzzleView};
-use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
-          Resources, Sprite};
+use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sprite};
 use modes::SOLVED_INFO_TEXT;
-use save::{Direction, Game, PuzzleState, WreckedState};
+use save::{Direction, Game, PuzzleState, CubeState};
 use super::scenes::{compile_intro_scene, compile_outro_scene};
 
 // ========================================================================= //
 
 pub struct View {
     core: PuzzleCore<(Direction, i32, i32)>,
-    grid: WreckedGrid,
-    solution: SolutionDisplay,
+    grid: CubeGrid,
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect, state: &WreckedState)
+    pub fn new(resources: &mut Resources, visible: Rect, state: &CubeState)
                -> View {
         let intro = compile_intro_scene(resources);
-        let outro = compile_outro_scene(resources, visible);
+        let outro = compile_outro_scene(resources);
         let core = PuzzleCore::new(resources, visible, state, intro, outro);
         let mut view = View {
             core: core,
-            grid: WreckedGrid::new(resources, 84, 132),
-            solution: SolutionDisplay::new(resources),
+            grid: CubeGrid::new(resources, 84, 132),
         };
         view.drain_queue();
         view
     }
 
     fn drain_queue(&mut self) {
-        for (_, index) in self.core.drain_queue() {
-            self.solution.set_index(index);
+        for (_, _) in self.core.drain_queue() {
+            // TODO drain queue
         }
     }
 }
 
 impl Element<Game, PuzzleCmd> for View {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
-        let state = &game.wrecked_angle;
+        let state = &game.cube_tangle;
         self.core.draw_back_layer(canvas);
-        self.solution.draw(state, canvas);
         self.grid.draw(state, canvas);
         self.core.draw_middle_layer(canvas);
         self.core.draw_front_layer(canvas, state);
@@ -68,16 +62,13 @@ impl Element<Game, PuzzleCmd> for View {
 
     fn handle_event(&mut self, event: &Event, game: &mut Game)
                     -> Action<PuzzleCmd> {
-        let state = &mut game.wrecked_angle;
+        let state = &mut game.cube_tangle;
         let mut action = self.core.handle_event(event, state);
         self.drain_queue();
         if !action.should_stop() {
             let subaction = self.grid.handle_event(event, state);
             if let Some(&(dir, rank, by)) = subaction.value() {
                 if state.is_solved() {
-                    if cfg!(debug_assertions) {
-                        println!("Puzzle solved, beginning outro.");
-                    }
                     self.core.begin_outro_scene();
                     self.drain_queue();
                     self.core.clear_undo_redo();
@@ -87,16 +78,13 @@ impl Element<Game, PuzzleCmd> for View {
             }
             action.merge(subaction.but_no_value());
         }
-        if !action.should_stop() {
-            action.merge(self.solution.handle_event(event, state));
-        }
         action
     }
 }
 
 impl PuzzleView for View {
     fn info_text(&self, game: &Game) -> &'static str {
-        if game.wrecked_angle.is_solved() {
+        if game.cube_tangle.is_solved() {
             SOLVED_INFO_TEXT
         } else {
             INFO_BOX_TEXT
@@ -105,30 +93,30 @@ impl PuzzleView for View {
 
     fn undo(&mut self, game: &mut Game) {
         if let Some((dir, rank, by)) = self.core.pop_undo() {
-            game.wrecked_angle.shift_tiles(dir, rank, -by);
+            game.cube_tangle.rotate_cubes(dir, rank, -by);
         }
     }
 
     fn redo(&mut self, game: &mut Game) {
         if let Some((dir, rank, by)) = self.core.pop_redo() {
-            game.wrecked_angle.shift_tiles(dir, rank, by);
+            game.cube_tangle.rotate_cubes(dir, rank, by);
         }
     }
 
     fn reset(&mut self, game: &mut Game) {
         self.core.clear_undo_redo();
-        game.wrecked_angle.reset();
+        game.cube_tangle.reset();
     }
 
     fn replay(&mut self, game: &mut Game) {
-        game.wrecked_angle.replay();
+        game.cube_tangle.replay();
         self.core.replay();
         self.drain_queue();
     }
 
     fn solve(&mut self, game: &mut Game) {
         self.core.clear_undo_redo();
-        game.wrecked_angle.solve();
+        game.cube_tangle.solve();
         self.core.begin_outro_scene();
         self.drain_queue();
     }
@@ -136,8 +124,8 @@ impl PuzzleView for View {
 
 // ========================================================================= //
 
-const TILE_USIZE: u32 = 24;
-const TILE_SIZE: i32 = TILE_USIZE as i32;
+const CUBE_USIZE: u32 = 32;
+const CUBE_SIZE: i32 = CUBE_USIZE as i32;
 
 struct Drag {
     from: Point,
@@ -159,9 +147,9 @@ impl Drag {
     pub fn set_to(&mut self, to: Point) -> Option<(Direction, i32, i32)> {
         self.to = to;
         let (dir, rank, dist) = self.dir_rank_dist();
-        if dist > TILE_SIZE / 2 {
-            let by = 1 + (dist - TILE_SIZE / 2) / TILE_SIZE;
-            self.from = self.from + dir.delta() * (by * TILE_SIZE);
+        if dist > CUBE_SIZE / 2 {
+            let by = 1 + (dist - CUBE_SIZE / 2) / CUBE_SIZE;
+            self.from = self.from + dir.delta() * (by * CUBE_SIZE);
             if let Some((accum_dir, accum_rank, ref mut accum_by)) =
                    self.accum {
                 assert_eq!(dir.is_vertical(), accum_dir.is_vertical());
@@ -200,94 +188,112 @@ impl Drag {
             }
         };
         let rank = if dir.is_vertical() {
-            self.from.x() / TILE_SIZE
+            self.from.x() / CUBE_SIZE
         } else {
-            self.from.y() / TILE_SIZE
+            self.from.y() / CUBE_SIZE
         };
         (dir, rank, dist)
     }
 
-    pub fn offset_for(&self, col: i32, row: i32) -> Point {
+    pub fn tilt_dir_for(&self, col: i32, row: i32) -> Option<Direction> {
         let (dir, rank, dist) = self.dir_rank_dist();
         let for_rank = if dir.is_vertical() {
             col
         } else {
             row
         };
-        if rank == for_rank {
-            dir.delta() * dist
+        if rank == for_rank && dist >= CUBE_SIZE / 4 {
+            Some(dir)
         } else {
-            Point::new(0, 0)
+            None
         }
     }
 }
 
 // ========================================================================= //
 
-struct WreckedGrid {
+struct CubeGrid {
     left: i32,
     top: i32,
-    tile_sprites: Vec<Sprite>,
-    hole_sprites: Vec<Sprite>,
+    cubes: Vec<Sprite>,
+    faces: Vec<Sprite>,
     drag: Option<Drag>,
 }
 
-impl WreckedGrid {
-    fn new(resources: &mut Resources, left: i32, top: i32) -> WreckedGrid {
-        WreckedGrid {
+impl CubeGrid {
+    fn new(resources: &mut Resources, left: i32, top: i32) -> CubeGrid {
+        CubeGrid {
             left: left,
             top: top,
-            tile_sprites: resources.get_sprites("wrecked/tiles"),
-            hole_sprites: resources.get_sprites("wrecked/holes"),
+            cubes: resources.get_sprites("tangle/cubes"),
+            faces: resources.get_sprites("tangle/faces"),
             drag: None,
         }
     }
 
     fn rect(&self) -> Rect {
-        Rect::new(self.left, self.top, 9 * TILE_USIZE, 7 * TILE_USIZE)
+        Rect::new(self.left, self.top, 4 * CUBE_USIZE, 4 * CUBE_USIZE)
+    }
+
+    fn tilt_dir_for(&self, col: i32, row: i32) -> Option<Direction> {
+        if let Some(ref drag) = self.drag {
+            drag.tilt_dir_for(col, row)
+        } else {
+            None
+        }
     }
 }
 
-impl Element<WreckedState, (Direction, i32, i32)> for WreckedGrid {
-    fn draw(&self, state: &WreckedState, canvas: &mut Canvas) {
-        for row in 0..7 {
-            let top = self.top + row * TILE_SIZE;
-            for col in 0..9 {
-                if state.tile_at(col, row).is_none() {
-                    let left = self.left + col * TILE_SIZE;
-                    let rect = Rect::new(left, top, TILE_USIZE, TILE_USIZE);
-                    canvas.fill_rect((15, 20, 15), rect);
-                    canvas.draw_sprite(&self.hole_sprites[0], rect.top_left());
-                }
-            }
-        }
-        for row in 0..7 {
-            let top = self.top + row * TILE_SIZE;
-            for col in 0..9 {
-                let left = self.left + col * TILE_SIZE;
-                let mut pt = Point::new(left, top);
-                if let Some(ref drag) = self.drag {
-                    pt = pt + drag.offset_for(col, row);
-                }
-                if let Some(index) = state.tile_at(col, row) {
-                    canvas.draw_sprite(&self.tile_sprites[index], pt);
+impl Element<CubeState, (Direction, i32, i32)> for CubeGrid {
+    fn draw(&self, state: &CubeState, canvas: &mut Canvas) {
+        for row in 0..4 {
+            for col in 0..4 {
+                let pt = Point::new(self.left + col * CUBE_SIZE,
+                                    self.top + row * CUBE_SIZE);
+                let (fr, rt, bt) = state.faces_at(col, row);
+                if let Some(dir) = self.tilt_dir_for(col, row) {
+                    if dir.is_vertical() {
+                        canvas.draw_sprite_transposed(&self.cubes[1], pt);
+                        let (tp, bt) = if dir == Direction::South {
+                            (5 - bt, fr)
+                        } else {
+                            (fr, bt)
+                        };
+                        canvas.draw_sprite_transposed(&self.faces[12 + bt],
+                                                      pt);
+                        canvas.draw_sprite_transposed(&self.faces[18 + tp],
+                                                      pt);
+                        canvas.draw_sprite_transposed(&self.faces[24 + rt],
+                                                      pt);
+                    } else {
+                        canvas.draw_sprite(&self.cubes[1], pt);
+                        let (lt, rt) = if dir == Direction::East {
+                            (5 - rt, fr)
+                        } else {
+                            (fr, rt)
+                        };
+                        canvas.draw_sprite(&self.faces[12 + rt], pt);
+                        canvas.draw_sprite(&self.faces[18 + lt], pt);
+                        canvas.draw_sprite(&self.faces[24 + bt], pt);
+                    }
+                } else {
+                    canvas.draw_sprite(&self.cubes[0], pt);
+                    canvas.draw_sprite(&self.faces[fr], pt);
+                    canvas.draw_sprite(&self.faces[rt + 6], pt);
+                    canvas.draw_sprite_transposed(&self.faces[bt + 6], pt);
                 }
             }
         }
     }
 
-    fn handle_event(&mut self, event: &Event, state: &mut WreckedState)
+    fn handle_event(&mut self, event: &Event, state: &mut CubeState)
                     -> Action<(Direction, i32, i32)> {
         let rect = self.rect();
         match event {
             &Event::MouseDown(pt) if !state.is_solved() => {
                 if rect.contains(pt) {
                     let rel_pt = pt - rect.top_left();
-                    let col = rel_pt.x() / TILE_SIZE;
-                    let row = rel_pt.y() / TILE_SIZE;
-                    if state.tile_at(col, row).is_some() {
-                        self.drag = Some(Drag::new(rel_pt));
-                    }
+                    self.drag = Some(Drag::new(rel_pt));
                 }
                 Action::ignore()
             }
@@ -295,7 +301,7 @@ impl Element<WreckedState, (Direction, i32, i32)> for WreckedGrid {
                 if let Some(mut drag) = self.drag.take() {
                     if let Some((dir, rank, by)) =
                            drag.set_to(pt - rect.top_left()) {
-                        state.shift_tiles(dir, rank, by);
+                        state.rotate_cubes(dir, rank, by);
                         if state.is_solved() {
                             return Action::redraw().and_return(drag.accum()
                                                                    .unwrap());
@@ -325,88 +331,12 @@ impl Element<WreckedState, (Direction, i32, i32)> for WreckedGrid {
 
 // ========================================================================= //
 
-const SOLUTION_LEFT: i32 = 452;
-const SOLUTION_TOP: i32 = 211;
-
-struct SolutionDisplay {
-    font: Rc<Font>,
-    sprites: Vec<Sprite>,
-    index: usize,
-    anim: usize,
-}
-
-impl SolutionDisplay {
-    fn new(resources: &mut Resources) -> SolutionDisplay {
-        SolutionDisplay {
-            font: resources.get_font("roman"),
-            sprites: resources.get_sprites("wrecked/solution"),
-            index: 0,
-            anim: 0,
-        }
-    }
-
-    fn set_index(&mut self, index: i32) {
-        if index >= 0 {
-            self.index = index as usize;
-            self.anim = 12;
-        } else {
-            self.index = (-index - 1) as usize;
-            self.anim = 0;
-        }
-    }
-}
-
-impl Element<WreckedState, PuzzleCmd> for SolutionDisplay {
-    fn draw(&self, state: &WreckedState, canvas: &mut Canvas) {
-        let index = if self.anim > 0 {
-            ((self.anim / 2) % 3) + 3
-        } else {
-            self.index
-        };
-        canvas.draw_sprite(&self.sprites[index],
-                           Point::new(SOLUTION_LEFT, SOLUTION_TOP));
-        if index == 0 {
-            canvas.draw_text(&self.font,
-                             Align::Center,
-                             Point::new(SOLUTION_LEFT + 28,
-                                        SOLUTION_TOP + 18),
-                             "Status:");
-            let status = if state.is_solved() {
-                "Fixed, sorta."
-            } else {
-                "BORKEN"
-            };
-            canvas.draw_text(&self.font,
-                             Align::Center,
-                             Point::new(SOLUTION_LEFT + 28,
-                                        SOLUTION_TOP + 32),
-                             status);
-        }
-    }
-
-    fn handle_event(&mut self, event: &Event, _state: &mut WreckedState)
-                    -> Action<PuzzleCmd> {
-        match event {
-            &Event::ClockTick => {
-                if self.anim > 0 {
-                    self.anim -= 1;
-                    Action::redraw()
-                } else {
-                    Action::ignore()
-                }
-            }
-            _ => Action::ignore(),
-        }
-    }
-}
-
-// ========================================================================= //
-
 const INFO_BOX_TEXT: &'static str = "\
-Your goal is to arrange the large grid on the left into
-the pattern shown on the small grid on the right.
+Your goal is to arrange the front faces of the cubes in
+the large grid on the left into the pattern shown on the
+small grid on the right.
 
-Drag a tile on the large grid up, down, left, or right
-to shift that whole row or column.";
+Drag a cube on the large grid up, down, left, or right
+to rotate that whole row or column.";
 
 // ========================================================================= //

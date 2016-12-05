@@ -18,6 +18,7 @@
 // +--------------------------------------------------------------------------+
 
 mod attic;
+mod cube;
 mod discon;
 mod dots;
 mod ground;
@@ -30,6 +31,7 @@ mod puzzle;
 mod wrecked;
 
 pub use self::attic::AtticState;
+pub use self::cube::CubeState;
 pub use self::discon::DisconState;
 pub use self::dots::DotsState;
 pub use self::ground::GroundState;

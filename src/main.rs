@@ -154,6 +154,9 @@ fn main() {
                         Location::ConnectTheDots => {
                             modes::run_connect_the_dots(&mut window, game)
                         }
+                        Location::CubeTangle => {
+                            modes::run_cube_tangle(&mut window, game)
+                        }
                         Location::Disconnected => {
                             modes::run_disconnected(&mut window, game)
                         }

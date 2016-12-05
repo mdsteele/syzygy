@@ -116,6 +116,23 @@ impl<'a> Canvas<'a> {
                                           sprite.height())));
     }
 
+    pub fn draw_sprite_transposed(&mut self, sprite: &Sprite,
+                                  mut top_left: Point) {
+        top_left = top_left.offset(self.offset_rect.x(), self.offset_rect.y());
+        self.renderer
+            .copy_ex(&sprite.sdl2_texture(),
+                     None,
+                     Some(Rect::new(top_left.x(),
+                                    top_left.y(),
+                                    sprite.width(),
+                                    sprite.height())),
+                     90.0,
+                     None,
+                     false,
+                     true)
+            .unwrap();
+    }
+
     pub fn draw_sprite_flipped(&mut self, sprite: &Sprite,
                                mut top_left: Point, flip_horz: bool,
                                flip_vert: bool) {

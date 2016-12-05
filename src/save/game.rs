@@ -22,9 +22,9 @@ use toml;
 
 use super::access::Access;
 use super::location::Location;
-use super::puzzles::{AtticState, DisconState, DotsState, GroundState,
-                     LevelUpState, LogLevelState, MissedState, PasswordState,
-                     PrologState, PuzzleState, WreckedState};
+use super::puzzles::{AtticState, CubeState, DisconState, DotsState,
+                     GroundState, LevelUpState, LogLevelState, MissedState,
+                     PasswordState, PrologState, PuzzleState, WreckedState};
 use super::util::{pop_table, to_table};
 
 // ========================================================================= //
@@ -40,6 +40,7 @@ pub struct Game {
     pub prolog: PrologState,
     pub a_light_in_the_attic: AtticState,
     pub connect_the_dots: DotsState,
+    pub cube_tangle: CubeState,
     pub disconnected: DisconState,
     pub level_up: LevelUpState,
     pub log_level: LogLevelState,
@@ -62,6 +63,7 @@ impl Game {
         let prolog = pop_table(&mut table, Location::Prolog.key());
         let attic = pop_table(&mut table, Location::ALightInTheAttic.key());
         let dots = pop_table(&mut table, Location::ConnectTheDots.key());
+        let cube = pop_table(&mut table, Location::CubeTangle.key());
         let discon = pop_table(&mut table, Location::Disconnected.key());
         let levelup = pop_table(&mut table, Location::LevelUp.key());
         let loglevel = pop_table(&mut table, Location::LogLevel.key());
@@ -74,6 +76,7 @@ impl Game {
             prolog: PrologState::from_toml(prolog),
             a_light_in_the_attic: AtticState::from_toml(attic),
             connect_the_dots: DotsState::from_toml(dots),
+            cube_tangle: CubeState::from_toml(cube),
             disconnected: DisconState::from_toml(discon),
             level_up: LevelUpState::from_toml(levelup),
             log_level: LogLevelState::from_toml(loglevel),
@@ -96,6 +99,8 @@ impl Game {
                      self.a_light_in_the_attic.to_toml());
         table.insert(Location::ConnectTheDots.key().to_string(),
                      self.connect_the_dots.to_toml());
+        table.insert(Location::CubeTangle.key().to_string(),
+                     self.cube_tangle.to_toml());
         table.insert(Location::Disconnected.key().to_string(),
                      self.disconnected.to_toml());
         table.insert(Location::LevelUp.key().to_string(),
@@ -129,6 +134,7 @@ impl Game {
             Location::Prolog => self.prolog.access(),
             Location::ALightInTheAttic => self.a_light_in_the_attic.access(),
             Location::ConnectTheDots => self.connect_the_dots.access(),
+            Location::CubeTangle => self.cube_tangle.access(),
             Location::Disconnected => self.disconnected.access(),
             Location::LevelUp => self.level_up.access(),
             Location::LogLevel => self.log_level.access(),

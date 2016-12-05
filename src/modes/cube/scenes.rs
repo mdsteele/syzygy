@@ -17,38 +17,30 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod attic;
-mod cube;
-mod discon;
-mod dots;
-mod ground;
-mod info;
-mod levelup;
-mod loglevel;
-mod map;
-mod missed;
-mod mode;
-mod password;
-mod prolog;
-mod puzzle;
-mod title;
-mod wrecked;
+use elements::{Ast, Scene};
+use gui::{Resources, Sound};
 
-pub use self::attic::run_a_light_in_the_attic;
-pub use self::cube::run_cube_tangle;
-pub use self::discon::run_disconnected;
-pub use self::dots::run_connect_the_dots;
-pub use self::ground::run_shifting_ground;
-pub use self::info::{SOLVED_INFO_TEXT, run_info_box};
-pub use self::levelup::run_level_up;
-pub use self::loglevel::run_log_level;
-pub use self::map::run_map_screen;
-pub use self::missed::run_missed_connections;
-pub use self::mode::Mode;
-pub use self::password::run_password_file;
-pub use self::prolog::run_prolog;
-pub use self::puzzle::run_puzzle;
-pub use self::title::run_title_screen;
-pub use self::wrecked::run_wrecked_angle;
+// ========================================================================= //
+
+pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
+    let ast = vec![
+        Ast::Seq(vec![
+            // TODO: Make a background for "Cube Tangle".
+            Ast::SetBg("wrecked_angle"),
+        ]),
+    ];
+    Ast::compile_scene(resources, ast)
+}
+
+// ========================================================================= //
+
+pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::solve_puzzle_chime()),
+        ]),
+    ];
+    Ast::compile_scene(resources, ast)
+}
 
 // ========================================================================= //

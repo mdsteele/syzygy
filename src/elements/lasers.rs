@@ -22,7 +22,7 @@ use std::collections::{HashMap, VecDeque};
 use std::rc::Rc;
 
 use gui::{Action, Align, Canvas, Element, Event, FRAME_DELAY_MILLIS, Font,
-          Point, Rect, Resources, Sprite};
+          Point, Rect, Resources, Sound, Sprite};
 use save::{Device, DeviceGrid, Direction, LaserColor};
 
 // ========================================================================= //
@@ -50,6 +50,7 @@ struct GridDrag {
     from_pt: Point,
     to_pt: Point,
     millis: u32,
+    moved: bool,
 }
 
 // ========================================================================= //
@@ -431,6 +432,7 @@ impl Element<DeviceGrid, LaserCmd> for LaserField {
                                 from_pt: pt,
                                 to_pt: pt,
                                 millis: 0,
+                                moved: false,
                             });
                         }
                     }
@@ -441,7 +443,12 @@ impl Element<DeviceGrid, LaserCmd> for LaserField {
                     drag.to_pt = pt - self.rect.top_left();
                     self.lasers.clear();
                     self.sparks.clear();
-                    return Action::redraw();
+                    let mut action = Action::redraw();
+                    if !drag.moved {
+                        drag.moved = true;
+                        action = action.and_play_sound(Sound::device_pickup());
+                    }
+                    return action;
                 }
             }
             &Event::MouseUp => {
@@ -454,6 +461,7 @@ impl Element<DeviceGrid, LaserCmd> for LaserField {
                             grid.rotate(drag.from_col, drag.from_row);
                             self.recalculate_lasers(grid);
                             Action::redraw()
+                                .and_play_sound(Sound::device_rotate())
                                 .and_return(LaserCmd::Rotated(drag.from_col,
                                                               drag.from_row))
                         } else {
@@ -468,6 +476,7 @@ impl Element<DeviceGrid, LaserCmd> for LaserField {
                         self.recalculate_lasers(grid);
                         if success {
                             Action::redraw()
+                                .and_play_sound(Sound::device_drop())
                                 .and_return(LaserCmd::Moved(drag.from_col,
                                                             drag.from_row,
                                                             to_col,

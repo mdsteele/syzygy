@@ -57,6 +57,22 @@ impl Sound {
         Sound::new(Wave::noise(2000.0).adshr(0.0, 0.0, 0.5, 0.0, 0.25))
     }
 
+    pub fn device_drop() -> Sound {
+        Sound::new(Wave::noise(Wave::from(5000.0) +
+                               Wave::from(-3000.0).delayed(0.05))
+                       .adshr(0.0, 0.0, 0.25, 0.0, 0.075))
+    }
+
+    pub fn device_pickup() -> Sound {
+        Sound::new(Wave::noise(Wave::from(2000.0) +
+                               Wave::from(3000.0).delayed(0.05))
+                       .adshr(0.0, 0.0, 0.25, 0.0, 0.075))
+    }
+
+    pub fn device_rotate() -> Sound {
+        Sound::new(Wave::noise(8000.0).adshr(0.0, 0.0, 0.25, 0.0, 0.05))
+    }
+
     pub fn platform_shift(num_times: i32) -> Sound {
         Sound::new(Wave::noise(800.0)
                        .adshr(0.071, 0.0, 1.0, 0.0, 0.142)

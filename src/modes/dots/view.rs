@@ -90,7 +90,6 @@ impl Element<Game, PuzzleCmd> for View {
                         println!("Puzzle solved, beginning outro.");
                     }
                     self.core.begin_outro_scene();
-                    self.core.clear_undo_redo();
                 } else {
                     self.core.push_undo(cmd);
                 }
@@ -158,7 +157,6 @@ impl PuzzleView for View {
 
     fn solve(&mut self, game: &mut Game) {
         let state = &mut game.connect_the_dots;
-        self.core.clear_undo_redo();
         state.solve();
         self.laser_field.recalculate_lasers(state.grid());
         self.core.begin_outro_scene();

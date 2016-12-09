@@ -103,7 +103,6 @@ impl Element<Game, PuzzleCmd> for View {
                         state.set_slider_offset(col, new_offset);
                         if state.is_solved() {
                             self.core.begin_outro_scene();
-                            self.core.clear_undo_redo();
                         } else {
                             self.core.push_undo(UndoRedo::Slider(col,
                                                                  old_offset,
@@ -222,7 +221,6 @@ impl PuzzleView for View {
     }
 
     fn solve(&mut self, game: &mut Game) {
-        self.core.clear_undo_redo();
         game.password_file.solve();
         for crossword in &mut self.crosswords {
             crossword.reset_cursor();

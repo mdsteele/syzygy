@@ -403,7 +403,6 @@ impl PuzzleView for View {
 
     fn solve(&mut self, game: &mut Game) {
         let state = &mut game.shifting_ground;
-        self.core.clear_undo_redo();
         state.solve();
         self.update_platform_positions(state);
         self.update_elinsa_position(state);

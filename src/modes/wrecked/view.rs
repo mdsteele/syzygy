@@ -80,7 +80,6 @@ impl Element<Game, PuzzleCmd> for View {
                     }
                     self.core.begin_outro_scene();
                     self.drain_queue();
-                    self.core.clear_undo_redo();
                 } else {
                     self.core.push_undo((dir, rank, by));
                 }
@@ -127,7 +126,6 @@ impl PuzzleView for View {
     }
 
     fn solve(&mut self, game: &mut Game) {
-        self.core.clear_undo_redo();
         game.wrecked_angle.solve();
         self.core.begin_outro_scene();
         self.drain_queue();

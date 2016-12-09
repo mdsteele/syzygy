@@ -100,6 +100,7 @@ impl<U: Clone> PuzzleCore<U> {
     }
 
     pub fn begin_outro_scene(&mut self) {
+        self.clear_undo_redo();
         self.outro_scene.begin(&mut self.theater);
     }
 

@@ -85,7 +85,6 @@ impl Element<Game, PuzzleCmd> for View {
                 if state.is_solved() {
                     self.crossword.reset_cursor();
                     self.core.begin_outro_scene();
-                    self.core.clear_undo_redo();
                 } else {
                     self.core.push_undo((row, index, old_chr, chr));
                 }
@@ -135,7 +134,6 @@ impl PuzzleView for View {
     }
 
     fn solve(&mut self, game: &mut Game) {
-        self.core.clear_undo_redo();
         game.log_level.solve();
         self.crossword.reset_cursor();
         self.core.begin_outro_scene();

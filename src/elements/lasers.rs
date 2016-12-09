@@ -489,17 +489,20 @@ impl Element<DeviceGrid, LaserCmd> for LaserField {
 pub struct DangerSign {
     font1: Rc<Font>,
     font2: Rc<Font>,
-    string: String,
+    string1: String,
+    string2: String,
     rect: Rect,
 }
 
 impl DangerSign {
-    pub fn new(resources: &mut Resources, left: i32, top: i32, string: &str)
+    pub fn new(resources: &mut Resources, (left, top): (i32, i32),
+               string1: &str, string2: &str)
                -> DangerSign {
         DangerSign {
             font1: resources.get_font("danger"),
             font2: resources.get_font("tiny"),
-            string: string.to_string(),
+            string1: string1.to_string(),
+            string2: string2.to_string(),
             rect: Rect::new(left, top, 80, 32),
         }
     }
@@ -509,11 +512,11 @@ impl DangerSign {
         canvas.draw_text(&self.font1,
                          Align::Center,
                          Point::new(40, 16),
-                         "%DANGER");
+                         &self.string1);
         canvas.draw_text(&self.font2,
                          Align::Center,
                          Point::new(40, 26),
-                         &self.string);
+                         &self.string2);
     }
 }
 

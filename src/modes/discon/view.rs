@@ -42,7 +42,10 @@ impl View {
         let mut view = View {
             core: core,
             laser_field: LaserField::new(resources, 120, 72, state.grid()),
-            danger_sign: DangerSign::new(resources, 224, 160, "HIGH VOLTAGE"),
+            danger_sign: DangerSign::new(resources,
+                                         (224, 160),
+                                         "%DANGER",
+                                         "HIGH VOLTAGE"),
             box_open: false,
         };
         view.drain_queue();

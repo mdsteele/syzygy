@@ -35,6 +35,7 @@ const NODES: &'static [(Location, (i32, i32))] = &[
     (Location::Prolog, (75, 100)),
     (Location::ALightInTheAttic, (200, 50)),
     (Location::ConnectTheDots, (150, 150)),
+    (Location::CrossTheLine, (125, 225)),
     (Location::CubeTangle, (125, 280)),
     (Location::Disconnected, (100, 150)),
     (Location::LevelUp, (225, 175)),

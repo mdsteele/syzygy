@@ -188,12 +188,7 @@ impl Element<CrosswordState, (i32, i32, char)> for CrosswordView {
                 if chr != ' ' {
                     let pt = Point::new(left + BOX_SIZE / 2,
                                         top + BOX_SIZE - 3);
-                    let mut string = String::new();
-                    string.push(chr);
-                    canvas.draw_text(&self.block_font,
-                                     Align::Center,
-                                     pt,
-                                     &string);
+                    canvas.draw_char(&self.block_font, Align::Center, pt, chr);
                 }
                 canvas.draw_rect((255, 255, 255), rect);
             }

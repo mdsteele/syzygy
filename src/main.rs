@@ -20,6 +20,7 @@
 extern crate ahi;
 extern crate getopts;
 extern crate itersynth;
+extern crate rand;
 extern crate sdl2;
 extern crate toml;
 

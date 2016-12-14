@@ -6,6 +6,7 @@ dependencies = [
  "gcc 0.3.35 (registry+https://github.com/rust-lang/crates.io-index)",
  "getopts 0.2.14 (registry+https://github.com/rust-lang/crates.io-index)",
  "itersynth 0.1.0 (git+https://github.com/mdsteele/itersynth?rev=bc1e3ffe726c80e3a931bf9e58f4a98f213c2bf5)",
+ "rand 0.3.14 (registry+https://github.com/rust-lang/crates.io-index)",
  "sdl2 0.22.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "toml 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]

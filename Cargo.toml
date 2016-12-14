@@ -10,6 +10,7 @@ gcc = "0.3"
 
 [dependencies]
 getopts = "0.2"
+rand = "0.3"
 sdl2 = { version = "0.22", features = ["use_mac_framework"] }
 toml = { version = "0.2", features = [] }
 

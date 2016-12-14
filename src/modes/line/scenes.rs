@@ -25,8 +25,7 @@ use gui::{Resources, Sound};
 pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
-            // TODO: Make a background for "Cross the Line".
-            Ast::SetBg("disconnected"),
+            Ast::SetBg("cross_the_line"),
         ]),
     ];
     Ast::compile_scene(resources, ast)

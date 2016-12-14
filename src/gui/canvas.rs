@@ -181,6 +181,13 @@ impl<'a> Canvas<'a> {
             .unwrap();
     }
 
+    pub fn draw_char(&mut self, font: &Font, alignment: Align, start: Point,
+                     chr: char) {
+        let mut text = String::with_capacity(1);
+        text.push(chr);
+        self.draw_text(font, alignment, start, &text);
+    }
+
     pub fn draw_text(&mut self, font: &Font, alignment: Align, start: Point,
                      text: &str) {
         let top = start.y() - font.baseline();

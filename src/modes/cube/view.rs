@@ -38,7 +38,7 @@ impl View {
         let core = PuzzleCore::new(resources, visible, state, intro, outro);
         let mut view = View {
             core: core,
-            grid: CubeGrid::new(resources, 84, 132),
+            grid: CubeGrid::new(resources, 232, 72),
         };
         view.drain_queue();
         view

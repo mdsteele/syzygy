@@ -25,8 +25,7 @@ use gui::{Resources, Sound};
 pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
-            // TODO: Make a background for "Cube Tangle".
-            Ast::SetBg("wrecked_angle"),
+            Ast::SetBg("cube_tangle"),
         ]),
     ];
     Ast::compile_scene(resources, ast)

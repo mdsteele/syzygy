@@ -38,11 +38,12 @@ const NODES: &'static [(Location, (i32, i32))] = &[
     (Location::CrossTheLine, (125, 225)),
     (Location::CubeTangle, (125, 280)),
     (Location::Disconnected, (100, 150)),
-    (Location::LevelUp, (225, 175)),
+    (Location::LevelUp, (225, 125)),
     (Location::LogLevel, (125, 175)),
     (Location::MissedConnections, (200, 150)),
     (Location::PasswordFile, (400, 200)),
     (Location::ShiftingGround, (150, 250)),
+    (Location::SystemFailure, (360, 200)),
     (Location::WreckedAngle, (100, 250)),
 ];
 
@@ -74,8 +75,7 @@ impl View {
         let mut paths = Vec::new();
         for &(location, (x, y)) in NODES {
             if game.is_unlocked(location) {
-                let solved = game.is_solved(location);
-                let node = PuzzleNode::new(resources, location, solved);
+                let node = PuzzleNode::new(resources, location, game);
                 let left = x - NODE_WIDTH as i32 / 2;
                 let top = y - NODE_HEIGHT as i32 / 2;
                 let rect = Rect::new(left, top, NODE_WIDTH, NODE_HEIGHT);
@@ -173,10 +173,13 @@ struct PuzzleNode {
 }
 
 impl PuzzleNode {
-    fn new(resources: &mut Resources, location: Location, solved: bool)
+    fn new(resources: &mut Resources, location: Location, game: &Game)
            -> PuzzleNode {
-        let index = if solved {
+        let index = if game.is_solved(location) {
             1
+        } else if location == Location::SystemFailure &&
+                       !game.system_failure.mid_scene_is_done() {
+            2
         } else {
             0
         };

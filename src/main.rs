@@ -179,6 +179,9 @@ fn main() {
                         Location::ShiftingGround => {
                             modes::run_shifting_ground(&mut window, game)
                         }
+                        Location::SystemFailure => {
+                            modes::run_system_failure(&mut window, game)
+                        }
                         Location::WreckedAngle => {
                             modes::run_wrecked_angle(&mut window, game)
                         }

@@ -36,6 +36,7 @@ pub enum Location {
     MissedConnections,
     PasswordFile,
     ShiftingGround,
+    SystemFailure,
     WreckedAngle,
 }
 
@@ -54,6 +55,7 @@ impl Location {
             Location::MissedConnections => "Missed Connections",
             Location::PasswordFile => "Password File",
             Location::ShiftingGround => "Shifting Ground",
+            Location::SystemFailure => "System Failure",
             Location::WreckedAngle => "Wrecked Angle",
         }
     }
@@ -72,6 +74,7 @@ impl Location {
             Location::MissedConnections => Location::Map,
             Location::PasswordFile => Location::Map,
             Location::ShiftingGround => Location::Map,
+            Location::SystemFailure => Location::PasswordFile,
             Location::WreckedAngle => Location::ShiftingGround,
         }
     }
@@ -88,8 +91,9 @@ impl Location {
             Location::LevelUp => vec![Location::MissedConnections],
             Location::LogLevel => vec![Location::Disconnected],
             Location::MissedConnections => vec![Location::ConnectTheDots],
-            Location::PasswordFile => vec![], // TODO: vec![SystemFailure]
+            Location::PasswordFile => vec![Location::SystemFailure],
             Location::ShiftingGround => vec![Location::WreckedAngle],
+            Location::SystemFailure => vec![Location::LogLevel],
             Location::WreckedAngle => vec![Location::Prolog],
         }
     }
@@ -108,6 +112,7 @@ impl Location {
             Location::MissedConnections => "missed_connections",
             Location::PasswordFile => "password_file",
             Location::ShiftingGround => "shifting_ground",
+            Location::SystemFailure => "system_failure",
             Location::WreckedAngle => "wrecked_angle",
         }
     }
@@ -127,6 +132,7 @@ impl Location {
                 "missed_connections" => return Location::MissedConnections,
                 "password_file" => return Location::PasswordFile,
                 "shifting_ground" => return Location::ShiftingGround,
+                "system_failure" => return Location::SystemFailure,
                 "wrecked_angle" => return Location::WreckedAngle,
                 _ => {}
             }
@@ -163,6 +169,7 @@ mod tests {
                           Location::MissedConnections,
                           Location::PasswordFile,
                           Location::ShiftingGround,
+                          Location::SystemFailure,
                           Location::WreckedAngle];
         for original in locations {
             let result = Location::from_toml(Some(&original.to_toml()));

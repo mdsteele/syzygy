@@ -63,7 +63,7 @@ impl CubeState {
         };
         let is_initial = &grid as &[i32] == INITIAL_GRID;
         CubeState {
-            access: Access::from_toml(table.get(ACCESS_KEY)),
+            access: access,
             grid: grid,
             is_initial: is_initial,
         }

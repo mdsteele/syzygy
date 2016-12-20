@@ -17,30 +17,30 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod access;
-mod crossword;
-mod data;
-mod device;
-mod direction;
-mod game;
-mod location;
-mod path;
-mod prefs;
-mod puzzles;
-mod util;
+use elements::{Ast, Scene};
+use gui::{Resources, Sound};
 
-pub use self::access::Access;
-pub use self::crossword::{CrosswordState, ValidChars};
-pub use self::data::SaveData;
-pub use self::device::{Device, DeviceGrid, LaserColor};
-pub use self::direction::Direction;
-pub use self::game::Game;
-pub use self::location::Location;
-pub use self::path::get_default_save_file_path;
-pub use self::prefs::Prefs;
-pub use self::puzzles::{AtticState, CubeState, DotsState, DisconState,
-                        FailureState, GroundState, LevelUpState, LineState,
-                        LogLevelState, MissedState, PasswordState,
-                        PrologState, PuzzleState, WreckedState};
+// ========================================================================= //
+
+pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
+    let ast = vec![
+        Ast::Seq(vec![
+            // TODO: Make a background for "System Failure"
+            Ast::SetBg("cube_tangle"),
+        ]),
+    ];
+    Ast::compile_scene(resources, ast)
+}
+
+// ========================================================================= //
+
+pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::solve_puzzle_chime()),
+        ]),
+    ];
+    Ast::compile_scene(resources, ast)
+}
 
 // ========================================================================= //

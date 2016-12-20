@@ -25,8 +25,7 @@ use gui::{Resources, Sound};
 pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
-            // TODO: Make a background for "System Failure"
-            Ast::SetBg("cube_tangle"),
+            Ast::SetBg("system_failure"),
         ]),
     ];
     Ast::compile_scene(resources, ast)

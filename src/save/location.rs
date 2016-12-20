@@ -70,7 +70,7 @@ impl Location {
             Location::CubeTangle => Location::Map,
             Location::Disconnected => Location::LogLevel,
             Location::LevelUp => Location::Map,
-            Location::LogLevel => Location::ConnectTheDots,
+            Location::LogLevel => Location::SystemFailure,
             Location::MissedConnections => Location::Map,
             Location::PasswordFile => Location::Map,
             Location::ShiftingGround => Location::Map,

@@ -28,6 +28,7 @@ use super::scenes::{compile_intro_scene, compile_outro_scene};
 pub struct View {
     core: PuzzleCore<(Direction, i32, i32)>,
     grid: CubeGrid,
+    solution: SolutionDisplay,
 }
 
 impl View {
@@ -39,14 +40,15 @@ impl View {
         let mut view = View {
             core: core,
             grid: CubeGrid::new(resources, 232, 72),
+            solution: SolutionDisplay::new(resources),
         };
         view.drain_queue();
         view
     }
 
     fn drain_queue(&mut self) {
-        for (_, _) in self.core.drain_queue() {
-            // TODO drain queue
+        for (_, index) in self.core.drain_queue() {
+            self.solution.set_index(index);
         }
     }
 }
@@ -55,6 +57,7 @@ impl Element<Game, PuzzleCmd> for View {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
         let state = &game.cube_tangle;
         self.core.draw_back_layer(canvas);
+        self.solution.draw(state, canvas);
         self.grid.draw(state, canvas);
         self.core.draw_middle_layer(canvas);
         self.core.draw_front_layer(canvas, state);
@@ -76,6 +79,9 @@ impl Element<Game, PuzzleCmd> for View {
                 }
             }
             action.merge(subaction.but_no_value());
+        }
+        if !action.should_stop() {
+            action.merge(self.solution.handle_event(event, state));
         }
         action
     }
@@ -110,6 +116,7 @@ impl PuzzleView for View {
     fn replay(&mut self, game: &mut Game) {
         game.cube_tangle.replay();
         self.core.replay();
+        self.solution.set_index(-1);
         self.drain_queue();
     }
 
@@ -329,10 +336,68 @@ impl Element<CubeState, (Direction, i32, i32)> for CubeGrid {
 
 // ========================================================================= //
 
+const SOLUTION_LEFT: i32 = 96;
+const SOLUTION_TOP: i32 = 128;
+
+struct SolutionDisplay {
+    sprites: Vec<Sprite>,
+    index: usize,
+    anim: usize,
+}
+
+impl SolutionDisplay {
+    fn new(resources: &mut Resources) -> SolutionDisplay {
+        SolutionDisplay {
+            sprites: resources.get_sprites("tangle/solution"),
+            index: 0,
+            anim: 0,
+        }
+    }
+
+    fn set_index(&mut self, index: i32) {
+        if index >= 0 {
+            self.index = index as usize;
+            self.anim = 12;
+        } else {
+            self.index = (-index - 1) as usize;
+            self.anim = 0;
+        }
+    }
+}
+
+impl Element<CubeState, PuzzleCmd> for SolutionDisplay {
+    fn draw(&self, _state: &CubeState, canvas: &mut Canvas) {
+        let index = if self.anim > 0 {
+            ((self.anim / 2) % 3) + 2
+        } else {
+            self.index
+        };
+        canvas.draw_sprite(&self.sprites[index],
+                           Point::new(SOLUTION_LEFT, SOLUTION_TOP));
+    }
+
+    fn handle_event(&mut self, event: &Event, _state: &mut CubeState)
+                    -> Action<PuzzleCmd> {
+        match event {
+            &Event::ClockTick => {
+                if self.anim > 0 {
+                    self.anim -= 1;
+                    Action::redraw()
+                } else {
+                    Action::ignore()
+                }
+            }
+            _ => Action::ignore(),
+        }
+    }
+}
+
+// ========================================================================= //
+
 const INFO_BOX_TEXT: &'static str = "\
 Your goal is to arrange the front faces of the cubes in
-the large grid on the left into the pattern shown on the
-small grid on the right.
+the large grid in the middle into the pattern shown on
+the small grid on the left.
 
 Drag a cube on the large grid up, down, left, or right
 to rotate that whole row or column.";

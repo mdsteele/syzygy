@@ -26,6 +26,10 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
             Ast::SetBg("cube_tangle"),
+            Ast::Wait(1.0),
+            Ast::Queue(0, 1),
+            Ast::Wait(1.0),
+            Ast::Queue(0, -2),
         ]),
     ];
     Ast::compile_scene(resources, ast)

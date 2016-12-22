@@ -32,12 +32,12 @@ const STAGE_KEY: &'static str = "stage";
 #[cfg_attr(rustfmt, rustfmt_skip)]
 const GRIDS: &'static [(i32, char, char, &'static str)] = &[
     (4, 'K', 'N', "CDGHMOTWXYZ"), // 4x3 = 12
-    (5, '6', '9', "BEFILORSZ12378"), // 5x3 = 15
+    (5, '9', '6', "BEFILORSZ12378"), // 5x3 = 15
     (4, 'A', 'V', "CDGJKPQRUWY4560"), // 4x4 = 16
     (6, 'I', 'T', "AEFHKLMNVWXZ12679"), // 6x3 = 18
     (5, 'M', 'W', "BCDGJOPQRSU23456890"), // 5x4 = 20
     (6, '5', 'S', "ABCEFGIMOQRTVWZ01234678"), // 6x4 = 24
-    (5, 'E', 'F', "BCDGHIKLMPRSWXYZ23456890"), // 5x5 = 25
+    (5, 'F', 'E', "BCDGHIKLMPRSWXYZ23456890"), // 5x5 = 25
     (6, '`', '\'', "!@#$%^&*()-_=+[]{}\\|;:\"<>~./?"), // 6x5 = 30
     (6, 'O', '0', "ABCDEFGHIJKNPQSUVWYZ1235689#$(};,-~"), // 6x6 = 36
     (7, 'P', 'R', "ABCDEFGHIJLMNOQSTUVWXYZ0123456789{)[]:;<`"), // 7x6 = 42

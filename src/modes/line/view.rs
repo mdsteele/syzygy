@@ -51,7 +51,39 @@ impl View {
     }
 
     fn drain_queue(&mut self) {
-        for (_, _) in self.core.drain_queue() {
+        for entry in self.core.drain_queue() {
+            match entry {
+                (0, -1) => {
+                    self.grid1.override_grid = Some(Vec::new());
+                    self.grid2.override_grid = Some(Vec::new());
+                }
+                (0, 0) => {
+                    self.grid1.override_grid = None;
+                    self.grid2.override_grid = None;
+                }
+                (0, 1) => {
+                    self.grid1.override_grid = Some("SAFE".chars().collect());
+                    self.grid2.override_grid = Some("FACE".chars().collect());
+                }
+                (1, index) => {
+                    if index >= 0 {
+                        self.grid1.selected = Some(index as usize);
+                    } else {
+                        self.grid1.selected = None;
+                    }
+                }
+                (2, index) => {
+                    if index >= 0 {
+                        self.grid2.selected = Some(index as usize);
+                    } else {
+                        self.grid2.selected = None;
+                    }
+                }
+                (3, hide) => {
+                    self.answers.filtered = hide != 0;
+                }
+                _ => {}
+            }
             // TODO: drain queue
         }
     }
@@ -123,6 +155,7 @@ impl PuzzleView for View {
     fn replay(&mut self, game: &mut Game) {
         game.cross_the_line.replay();
         self.core.replay();
+        self.answers.filtered = false;
         self.drain_queue();
     }
 
@@ -146,6 +179,7 @@ struct LetterGrid {
     is_grid_2: bool,
     font: Rc<Font>,
     selected: Option<usize>,
+    override_grid: Option<Vec<char>>,
 }
 
 impl LetterGrid {
@@ -157,6 +191,7 @@ impl LetterGrid {
             is_grid_2: is_grid_2,
             font: resources.get_font("block"),
             selected: None,
+            override_grid: None,
         }
     }
 
@@ -177,7 +212,9 @@ impl LetterGrid {
 impl Element<LineState, ()> for LetterGrid {
     fn draw(&self, state: &LineState, canvas: &mut Canvas) {
         let num_cols = state.num_cols();
-        let grid = if self.is_grid_2 {
+        let grid = if let Some(ref grid) = self.override_grid {
+            grid
+        } else if self.is_grid_2 {
             state.grid2()
         } else {
             state.grid1()
@@ -240,10 +277,22 @@ impl Element<LineState, ()> for LetterGrid {
 
 // ========================================================================= //
 
+const FILTER: &'static [(bool, bool)] = &[(true, false),
+                                          (false, false),
+                                          (true, false),
+                                          (false, true),
+                                          (true, true),
+                                          (false, false),
+                                          (false, true),
+                                          (false, false),
+                                          (true, false),
+                                          (false, true)];
+
 struct AnswersDisplay {
     left: i32,
     top: i32,
     font: Rc<Font>,
+    filtered: bool,
 }
 
 
@@ -253,20 +302,24 @@ impl AnswersDisplay {
             left: left,
             top: top,
             font: resources.get_font("block"),
+            filtered: false,
         }
     }
 }
 
 impl Element<LineState, ()> for AnswersDisplay {
     fn draw(&self, state: &LineState, canvas: &mut Canvas) {
-        // TODO: When solved, display only a certain subset of the letters.
         for stage in 0..state.current_stage() {
             let (chr1, chr2) = state.stage_letters(stage);
             let cx = self.left + stage * BOX_SIZE + BOX_SIZE / 2;
-            let pt1 = Point::new(cx, self.top + BOX_SIZE - 3);
-            let pt2 = Point::new(cx, self.top + 2 * BOX_SIZE - 3);
-            canvas.draw_char(&self.font, Align::Center, pt1, chr1);
-            canvas.draw_char(&self.font, Align::Center, pt2, chr2);
+            if !self.filtered || FILTER[stage as usize].0 {
+                let pt1 = Point::new(cx, self.top + BOX_SIZE - 3);
+                canvas.draw_char(&self.font, Align::Center, pt1, chr1);
+            }
+            if !self.filtered || FILTER[stage as usize].1 {
+                let pt2 = Point::new(cx, self.top + 2 * BOX_SIZE - 3);
+                canvas.draw_char(&self.font, Align::Center, pt2, chr2);
+            }
         }
     }
 

@@ -62,8 +62,6 @@ impl AtticState {
         toml::Value::Table(table)
     }
 
-    pub fn visit(&mut self) { self.access.visit(); }
-
     pub fn reset(&mut self) { self.toggled.clear(); }
 
     pub fn replay(&mut self) {
@@ -194,6 +192,8 @@ impl PuzzleState for AtticState {
     fn location(&self) -> Location { Location::ALightInTheAttic }
 
     fn access(&self) -> Access { self.access }
+
+    fn access_mut(&mut self) -> &mut Access { &mut self.access }
 
     fn can_reset(&self) -> bool { !self.toggled.is_empty() }
 }

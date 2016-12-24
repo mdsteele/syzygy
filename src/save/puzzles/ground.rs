@@ -90,8 +90,6 @@ impl GroundState {
         toml::Value::Table(table)
     }
 
-    pub fn visit(&mut self) { self.access.visit(); }
-
     pub fn reset(&mut self) {
         self.positions = INITIAL_POSITIONS.to_vec();
         self.elinsa_row = INITIAL_ELINSA_ROW;
@@ -166,6 +164,8 @@ impl PuzzleState for GroundState {
     fn location(&self) -> Location { Location::ShiftingGround }
 
     fn access(&self) -> Access { self.access }
+
+    fn access_mut(&mut self) -> &mut Access { &mut self.access }
 
     fn can_reset(&self) -> bool { !self.is_initial }
 }

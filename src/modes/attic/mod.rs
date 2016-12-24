@@ -34,7 +34,6 @@ pub fn run_a_light_in_the_attic(window: &mut Window, game: &mut Game) -> Mode {
                   visible_rect,
                   &game.a_light_in_the_attic)
     };
-    game.a_light_in_the_attic.visit();
     run_puzzle(window, game, view)
 }
 

@@ -59,8 +59,6 @@ impl DotsState {
         toml::Value::Table(table)
     }
 
-    pub fn visit(&mut self) { self.access.visit(); }
-
     pub fn mark_solved(&mut self) { self.access = Access::Solved; }
 
     pub fn reset(&mut self) { self.grid = DotsState::initial_grid(); }
@@ -156,6 +154,8 @@ impl PuzzleState for DotsState {
     fn location(&self) -> Location { Location::ConnectTheDots }
 
     fn access(&self) -> Access { self.access }
+
+    fn access_mut(&mut self) -> &mut Access { &mut self.access }
 
     fn can_reset(&self) -> bool { self.grid.is_modified() }
 }

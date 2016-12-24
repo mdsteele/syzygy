@@ -32,7 +32,6 @@ pub fn run_system_failure(window: &mut Window, game: &mut Game) -> Mode {
         let visible_rect = window.visible_rect();
         View::new(&mut window.resources(), visible_rect, game)
     };
-    game.system_failure.visit();
     run_puzzle(window, game, view)
 }
 

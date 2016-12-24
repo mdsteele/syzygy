@@ -35,7 +35,6 @@ pub fn run_disconnected(window: &mut Window, game: &mut Game) -> Mode {
     if !game.ever_clicked_info {
         view.flash_info_button();
     }
-    game.disconnected.visit();
     run_puzzle(window, game, view)
 }
 

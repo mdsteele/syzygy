@@ -32,7 +32,6 @@ pub fn run_log_level(window: &mut Window, game: &mut Game) -> Mode {
         let visible_rect = window.visible_rect();
         View::new(&mut window.resources(), visible_rect, &game.log_level)
     };
-    game.log_level.visit();
     run_puzzle(window, game, view)
 }
 

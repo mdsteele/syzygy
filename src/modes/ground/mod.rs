@@ -32,7 +32,6 @@ pub fn run_shifting_ground(window: &mut Window, game: &mut Game) -> Mode {
         let visible_rect = window.visible_rect();
         View::new(&mut window.resources(), visible_rect, &game.shifting_ground)
     };
-    game.shifting_ground.visit();
     run_puzzle(window, game, view)
 }
 

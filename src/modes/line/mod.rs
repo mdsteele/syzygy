@@ -32,7 +32,6 @@ pub fn run_cross_the_line(window: &mut Window, game: &mut Game) -> Mode {
         let visible_rect = window.visible_rect();
         View::new(&mut window.resources(), visible_rect, &game.cross_the_line)
     };
-    game.cross_the_line.visit();
     run_puzzle(window, game, view)
 }
 

@@ -34,7 +34,6 @@ pub fn run_missed_connections(window: &mut Window, game: &mut Game) -> Mode {
                   visible_rect,
                   &game.missed_connections)
     };
-    game.missed_connections.visit();
     run_puzzle(window, game, view)
 }
 

@@ -45,7 +45,7 @@ impl View {
                -> View {
         let mut theater = Theater::new();
         let mut scene = compile_scene(resources);
-        if state.is_visited() {
+        if state.is_solved() {
             scene.skip(&mut theater);
         } else {
             scene.begin(&mut theater);

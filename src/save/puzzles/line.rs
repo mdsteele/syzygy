@@ -106,8 +106,6 @@ impl LineState {
         toml::Value::Table(table)
     }
 
-    pub fn visit(&mut self) { self.access.visit(); }
-
     pub fn reset(&mut self) {}
 
     pub fn replay(&mut self) {
@@ -192,6 +190,8 @@ impl PuzzleState for LineState {
     fn location(&self) -> Location { Location::CrossTheLine }
 
     fn access(&self) -> Access { self.access }
+
+    fn access_mut(&mut self) -> &mut Access { &mut self.access }
 
     fn can_reset(&self) -> bool { false }
 }

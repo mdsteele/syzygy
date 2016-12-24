@@ -32,7 +32,6 @@ pub fn run_password_file(window: &mut Window, game: &mut Game) -> Mode {
         let visible_rect = window.visible_rect();
         View::new(&mut window.resources(), visible_rect, &game.password_file)
     };
-    game.password_file.visit();
     run_puzzle(window, game, view)
 }
 

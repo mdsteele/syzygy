@@ -30,7 +30,6 @@ pub fn run_prolog(window: &mut Window, game: &mut Game) -> Mode {
         let visible_rect = window.visible_rect();
         View::new(&mut window.resources(), visible_rect, &game.prolog)
     };
-    game.prolog.visit();
     window.render(game, &view);
     loop {
         let mut action = match window.next_event() {

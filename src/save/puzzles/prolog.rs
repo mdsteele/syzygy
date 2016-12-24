@@ -42,10 +42,6 @@ impl PrologState {
 
     pub fn access(&self) -> Access { self.access }
 
-    pub fn is_visited(&self) -> bool { self.access.is_visited() }
-
-    pub fn visit(&mut self) { self.access.visit(); }
-
     pub fn is_solved(&self) -> bool { self.access == Access::Solved }
 
     pub fn mark_solved(&mut self) { self.access = Access::Solved; }

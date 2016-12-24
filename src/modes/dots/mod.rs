@@ -34,7 +34,6 @@ pub fn run_connect_the_dots(window: &mut Window, game: &mut Game) -> Mode {
                   visible_rect,
                   &game.connect_the_dots)
     };
-    game.connect_the_dots.visit();
     run_puzzle(window, game, view)
 }
 

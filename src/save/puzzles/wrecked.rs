@@ -100,8 +100,6 @@ impl WreckedState {
         toml::Value::Table(table)
     }
 
-    pub fn visit(&mut self) { self.access.visit(); }
-
     pub fn replay(&mut self) {
         self.access = Access::Replay;
         self.grid = INITIAL_GRID.to_vec();
@@ -195,6 +193,8 @@ impl PuzzleState for WreckedState {
     fn location(&self) -> Location { Location::WreckedAngle }
 
     fn access(&self) -> Access { self.access }
+
+    fn access_mut(&mut self) -> &mut Access { &mut self.access }
 
     fn can_reset(&self) -> bool { !self.is_initial }
 }

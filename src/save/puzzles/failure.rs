@@ -53,8 +53,6 @@ impl FailureState {
         toml::Value::Table(table)
     }
 
-    pub fn visit(&mut self) { self.access.visit(); }
-
     pub fn replay(&mut self) {
         self.access = Access::Replay;
         // TODO replay
@@ -76,6 +74,8 @@ impl PuzzleState for FailureState {
     fn location(&self) -> Location { Location::SystemFailure }
 
     fn access(&self) -> Access { self.access }
+
+    fn access_mut(&mut self) -> &mut Access { &mut self.access }
 
     fn can_reset(&self) -> bool { false } // TODO
 }

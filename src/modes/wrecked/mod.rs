@@ -32,7 +32,6 @@ pub fn run_wrecked_angle(window: &mut Window, game: &mut Game) -> Mode {
         let visible_rect = window.visible_rect();
         View::new(&mut window.resources(), visible_rect, &game.wrecked_angle)
     };
-    game.wrecked_angle.visit();
     run_puzzle(window, game, view)
 }
 

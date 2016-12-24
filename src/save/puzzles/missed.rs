@@ -59,8 +59,6 @@ impl MissedState {
         toml::Value::Table(table)
     }
 
-    pub fn visit(&mut self) { self.access.visit(); }
-
     pub fn mark_solved(&mut self) { self.access = Access::Solved; }
 
     pub fn reset(&mut self) { self.grid = MissedState::initial_grid(); }
@@ -160,6 +158,8 @@ impl PuzzleState for MissedState {
     fn location(&self) -> Location { Location::MissedConnections }
 
     fn access(&self) -> Access { self.access }
+
+    fn access_mut(&mut self) -> &mut Access { &mut self.access }
 
     fn can_reset(&self) -> bool { self.grid.is_modified() }
 }

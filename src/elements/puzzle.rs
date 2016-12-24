@@ -172,7 +172,8 @@ impl<U: Clone> PuzzleCore<U> {
         self.screen_fade.draw(&(), canvas);
     }
 
-    pub fn handle_event<S: PuzzleState>(&mut self, event: &Event, state: &S)
+    pub fn handle_event<S: PuzzleState>(&mut self, event: &Event,
+                                        state: &mut S)
                                         -> Action<PuzzleCmd> {
         let mut action = self.screen_fade.handle_event(event, &mut ());
         if !action.should_stop() {
@@ -181,6 +182,9 @@ impl<U: Clone> PuzzleCore<U> {
             } else {
                 self.intro_scene.handle_event(event, &mut self.theater)
             };
+            if self.intro_scene.is_finished() {
+                state.visit();
+            }
             if !self.previously_solved && self.outro_scene.is_finished() &&
                self.screen_fade.is_transparent() {
                 self.screen_fade.fade_out_and_return(PuzzleCmd::Next);

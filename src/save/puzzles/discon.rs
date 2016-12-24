@@ -59,8 +59,6 @@ impl DisconState {
         toml::Value::Table(table)
     }
 
-    pub fn visit(&mut self) { self.access.visit(); }
-
     pub fn mark_solved(&mut self) { self.access = Access::Solved; }
 
     pub fn reset(&mut self) { self.grid = DisconState::initial_grid(); }
@@ -147,6 +145,8 @@ impl PuzzleState for DisconState {
     fn location(&self) -> Location { Location::Disconnected }
 
     fn access(&self) -> Access { self.access }
+
+    fn access_mut(&mut self) -> &mut Access { &mut self.access }
 
     fn can_reset(&self) -> bool { self.grid.is_modified() }
 }

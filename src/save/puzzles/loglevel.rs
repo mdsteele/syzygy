@@ -64,8 +64,6 @@ impl LogLevelState {
         toml::Value::Table(table)
     }
 
-    pub fn visit(&mut self) { self.access.visit(); }
-
     pub fn reset(&mut self) { self.words.reset(); }
 
     pub fn replay(&mut self) {
@@ -104,6 +102,8 @@ impl PuzzleState for LogLevelState {
     fn location(&self) -> Location { Location::LogLevel }
 
     fn access(&self) -> Access { self.access }
+
+    fn access_mut(&mut self) -> &mut Access { &mut self.access }
 
     fn can_reset(&self) -> bool { self.words.can_reset() }
 }

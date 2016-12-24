@@ -32,7 +32,6 @@ pub fn run_cube_tangle(window: &mut Window, game: &mut Game) -> Mode {
         let visible_rect = window.visible_rect();
         View::new(&mut window.resources(), visible_rect, &game.cube_tangle)
     };
-    game.cube_tangle.visit();
     run_puzzle(window, game, view)
 }
 

@@ -26,7 +26,11 @@ pub trait PuzzleState {
 
     fn access(&self) -> Access;
 
+    fn access_mut(&mut self) -> &mut Access;
+
     fn is_visited(&self) -> bool { self.access().is_visited() }
+
+    fn visit(&mut self) { self.access_mut().visit(); }
 
     fn is_solved(&self) -> bool { self.access() == Access::Solved }
 

@@ -152,8 +152,6 @@ impl PasswordState {
         toml::Value::Table(table)
     }
 
-    pub fn visit(&mut self) { self.access.visit(); }
-
     pub fn reset(&mut self) {
         if self.all_crosswords_done() {
             self.sliders = INIT_SLIDERS;
@@ -260,6 +258,8 @@ impl PuzzleState for PasswordState {
     fn location(&self) -> Location { Location::PasswordFile }
 
     fn access(&self) -> Access { self.access }
+
+    fn access_mut(&mut self) -> &mut Access { &mut self.access }
 
     fn can_reset(&self) -> bool {
         if self.all_crosswords_done() {

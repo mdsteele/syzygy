@@ -41,6 +41,6 @@ pub use self::prefs::Prefs;
 pub use self::puzzles::{AtticState, CubeState, DotsState, DisconState,
                         FailureState, GroundState, LevelUpState, LineState,
                         LogLevelState, MissedState, PasswordState,
-                        PrologState, PuzzleState, WreckedState};
+                        PrologState, PuzzleState, TreadState, WreckedState};
 
 // ========================================================================= //

@@ -37,6 +37,7 @@ pub enum Location {
     PasswordFile,
     ShiftingGround,
     SystemFailure,
+    TreadLightly,
     WreckedAngle,
 }
 
@@ -56,6 +57,7 @@ impl Location {
             Location::PasswordFile => "Password File",
             Location::ShiftingGround => "Shifting Ground",
             Location::SystemFailure => "System Failure",
+            Location::TreadLightly => "Tread Lightly",
             Location::WreckedAngle => "Wrecked Angle",
         }
     }
@@ -64,7 +66,7 @@ impl Location {
         match self {
             Location::Map => Location::Map,
             Location::Prolog => Location::Disconnected,
-            Location::ALightInTheAttic => Location::Map,
+            Location::ALightInTheAttic => Location::TreadLightly,
             Location::ConnectTheDots => Location::MissedConnections,
             Location::CrossTheLine => Location::Map,
             Location::CubeTangle => Location::Map,
@@ -75,6 +77,7 @@ impl Location {
             Location::PasswordFile => Location::Map,
             Location::ShiftingGround => Location::Map,
             Location::SystemFailure => Location::PasswordFile,
+            Location::TreadLightly => Location::Map,
             Location::WreckedAngle => Location::ShiftingGround,
         }
     }
@@ -94,6 +97,7 @@ impl Location {
             Location::PasswordFile => vec![Location::SystemFailure],
             Location::ShiftingGround => vec![Location::WreckedAngle],
             Location::SystemFailure => vec![Location::LogLevel],
+            Location::TreadLightly => vec![Location::ALightInTheAttic],
             Location::WreckedAngle => vec![Location::Prolog],
         }
     }
@@ -113,6 +117,7 @@ impl Location {
             Location::PasswordFile => "password_file",
             Location::ShiftingGround => "shifting_ground",
             Location::SystemFailure => "system_failure",
+            Location::TreadLightly => "tread_lightly",
             Location::WreckedAngle => "wrecked_angle",
         }
     }
@@ -133,6 +138,7 @@ impl Location {
                 "password_file" => return Location::PasswordFile,
                 "shifting_ground" => return Location::ShiftingGround,
                 "system_failure" => return Location::SystemFailure,
+                "tread_lightly" => return Location::TreadLightly,
                 "wrecked_angle" => return Location::WreckedAngle,
                 _ => {}
             }
@@ -170,6 +176,7 @@ mod tests {
                           Location::PasswordFile,
                           Location::ShiftingGround,
                           Location::SystemFailure,
+                          Location::TreadLightly,
                           Location::WreckedAngle];
         for original in locations {
             let result = Location::from_toml(Some(&original.to_toml()));

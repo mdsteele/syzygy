@@ -182,6 +182,9 @@ fn main() {
                         Location::SystemFailure => {
                             modes::run_system_failure(&mut window, game)
                         }
+                        Location::TreadLightly => {
+                            modes::run_tread_lightly(&mut window, game)
+                        }
                         Location::WreckedAngle => {
                             modes::run_wrecked_angle(&mut window, game)
                         }

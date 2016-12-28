@@ -34,6 +34,7 @@ const NODE_HEIGHT: u32 = 24;
 const NODES: &'static [(Location, (i32, i32))] = &[
     (Location::Prolog, (75, 100)),
     (Location::ALightInTheAttic, (200, 50)),
+    (Location::TreadLightly, (250, 50)),
     (Location::ConnectTheDots, (150, 150)),
     (Location::CrossTheLine, (125, 225)),
     (Location::CubeTangle, (125, 280)),

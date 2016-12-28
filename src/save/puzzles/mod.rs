@@ -30,6 +30,7 @@ mod missed;
 mod password;
 mod prolog;
 mod puzzle;
+mod tread;
 mod wrecked;
 
 pub use self::attic::AtticState;
@@ -45,6 +46,7 @@ pub use self::missed::MissedState;
 pub use self::password::PasswordState;
 pub use self::prolog::PrologState;
 pub use self::puzzle::PuzzleState;
+pub use self::tread::TreadState;
 pub use self::wrecked::WreckedState;
 
 // ========================================================================= //

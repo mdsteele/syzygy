@@ -210,16 +210,6 @@ impl PuzzleView for View {
         }
     }
 
-    fn replay(&mut self, game: &mut Game) {
-        game.password_file.replay();
-        for crossword in &mut self.crosswords {
-            crossword.reset_cursor();
-            crossword.set_center_word_hilighted(false);
-        }
-        self.core.replay();
-        self.drain_queue();
-    }
-
     fn solve(&mut self, game: &mut Game) {
         game.password_file.solve();
         for crossword in &mut self.crosswords {

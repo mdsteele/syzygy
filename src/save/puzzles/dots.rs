@@ -52,13 +52,6 @@ impl DotsState {
 
     pub fn mark_solved(&mut self) { self.access = Access::Solved; }
 
-    pub fn reset(&mut self) { self.grid = DotsState::initial_grid(); }
-
-    pub fn replay(&mut self) {
-        self.access = Access::Replay;
-        self.grid = DotsState::initial_grid();
-    }
-
     pub fn solve(&mut self) {
         self.access = Access::Solved;
         self.grid = DotsState::solved_grid();
@@ -149,6 +142,8 @@ impl PuzzleState for DotsState {
     fn access_mut(&mut self) -> &mut Access { &mut self.access }
 
     fn can_reset(&self) -> bool { self.grid.is_modified() }
+
+    fn reset(&mut self) { self.grid = DotsState::initial_grid(); }
 
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::Table::new();

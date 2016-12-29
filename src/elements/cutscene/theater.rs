@@ -47,13 +47,6 @@ impl Theater {
         }
     }
 
-    pub fn reset(&mut self) {
-        self.background = None;
-        self.actors.clear();
-        self.queue.clear();
-        self.dark = false;
-    }
-
     pub fn set_background(&mut self, background: Rc<Background>) {
         self.background = Some(background);
     }

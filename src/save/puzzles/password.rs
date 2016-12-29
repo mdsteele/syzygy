@@ -124,25 +124,6 @@ impl PasswordState {
         }
     }
 
-    pub fn reset(&mut self) {
-        if self.all_crosswords_done() {
-            self.sliders = INIT_SLIDERS;
-        } else {
-            self.crosswords[self.active_slot as usize].0 = false;
-            self.crosswords[self.active_slot as usize].1.reset();
-        }
-    }
-
-    pub fn replay(&mut self) {
-        self.access = Access::Replay;
-        self.active_slot = 0;
-        for &mut (ref mut done, ref mut crossword) in &mut self.crosswords {
-            *done = false;
-            crossword.reset();
-        }
-        self.sliders = INIT_SLIDERS;
-    }
-
     pub fn solve(&mut self) {
         self.access = Access::Solved;
         self.crosswords = [(true, CrosswordState::new(VALID, ELINSA_WORDS)),
@@ -240,6 +221,25 @@ impl PuzzleState for PasswordState {
             let (done, ref cross) = self.crosswords[self.active_slot as usize];
             !done && cross.can_reset()
         }
+    }
+
+    fn reset(&mut self) {
+        if self.all_crosswords_done() {
+            self.sliders = INIT_SLIDERS;
+        } else {
+            self.crosswords[self.active_slot as usize].0 = false;
+            self.crosswords[self.active_slot as usize].1.reset();
+        }
+    }
+
+    fn replay(&mut self) {
+        self.active_slot = 0;
+        for &mut (ref mut done, ref mut crossword) in &mut self.crosswords {
+            *done = false;
+            crossword.reset();
+        }
+        self.sliders = INIT_SLIDERS;
+        self.access = Access::BeginReplay;
     }
 
     fn to_toml(&self) -> toml::Value {

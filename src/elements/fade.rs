@@ -43,8 +43,6 @@ impl<A> ScreenFade<A> {
         self.opacity == 0 && self.fade_out_command.is_none()
     }
 
-    pub fn fade_in(&mut self) { self.fade_out_command = None; }
-
     pub fn fade_out_and_return(&mut self, command: A) {
         self.fade_out_command = Some(command);
     }

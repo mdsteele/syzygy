@@ -113,13 +113,6 @@ impl PuzzleView for View {
         game.cube_tangle.reset();
     }
 
-    fn replay(&mut self, game: &mut Game) {
-        game.cube_tangle.replay();
-        self.core.replay();
-        self.solution.set_index(-1);
-        self.drain_queue();
-    }
-
     fn solve(&mut self, game: &mut Game) {
         game.cube_tangle.solve();
         self.core.begin_outro_scene();

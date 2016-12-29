@@ -36,11 +36,20 @@ pub trait PuzzleState {
 
     fn visit(&mut self) { self.access_mut().visit(); }
 
+    fn revisit(&mut self) { self.access_mut().revisit(); }
+
     fn has_been_solved(&self) -> bool { self.access().has_been_solved() }
 
     fn is_solved(&self) -> bool { self.access().is_solved() }
 
     fn can_reset(&self) -> bool;
+
+    fn reset(&mut self);
+
+    fn replay(&mut self) {
+        self.reset();
+        *self.access_mut() = Access::BeginReplay;
+    }
 
     fn to_toml(&self) -> toml::Value;
 }

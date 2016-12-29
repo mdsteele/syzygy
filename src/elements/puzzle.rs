@@ -45,8 +45,6 @@ pub trait PuzzleView: Element<Game, PuzzleCmd> {
 
     fn reset(&mut self, game: &mut Game);
 
-    fn replay(&mut self, game: &mut Game);
-
     fn solve(&mut self, game: &mut Game);
 }
 
@@ -102,14 +100,6 @@ impl<U: Clone> PuzzleCore<U> {
     pub fn begin_outro_scene(&mut self) {
         self.clear_undo_redo();
         self.outro_scene.begin(&mut self.theater);
-    }
-
-    pub fn replay(&mut self) {
-        self.theater.reset();
-        self.intro_scene.reset();
-        self.outro_scene.reset();
-        self.intro_scene.begin(&mut self.theater);
-        self.screen_fade.fade_in();
     }
 
     pub fn push_undo(&mut self, change: U) {

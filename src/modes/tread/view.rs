@@ -156,15 +156,6 @@ impl PuzzleView for View {
         game.tread_lightly.reset();
     }
 
-    fn replay(&mut self, game: &mut Game) {
-        game.tread_lightly.replay();
-        for toggle in self.toggles.iter_mut() {
-            toggle.set_hilight(false);
-        }
-        self.core.replay();
-        self.drain_queue();
-    }
-
     fn solve(&mut self, game: &mut Game) {
         game.tread_lightly.solve();
         self.core.begin_outro_scene();

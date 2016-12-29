@@ -19,7 +19,7 @@
 
 use gui::{Element, Event, Window};
 use modes::{Mode, run_info_box};
-use save::{Game, Location};
+use save::{Game, Location, PuzzleState};
 
 use super::view::{Cmd, INFO_BOX_TEXT, View};
 
@@ -50,7 +50,8 @@ pub fn run_prolog(window: &mut Window, game: &mut Game) -> Mode {
                 return Mode::Location(Location::Disconnected);
             }
             Some(&Cmd::Replay) => {
-                view.replay(game);
+                game.prolog.replay();
+                return Mode::Location(Location::Prolog);
             }
             None => {}
         }

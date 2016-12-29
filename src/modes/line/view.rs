@@ -152,13 +152,6 @@ impl PuzzleView for View {
         game.cross_the_line.reset();
     }
 
-    fn replay(&mut self, game: &mut Game) {
-        game.cross_the_line.replay();
-        self.core.replay();
-        self.answers.filtered = false;
-        self.drain_queue();
-    }
-
     fn solve(&mut self, game: &mut Game) {
         game.cross_the_line.solve();
         self.core.begin_outro_scene();

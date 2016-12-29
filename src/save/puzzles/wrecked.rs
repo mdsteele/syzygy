@@ -87,17 +87,6 @@ impl WreckedState {
         }
     }
 
-    pub fn replay(&mut self) {
-        self.access = Access::Replay;
-        self.grid = INITIAL_GRID.to_vec();
-        self.is_initial = true;
-    }
-
-    pub fn reset(&mut self) {
-        self.grid = INITIAL_GRID.to_vec();
-        self.is_initial = true;
-    }
-
     pub fn solve(&mut self) {
         self.access = Access::Solved;
         self.grid = SOLVED_GRID.to_vec();
@@ -184,6 +173,11 @@ impl PuzzleState for WreckedState {
     fn access_mut(&mut self) -> &mut Access { &mut self.access }
 
     fn can_reset(&self) -> bool { !self.is_initial }
+
+    fn reset(&mut self) {
+        self.grid = INITIAL_GRID.to_vec();
+        self.is_initial = true;
+    }
 
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::Table::new();

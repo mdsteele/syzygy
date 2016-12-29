@@ -124,8 +124,8 @@ impl Game {
         self.puzzle_state(location).has_been_solved()
     }
 
-    pub fn puzzle_state(&self, location: Location) -> &PuzzleState {
-        match location {
+    pub fn puzzle_state(&self, loc: Location) -> &PuzzleState {
+        match loc {
             Location::Map => panic!("no PuzzleState for Map"),
             Location::Prolog => &self.prolog,
             Location::ALightInTheAttic => &self.a_light_in_the_attic,
@@ -141,6 +141,26 @@ impl Game {
             Location::SystemFailure => &self.system_failure,
             Location::TreadLightly => &self.tread_lightly,
             Location::WreckedAngle => &self.wrecked_angle,
+        }
+    }
+
+    pub fn puzzle_state_mut(&mut self, loc: Location) -> &mut PuzzleState {
+        match loc {
+            Location::Map => panic!("no PuzzleState for Map"),
+            Location::Prolog => &mut self.prolog,
+            Location::ALightInTheAttic => &mut self.a_light_in_the_attic,
+            Location::ConnectTheDots => &mut self.connect_the_dots,
+            Location::CrossTheLine => &mut self.cross_the_line,
+            Location::CubeTangle => &mut self.cube_tangle,
+            Location::Disconnected => &mut self.disconnected,
+            Location::LevelUp => &mut self.level_up,
+            Location::LogLevel => &mut self.log_level,
+            Location::MissedConnections => &mut self.missed_connections,
+            Location::PasswordFile => &mut self.password_file,
+            Location::ShiftingGround => &mut self.shifting_ground,
+            Location::SystemFailure => &mut self.system_failure,
+            Location::TreadLightly => &mut self.tread_lightly,
+            Location::WreckedAngle => &mut self.wrecked_angle,
         }
     }
 }

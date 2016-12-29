@@ -55,13 +55,6 @@ impl LogLevelState {
         }
     }
 
-    pub fn reset(&mut self) { self.words.reset(); }
-
-    pub fn replay(&mut self) {
-        self.access = Access::Replay;
-        self.reset();
-    }
-
     pub fn solve(&mut self) {
         self.access = Access::Solved;
         self.words = CrosswordState::new(ValidChars::LettersAndNumbers,
@@ -97,6 +90,8 @@ impl PuzzleState for LogLevelState {
     fn access_mut(&mut self) -> &mut Access { &mut self.access }
 
     fn can_reset(&self) -> bool { self.words.can_reset() }
+
+    fn reset(&mut self) { self.words.reset(); }
 
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::Table::new();

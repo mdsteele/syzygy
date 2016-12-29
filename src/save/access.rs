@@ -27,7 +27,8 @@ pub enum Access {
     Unvisited,
     Unsolved,
     Solved,
-    Replay,
+    BeginReplay,
+    Replaying,
 }
 
 impl Access {
@@ -37,7 +38,8 @@ impl Access {
                 "unvisited" => return Access::Unvisited,
                 "unsolved" => return Access::Unsolved,
                 "solved" => return Access::Solved,
-                "replay" => return Access::Replay,
+                "begin_replay" => return Access::BeginReplay,
+                "replaying" => return Access::Replaying,
                 _ => {}
             }
         }
@@ -49,7 +51,8 @@ impl Access {
             Access::Unvisited => "unvisited",
             Access::Unsolved => "unsolved",
             Access::Solved => "solved",
-            Access::Replay => "replay",
+            Access::BeginReplay => "begin_replay",
+            Access::Replaying => "replaying",
         };
         toml::Value::String(string.to_string())
     }
@@ -58,13 +61,21 @@ impl Access {
 
     pub fn is_solved(&self) -> bool { *self == Access::Solved }
 
-    // TODO: Eventually these will be two different things.
     pub fn has_been_visited(&self) -> bool { *self != Access::Unvisited }
-    pub fn is_visited(&self) -> bool { *self != Access::Unvisited }
+
+    pub fn is_visited(&self) -> bool {
+        *self != Access::Unvisited && *self != Access::BeginReplay
+    }
 
     pub fn visit(&mut self) {
-        if *self < Access::Unsolved {
+        if *self == Access::Unvisited {
             *self = Access::Unsolved;
+        }
+    }
+
+    pub fn revisit(&mut self) {
+        if *self == Access::BeginReplay {
+            *self = Access::Replaying;
         }
     }
 }
@@ -84,7 +95,8 @@ mod tests {
         let all = &[Access::Unvisited,
                     Access::Unsolved,
                     Access::Solved,
-                    Access::Replay];
+                    Access::BeginReplay,
+                    Access::Replaying];
         for original in all {
             let result = Access::from_toml(Some(&original.to_toml()));
             assert_eq!(result, *original);

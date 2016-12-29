@@ -175,7 +175,7 @@ impl HudButton {
             HudCmd::Redo => active && input.can_redo && !solved,
             HudCmd::Reset => active && input.can_reset && !solved,
             HudCmd::Replay => active && solved,
-            HudCmd::Solve => active && input.access == Access::Replay,
+            HudCmd::Solve => active && input.access == Access::Replaying,
         }
     }
 }

@@ -36,8 +36,6 @@ impl PrologState {
     }
 
     pub fn mark_solved(&mut self) { self.access = Access::Solved; }
-
-    pub fn replay(&mut self) { self.access = Access::Replay; }
 }
 
 impl PuzzleState for PrologState {
@@ -48,6 +46,8 @@ impl PuzzleState for PrologState {
     fn access_mut(&mut self) -> &mut Access { &mut self.access }
 
     fn can_reset(&self) -> bool { false }
+
+    fn reset(&mut self) {}
 
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::Table::new();

@@ -90,14 +90,6 @@ impl LineState {
         state
     }
 
-    pub fn reset(&mut self) {}
-
-    pub fn replay(&mut self) {
-        self.access = Access::Replay;
-        self.stage = 0;
-        self.reseed();
-    }
-
     pub fn solve(&mut self) {
         self.access = Access::Solved;
         self.stage = GRIDS.len() as i32;
@@ -178,6 +170,11 @@ impl PuzzleState for LineState {
     fn access_mut(&mut self) -> &mut Access { &mut self.access }
 
     fn can_reset(&self) -> bool { false }
+
+    fn reset(&mut self) {
+        self.stage = 0;
+        self.reseed();
+    }
 
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::Table::new();

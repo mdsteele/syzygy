@@ -119,14 +119,6 @@ impl PuzzleView for View {
         self.crossword.reset_cursor();
     }
 
-    fn replay(&mut self, game: &mut Game) {
-        game.level_up.replay();
-        self.crossword.reset_cursor();
-        self.crossword.set_center_word_hilighted(false);
-        self.core.replay();
-        self.drain_queue();
-    }
-
     fn solve(&mut self, game: &mut Game) {
         game.level_up.solve();
         self.crossword.reset_cursor();

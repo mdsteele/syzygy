@@ -392,15 +392,6 @@ impl PuzzleView for View {
         self.update_elinsa_position(state);
     }
 
-    fn replay(&mut self, game: &mut Game) {
-        let state = &mut game.shifting_ground;
-        state.replay();
-        self.update_platform_positions(state);
-        self.update_elinsa_position(state);
-        self.core.replay();
-        self.drain_queue();
-    }
-
     fn solve(&mut self, game: &mut Game) {
         let state = &mut game.shifting_ground;
         state.solve();

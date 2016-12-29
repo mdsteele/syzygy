@@ -74,17 +74,6 @@ impl GroundState {
         }
     }
 
-    pub fn reset(&mut self) {
-        self.positions = INITIAL_POSITIONS.to_vec();
-        self.elinsa_row = INITIAL_ELINSA_ROW;
-        self.is_initial = true;
-    }
-
-    pub fn replay(&mut self) {
-        self.reset();
-        self.access = Access::Replay;
-    }
-
     pub fn solve(&mut self) {
         self.access = Access::Solved;
         self.positions[0] = MAX_POSITION;
@@ -152,6 +141,12 @@ impl PuzzleState for GroundState {
     fn access_mut(&mut self) -> &mut Access { &mut self.access }
 
     fn can_reset(&self) -> bool { !self.is_initial }
+
+    fn reset(&mut self) {
+        self.positions = INITIAL_POSITIONS.to_vec();
+        self.elinsa_row = INITIAL_ELINSA_ROW;
+        self.is_initial = true;
+    }
 
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::Table::new();

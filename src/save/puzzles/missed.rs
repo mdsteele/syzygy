@@ -52,13 +52,6 @@ impl MissedState {
 
     pub fn mark_solved(&mut self) { self.access = Access::Solved; }
 
-    pub fn reset(&mut self) { self.grid = MissedState::initial_grid(); }
-
-    pub fn replay(&mut self) {
-        self.access = Access::Replay;
-        self.grid = MissedState::initial_grid();
-    }
-
     pub fn solve(&mut self) {
         self.access = Access::Solved;
         self.grid = MissedState::solved_grid();
@@ -153,6 +146,8 @@ impl PuzzleState for MissedState {
     fn access_mut(&mut self) -> &mut Access { &mut self.access }
 
     fn can_reset(&self) -> bool { self.grid.is_modified() }
+
+    fn reset(&mut self) { self.grid = MissedState::initial_grid(); }
 
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::Table::new();

@@ -139,12 +139,6 @@ impl PuzzleView for View {
         game.system_failure.reset();
     }
 
-    fn replay(&mut self, game: &mut Game) {
-        game.system_failure.replay();
-        self.core.replay();
-        self.drain_queue();
-    }
-
     fn solve(&mut self, game: &mut Game) {
         game.system_failure.solve();
         self.core.begin_outro_scene();

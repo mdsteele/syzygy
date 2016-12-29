@@ -60,14 +60,6 @@ impl View {
         view
     }
 
-    pub fn replay(&mut self, game: &mut Game) {
-        game.prolog.replay();
-        self.theater.reset();
-        self.scene.reset();
-        self.scene.begin(&mut self.theater);
-        self.screen_fade.fade_in();
-    }
-
     fn hud_input(&self, state: &PrologState) -> HudInput {
         HudInput {
             name: "Prolog",

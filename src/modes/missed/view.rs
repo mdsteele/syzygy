@@ -132,14 +132,6 @@ impl PuzzleView for View {
         self.laser_field.recalculate_lasers(state.grid());
     }
 
-    fn replay(&mut self, game: &mut Game) {
-        let state = &mut game.missed_connections;
-        state.replay();
-        self.laser_field.recalculate_lasers(state.grid());
-        self.core.replay();
-        self.drain_queue();
-    }
-
     fn solve(&mut self, game: &mut Game) {
         let state = &mut game.missed_connections;
         state.solve();

@@ -51,14 +51,6 @@ impl Scene {
         }
     }
 
-    pub fn reset(&mut self) {
-        for node in self.nodes.iter_mut() {
-            node.reset();
-        }
-        self.index = 0;
-        self.began = false;
-    }
-
     pub fn tick(&mut self, theater: &mut Theater) -> bool {
         if !self.began {
             return false;

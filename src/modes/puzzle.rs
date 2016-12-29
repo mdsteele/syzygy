@@ -27,6 +27,8 @@ use save::{Game, Location};
 pub fn run_puzzle<V: PuzzleView>(window: &mut Window, game: &mut Game,
                                  mut view: V)
                                  -> Mode {
+    let location = game.location;
+    game.puzzle_state_mut(location).revisit();
     window.render(game, &view);
     loop {
         let mut action = match window.next_event() {
@@ -46,14 +48,17 @@ pub fn run_puzzle<V: PuzzleView>(window: &mut Window, game: &mut Game,
             Some(&PuzzleCmd::Undo) => view.undo(game),
             Some(&PuzzleCmd::Redo) => view.redo(game),
             Some(&PuzzleCmd::Reset) => view.reset(game),
-            Some(&PuzzleCmd::Replay) => view.replay(game),
+            Some(&PuzzleCmd::Replay) => {
+                game.puzzle_state_mut(location).replay();
+                return Mode::Location(location);
+            }
             Some(&PuzzleCmd::Solve) => view.solve(game),
             Some(&PuzzleCmd::Next) => {
-                let mut loc = game.location.next();
-                if !game.is_unlocked(loc) {
-                    loc = Location::Map;
+                let mut next = location.next();
+                if !game.is_unlocked(next) {
+                    next = Location::Map;
                 }
-                return Mode::Location(loc);
+                return Mode::Location(next);
             }
             None => {}
         }

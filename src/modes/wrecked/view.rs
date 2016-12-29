@@ -119,12 +119,6 @@ impl PuzzleView for View {
         game.wrecked_angle.reset();
     }
 
-    fn replay(&mut self, game: &mut Game) {
-        game.wrecked_angle.replay();
-        self.core.replay();
-        self.drain_queue();
-    }
-
     fn solve(&mut self, game: &mut Game) {
         game.wrecked_angle.solve();
         self.core.begin_outro_scene();

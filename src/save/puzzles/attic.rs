@@ -51,13 +51,6 @@ impl AtticState {
         }
     }
 
-    pub fn reset(&mut self) { self.toggled.clear(); }
-
-    pub fn replay(&mut self) {
-        self.access = Access::Replay;
-        self.toggled.clear();
-    }
-
     pub fn solve(&mut self) {
         self.access = Access::Solved;
         self.toggled = SOLVED_TOGGLED.iter().cloned().collect();
@@ -185,6 +178,8 @@ impl PuzzleState for AtticState {
     fn access_mut(&mut self) -> &mut Access { &mut self.access }
 
     fn can_reset(&self) -> bool { !self.toggled.is_empty() }
+
+    fn reset(&mut self) { self.toggled.clear(); }
 
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::Table::new();

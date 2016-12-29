@@ -152,15 +152,6 @@ impl PuzzleView for View {
         game.a_light_in_the_attic.reset();
     }
 
-    fn replay(&mut self, game: &mut Game) {
-        game.a_light_in_the_attic.replay();
-        for toggle in self.toggles.iter_mut() {
-            toggle.set_hilight(false);
-        }
-        self.core.replay();
-        self.drain_queue();
-    }
-
     fn solve(&mut self, game: &mut Game) {
         game.a_light_in_the_attic.solve();
         self.core.begin_outro_scene();

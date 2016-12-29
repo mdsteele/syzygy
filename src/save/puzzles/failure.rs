@@ -45,15 +45,6 @@ impl FailureState {
         }
     }
 
-    pub fn replay(&mut self) {
-        self.access = Access::Replay;
-        // TODO replay
-    }
-
-    pub fn reset(&mut self) {
-        // TODO reset
-    }
-
     pub fn solve(&mut self) {
         self.access = Access::Solved;
         // TODO solve
@@ -70,6 +61,10 @@ impl PuzzleState for FailureState {
     fn access_mut(&mut self) -> &mut Access { &mut self.access }
 
     fn can_reset(&self) -> bool { false } // TODO
+
+    fn reset(&mut self) {
+        // TODO reset
+    }
 
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::Table::new();

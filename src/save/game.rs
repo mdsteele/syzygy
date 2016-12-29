@@ -20,7 +20,6 @@
 use std::default::Default;
 use toml;
 
-use super::access::Access;
 use super::location::Location;
 use super::puzzles::{AtticState, CubeState, DisconState, DotsState,
                      FailureState, GroundState, LevelUpState, LineState,
@@ -103,64 +102,45 @@ impl Game {
     pub fn to_toml(&self) -> toml::Value {
         let mut table = toml::Table::new();
         table.insert(LOCATION_KEY.to_string(), self.location.to_toml());
-        table.insert(Location::Prolog.key().to_string(),
-                     self.prolog.to_toml());
-        table.insert(Location::ALightInTheAttic.key().to_string(),
-                     self.a_light_in_the_attic.to_toml());
-        table.insert(Location::ConnectTheDots.key().to_string(),
-                     self.connect_the_dots.to_toml());
-        table.insert(Location::CrossTheLine.key().to_string(),
-                     self.cross_the_line.to_toml());
-        table.insert(Location::CubeTangle.key().to_string(),
-                     self.cube_tangle.to_toml());
-        table.insert(Location::Disconnected.key().to_string(),
-                     self.disconnected.to_toml());
-        table.insert(Location::LevelUp.key().to_string(),
-                     self.level_up.to_toml());
-        table.insert(Location::LogLevel.key().to_string(),
-                     self.log_level.to_toml());
-        table.insert(Location::MissedConnections.key().to_string(),
-                     self.missed_connections.to_toml());
-        table.insert(Location::PasswordFile.key().to_string(),
-                     self.password_file.to_toml());
-        table.insert(Location::ShiftingGround.key().to_string(),
-                     self.shifting_ground.to_toml());
-        table.insert(Location::SystemFailure.key().to_string(),
-                     self.system_failure.to_toml());
-        table.insert(Location::TreadLightly.key().to_string(),
-                     self.tread_lightly.to_toml());
-        table.insert(Location::WreckedAngle.key().to_string(),
-                     self.wrecked_angle.to_toml());
+        for &location in Location::all() {
+            if location != Location::Map {
+                let puzzle_state = self.puzzle_state(location);
+                if puzzle_state.has_been_visited() {
+                    table.insert(location.key().to_string(),
+                                 puzzle_state.to_toml());
+                }
+            }
+        }
         table.insert(EVER_CLICKED_INFO_KEY.to_string(),
                      toml::Value::Boolean(self.ever_clicked_info));
         toml::Value::Table(table)
     }
 
     pub fn is_unlocked(&self, location: Location) -> bool {
-        location.prereqs().iter().all(|&prereq| self.is_solved(prereq))
+        location.prereqs().iter().all(|&prereq| self.has_been_solved(prereq))
     }
 
-    pub fn is_solved(&self, location: Location) -> bool {
-        self.access(location) >= Access::Solved
+    pub fn has_been_solved(&self, location: Location) -> bool {
+        self.puzzle_state(location).has_been_solved()
     }
 
-    pub fn access(&self, location: Location) -> Access {
+    pub fn puzzle_state(&self, location: Location) -> &PuzzleState {
         match location {
-            Location::Map => Access::Solved,
-            Location::Prolog => self.prolog.access(),
-            Location::ALightInTheAttic => self.a_light_in_the_attic.access(),
-            Location::ConnectTheDots => self.connect_the_dots.access(),
-            Location::CrossTheLine => self.cross_the_line.access(),
-            Location::CubeTangle => self.cube_tangle.access(),
-            Location::Disconnected => self.disconnected.access(),
-            Location::LevelUp => self.level_up.access(),
-            Location::LogLevel => self.log_level.access(),
-            Location::MissedConnections => self.missed_connections.access(),
-            Location::PasswordFile => self.password_file.access(),
-            Location::ShiftingGround => self.shifting_ground.access(),
-            Location::SystemFailure => self.system_failure.access(),
-            Location::TreadLightly => self.tread_lightly.access(),
-            Location::WreckedAngle => self.wrecked_angle.access(),
+            Location::Map => panic!("no PuzzleState for Map"),
+            Location::Prolog => &self.prolog,
+            Location::ALightInTheAttic => &self.a_light_in_the_attic,
+            Location::ConnectTheDots => &self.connect_the_dots,
+            Location::CrossTheLine => &self.cross_the_line,
+            Location::CubeTangle => &self.cube_tangle,
+            Location::Disconnected => &self.disconnected,
+            Location::LevelUp => &self.level_up,
+            Location::LogLevel => &self.log_level,
+            Location::MissedConnections => &self.missed_connections,
+            Location::PasswordFile => &self.password_file,
+            Location::ShiftingGround => &self.shifting_ground,
+            Location::SystemFailure => &self.system_failure,
+            Location::TreadLightly => &self.tread_lightly,
+            Location::WreckedAngle => &self.wrecked_angle,
         }
     }
 }

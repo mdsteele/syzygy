@@ -54,15 +54,6 @@ impl LevelUpState {
         }
     }
 
-    pub fn to_toml(&self) -> toml::Value {
-        let mut table = toml::Table::new();
-        table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
-        if !self.is_solved() {
-            table.insert(WORDS_KEY.to_string(), self.words.to_toml());
-        }
-        toml::Value::Table(table)
-    }
-
     pub fn reset(&mut self) { self.words.reset(); }
 
     pub fn replay(&mut self) {
@@ -105,6 +96,15 @@ impl PuzzleState for LevelUpState {
     fn access_mut(&mut self) -> &mut Access { &mut self.access }
 
     fn can_reset(&self) -> bool { self.words.can_reset() }
+
+    fn to_toml(&self) -> toml::Value {
+        let mut table = toml::Table::new();
+        table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
+        if !self.is_solved() {
+            table.insert(WORDS_KEY.to_string(), self.words.to_toml());
+        }
+        toml::Value::Table(table)
+    }
 }
 
 // ========================================================================= //

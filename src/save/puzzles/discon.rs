@@ -50,15 +50,6 @@ impl DisconState {
         }
     }
 
-    pub fn to_toml(&self) -> toml::Value {
-        let mut table = toml::Table::new();
-        table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
-        if self.grid.is_modified() && !self.is_solved() {
-            table.insert(GRID_KEY.to_string(), self.grid.to_toml());
-        }
-        toml::Value::Table(table)
-    }
-
     pub fn mark_solved(&mut self) { self.access = Access::Solved; }
 
     pub fn reset(&mut self) { self.grid = DisconState::initial_grid(); }
@@ -149,6 +140,15 @@ impl PuzzleState for DisconState {
     fn access_mut(&mut self) -> &mut Access { &mut self.access }
 
     fn can_reset(&self) -> bool { self.grid.is_modified() }
+
+    fn to_toml(&self) -> toml::Value {
+        let mut table = toml::Table::new();
+        table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
+        if self.grid.is_modified() && !self.is_solved() {
+            table.insert(GRID_KEY.to_string(), self.grid.to_toml());
+        }
+        toml::Value::Table(table)
+    }
 }
 
 // ========================================================================= //

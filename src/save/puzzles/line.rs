@@ -90,22 +90,6 @@ impl LineState {
         state
     }
 
-    pub fn to_toml(&self) -> toml::Value {
-        let mut table = toml::Table::new();
-        table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
-        if !self.is_solved() {
-            table.insert(STAGE_KEY.to_string(),
-                         toml::Value::Integer(self.stage as i64));
-            table.insert(SEED_KEY.to_string(),
-                         toml::Value::Array(self.seed
-                                                .iter()
-                                                .map(|&value| value as i64)
-                                                .map(toml::Value::Integer)
-                                                .collect()));
-        }
-        toml::Value::Table(table)
-    }
-
     pub fn reset(&mut self) {}
 
     pub fn replay(&mut self) {
@@ -194,6 +178,22 @@ impl PuzzleState for LineState {
     fn access_mut(&mut self) -> &mut Access { &mut self.access }
 
     fn can_reset(&self) -> bool { false }
+
+    fn to_toml(&self) -> toml::Value {
+        let mut table = toml::Table::new();
+        table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
+        if !self.is_solved() {
+            table.insert(STAGE_KEY.to_string(),
+                         toml::Value::Integer(self.stage as i64));
+            table.insert(SEED_KEY.to_string(),
+                         toml::Value::Array(self.seed
+                                                .iter()
+                                                .map(|&value| value as i64)
+                                                .map(toml::Value::Integer)
+                                                .collect()));
+        }
+        toml::Value::Table(table)
+    }
 }
 
 // ========================================================================= //

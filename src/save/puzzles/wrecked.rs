@@ -87,19 +87,6 @@ impl WreckedState {
         }
     }
 
-    pub fn to_toml(&self) -> toml::Value {
-        let mut table = toml::Table::new();
-        table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
-        if !self.is_initial {
-            let grid = self.grid
-                           .iter()
-                           .map(|&idx| toml::Value::Integer(idx as i64))
-                           .collect();
-            table.insert(GRID_KEY.to_string(), toml::Value::Array(grid));
-        }
-        toml::Value::Table(table)
-    }
-
     pub fn replay(&mut self) {
         self.access = Access::Replay;
         self.grid = INITIAL_GRID.to_vec();
@@ -197,6 +184,19 @@ impl PuzzleState for WreckedState {
     fn access_mut(&mut self) -> &mut Access { &mut self.access }
 
     fn can_reset(&self) -> bool { !self.is_initial }
+
+    fn to_toml(&self) -> toml::Value {
+        let mut table = toml::Table::new();
+        table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
+        if !self.is_initial {
+            let grid = self.grid
+                           .iter()
+                           .map(|&idx| toml::Value::Integer(idx as i64))
+                           .collect();
+            table.insert(GRID_KEY.to_string(), toml::Value::Array(grid));
+        }
+        toml::Value::Table(table)
+    }
 }
 
 // ========================================================================= //

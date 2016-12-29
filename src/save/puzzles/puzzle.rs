@@ -17,6 +17,8 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
+use toml;
+
 use save::{Access, Location};
 
 // ========================================================================= //
@@ -28,13 +30,19 @@ pub trait PuzzleState {
 
     fn access_mut(&mut self) -> &mut Access;
 
+    fn has_been_visited(&self) -> bool { self.access().has_been_visited() }
+
     fn is_visited(&self) -> bool { self.access().is_visited() }
 
     fn visit(&mut self) { self.access_mut().visit(); }
 
-    fn is_solved(&self) -> bool { self.access() == Access::Solved }
+    fn has_been_solved(&self) -> bool { self.access().has_been_solved() }
+
+    fn is_solved(&self) -> bool { self.access().is_solved() }
 
     fn can_reset(&self) -> bool;
+
+    fn to_toml(&self) -> toml::Value;
 }
 
 // ========================================================================= //

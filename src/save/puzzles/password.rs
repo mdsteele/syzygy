@@ -124,34 +124,6 @@ impl PasswordState {
         }
     }
 
-    pub fn to_toml(&self) -> toml::Value {
-        let mut table = toml::Table::new();
-        table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
-        if !self.is_solved() {
-            table.insert(ACTIVE_SLOT_KEY.to_string(),
-                         toml::Value::Integer(self.active_slot as i64));
-            table.insert(ELINSA_KEY.to_string(),
-                         self.crosswords[0].1.to_toml());
-            table.insert(ARGONY_KEY.to_string(),
-                         self.crosswords[1].1.to_toml());
-            table.insert(TEZURE_KEY.to_string(),
-                         self.crosswords[2].1.to_toml());
-            table.insert(YTTRIS_KEY.to_string(),
-                         self.crosswords[3].1.to_toml());
-            table.insert(UGRENT_KEY.to_string(),
-                         self.crosswords[4].1.to_toml());
-            table.insert(RELYNG_KEY.to_string(),
-                         self.crosswords[5].1.to_toml());
-            table.insert(SLIDERS_KEY.to_string(),
-                         toml::Value::Array(self.sliders
-                                                .iter()
-                                                .map(|&off| off as i64)
-                                                .map(toml::Value::Integer)
-                                                .collect()));
-        }
-        toml::Value::Table(table)
-    }
-
     pub fn reset(&mut self) {
         if self.all_crosswords_done() {
             self.sliders = INIT_SLIDERS;
@@ -268,6 +240,34 @@ impl PuzzleState for PasswordState {
             let (done, ref cross) = self.crosswords[self.active_slot as usize];
             !done && cross.can_reset()
         }
+    }
+
+    fn to_toml(&self) -> toml::Value {
+        let mut table = toml::Table::new();
+        table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
+        if !self.is_solved() {
+            table.insert(ACTIVE_SLOT_KEY.to_string(),
+                         toml::Value::Integer(self.active_slot as i64));
+            table.insert(ELINSA_KEY.to_string(),
+                         self.crosswords[0].1.to_toml());
+            table.insert(ARGONY_KEY.to_string(),
+                         self.crosswords[1].1.to_toml());
+            table.insert(TEZURE_KEY.to_string(),
+                         self.crosswords[2].1.to_toml());
+            table.insert(YTTRIS_KEY.to_string(),
+                         self.crosswords[3].1.to_toml());
+            table.insert(UGRENT_KEY.to_string(),
+                         self.crosswords[4].1.to_toml());
+            table.insert(RELYNG_KEY.to_string(),
+                         self.crosswords[5].1.to_toml());
+            table.insert(SLIDERS_KEY.to_string(),
+                         toml::Value::Array(self.sliders
+                                                .iter()
+                                                .map(|&off| off as i64)
+                                                .map(toml::Value::Integer)
+                                                .collect()));
+        }
+        toml::Value::Table(table)
     }
 }
 

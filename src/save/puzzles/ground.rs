@@ -74,22 +74,6 @@ impl GroundState {
         }
     }
 
-    pub fn to_toml(&self) -> toml::Value {
-        let mut table = toml::Table::new();
-        table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
-        if !self.is_initial {
-            let positions = self.positions
-                                .iter()
-                                .map(|&idx| toml::Value::Integer(idx as i64))
-                                .collect();
-            table.insert(POSITIONS_KEY.to_string(),
-                         toml::Value::Array(positions));
-        }
-        table.insert(ELINSA_ROW_KEY.to_string(),
-                     toml::Value::Integer(self.elinsa_row as i64));
-        toml::Value::Table(table)
-    }
-
     pub fn reset(&mut self) {
         self.positions = INITIAL_POSITIONS.to_vec();
         self.elinsa_row = INITIAL_ELINSA_ROW;
@@ -168,6 +152,22 @@ impl PuzzleState for GroundState {
     fn access_mut(&mut self) -> &mut Access { &mut self.access }
 
     fn can_reset(&self) -> bool { !self.is_initial }
+
+    fn to_toml(&self) -> toml::Value {
+        let mut table = toml::Table::new();
+        table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
+        if !self.is_initial {
+            let positions = self.positions
+                                .iter()
+                                .map(|&idx| toml::Value::Integer(idx as i64))
+                                .collect();
+            table.insert(POSITIONS_KEY.to_string(),
+                         toml::Value::Array(positions));
+        }
+        table.insert(ELINSA_ROW_KEY.to_string(),
+                     toml::Value::Integer(self.elinsa_row as i64));
+        toml::Value::Table(table)
+    }
 }
 
 // ========================================================================= //

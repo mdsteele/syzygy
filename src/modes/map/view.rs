@@ -176,7 +176,7 @@ struct PuzzleNode {
 impl PuzzleNode {
     fn new(resources: &mut Resources, location: Location, game: &Game)
            -> PuzzleNode {
-        let index = if game.is_solved(location) {
+        let index = if game.has_been_solved(location) {
             1
         } else if location == Location::SystemFailure &&
                        !game.system_failure.mid_scene_is_done() {

@@ -180,7 +180,7 @@ impl DashChip {
 
 impl Element<Game, ()> for DashChip {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
-        let index = if game.is_solved(self.location) {
+        let index = if game.has_been_solved(self.location) {
             DASH_ANIM_INDICES[(self.anim / DASH_ANIM_SLOWDOWN) as usize]
         } else {
             0

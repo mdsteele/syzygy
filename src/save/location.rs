@@ -42,6 +42,8 @@ pub enum Location {
 }
 
 impl Location {
+    pub fn all() -> &'static [Location] { ALL_LOCATIONS }
+
     pub fn name(self) -> &'static str {
         match self {
             Location::Map => "The Map",
@@ -124,23 +126,10 @@ impl Location {
 
     pub fn from_toml(value: Option<&toml::Value>) -> Location {
         if let Some(string) = value.and_then(toml::Value::as_str) {
-            match string {
-                "map" => return Location::Map,
-                "prolog" => return Location::Prolog,
-                "a_light_in_the_attic" => return Location::ALightInTheAttic,
-                "connect_the_dots" => return Location::ConnectTheDots,
-                "cross_the_line" => return Location::CrossTheLine,
-                "cube_tangle" => return Location::CubeTangle,
-                "disconnected" => return Location::Disconnected,
-                "level_up" => return Location::LevelUp,
-                "log_level" => return Location::LogLevel,
-                "missed_connections" => return Location::MissedConnections,
-                "password_file" => return Location::PasswordFile,
-                "shifting_ground" => return Location::ShiftingGround,
-                "system_failure" => return Location::SystemFailure,
-                "tread_lightly" => return Location::TreadLightly,
-                "wrecked_angle" => return Location::WreckedAngle,
-                _ => {}
+            for &location in Location::all() {
+                if string == location.key() {
+                    return location;
+                }
             }
         }
         Default::default()
@@ -155,6 +144,22 @@ impl Default for Location {
     fn default() -> Location { Location::Map }
 }
 
+const ALL_LOCATIONS: &'static [Location] = &[Location::Map,
+                                             Location::Prolog,
+                                             Location::ALightInTheAttic,
+                                             Location::ConnectTheDots,
+                                             Location::CrossTheLine,
+                                             Location::CubeTangle,
+                                             Location::Disconnected,
+                                             Location::LevelUp,
+                                             Location::LogLevel,
+                                             Location::MissedConnections,
+                                             Location::PasswordFile,
+                                             Location::ShiftingGround,
+                                             Location::SystemFailure,
+                                             Location::TreadLightly,
+                                             Location::WreckedAngle];
+
 // ========================================================================= //
 
 #[cfg(test)]
@@ -163,22 +168,7 @@ mod tests {
 
     #[test]
     fn toml_round_trip() {
-        let locations = &[Location::Map,
-                          Location::Prolog,
-                          Location::ALightInTheAttic,
-                          Location::ConnectTheDots,
-                          Location::CrossTheLine,
-                          Location::CubeTangle,
-                          Location::Disconnected,
-                          Location::LevelUp,
-                          Location::LogLevel,
-                          Location::MissedConnections,
-                          Location::PasswordFile,
-                          Location::ShiftingGround,
-                          Location::SystemFailure,
-                          Location::TreadLightly,
-                          Location::WreckedAngle];
-        for original in locations {
+        for original in Location::all() {
             let result = Location::from_toml(Some(&original.to_toml()));
             assert_eq!(result, *original);
         }

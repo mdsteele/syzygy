@@ -75,19 +75,6 @@ impl TreadState {
         state
     }
 
-    pub fn to_toml(&self) -> toml::Value {
-        let mut table = toml::Table::new();
-        table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
-        if self.access != Access::Solved {
-            let toggled = self.toggled
-                              .iter()
-                              .map(|&idx| toml::Value::Integer(idx as i64))
-                              .collect();
-            table.insert(TOGGLED_KEY.to_string(), toml::Value::Array(toggled));
-        }
-        toml::Value::Table(table)
-    }
-
     pub fn reset(&mut self) {
         self.toggled.clear();
         self.rebuild_grid();
@@ -196,6 +183,19 @@ impl PuzzleState for TreadState {
     fn access_mut(&mut self) -> &mut Access { &mut self.access }
 
     fn can_reset(&self) -> bool { !self.toggled.is_empty() }
+
+    fn to_toml(&self) -> toml::Value {
+        let mut table = toml::Table::new();
+        table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
+        if self.access != Access::Solved {
+            let toggled = self.toggled
+                              .iter()
+                              .map(|&idx| toml::Value::Integer(idx as i64))
+                              .collect();
+            table.insert(TOGGLED_KEY.to_string(), toml::Value::Array(toggled));
+        }
+        toml::Value::Table(table)
+    }
 }
 
 // ========================================================================= //

@@ -19,7 +19,8 @@
 
 use toml;
 
-use save::Access;
+use save::{Access, Location};
+use super::PuzzleState;
 use super::super::util::ACCESS_KEY;
 
 // ========================================================================= //
@@ -34,19 +35,25 @@ impl PrologState {
         PrologState { access: Access::from_toml(table.get(ACCESS_KEY)) }
     }
 
-    pub fn to_toml(&self) -> toml::Value {
+    pub fn mark_solved(&mut self) { self.access = Access::Solved; }
+
+    pub fn replay(&mut self) { self.access = Access::Replay; }
+}
+
+impl PuzzleState for PrologState {
+    fn location(&self) -> Location { Location::Prolog }
+
+    fn access(&self) -> Access { self.access }
+
+    fn access_mut(&mut self) -> &mut Access { &mut self.access }
+
+    fn can_reset(&self) -> bool { false }
+
+    fn to_toml(&self) -> toml::Value {
         let mut table = toml::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         toml::Value::Table(table)
     }
-
-    pub fn access(&self) -> Access { self.access }
-
-    pub fn is_solved(&self) -> bool { self.access == Access::Solved }
-
-    pub fn mark_solved(&mut self) { self.access = Access::Solved; }
-
-    pub fn replay(&mut self) { self.access = Access::Replay; }
 }
 
 // ========================================================================= //

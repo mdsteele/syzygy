@@ -45,14 +45,6 @@ impl FailureState {
         }
     }
 
-    pub fn to_toml(&self) -> toml::Value {
-        let mut table = toml::Table::new();
-        table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
-        table.insert(MID_SCENE_DONE_KEY.to_string(),
-                     toml::Value::Boolean(self.mid_scene_done));
-        toml::Value::Table(table)
-    }
-
     pub fn replay(&mut self) {
         self.access = Access::Replay;
         // TODO replay
@@ -78,6 +70,14 @@ impl PuzzleState for FailureState {
     fn access_mut(&mut self) -> &mut Access { &mut self.access }
 
     fn can_reset(&self) -> bool { false } // TODO
+
+    fn to_toml(&self) -> toml::Value {
+        let mut table = toml::Table::new();
+        table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
+        table.insert(MID_SCENE_DONE_KEY.to_string(),
+                     toml::Value::Boolean(self.mid_scene_done));
+        toml::Value::Table(table)
+    }
 }
 
 // ========================================================================= //

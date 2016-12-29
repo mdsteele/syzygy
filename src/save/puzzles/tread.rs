@@ -182,7 +182,7 @@ impl PuzzleState for TreadState {
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
-        if self.access != Access::Solved {
+        if !self.is_solved() && !self.toggled.is_empty() {
             let toggled = self.toggled
                               .iter()
                               .map(|&idx| toml::Value::Integer(idx as i64))

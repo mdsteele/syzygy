@@ -184,11 +184,13 @@ impl PuzzleState for AtticState {
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
-        let toggled = self.toggled
-                          .iter()
-                          .map(|&idx| toml::Value::Integer(idx as i64))
-                          .collect();
-        table.insert(TOGGLED_KEY.to_string(), toml::Value::Array(toggled));
+        if !self.is_solved() && !self.toggled.is_empty() {
+            let toggled = self.toggled
+                              .iter()
+                              .map(|&idx| toml::Value::Integer(idx as i64))
+                              .collect();
+            table.insert(TOGGLED_KEY.to_string(), toml::Value::Array(toggled));
+        }
         toml::Value::Table(table)
     }
 }

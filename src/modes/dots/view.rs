@@ -86,9 +86,6 @@ impl Element<Game, PuzzleCmd> for View {
             if let Some(&cmd) = subaction.value() {
                 if self.laser_field.all_detectors_satisfied(state.grid()) {
                     state.mark_solved();
-                    if cfg!(debug_assertions) {
-                        println!("Puzzle solved, beginning outro.");
-                    }
                     self.core.begin_outro_scene();
                 } else {
                     self.core.push_undo(cmd);

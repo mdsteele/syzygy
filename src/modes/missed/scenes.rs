@@ -17,17 +17,24 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use elements::{Ast, Scene};
-use gui::Resources;
+use elements::{Ast, Scene, TalkPos, TalkStyle};
+use gui::{Resources, Sound};
 
 // ========================================================================= //
 
 pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
-        // TODO: Make a background for "Missed Connections".
-        Ast::SetBg("disconnected"),
-        Ast::Place(0, "chars/tezure", 0, (-16, 304)),
-        Ast::Slide(0, (304, 304), true, true, 1.0),
+        Ast::Seq(vec![
+            Ast::SetBg("missed_connections"),
+            Ast::Place(0, "chars/tezure", 0, (-16, 304)),
+            Ast::Slide(0, (304, 304), true, true, 1.0),
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE, "Let's have a look."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Queue(0, 1), // Make laser field visible.
+        ]),
     ];
     Ast::compile_scene(resources, ast)
 }
@@ -36,7 +43,12 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
 
 pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
-        Ast::Slide(0, (592, 304), true, false, 1.0),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::solve_puzzle_chime()),
+            Ast::Wait(1.0),
+            Ast::Slide(0, (592, 304), true, false, 1.0),
+            Ast::Remove(0),
+        ]),
     ];
     Ast::compile_scene(resources, ast)
 }

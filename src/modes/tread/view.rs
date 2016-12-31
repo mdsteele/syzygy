@@ -165,8 +165,8 @@ impl PuzzleView for View {
 
 // ========================================================================= //
 
-const LIGHTS_TOP: i32 = 56;
-const LIGHTS_LEFT: i32 = 312;
+const LIGHTS_TOP: i32 = 72;
+const LIGHTS_LEFT: i32 = 200;
 const TOGGLE_MAX_LIGHT_RADIUS: i32 = 12;
 
 struct ToggleLight {
@@ -313,7 +313,7 @@ impl NextLetter {
 impl Element<TreadState, PuzzleCmd> for NextLetter {
     fn draw(&self, state: &TreadState, canvas: &mut Canvas) {
         if let Some(chr) = state.next_label() {
-            let pt = Point::new(120, 100);
+            let pt = Point::new(104, 130);
             canvas.draw_char(&self.font, Align::Center, pt, chr);
         }
     }

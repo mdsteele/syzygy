@@ -25,12 +25,14 @@ use gui::{Resources, Sound};
 pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
-            // TODO: Make a background for "Tread Lightly".
-            Ast::SetBg("a_light_in_the_attic"),
-            Ast::Place(0, "chars/tezure", 0, (-16, 112)),
-            Ast::Slide(0, (170, 112), false, true, 1.0),
+            Ast::SetBg("tread_lightly"),
+            Ast::Place(0, "chars/tezure", 0, (-16, 288)),
+            Ast::Slide(0, (144, 288), false, false, 1.0),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(0, (186, 304), 0.5),
+            Ast::Slide(0, (215, 304), false, true, 0.35),
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(0, TalkStyle::Normal, TalkPos::SE, "Hmm."),
+            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE, "Hmm."),
         ]),
     ];
     Ast::compile_scene(resources, ast)
@@ -42,8 +44,28 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
             Ast::Sound(Sound::solve_puzzle_chime()),
-            Ast::Wait(1.0),
-            Ast::Slide(0, (-16, 112), true, false, 1.0),
+            Ast::Wait(0.25),
+            Ast::Queue(0, 1),
+            Ast::Wait(0.1),
+            Ast::Queue(2, 1),
+            Ast::Wait(0.1),
+            Ast::Queue(4, 1),
+            Ast::Wait(0.1),
+            Ast::Queue(7, 1),
+            Ast::Wait(0.1),
+            Ast::Queue(8, 1),
+            Ast::Wait(0.1),
+            Ast::Queue(9, 1),
+            Ast::Wait(0.1),
+            Ast::Queue(10, 1),
+            Ast::Wait(0.1),
+            Ast::Light(0, true),
+            Ast::Dark(true),
+            Ast::Wait(0.5),
+            Ast::Slide(0, (410, 304), true, false, 1.0),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(0, (448, 288), 0.5),
+            Ast::Slide(0, (592, 288), false, false, 0.5),
             Ast::Remove(0),
         ]),
     ];

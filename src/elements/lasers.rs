@@ -23,7 +23,7 @@ use std::rc::Rc;
 
 use gui::{Action, Align, Canvas, Element, Event, FRAME_DELAY_MILLIS, Font,
           Point, Rect, Resources, Sound, Sprite};
-use save::{Device, DeviceGrid, Direction, LaserColor};
+use save::{Device, DeviceGrid, Direction, PrimaryColor};
 
 // ========================================================================= //
 
@@ -62,7 +62,7 @@ pub struct LaserField {
     sparks_sprites: Vec<Sprite>,
     wall_sprites: Vec<Sprite>,
     drag: Option<GridDrag>,
-    lasers: HashMap<(Point, Direction), (LaserColor, i32)>,
+    lasers: HashMap<(Point, Direction), (PrimaryColor, i32)>,
     sparks: HashMap<(Point, Direction), i32>,
     anim_counter: i32,
 }
@@ -132,9 +132,9 @@ impl LaserField {
                                                dir.is_vertical(),
                                                false);
                 let i = match color {
-                    LaserColor::Red => 0,
-                    LaserColor::Green => 1,
-                    LaserColor::Blue => 2,
+                    PrimaryColor::Red => 0,
+                    PrimaryColor::Green => 1,
+                    PrimaryColor::Blue => 2,
                 };
                 canvas.draw_sprite_centered(&self.gem_sprites[i], center);
             }
@@ -145,9 +145,9 @@ impl LaserField {
                                                dir.is_vertical(),
                                                false);
                 let i = match color {
-                    LaserColor::Red => 3,
-                    LaserColor::Green => 4,
-                    LaserColor::Blue => 5,
+                    PrimaryColor::Red => 3,
+                    PrimaryColor::Green => 4,
+                    PrimaryColor::Blue => 5,
                 };
                 canvas.draw_sprite_rotated(&self.gem_sprites[i],
                                            center,
@@ -191,7 +191,7 @@ impl LaserField {
     pub fn recalculate_lasers(&mut self, grid: &DeviceGrid) {
         self.clear_lasers();
         let (num_cols, num_rows) = grid.size();
-        let mut queue: VecDeque<(Point, Direction, LaserColor)> =
+        let mut queue: VecDeque<(Point, Direction, PrimaryColor)> =
             VecDeque::new();
         for row in 0..num_rows {
             for col in 0..num_cols {
@@ -327,9 +327,9 @@ impl Element<DeviceGrid, LaserCmd> for LaserField {
             }
             for (&(coords, dir), &(laser_color, dist)) in self.lasers.iter() {
                 let fill_color = match laser_color {
-                    LaserColor::Red => (255, 64, 64),
-                    LaserColor::Green => (64, 255, 64),
-                    LaserColor::Blue => (64, 64, 255),
+                    PrimaryColor::Red => (255, 64, 64),
+                    PrimaryColor::Green => (64, 255, 64),
+                    PrimaryColor::Blue => (64, 64, 255),
                 };
                 let mut fill_rect = match dir {
                     Direction::East => {
@@ -531,17 +531,17 @@ impl DangerSign {
 
 // ========================================================================= //
 
-fn mixer_output(color1: LaserColor, color2: LaserColor) -> LaserColor {
+fn mixer_output(color1: PrimaryColor, color2: PrimaryColor) -> PrimaryColor {
     match (color1, color2) {
-        (LaserColor::Red, LaserColor::Red) => LaserColor::Red,
-        (LaserColor::Red, LaserColor::Green) => LaserColor::Blue,
-        (LaserColor::Red, LaserColor::Blue) => LaserColor::Green,
-        (LaserColor::Green, LaserColor::Red) => LaserColor::Blue,
-        (LaserColor::Green, LaserColor::Green) => LaserColor::Green,
-        (LaserColor::Green, LaserColor::Blue) => LaserColor::Red,
-        (LaserColor::Blue, LaserColor::Red) => LaserColor::Green,
-        (LaserColor::Blue, LaserColor::Green) => LaserColor::Red,
-        (LaserColor::Blue, LaserColor::Blue) => LaserColor::Blue,
+        (PrimaryColor::Red, PrimaryColor::Red) => PrimaryColor::Red,
+        (PrimaryColor::Red, PrimaryColor::Green) => PrimaryColor::Blue,
+        (PrimaryColor::Red, PrimaryColor::Blue) => PrimaryColor::Green,
+        (PrimaryColor::Green, PrimaryColor::Red) => PrimaryColor::Blue,
+        (PrimaryColor::Green, PrimaryColor::Green) => PrimaryColor::Green,
+        (PrimaryColor::Green, PrimaryColor::Blue) => PrimaryColor::Red,
+        (PrimaryColor::Blue, PrimaryColor::Red) => PrimaryColor::Green,
+        (PrimaryColor::Blue, PrimaryColor::Green) => PrimaryColor::Red,
+        (PrimaryColor::Blue, PrimaryColor::Blue) => PrimaryColor::Blue,
     }
 }
 

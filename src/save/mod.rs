@@ -18,6 +18,7 @@
 // +--------------------------------------------------------------------------+
 
 mod access;
+mod color;
 mod crossword;
 mod data;
 mod device;
@@ -30,9 +31,10 @@ mod puzzles;
 mod util;
 
 pub use self::access::Access;
+pub use self::color::PrimaryColor;
 pub use self::crossword::{CrosswordState, ValidChars};
 pub use self::data::SaveData;
-pub use self::device::{Device, DeviceGrid, LaserColor};
+pub use self::device::{Device, DeviceGrid};
 pub use self::direction::Direction;
 pub use self::game::Game;
 pub use self::location::Location;
@@ -41,6 +43,7 @@ pub use self::prefs::Prefs;
 pub use self::puzzles::{AtticState, CubeState, DotsState, DisconState,
                         FailureState, GroundState, LevelUpState, LineState,
                         LogLevelState, MissedState, PasswordState,
-                        PrologState, PuzzleState, TreadState, WreckedState};
+                        PrologState, PuzzleState, SyrupState, TreadState,
+                        WreckedState};
 
 // ========================================================================= //

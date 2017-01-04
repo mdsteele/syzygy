@@ -20,7 +20,7 @@
 use std::default::Default;
 use toml;
 
-use save::{Access, Device, DeviceGrid, Direction, LaserColor, Location};
+use save::{Access, Device, DeviceGrid, Direction, PrimaryColor, Location};
 use super::PuzzleState;
 use super::super::util::{ACCESS_KEY, pop_array};
 
@@ -63,24 +63,24 @@ impl DisconState {
 
     fn base_grid() -> DeviceGrid {
         let mut grid = DeviceGrid::new(9, 5);
-        grid.set(0, 0, Device::Emitter(LaserColor::Red), Direction::East);
+        grid.set(0, 0, Device::Emitter(PrimaryColor::Red), Direction::East);
         grid.set(3, 0, Device::Wall, Direction::East);
         grid.set(4, 0, Device::Wall, Direction::East);
         grid.set(5, 0, Device::Wall, Direction::East);
-        grid.set(8, 0, Device::Detector(LaserColor::Blue), Direction::West);
+        grid.set(8, 0, Device::Detector(PrimaryColor::Blue), Direction::West);
         grid.set(0, 1, Device::Wall, Direction::East);
         grid.set(1, 1, Device::Wall, Direction::East);
         grid.set(8, 1, Device::Wall, Direction::East);
-        grid.set(0, 2, Device::Emitter(LaserColor::Green), Direction::East);
+        grid.set(0, 2, Device::Emitter(PrimaryColor::Green), Direction::East);
         grid.set(4, 2, Device::Wall, Direction::East);
         grid.set(5, 2, Device::Wall, Direction::East);
-        grid.set(8, 2, Device::Detector(LaserColor::Green), Direction::West);
+        grid.set(8, 2, Device::Detector(PrimaryColor::Green), Direction::West);
         grid.set(0, 3, Device::Wall, Direction::East);
         grid.set(7, 3, Device::Wall, Direction::East);
         grid.set(8, 3, Device::Wall, Direction::East);
-        grid.set(0, 4, Device::Emitter(LaserColor::Blue), Direction::East);
+        grid.set(0, 4, Device::Emitter(PrimaryColor::Blue), Direction::East);
         grid.set(4, 4, Device::Channel, Direction::East);
-        grid.set(8, 4, Device::Detector(LaserColor::Red), Direction::West);
+        grid.set(8, 4, Device::Detector(PrimaryColor::Red), Direction::West);
         grid
     }
 

@@ -20,7 +20,7 @@
 use std::default::Default;
 use toml;
 
-use save::{Access, Device, DeviceGrid, Direction, LaserColor, Location};
+use save::{Access, Device, DeviceGrid, Direction, PrimaryColor, Location};
 use super::PuzzleState;
 use super::super::util::{ACCESS_KEY, pop_array};
 
@@ -63,29 +63,29 @@ impl DotsState {
 
     fn base_grid() -> DeviceGrid {
         let mut grid = DeviceGrid::new(9, 5);
-        grid.set(0, 0, Device::Emitter(LaserColor::Blue), Direction::East);
+        grid.set(0, 0, Device::Emitter(PrimaryColor::Blue), Direction::East);
         grid.set(4, 0, Device::CrossChannel, Direction::East);
-        grid.set(8, 0, Device::Detector(LaserColor::Blue), Direction::West);
+        grid.set(8, 0, Device::Detector(PrimaryColor::Blue), Direction::West);
         grid.set(0, 1, Device::Wall, Direction::East);
         grid.set(2, 1, Device::Wall, Direction::East);
         grid.set(3, 1, Device::Channel, Direction::South);
         grid.set(5, 1, Device::Channel, Direction::East);
         grid.set(6, 1, Device::CrossChannel, Direction::East);
         grid.set(8, 1, Device::Wall, Direction::East);
-        grid.set(0, 2, Device::Emitter(LaserColor::Green), Direction::East);
+        grid.set(0, 2, Device::Emitter(PrimaryColor::Green), Direction::East);
         grid.set(1, 2, Device::CrossChannel, Direction::East);
         grid.set(4, 2, Device::CrossChannel, Direction::East);
         grid.set(7, 2, Device::CrossChannel, Direction::East);
-        grid.set(8, 2, Device::Detector(LaserColor::Green), Direction::West);
+        grid.set(8, 2, Device::Detector(PrimaryColor::Green), Direction::West);
         grid.set(0, 3, Device::Wall, Direction::East);
         grid.set(2, 3, Device::CrossChannel, Direction::East);
         grid.set(3, 3, Device::Channel, Direction::East);
         grid.set(5, 3, Device::Channel, Direction::South);
         grid.set(6, 3, Device::Wall, Direction::East);
         grid.set(8, 3, Device::Wall, Direction::East);
-        grid.set(0, 4, Device::Emitter(LaserColor::Red), Direction::East);
+        grid.set(0, 4, Device::Emitter(PrimaryColor::Red), Direction::East);
         grid.set(4, 4, Device::CrossChannel, Direction::East);
-        grid.set(8, 4, Device::Detector(LaserColor::Green), Direction::West);
+        grid.set(8, 4, Device::Detector(PrimaryColor::Green), Direction::West);
         grid
     }
 

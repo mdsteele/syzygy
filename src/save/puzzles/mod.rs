@@ -30,6 +30,7 @@ mod missed;
 mod password;
 mod prolog;
 mod puzzle;
+mod syrup;
 mod tread;
 mod wrecked;
 
@@ -46,6 +47,7 @@ pub use self::missed::MissedState;
 pub use self::password::PasswordState;
 pub use self::prolog::PrologState;
 pub use self::puzzle::PuzzleState;
+pub use self::syrup::SyrupState;
 pub use self::tread::TreadState;
 pub use self::wrecked::WreckedState;
 

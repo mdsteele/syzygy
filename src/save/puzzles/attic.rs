@@ -40,14 +40,20 @@ pub struct AtticState {
 
 impl AtticState {
     pub fn from_toml(mut table: toml::Table) -> AtticState {
+        let access = Access::from_toml(table.get(ACCESS_KEY));
+        let toggled = if access == Access::Solved {
+            SOLVED_TOGGLED.iter().cloned().collect()
+        } else {
+            pop_array(&mut table, TOGGLED_KEY)
+                .iter()
+                .filter_map(toml::Value::as_integer)
+                .filter(|&idx| 0 <= idx && idx < 16)
+                .map(|idx| idx as i32)
+                .collect()
+        };
         AtticState {
-            access: Access::from_toml(table.get(ACCESS_KEY)),
-            toggled: pop_array(&mut table, TOGGLED_KEY)
-                         .iter()
-                         .filter_map(toml::Value::as_integer)
-                         .filter(|&idx| 0 <= idx && idx < 16)
-                         .map(|idx| idx as i32)
-                         .collect(),
+            access: access,
+            toggled: toggled,
         }
     }
 

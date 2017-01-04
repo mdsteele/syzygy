@@ -167,6 +167,9 @@ fn main() {
                         Location::LevelUp => {
                             modes::run_level_up(&mut window, game)
                         }
+                        Location::LightSyrup => {
+                            modes::run_light_syrup(&mut window, game)
+                        }
                         Location::LogLevel => {
                             modes::run_log_level(&mut window, game)
                         }

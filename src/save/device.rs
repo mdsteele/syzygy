@@ -20,7 +20,7 @@
 use std::collections::HashMap;
 use toml;
 
-use save::Direction;
+use save::{Direction, PrimaryColor};
 use super::util::{pop_array, to_i32, to_table};
 
 // ========================================================================= //
@@ -200,21 +200,12 @@ impl DeviceGrid {
 // ========================================================================= //
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
-pub enum LaserColor {
-    Red,
-    Green,
-    Blue,
-}
-
-// ========================================================================= //
-
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Device {
     Wall,
     Channel,
     CrossChannel,
-    Emitter(LaserColor),
-    Detector(LaserColor),
+    Emitter(PrimaryColor),
+    Detector(PrimaryColor),
     Mirror,
     Splitter,
     Mixer,
@@ -227,12 +218,12 @@ impl Device {
                 "O" => return Device::Wall,
                 "=" => return Device::Channel,
                 "+" => return Device::CrossChannel,
-                "Er" => return Device::Emitter(LaserColor::Red),
-                "Eg" => return Device::Emitter(LaserColor::Green),
-                "Eb" => return Device::Emitter(LaserColor::Blue),
-                "Dr" => return Device::Detector(LaserColor::Red),
-                "Dg" => return Device::Detector(LaserColor::Green),
-                "Db" => return Device::Detector(LaserColor::Blue),
+                "Er" => return Device::Emitter(PrimaryColor::Red),
+                "Eg" => return Device::Emitter(PrimaryColor::Green),
+                "Eb" => return Device::Emitter(PrimaryColor::Blue),
+                "Dr" => return Device::Detector(PrimaryColor::Red),
+                "Dg" => return Device::Detector(PrimaryColor::Green),
+                "Db" => return Device::Detector(PrimaryColor::Blue),
                 "/" => return Device::Mirror,
                 "T" => return Device::Splitter,
                 "M" => return Device::Mixer,
@@ -247,12 +238,12 @@ impl Device {
             Device::Wall => "O",
             Device::Channel => "=",
             Device::CrossChannel => "+",
-            Device::Emitter(LaserColor::Red) => "Er",
-            Device::Emitter(LaserColor::Green) => "Eg",
-            Device::Emitter(LaserColor::Blue) => "Eb",
-            Device::Detector(LaserColor::Red) => "Dr",
-            Device::Detector(LaserColor::Green) => "Dg",
-            Device::Detector(LaserColor::Blue) => "Db",
+            Device::Emitter(PrimaryColor::Red) => "Er",
+            Device::Emitter(PrimaryColor::Green) => "Eg",
+            Device::Emitter(PrimaryColor::Blue) => "Eb",
+            Device::Detector(PrimaryColor::Red) => "Dr",
+            Device::Detector(PrimaryColor::Green) => "Dg",
+            Device::Detector(PrimaryColor::Blue) => "Db",
             Device::Mirror => "/",
             Device::Splitter => "T",
             Device::Mixer => "M",
@@ -272,8 +263,8 @@ impl Device {
 
 #[cfg(test)]
 mod tests {
-    use save::Direction;
-    use super::{Device, DeviceGrid, LaserColor};
+    use save::{Direction, PrimaryColor};
+    use super::{Device, DeviceGrid};
     use super::super::util::to_array;
 
     #[test]
@@ -281,12 +272,12 @@ mod tests {
         let all = &[Device::Wall,
                     Device::Channel,
                     Device::CrossChannel,
-                    Device::Emitter(LaserColor::Red),
-                    Device::Emitter(LaserColor::Green),
-                    Device::Emitter(LaserColor::Blue),
-                    Device::Detector(LaserColor::Red),
-                    Device::Detector(LaserColor::Green),
-                    Device::Detector(LaserColor::Blue),
+                    Device::Emitter(PrimaryColor::Red),
+                    Device::Emitter(PrimaryColor::Green),
+                    Device::Emitter(PrimaryColor::Blue),
+                    Device::Detector(PrimaryColor::Red),
+                    Device::Detector(PrimaryColor::Green),
+                    Device::Detector(PrimaryColor::Blue),
                     Device::Mirror,
                     Device::Splitter,
                     Device::Mixer];

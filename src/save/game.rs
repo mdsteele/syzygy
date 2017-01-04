@@ -24,7 +24,7 @@ use super::location::Location;
 use super::puzzles::{AtticState, CubeState, DisconState, DotsState,
                      FailureState, GroundState, LevelUpState, LineState,
                      LogLevelState, MissedState, PasswordState, PrologState,
-                     PuzzleState, TreadState, WreckedState};
+                     PuzzleState, SyrupState, TreadState, WreckedState};
 use super::util::{pop_table, to_table};
 
 // ========================================================================= //
@@ -44,6 +44,7 @@ pub struct Game {
     pub cube_tangle: CubeState,
     pub disconnected: DisconState,
     pub level_up: LevelUpState,
+    pub light_syrup: SyrupState,
     pub log_level: LogLevelState,
     pub missed_connections: MissedState,
     pub password_file: PasswordState,
@@ -70,6 +71,7 @@ impl Game {
         let cube = pop_table(&mut table, Location::CubeTangle.key());
         let discon = pop_table(&mut table, Location::Disconnected.key());
         let levelup = pop_table(&mut table, Location::LevelUp.key());
+        let syrup = pop_table(&mut table, Location::LightSyrup.key());
         let loglevel = pop_table(&mut table, Location::LogLevel.key());
         let missed = pop_table(&mut table, Location::MissedConnections.key());
         let password = pop_table(&mut table, Location::PasswordFile.key());
@@ -86,6 +88,7 @@ impl Game {
             cube_tangle: CubeState::from_toml(cube),
             disconnected: DisconState::from_toml(discon),
             level_up: LevelUpState::from_toml(levelup),
+            light_syrup: SyrupState::from_toml(syrup),
             log_level: LogLevelState::from_toml(loglevel),
             missed_connections: MissedState::from_toml(missed),
             password_file: PasswordState::from_toml(password),
@@ -134,6 +137,7 @@ impl Game {
             Location::CubeTangle => &self.cube_tangle,
             Location::Disconnected => &self.disconnected,
             Location::LevelUp => &self.level_up,
+            Location::LightSyrup => &self.light_syrup,
             Location::LogLevel => &self.log_level,
             Location::MissedConnections => &self.missed_connections,
             Location::PasswordFile => &self.password_file,
@@ -154,6 +158,7 @@ impl Game {
             Location::CubeTangle => &mut self.cube_tangle,
             Location::Disconnected => &mut self.disconnected,
             Location::LevelUp => &mut self.level_up,
+            Location::LightSyrup => &mut self.light_syrup,
             Location::LogLevel => &mut self.log_level,
             Location::MissedConnections => &mut self.missed_connections,
             Location::PasswordFile => &mut self.password_file,

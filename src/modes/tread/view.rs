@@ -86,7 +86,11 @@ impl View {
 
     fn drain_queue(&mut self) {
         for (index, enable) in self.core.drain_queue() {
-            self.toggles[index as usize].set_hilight(enable != 0);
+            if index < 0 {
+                self.next.visible = enable != 0;
+            } else if (index as usize) < self.toggles.len() {
+                self.toggles[index as usize].set_hilight(enable != 0);
+            }
         }
     }
 }
@@ -302,19 +306,26 @@ impl Element<TreadState, PuzzleCmd> for PassiveLight {
 
 struct NextLetter {
     font: Rc<Font>,
+    visible: bool,
 }
 
 impl NextLetter {
     fn new(resources: &mut Resources) -> NextLetter {
-        NextLetter { font: resources.get_font("block") }
+        NextLetter {
+            font: resources.get_font("block"),
+            visible: false,
+        }
     }
 }
 
 impl Element<TreadState, PuzzleCmd> for NextLetter {
     fn draw(&self, state: &TreadState, canvas: &mut Canvas) {
-        if let Some(chr) = state.next_label() {
-            let pt = Point::new(104, 130);
-            canvas.draw_char(&self.font, Align::Center, pt, chr);
+        if self.visible {
+            canvas.fill_rect((0, 0, 127), Rect::new(86, 102, 36, 36));
+            if let Some(chr) = state.next_label() {
+                let pt = Point::new(104, 130);
+                canvas.draw_char(&self.font, Align::Center, pt, chr);
+            }
         }
     }
 

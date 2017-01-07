@@ -34,6 +34,9 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(0, TalkStyle::Normal, TalkPos::NE, "Hmm."),
         ]),
+        Ast::Seq(vec![
+            Ast::Queue(-1, 1), // Show next-letter view.
+        ]),
     ];
     Ast::compile_scene(resources, ast)
 }
@@ -44,6 +47,7 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
             Ast::Sound(Sound::solve_puzzle_chime()),
+            Ast::Queue(-1, 0), // Hide next-letter view.
             Ast::Wait(0.25),
             Ast::Queue(0, 1),
             Ast::Wait(0.1),

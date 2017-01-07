@@ -178,7 +178,9 @@ impl SequenceNode {
 impl SceneNode for SequenceNode {
     fn status(&self) -> Status {
         if self.on_last_node() {
-            self.nodes[self.index].status()
+            let status = self.nodes[self.index].status();
+            debug_assert!(status != Status::Done);
+            status
         } else if self.index < self.nodes.len() {
             Status::Active
         } else {
@@ -188,9 +190,14 @@ impl SceneNode for SequenceNode {
 
     fn begin(&mut self, theater: &mut Theater, terminated_by_pause: bool) {
         self.terminated_by_pause = terminated_by_pause;
-        let len = self.nodes.len();
-        if len > 0 {
-            self.nodes[0].begin(theater, terminated_by_pause && len == 1);
+        while self.index < self.nodes.len() {
+            let pause = terminated_by_pause && self.on_last_node();
+            let node = &mut self.nodes[self.index];
+            node.begin(theater, pause);
+            if node.status() != Status::Done {
+                break;
+            }
+            self.index += 1;
         }
     }
 

@@ -18,16 +18,17 @@
 // +--------------------------------------------------------------------------+
 
 use elements::{DangerSign, LaserCmd, LaserField, PuzzleCmd, PuzzleCore,
-               PuzzleView};
+               PuzzleView, Scene};
 use gui::{Action, Canvas, Element, Event, Rect, Resources};
 use modes::SOLVED_INFO_TEXT;
 use save::{DotsState, Game, PuzzleState};
-use super::scenes::{compile_intro_scene, compile_outro_scene};
+use super::scenes;
 
 // ========================================================================= //
 
 pub struct View {
     core: PuzzleCore<LaserCmd>,
+    tezure_midscene: Scene,
     laser_field: LaserField,
     danger_sign: DangerSign,
     box_open: bool,
@@ -36,11 +37,12 @@ pub struct View {
 impl View {
     pub fn new(resources: &mut Resources, visible: Rect, state: &DotsState)
                -> View {
-        let intro = compile_intro_scene(resources);
-        let outro = compile_outro_scene(resources);
+        let intro = scenes::compile_intro_scene(resources);
+        let outro = scenes::compile_outro_scene(resources);
         let core = PuzzleCore::new(resources, visible, state, intro, outro);
         let mut view = View {
             core: core,
+            tezure_midscene: scenes::compile_tezure_midscene(resources),
             laser_field: LaserField::new(resources, 168, 152, state.grid()),
             danger_sign: DangerSign::new(resources,
                                          (272, 208),
@@ -92,6 +94,14 @@ impl Element<Game, PuzzleCmd> for View {
                 }
             }
             action.merge(subaction.but_no_value());
+        }
+        if !action.should_stop() {
+            if let &Event::MouseDown(pt) = event {
+                if let Some(0) = self.core.theater().actor_at_point(pt) {
+                    self.core.inject_scene(self.tezure_midscene.clone());
+                    self.drain_queue();
+                }
+            }
         }
         action
     }

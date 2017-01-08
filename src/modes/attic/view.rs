@@ -19,16 +19,18 @@
 
 use std::cmp;
 
-use elements::{PuzzleCmd, PuzzleCore, PuzzleView};
+use elements::{PuzzleCmd, PuzzleCore, PuzzleView, Scene};
 use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sprite};
 use modes::SOLVED_INFO_TEXT;
 use save::{AtticState, Game, PuzzleState};
-use super::scenes::{compile_intro_scene, compile_outro_scene};
+use super::scenes;
 
 // ========================================================================= //
 
 pub struct View {
     core: PuzzleCore<(i32, i32)>,
+    argony_midscene: Scene,
+    tezure_midscene: Scene,
     toggles: Vec<ToggleLight>,
     passives: Vec<PassiveLight>,
 }
@@ -36,11 +38,13 @@ pub struct View {
 impl View {
     pub fn new(resources: &mut Resources, visible: Rect, state: &AtticState)
                -> View {
-        let intro = compile_intro_scene(resources);
-        let outro = compile_outro_scene(resources);
+        let intro = scenes::compile_intro_scene(resources);
+        let outro = scenes::compile_outro_scene(resources);
         let core = PuzzleCore::new(resources, visible, state, intro, outro);
         let mut view = View {
             core: core,
+            argony_midscene: scenes::compile_argony_midscene(resources),
+            tezure_midscene: scenes::compile_tezure_midscene(resources),
             toggles: vec![
                 ToggleLight::new(resources, state, (1, 1), 'C'),
                 ToggleLight::new(resources, state, (2, 1), 'Z'),
@@ -121,6 +125,21 @@ impl Element<Game, PuzzleCmd> for View {
         }
         if !action.should_stop() {
             action.merge(self.passives.handle_event(event, state));
+        }
+        if !action.should_stop() {
+            if let &Event::MouseDown(pt) = event {
+                match self.core.theater().actor_at_point(pt) {
+                    Some(0) => {
+                        self.core.inject_scene(self.tezure_midscene.clone());
+                        self.drain_queue();
+                    }
+                    Some(1) => {
+                        self.core.inject_scene(self.argony_midscene.clone());
+                        self.drain_queue();
+                    }
+                    _ => {}
+                }
+            }
         }
         action
     }

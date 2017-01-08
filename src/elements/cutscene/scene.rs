@@ -27,6 +27,7 @@ use super::theater::{TalkPos, Theater};
 
 // ========================================================================= //
 
+#[derive(Clone)]
 pub struct Scene {
     nodes: Vec<Box<SceneNode>>,
     index: usize,
@@ -75,9 +76,6 @@ impl Scene {
     }
 
     pub fn skip(&mut self, theater: &mut Theater) {
-        if cfg!(debug_assertions) {
-            println!("Skipping cutscene.");
-        }
         while self.index < self.nodes.len() {
             self.nodes[self.index].skip(theater);
             self.index += 1;
@@ -140,6 +138,8 @@ pub enum Status {
 // ========================================================================= //
 
 pub trait SceneNode {
+    fn box_clone(&self) -> Box<SceneNode>;
+
     fn status(&self) -> Status { Status::Done }
 
     fn begin(&mut self, _theater: &mut Theater, _terminated_by_pause: bool) {}
@@ -155,8 +155,13 @@ pub trait SceneNode {
     fn unpause(&mut self) {}
 }
 
+impl Clone for Box<SceneNode> {
+    fn clone(&self) -> Box<SceneNode> { self.box_clone() }
+}
+
 // ========================================================================= //
 
+#[derive(Clone)]
 pub struct SequenceNode {
     nodes: Vec<Box<SceneNode>>,
     index: usize,
@@ -176,6 +181,8 @@ impl SequenceNode {
 }
 
 impl SceneNode for SequenceNode {
+    fn box_clone(&self) -> Box<SceneNode> { Box::new(self.clone()) }
+
     fn status(&self) -> Status {
         if self.on_last_node() {
             let status = self.nodes[self.index].status();
@@ -244,6 +251,7 @@ impl SceneNode for SequenceNode {
 
 // ========================================================================= //
 
+#[derive(Clone)]
 pub struct ParallelNode {
     nodes: Vec<Box<SceneNode>>,
 }
@@ -255,6 +263,8 @@ impl ParallelNode {
 }
 
 impl SceneNode for ParallelNode {
+    fn box_clone(&self) -> Box<SceneNode> { Box::new(self.clone()) }
+
     fn status(&self) -> Status {
         let mut status = Status::Done;
         for node in self.nodes.iter() {
@@ -307,6 +317,7 @@ impl SceneNode for ParallelNode {
 
 // ========================================================================= //
 
+#[derive(Clone)]
 pub struct LoopNode {
     node: Box<SceneNode>,
     min_iterations: i32,
@@ -336,6 +347,8 @@ impl LoopNode {
 }
 
 impl SceneNode for LoopNode {
+    fn box_clone(&self) -> Box<SceneNode> { Box::new(self.clone()) }
+
     fn status(&self) -> Status {
         if self.iteration < self.min_iterations {
             Status::Active
@@ -385,6 +398,7 @@ impl SceneNode for LoopNode {
 
 // ========================================================================= //
 
+#[derive(Clone)]
 pub struct DarkNode {
     dark: bool,
 }
@@ -394,6 +408,8 @@ impl DarkNode {
 }
 
 impl SceneNode for DarkNode {
+    fn box_clone(&self) -> Box<SceneNode> { Box::new(self.clone()) }
+
     fn begin(&mut self, theater: &mut Theater, _: bool) { self.skip(theater); }
 
     fn skip(&mut self, theater: &mut Theater) { theater.set_dark(self.dark); }
@@ -403,6 +419,7 @@ impl SceneNode for DarkNode {
 
 const GRAVITY: f64 = 480.0;
 
+#[derive(Clone)]
 pub struct JumpNode {
     progress: i32,
     duration: i32,
@@ -432,6 +449,8 @@ impl JumpNode {
 }
 
 impl SceneNode for JumpNode {
+    fn box_clone(&self) -> Box<SceneNode> { Box::new(self.clone()) }
+
     fn status(&self) -> Status {
         if self.progress < self.duration {
             Status::Active
@@ -472,6 +491,7 @@ impl SceneNode for JumpNode {
 
 // ========================================================================= //
 
+#[derive(Clone)]
 pub struct LightNode {
     slot: i32,
     light: Option<Sprite>,
@@ -487,6 +507,8 @@ impl LightNode {
 }
 
 impl SceneNode for LightNode {
+    fn box_clone(&self) -> Box<SceneNode> { Box::new(self.clone()) }
+
     fn begin(&mut self, theater: &mut Theater, _: bool) { self.skip(theater); }
 
     fn skip(&mut self, theater: &mut Theater) {
@@ -496,6 +518,7 @@ impl SceneNode for LightNode {
 
 // ========================================================================= //
 
+#[derive(Clone)]
 pub struct PlaceNode {
     slot: i32,
     sprite: Sprite,
@@ -513,6 +536,8 @@ impl PlaceNode {
 }
 
 impl SceneNode for PlaceNode {
+    fn box_clone(&self) -> Box<SceneNode> { Box::new(self.clone()) }
+
     fn begin(&mut self, theater: &mut Theater, _: bool) { self.skip(theater); }
 
     fn skip(&mut self, theater: &mut Theater) {
@@ -522,6 +547,7 @@ impl SceneNode for PlaceNode {
 
 // ========================================================================= //
 
+#[derive(Clone)]
 pub struct QueueNode {
     entry: (i32, i32),
 }
@@ -531,6 +557,8 @@ impl QueueNode {
 }
 
 impl SceneNode for QueueNode {
+    fn box_clone(&self) -> Box<SceneNode> { Box::new(self.clone()) }
+
     fn begin(&mut self, theater: &mut Theater, _: bool) { self.skip(theater); }
 
     fn skip(&mut self, theater: &mut Theater) { theater.enqueue(self.entry); }
@@ -538,6 +566,7 @@ impl SceneNode for QueueNode {
 
 // ========================================================================= //
 
+#[derive(Clone)]
 pub struct RemoveNode {
     slot: i32,
 }
@@ -547,6 +576,8 @@ impl RemoveNode {
 }
 
 impl SceneNode for RemoveNode {
+    fn box_clone(&self) -> Box<SceneNode> { Box::new(self.clone()) }
+
     fn begin(&mut self, theater: &mut Theater, _: bool) { self.skip(theater); }
 
     fn skip(&mut self, theater: &mut Theater) {
@@ -556,6 +587,7 @@ impl SceneNode for RemoveNode {
 
 // ========================================================================= //
 
+#[derive(Clone)]
 pub struct SetBgNode {
     background: Rc<Background>,
 }
@@ -567,6 +599,8 @@ impl SetBgNode {
 }
 
 impl SceneNode for SetBgNode {
+    fn box_clone(&self) -> Box<SceneNode> { Box::new(self.clone()) }
+
     fn begin(&mut self, theater: &mut Theater, _: bool) { self.skip(theater); }
 
     fn skip(&mut self, theater: &mut Theater) {
@@ -576,6 +610,7 @@ impl SceneNode for SetBgNode {
 
 // ========================================================================= //
 
+#[derive(Clone)]
 pub struct SlideNode {
     progress: i32,
     duration: i32,
@@ -603,6 +638,8 @@ impl SlideNode {
 }
 
 impl SceneNode for SlideNode {
+    fn box_clone(&self) -> Box<SceneNode> { Box::new(self.clone()) }
+
     fn status(&self) -> Status {
         if self.progress < self.duration {
             Status::Active
@@ -657,6 +694,7 @@ impl SceneNode for SlideNode {
 
 // ========================================================================= //
 
+#[derive(Clone)]
 pub struct SoundNode {
     sound: Sound,
 }
@@ -666,6 +704,8 @@ impl SoundNode {
 }
 
 impl SceneNode for SoundNode {
+    fn box_clone(&self) -> Box<SceneNode> { Box::new(self.clone()) }
+
     fn begin(&mut self, theater: &mut Theater, _: bool) {
         theater.add_sound(self.sound.clone());
     }
@@ -673,6 +713,7 @@ impl SceneNode for SoundNode {
 
 // ========================================================================= //
 
+#[derive(Clone)]
 pub struct TalkNode {
     slot: i32,
     bubble_sprites: Vec<Sprite>,
@@ -698,6 +739,8 @@ impl TalkNode {
 }
 
 impl SceneNode for TalkNode {
+    fn box_clone(&self) -> Box<SceneNode> { Box::new(self.clone()) }
+
     fn status(&self) -> Status { self.status }
 
     fn begin(&mut self, theater: &mut Theater, terminated_by_pause: bool) {
@@ -738,6 +781,7 @@ impl SceneNode for TalkNode {
 
 // ========================================================================= //
 
+#[derive(Clone)]
 pub struct WaitNode {
     progress: i32,
     duration: i32,
@@ -753,6 +797,8 @@ impl WaitNode {
 }
 
 impl SceneNode for WaitNode {
+    fn box_clone(&self) -> Box<SceneNode> { Box::new(self.clone()) }
+
     fn status(&self) -> Status {
         if self.progress < self.duration {
             Status::Active

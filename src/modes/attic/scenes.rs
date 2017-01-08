@@ -113,6 +113,32 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
 
 // ========================================================================= //
 
+pub fn compile_argony_midscene(resources: &mut Resources) -> Scene {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(1, TalkStyle::Normal, TalkPos::SE,
+                      "You should probably\n\
+                       start with the top row.")
+        ]),
+    ];
+    Ast::compile_scene(resources, ast)
+}
+
+pub fn compile_tezure_midscene(resources: &mut Resources) -> Scene {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_thought()),
+            Ast::Talk(0, TalkStyle::Thought, TalkPos::NE,
+                      "Why couldn't there just be\n\
+                       a light switch or something?")
+        ]),
+    ];
+    Ast::compile_scene(resources, ast)
+}
+
+// ========================================================================= //
+
 pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![

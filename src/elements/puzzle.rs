@@ -53,6 +53,7 @@ pub trait PuzzleView: Element<Game, PuzzleCmd> {
 pub struct PuzzleCore<U> {
     theater: Theater,
     intro_scene: Scene,
+    middle_scene: Option<Scene>,
     outro_scene: Scene,
     hud: Hud,
     screen_fade: ScreenFade<PuzzleCmd>,
@@ -78,6 +79,7 @@ impl<U: Clone> PuzzleCore<U> {
         PuzzleCore {
             theater: theater,
             intro_scene: intro_scene,
+            middle_scene: None,
             outro_scene: outro_scene,
             hud: Hud::new(resources, visible, state.location()),
             screen_fade: ScreenFade::new(resources),
@@ -95,6 +97,11 @@ impl<U: Clone> PuzzleCore<U> {
 
     pub fn drain_queue(&mut self) -> Vec<(i32, i32)> {
         self.theater.drain_queue()
+    }
+
+    pub fn inject_scene(&mut self, mut scene: Scene) {
+        scene.begin(&mut self.theater);
+        self.middle_scene = Some(scene);
     }
 
     pub fn begin_outro_scene(&mut self) {
@@ -131,7 +138,9 @@ impl<U: Clone> PuzzleCore<U> {
     }
 
     fn hud_input<S: PuzzleState>(&self, state: &S) -> HudInput {
-        let scene = if state.is_solved() {
+        let scene = if let Some(ref scene) = self.middle_scene {
+            scene
+        } else if state.is_solved() {
             &self.outro_scene
         } else {
             &self.intro_scene
@@ -167,13 +176,21 @@ impl<U: Clone> PuzzleCore<U> {
                                         -> Action<PuzzleCmd> {
         let mut action = self.screen_fade.handle_event(event, &mut ());
         if !action.should_stop() {
-            let subaction = if state.is_solved() {
+            let subaction = if let Some(ref mut scene) = self.middle_scene {
+                scene.handle_event(event, &mut self.theater)
+            } else if state.is_solved() {
                 self.outro_scene.handle_event(event, &mut self.theater)
             } else {
                 self.intro_scene.handle_event(event, &mut self.theater)
             };
             if self.intro_scene.is_finished() {
                 state.visit();
+            }
+            if self.middle_scene
+                   .as_ref()
+                   .map(Scene::is_finished)
+                   .unwrap_or(false) {
+                self.middle_scene = None;
             }
             if !self.previously_solved && self.outro_scene.is_finished() &&
                self.screen_fade.is_transparent() {

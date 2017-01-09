@@ -152,6 +152,9 @@ fn main() {
                         Location::ALightInTheAttic => {
                             modes::run_a_light_in_the_attic(&mut window, game)
                         }
+                        Location::BlackAndBlue => {
+                            modes::run_black_and_blue(&mut window, game)
+                        }
                         Location::ConnectTheDots => {
                             modes::run_connect_the_dots(&mut window, game)
                         }

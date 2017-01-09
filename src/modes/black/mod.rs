@@ -17,40 +17,22 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod attic;
-mod black;
-mod cube;
-mod discon;
-mod dots;
-mod failure;
-mod ground;
-mod levelup;
-mod line;
-mod loglevel;
-mod missed;
-mod password;
-mod prolog;
-mod puzzle;
-mod syrup;
-mod tread;
-mod wrecked;
+mod scenes;
+mod view;
 
-pub use self::attic::AtticState;
-pub use self::black::BlackState;
-pub use self::cube::CubeState;
-pub use self::discon::DisconState;
-pub use self::dots::DotsState;
-pub use self::failure::FailureState;
-pub use self::ground::GroundState;
-pub use self::levelup::LevelUpState;
-pub use self::line::LineState;
-pub use self::loglevel::LogLevelState;
-pub use self::missed::MissedState;
-pub use self::password::PasswordState;
-pub use self::prolog::PrologState;
-pub use self::puzzle::PuzzleState;
-pub use self::syrup::SyrupState;
-pub use self::tread::TreadState;
-pub use self::wrecked::WreckedState;
+use gui::Window;
+use modes::{Mode, run_puzzle};
+use save::Game;
+use self::view::View;
+
+// ========================================================================= //
+
+pub fn run_black_and_blue(window: &mut Window, game: &mut Game) -> Mode {
+    let view = {
+        let visible_rect = window.visible_rect();
+        View::new(&mut window.resources(), visible_rect, &game.black_and_blue)
+    };
+    run_puzzle(window, game, view)
+}
 
 // ========================================================================= //

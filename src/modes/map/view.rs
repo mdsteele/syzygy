@@ -34,7 +34,7 @@ const NODE_HEIGHT: u32 = 24;
 const NODES: &'static [(Location, (i32, i32))] = &[
     (Location::Prolog, (75, 100)),
     (Location::ALightInTheAttic, (200, 50)),
-    (Location::TreadLightly, (300, 50)),
+    (Location::BlackAndBlue, (225, 75)),
     (Location::ConnectTheDots, (150, 150)),
     (Location::CrossTheLine, (125, 225)),
     (Location::CubeTangle, (125, 280)),
@@ -46,6 +46,7 @@ const NODES: &'static [(Location, (i32, i32))] = &[
     (Location::PasswordFile, (400, 200)),
     (Location::ShiftingGround, (150, 250)),
     (Location::SystemFailure, (360, 200)),
+    (Location::TreadLightly, (300, 50)),
     (Location::WreckedAngle, (100, 250)),
 ];
 

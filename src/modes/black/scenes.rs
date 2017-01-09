@@ -17,40 +17,37 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod attic;
-mod black;
-mod cube;
-mod discon;
-mod dots;
-mod failure;
-mod ground;
-mod levelup;
-mod line;
-mod loglevel;
-mod missed;
-mod password;
-mod prolog;
-mod puzzle;
-mod syrup;
-mod tread;
-mod wrecked;
+use elements::{Ast, Scene, TalkPos, TalkStyle};
+use gui::{Resources, Sound};
 
-pub use self::attic::AtticState;
-pub use self::black::BlackState;
-pub use self::cube::CubeState;
-pub use self::discon::DisconState;
-pub use self::dots::DotsState;
-pub use self::failure::FailureState;
-pub use self::ground::GroundState;
-pub use self::levelup::LevelUpState;
-pub use self::line::LineState;
-pub use self::loglevel::LogLevelState;
-pub use self::missed::MissedState;
-pub use self::password::PasswordState;
-pub use self::prolog::PrologState;
-pub use self::puzzle::PuzzleState;
-pub use self::syrup::SyrupState;
-pub use self::tread::TreadState;
-pub use self::wrecked::WreckedState;
+// ========================================================================= //
+
+pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::SetBg("black_and_blue"),
+            Ast::Place(0, "chars/tezure", 0, (-16, 320)),
+            Ast::Slide(0, (304, 320), true, true, 1.0),
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE, "Let's have a look."),
+        ]),
+    ];
+    Ast::compile_scene(resources, ast)
+}
+
+// ========================================================================= //
+
+pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::solve_puzzle_chime()),
+            Ast::Wait(1.0),
+            Ast::Slide(0, (592, 320), true, false, 1.0),
+            Ast::Remove(0),
+        ]),
+    ];
+    Ast::compile_scene(resources, ast)
+}
 
 // ========================================================================= //

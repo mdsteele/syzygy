@@ -17,40 +17,44 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod attic;
-mod black;
-mod cube;
-mod discon;
-mod dots;
-mod failure;
-mod ground;
-mod levelup;
-mod line;
-mod loglevel;
-mod missed;
-mod password;
-mod prolog;
-mod puzzle;
-mod syrup;
-mod tread;
-mod wrecked;
+use toml;
 
-pub use self::attic::AtticState;
-pub use self::black::BlackState;
-pub use self::cube::CubeState;
-pub use self::discon::DisconState;
-pub use self::dots::DotsState;
-pub use self::failure::FailureState;
-pub use self::ground::GroundState;
-pub use self::levelup::LevelUpState;
-pub use self::line::LineState;
-pub use self::loglevel::LogLevelState;
-pub use self::missed::MissedState;
-pub use self::password::PasswordState;
-pub use self::prolog::PrologState;
-pub use self::puzzle::PuzzleState;
-pub use self::syrup::SyrupState;
-pub use self::tread::TreadState;
-pub use self::wrecked::WreckedState;
+use save::{Access, Location};
+use super::PuzzleState;
+use super::super::util::ACCESS_KEY;
+
+// ========================================================================= //
+
+#[derive(Default)]
+pub struct BlackState {
+    access: Access,
+}
+
+impl BlackState {
+    pub fn from_toml(table: toml::Table) -> BlackState {
+        let access = Access::from_toml(table.get(ACCESS_KEY));
+        BlackState { access: access }
+    }
+
+    pub fn solve(&mut self) { self.access = Access::Solved; }
+}
+
+impl PuzzleState for BlackState {
+    fn location(&self) -> Location { Location::BlackAndBlue }
+
+    fn access(&self) -> Access { self.access }
+
+    fn access_mut(&mut self) -> &mut Access { &mut self.access }
+
+    fn can_reset(&self) -> bool { false } // TODO
+
+    fn reset(&mut self) {} // TODO
+
+    fn to_toml(&self) -> toml::Value {
+        let mut table = toml::Table::new();
+        table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
+        toml::Value::Table(table)
+    }
+}
 
 // ========================================================================= //

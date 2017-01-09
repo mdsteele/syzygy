@@ -21,10 +21,11 @@ use std::default::Default;
 use toml;
 
 use super::location::Location;
-use super::puzzles::{AtticState, CubeState, DisconState, DotsState,
-                     FailureState, GroundState, LevelUpState, LineState,
-                     LogLevelState, MissedState, PasswordState, PrologState,
-                     PuzzleState, SyrupState, TreadState, WreckedState};
+use super::puzzles::{AtticState, BlackState, CubeState, DisconState,
+                     DotsState, FailureState, GroundState, LevelUpState,
+                     LineState, LogLevelState, MissedState, PasswordState,
+                     PrologState, PuzzleState, SyrupState, TreadState,
+                     WreckedState};
 use super::util::{pop_table, to_table};
 
 // ========================================================================= //
@@ -39,6 +40,7 @@ pub struct Game {
     pub location: Location,
     pub prolog: PrologState,
     pub a_light_in_the_attic: AtticState,
+    pub black_and_blue: BlackState,
     pub connect_the_dots: DotsState,
     pub cross_the_line: LineState,
     pub cube_tangle: CubeState,
@@ -64,41 +66,44 @@ impl Game {
 
     pub fn from_toml(value: toml::Value) -> Game {
         let mut table = to_table(value);
-        let prolog = pop_table(&mut table, Location::Prolog.key());
-        let attic = pop_table(&mut table, Location::ALightInTheAttic.key());
-        let dots = pop_table(&mut table, Location::ConnectTheDots.key());
-        let line = pop_table(&mut table, Location::CrossTheLine.key());
-        let cube = pop_table(&mut table, Location::CubeTangle.key());
-        let discon = pop_table(&mut table, Location::Disconnected.key());
-        let levelup = pop_table(&mut table, Location::LevelUp.key());
-        let syrup = pop_table(&mut table, Location::LightSyrup.key());
-        let loglevel = pop_table(&mut table, Location::LogLevel.key());
-        let missed = pop_table(&mut table, Location::MissedConnections.key());
-        let password = pop_table(&mut table, Location::PasswordFile.key());
-        let ground = pop_table(&mut table, Location::ShiftingGround.key());
-        let failure = pop_table(&mut table, Location::SystemFailure.key());
-        let tread = pop_table(&mut table, Location::TreadLightly.key());
-        let wrecked = pop_table(&mut table, Location::WreckedAngle.key());
+        let table_ref = &mut table;
         Game {
-            location: Location::from_toml(table.get(LOCATION_KEY)),
-            prolog: PrologState::from_toml(prolog),
-            a_light_in_the_attic: AtticState::from_toml(attic),
-            connect_the_dots: DotsState::from_toml(dots),
-            cross_the_line: LineState::from_toml(line),
-            cube_tangle: CubeState::from_toml(cube),
-            disconnected: DisconState::from_toml(discon),
-            level_up: LevelUpState::from_toml(levelup),
-            light_syrup: SyrupState::from_toml(syrup),
-            log_level: LogLevelState::from_toml(loglevel),
-            missed_connections: MissedState::from_toml(missed),
-            password_file: PasswordState::from_toml(password),
-            shifting_ground: GroundState::from_toml(ground),
-            system_failure: FailureState::from_toml(failure),
-            tread_lightly: TreadState::from_toml(tread),
-            wrecked_angle: WreckedState::from_toml(wrecked),
-            ever_clicked_info: table.get(EVER_CLICKED_INFO_KEY)
-                                    .and_then(toml::Value::as_bool)
-                                    .unwrap_or(false),
+            location: Location::from_toml(table_ref.get(LOCATION_KEY)),
+            prolog: PrologState::from_toml(
+                pop_table(table_ref, Location::Prolog.key())),
+            a_light_in_the_attic: AtticState::from_toml(
+                pop_table(table_ref, Location::ALightInTheAttic.key())),
+            black_and_blue: BlackState::from_toml(
+                pop_table(table_ref, Location::BlackAndBlue.key())),
+            connect_the_dots: DotsState::from_toml(
+                pop_table(table_ref, Location::ConnectTheDots.key())),
+            cross_the_line: LineState::from_toml(
+                pop_table(table_ref, Location::CrossTheLine.key())),
+            cube_tangle: CubeState::from_toml(
+                pop_table(table_ref, Location::CubeTangle.key())),
+            disconnected: DisconState::from_toml(
+                pop_table(table_ref, Location::Disconnected.key())),
+            level_up: LevelUpState::from_toml(
+                pop_table(table_ref, Location::LevelUp.key())),
+            light_syrup: SyrupState::from_toml(
+                pop_table(table_ref, Location::LightSyrup.key())),
+            log_level: LogLevelState::from_toml(
+                pop_table(table_ref, Location::LogLevel.key())),
+            missed_connections: MissedState::from_toml(
+                pop_table(table_ref, Location::MissedConnections.key())),
+            password_file: PasswordState::from_toml(
+                pop_table(table_ref, Location::PasswordFile.key())),
+            shifting_ground: GroundState::from_toml(
+                pop_table(table_ref, Location::ShiftingGround.key())),
+            system_failure: FailureState::from_toml(
+                pop_table(table_ref, Location::SystemFailure.key())),
+            tread_lightly: TreadState::from_toml(
+                pop_table(table_ref, Location::TreadLightly.key())),
+            wrecked_angle: WreckedState::from_toml(
+                pop_table(table_ref, Location::WreckedAngle.key())),
+            ever_clicked_info: table_ref.get(EVER_CLICKED_INFO_KEY)
+                                        .and_then(toml::Value::as_bool)
+                                        .unwrap_or(false),
         }
     }
 
@@ -132,6 +137,7 @@ impl Game {
             Location::Map => panic!("no PuzzleState for Map"),
             Location::Prolog => &self.prolog,
             Location::ALightInTheAttic => &self.a_light_in_the_attic,
+            Location::BlackAndBlue => &self.black_and_blue,
             Location::ConnectTheDots => &self.connect_the_dots,
             Location::CrossTheLine => &self.cross_the_line,
             Location::CubeTangle => &self.cube_tangle,
@@ -153,6 +159,7 @@ impl Game {
             Location::Map => panic!("no PuzzleState for Map"),
             Location::Prolog => &mut self.prolog,
             Location::ALightInTheAttic => &mut self.a_light_in_the_attic,
+            Location::BlackAndBlue => &mut self.black_and_blue,
             Location::ConnectTheDots => &mut self.connect_the_dots,
             Location::CrossTheLine => &mut self.cross_the_line,
             Location::CubeTangle => &mut self.cube_tangle,

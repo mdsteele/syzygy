@@ -358,21 +358,21 @@ impl Element<WreckedState, PuzzleCmd> for SolutionDisplay {
         canvas.draw_sprite(&self.sprites[index],
                            Point::new(SOLUTION_LEFT, SOLUTION_TOP));
         if index == 0 {
-            canvas.draw_text(&self.font,
-                             Align::Center,
-                             Point::new(SOLUTION_LEFT + 28,
-                                        SOLUTION_TOP + 18),
-                             "Status:");
-            let status = if state.is_solved() {
-                "Fixed, sorta."
+            let (text1, text2) = if state.is_solved() {
+                ("Fixed,", "sorta.")
             } else {
-                "BORKEN"
+                ("Status:", "BORKEN")
             };
             canvas.draw_text(&self.font,
                              Align::Center,
                              Point::new(SOLUTION_LEFT + 28,
+                                        SOLUTION_TOP + 18),
+                             text1);
+            canvas.draw_text(&self.font,
+                             Align::Center,
+                             Point::new(SOLUTION_LEFT + 28,
                                         SOLUTION_TOP + 32),
-                             status);
+                             text2);
         }
     }
 

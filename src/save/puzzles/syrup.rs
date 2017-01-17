@@ -107,9 +107,9 @@ impl SyrupState {
             PrimaryColor::Green => PrimaryColor::Blue,
             PrimaryColor::Blue => PrimaryColor::Red,
         };
-        if matches(&self.red_toggled, SOLVED_RED_TOGGLED) &&
-           matches(&self.green_toggled, SOLVED_GREEN_TOGGLED) &&
-           matches(&self.blue_toggled, SOLVED_BLUE_TOGGLED) {
+        if self.red_grid.iter().all(|&r| r) &&
+           self.green_grid.iter().all(|&g| g) &&
+           self.blue_grid.iter().all(|&b| b) {
             self.access = Access::Solved;
         }
     }
@@ -253,11 +253,6 @@ fn rebuild_grid(grid: &mut Vec<bool>, toggled: &BTreeSet<i32>,
             grid[index as usize] = !grid[index as usize];
         }
     }
-}
-
-fn matches(actual: &BTreeSet<i32>, solved: &[i32]) -> bool {
-    let actual_vec: Vec<i32> = actual.iter().cloned().collect();
-    &actual_vec as &[i32] == solved
 }
 
 fn insert_toggled(table: &mut toml::Table, key: &str, tog: &BTreeSet<i32>) {

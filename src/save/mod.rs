@@ -40,10 +40,10 @@ pub use self::game::Game;
 pub use self::location::Location;
 pub use self::path::get_default_save_file_path;
 pub use self::prefs::Prefs;
-pub use self::puzzles::{AtticState, BlackState, CubeState, DotsState,
-                        DisconState, FailureState, GroundState, LevelUpState,
-                        LineState, LogLevelState, MissedState, PasswordState,
-                        PrologState, PuzzleState, SyrupState, TreadState,
-                        WreckedState};
+pub use self::puzzles::{AtticState, BlackState, BlameState, CubeState,
+                        DotsState, DisconState, FailureState, GroundState,
+                        LevelUpState, LineState, LogLevelState, MissedState,
+                        PasswordState, PrologState, PuzzleState, SyrupState,
+                        TreadState, WreckedState};
 
 // ========================================================================= //

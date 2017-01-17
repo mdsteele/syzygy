@@ -21,11 +21,11 @@ use std::default::Default;
 use toml;
 
 use super::location::Location;
-use super::puzzles::{AtticState, BlackState, CubeState, DisconState,
-                     DotsState, FailureState, GroundState, LevelUpState,
-                     LineState, LogLevelState, MissedState, PasswordState,
-                     PrologState, PuzzleState, SyrupState, TreadState,
-                     WreckedState};
+use super::puzzles::{AtticState, BlackState, BlameState, CubeState,
+                     DisconState, DotsState, FailureState, GroundState,
+                     LevelUpState, LineState, LogLevelState, MissedState,
+                     PasswordState, PrologState, PuzzleState, SyrupState,
+                     TreadState, WreckedState};
 use super::util::{pop_table, to_table};
 
 // ========================================================================= //
@@ -50,6 +50,7 @@ pub struct Game {
     pub log_level: LogLevelState,
     pub missed_connections: MissedState,
     pub password_file: PasswordState,
+    pub shift_the_blame: BlameState,
     pub shifting_ground: GroundState,
     pub system_failure: FailureState,
     pub tread_lightly: TreadState,
@@ -93,6 +94,8 @@ impl Game {
                 pop_table(table_ref, Location::MissedConnections.key())),
             password_file: PasswordState::from_toml(
                 pop_table(table_ref, Location::PasswordFile.key())),
+            shift_the_blame: BlameState::from_toml(
+                pop_table(table_ref, Location::ShiftTheBlame.key())),
             shifting_ground: GroundState::from_toml(
                 pop_table(table_ref, Location::ShiftingGround.key())),
             system_failure: FailureState::from_toml(
@@ -147,6 +150,7 @@ impl Game {
             Location::LogLevel => &self.log_level,
             Location::MissedConnections => &self.missed_connections,
             Location::PasswordFile => &self.password_file,
+            Location::ShiftTheBlame => &self.shift_the_blame,
             Location::ShiftingGround => &self.shifting_ground,
             Location::SystemFailure => &self.system_failure,
             Location::TreadLightly => &self.tread_lightly,
@@ -169,6 +173,7 @@ impl Game {
             Location::LogLevel => &mut self.log_level,
             Location::MissedConnections => &mut self.missed_connections,
             Location::PasswordFile => &mut self.password_file,
+            Location::ShiftTheBlame => &mut self.shift_the_blame,
             Location::ShiftingGround => &mut self.shifting_ground,
             Location::SystemFailure => &mut self.system_failure,
             Location::TreadLightly => &mut self.tread_lightly,

@@ -19,6 +19,7 @@
 
 mod attic;
 mod black;
+mod blame;
 mod cube;
 mod discon;
 mod dots;
@@ -41,6 +42,7 @@ mod wrecked;
 
 pub use self::attic::run_a_light_in_the_attic;
 pub use self::black::run_black_and_blue;
+pub use self::blame::run_shift_the_blame;
 pub use self::cube::run_cube_tangle;
 pub use self::discon::run_disconnected;
 pub use self::dots::run_connect_the_dots;

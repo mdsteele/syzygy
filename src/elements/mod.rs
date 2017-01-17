@@ -25,6 +25,7 @@ mod hud;
 mod lasers;
 mod paragraph;
 mod puzzle;
+pub mod shift;
 
 pub use self::crossword::CrosswordView;
 pub use self::cutscene::{Ast, Scene, TalkPos, TalkStyle, Theater};

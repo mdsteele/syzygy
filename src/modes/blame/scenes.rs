@@ -17,42 +17,40 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod attic;
-mod black;
-mod blame;
-mod cube;
-mod discon;
-mod dots;
-mod failure;
-mod ground;
-mod levelup;
-mod line;
-mod loglevel;
-mod missed;
-mod password;
-mod prolog;
-mod puzzle;
-mod syrup;
-mod tread;
-mod wrecked;
+use elements::{Ast, Scene, TalkPos, TalkStyle};
+use gui::{Resources, Sound};
 
-pub use self::attic::AtticState;
-pub use self::black::BlackState;
-pub use self::blame::BlameState;
-pub use self::cube::CubeState;
-pub use self::discon::DisconState;
-pub use self::dots::DotsState;
-pub use self::failure::FailureState;
-pub use self::ground::GroundState;
-pub use self::levelup::LevelUpState;
-pub use self::line::LineState;
-pub use self::loglevel::LogLevelState;
-pub use self::missed::MissedState;
-pub use self::password::PasswordState;
-pub use self::prolog::PrologState;
-pub use self::puzzle::PuzzleState;
-pub use self::syrup::SyrupState;
-pub use self::tread::TreadState;
-pub use self::wrecked::WreckedState;
+// ========================================================================= //
+
+pub const ELINSA_SLOT: i32 = 0;
+
+// ========================================================================= //
+
+pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::SetBg("shift_the_blame"),
+            Ast::Place(0, "chars/elinsa", 0, (432, 320)),
+            Ast::Wait(1.0),
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(0, TalkStyle::Normal, TalkPos::NW, "Ow, my head..."),
+        ]),
+    ];
+    Ast::compile_scene(resources, ast)
+}
+
+// ========================================================================= //
+
+pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::solve_puzzle_chime()),
+            Ast::Wait(1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(0, TalkStyle::Normal, TalkPos::NW, "Done and done."),
+        ]),
+    ];
+    Ast::compile_scene(resources, ast)
+}
 
 // ========================================================================= //

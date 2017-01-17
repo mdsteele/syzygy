@@ -145,6 +145,11 @@ impl<U: Clone> PuzzleCore<U> {
         } else {
             &self.intro_scene
         };
+        let mut can_reset = state.can_reset();
+        if !can_reset && state.allow_reset_for_undo_redo() {
+            can_reset = !self.undo_stack.is_empty() ||
+                        !self.redo_stack.is_empty();
+        }
         HudInput {
             name: state.location().name(),
             access: state.access(),
@@ -152,7 +157,7 @@ impl<U: Clone> PuzzleCore<U> {
             active: self.screen_fade.is_transparent() && scene.is_finished(),
             can_undo: !self.undo_stack.is_empty(),
             can_redo: !self.redo_stack.is_empty(),
-            can_reset: state.can_reset(),
+            can_reset: can_reset,
         }
     }
 

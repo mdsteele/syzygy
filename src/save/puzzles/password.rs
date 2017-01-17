@@ -214,6 +214,8 @@ impl PuzzleState for PasswordState {
 
     fn access_mut(&mut self) -> &mut Access { &mut self.access }
 
+    fn allow_reset_for_undo_redo(&self) -> bool { false }
+
     fn can_reset(&self) -> bool {
         if self.all_crosswords_done() {
             self.sliders != INIT_SLIDERS

@@ -42,6 +42,8 @@ pub trait PuzzleState {
 
     fn is_solved(&self) -> bool { self.access().is_solved() }
 
+    fn allow_reset_for_undo_redo(&self) -> bool { true }
+
     fn can_reset(&self) -> bool;
 
     fn reset(&mut self);

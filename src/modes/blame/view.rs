@@ -352,8 +352,10 @@ impl View {
                         break;
                     }
                 }
-                if elinsa_row == last_row && pos_0 == max_pos_for_last_row ||
-                   elinsa_row == 1 && pos_0 == 0 {
+                if elinsa_row == last_row &&
+                   (pos_0 == max_pos_for_last_row ||
+                    pos_1 == max_pos_for_last_row) ||
+                   elinsa_row == 1 && (pos_0 == 0 || pos_1 == 0) {
                     break;
                 }
                 elinsa_row -= 1;

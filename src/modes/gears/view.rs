@@ -25,7 +25,7 @@ use elements::cutscene::{JumpNode, SceneNode, SequenceNode, SlideNode,
 use elements::shift::{ArrowPair, Platform};
 use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sound};
 use modes::SOLVED_INFO_TEXT;
-use save::{GroundState, Game, PuzzleState};
+use save::{Game, GearsState, PuzzleState};
 use super::scenes::{ELINSA_SLOT, compile_intro_scene, compile_outro_scene};
 
 // ========================================================================= //
@@ -35,11 +35,10 @@ pub struct View {
     animation: Scene,
     platforms: Vec<Platform>,
     arrows: Vec<ArrowPair>,
-    platforms_and_arrows_visible: bool,
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect, state: &GroundState)
+    pub fn new(resources: &mut Resources, visible: Rect, state: &GearsState)
                -> View {
         let intro = compile_intro_scene(resources);
         let outro = compile_outro_scene(resources);
@@ -48,24 +47,25 @@ impl View {
             core: core,
             animation: Scene::new(Vec::new()),
             platforms: vec![
-                Platform::new(resources, (160, 88), state.get_position(0)),
-                Platform::new(resources, (160, 120), state.get_position(1)),
-                Platform::new(resources, (160, 152), state.get_position(2)),
-                Platform::new(resources, (160, 184), state.get_position(3)),
-                Platform::new(resources, (160, 216), state.get_position(4)),
-                Platform::new(resources, (160, 248), state.get_position(5)),
-                Platform::new(resources, (160, 280), state.get_position(6)),
+                Platform::new(resources, (96, 88), state.get_position(0)),
+                Platform::new(resources, (96, 120), state.get_position(1)),
+                Platform::new(resources, (96, 152), state.get_position(2)),
+                Platform::new(resources, (96, 184), state.get_position(3)),
+                Platform::new(resources, (96, 184), state.get_position(4)),
+                Platform::new(resources, (96, 216), state.get_position(5)),
+                Platform::new(resources, (96, 248), state.get_position(6)),
+                Platform::new(resources, (96, 280), state.get_position(7)),
             ],
             arrows: vec![
-                ArrowPair::new(resources, (480, 96), 0, 8),
-                ArrowPair::new(resources, (480, 128), 1, 5),
-                ArrowPair::new(resources, (480, 160), 2, 6),
-                ArrowPair::new(resources, (480, 192), 3, 7),
-                ArrowPair::new(resources, (480, 224), 4, 5),
-                ArrowPair::new(resources, (480, 256), 5, 3),
-                ArrowPair::new(resources, (480, 288), 6, 4),
+                ArrowPair::new(resources, (448, 96), 0, 3),
+                ArrowPair::new(resources, (448, 128), 1, 3),
+                ArrowPair::new(resources, (448, 160), 2, 6),
+                ArrowPair::new(resources, (448, 192), 3, 3),
+                ArrowPair::new(resources, (48, 192), 4, 2),
+                ArrowPair::new(resources, (48, 224), 5, 7),
+                ArrowPair::new(resources, (48, 256), 6, 5),
+                ArrowPair::new(resources, (48, 288), 7, 3),
             ],
-            platforms_and_arrows_visible: true,
         };
         view.animation.begin(view.core.theater_mut());
         view.drain_queue();
@@ -77,14 +77,24 @@ impl View {
 
     fn drain_queue(&mut self) {
         for (row, pos) in self.core.drain_queue() {
-            if row >= 0 && row < self.platforms.len() as i32 {
+            if pos < 0 {
+                self.set_override_row(row);
+            } else if row >= 0 && row < self.platforms.len() as i32 {
                 self.platforms[row as usize].set_goal(pos);
-            } else if row == -1 {
-                self.platforms_and_arrows_visible = pos != 0;
             } else if row == -2 {
                 for platform in self.platforms.iter_mut() {
                     platform.move_to_goal();
                 }
+            }
+        }
+    }
+
+    fn set_override_row(&mut self, row: i32) {
+        for (index, arrow) in self.arrows.iter_mut().enumerate() {
+            if index as i32 == row {
+                arrow.set_delta_override(Some(4));
+            } else {
+                arrow.set_delta_override(None);
             }
         }
     }
@@ -94,11 +104,11 @@ impl View {
         self.platforms[row as usize].top()
     }
 
-    fn platform_pt(&self, state: &GroundState, row: i32) -> Point {
+    fn platform_pt(&self, state: &GearsState, row: i32) -> Point {
         if row < 0 {
-            Point::new(496, 64)
-        } else if row >= GroundState::num_rows() {
-            Point::new(144, 304)
+            Point::new(80, 64)
+        } else if row >= GearsState::num_rows() {
+            Point::new(464, 304)
         } else {
             self.platform_pt_for_pos(row, state.get_position(row))
         }
@@ -113,21 +123,24 @@ impl View {
         Point::new(self.platforms[0].pos_to_left(pos) + 16, 320)
     }
 
-    fn update_elinsa_position(&mut self, state: &GroundState) {
-        let position = self.platform_pt(state, state.get_elinsa_row());
+    fn update_elinsa_position(&mut self, state: &GearsState) {
+        let row = state.get_elinsa_row();
+        let position = self.platform_pt(state, row);
         self.core.theater_mut().set_actor_position(ELINSA_SLOT, position);
+        self.set_override_row(row);
     }
 
-    fn update_platform_positions(&mut self, state: &GroundState) {
-        for row in 0..GroundState::num_rows() {
+    fn update_platform_positions(&mut self, state: &GearsState) {
+        for row in 0..GearsState::num_rows() {
             self.platforms[row as usize].set_position(state.get_position(row));
         }
     }
 
-    fn shift_platform(&mut self, state: &mut GroundState, row: i32,
+    fn shift_platform(&mut self, state: &mut GearsState, row: i32,
                       mut delta: i32) {
-        let max_pos = GroundState::max_position();
-        let num_rows = GroundState::num_rows() as i32;
+        let num_rows = GearsState::num_rows() as i32;
+        let min_pos = GearsState::min_position_for_row(row);
+        let max_pos = GearsState::max_position_for_row(row);
         let original_position = state.get_position(row);
         let original_elinsa_row = state.get_elinsa_row();
         let mut top_seq: Vec<Box<SceneNode>> = Vec::new();
@@ -144,10 +157,10 @@ impl View {
             let mut elinsa_seq: Vec<Box<SceneNode>> = Vec::new();
             let old_pos = pos;
             pos += delta;
-            if pos < 0 {
+            if pos < min_pos {
                 debug_assert!(delta < 0);
-                pos = 0;
-                delta = -(delta + old_pos);
+                pos = min_pos;
+                delta = -(delta + (old_pos - min_pos));
                 debug_assert!(delta > 0);
             } else if pos > max_pos {
                 debug_assert!(delta > 0);
@@ -163,11 +176,12 @@ impl View {
             platform_seq.push(Box::new(QueueNode::new((row, pos))));
             platform_seq.push(Box::new(WaitNode::new(travel_time)));
             if elinsa_row >= 0 && elinsa_row < num_rows &&
-               row == elinsa_row - 1 {
+               (row == elinsa_row - 1 ||
+                ((row == 2 || row == 3) && row == elinsa_row - 2)) {
                 let impact = if pos > old_pos && elinsa_pos > old_pos &&
                                 elinsa_pos <= pos {
                     Some((Platform::travel_time(old_pos, elinsa_pos - 1),
-                          cmp::min(max_pos, elinsa_pos + 1)))
+                          cmp::min(10, elinsa_pos + 1)))
                 } else if pos < old_pos && elinsa_pos >= pos &&
                                 elinsa_pos < old_pos {
                     Some((Platform::travel_time(old_pos, elinsa_pos + 1),
@@ -192,21 +206,46 @@ impl View {
                     elinsa_seq.push(Box::new(JumpNode::new(ELINSA_SLOT,
                                                            dest,
                                                            time_to_fall)));
+                    elinsa_seq.push(Box::new(QueueNode::new((elinsa_row,
+                                                             -1))));
                 }
             } else if row == elinsa_row {
-                let impact = if row > 0 {
-                    let barrier_pos = state.get_position(row - 1);
-                    if pos > old_pos && barrier_pos > old_pos &&
-                       barrier_pos <= pos {
-                        Some(barrier_pos - 1)
-                    } else if pos < old_pos && barrier_pos < old_pos &&
-                       barrier_pos >= pos {
-                        Some(barrier_pos + 1)
+                let barrier_pos_1 = if row > 0 {
+                    state.get_position(row - 1)
+                } else {
+                    5
+                };
+                let barrier_pos_2 = if row == 4 || row == 5 {
+                    state.get_position(row - 2)
+                } else {
+                    barrier_pos_1
+                };
+                let impact = if pos > old_pos {
+                    if barrier_pos_1 > old_pos && barrier_pos_1 <= pos {
+                        if barrier_pos_2 > old_pos &&
+                           barrier_pos_2 < barrier_pos_1 {
+                            Some(barrier_pos_2 - 1)
+                        } else {
+                            Some(barrier_pos_1 - 1)
+                        }
+                    } else if barrier_pos_2 > old_pos && barrier_pos_2 <= pos {
+                        Some(barrier_pos_2 - 1)
                     } else {
                         None
                     }
                 } else {
-                    None
+                    if barrier_pos_1 < old_pos && barrier_pos_1 >= pos {
+                        if barrier_pos_2 < old_pos &&
+                           barrier_pos_2 > barrier_pos_1 {
+                            Some(barrier_pos_2 + 1)
+                        } else {
+                            Some(barrier_pos_1 + 1)
+                        }
+                    } else if barrier_pos_2 < old_pos && barrier_pos_2 >= pos {
+                        Some(barrier_pos_2 + 1)
+                    } else {
+                        None
+                    }
                 };
                 if let Some(new_elinsa_pos) = impact {
                     let time_to_hit = Platform::travel_time(elinsa_pos,
@@ -232,6 +271,8 @@ impl View {
                     elinsa_seq.push(Box::new(JumpNode::new(ELINSA_SLOT,
                                                            jump_dest,
                                                            time_to_fall)));
+                    elinsa_seq.push(Box::new(QueueNode::new((elinsa_row,
+                                                             -1))));
                 } else {
                     elinsa_pos = pos;
                     let dest = self.platform_pt_for_pos(row, elinsa_pos);
@@ -251,9 +292,9 @@ impl View {
 
         // If Elinsa fell to the floor, get back on the starting platform:
         if elinsa_row == num_rows && original_elinsa_row != num_rows {
-            let slide_time = 0.5 * Platform::travel_time(elinsa_pos, 0);
+            let slide_time = 0.5 * Platform::travel_time(elinsa_pos, 10);
             top_seq.push(Box::new(SlideNode::new(ELINSA_SLOT,
-                                                 self.floor_pt_for_pos(0),
+                                                 self.floor_pt_for_pos(10),
                                                  false,
                                                  false,
                                                  slide_time)));
@@ -263,37 +304,56 @@ impl View {
         }
 
         // Make Elinsa climb upwards:
-        if elinsa_row == num_rows && state.get_position(num_rows - 1) == 0 &&
-           state.get_position(num_rows - 2) != 0 {
+        let last_row = num_rows - 1;
+        let max_pos_for_last_row = GearsState::max_position_for_row(last_row);
+        if elinsa_row == num_rows &&
+           state.get_position(last_row) == max_pos_for_last_row &&
+           state.get_position(last_row - 1) != max_pos_for_last_row {
             elinsa_row -= 1;
             let dest = self.platform_pt(state, elinsa_row);
             top_seq.push(Box::new(SoundNode::new(Sound::small_jump())));
             top_seq.push(Box::new(JumpNode::new(ELINSA_SLOT, dest, 0.6)));
+            top_seq.push(Box::new(QueueNode::new((elinsa_row, -1))));
         }
         if elinsa_row < num_rows {
             while elinsa_row > 0 {
-                let pos_0 = state.get_position(elinsa_row);
+                let elinsa_pos = state.get_position(elinsa_row);
                 let pos_1 = state.get_position(elinsa_row - 1);
-                if (pos_0 - pos_1).abs() != 1 {
-                    break;
-                }
-                if elinsa_row >= 2 {
-                    let pos_2 = state.get_position(elinsa_row - 2);
-                    if pos_2 == pos_1 || pos_2 == pos_0 {
-                        break;
+                let pos_2 = if elinsa_row > 1 {
+                    state.get_position(elinsa_row - 2)
+                } else {
+                    5
+                };
+                let mut next_row = elinsa_row;
+                if (elinsa_pos - pos_1).abs() == 1 && pos_2 != pos_1 &&
+                   pos_2 != elinsa_pos &&
+                   ((elinsa_row != 5 && elinsa_row != 6) ||
+                    state.get_position(elinsa_row - 3) != pos_1) {
+                    next_row = elinsa_row - 1;
+                } else if (elinsa_row == 4 || elinsa_row == 5) &&
+                   (elinsa_pos - pos_2).abs() == 1 {
+                    let pos_3 = state.get_position(elinsa_row - 3);
+                    if pos_3 != pos_2 && pos_3 != elinsa_pos {
+                        next_row = elinsa_row - 2;
                     }
                 }
-                elinsa_row -= 1;
+                if next_row == elinsa_row {
+                    break;
+                }
+                elinsa_row = next_row;
                 let dest = self.platform_pt(state, elinsa_row);
                 top_seq.push(Box::new(SoundNode::new(Sound::small_jump())));
                 top_seq.push(Box::new(JumpNode::new(ELINSA_SLOT, dest, 0.6)));
+                top_seq.push(Box::new(QueueNode::new((elinsa_row, -1))));
             }
         }
-        if elinsa_row == 0 && state.get_position(0) == max_pos {
+        if elinsa_row == 0 &&
+           state.get_position(0) == GearsState::min_position_for_row(0) {
             elinsa_row -= 1;
             let dest = self.platform_pt(state, elinsa_row);
             top_seq.push(Box::new(SoundNode::new(Sound::small_jump())));
             top_seq.push(Box::new(JumpNode::new(ELINSA_SLOT, dest, 0.6)));
+            top_seq.push(Box::new(QueueNode::new((elinsa_row, -1))));
         }
         state.set_elinsa_row(elinsa_row);
         self.core.push_undo((row,
@@ -311,22 +371,20 @@ impl View {
 
 impl Element<Game, PuzzleCmd> for View {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
-        let state = &game.shifting_ground;
+        let state = &game.shift_gears;
         self.core.draw_back_layer(canvas);
-        if self.platforms_and_arrows_visible {
-            self.arrows.draw(&(), canvas);
-            self.platforms.draw(&(), canvas);
-        }
+        self.arrows.draw(&(), canvas);
+        self.platforms.draw(&(), canvas);
         self.core.draw_middle_layer(canvas);
         self.core.draw_front_layer(canvas, state);
     }
 
     fn handle_event(&mut self, event: &Event, game: &mut Game)
                     -> Action<PuzzleCmd> {
-        let state = &mut game.shifting_ground;
+        let state = &mut game.shift_gears;
         let mut action = self.core.handle_event(event, state);
         self.drain_queue();
-        if !action.should_stop() && self.platforms_and_arrows_visible {
+        if !action.should_stop() {
             let subaction = self.platforms.handle_event(event, &mut ());
             action.merge(subaction.but_no_value());
         }
@@ -339,7 +397,7 @@ impl Element<Game, PuzzleCmd> for View {
                 self.core.begin_outro_scene();
             }
         }
-        if !action.should_stop() && self.platforms_and_arrows_visible &&
+        if !action.should_stop() &&
            (event == &Event::ClockTick || !state.is_solved()) {
             let subaction = self.arrows.handle_event(event, &mut ());
             if let Some(&(row, delta)) = subaction.value() {
@@ -353,7 +411,7 @@ impl Element<Game, PuzzleCmd> for View {
 
 impl PuzzleView for View {
     fn info_text(&self, game: &Game) -> &'static str {
-        if game.shifting_ground.is_solved() {
+        if game.shift_gears.is_solved() {
             SOLVED_INFO_TEXT
         } else {
             INFO_BOX_TEXT
@@ -362,7 +420,7 @@ impl PuzzleView for View {
 
     fn undo(&mut self, game: &mut Game) {
         if let Some((row, dx, dy)) = self.core.pop_undo() {
-            let state = &mut game.shifting_ground;
+            let state = &mut game.shift_gears;
             let new_pos = state.get_position(row) - dx;
             let new_elinsa = state.get_elinsa_row() - dy;
             state.set_position(row, new_pos);
@@ -374,7 +432,7 @@ impl PuzzleView for View {
 
     fn redo(&mut self, game: &mut Game) {
         if let Some((row, dx, dy)) = self.core.pop_redo() {
-            let state = &mut game.shifting_ground;
+            let state = &mut game.shift_gears;
             let new_pos = state.get_position(row) + dx;
             let new_elinsa = state.get_elinsa_row() + dy;
             state.set_position(row, new_pos);
@@ -385,7 +443,7 @@ impl PuzzleView for View {
     }
 
     fn reset(&mut self, game: &mut Game) {
-        let state = &mut game.shifting_ground;
+        let state = &mut game.shift_gears;
         self.core.clear_undo_redo();
         state.reset();
         self.update_platform_positions(state);
@@ -393,7 +451,7 @@ impl PuzzleView for View {
     }
 
     fn solve(&mut self, game: &mut Game) {
-        let state = &mut game.shifting_ground;
+        let state = &mut game.shift_gears;
         state.solve();
         self.update_platform_positions(state);
         self.update_elinsa_position(state);
@@ -406,10 +464,12 @@ impl PuzzleView for View {
 
 const INFO_BOX_TEXT: &'static str = "\
 Your goal is to help Elinsa reach the ledge in the
-upper-right corner.
+upper-left corner.
 
 $M{Tap}{Click} the arrow buttons to move a platform to
-the left or to the right.
+the left or to the right.  If Elinsa is standing on
+that platform, it will move by 4 instead of by
+its normal distance.
 
 Elinsa will jump up onto the next platform when
 it is adjacent to her.";

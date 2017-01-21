@@ -17,52 +17,45 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod attic;
-mod black;
-mod blame;
-mod cube;
-mod discon;
-mod dots;
-mod failure;
-mod gears;
-mod ground;
-mod info;
-mod levelup;
-mod line;
-mod loglevel;
-mod map;
-mod missed;
-mod mode;
-mod password;
-mod prolog;
-mod puzzle;
-mod syrup;
-mod title;
-mod tread;
-mod wrecked;
+use elements::{Ast, Scene, TalkPos, TalkStyle};
+use gui::{Resources, Sound};
 
-pub use self::attic::run_a_light_in_the_attic;
-pub use self::black::run_black_and_blue;
-pub use self::blame::run_shift_the_blame;
-pub use self::cube::run_cube_tangle;
-pub use self::discon::run_disconnected;
-pub use self::dots::run_connect_the_dots;
-pub use self::failure::run_system_failure;
-pub use self::gears::run_shift_gears;
-pub use self::ground::run_shifting_ground;
-pub use self::info::{SOLVED_INFO_TEXT, run_info_box};
-pub use self::levelup::run_level_up;
-pub use self::line::run_cross_the_line;
-pub use self::loglevel::run_log_level;
-pub use self::map::run_map_screen;
-pub use self::missed::run_missed_connections;
-pub use self::mode::Mode;
-pub use self::password::run_password_file;
-pub use self::prolog::run_prolog;
-pub use self::puzzle::run_puzzle;
-pub use self::syrup::run_light_syrup;
-pub use self::title::run_title_screen;
-pub use self::tread::run_tread_lightly;
-pub use self::wrecked::run_wrecked_angle;
+// ========================================================================= //
+
+pub const ELINSA_SLOT: i32 = 0;
+
+// ========================================================================= //
+
+pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::SetBg("shift_gears"),
+            Ast::Place(0, "chars/elinsa", 0, (592, 304)),
+            Ast::Slide(0, (464, 304), false, true, 0.75),
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(0, TalkStyle::Normal, TalkPos::NW, "Let's do this."),
+        ]),
+    ];
+    Ast::compile_scene(resources, ast)
+}
+
+// ========================================================================= //
+
+pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::solve_puzzle_chime()),
+            Ast::Wait(1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(0, TalkStyle::Normal, TalkPos::SE, "Done and done."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(0, (-16, 64), true, false, 0.75),
+            Ast::Remove(0),
+        ]),
+    ];
+    Ast::compile_scene(resources, ast)
+}
 
 // ========================================================================= //

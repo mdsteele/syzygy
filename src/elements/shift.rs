@@ -33,7 +33,8 @@ pub struct ArrowPair {
     left: i32,
     top: i32,
     row: i32,
-    delta: i32,
+    default_delta: i32,
+    delta_override: Option<i32>,
     blink_left: i32,
     blink_right: i32,
 }
@@ -48,10 +49,19 @@ impl ArrowPair {
             left: topleft.0,
             top: topleft.1,
             row: row,
-            delta: delta,
+            default_delta: delta,
+            delta_override: None,
             blink_left: 0,
             blink_right: 0,
         }
+    }
+
+    pub fn set_delta_override(&mut self, delta_override: Option<i32>) {
+        self.delta_override = delta_override;
+    }
+
+    fn delta(&self) -> i32 {
+        self.delta_override.unwrap_or(self.default_delta)
     }
 
     fn rect(&self) -> Rect { Rect::new(self.left, self.top, 48, 16) }
@@ -70,13 +80,18 @@ impl Element<(), (i32, i32)> for ArrowPair {
         } else {
             &self.sprites[3]
         };
+        let middle = if self.delta_override.is_none() {
+            &self.sprites[4]
+        } else {
+            &self.sprites[5]
+        };
         canvas.draw_sprite(left_arrow, Point::new(3, 0));
         canvas.draw_sprite(right_arrow, Point::new(31, 0));
-        canvas.draw_sprite(&self.sprites[4], Point::new(17, 0));
+        canvas.draw_sprite(middle, Point::new(17, 0));
         canvas.draw_text(&self.font,
                          Align::Center,
                          Point::new(24, 12),
-                         &format!("{}", self.delta));
+                         &format!("{}", self.delta()));
     }
 
     fn handle_event(&mut self, event: &Event, _state: &mut ())
@@ -103,10 +118,10 @@ impl Element<(), (i32, i32)> for ArrowPair {
                 if rect.contains(pt) {
                     if pt.x() - rect.x() <= (rect.width() / 2) as i32 {
                         self.blink_left = ARROW_BLINK_FRAMES;
-                        Action::redraw().and_return((self.row, -self.delta))
+                        Action::redraw().and_return((self.row, -self.delta()))
                     } else {
                         self.blink_right = ARROW_BLINK_FRAMES;
-                        Action::redraw().and_return((self.row, self.delta))
+                        Action::redraw().and_return((self.row, self.delta()))
                     }
                 } else {
                     Action::ignore()

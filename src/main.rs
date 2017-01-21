@@ -182,6 +182,9 @@ fn main() {
                         Location::PasswordFile => {
                             modes::run_password_file(&mut window, game)
                         }
+                        Location::ShiftGears => {
+                            modes::run_shift_gears(&mut window, game)
+                        }
                         Location::ShiftTheBlame => {
                             modes::run_shift_the_blame(&mut window, game)
                         }

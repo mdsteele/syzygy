@@ -84,7 +84,6 @@ impl View {
                 }
                 _ => {}
             }
-            // TODO: drain queue
         }
     }
 }

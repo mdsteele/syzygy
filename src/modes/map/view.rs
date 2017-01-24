@@ -39,6 +39,7 @@ const NODES: &'static [(Location, (i32, i32))] = &[
     (Location::CrossTheLine, (125, 225)),
     (Location::CubeTangle, (125, 280)),
     (Location::Disconnected, (100, 150)),
+    (Location::DoubleCross, (175, 225)),
     (Location::LevelUp, (225, 125)),
     (Location::LightSyrup, (250, 50)),
     (Location::LogLevel, (125, 175)),

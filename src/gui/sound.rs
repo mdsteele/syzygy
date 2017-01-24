@@ -84,6 +84,17 @@ impl Sound {
                        .adshr(0.0, 0.0, 0.25, 0.1, 0.1))
     }
 
+    pub fn mid_puzzle_chime() -> Sound {
+        let duty = Wave::sine(3.0) * 0.1 + 0.75;
+        let c4 = Wave::triangle(261.62, duty.clone())
+                     .adshr(0.01, 0.1, 0.5, 0.0, 0.2);
+        let e4 = Wave::triangle(329.62, duty.clone())
+                     .adshr(0.01, 0.1, 0.5, 0.0, 0.2);
+        let g4 = Wave::triangle(391.99, duty.clone())
+                     .adshr(0.01, 0.1, 0.5, 0.0, 0.4);
+        Sound::new((c4 + e4.delayed(0.05) + g4.delayed(0.1)))
+    }
+
     pub fn solve_puzzle_chime() -> Sound {
         let duty = Wave::sine(3.0) * 0.1 + 0.75;
         let c5 = Wave::triangle(523.25, duty.clone());

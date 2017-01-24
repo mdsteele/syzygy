@@ -17,34 +17,22 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod access;
-mod color;
-mod crossword;
-mod data;
-mod device;
-mod direction;
-mod game;
-mod location;
-mod path;
-mod prefs;
-mod puzzles;
-mod util;
+mod scenes;
+mod view;
 
-pub use self::access::Access;
-pub use self::color::PrimaryColor;
-pub use self::crossword::{CrosswordState, ValidChars};
-pub use self::data::SaveData;
-pub use self::device::{Device, DeviceGrid};
-pub use self::direction::Direction;
-pub use self::game::Game;
-pub use self::location::Location;
-pub use self::path::get_default_save_file_path;
-pub use self::prefs::Prefs;
-pub use self::puzzles::{AtticState, BlackState, BlameState, CubeState,
-                        DisconState, DotsState, DoubleState, FailureState,
-                        GearsState, GroundState, LevelUpState, LineState,
-                        LogLevelState, MissedState, PasswordState,
-                        PrologState, PuzzleState, SyrupState, TreadState,
-                        WreckedState};
+use gui::Window;
+use modes::{Mode, run_puzzle};
+use save::Game;
+use self::view::View;
+
+// ========================================================================= //
+
+pub fn run_double_cross(window: &mut Window, game: &mut Game) -> Mode {
+    let view = {
+        let visible_rect = window.visible_rect();
+        View::new(&mut window.resources(), visible_rect, &game.double_cross)
+    };
+    run_puzzle(window, game, view)
+}
 
 // ========================================================================= //

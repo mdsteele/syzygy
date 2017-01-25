@@ -32,7 +32,8 @@ const NAMEBOX_WIDTH: u32 = 114;
 const NAMEBOX_HEIGHT: u32 = 16;
 const SCROLL_SPEED: i32 = 2;
 const PAUSE_TEXT: &'static str = "$M{Tap}{Click} anywhere to continue";
-const PAUSE_TEXT_MARGIN: i32 = 2;
+const PAUSE_TEXT_MARGIN_HORZ: i32 = 5;
+const PAUSE_TEXT_MARGIN_VERT: i32 = 3;
 
 // ========================================================================= //
 
@@ -134,21 +135,21 @@ impl HudButton {
     fn new(resources: &mut Resources, location: Location, value: HudCmd,
            center_x: i32, bottom: i32)
            -> HudButton {
-        let sprites = resources.get_sprites("hud_buttons");
-        let index = match value {
-            HudCmd::Back if location == Location::Map => 0,
-            HudCmd::Back => 2,
-            HudCmd::Info => 4,
-            HudCmd::Undo => 6,
-            HudCmd::Redo => 8,
-            HudCmd::Reset => 10,
-            HudCmd::Replay => 12,
-            HudCmd::Solve => 14,
+        let sprites = resources.get_sprites("hud/buttons");
+        let (index, width) = match value {
+            HudCmd::Back if location == Location::Map => (0, 48),
+            HudCmd::Back => (2, 46),
+            HudCmd::Info => (4, 46),
+            HudCmd::Undo => (6, 50),
+            HudCmd::Redo => (8, 50),
+            HudCmd::Reset => (10, 54),
+            HudCmd::Replay => (12, 60),
+            HudCmd::Solve => (14, 54),
         };
         let sprite = sprites[index].clone();
         let rect = Rect::new(center_x - sprite.width() as i32 / 2,
                              bottom - sprite.height() as i32,
-                             sprite.width(),
+                             width,
                              sprite.height());
         HudButton {
             base_sprite: sprite,
@@ -233,18 +234,23 @@ impl Element<HudInput, HudCmd> for HudButton {
 // ========================================================================= //
 
 struct HudNamebox {
+    sprites: Vec<Sprite>,
     font: Rc<Font>,
 }
 
 impl HudNamebox {
     fn new(resources: &mut Resources) -> HudNamebox {
-        HudNamebox { font: resources.get_font("roman") }
+        HudNamebox {
+            sprites: resources.get_sprites("hud/namebox"),
+            font: resources.get_font("roman"),
+        }
     }
 }
 
 impl Element<HudInput, HudCmd> for HudNamebox {
     fn draw(&self, input: &HudInput, canvas: &mut Canvas) {
-        canvas.clear((200, 200, 200));
+        canvas.draw_sprite(&self.sprites[0], Point::new(0, 0));
+        canvas.fill_rect((200, 200, 200), Rect::new(2, 2, 110, 14));
         let start = Point::new(canvas.width() as i32 / 2, 12);
         canvas.draw_text(&self.font, Align::Center, start, input.name);
     }
@@ -260,6 +266,7 @@ impl Element<HudInput, HudCmd> for HudNamebox {
 struct PauseIndicator {
     paragraph: Paragraph,
     outer_rect: Rect,
+    mid_rect: Rect,
     inner_rect: Rect,
 }
 
@@ -270,21 +277,27 @@ impl PauseIndicator {
                                        Align::Center,
                                        PAUSE_TEXT);
         let inner_width = paragraph.min_width();
-        let outer_width = inner_width + 2 * PAUSE_TEXT_MARGIN;
+        let outer_width = inner_width + 2 * PAUSE_TEXT_MARGIN_HORZ;
         let inner_height = paragraph.height();
-        let outer_height = inner_height + 2 * PAUSE_TEXT_MARGIN as u32;
+        let outer_height = inner_height + 2 * PAUSE_TEXT_MARGIN_VERT as u32;
         let outer_rect = Rect::new(visible.x() +
                                    (visible.width() as i32 - outer_width) / 2,
                                    visible.top(),
                                    outer_width as u32,
                                    outer_height);
-        let inner_rect = Rect::new(outer_rect.x() + PAUSE_TEXT_MARGIN,
-                                   outer_rect.y() + PAUSE_TEXT_MARGIN,
+        let mid_rect = Rect::new(outer_rect.x() + 1,
+                                 outer_rect.y() - 1,
+                                 outer_rect.width() - 2,
+                                 outer_rect.height());
+        let inner_rect = Rect::new(outer_rect.x() + PAUSE_TEXT_MARGIN_HORZ,
+                                   outer_rect.y() + PAUSE_TEXT_MARGIN_VERT -
+                                   1,
                                    inner_width as u32,
                                    inner_height);
         PauseIndicator {
             paragraph: paragraph,
             outer_rect: outer_rect,
+            mid_rect: mid_rect,
             inner_rect: inner_rect,
         }
     }
@@ -294,6 +307,7 @@ impl Element<HudInput, HudCmd> for PauseIndicator {
     fn draw(&self, input: &HudInput, canvas: &mut Canvas) {
         if input.is_paused {
             canvas.fill_rect((255, 255, 255), self.outer_rect);
+            canvas.draw_rect((0, 0, 0), self.mid_rect);
             let mut canvas = canvas.subcanvas(self.inner_rect);
             self.paragraph.draw(&mut canvas);
         }

@@ -43,6 +43,8 @@ impl Scene {
         }
     }
 
+    pub fn empty() -> Scene { Scene::new(Vec::new()) }
+
     pub fn begin(&mut self, theater: &mut Theater) {
         if !self.began {
             if !self.nodes.is_empty() {

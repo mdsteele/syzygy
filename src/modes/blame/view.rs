@@ -45,7 +45,7 @@ impl View {
         let core = PuzzleCore::new(resources, visible, state, intro, outro);
         let mut view = View {
             core: core,
-            animation: Scene::new(Vec::new()),
+            animation: Scene::empty(),
             platforms: vec![
                 Platform::new(resources, (112,  88), state.get_position(0)),
                 Platform::new(resources, (112, 120), state.get_position(1)),
@@ -437,6 +437,7 @@ impl PuzzleView for View {
 
     fn undo(&mut self, game: &mut Game) {
         if let Some((row_1, dx_1, dx_2, dy)) = self.core.pop_undo() {
+            self.animation = Scene::empty();
             let state = &mut game.shift_the_blame;
             let row_2 = row_1 + 1;
             let new_pos_1 = state.get_position(row_1) - dx_1;

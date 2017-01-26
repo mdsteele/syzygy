@@ -20,7 +20,7 @@
 use std::collections::BTreeSet;
 use toml;
 
-use save::{Access, PrimaryColor, Location};
+use save::{Access, Location, PrimaryColor};
 use super::PuzzleState;
 use super::super::util::{ACCESS_KEY, pop_array};
 

@@ -20,8 +20,8 @@
 use std::cmp;
 
 use elements::{PuzzleCmd, PuzzleCore, PuzzleView, Scene};
-use elements::cutscene::{JumpNode, SceneNode, SequenceNode, SlideNode,
-                         ParallelNode, QueueNode, SoundNode, WaitNode};
+use elements::cutscene::{JumpNode, ParallelNode, QueueNode, SceneNode,
+                         SequenceNode, SlideNode, SoundNode, WaitNode};
 use elements::shift::{ArrowPair, Platform};
 use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sound};
 use modes::SOLVED_INFO_TEXT;

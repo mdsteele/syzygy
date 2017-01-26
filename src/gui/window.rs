@@ -29,7 +29,7 @@ use super::canvas::{Align, Canvas};
 use super::element::Element;
 use super::event::Event;
 use super::font::Font;
-use super::resources::{Resources, ResourceCache};
+use super::resources::{ResourceCache, Resources};
 use super::sound::{Sound, SoundMixer, SoundQueue};
 
 // ========================================================================= //

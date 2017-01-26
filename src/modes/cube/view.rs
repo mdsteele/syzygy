@@ -20,7 +20,7 @@
 use elements::{PuzzleCmd, PuzzleCore, PuzzleView};
 use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sprite};
 use modes::SOLVED_INFO_TEXT;
-use save::{Direction, Game, PuzzleState, CubeState};
+use save::{CubeState, Direction, Game, PuzzleState};
 use super::scenes::{compile_intro_scene, compile_outro_scene};
 
 // ========================================================================= //

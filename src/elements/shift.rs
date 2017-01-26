@@ -20,7 +20,7 @@
 use std::cmp::{max, min};
 use std::rc::Rc;
 
-use gui::{Action, Align, Canvas, Element, Event, Font, FRAME_DELAY_MILLIS,
+use gui::{Action, Align, Canvas, Element, Event, FRAME_DELAY_MILLIS, Font,
           Point, Rect, Resources, Sprite};
 
 // ========================================================================= //

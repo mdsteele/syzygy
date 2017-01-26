@@ -20,7 +20,7 @@
 use std::default::Default;
 use toml;
 
-use save::{Access, Device, DeviceGrid, Direction, PrimaryColor, Location};
+use save::{Access, Device, DeviceGrid, Direction, Location, PrimaryColor};
 use super::PuzzleState;
 use super::super::util::{ACCESS_KEY, pop_array};
 

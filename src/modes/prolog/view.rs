@@ -19,7 +19,7 @@
 
 use elements::{Hud, HudCmd, HudInput, Scene, ScreenFade, Theater};
 use gui::{Action, Canvas, Element, Event, Rect, Resources};
-use save::{PrologState, PuzzleState, Game, Location};
+use save::{Game, Location, PrologState, PuzzleState};
 use super::scenes::compile_scene;
 
 // ========================================================================= //

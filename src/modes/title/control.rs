@@ -21,7 +21,7 @@ use gui::{Element, Event, Window};
 use modes::{Mode, run_info_box};
 use save::SaveData;
 
-use super::view::{ABOUT_BOX_TEXT, ConfirmEraseView, Cmd, View};
+use super::view::{ABOUT_BOX_TEXT, Cmd, ConfirmEraseView, View};
 
 // ========================================================================= //
 

@@ -20,8 +20,8 @@
 use std::cmp::{max, min};
 use std::rc::Rc;
 
-use elements::{CrosswordView, TalkPos, Paragraph, PuzzleCmd, PuzzleCore,
-               PuzzleView};
+use elements::{CrosswordView, Paragraph, PuzzleCmd, PuzzleCore, PuzzleView,
+               TalkPos};
 use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
           Resources, Sound, Sprite};
 use modes::SOLVED_INFO_TEXT;

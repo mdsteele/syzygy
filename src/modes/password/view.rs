@@ -20,9 +20,10 @@
 use std::cmp::{max, min};
 use std::rc::Rc;
 
-use elements::{CrosswordView, PuzzleCmd, PuzzleCore, PuzzleView};
+use elements::{CrosswordView, TalkPos, Paragraph, PuzzleCmd, PuzzleCore,
+               PuzzleView};
 use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
-          Resources, Sound};
+          Resources, Sound, Sprite};
 use modes::SOLVED_INFO_TEXT;
 use save::{Game, PasswordState, PuzzleState};
 use super::scenes::{compile_intro_scene, compile_outro_scene};
@@ -39,6 +40,8 @@ enum UndoRedo {
 
 pub struct View {
     core: PuzzleCore<UndoRedo>,
+    speech_bubble: Vec<Sprite>,
+    paragraphs: [(Rc<Paragraph>, TalkPos); 6],
     crosswords: [CrosswordView; 6],
     slider: PasswordSlider,
 }
@@ -51,12 +54,19 @@ impl View {
         let core = PuzzleCore::new(resources, visible, state, intro, outro);
         let mut view = View {
             core: core,
-            crosswords: [CrosswordView::new(resources, 264, 130, ELINSA_OFFS),
-                         CrosswordView::new(resources, 264, 130, ARGONY_OFFS),
-                         CrosswordView::new(resources, 276, 130, TEZURE_OFFS),
-                         CrosswordView::new(resources, 276, 130, YTTRIS_OFFS),
-                         CrosswordView::new(resources, 212, 130, UGRENT_OFFS),
-                         CrosswordView::new(resources, 276, 130, RELYNG_OFFS)],
+            speech_bubble: resources.get_sprites("speech/normal"),
+            paragraphs: [make_speech(resources, TalkPos::E, ELINSA_SPEECH),
+                         make_speech(resources, TalkPos::W, ARGONY_SPEECH),
+                         make_speech(resources, TalkPos::NE, TEZURE_SPEECH),
+                         make_speech(resources, TalkPos::NW, YTTRIS_SPEECH),
+                         make_speech(resources, TalkPos::E, UGRENT_SPEECH),
+                         make_speech(resources, TalkPos::W, RELYNG_SPEECH)],
+            crosswords: [CrosswordView::new(resources, 264, 116, ELINSA_OFFS),
+                         CrosswordView::new(resources, 264, 116, ARGONY_OFFS),
+                         CrosswordView::new(resources, 276, 116, TEZURE_OFFS),
+                         CrosswordView::new(resources, 276, 116, YTTRIS_OFFS),
+                         CrosswordView::new(resources, 212, 116, UGRENT_OFFS),
+                         CrosswordView::new(resources, 276, 116, RELYNG_OFFS)],
             slider: PasswordSlider::new(resources),
         };
         for (slot, crossword) in view.crosswords.iter_mut().enumerate() {
@@ -65,12 +75,34 @@ impl View {
             }
         }
         view.drain_queue();
+        if state.is_visited() && !state.is_solved() {
+            view.display_crossword_speech(state);
+        }
         view
     }
 
     fn drain_queue(&mut self) {
         for (_, _) in self.core.drain_queue() {
             // TODO drain queue
+        }
+    }
+
+    fn display_crossword_speech(&mut self, state: &PasswordState) -> bool {
+        let theater = self.core.theater_mut();
+        for other in 0..6 {
+            theater.clear_actor_speech(other);
+        }
+        let slot = state.active_slot();
+        if !state.crossword_is_done(slot) {
+            let (paragraph, talk_pos) = self.paragraphs[slot as usize].clone();
+            theater.set_actor_speech(slot,
+                                     self.speech_bubble.clone(),
+                                     (255, 255, 255),
+                                     talk_pos,
+                                     paragraph);
+            true
+        } else {
+            false
         }
     }
 }
@@ -113,22 +145,23 @@ impl Element<Game, PuzzleCmd> for View {
                 action.merge(subaction.but_no_value());
             } else {
                 let slot = state.active_slot();
-                let crossword_view = &mut self.crosswords[slot as usize];
+                let idx = slot as usize;
                 if event == &Event::ClockTick ||
                    !state.crossword_is_done(slot) {
                     let subaction = {
                         let crossword = state.crossword_mut(slot);
-                        crossword_view.handle_event(event, crossword)
+                        self.crosswords[idx].handle_event(event, crossword)
                     };
                     if let Some(&(row, index, chr)) = subaction.value() {
                         let old_chr = state.crossword(slot)
                                            .get_char(row, index);
                         state.crossword_mut(slot).set_char(row, index, chr);
                         if state.check_crossword(slot) {
-                            crossword_view.reset_cursor();
-                            crossword_view.animate_center_word();
+                            self.crosswords[idx].reset_cursor();
+                            self.crosswords[idx].animate_center_word();
                             let sound = Sound::solve_puzzle_chime();
                             action = action.and_play_sound(sound);
+                            self.display_crossword_speech(state);
                             self.core.clear_undo_redo();
                         } else {
                             self.core.push_undo(UndoRedo::Crossword(slot,
@@ -150,6 +183,10 @@ impl Element<Game, PuzzleCmd> for View {
                         if let Some(slot) = opt_slot {
                             state.set_active_slot(slot);
                             self.crosswords[slot as usize].reset_cursor();
+                            if self.display_crossword_speech(state) {
+                                action =
+                                    action.and_play_sound(Sound::talk_hi());
+                            }
                             action.merge(Action::redraw().and_stop());
                         }
                     }
@@ -341,6 +378,30 @@ impl Element<PasswordState, (i32, i32)> for PasswordSlider {
 }
 
 // ========================================================================= //
+
+const ELINSA_SPEECH: &'static str = "\
+If you don't do something yourself, it's not
+like you can expect it to work out well.";
+const ARGONY_SPEECH: &'static str = "\
+Those who don't learn from the past won't
+have much luck in the future either.";
+const TEZURE_SPEECH: &'static str = "\
+I may be new around here, but I'm committed
+to helping us all to get through this.";
+const YTTRIS_SPEECH: &'static str = "\
+I feel frightened, yet inspired!
+Who knows what will happen next?";
+const UGRENT_SPEECH: &'static str = "\
+Don't get sloppy, or you're
+going to endanger us all.";
+const RELYNG_SPEECH: &'static str = "\
+Sometimes you have to hide your
+own cards to uncover the truth.";
+
+fn make_speech(resources: &mut Resources, pos: TalkPos, text: &str)
+               -> (Rc<Paragraph>, TalkPos) {
+    (Rc::new(Paragraph::new(resources, "roman", Align::Center, text)), pos)
+}
 
 const ELINSA_OFFS: &'static [(i32, &'static str)] = &[(5, ""), (5, ""),
                                                       (5, ""), (6, ""),

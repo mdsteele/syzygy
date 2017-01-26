@@ -31,13 +31,13 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Place(3, "chars/yttris", 0, (592, 160)),
             Ast::Slide(3, (480, 160), false, true, 1.0),
             Ast::Place(4, "chars/ugrent", 0, (-16, 320)),
-            Ast::Slide(4, (176, 320), false, true, 1.0),
+            Ast::Slide(4, (144, 320), false, true, 1.0),
             Ast::Place(0, "chars/elinsa", 0, (-16, 96)),
-            Ast::Slide(0, (176, 96), false, true, 1.0),
+            Ast::Slide(0, (122, 96), false, true, 1.0),
             Ast::Place(1, "chars/argony", 0, (592, 96)),
-            Ast::Slide(1, (400, 96), false, true, 1.0),
+            Ast::Slide(1, (454, 96), false, true, 1.0),
             Ast::Place(5, "chars/relyng", 0, (592, 320)),
-            Ast::Slide(5, (400, 320), false, true, 1.0),
+            Ast::Slide(5, (432, 320), false, true, 1.0),
         ]),
     ];
     Ast::compile_scene(resources, ast)

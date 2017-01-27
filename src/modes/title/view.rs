@@ -21,7 +21,7 @@ use std::rc::Rc;
 
 use gui::{Action, Align, Canvas, Element, Event, Font, GroupElement, Point,
           Rect, Resources, Sound, Sprite, SubrectElement};
-use elements::DialogBox;
+use elements::{DialogBox, FadeStyle, ScreenFade};
 use save::SaveData;
 
 // ========================================================================= //
@@ -49,6 +49,7 @@ pub enum Cmd {
 // ========================================================================= //
 
 pub struct View {
+    screen_fade: ScreenFade<Cmd>,
     elements: GroupElement<SaveData, Cmd>,
 }
 
@@ -112,7 +113,10 @@ impl View {
                                  BOTTOM_BUTTONS_HEIGHT);
             SubrectElement::new(EraseGameButton::new(resources), rect)
         }));
-        View { elements: GroupElement::new(elements) }
+        View {
+            screen_fade: ScreenFade::new(resources, FadeStyle::Uniform),
+            elements: GroupElement::new(elements),
+        }
     }
 }
 
@@ -120,11 +124,21 @@ impl Element<SaveData, Cmd> for View {
     fn draw(&self, data: &SaveData, canvas: &mut Canvas) {
         canvas.clear((64, 64, 128));
         self.elements.draw(data, canvas);
+        self.screen_fade.draw(&(), canvas);
     }
 
     fn handle_event(&mut self, event: &Event, data: &mut SaveData)
                     -> Action<Cmd> {
-        self.elements.handle_event(event, data)
+        let mut action = self.screen_fade.handle_event(event, &mut ());
+        if !action.should_stop() {
+            let mut subaction = self.elements.handle_event(event, data);
+            if let Some(&Cmd::StartGame) = subaction.value() {
+                self.screen_fade.fade_out_and_return(Cmd::StartGame);
+                subaction = subaction.but_no_value();
+            }
+            action.merge(subaction);
+        }
+        action
     }
 }
 

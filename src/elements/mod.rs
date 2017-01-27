@@ -30,7 +30,7 @@ pub mod shift;
 pub use self::crossword::CrosswordView;
 pub use self::cutscene::{Ast, Scene, TalkPos, TalkStyle, Theater};
 pub use self::dialog::DialogBox;
-pub use self::fade::ScreenFade;
+pub use self::fade::{FadeStyle, ScreenFade};
 pub use self::hud::{Hud, HudCmd, HudInput};
 pub use self::lasers::{DangerSign, LaserCmd, LaserField};
 pub use self::paragraph::Paragraph;

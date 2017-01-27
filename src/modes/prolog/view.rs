@@ -17,7 +17,7 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use elements::{Hud, HudCmd, HudInput, Scene, ScreenFade, Theater};
+use elements::{FadeStyle, Hud, HudCmd, HudInput, Scene, ScreenFade, Theater};
 use gui::{Action, Canvas, Element, Event, Rect, Resources};
 use save::{Game, Location, PrologState, PuzzleState};
 use super::scenes::compile_scene;
@@ -53,7 +53,7 @@ impl View {
         let mut view = View {
             theater: theater,
             scene: scene,
-            screen_fade: ScreenFade::new(resources),
+            screen_fade: ScreenFade::new(resources, FadeStyle::TopBottom),
             hud: Hud::new(resources, visible, Location::ALightInTheAttic),
         };
         view.drain_queue();

@@ -20,7 +20,7 @@
 use std::cmp::min;
 use std::collections::HashMap;
 
-use elements::{Hud, HudCmd, HudInput, ScreenFade};
+use elements::{FadeStyle, Hud, HudCmd, HudInput, ScreenFade};
 use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sprite,
           SubrectElement};
 use save::{Access, Game, Location};
@@ -108,7 +108,7 @@ impl View {
             }
         }
         View {
-            screen_fade: ScreenFade::new(resources),
+            screen_fade: ScreenFade::new(resources, FadeStyle::Radial),
             hud: Hud::new(resources, visible, Location::Map),
             nodes: nodes,
             paths: paths,

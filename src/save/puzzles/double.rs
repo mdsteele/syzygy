@@ -40,7 +40,6 @@ const WORD_CLUES: &'static [(&'static str, &'static str)] = &[
     ("HIGH LOW", "euphoric / to moo"),
     ("UP DOWN", "out of bed / feathers"),
     ("EVEN ODD", "balanced / unusual"),
-    ("WAX WANE", "to polish / to become weaker"), // TODO: questionable
     ("FAST SLOW", "to abstain from food / dim-witted"),
     ("RISE FALL", "a hill / autumn"),
     ("HARD SOFT", "alcoholic / quiet"),
@@ -49,9 +48,8 @@ const WORD_CLUES: &'static [(&'static str, &'static str)] = &[
     ("WELL ILL", "a waterhole / a misfortune"),
     ("FIRST LAST", "foremost / to endure"),
     ("BLACK WHITE", "served without milk / part of the eye"),
-    ("COME GO", "to take place / a board game"), // TODO: questionable
-    ("RAISE SINK", "a salary increase / a wash basin"),
-    ("BOTTOM TOP", "one's rump / a spinning toy"),
+    ("SINK FLOAT", "a wash basin / a parade display"),
+    ("BOTTOM TOP", "Shakespearean donkey / a spinning toy"),
     ("OPEN CLOSE", "frank / nearby"),
     ("BREAK FIX", "an interruption / to rig"),
     ("SMOOTH ROUGH", "charming / outside the fairway"),

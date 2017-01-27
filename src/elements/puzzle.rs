@@ -17,7 +17,7 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use elements::{Hud, HudCmd, HudInput, Scene, ScreenFade, Theater};
+use elements::{FadeStyle, Hud, HudCmd, HudInput, Scene, ScreenFade, Theater};
 use gui::{Action, Canvas, Element, Event, Rect, Resources};
 use save::{Access, Game, PuzzleState};
 
@@ -82,7 +82,7 @@ impl<U: Clone> PuzzleCore<U> {
             middle_scene: None,
             outro_scene: outro_scene,
             hud: Hud::new(resources, visible, state.location()),
-            screen_fade: ScreenFade::new(resources),
+            screen_fade: ScreenFade::new(resources, FadeStyle::RightLeft),
             undo_stack: Vec::new(),
             redo_stack: Vec::new(),
             previously_solved: state.access() >= Access::Solved,

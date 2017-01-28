@@ -41,18 +41,23 @@ const WORD_CLUES: &'static [(&'static str, &'static str)] = &[
     ("UP DOWN", "out of bed / feathers"),
     ("EVEN ODD", "balanced / unusual"),
     ("FAST SLOW", "to abstain from food / dim-witted"),
+    ("TIGHT LOOSE", "miserly / at large"),
     ("RISE FALL", "a hill / autumn"),
+    ("LIVING DEAD", "a sufficient income / absolute"),
     ("HARD SOFT", "alcoholic / quiet"),
     ("BACK FRONT", "to support / to pay in advance"),
     ("IN OUT", "fashionable / three strikes"),
+    ("COMMON RARE", "a public park / barely cooked"),
     ("WELL ILL", "a waterhole / a misfortune"),
     ("FIRST LAST", "foremost / to endure"),
     ("BLACK WHITE", "served without milk / part of the eye"),
+    ("FRESH STALE", "impudent / hackneyed"),
     ("SINK FLOAT", "a wash basin / a parade display"),
     ("BOTTOM TOP", "Shakespearean donkey / a spinning toy"),
     ("OPEN CLOSE", "frank / nearby"),
     ("BREAK FIX", "an interruption / to rig"),
     ("SMOOTH ROUGH", "charming / outside the fairway"),
+    ("SOW REAP", "a female pig / to obtain"),
     ("HIT MISS", "a successful pop song / a young woman"),
     ("PLAIN FANCY", "a flat grassy area / to desire"),
     ("LIFT DROP", "an elevator / an iota of water"),
@@ -98,6 +103,10 @@ impl DoubleState {
         self.done = (0..(WORD_CLUES.len() as i32)).collect();
         self.current = 0;
     }
+
+    pub fn total_num_clues(&self) -> u32 { WORD_CLUES.len() as u32 }
+
+    pub fn num_clues_done(&self) -> u32 { self.done.len() as u32 }
 
     pub fn current_clue(&self) -> &str {
         debug_assert!(self.current >= 0 &&

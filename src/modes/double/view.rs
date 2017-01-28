@@ -189,7 +189,7 @@ impl Element<DoubleState, String> for InputDisplay {
         if !self.text.is_empty() {
             canvas.draw_text(&self.font,
                              Align::Center,
-                             Point::new(288, 136),
+                             Point::new(288, 137),
                              &self.text);
         }
     }
@@ -238,6 +238,11 @@ impl Element<DoubleState, ()> for ClueDisplay {
                          Align::Center,
                          Point::new(288, 94),
                          state.current_clue());
+        let num_done = state.num_clues_done();
+        if num_done > 0 {
+            let width = 94 * num_done / state.total_num_clues();
+            canvas.fill_rect((95, 95, 95), Rect::new(241, 161, width, 14));
+        }
     }
 
     fn handle_event(&mut self, _: &Event, _: &mut DoubleState) -> Action<()> {

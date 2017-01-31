@@ -44,7 +44,7 @@ pub use self::puzzles::{AtticState, BlackState, BlameState, CubeState,
                         DisconState, DotsState, DoubleState, FailureState,
                         GearsState, GroundState, LevelUpState, LineState,
                         LogLevelState, MissedState, PasswordState,
-                        PrologState, PuzzleState, SyrupState, TreadState,
-                        WreckedState};
+                        PrologState, PuzzleState, SauceState, SyrupState,
+                        TreadState, WreckedState};
 
 // ========================================================================= //

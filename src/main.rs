@@ -158,6 +158,9 @@ fn main() {
                         Location::ConnectTheDots => {
                             modes::run_connect_the_dots(&mut window, game)
                         }
+                        Location::CrossSauce => {
+                            modes::run_cross_sauce(&mut window, game)
+                        }
                         Location::CrossTheLine => {
                             modes::run_cross_the_line(&mut window, game)
                         }

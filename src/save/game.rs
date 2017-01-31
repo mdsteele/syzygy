@@ -25,7 +25,8 @@ use super::puzzles::{AtticState, BlackState, BlameState, CubeState,
                      DisconState, DotsState, DoubleState, FailureState,
                      GearsState, GroundState, LevelUpState, LineState,
                      LogLevelState, MissedState, PasswordState, PrologState,
-                     PuzzleState, SyrupState, TreadState, WreckedState};
+                     PuzzleState, SauceState, SyrupState, TreadState,
+                     WreckedState};
 use super::util::{pop_table, to_table};
 
 // ========================================================================= //
@@ -42,6 +43,7 @@ pub struct Game {
     pub a_light_in_the_attic: AtticState,
     pub black_and_blue: BlackState,
     pub connect_the_dots: DotsState,
+    pub cross_sauce: SauceState,
     pub cross_the_line: LineState,
     pub cube_tangle: CubeState,
     pub disconnected: DisconState,
@@ -80,6 +82,8 @@ impl Game {
                 pop_table(table_ref, Location::BlackAndBlue.key())),
             connect_the_dots: DotsState::from_toml(
                 pop_table(table_ref, Location::ConnectTheDots.key())),
+            cross_sauce: SauceState::from_toml(
+                pop_table(table_ref, Location::CrossSauce.key())),
             cross_the_line: LineState::from_toml(
                 pop_table(table_ref, Location::CrossTheLine.key())),
             cube_tangle: CubeState::from_toml(
@@ -148,6 +152,7 @@ impl Game {
             Location::ALightInTheAttic => &self.a_light_in_the_attic,
             Location::BlackAndBlue => &self.black_and_blue,
             Location::ConnectTheDots => &self.connect_the_dots,
+            Location::CrossSauce => &self.cross_sauce,
             Location::CrossTheLine => &self.cross_the_line,
             Location::CubeTangle => &self.cube_tangle,
             Location::Disconnected => &self.disconnected,
@@ -173,6 +178,7 @@ impl Game {
             Location::ALightInTheAttic => &mut self.a_light_in_the_attic,
             Location::BlackAndBlue => &mut self.black_and_blue,
             Location::ConnectTheDots => &mut self.connect_the_dots,
+            Location::CrossSauce => &mut self.cross_sauce,
             Location::CrossTheLine => &mut self.cross_the_line,
             Location::CubeTangle => &mut self.cube_tangle,
             Location::Disconnected => &mut self.disconnected,

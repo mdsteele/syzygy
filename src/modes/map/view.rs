@@ -36,6 +36,7 @@ const NODES: &'static [(Location, (i32, i32))] = &[
     (Location::ALightInTheAttic, (200, 50)),
     (Location::BlackAndBlue, (225, 75)),
     (Location::ConnectTheDots, (150, 150)),
+    (Location::CrossSauce, (225, 225)),
     (Location::CrossTheLine, (125, 225)),
     (Location::CubeTangle, (125, 280)),
     (Location::Disconnected, (100, 150)),

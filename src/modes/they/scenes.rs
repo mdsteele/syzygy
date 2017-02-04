@@ -17,34 +17,42 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod access;
-mod color;
-mod crossword;
-mod data;
-mod device;
-mod direction;
-mod game;
-mod location;
-mod path;
-mod prefs;
-mod puzzles;
-mod util;
+use elements::{Ast, Scene, TalkPos, TalkStyle};
+use gui::{Resources, Sound};
 
-pub use self::access::Access;
-pub use self::color::PrimaryColor;
-pub use self::crossword::{CrosswordState, ValidChars};
-pub use self::data::SaveData;
-pub use self::device::{Device, DeviceGrid};
-pub use self::direction::Direction;
-pub use self::game::Game;
-pub use self::location::Location;
-pub use self::path::get_default_save_file_path;
-pub use self::prefs::Prefs;
-pub use self::puzzles::{AtticState, BlackState, BlameState, CubeState,
-                        DisconState, DotsState, DoubleState, FailureState,
-                        GearsState, GroundState, LevelUpState, LineState,
-                        LogLevelState, MissedState, PasswordState,
-                        PrologState, PuzzleState, SauceState, SyrupState,
-                        TheYState, TreadState, WreckedState};
+// ========================================================================= //
+
+pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::SetBg("the_y_factor"),
+            Ast::Place(0, "chars/tezure", 0, (-16, 320)),
+            Ast::Slide(0, (88, 320), true, true, 1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE,
+                      "Whoa.")
+        ]),
+    ];
+    Ast::compile_scene(resources, ast)
+}
+
+// ========================================================================= //
+
+pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::transform_final()),
+            Ast::Wait(2.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE,
+                      "That's better."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(0, (-16, 320), true, false, 1.0),
+            Ast::Remove(0),
+        ]),
+    ];
+    Ast::compile_scene(resources, ast)
+}
 
 // ========================================================================= //

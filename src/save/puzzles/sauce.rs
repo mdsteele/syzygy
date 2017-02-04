@@ -55,7 +55,7 @@ const WORD_CLUES: &'static [(&'static str, &'static str)] = &[
     ("GOOSE TRUCE", "a ceasefire between waterbirds"),
     ("HIGH EYE", "a raised visual organ"),
     ("JEWEL TOOL", "a gemstone utensil"),
-    ("GNAWED ROD", "a chewed pole"),
+    ("GNAWED ROD", "a chewed pole"), // TODO: questionable
     ("PARTIAL MARSHAL", "a biased parade leader"),
     ("SCORED BOARD", "a notched wooden plank"),
     ("FENCE TENTS", "to sell stolen cloth shelters"),

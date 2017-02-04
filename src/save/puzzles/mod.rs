@@ -36,6 +36,7 @@ mod prolog;
 mod puzzle;
 mod sauce;
 mod syrup;
+mod they;
 mod tread;
 mod wrecked;
 
@@ -58,6 +59,7 @@ pub use self::prolog::PrologState;
 pub use self::puzzle::PuzzleState;
 pub use self::sauce::SauceState;
 pub use self::syrup::SyrupState;
+pub use self::they::TheYState;
 pub use self::tread::TreadState;
 pub use self::wrecked::WreckedState;
 

@@ -50,6 +50,7 @@ const NODES: &'static [(Location, (i32, i32))] = &[
     (Location::ShiftTheBlame, (275, 75)),
     (Location::ShiftingGround, (150, 250)),
     (Location::SystemFailure, (360, 200)),
+    (Location::TheYFactor, (100, 200)),
     (Location::TreadLightly, (300, 50)),
     (Location::WreckedAngle, (100, 250)),
 ];

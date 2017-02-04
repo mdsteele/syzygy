@@ -200,6 +200,9 @@ fn main() {
                         Location::SystemFailure => {
                             modes::run_system_failure(&mut window, game)
                         }
+                        Location::TheYFactor => {
+                            modes::run_the_y_factor(&mut window, game)
+                        }
                         Location::TreadLightly => {
                             modes::run_tread_lightly(&mut window, game)
                         }

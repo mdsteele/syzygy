@@ -25,8 +25,8 @@ use super::puzzles::{AtticState, BlackState, BlameState, CubeState,
                      DisconState, DotsState, DoubleState, FailureState,
                      GearsState, GroundState, LevelUpState, LineState,
                      LogLevelState, MissedState, PasswordState, PrologState,
-                     PuzzleState, SauceState, SyrupState, TreadState,
-                     WreckedState};
+                     PuzzleState, SauceState, SyrupState, TheYState,
+                     TreadState, WreckedState};
 use super::util::{pop_table, to_table};
 
 // ========================================================================= //
@@ -57,6 +57,7 @@ pub struct Game {
     pub shift_the_blame: BlameState,
     pub shifting_ground: GroundState,
     pub system_failure: FailureState,
+    pub the_y_factor: TheYState,
     pub tread_lightly: TreadState,
     pub wrecked_angle: WreckedState,
     pub ever_clicked_info: bool,
@@ -110,6 +111,8 @@ impl Game {
                 pop_table(table_ref, Location::ShiftingGround.key())),
             system_failure: FailureState::from_toml(
                 pop_table(table_ref, Location::SystemFailure.key())),
+            the_y_factor: TheYState::from_toml(
+                pop_table(table_ref, Location::TheYFactor.key())),
             tread_lightly: TreadState::from_toml(
                 pop_table(table_ref, Location::TreadLightly.key())),
             wrecked_angle: WreckedState::from_toml(
@@ -166,6 +169,7 @@ impl Game {
             Location::ShiftTheBlame => &self.shift_the_blame,
             Location::ShiftingGround => &self.shifting_ground,
             Location::SystemFailure => &self.system_failure,
+            Location::TheYFactor => &self.the_y_factor,
             Location::TreadLightly => &self.tread_lightly,
             Location::WreckedAngle => &self.wrecked_angle,
         }
@@ -192,6 +196,7 @@ impl Game {
             Location::ShiftTheBlame => &mut self.shift_the_blame,
             Location::ShiftingGround => &mut self.shifting_ground,
             Location::SystemFailure => &mut self.system_failure,
+            Location::TheYFactor => &mut self.the_y_factor,
             Location::TreadLightly => &mut self.tread_lightly,
             Location::WreckedAngle => &mut self.wrecked_angle,
         }

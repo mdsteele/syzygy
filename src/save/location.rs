@@ -43,6 +43,7 @@ pub enum Location {
     ShiftTheBlame,
     ShiftingGround,
     SystemFailure,
+    TheYFactor,
     TreadLightly,
     WreckedAngle,
 }
@@ -71,6 +72,7 @@ impl Location {
             Location::ShiftTheBlame => "Shift the Blame",
             Location::ShiftingGround => "Shifting Ground",
             Location::SystemFailure => "System Failure",
+            Location::TheYFactor => "The Y Factor",
             Location::TreadLightly => "Tread Lightly",
             Location::WreckedAngle => "Wrecked Angle",
         }
@@ -97,6 +99,7 @@ impl Location {
             Location::ShiftTheBlame => Location::Map,
             Location::ShiftingGround => Location::Map,
             Location::SystemFailure => Location::PasswordFile,
+            Location::TheYFactor => Location::Map,
             Location::TreadLightly => Location::Map,
             Location::WreckedAngle => Location::ShiftingGround,
         }
@@ -123,6 +126,7 @@ impl Location {
             Location::ShiftTheBlame => vec![Location::BlackAndBlue],
             Location::ShiftingGround => vec![Location::WreckedAngle],
             Location::SystemFailure => vec![Location::LogLevel],
+            Location::TheYFactor => vec![Location::Prolog],
             Location::TreadLightly => vec![Location::LightSyrup],
             Location::WreckedAngle => vec![Location::Prolog],
         }
@@ -149,6 +153,7 @@ impl Location {
             Location::ShiftTheBlame => "shift_the_blame",
             Location::ShiftingGround => "shifting_ground",
             Location::SystemFailure => "system_failure",
+            Location::TheYFactor => "the_y_factor",
             Location::TreadLightly => "tread_lightly",
             Location::WreckedAngle => "wrecked_angle",
         }
@@ -194,6 +199,7 @@ const ALL_LOCATIONS: &'static [Location] = &[Location::Map,
                                              Location::ShiftingGround,
                                              Location::SystemFailure,
                                              Location::TreadLightly,
+                                             Location::TheYFactor,
                                              Location::WreckedAngle];
 
 // ========================================================================= //

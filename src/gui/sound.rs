@@ -40,48 +40,52 @@ impl Sound {
     fn new(wave: Wave) -> Sound { Sound { wave: wave } }
 
     pub fn beep() -> Sound {
-        Sound::new(Wave::pulse(440.0, 0.5).adshr(0.0, 0.0, 0.25, 0.3, 0.05))
+        Sound::new(Wave::pulse(440.0, 0.5).adshr(0.0, 0.0, 0.25, 0.3, 0.05) *
+                   0.4)
     }
 
     pub fn bridge_break() -> Sound {
         Sound::new(Wave::noise(Wave::slide(400.0, -150.0, 0.0))
                        .adshr(0.0, 0.0, 0.75, 0.0, 0.6) *
-                   Wave::sine(8.0))
+                   Wave::sine(8.0) * 0.4)
     }
 
     pub fn bridge_crack() -> Sound {
-        Sound::new(Wave::noise(1000.0).adshr(0.0, 0.0, 0.5, 0.0, 0.1))
+        Sound::new(Wave::noise(1000.0).adshr(0.0, 0.0, 0.5, 0.0, 0.1) * 0.4)
     }
 
     pub fn character_collision() -> Sound {
-        Sound::new(Wave::noise(2000.0).adshr(0.0, 0.0, 0.5, 0.0, 0.25))
+        Sound::new(Wave::noise(2000.0).adshr(0.0, 0.0, 0.5, 0.0, 0.25) * 0.4)
     }
 
     pub fn device_drop() -> Sound {
         Sound::new(Wave::noise(Wave::from(5000.0) +
                                Wave::from(-3000.0).delayed(0.05))
-                       .adshr(0.0, 0.0, 0.25, 0.0, 0.075))
+                       .adshr(0.0, 0.0, 0.25, 0.0, 0.075) *
+                   0.4)
     }
 
     pub fn device_pickup() -> Sound {
         Sound::new(Wave::noise(Wave::from(2000.0) +
                                Wave::from(3000.0).delayed(0.05))
-                       .adshr(0.0, 0.0, 0.25, 0.0, 0.075))
+                       .adshr(0.0, 0.0, 0.25, 0.0, 0.075) *
+                   0.4)
     }
 
     pub fn device_rotate() -> Sound {
-        Sound::new(Wave::noise(8000.0).adshr(0.0, 0.0, 0.25, 0.0, 0.05))
+        Sound::new(Wave::noise(8000.0).adshr(0.0, 0.0, 0.25, 0.0, 0.05) * 0.4)
     }
 
     pub fn platform_shift(num_times: i32) -> Sound {
         Sound::new(Wave::noise(800.0)
                        .adshr(0.071, 0.0, 1.0, 0.0, 0.142)
-                       .repeated(num_times) * 0.25)
+                       .repeated(num_times) * 0.1)
     }
 
     pub fn small_jump() -> Sound {
         Sound::new(Wave::pulse(Wave::slide(200.0, 750.0, 1500.0), 0.25)
-                       .adshr(0.0, 0.0, 0.25, 0.1, 0.1))
+                       .adshr(0.0, 0.0, 0.25, 0.1, 0.1) *
+                   0.4)
     }
 
     pub fn mid_puzzle_chime() -> Sound {
@@ -102,34 +106,49 @@ impl Sound {
         let g5 = Wave::triangle(783.99, duty.clone());
         let c6 = Wave::triangle(1046.50, duty);
         let chord = c5 + e5 + g5 + c6;
-        Sound::new(chord.adshr(0.01, 0.1, 0.5, 0.0, 0.75) * 0.75)
+        Sound::new(chord.adshr(0.01, 0.1, 0.5, 0.0, 0.75) * 0.3)
     }
 
     pub fn talk_annoyed_hi() -> Sound {
         Sound::new(Wave::pulse(Wave::slide(120.0, 200.0, -3000.0), 0.2)
-                       .adshr(0.0, 0.0, 0.25, 0.25, 0.2))
+                       .adshr(0.0, 0.0, 0.25, 0.25, 0.2) *
+                   0.5)
     }
 
     pub fn talk_annoyed_lo() -> Sound {
         Sound::new(Wave::pulse(Wave::slide(100.0, 200.0, -3000.0), 0.2)
-                       .adshr(0.0, 0.0, 0.25, 0.25, 0.2))
+                       .adshr(0.0, 0.0, 0.25, 0.25, 0.2) *
+                   0.5)
     }
 
     pub fn talk_hi() -> Sound {
         Sound::new(Wave::noise(Wave::slide(7000.0, 20000.0, 0.0))
                        .adshr(0.05, 0.0, 1.0, 0.0, 0.15) *
-                   0.25)
+                   0.1)
     }
 
     pub fn talk_lo() -> Sound {
         Sound::new(Wave::noise(Wave::slide(7000.0, -20000.0, 0.0))
                        .adshr(0.05, 0.0, 1.0, 0.0, 0.15) *
-                   0.25)
+                   0.1)
     }
 
     pub fn talk_thought() -> Sound {
         Sound::new((Wave::noise(5000.0) * Wave::sine(6.0))
                        .adshr(0.0, 0.0, 0.08, 0.1, 0.2))
+    }
+
+    pub fn transform_final() -> Sound {
+        let freq = Wave::sine(10.0) * 2.0 + 200.0;
+        let duty = Wave::sine(0.2) * 0.45 + 0.5;
+        Sound::new(Wave::triangle(freq, duty).adshr(0.1, 0.0, 1.0, 0.9, 0.4))
+    }
+
+    pub fn transform_step(step: usize) -> Sound {
+        let pitch = 275.0 + 25.0 * step as f32;
+        let freq = (Wave::sine(10.0) * 0.01 + 1.0) * pitch;
+        Sound::new(Wave::triangle(freq, 0.85).adshr(0.05, 0.0, 1.0, 0.0, 0.4) *
+                   0.2)
     }
 }
 

@@ -21,8 +21,8 @@ use std::cmp;
 use std::rc::Rc;
 
 use elements::Paragraph;
-use gui::{Action, Align, Canvas, Element, Event, Font, GroupElement, Point,
-          Rect, Resources, Sprite, SubrectElement};
+use gui::{Action, Align, Canvas, Element, Event, Font, GroupElement, KeyMod,
+          Keycode, Point, Rect, Resources, Sprite, SubrectElement};
 use save::{Access, Location};
 
 // ========================================================================= //
@@ -225,6 +225,15 @@ impl Element<HudInput, HudCmd> for HudButton {
                 self.blink_frames = BLINK_FRAMES;
                 self.flashing = false;
                 Action::redraw().and_return(self.value)
+            }
+            &Event::KeyDown(Keycode::Z, keymod) if self.is_enabled(input) => {
+                if keymod == KeyMod::command() && self.value == HudCmd::Undo ||
+                   keymod == (KeyMod::command() | KeyMod::shift()) &&
+                   self.value == HudCmd::Redo {
+                    Action::redraw().and_return(self.value)
+                } else {
+                    Action::ignore()
+                }
             }
             _ => Action::ignore(),
         }

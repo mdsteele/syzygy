@@ -98,17 +98,25 @@ pub struct KeyMod {
 }
 
 impl KeyMod {
+    pub fn none() -> KeyMod { KeyMod { bits: 0x0 } }
+
+    pub fn shift() -> KeyMod { KeyMod { bits: 0x1 } }
+
+    pub fn alt() -> KeyMod { KeyMod { bits: 0x2 } }
+
+    pub fn command() -> KeyMod { KeyMod { bits: 0x4 } }
+
     fn from_sdl2(kmod: sdl2::keyboard::Mod) -> KeyMod {
-        let mut result = NONE;
+        let mut result = KeyMod::none();
 
         let sdl2_shift = sdl2::keyboard::LSHIFTMOD | sdl2::keyboard::RSHIFTMOD;
         if kmod.intersects(sdl2_shift) {
-            result |= SHIFT;
+            result |= KeyMod::shift();
         }
 
         let sdl2_alt = sdl2::keyboard::LALTMOD | sdl2::keyboard::RALTMOD;
         if kmod.intersects(sdl2_alt) {
-            result |= ALT;
+            result |= KeyMod::alt();
         }
 
         let sdl2_command = if cfg!(any(target_os = "ios",
@@ -118,7 +126,7 @@ impl KeyMod {
             sdl2::keyboard::LCTRLMOD | sdl2::keyboard::RCTRLMOD
         };
         if kmod.intersects(sdl2_command) {
-            result |= COMMAND;
+            result |= KeyMod::command();
         }
 
         result
@@ -135,10 +143,5 @@ impl BitOr for KeyMod {
 impl BitOrAssign for KeyMod {
     fn bitor_assign(&mut self, rhs: KeyMod) { self.bits |= rhs.bits; }
 }
-
-pub const NONE: KeyMod = KeyMod { bits: 0x0 };
-pub const SHIFT: KeyMod = KeyMod { bits: 0x1 };
-pub const ALT: KeyMod = KeyMod { bits: 0x2 };
-pub const COMMAND: KeyMod = KeyMod { bits: 0x4 };
 
 // ========================================================================= //

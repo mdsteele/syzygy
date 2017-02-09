@@ -59,15 +59,15 @@ impl Sound {
     }
 
     pub fn device_drop() -> Sound {
-        Sound::new(Wave::noise(Wave::from(5000.0) +
-                               Wave::from(-3000.0).delayed(0.05))
+        Sound::new(Wave::noise(Wave::from(2000.0) +
+                               Wave::from(3000.0).delayed(0.05))
                        .adshr(0.0, 0.0, 0.25, 0.0, 0.075) *
                    0.4)
     }
 
     pub fn device_pickup() -> Sound {
-        Sound::new(Wave::noise(Wave::from(2000.0) +
-                               Wave::from(3000.0).delayed(0.05))
+        Sound::new(Wave::noise(Wave::from(5000.0) +
+                               Wave::from(-3000.0).delayed(0.05))
                        .adshr(0.0, 0.0, 0.25, 0.0, 0.075) *
                    0.4)
     }

@@ -44,6 +44,7 @@ const NODES: &'static [(Location, (i32, i32))] = &[
     (Location::LevelUp, (225, 125)),
     (Location::LightSyrup, (250, 50)),
     (Location::LogLevel, (125, 175)),
+    (Location::MemoryLane, (175, 280)),
     (Location::MissedConnections, (200, 150)),
     (Location::PasswordFile, (400, 200)),
     (Location::ShiftGears, (200, 250)),

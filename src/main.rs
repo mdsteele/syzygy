@@ -20,6 +20,7 @@
 extern crate ahi;
 extern crate getopts;
 extern crate itersynth;
+extern crate num_integer;
 extern crate rand;
 extern crate sdl2;
 extern crate toml;
@@ -181,6 +182,9 @@ fn main() {
                         }
                         Location::LogLevel => {
                             modes::run_log_level(&mut window, game)
+                        }
+                        Location::MemoryLane => {
+                            modes::run_memory_lane(&mut window, game)
                         }
                         Location::MissedConnections => {
                             modes::run_missed_connections(&mut window, game)

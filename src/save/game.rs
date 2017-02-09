@@ -23,10 +23,10 @@ use toml;
 use super::location::Location;
 use super::puzzles::{AtticState, BlackState, BlameState, CubeState,
                      DisconState, DotsState, DoubleState, FailureState,
-                     GearsState, GroundState, LevelUpState, LineState,
-                     LogLevelState, MissedState, PasswordState, PrologState,
-                     PuzzleState, SauceState, SyrupState, TheYState,
-                     TreadState, WreckedState};
+                     GearsState, GroundState, LaneState, LevelUpState,
+                     LineState, LogLevelState, MissedState, PasswordState,
+                     PrologState, PuzzleState, SauceState, SyrupState,
+                     TheYState, TreadState, WreckedState};
 use super::util::{pop_table, to_table};
 
 // ========================================================================= //
@@ -51,6 +51,7 @@ pub struct Game {
     pub level_up: LevelUpState,
     pub light_syrup: SyrupState,
     pub log_level: LogLevelState,
+    pub memory_lane: LaneState,
     pub missed_connections: MissedState,
     pub password_file: PasswordState,
     pub shift_gears: GearsState,
@@ -99,6 +100,8 @@ impl Game {
                 pop_table(table_ref, Location::LightSyrup.key())),
             log_level: LogLevelState::from_toml(
                 pop_table(table_ref, Location::LogLevel.key())),
+            memory_lane: LaneState::from_toml(
+                pop_table(table_ref, Location::MemoryLane.key())),
             missed_connections: MissedState::from_toml(
                 pop_table(table_ref, Location::MissedConnections.key())),
             password_file: PasswordState::from_toml(
@@ -163,6 +166,7 @@ impl Game {
             Location::LevelUp => &self.level_up,
             Location::LightSyrup => &self.light_syrup,
             Location::LogLevel => &self.log_level,
+            Location::MemoryLane => &self.memory_lane,
             Location::MissedConnections => &self.missed_connections,
             Location::PasswordFile => &self.password_file,
             Location::ShiftGears => &self.shift_gears,
@@ -190,6 +194,7 @@ impl Game {
             Location::LevelUp => &mut self.level_up,
             Location::LightSyrup => &mut self.light_syrup,
             Location::LogLevel => &mut self.log_level,
+            Location::MemoryLane => &mut self.memory_lane,
             Location::MissedConnections => &mut self.missed_connections,
             Location::PasswordFile => &mut self.password_file,
             Location::ShiftGears => &mut self.shift_gears,

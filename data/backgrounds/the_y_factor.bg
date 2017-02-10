@@ -4,7 +4,7 @@
 >blue_ells
 >green_pipes
 >miniblocks
->gray_blocks
+>bg_miniblocks
 
         DB                                      DB  DBDB
         DB                                      DB  DBDB
@@ -16,12 +16,12 @@ DADADD        EOEOEOEOEOEOEOEOEOEOEOEOEOEOEOEO      DB
 DADADADADE    EOACACACACEOACACACACEOACACACACEO
               EIEIEIEIEIEIEIEIEIEIEIEIEIEIEIEI          BCBABABDAAAABCBA
                                                                       CD
-                                                                      CI
-
-
-                            AE  AE  AE  AE  AE  AE  AE  AE
-                            AB  AB  AB  AB  AB  AB  AB  AB
-                            AB  AB  AB  AB  AB  AB  AB  AB
+              FK                                                      CI
+              FOFBFG
+              FOFLFO
+              FDFOFO        AE  AE  AE  AE  AE  AE  AE  AE
+                FMFH        AB  AB  AB  AB  AB  AB  AB  AB
+                FC          AB  AB  AB  AB  AB  AB  AB  AB
 BABABABABD                  AB  AB  AB  AB  AB  AB  AB  AB
 CDCACACB    BCBABABABD    BKBIBIBIBIBIBIBIBIBIBIBIBIBIBIBIBL  BCBABABABA
 CDCACACB      CDCACB      BMBJBJBJBJBJBJBJBJBJBJBJBJBJBJBJBN  DCCDCACACA

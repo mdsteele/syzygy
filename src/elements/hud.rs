@@ -22,7 +22,7 @@ use std::rc::Rc;
 
 use elements::Paragraph;
 use gui::{Action, Align, Canvas, Element, Event, Font, GroupElement, KeyMod,
-          Keycode, Point, Rect, Resources, Sprite, SubrectElement};
+          Keycode, Point, Rect, Resources, Sound, Sprite, SubrectElement};
 use save::{Access, Location};
 
 // ========================================================================= //
@@ -179,6 +179,18 @@ impl HudButton {
             HudCmd::Solve => active && input.access == Access::Replaying,
         }
     }
+
+    fn click_action(&self) -> Action<HudCmd> {
+        let mut action = Action::redraw().and_return(self.value);
+        if self.value == HudCmd::Undo {
+            action = action.and_play_sound(Sound::undo());
+        } else if self.value == HudCmd::Redo {
+            action = action.and_play_sound(Sound::redo());
+        } else if self.value == HudCmd::Reset {
+            action = action.and_play_sound(Sound::reset());
+        }
+        action
+    }
 }
 
 impl Element<HudInput, HudCmd> for HudButton {
@@ -224,13 +236,13 @@ impl Element<HudInput, HudCmd> for HudButton {
                                      self.rect.contains(pt) => {
                 self.blink_frames = BLINK_FRAMES;
                 self.flashing = false;
-                Action::redraw().and_return(self.value)
+                self.click_action()
             }
             &Event::KeyDown(Keycode::Z, keymod) if self.is_enabled(input) => {
                 if keymod == KeyMod::command() && self.value == HudCmd::Undo ||
                    keymod == (KeyMod::command() | KeyMod::shift()) &&
                    self.value == HudCmd::Redo {
-                    Action::redraw().and_return(self.value)
+                    self.click_action()
                 } else {
                     Action::ignore()
                 }

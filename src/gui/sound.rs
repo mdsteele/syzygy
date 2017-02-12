@@ -150,6 +150,23 @@ impl Sound {
         Sound::new(Wave::triangle(freq, 0.85).adshr(0.05, 0.0, 1.0, 0.0, 0.4) *
                    0.2)
     }
+
+    pub fn undo() -> Sound {
+        Sound::new(Wave::pulse(Wave::from(-30.0).delayed(0.06) + 150.0, 0.5)
+                       .adshr(0.0, 0.0, 0.1, 0.1, 0.25))
+    }
+
+    pub fn redo() -> Sound {
+        Sound::new(Wave::pulse(Wave::from(30.0).delayed(0.06) + 120.0, 0.5)
+                       .adshr(0.0, 0.0, 0.1, 0.1, 0.25))
+    }
+
+    pub fn reset() -> Sound {
+        Sound::new(Wave::pulse(Wave::slide(135.0, -30.0, 0.0) +
+                               Wave::pulse(8.0, 0.5) * 15.0,
+                               0.5)
+                       .adshr(0.0, 0.0, 0.1, 0.1, 0.75))
+    }
 }
 
 // ========================================================================= //

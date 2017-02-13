@@ -18,6 +18,7 @@
 // +--------------------------------------------------------------------------+
 
 extern crate ahi;
+extern crate app_dirs;
 extern crate getopts;
 extern crate itersynth;
 extern crate num_integer;

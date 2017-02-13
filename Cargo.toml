@@ -10,7 +10,7 @@ app_dirs = "1.1"
 getopts = "0.2"
 num-integer = "0.1"
 rand = "0.3"
-sdl2 = { version = "0.22", features = ["use_mac_framework"] }
+sdl2 = { version = "0.28", features = ["use_mac_framework"] }
 toml = "0.3"
 
 [dependencies.ahi]

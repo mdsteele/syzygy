@@ -18,7 +18,7 @@
 // +--------------------------------------------------------------------------+
 
 use sdl2;
-use sdl2::mouse::Mouse;
+use sdl2::mouse::MouseButton;
 use sdl2::rect::Point;
 use std::ops::{BitOr, BitOrAssign};
 
@@ -58,11 +58,11 @@ impl Event {
                     None
                 }
             }
-            &sdl2::event::Event::MouseButtonDown { mouse_btn: Mouse::Left,
-                                                   x, y, .. } => {
+            &sdl2::event::Event::MouseButtonDown {
+                mouse_btn: MouseButton::Left, x, y, .. } => {
               Some(Event::MouseDown(Point::new(x, y)))
             }
-            &sdl2::event::Event::MouseButtonUp { mouse_btn: Mouse::Left,
+            &sdl2::event::Event::MouseButtonUp { mouse_btn: MouseButton::Left,
                                                  .. } => {
               Some(Event::MouseUp)
             }

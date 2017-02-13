@@ -113,7 +113,7 @@ impl<'a> Canvas<'a> {
                            Some(Rect::new(top_left.x(),
                                           top_left.y(),
                                           sprite.width(),
-                                          sprite.height())));
+                                          sprite.height()))).unwrap();
     }
 
     pub fn draw_sprite_transposed(&mut self, sprite: &Sprite,

@@ -31,7 +31,7 @@ pub struct BlackState {
 }
 
 impl BlackState {
-    pub fn from_toml(table: toml::Table) -> BlackState {
+    pub fn from_toml(table: toml::value::Table) -> BlackState {
         let access = Access::from_toml(table.get(ACCESS_KEY));
         BlackState { access: access }
     }
@@ -51,7 +51,7 @@ impl PuzzleState for BlackState {
     fn reset(&mut self) {} // TODO
 
     fn to_toml(&self) -> toml::Value {
-        let mut table = toml::Table::new();
+        let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         toml::Value::Table(table)
     }

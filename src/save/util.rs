@@ -24,26 +24,28 @@ use toml;
 
 pub const ACCESS_KEY: &'static str = "access";
 
-pub fn pop_array(table: &mut toml::Table, key: &str) -> toml::Array {
+pub fn pop_array(table: &mut toml::value::Table, key: &str)
+                 -> toml::value::Array {
     if let Some(value) = table.remove(key) {
         to_array(value)
     } else {
-        toml::Array::new()
+        toml::value::Array::new()
     }
 }
 
-pub fn pop_table(table: &mut toml::Table, key: &str) -> toml::Table {
+pub fn pop_table(table: &mut toml::value::Table, key: &str)
+                 -> toml::value::Table {
     if let Some(value) = table.remove(key) {
         to_table(value)
     } else {
-        toml::Table::new()
+        toml::value::Table::new()
     }
 }
 
-pub fn to_array(value: toml::Value) -> toml::Array {
+pub fn to_array(value: toml::Value) -> toml::value::Array {
     match value {
         toml::Value::Array(array) => array,
-        _ => toml::Array::new(),
+        _ => toml::value::Array::new(),
     }
 }
 
@@ -69,10 +71,10 @@ pub fn to_string(value: toml::Value) -> String {
     }
 }
 
-pub fn to_table(value: toml::Value) -> toml::Table {
+pub fn to_table(value: toml::Value) -> toml::value::Table {
     match value {
         toml::Value::Table(table) => table,
-        _ => toml::Table::new(),
+        _ => toml::value::Table::new(),
     }
 }
 

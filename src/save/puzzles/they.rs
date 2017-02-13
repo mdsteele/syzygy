@@ -44,7 +44,7 @@ pub struct TheYState {
 }
 
 impl TheYState {
-    pub fn from_toml(mut table: toml::Table) -> TheYState {
+    pub fn from_toml(mut table: toml::value::Table) -> TheYState {
         let access = Access::from_toml(table.get(ACCESS_KEY));
         let sequence = if access.is_solved() {
             SOLVED_SEQUENCE.iter().cloned().collect()
@@ -128,7 +128,7 @@ impl PuzzleState for TheYState {
     }
 
     fn to_toml(&self) -> toml::Value {
-        let mut table = toml::Table::new();
+        let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.is_solved() && !self.sequence.is_empty() {
             let seq = self.sequence

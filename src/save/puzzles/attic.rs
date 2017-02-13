@@ -39,7 +39,7 @@ pub struct AtticState {
 }
 
 impl AtticState {
-    pub fn from_toml(mut table: toml::Table) -> AtticState {
+    pub fn from_toml(mut table: toml::value::Table) -> AtticState {
         let access = Access::from_toml(table.get(ACCESS_KEY));
         let toggled = if access == Access::Solved {
             SOLVED_TOGGLED.iter().cloned().collect()
@@ -188,7 +188,7 @@ impl PuzzleState for AtticState {
     fn reset(&mut self) { self.toggled.clear(); }
 
     fn to_toml(&self) -> toml::Value {
-        let mut table = toml::Table::new();
+        let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.is_solved() && !self.toggled.is_empty() {
             let toggled = self.toggled

@@ -36,7 +36,7 @@ pub struct DotsState {
 }
 
 impl DotsState {
-    pub fn from_toml(mut table: toml::Table) -> DotsState {
+    pub fn from_toml(mut table: toml::value::Table) -> DotsState {
         let access = Access::from_toml(table.get(ACCESS_KEY));
         let grid = if access == Access::Solved {
             DotsState::solved_grid()
@@ -146,7 +146,7 @@ impl PuzzleState for DotsState {
     fn reset(&mut self) { self.grid = DotsState::initial_grid(); }
 
     fn to_toml(&self) -> toml::Value {
-        let mut table = toml::Table::new();
+        let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if self.grid.is_modified() && !self.is_solved() {
             table.insert(GRID_KEY.to_string(), self.grid.to_toml());

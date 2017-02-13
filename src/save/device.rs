@@ -49,7 +49,8 @@ impl DeviceGrid {
         }
     }
 
-    pub fn from_toml(array: toml::Array, default: &DeviceGrid) -> DeviceGrid {
+    pub fn from_toml(array: toml::value::Array, default: &DeviceGrid)
+                     -> DeviceGrid {
         let mut grid = default.clone();
         grid.is_modified = true;
         let mut default_device_counts: HashMap<Device, i32> = HashMap::new();
@@ -94,14 +95,14 @@ impl DeviceGrid {
     }
 
     pub fn to_toml(&self) -> toml::Value {
-        let mut array = toml::Array::new();
+        let mut array = toml::value::Array::new();
         for row in 0..self.num_rows {
             for col in 0..self.num_cols {
                 let index = (row * self.num_cols + col) as usize;
                 if let Some((device, dir)) = self.grid[index] {
                     if device.is_moveable() {
-                        let mut table = toml::Table::new();
-                        let mut coords = toml::Array::new();
+                        let mut table = toml::value::Table::new();
+                        let mut coords = toml::value::Array::new();
                         coords.push(toml::Value::Integer(col as i64));
                         coords.push(toml::Value::Integer(row as i64));
                         table.insert(COORDS_KEY.to_string(),

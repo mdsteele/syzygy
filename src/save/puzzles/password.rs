@@ -87,7 +87,7 @@ pub struct PasswordState {
 }
 
 impl PasswordState {
-    pub fn from_toml(mut table: toml::Table) -> PasswordState {
+    pub fn from_toml(mut table: toml::value::Table) -> PasswordState {
         let access = Access::from_toml(table.get(ACCESS_KEY));
         let active_slot = max(0,
                               min(5,
@@ -245,7 +245,7 @@ impl PuzzleState for PasswordState {
     }
 
     fn to_toml(&self) -> toml::Value {
-        let mut table = toml::Table::new();
+        let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.is_solved() {
             table.insert(ACTIVE_SLOT_KEY.to_string(),
@@ -275,7 +275,7 @@ impl PuzzleState for PasswordState {
 
 // ========================================================================= //
 
-fn load(table: &mut toml::Table, access: Access, key: &str,
+fn load(table: &mut toml::value::Table, access: Access, key: &str,
         solved_words: &[&str])
         -> (bool, CrosswordState) {
     if access == Access::Solved {

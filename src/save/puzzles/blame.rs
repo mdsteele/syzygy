@@ -45,7 +45,7 @@ pub struct BlameState {
 }
 
 impl BlameState {
-    pub fn from_toml(mut table: toml::Table) -> BlameState {
+    pub fn from_toml(mut table: toml::value::Table) -> BlameState {
         let mut positions: Vec<i32> = pop_array(&mut table, POSITIONS_KEY)
                                           .into_iter()
                                           .map(to_i32)
@@ -156,7 +156,7 @@ impl PuzzleState for BlameState {
     }
 
     fn to_toml(&self) -> toml::Value {
-        let mut table = toml::Table::new();
+        let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.is_initial {
             let positions = self.positions

@@ -45,7 +45,7 @@ pub struct CubeState {
 }
 
 impl CubeState {
-    pub fn from_toml(mut table: toml::Table) -> CubeState {
+    pub fn from_toml(mut table: toml::value::Table) -> CubeState {
         let access = Access::from_toml(table.get(ACCESS_KEY));
         let grid = if access == Access::Solved {
             SOLVED_GRID.to_vec()
@@ -131,7 +131,7 @@ impl PuzzleState for CubeState {
     }
 
     fn to_toml(&self) -> toml::Value {
-        let mut table = toml::Table::new();
+        let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.is_initial && !self.is_solved() {
             let grid = self.grid

@@ -28,7 +28,7 @@ pub struct Prefs {
 impl Prefs {
     pub fn with_defaults() -> Prefs { Prefs { fullscreen: true } }
 
-    pub fn from_toml(table: &toml::Table) -> Prefs {
+    pub fn from_toml(table: &toml::value::Table) -> Prefs {
         let mut prefs = Prefs::with_defaults();
         if let Some(fullscreen) = table.get(FULLSCREEN_KEY)
                                        .and_then(toml::Value::as_bool) {
@@ -38,7 +38,7 @@ impl Prefs {
     }
 
     pub fn to_toml(&self) -> toml::Value {
-        let mut table = toml::Table::new();
+        let mut table = toml::value::Table::new();
         table.insert(FULLSCREEN_KEY.to_string(),
                      toml::Value::Boolean(self.fullscreen));
         toml::Value::Table(table)

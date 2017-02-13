@@ -55,7 +55,7 @@ pub struct WreckedState {
 }
 
 impl WreckedState {
-    pub fn from_toml(mut table: toml::Table) -> WreckedState {
+    pub fn from_toml(mut table: toml::value::Table) -> WreckedState {
         let mut grid: Vec<i8> = pop_array(&mut table, GRID_KEY)
                                     .iter()
                                     .filter_map(toml::Value::as_integer)
@@ -180,7 +180,7 @@ impl PuzzleState for WreckedState {
     }
 
     fn to_toml(&self) -> toml::Value {
-        let mut table = toml::Table::new();
+        let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.is_initial {
             let grid = self.grid

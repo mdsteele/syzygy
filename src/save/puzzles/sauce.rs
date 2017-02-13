@@ -74,7 +74,7 @@ pub struct SauceState {
 }
 
 impl SauceState {
-    pub fn from_toml(mut table: toml::Table) -> SauceState {
+    pub fn from_toml(mut table: toml::value::Table) -> SauceState {
         let num_clues = WORD_CLUES.len() as i32;
         let access = Access::from_toml(table.get(ACCESS_KEY));
         let current = min(max(0,
@@ -181,7 +181,7 @@ impl PuzzleState for SauceState {
     }
 
     fn to_toml(&self) -> toml::Value {
-        let mut table = toml::Table::new();
+        let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.access.is_solved() {
             table.insert(CURRENT_KEY.to_string(),

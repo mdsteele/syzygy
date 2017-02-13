@@ -45,7 +45,7 @@ pub struct GroundState {
 }
 
 impl GroundState {
-    pub fn from_toml(mut table: toml::Table) -> GroundState {
+    pub fn from_toml(mut table: toml::value::Table) -> GroundState {
         let mut positions: Vec<i32> = pop_array(&mut table, POSITIONS_KEY)
                                           .iter()
                                           .filter_map(toml::Value::as_integer)
@@ -149,7 +149,7 @@ impl PuzzleState for GroundState {
     }
 
     fn to_toml(&self) -> toml::Value {
-        let mut table = toml::Table::new();
+        let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.is_initial {
             let positions = self.positions

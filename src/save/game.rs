@@ -127,7 +127,7 @@ impl Game {
     }
 
     pub fn to_toml(&self) -> toml::Value {
-        let mut table = toml::Table::new();
+        let mut table = toml::value::Table::new();
         table.insert(LOCATION_KEY.to_string(), self.location.to_toml());
         for &location in Location::all() {
             if location != Location::Map {

@@ -24,6 +24,8 @@ use super::game::Game;
 use super::prefs::Prefs;
 use toml;
 
+use super::util::to_table;
+
 // ========================================================================= //
 
 const GAME_KEY: &'static str = "game";
@@ -46,7 +48,7 @@ impl SaveData {
         }
     }
 
-    fn from_toml(path: PathBuf, mut table: toml::Table) -> SaveData {
+    fn from_toml(path: PathBuf, mut table: toml::value::Table) -> SaveData {
         let mut data = SaveData::new(path);
         if let Some(prefs) = table.get(PREFS_KEY)
                                   .and_then(toml::Value::as_table) {
@@ -59,7 +61,7 @@ impl SaveData {
     }
 
     fn to_toml(&self) -> toml::Value {
-        let mut table = toml::Table::new();
+        let mut table = toml::value::Table::new();
         table.insert(PREFS_KEY.to_string(), self.prefs.to_toml());
         if let Some(ref game) = self.game {
             table.insert(GAME_KEY.to_string(), game.to_toml());
@@ -82,9 +84,9 @@ impl SaveData {
         let mut file = try!(fs::File::open(&path));
         let mut string = String::new();
         try!(file.read_to_string(&mut string));
-        match toml::Parser::new(&string).parse() {
-            Some(value) => Ok(SaveData::from_toml(path, value)),
-            None => {
+        match string.parse::<toml::Value>() {
+            Ok(value) => Ok(SaveData::from_toml(path, to_table(value))),
+            Err(_) => {
                 Err(io::Error::new(io::ErrorKind::InvalidData,
                                    "failed to parse toml"))
             }

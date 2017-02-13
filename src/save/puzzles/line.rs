@@ -55,7 +55,7 @@ pub struct LineState {
 }
 
 impl LineState {
-    pub fn from_toml(mut table: toml::Table) -> LineState {
+    pub fn from_toml(mut table: toml::value::Table) -> LineState {
         let access = Access::from_toml(table.get(ACCESS_KEY));
         let stage = if access == Access::Solved {
             GRIDS.len() as i32
@@ -177,7 +177,7 @@ impl PuzzleState for LineState {
     }
 
     fn to_toml(&self) -> toml::Value {
-        let mut table = toml::Table::new();
+        let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.is_solved() {
             table.insert(STAGE_KEY.to_string(),

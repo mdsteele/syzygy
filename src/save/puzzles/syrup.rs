@@ -66,7 +66,7 @@ pub struct SyrupState {
 }
 
 impl SyrupState {
-    pub fn from_toml(mut table: toml::Table) -> SyrupState {
+    pub fn from_toml(mut table: toml::value::Table) -> SyrupState {
         let table_ref = &mut table;
         let mut state = SyrupState {
             access: Access::from_toml(table_ref.get(ACCESS_KEY)),
@@ -189,7 +189,7 @@ impl PuzzleState for SyrupState {
     }
 
     fn to_toml(&self) -> toml::Value {
-        let mut table = toml::Table::new();
+        let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.is_solved() {
             table.insert(NEXT_COLOR_KEY.to_string(),
@@ -255,7 +255,8 @@ fn rebuild_grid(grid: &mut Vec<bool>, toggled: &BTreeSet<i32>,
     }
 }
 
-fn insert_toggled(table: &mut toml::Table, key: &str, tog: &BTreeSet<i32>) {
+fn insert_toggled(table: &mut toml::value::Table, key: &str,
+                  tog: &BTreeSet<i32>) {
     if !tog.is_empty() {
         let vec = tog.iter()
                      .map(|&idx| toml::Value::Integer(idx as i64))
@@ -264,7 +265,8 @@ fn insert_toggled(table: &mut toml::Table, key: &str, tog: &BTreeSet<i32>) {
     }
 }
 
-fn pop_toggled(mut table: &mut toml::Table, key: &str) -> BTreeSet<i32> {
+fn pop_toggled(mut table: &mut toml::value::Table, key: &str)
+               -> BTreeSet<i32> {
     pop_array(&mut table, key)
         .iter()
         .filter_map(toml::Value::as_integer)

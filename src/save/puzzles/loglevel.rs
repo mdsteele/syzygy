@@ -40,7 +40,7 @@ pub struct LogLevelState {
 }
 
 impl LogLevelState {
-    pub fn from_toml(mut table: toml::Table) -> LogLevelState {
+    pub fn from_toml(mut table: toml::value::Table) -> LogLevelState {
         let access = Access::from_toml(table.get(ACCESS_KEY));
         let words = if access == Access::Solved {
             CrosswordState::new(ValidChars::LettersAndNumbers, SOLVED_WORDS)
@@ -94,7 +94,7 @@ impl PuzzleState for LogLevelState {
     fn reset(&mut self) { self.words.reset(); }
 
     fn to_toml(&self) -> toml::Value {
-        let mut table = toml::Table::new();
+        let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.is_solved() {
             table.insert(WORDS_KEY.to_string(), self.words.to_toml());

@@ -36,7 +36,7 @@ pub struct FailureState {
 }
 
 impl FailureState {
-    pub fn from_toml(table: toml::Table) -> FailureState {
+    pub fn from_toml(table: toml::value::Table) -> FailureState {
         FailureState {
             access: Access::from_toml(table.get(ACCESS_KEY)),
             mid_scene_done: table.get(MID_SCENE_DONE_KEY)
@@ -67,7 +67,7 @@ impl PuzzleState for FailureState {
     }
 
     fn to_toml(&self) -> toml::Value {
-        let mut table = toml::Table::new();
+        let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         table.insert(MID_SCENE_DONE_KEY.to_string(),
                      toml::Value::Boolean(self.mid_scene_done));

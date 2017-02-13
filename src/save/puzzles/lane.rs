@@ -70,7 +70,7 @@ pub struct LaneState {
 }
 
 impl LaneState {
-    pub fn from_toml(mut table: toml::Table) -> LaneState {
+    pub fn from_toml(mut table: toml::value::Table) -> LaneState {
         let access = Access::from_toml(table.get(ACCESS_KEY));
         let stage = if access.is_solved() {
             STAGES.len()
@@ -246,7 +246,7 @@ impl PuzzleState for LaneState {
     }
 
     fn to_toml(&self) -> toml::Value {
-        let mut table = toml::Table::new();
+        let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.access.is_solved() {
             table.insert(STAGE_KEY.to_string(),

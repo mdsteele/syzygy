@@ -68,7 +68,8 @@ impl CrosswordState {
         crossword
     }
 
-    pub fn from_toml(array: toml::Array, valid: ValidChars, solved: &[&str])
+    pub fn from_toml(array: toml::value::Array, valid: ValidChars,
+                     solved: &[&str])
                      -> CrosswordState {
         let mut words: Vec<Vec<char>> = array.into_iter()
                                              .map(to_string)

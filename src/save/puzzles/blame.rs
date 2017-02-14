@@ -47,9 +47,9 @@ pub struct BlameState {
 impl BlameState {
     pub fn from_toml(mut table: toml::value::Table) -> BlameState {
         let mut positions: Vec<i32> = pop_array(&mut table, POSITIONS_KEY)
-                                          .into_iter()
-                                          .map(to_i32)
-                                          .collect();
+            .into_iter()
+            .map(to_i32)
+            .collect();
         if positions.len() != INITIAL_POSITIONS.len() {
             positions = INITIAL_POSITIONS.to_vec();
         } else {

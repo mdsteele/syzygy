@@ -31,8 +31,8 @@ pub struct View<'a, A, E: 'a> {
 }
 
 impl<'a, A, E> View<'a, A, E> {
-    pub fn new(resources: &mut Resources, visible: Rect, original_view: &'a E,
-               text: &str)
+    pub fn new(resources: &mut Resources, visible: Rect,
+               original_view: &'a E, text: &str)
                -> View<'a, A, E> {
         let buttons = vec![("OK".to_string(), ())];
         let dialog = DialogBox::new(resources, visible, text, buttons);

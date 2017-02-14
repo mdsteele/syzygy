@@ -40,29 +40,27 @@ impl View {
         let core = PuzzleCore::new(resources, visible, state, intro, outro);
         let mut view = View {
             core: core,
-            toggles: vec![
-                ToggleLight::new(resources, state, (1, 0)),
-                ToggleLight::new(resources, state, (2, 0)),
-                ToggleLight::new(resources, state, (3, 0)),
-                ToggleLight::new(resources, state, (0, 1)),
-                ToggleLight::new(resources, state, (1, 1)),
-                ToggleLight::new(resources, state, (2, 1)),
-                ToggleLight::new(resources, state, (3, 1)),
-                ToggleLight::new(resources, state, (4, 1)),
-                ToggleLight::new(resources, state, (0, 2)),
-                ToggleLight::new(resources, state, (1, 2)),
-                ToggleLight::new(resources, state, (2, 2)),
-                ToggleLight::new(resources, state, (3, 2)),
-                ToggleLight::new(resources, state, (4, 2)),
-                ToggleLight::new(resources, state, (0, 3)),
-                ToggleLight::new(resources, state, (1, 3)),
-                ToggleLight::new(resources, state, (2, 3)),
-                ToggleLight::new(resources, state, (3, 3)),
-                ToggleLight::new(resources, state, (4, 3)),
-                ToggleLight::new(resources, state, (1, 4)),
-                ToggleLight::new(resources, state, (2, 4)),
-                ToggleLight::new(resources, state, (3, 4)),
-            ],
+            toggles: vec![ToggleLight::new(resources, state, (1, 0)),
+                          ToggleLight::new(resources, state, (2, 0)),
+                          ToggleLight::new(resources, state, (3, 0)),
+                          ToggleLight::new(resources, state, (0, 1)),
+                          ToggleLight::new(resources, state, (1, 1)),
+                          ToggleLight::new(resources, state, (2, 1)),
+                          ToggleLight::new(resources, state, (3, 1)),
+                          ToggleLight::new(resources, state, (4, 1)),
+                          ToggleLight::new(resources, state, (0, 2)),
+                          ToggleLight::new(resources, state, (1, 2)),
+                          ToggleLight::new(resources, state, (2, 2)),
+                          ToggleLight::new(resources, state, (3, 2)),
+                          ToggleLight::new(resources, state, (4, 2)),
+                          ToggleLight::new(resources, state, (0, 3)),
+                          ToggleLight::new(resources, state, (1, 3)),
+                          ToggleLight::new(resources, state, (2, 3)),
+                          ToggleLight::new(resources, state, (3, 3)),
+                          ToggleLight::new(resources, state, (4, 3)),
+                          ToggleLight::new(resources, state, (1, 4)),
+                          ToggleLight::new(resources, state, (2, 4)),
+                          ToggleLight::new(resources, state, (3, 4))],
         };
         view.drain_queue();
         view
@@ -154,7 +152,8 @@ struct ToggleLight {
 }
 
 impl ToggleLight {
-    fn new(resources: &mut Resources, state: &SyrupState, position: (i32, i32))
+    fn new(resources: &mut Resources, state: &SyrupState,
+           position: (i32, i32))
            -> ToggleLight {
         let (red, green, blue) = state.light_colors(position);
         ToggleLight {

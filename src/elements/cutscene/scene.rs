@@ -726,8 +726,9 @@ pub struct TalkNode {
 }
 
 impl TalkNode {
-    pub fn new(slot: i32, bubble_sprites: Vec<Sprite>, bg_color: (u8, u8, u8),
-               talk_pos: TalkPos, paragraph: Paragraph)
+    pub fn new(slot: i32, bubble_sprites: Vec<Sprite>,
+               bg_color: (u8, u8, u8), talk_pos: TalkPos,
+               paragraph: Paragraph)
                -> TalkNode {
         TalkNode {
             slot: slot,

@@ -31,6 +31,7 @@ pub struct View {
 }
 
 impl View {
+    #[cfg_attr(rustfmt, rustfmt_skip)]
     pub fn new(resources: &mut Resources, visible: Rect, game: &Game) -> View {
         let intro = compile_intro_scene(resources);
         let outro = compile_outro_scene(resources);
@@ -160,7 +161,8 @@ struct DashChip {
 }
 
 impl DashChip {
-    fn new(resources: &mut Resources, left: i32, top: i32, location: Location)
+    fn new(resources: &mut Resources, left: i32, top: i32,
+           location: Location)
            -> DashChip {
         DashChip {
             sprites: resources.get_sprites("failure/chips"),

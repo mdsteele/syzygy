@@ -66,6 +66,7 @@ pub struct Hud {
 }
 
 impl Hud {
+    #[cfg_attr(rustfmt, rustfmt_skip)]
     pub fn new(resources: &mut Resources, visible: Rect, location: Location)
                -> Hud {
         let bot = visible.bottom();
@@ -293,10 +294,8 @@ struct PauseIndicator {
 
 impl PauseIndicator {
     fn new(resources: &mut Resources, visible: Rect) -> PauseIndicator {
-        let paragraph = Paragraph::new(resources,
-                                       "roman",
-                                       Align::Center,
-                                       PAUSE_TEXT);
+        let paragraph =
+            Paragraph::new(resources, "roman", Align::Center, PAUSE_TEXT);
         let inner_width = paragraph.min_width();
         let outer_width = inner_width + 2 * PAUSE_TEXT_MARGIN_HORZ;
         let inner_height = paragraph.height();

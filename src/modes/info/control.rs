@@ -25,7 +25,8 @@ use super::view::View;
 
 pub fn run_info_box<S, A, E: Element<S, A>>(window: &mut Window,
                                             original_view: &E,
-                                            original_input: &mut S, text: &str)
+                                            original_input: &mut S,
+                                            text: &str)
                                             -> bool {
     let mut view = {
         let visible = window.visible_rect();

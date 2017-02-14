@@ -62,10 +62,8 @@ impl View {
                        QUIT_BUTTON_WIDTH as i32) / 3;
         let mut elements: Vec<Box<Element<SaveData, Cmd>>> = vec![];
         elements.push(Box::new({
-            let mut rect = Rect::new(0,
-                                     0,
-                                     START_BUTTON_WIDTH,
-                                     START_BUTTON_HEIGHT);
+            let mut rect =
+                Rect::new(0, 0, START_BUTTON_WIDTH, START_BUTTON_HEIGHT);
             rect.center_on(visible.center());
             SubrectElement::new(StartGameButton::new(resources), rect)
         }));
@@ -309,6 +307,7 @@ impl Element<SaveData, Cmd> for QuitButton {
 
 // ========================================================================= //
 
+#[cfg_attr(rustfmt, rustfmt_skip)]
 pub const ABOUT_BOX_TEXT: &'static str = "\
 $C$f{block}SYSTEM SYZYGY$r$L\n\
 \n\
@@ -332,7 +331,8 @@ pub struct ConfirmEraseView<'a> {
 }
 
 impl<'a> ConfirmEraseView<'a> {
-    pub fn new(resources: &mut Resources, visible: Rect, title_view: &'a View)
+    pub fn new(resources: &mut Resources, visible: Rect,
+               title_view: &'a View)
                -> ConfirmEraseView<'a> {
         let text = "Really erase game data?\nAll progress will be lost!";
         let buttons = vec![("Cancel".to_string(), false),

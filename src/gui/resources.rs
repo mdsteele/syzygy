@@ -89,14 +89,13 @@ impl ResourceCache {
             println!("Loading background: {}", name);
         }
         let path = PathBuf::from("data/backgrounds")
-                       .join(name)
-                       .with_extension("bg");
-        let background = Rc::new(Background::load(&path, |name| {
-                                     self.get_sprites(renderer,
-                                                      &format!("tiles/{}",
-                                                               name))
-                                 })
-                                     .expect(name));
+            .join(name)
+            .with_extension("bg");
+        let background =
+            Rc::new(Background::load(&path, |name| {
+                        self.get_sprites(renderer, &format!("tiles/{}", name))
+                    })
+                        .expect(name));
         self.backgrounds.insert(name.to_string(), background.clone());
         background
     }
@@ -109,8 +108,8 @@ impl ResourceCache {
             println!("Loading font: {}", name);
         }
         let path = PathBuf::from("data/fonts")
-                       .join(name)
-                       .with_extension("ahf");
+            .join(name)
+            .with_extension("ahf");
         let ahf = load_ahf_from_file(&path).expect(name);
         let font = Rc::new(Font::new(renderer, &ahf));
         self.fonts.insert(name.to_string(), font.clone());
@@ -125,8 +124,8 @@ impl ResourceCache {
             println!("Loading sprites: {}", name);
         }
         let path = PathBuf::from("data/sprites")
-                       .join(name)
-                       .with_extension("ahi");
+            .join(name)
+            .with_extension("ahi");
         let ahi = load_ahi_from_file(&path).expect(name);
         let vec: Vec<Sprite> = ahi.iter()
                                   .map(|image| Sprite::new(renderer, image))

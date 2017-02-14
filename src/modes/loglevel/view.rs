@@ -32,7 +32,8 @@ pub struct View {
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect, state: &LogLevelState)
+    pub fn new(resources: &mut Resources, visible: Rect,
+               state: &LogLevelState)
                -> View {
         let intro = compile_intro_scene(resources);
         let outro = compile_outro_scene(resources);

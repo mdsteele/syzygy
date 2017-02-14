@@ -32,19 +32,15 @@ const NUM_ROWS: i32 = 7;
 
 const GRID_KEY: &'static str = "grid";
 
-const INITIAL_GRID: &'static [i8] = &[2, 1, 2, 1, 2, -1, 2, 0, 1, -1, -1, 1,
-                                      2, 0, -1, -1, 2, 0, 0, 1, 2, 1, -1, 0,
-                                      1, 1, 2, 2, 0, -1, -1, 2, -1, -1, -1,
-                                      1, 2, 1, 0, 2, -1, 1, 2, 2, 0, 0, -1,
-                                      -1, -1, 1, 0, -1, 0, 1, 1, 0, 2, 2, 0,
-                                      1, -1, 2, 2];
+const INITIAL_GRID: &'static [i8] =
+    &[2, 1, 2, 1, 2, -1, 2, 0, 1, -1, -1, 1, 2, 0, -1, -1, 2, 0, 0, 1, 2, 1,
+      -1, 0, 1, 1, 2, 2, 0, -1, -1, 2, -1, -1, -1, 1, 2, 1, 0, 2, -1, 1, 2,
+      2, 0, 0, -1, -1, -1, 1, 0, -1, 0, 1, 1, 0, 2, 2, 0, 1, -1, 2, 2];
 
-const SOLVED_GRID: &'static [i8] = &[0, 0, 0, 1, 1, -1, 2, 2, 2, -1, -1, 0,
-                                     1, 1, -1, -1, 2, 2, 2, 2, 2, 0, -1, 0,
-                                     1, 1, 1, 2, 2, -1, -1, 0, -1, -1, -1, 1,
-                                     2, 2, 2, 0, -1, 0, 1, 1, 1, 1, -1, -1,
-                                     -1, 2, 2, -1, 0, 0, 1, 1, 1, 2, 2, 2,
-                                     -1, 0, 0];
+const SOLVED_GRID: &'static [i8] =
+    &[0, 0, 0, 1, 1, -1, 2, 2, 2, -1, -1, 0, 1, 1, -1, -1, 2, 2, 2, 2, 2, 0,
+      -1, 0, 1, 1, 1, 2, 2, -1, -1, 0, -1, -1, -1, 1, 2, 2, 2, 0, -1, 0, 1,
+      1, 1, 1, -1, -1, -1, 2, 2, -1, 0, 0, 1, 1, 1, 2, 2, 2, -1, 0, 0];
 
 // ========================================================================= //
 
@@ -57,11 +53,11 @@ pub struct WreckedState {
 impl WreckedState {
     pub fn from_toml(mut table: toml::value::Table) -> WreckedState {
         let mut grid: Vec<i8> = pop_array(&mut table, GRID_KEY)
-                                    .iter()
-                                    .filter_map(toml::Value::as_integer)
-                                    .filter(|&tile| -1 <= tile && tile < 3)
-                                    .map(|tile| tile as i8)
-                                    .collect();
+            .iter()
+            .filter_map(toml::Value::as_integer)
+            .filter(|&tile| -1 <= tile && tile < 3)
+            .map(|tile| tile as i8)
+            .collect();
         let mut init_sorted = INITIAL_GRID.to_vec();
         init_sorted.sort();
         let mut grid_sorted = grid.clone();
@@ -226,9 +222,9 @@ mod tests {
     #[test]
     fn deque_rotation() {
         let mut deque: VecDeque<i32> = [1, 2, 3, 4, 5]
-                                           .iter()
-                                           .cloned()
-                                           .collect();
+            .iter()
+            .cloned()
+            .collect();
         rotate_deque(&mut deque, 0);
         assert_eq!(deque.iter().cloned().collect::<Vec<i32>>(),
                    vec![1, 2, 3, 4, 5]);

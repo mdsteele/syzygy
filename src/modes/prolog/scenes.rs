@@ -22,6 +22,7 @@ use gui::Resources;
 
 // ========================================================================= //
 
+#[cfg_attr(rustfmt, rustfmt_skip)]
 pub fn compile_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![

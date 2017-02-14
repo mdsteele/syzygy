@@ -21,8 +21,8 @@ use std::cmp::{max, min};
 use std::rc::Rc;
 
 use elements::{PuzzleCmd, PuzzleCore, PuzzleView};
-use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
-          Resources, Sound, Sprite};
+use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
+          Sound, Sprite};
 use modes::SOLVED_INFO_TEXT;
 use save::{Game, PuzzleState, TheYState};
 use super::scenes;
@@ -46,14 +46,12 @@ impl View {
         let core = PuzzleCore::new(resources, visible, state, intro, outro);
         let mut view = View {
             core: core,
-            buttons: vec![
-                TransformButton::new(resources, state, 0),
-                TransformButton::new(resources, state, 1),
-                TransformButton::new(resources, state, 2),
-                TransformButton::new(resources, state, 3),
-                TransformButton::new(resources, state, 4),
-                TransformButton::new(resources, state, 5),
-            ],
+            buttons: vec![TransformButton::new(resources, state, 0),
+                          TransformButton::new(resources, state, 1),
+                          TransformButton::new(resources, state, 2),
+                          TransformButton::new(resources, state, 3),
+                          TransformButton::new(resources, state, 4),
+                          TransformButton::new(resources, state, 5)],
             letters: LettersView::new(resources, state),
             retry_countdown: 0,
         };

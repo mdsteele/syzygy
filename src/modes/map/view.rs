@@ -187,7 +187,7 @@ impl PuzzleNode {
         let index = if game.has_been_solved(location) {
             1
         } else if location == Location::SystemFailure &&
-                       !game.system_failure.mid_scene_is_done() {
+                              !game.system_failure.mid_scene_is_done() {
             2
         } else {
             0
@@ -208,7 +208,8 @@ impl Element<Option<Location>, Location> for PuzzleNode {
         }
     }
 
-    fn handle_event(&mut self, event: &Event, selected: &mut Option<Location>)
+    fn handle_event(&mut self, event: &Event,
+                    selected: &mut Option<Location>)
                     -> Action<Location> {
         match event {
             &Event::MouseDown(_) => {

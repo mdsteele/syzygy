@@ -20,8 +20,8 @@
 use num_integer::div_floor;
 
 use elements::{Paragraph, PuzzleCmd, PuzzleCore, PuzzleView};
-use gui::{Action, Align, Canvas, Element, Event, Point, Rect, Resources,
-          Sound, Sprite};
+use gui::{Action, Align, Canvas, Element, Event, Point, Rect, Resources, Sound,
+          Sprite};
 use modes::SOLVED_INFO_TEXT;
 use save::{Game, LaneState, PuzzleState};
 use super::scenes::{compile_intro_scene, compile_outro_scene};
@@ -397,9 +397,8 @@ impl FreeSymbolView {
 
     fn draw(&self, state: &LaneState, canvas: &mut Canvas) {
         if let Some(symbol) = state.next_remove() {
-            canvas.draw_sprite(&self.symbol_sprites[(symbol - 1) as usize *
-                                                    2],
-                               self.top_left);
+            let index = (symbol - 1) as usize * 2;
+            canvas.draw_sprite(&self.symbol_sprites[index], self.top_left);
         }
     }
 }

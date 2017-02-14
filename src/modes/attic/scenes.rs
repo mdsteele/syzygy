@@ -22,6 +22,7 @@ use gui::{Resources, Sound};
 
 // ========================================================================= //
 
+#[cfg_attr(rustfmt, rustfmt_skip)]
 pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
@@ -113,6 +114,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
 
 // ========================================================================= //
 
+#[cfg_attr(rustfmt, rustfmt_skip)]
 pub fn compile_argony_midscene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
@@ -125,6 +127,7 @@ pub fn compile_argony_midscene(resources: &mut Resources) -> Scene {
     Ast::compile_scene(resources, ast)
 }
 
+#[cfg_attr(rustfmt, rustfmt_skip)]
 pub fn compile_tezure_midscene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
@@ -139,6 +142,7 @@ pub fn compile_tezure_midscene(resources: &mut Resources) -> Scene {
 
 // ========================================================================= //
 
+#[cfg_attr(rustfmt, rustfmt_skip)]
 pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![

@@ -79,14 +79,11 @@ impl LaneState {
                 STAGES.len() - 1)
         };
         let mut grid: Vec<i8> = pop_array(&mut table, GRID_KEY)
-                                    .into_iter()
-                                    .map(to_i32)
-                                    .filter(|&val| {
-                                        -NUM_SYMBOLS <= val &&
-                                        val <= NUM_SYMBOLS
-                                    })
-                                    .map(|val| val as i8)
-                                    .collect();
+            .into_iter()
+            .map(to_i32)
+            .filter(|&val| -NUM_SYMBOLS <= val && val <= NUM_SYMBOLS)
+            .map(|val| val as i8)
+            .collect();
         grid.resize(GRID_SIZE, 0);
         LaneState {
             access: access,

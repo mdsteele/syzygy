@@ -66,8 +66,8 @@ impl LineState {
         if access != Access::Solved {
             let mut index = 0;
             for value in pop_array(&mut table, SEED_KEY)
-                             .into_iter()
-                             .map(to_u32) {
+                .into_iter()
+                .map(to_u32) {
                 seed[index] = value;
                 index += 1;
                 if index >= 8 {

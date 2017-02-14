@@ -51,11 +51,11 @@ impl CubeState {
             SOLVED_GRID.to_vec()
         } else {
             let mut grid: Vec<i32> = pop_array(&mut table, GRID_KEY)
-                                         .iter()
-                                         .filter_map(toml::Value::as_integer)
-                                         .filter(|&idx| 0 <= idx && idx < 24)
-                                         .map(|idx| idx as i32)
-                                         .collect();
+                .iter()
+                .filter_map(toml::Value::as_integer)
+                .filter(|&idx| 0 <= idx && idx < 24)
+                .map(|idx| idx as i32)
+                .collect();
             if grid.len() != (NUM_COLS * NUM_ROWS) as usize {
                 grid = INITIAL_GRID.to_vec();
             }

@@ -67,7 +67,8 @@ impl Theater {
         }
     }
 
-    pub fn set_actor_speech(&mut self, slot: i32, bubble_sprites: Vec<Sprite>,
+    pub fn set_actor_speech(&mut self, slot: i32,
+                            bubble_sprites: Vec<Sprite>,
                             bg_color: (u8, u8, u8), talk_pos: TalkPos,
                             paragraph: Rc<Paragraph>) {
         if let Some(actor) = self.actors.get_mut(&slot) {
@@ -168,10 +169,11 @@ fn remove_rect(rects: &mut Vec<Rect>, remove: Rect) {
                                          (inter.top() - rect.top()) as u32));
             }
             if inter.bottom() < rect.bottom() {
-                new_rects.push(Rect::new(rect.left(), inter.bottom(),
+                new_rects.push(Rect::new(rect.left(),
+                                         inter.bottom(),
                                          rect.width(),
-                                         (rect.bottom() -
-                                          inter.bottom()) as u32));
+                                         (rect.bottom() - inter.bottom()) as
+                                         u32));
             }
             if inter.left() > rect.left() {
                 new_rects.push(Rect::new(rect.left(),
@@ -180,8 +182,10 @@ fn remove_rect(rects: &mut Vec<Rect>, remove: Rect) {
                                          inter.height()));
             }
             if inter.right() < rect.right() {
-                new_rects.push(Rect::new(inter.right(), inter.top(),
-                                         (rect.right() - inter.right()) as u32,
+                new_rects.push(Rect::new(inter.right(),
+                                         inter.top(),
+                                         (rect.right() - inter.right()) as
+                                         u32,
                                          inter.height()));
             }
         } else {

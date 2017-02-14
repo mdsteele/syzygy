@@ -74,12 +74,12 @@ impl Window {
             let aspect_ratio = (native_width as f64) / (native_height as f64);
             let ideal_ratio = (ideal_width as f64) / (ideal_height as f64);
             if aspect_ratio > ideal_ratio {
-                let actual_width =
-                    (aspect_ratio * (ideal_height as f64)).round() as u32;
+                let actual_width = (aspect_ratio * (ideal_height as f64))
+                    .round() as u32;
                 (actual_width, ideal_height)
             } else {
-                let actual_height =
-                    ((ideal_width as f64) / aspect_ratio).round() as u32;
+                let actual_height = ((ideal_width as f64) / aspect_ratio)
+                    .round() as u32;
                 (ideal_width, actual_height)
             }
         };

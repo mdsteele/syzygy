@@ -148,14 +148,13 @@ impl Drag {
         if dist > CUBE_SIZE / 2 {
             let by = 1 + (dist - CUBE_SIZE / 2) / CUBE_SIZE;
             self.from = self.from + dir.delta() * (by * CUBE_SIZE);
-            if let Some((accum_dir, accum_rank, ref mut accum_by)) =
-                   self.accum {
-                assert_eq!(dir.is_vertical(), accum_dir.is_vertical());
-                assert_eq!(rank, accum_rank);
-                if dir == accum_dir {
-                    *accum_by += by;
+            if let Some((acc_dir, acc_rank, ref mut acc_by)) = self.accum {
+                assert_eq!(dir.is_vertical(), acc_dir.is_vertical());
+                assert_eq!(rank, acc_rank);
+                if dir == acc_dir {
+                    *acc_by += by;
                 } else {
-                    *accum_by -= by;
+                    *acc_by -= by;
                 }
             } else {
                 self.accum = Some((dir, rank, by));
@@ -297,8 +296,8 @@ impl Element<CubeState, (Direction, i32, i32)> for CubeGrid {
             }
             &Event::MouseDrag(pt) => {
                 if let Some(mut drag) = self.drag.take() {
-                    if let Some((dir, rank, by)) =
-                           drag.set_to(pt - rect.top_left()) {
+                    let drag_result = drag.set_to(pt - rect.top_left());
+                    if let Some((dir, rank, by)) = drag_result {
                         state.rotate_cubes(dir, rank, by);
                         if state.is_solved() {
                             return Action::redraw().and_return(drag.accum()

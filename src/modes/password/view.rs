@@ -22,8 +22,8 @@ use std::rc::Rc;
 
 use elements::{CrosswordView, Paragraph, PuzzleCmd, PuzzleCore, PuzzleView,
                TalkPos};
-use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
-          Resources, Sound, Sprite};
+use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
+          Sound, Sprite};
 use modes::SOLVED_INFO_TEXT;
 use save::{Game, PasswordState, PuzzleState};
 use super::scenes::{compile_intro_scene, compile_outro_scene};
@@ -47,7 +47,8 @@ pub struct View {
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect, state: &PasswordState)
+    pub fn new(resources: &mut Resources, visible: Rect,
+               state: &PasswordState)
                -> View {
         let intro = compile_intro_scene(resources);
         let outro = compile_outro_scene(resources);
@@ -363,10 +364,10 @@ impl Element<PasswordState, (i32, i32)> for PasswordSlider {
             &Event::MouseUp => {
                 if let Some(drag) = self.drag.take() {
                     let old_offset = state.get_slider_offset(drag.col);
-                    let delta =
-                        ((drag.to_y - drag.from_y) as f64 /
-                         BOX_SIZE as f64)
-                            .round() as i32;
+                    let delta = ((drag.to_y - drag.from_y) as f64 /
+                                 BOX_SIZE as f64)
+                                    .round() as
+                                i32;
                     let new_offset = max(-5, min(0, old_offset + delta));
                     return Action::redraw().and_return((drag.col, new_offset));
                 }
@@ -403,24 +404,18 @@ fn make_speech(resources: &mut Resources, pos: TalkPos, text: &str)
     (Rc::new(Paragraph::new(resources, "roman", Align::Center, text)), pos)
 }
 
-const ELINSA_OFFS: &'static [(i32, &'static str)] = &[(5, ""), (5, ""),
-                                                      (5, ""), (6, ""),
-                                                      (2, ""), (4, "")];
-const ARGONY_OFFS: &'static [(i32, &'static str)] = &[(5, ""), (2, ""),
-                                                      (7, ""), (4, ""),
-                                                      (7, ""), (6, "")];
-const TEZURE_OFFS: &'static [(i32, &'static str)] = &[(2, ""), (1, ""),
-                                                      (6, ""), (1, ""),
-                                                      (5, ""), (4, "")];
-const YTTRIS_OFFS: &'static [(i32, &'static str)] = &[(5, ""), (3, ""),
-                                                      (4, ""), (3, ""),
-                                                      (5, ""), (4, "")];
-const UGRENT_OFFS: &'static [(i32, &'static str)] = &[(2, ""), (0, ""),
-                                                      (1, ""), (1, ""),
-                                                      (2, ""), (2, "")];
-const RELYNG_OFFS: &'static [(i32, &'static str)] = &[(0, ""), (2, ""),
-                                                      (4, ""), (6, ""),
-                                                      (7, ""), (7, "")];
+const ELINSA_OFFS: &'static [(i32, &'static str)] =
+    &[(5, ""), (5, ""), (5, ""), (6, ""), (2, ""), (4, "")];
+const ARGONY_OFFS: &'static [(i32, &'static str)] =
+    &[(5, ""), (2, ""), (7, ""), (4, ""), (7, ""), (6, "")];
+const TEZURE_OFFS: &'static [(i32, &'static str)] =
+    &[(2, ""), (1, ""), (6, ""), (1, ""), (5, ""), (4, "")];
+const YTTRIS_OFFS: &'static [(i32, &'static str)] =
+    &[(5, ""), (3, ""), (4, ""), (3, ""), (5, ""), (4, "")];
+const UGRENT_OFFS: &'static [(i32, &'static str)] =
+    &[(2, ""), (0, ""), (1, ""), (1, ""), (2, ""), (2, "")];
+const RELYNG_OFFS: &'static [(i32, &'static str)] =
+    &[(0, ""), (2, ""), (4, ""), (6, ""), (7, ""), (7, "")];
 
 const CROSSWORDS_INFO_BOX_TEXT: &'static str = "\
 Your goal is to fill in all six crosswords.

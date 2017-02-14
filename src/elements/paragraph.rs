@@ -49,8 +49,8 @@ pub struct Paragraph {
 }
 
 impl Paragraph {
-    pub fn new(resources: &mut Resources, init_font: &str, init_align: Align,
-               text: &str)
+    pub fn new(resources: &mut Resources, init_font: &str,
+               init_align: Align, text: &str)
                -> Paragraph {
         let mut parser = Parser::new(resources, init_font, init_align);
         let mut chars = text.chars();
@@ -137,8 +137,8 @@ impl Line {
     fn baseline(&self) -> i32 {
         let mut baseline = 0;
         for piece in (self.left.iter())
-                         .chain(self.center.iter())
-                         .chain(self.right.iter()) {
+            .chain(self.center.iter())
+            .chain(self.right.iter()) {
             baseline = cmp::max(baseline, piece.baseline());
         }
         baseline
@@ -147,8 +147,8 @@ impl Line {
     fn min_width(&self) -> i32 {
         let mut width = 0;
         for piece in (self.left.iter())
-                         .chain(self.center.iter())
-                         .chain(self.right.iter()) {
+            .chain(self.center.iter())
+            .chain(self.right.iter()) {
             width += piece.width();
         }
         width
@@ -158,8 +158,8 @@ impl Line {
         let baseline = self.baseline();
         let mut height = MIN_LINE_HEIGHT;
         for piece in (self.left.iter())
-                         .chain(self.center.iter())
-                         .chain(self.right.iter()) {
+            .chain(self.center.iter())
+            .chain(self.right.iter()) {
             height = cmp::max(height,
                               (baseline - piece.baseline()) as u32 +
                               piece.height());

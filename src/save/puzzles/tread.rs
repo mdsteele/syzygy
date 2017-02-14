@@ -31,12 +31,10 @@ const TOGGLED_KEY: &'static str = "toggled";
 const NUM_COLS: i32 = 4;
 const NUM_ROWS: i32 = 3;
 
-const INITIAL_GRID: &'static [bool] = &[false, true, false, true, true,
-                                        false, true, false, true, true, true,
-                                        false, false, false, false, true,
-                                        false, true, true, false, true,
-                                        false, true, true, false, true, true,
-                                        false, true, false];
+const INITIAL_GRID: &'static [bool] =
+    &[false, true, false, true, true, false, true, false, true, true, true,
+      false, false, false, false, true, false, true, true, false, true,
+      false, true, true, false, true, true, false, true, false];
 
 const LETTERS: &'static [char] = &['T', 'A', 'S', 'H', 'L', 'E', 'T'];
 
@@ -59,11 +57,11 @@ impl TreadState {
             SOLVED_TOGGLED_1.iter().cloned().collect()
         } else {
             let set: BTreeSet<i32> = pop_array(&mut table, TOGGLED_KEY)
-                                         .iter()
-                                         .filter_map(toml::Value::as_integer)
-                                         .filter(|&idx| 0 <= idx && idx < 12)
-                                         .map(|idx| idx as i32)
-                                         .collect();
+                .iter()
+                .filter_map(toml::Value::as_integer)
+                .filter(|&idx| 0 <= idx && idx < 12)
+                .map(|idx| idx as i32)
+                .collect();
             set.into_iter().take(LETTERS.len()).collect()
         };
         let mut state = TreadState {

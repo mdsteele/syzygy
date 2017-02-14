@@ -20,8 +20,8 @@
 use std::rc::Rc;
 
 use elements::{PuzzleCmd, PuzzleCore, PuzzleView};
-use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
-          Resources, Sprite};
+use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
+          Sprite};
 use modes::SOLVED_INFO_TEXT;
 use save::{Direction, Game, PuzzleState, WreckedState};
 use super::scenes::{compile_intro_scene, compile_outro_scene};
@@ -35,7 +35,8 @@ pub struct View {
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect, state: &WreckedState)
+    pub fn new(resources: &mut Resources, visible: Rect,
+               state: &WreckedState)
                -> View {
         let intro = compile_intro_scene(resources);
         let outro = compile_outro_scene(resources, visible);
@@ -154,14 +155,13 @@ impl Drag {
         if dist > TILE_SIZE / 2 {
             let by = 1 + (dist - TILE_SIZE / 2) / TILE_SIZE;
             self.from = self.from + dir.delta() * (by * TILE_SIZE);
-            if let Some((accum_dir, accum_rank, ref mut accum_by)) =
-                   self.accum {
-                assert_eq!(dir.is_vertical(), accum_dir.is_vertical());
-                assert_eq!(rank, accum_rank);
-                if dir == accum_dir {
-                    *accum_by += by;
+            if let Some((acc_dir, acc_rank, ref mut acc_by)) = self.accum {
+                assert_eq!(dir.is_vertical(), acc_dir.is_vertical());
+                assert_eq!(rank, acc_rank);
+                if dir == acc_dir {
+                    *acc_by += by;
                 } else {
-                    *accum_by -= by;
+                    *acc_by -= by;
                 }
             } else {
                 self.accum = Some((dir, rank, by));
@@ -285,8 +285,8 @@ impl Element<WreckedState, (Direction, i32, i32)> for WreckedGrid {
             }
             &Event::MouseDrag(pt) => {
                 if let Some(mut drag) = self.drag.take() {
-                    if let Some((dir, rank, by)) =
-                           drag.set_to(pt - rect.top_left()) {
+                    let drag_result = drag.set_to(pt - rect.top_left());
+                    if let Some((dir, rank, by)) = drag_result {
                         state.shift_tiles(dir, rank, by);
                         if state.is_solved() {
                             return Action::redraw().and_return(drag.accum()

@@ -64,9 +64,8 @@ mod tests {
 
     #[test]
     fn toml_round_trip() {
-        let all = &[PrimaryColor::Red,
-                    PrimaryColor::Green,
-                    PrimaryColor::Blue];
+        let all =
+            &[PrimaryColor::Red, PrimaryColor::Green, PrimaryColor::Blue];
         for original in all {
             let result = PrimaryColor::from_toml(Some(&original.to_toml()));
             assert_eq!(result, *original);

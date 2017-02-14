@@ -48,10 +48,8 @@ impl View {
             core: core,
             input: InputDisplay::new(resources),
             clue: ClueDisplay::new(resources),
-            arrows: vec![
-                ArrowButton::new(resources, false),
-                ArrowButton::new(resources, true),
-            ],
+            arrows: vec![ArrowButton::new(resources, false),
+                         ArrowButton::new(resources, true)],
             text_timer: 0,
             text_prefix: None,
         };

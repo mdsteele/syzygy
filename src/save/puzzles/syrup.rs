@@ -31,21 +31,15 @@ const GREEN_TOGGLED_KEY: &'static str = "green";
 const BLUE_TOGGLED_KEY: &'static str = "blue";
 const NEXT_COLOR_KEY: &'static str = "next";
 
-const INITIAL_RED_GRID: &'static [bool] = &[true, true, true, true, false,
-                                            true, true, true, false, true,
-                                            true, true, true, false, true,
-                                            false, true, true, false, true,
-                                            true];
-const INITIAL_GREEN_GRID: &'static [bool] = &[true, false, true, false,
-                                              false, true, true, true, false,
-                                              false, true, false, true, true,
-                                              false, false, true, true, true,
-                                              true, true];
-const INITIAL_BLUE_GRID: &'static [bool] = &[true, false, true, true, false,
-                                             false, false, false, true, true,
-                                             true, true, true, true, true,
-                                             false, true, false, true, true,
-                                             false];
+const INITIAL_RED_GRID: &'static [bool] =
+    &[true, true, true, true, false, true, true, true, false, true, true,
+      true, true, false, true, false, true, true, false, true, true];
+const INITIAL_GREEN_GRID: &'static [bool] =
+    &[true, false, true, false, false, true, true, true, false, false, true,
+      false, true, true, false, false, true, true, true, true, true];
+const INITIAL_BLUE_GRID: &'static [bool] =
+    &[true, false, true, true, false, false, false, false, true, true, true,
+      true, true, true, true, false, true, false, true, true, false];
 
 const SOLVED_RED_TOGGLED: &'static [i32] = &[3, 8, 13, 14];
 const SOLVED_GREEN_TOGGLED: &'static [i32] = &[0, 4, 9, 10];

@@ -125,10 +125,8 @@ impl Ast {
                         }
                     };
                 let sprites = resources.get_sprites(bubble_name);
-                let paragraph = Paragraph::new(resources,
-                                               init_font,
-                                               init_align,
-                                               text);
+                let paragraph =
+                    Paragraph::new(resources, init_font, init_align, text);
                 Box::new(TalkNode::new(slot, sprites, color, pos, paragraph))
             }
             Ast::Wait(duration) => Box::new(WaitNode::new(duration)),

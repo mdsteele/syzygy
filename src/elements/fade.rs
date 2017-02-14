@@ -104,9 +104,8 @@ impl<A> Element<(), A> for ScreenFade<A> {
             debug_assert_eq!(self.sprites.len() as i32, MAX_CELL_OPACITY - 1);
             for row in 0..NUM_ROWS {
                 for col in 0..NUM_COLS {
-                    let cell_opacity = self.style.cell_opacity(col,
-                                                               row,
-                                                               self.opacity);
+                    let cell_opacity =
+                        self.style.cell_opacity(col, row, self.opacity);
                     if cell_opacity >= MAX_CELL_OPACITY {
                         canvas.fill_rect((0, 0, 0),
                                          Rect::new(col * TILE_SIZE,

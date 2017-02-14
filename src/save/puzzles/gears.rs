@@ -47,17 +47,17 @@ pub struct GearsState {
 impl GearsState {
     pub fn from_toml(mut table: toml::value::Table) -> GearsState {
         let mut positions: Vec<i32> = pop_array(&mut table, POSITIONS_KEY)
-                                          .into_iter()
-                                          .map(to_i32)
-                                          .collect();
+            .into_iter()
+            .map(to_i32)
+            .collect();
         if positions.len() != INITIAL_POSITIONS.len() {
             positions = INITIAL_POSITIONS.to_vec();
         } else {
             for (row, position) in positions.iter_mut().enumerate() {
-                *position =
-                    min(max(GearsState::min_position_for_row(row as i32),
-                            *position),
-                        GearsState::max_position_for_row(row as i32));
+                *position = min(max(GearsState::min_position_for_row(row as
+                                                                     i32),
+                                    *position),
+                                GearsState::max_position_for_row(row as i32));
             }
         }
         let mut elinsa_row = table.remove(ELINSA_ROW_KEY)

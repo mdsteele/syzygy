@@ -71,12 +71,11 @@ impl CrosswordState {
     pub fn from_toml(array: toml::value::Array, valid: ValidChars,
                      solved: &[&str])
                      -> CrosswordState {
-        let mut words: Vec<Vec<char>> = array.into_iter()
-                                             .map(to_string)
-                                             .map(|word| {
-                                                 word.chars().collect()
-                                             })
-                                             .collect();
+        let mut words: Vec<Vec<char>> =
+            array.into_iter()
+                 .map(to_string)
+                 .map(|word| word.chars().collect())
+                 .collect();
         words.resize(solved.len(), Vec::new());
         for (row, word) in words.iter_mut().enumerate() {
             word.resize(solved[row].len(), ' ');

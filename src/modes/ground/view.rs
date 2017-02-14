@@ -39,6 +39,7 @@ pub struct View {
 }
 
 impl View {
+    #[cfg_attr(rustfmt, rustfmt_skip)]
     pub fn new(resources: &mut Resources, visible: Rect, state: &GroundState)
                -> View {
         let intro = compile_intro_scene(resources);
@@ -169,7 +170,7 @@ impl View {
                     Some((Platform::travel_time(old_pos, elinsa_pos - 1),
                           cmp::min(max_pos, elinsa_pos + 1)))
                 } else if pos < old_pos && elinsa_pos >= pos &&
-                                elinsa_pos < old_pos {
+                                       elinsa_pos < old_pos {
                     Some((Platform::travel_time(old_pos, elinsa_pos + 1),
                           cmp::max(0, elinsa_pos - 1)))
                 } else {
@@ -200,7 +201,7 @@ impl View {
                        barrier_pos <= pos {
                         Some(barrier_pos - 1)
                     } else if pos < old_pos && barrier_pos < old_pos &&
-                       barrier_pos >= pos {
+                              barrier_pos >= pos {
                         Some(barrier_pos + 1)
                     } else {
                         None
@@ -301,9 +302,8 @@ impl View {
                              elinsa_row - original_elinsa_row));
 
         // Start animation:
-        self.animation = Scene::new(vec![
-            Box::new(SequenceNode::new(top_seq)),
-        ]);
+        self.animation =
+            Scene::new(vec![Box::new(SequenceNode::new(top_seq))]);
         self.animation.begin(self.core.theater_mut());
         self.drain_queue();
     }

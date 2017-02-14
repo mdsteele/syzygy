@@ -288,7 +288,7 @@ impl LaserField {
                     } else {
                         self.lasers.insert((next, anti_dir), (color, 3));
                         if let Some(&(other, _)) =
-                               self.lasers.get(&(next, laser_dir)) {
+                            self.lasers.get(&(next, laser_dir)) {
                             let output = mixer_output(color, other);
                             self.lasers.insert((next, mixer_dir), (output, 3));
                             self.sparks.remove(&(next, mixer_dir));
@@ -381,12 +381,11 @@ impl Element<DeviceGrid, LaserCmd> for LaserField {
             }
         }
         for (&(coords, dir), &dist) in self.sparks.iter() {
-            let center = self.rect.top_left() +
-                         dir.delta() * (GRID_CELL_SIZE / 2 - dist) +
-                         Point::new(coords.x() * GRID_CELL_SIZE +
-                                    GRID_CELL_SIZE / 2,
-                                    coords.y() * GRID_CELL_SIZE +
-                                    GRID_CELL_SIZE / 2);
+            let center =
+                self.rect.top_left() +
+                dir.delta() * (GRID_CELL_SIZE / 2 - dist) +
+                Point::new(coords.x() * GRID_CELL_SIZE + GRID_CELL_SIZE / 2,
+                           coords.y() * GRID_CELL_SIZE + GRID_CELL_SIZE / 2);
             canvas.draw_sprite_transformed(&self.sparks_sprites[0],
                                            center,
                                            dir.degrees(),

@@ -46,7 +46,7 @@ impl Sound {
 
     pub fn bridge_break() -> Sound {
         Sound::new(Wave::noise(Wave::slide(400.0, -150.0, 0.0))
-                       .adshr(0.0, 0.0, 0.75, 0.0, 0.6) *
+            .adshr(0.0, 0.0, 0.75, 0.0, 0.6) *
                    Wave::sine(8.0) * 0.4)
     }
 
@@ -78,24 +78,23 @@ impl Sound {
 
     pub fn platform_shift(num_times: i32) -> Sound {
         Sound::new(Wave::noise(800.0)
-                       .adshr(0.071, 0.0, 1.0, 0.0, 0.142)
-                       .repeated(num_times) * 0.1)
+            .adshr(0.071, 0.0, 1.0, 0.0, 0.142)
+            .repeated(num_times) * 0.1)
     }
 
     pub fn small_jump() -> Sound {
         Sound::new(Wave::pulse(Wave::slide(200.0, 750.0, 1500.0), 0.25)
-                       .adshr(0.0, 0.0, 0.25, 0.1, 0.1) *
-                   0.4)
+            .adshr(0.0, 0.0, 0.25, 0.1, 0.1) * 0.4)
     }
 
     pub fn mid_puzzle_chime() -> Sound {
         let duty = Wave::sine(3.0) * 0.1 + 0.75;
         let c4 = Wave::triangle(261.62, duty.clone())
-                     .adshr(0.01, 0.1, 0.5, 0.0, 0.2);
+            .adshr(0.01, 0.1, 0.5, 0.0, 0.2);
         let e4 = Wave::triangle(329.62, duty.clone())
-                     .adshr(0.01, 0.1, 0.5, 0.0, 0.2);
+            .adshr(0.01, 0.1, 0.5, 0.0, 0.2);
         let g4 = Wave::triangle(391.99, duty.clone())
-                     .adshr(0.01, 0.1, 0.5, 0.0, 0.4);
+            .adshr(0.01, 0.1, 0.5, 0.0, 0.4);
         Sound::new((c4 + e4.delayed(0.05) + g4.delayed(0.1)))
     }
 
@@ -111,31 +110,27 @@ impl Sound {
 
     pub fn talk_annoyed_hi() -> Sound {
         Sound::new(Wave::pulse(Wave::slide(120.0, 200.0, -3000.0), 0.2)
-                       .adshr(0.0, 0.0, 0.25, 0.25, 0.2) *
-                   0.5)
+            .adshr(0.0, 0.0, 0.25, 0.25, 0.2) * 0.5)
     }
 
     pub fn talk_annoyed_lo() -> Sound {
         Sound::new(Wave::pulse(Wave::slide(100.0, 200.0, -3000.0), 0.2)
-                       .adshr(0.0, 0.0, 0.25, 0.25, 0.2) *
-                   0.5)
+            .adshr(0.0, 0.0, 0.25, 0.25, 0.2) * 0.5)
     }
 
     pub fn talk_hi() -> Sound {
         Sound::new(Wave::noise(Wave::slide(7000.0, 20000.0, 0.0))
-                       .adshr(0.05, 0.0, 1.0, 0.0, 0.15) *
-                   0.1)
+            .adshr(0.05, 0.0, 1.0, 0.0, 0.15) * 0.1)
     }
 
     pub fn talk_lo() -> Sound {
         Sound::new(Wave::noise(Wave::slide(7000.0, -20000.0, 0.0))
-                       .adshr(0.05, 0.0, 1.0, 0.0, 0.15) *
-                   0.1)
+            .adshr(0.05, 0.0, 1.0, 0.0, 0.15) * 0.1)
     }
 
     pub fn talk_thought() -> Sound {
         Sound::new((Wave::noise(5000.0) * Wave::sine(6.0))
-                       .adshr(0.0, 0.0, 0.08, 0.1, 0.2))
+            .adshr(0.0, 0.0, 0.08, 0.1, 0.2))
     }
 
     pub fn transform_final() -> Sound {
@@ -147,18 +142,18 @@ impl Sound {
     pub fn transform_step(step: usize) -> Sound {
         let pitch = 275.0 + 25.0 * step as f32;
         let freq = (Wave::sine(10.0) * 0.01 + 1.0) * pitch;
-        Sound::new(Wave::triangle(freq, 0.85).adshr(0.05, 0.0, 1.0, 0.0, 0.4) *
-                   0.2)
+        Sound::new(Wave::triangle(freq, 0.85)
+            .adshr(0.05, 0.0, 1.0, 0.0, 0.4) * 0.2)
     }
 
     pub fn undo() -> Sound {
         Sound::new(Wave::pulse(Wave::from(-30.0).delayed(0.06) + 150.0, 0.5)
-                       .adshr(0.0, 0.0, 0.1, 0.1, 0.25))
+            .adshr(0.0, 0.0, 0.1, 0.1, 0.25))
     }
 
     pub fn redo() -> Sound {
         Sound::new(Wave::pulse(Wave::from(30.0).delayed(0.06) + 120.0, 0.5)
-                       .adshr(0.0, 0.0, 0.1, 0.1, 0.25))
+            .adshr(0.0, 0.0, 0.1, 0.1, 0.25))
     }
 
     pub fn reset() -> Sound {

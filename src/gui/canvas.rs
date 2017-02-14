@@ -108,12 +108,14 @@ impl<'a> Canvas<'a> {
 
     pub fn draw_sprite(&mut self, sprite: &Sprite, mut top_left: Point) {
         top_left = top_left.offset(self.offset_rect.x(), self.offset_rect.y());
-        self.renderer.copy(&sprite.sdl2_texture(),
-                           None,
-                           Some(Rect::new(top_left.x(),
-                                          top_left.y(),
-                                          sprite.width(),
-                                          sprite.height()))).unwrap();
+        self.renderer
+            .copy(&sprite.sdl2_texture(),
+                  None,
+                  Some(Rect::new(top_left.x(),
+                                 top_left.y(),
+                                 sprite.width(),
+                                 sprite.height())))
+            .unwrap();
     }
 
     pub fn draw_sprite_transposed(&mut self, sprite: &Sprite,

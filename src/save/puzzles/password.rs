@@ -55,12 +55,8 @@ const TEZURE_WORDS: &'static [&'static str] = &["DETERMINED",
                                                 "DUTIFUL",
                                                 "JUNIOR",
                                                 "LEADERSHIP"];
-const YTTRIS_WORDS: &'static [&'static str] = &["ENERGY",
-                                                "EMOTION",
-                                                "SPONTANEOUS",
-                                                "FEARFUL",
-                                                "CREATIVE",
-                                                "ARTISTIC"];
+const YTTRIS_WORDS: &'static [&'static str] =
+    &["ENERGY", "EMOTION", "SPONTANEOUS", "FEARFUL", "CREATIVE", "ARTISTIC"];
 const UGRENT_WORDS: &'static [&'static str] = &["CAUTION",
                                                 "GRUFF",
                                                 "PROTECTIVE",
@@ -99,11 +95,11 @@ impl PasswordState {
         } else {
             let mut sliders = INIT_SLIDERS;
             for (index, offset) in pop_array(&mut table, SLIDERS_KEY)
-                                       .iter()
-                                       .filter_map(toml::Value::as_integer)
-                                       .filter(|&off| -5 <= off && off <= 0)
-                                       .map(|off| off as i32)
-                                       .enumerate() {
+                .iter()
+                .filter_map(toml::Value::as_integer)
+                .filter(|&off| -5 <= off && off <= 0)
+                .map(|off| off as i32)
+                .enumerate() {
                 if index >= sliders.len() {
                     break;
                 }

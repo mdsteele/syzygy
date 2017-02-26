@@ -194,11 +194,7 @@ impl Drag {
 
     pub fn tilt_dir_for(&self, col: i32, row: i32) -> Option<Direction> {
         let (dir, rank, dist) = self.dir_rank_dist();
-        let for_rank = if dir.is_vertical() {
-            col
-        } else {
-            row
-        };
+        let for_rank = if dir.is_vertical() { col } else { row };
         if rank == for_rank && dist >= CUBE_SIZE / 4 {
             Some(dir)
         } else {

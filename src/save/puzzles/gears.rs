@@ -87,20 +87,12 @@ impl GearsState {
 
     pub fn min_position_for_row(row: i32) -> i32 {
         assert!(row >= 0 && row < NUM_ROWS);
-        if row == 3 {
-            6
-        } else {
-            0
-        }
+        if row == 3 { 6 } else { 0 }
     }
 
     pub fn max_position_for_row(row: i32) -> i32 {
         assert!(row >= 0 && row < NUM_ROWS);
-        if row == 4 {
-            4
-        } else {
-            10
-        }
+        if row == 4 { 4 } else { 10 }
     }
 
     pub fn get_position(&self, row: i32) -> i32 {

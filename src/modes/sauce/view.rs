@@ -266,11 +266,7 @@ impl ArrowButton {
     }
 
     fn rect(&self) -> Rect {
-        let left = if self.next {
-            464
-        } else {
-            96
-        };
+        let left = if self.next { 464 } else { 96 };
         Rect::new(left, 128, 16, 16)
     }
 
@@ -282,11 +278,7 @@ impl ArrowButton {
 
 impl Element<SauceState, bool> for ArrowButton {
     fn draw(&self, _: &SauceState, canvas: &mut Canvas) {
-        let mut idx = if self.next {
-            2
-        } else {
-            0
-        };
+        let mut idx = if self.next { 2 } else { 0 };
         if self.blink > 0 {
             idx += 1;
         }

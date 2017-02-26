@@ -188,11 +188,7 @@ impl Blinkenlight {
 
 impl Element<(), PuzzleCmd> for Blinkenlight {
     fn draw(&self, _unused: &(), canvas: &mut Canvas) {
-        let index = if self.anim < BLINK_FRAMES {
-            1
-        } else {
-            0
-        };
+        let index = if self.anim < BLINK_FRAMES { 1 } else { 0 };
         canvas.draw_sprite(&self.sprites[index], self.topleft);
     }
 

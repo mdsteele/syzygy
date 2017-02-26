@@ -75,11 +75,7 @@ impl Ast {
                 Box::new(ParallelNode::new(nodes))
             }
             Ast::Loop(min, max, ast) => {
-                let max = if max <= 0 {
-                    None
-                } else {
-                    Some(max)
-                };
+                let max = if max <= 0 { None } else { Some(max) };
                 Box::new(LoopNode::new(ast.to_scene_node(resources), min, max))
             }
             Ast::Dark(dark) => Box::new(DarkNode::new(dark)),

@@ -111,11 +111,7 @@ impl LaneState {
     pub fn symbol_at(&self, col: i32, row: i32) -> Option<i8> {
         if col >= 0 && col < NUM_COLS && row >= 0 && row < NUM_ROWS {
             let value = self.grid[(row * NUM_COLS + col) as usize];
-            if value == 0 {
-                None
-            } else {
-                Some(value.abs())
-            }
+            if value == 0 { None } else { Some(value.abs()) }
         } else {
             None
         }

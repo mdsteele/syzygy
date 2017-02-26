@@ -201,11 +201,7 @@ impl Drag {
 
     pub fn offset_for(&self, col: i32, row: i32) -> Point {
         let (dir, rank, dist) = self.dir_rank_dist();
-        let for_rank = if dir.is_vertical() {
-            col
-        } else {
-            row
-        };
+        let for_rank = if dir.is_vertical() { col } else { row };
         if rank == for_rank {
             dir.delta() * dist
         } else {

@@ -66,11 +66,7 @@ impl CrosswordView {
     pub fn animate_center_word(&mut self) { self.animation = Some(0); }
 
     pub fn set_center_word_hilighted(&mut self, hilight: bool) {
-        self.animation = if hilight {
-            Some(self.anim_max())
-        } else {
-            None
-        }
+        self.animation = if hilight { Some(self.anim_max()) } else { None }
     }
 
     fn anim_max(&self) -> i32 {

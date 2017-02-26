@@ -159,21 +159,9 @@ impl ToggleLight {
         ToggleLight {
             frame: resources.get_sprites("toggle_light")[0].clone(),
             position: position,
-            red_radius: if red {
-                MAX_LIGHT_RADIUS
-            } else {
-                0
-            },
-            green_radius: if green {
-                MAX_LIGHT_RADIUS
-            } else {
-                0
-            },
-            blue_radius: if blue {
-                MAX_LIGHT_RADIUS
-            } else {
-                0
-            },
+            red_radius: if red { MAX_LIGHT_RADIUS } else { 0 },
+            green_radius: if green { MAX_LIGHT_RADIUS } else { 0 },
+            blue_radius: if blue { MAX_LIGHT_RADIUS } else { 0 },
             hilight: 0,
         }
     }

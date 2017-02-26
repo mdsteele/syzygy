@@ -85,11 +85,7 @@ impl BlameState {
 
     pub fn max_position_for_row(row: i32) -> i32 {
         assert!(row >= 0 && row < NUM_ROWS);
-        if row >= 5 {
-            9
-        } else {
-            8
-        }
+        if row >= 5 { 9 } else { 8 }
     }
 
     pub fn get_position(&self, row: i32) -> i32 {

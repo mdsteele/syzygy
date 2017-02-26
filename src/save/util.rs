@@ -17,7 +17,7 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use std::{i32, u32};
+use std::{i32, i8, u32};
 use toml;
 
 // ========================================================================= //
@@ -58,6 +58,21 @@ pub fn to_i32(value: toml::Value) -> i32 {
                 i32::MIN
             } else {
                 integer as i32
+            }
+        }
+        _ => 0,
+    }
+}
+
+pub fn to_i8(value: toml::Value) -> i8 {
+    match value {
+        toml::Value::Integer(integer) => {
+            if integer > (i8::MAX as i64) {
+                i8::MAX
+            } else if integer < (i8::MIN as i64) {
+                i8::MIN
+            } else {
+                integer as i8
             }
         }
         _ => 0,

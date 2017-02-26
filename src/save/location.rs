@@ -22,7 +22,7 @@ use toml;
 
 // ========================================================================= //
 
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum Location {
     Map,
     Prolog,

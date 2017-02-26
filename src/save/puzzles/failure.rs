@@ -20,11 +20,13 @@
 use toml;
 
 use save::{Access, Location};
+use save::pyramid::{Board, Coords, Team};
 use super::PuzzleState;
-use super::super::util::ACCESS_KEY;
+use super::super::util::{ACCESS_KEY, pop_array};
 
 // ========================================================================= //
 
+const BOARD_KEY: &'static str = "board";
 const MID_SCENE_DONE_KEY: &'static str = "mid_done";
 
 // ========================================================================= //
@@ -33,24 +35,42 @@ const MID_SCENE_DONE_KEY: &'static str = "mid_done";
 pub struct FailureState {
     access: Access,
     mid_scene_done: bool,
+    board: Board,
 }
 
 impl FailureState {
-    pub fn from_toml(table: toml::value::Table) -> FailureState {
+    pub fn from_toml(mut table: toml::value::Table) -> FailureState {
+        let board_toml = pop_array(&mut table, BOARD_KEY);
         FailureState {
             access: Access::from_toml(table.get(ACCESS_KEY)),
             mid_scene_done: table.get(MID_SCENE_DONE_KEY)
                                  .and_then(toml::Value::as_bool)
                                  .unwrap_or(false),
+            board: Board::from_toml(board_toml),
         }
     }
 
     pub fn solve(&mut self) {
         self.access = Access::Solved;
-        // TODO solve
+        for coords in Coords::all() {
+            if self.board.piece_at(coords).is_none() {
+                let team = if self.board.srb_supply() > 0 {
+                    Team::SRB
+                } else {
+                    Team::You
+                };
+                self.board.set_piece_at(coords, team);
+            }
+        }
+        debug_assert_eq!(self.board.you_supply(), 0);
+        debug_assert_eq!(self.board.srb_supply(), 0);
     }
 
     pub fn mid_scene_is_done(&self) -> bool { self.mid_scene_done }
+
+    pub fn board(&self) -> &Board { &self.board }
+
+    pub fn board_mut(&mut self) -> &mut Board { &mut self.board }
 }
 
 impl PuzzleState for FailureState {
@@ -60,17 +80,18 @@ impl PuzzleState for FailureState {
 
     fn access_mut(&mut self) -> &mut Access { &mut self.access }
 
-    fn can_reset(&self) -> bool { false } // TODO
+    fn can_reset(&self) -> bool { !self.board.is_empty() }
 
-    fn reset(&mut self) {
-        // TODO reset
-    }
+    fn reset(&mut self) { self.board = Board::new(); }
 
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
-        table.insert(MID_SCENE_DONE_KEY.to_string(),
-                     toml::Value::Boolean(self.mid_scene_done));
+        if self.mid_scene_done {
+            table.insert(MID_SCENE_DONE_KEY.to_string(),
+                         toml::Value::Boolean(self.mid_scene_done));
+            table.insert(BOARD_KEY.to_string(), self.board.to_toml());
+        }
         toml::Value::Table(table)
     }
 }

@@ -28,6 +28,7 @@ mod location;
 mod path;
 mod prefs;
 mod puzzles;
+pub mod pyramid;
 mod util;
 
 pub use self::access::Access;

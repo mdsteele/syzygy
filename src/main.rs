@@ -175,6 +175,9 @@ fn main() {
                         Location::DoubleCross => {
                             modes::run_double_cross(&mut window, game)
                         }
+                        Location::FactOrFiction => {
+                            modes::run_fact_or_fiction(&mut window, game)
+                        }
                         Location::LevelUp => {
                             modes::run_level_up(&mut window, game)
                         }

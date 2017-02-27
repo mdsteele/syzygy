@@ -41,6 +41,7 @@ const NODES: &'static [(Location, (i32, i32))] = &[
     (Location::CubeTangle, (125, 280)),
     (Location::Disconnected, (100, 150)),
     (Location::DoubleCross, (175, 225)),
+    (Location::FactOrFiction, (150, 200)),
     (Location::LevelUp, (225, 125)),
     (Location::LightSyrup, (250, 50)),
     (Location::LogLevel, (125, 175)),
@@ -233,5 +234,28 @@ travel there.
 
 Nodes that still need to be repaired are marked in red.
 Repaired nodes are marked in green.";
+
+// ========================================================================= //
+
+#[cfg(test)]
+mod tests {
+    use std::collections::BTreeSet;
+
+    use save::Location;
+    use super::NODES;
+
+    #[test]
+    fn all_locations_represented_on_map() {
+        let mut locations: BTreeSet<Location> =
+            Location::all().iter().cloned().collect();
+        locations.remove(&Location::Map);
+        for &(loc, _) in NODES {
+            locations.remove(&loc);
+        }
+        assert!(locations.is_empty(),
+                "Unrepresented locations: {:?}",
+                locations);
+    }
+}
 
 // ========================================================================= //

@@ -23,10 +23,10 @@ use toml;
 use super::location::Location;
 use super::puzzles::{AtticState, BlackState, BlameState, CubeState,
                      DisconState, DotsState, DoubleState, FailureState,
-                     GearsState, GroundState, LaneState, LevelUpState,
-                     LineState, LogLevelState, MissedState, PasswordState,
-                     PrologState, PuzzleState, SauceState, SyrupState,
-                     TheYState, TreadState, WreckedState};
+                     FictionState, GearsState, GroundState, LaneState,
+                     LevelUpState, LineState, LogLevelState, MissedState,
+                     PasswordState, PrologState, PuzzleState, SauceState,
+                     SyrupState, TheYState, TreadState, WreckedState};
 use super::util::{pop_table, to_table};
 
 // ========================================================================= //
@@ -48,6 +48,7 @@ pub struct Game {
     pub cube_tangle: CubeState,
     pub disconnected: DisconState,
     pub double_cross: DoubleState,
+    pub fact_or_fiction: FictionState,
     pub level_up: LevelUpState,
     pub light_syrup: SyrupState,
     pub log_level: LogLevelState,
@@ -94,6 +95,8 @@ impl Game {
                 pop_table(table_ref, Location::Disconnected.key())),
             double_cross: DoubleState::from_toml(
                 pop_table(table_ref, Location::DoubleCross.key())),
+            fact_or_fiction: FictionState::from_toml(
+                pop_table(table_ref, Location::FactOrFiction.key())),
             level_up: LevelUpState::from_toml(
                 pop_table(table_ref, Location::LevelUp.key())),
             light_syrup: SyrupState::from_toml(
@@ -163,6 +166,7 @@ impl Game {
             Location::CubeTangle => &self.cube_tangle,
             Location::Disconnected => &self.disconnected,
             Location::DoubleCross => &self.double_cross,
+            Location::FactOrFiction => &self.fact_or_fiction,
             Location::LevelUp => &self.level_up,
             Location::LightSyrup => &self.light_syrup,
             Location::LogLevel => &self.log_level,
@@ -191,6 +195,7 @@ impl Game {
             Location::CubeTangle => &mut self.cube_tangle,
             Location::Disconnected => &mut self.disconnected,
             Location::DoubleCross => &mut self.double_cross,
+            Location::FactOrFiction => &mut self.fact_or_fiction,
             Location::LevelUp => &mut self.level_up,
             Location::LightSyrup => &mut self.light_syrup,
             Location::LogLevel => &mut self.log_level,

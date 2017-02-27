@@ -31,7 +31,6 @@ const MID_SCENE_DONE_KEY: &'static str = "mid_done";
 
 // ========================================================================= //
 
-#[derive(Default)]
 pub struct FailureState {
     access: Access,
     mid_scene_done: bool,

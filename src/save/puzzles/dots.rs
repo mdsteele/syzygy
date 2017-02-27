@@ -17,7 +17,6 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use std::default::Default;
 use toml;
 
 use save::{Access, Device, DeviceGrid, Direction, Location, PrimaryColor};
@@ -122,15 +121,6 @@ impl DotsState {
         grid.set(5, 4, Device::Mirror, Direction::South);
         grid.set_is_modified(true);
         grid
-    }
-}
-
-impl Default for DotsState {
-    fn default() -> DotsState {
-        DotsState {
-            access: Default::default(),
-            grid: DotsState::initial_grid(),
-        }
     }
 }
 

@@ -18,7 +18,6 @@
 // +--------------------------------------------------------------------------+
 
 use std::collections::VecDeque;
-use std::default::Default;
 use toml;
 
 use save::{Access, Direction, Location};
@@ -151,16 +150,6 @@ impl WreckedState {
     }
 }
 
-impl Default for WreckedState {
-    fn default() -> WreckedState {
-        WreckedState {
-            access: Default::default(),
-            grid: INITIAL_GRID.to_vec(),
-            is_initial: true,
-        }
-    }
-}
-
 impl PuzzleState for WreckedState {
     fn location(&self) -> Location { Location::WreckedAngle }
 
@@ -215,6 +204,7 @@ fn rotate_deque<T>(deque: &mut VecDeque<T>, by: i32) {
 #[cfg(test)]
 mod tests {
     use std::collections::VecDeque;
+    use toml;
 
     use save::Direction;
     use super::{WreckedState, rotate_deque};
@@ -247,7 +237,7 @@ mod tests {
 
     #[test]
     fn shift_east() {
-        let mut state: WreckedState = Default::default();
+        let mut state = WreckedState::from_toml(toml::value::Table::new());
         state.shift_tiles(Direction::East, 0, 1);
         assert_eq!(state.tile_at(0, 0), Some(1));
         assert_eq!(state.tile_at(5, 0), None);
@@ -256,7 +246,7 @@ mod tests {
 
     #[test]
     fn shift_west() {
-        let mut state: WreckedState = Default::default();
+        let mut state = WreckedState::from_toml(toml::value::Table::new());
         state.shift_tiles(Direction::West, 1, 1);
         assert_eq!(state.tile_at(1, 1), None);
         assert_eq!(state.tile_at(4, 1), Some(2));
@@ -265,7 +255,7 @@ mod tests {
 
     #[test]
     fn shift_south() {
-        let mut state: WreckedState = Default::default();
+        let mut state = WreckedState::from_toml(toml::value::Table::new());
         state.shift_tiles(Direction::South, 0, 1);
         assert_eq!(state.tile_at(0, 0), Some(1));
         assert_eq!(state.tile_at(0, 1), None);
@@ -274,7 +264,7 @@ mod tests {
 
     #[test]
     fn shift_north() {
-        let mut state: WreckedState = Default::default();
+        let mut state = WreckedState::from_toml(toml::value::Table::new());
         state.shift_tiles(Direction::North, 8, 1);
         assert_eq!(state.tile_at(8, 1), Some(2));
         assert_eq!(state.tile_at(8, 4), Some(1));

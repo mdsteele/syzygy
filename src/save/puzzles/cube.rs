@@ -17,7 +17,6 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use std::default::Default;
 use toml;
 
 use save::{Access, Direction, Location};
@@ -102,16 +101,6 @@ impl CubeState {
         self.is_initial = &self.grid as &[i32] == INITIAL_GRID;
         if self.grid.iter().zip(SOLVED_GRID.iter()).all(fronts_match) {
             self.access = Access::Solved;
-        }
-    }
-}
-
-impl Default for CubeState {
-    fn default() -> CubeState {
-        CubeState {
-            access: Default::default(),
-            grid: INITIAL_GRID.to_vec(),
-            is_initial: true,
         }
     }
 }

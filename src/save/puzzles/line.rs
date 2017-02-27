@@ -45,7 +45,6 @@ const GRIDS: &'static [(i32, char, char, &'static str)] = &[
 
 // ========================================================================= //
 
-#[derive(Default)]
 pub struct LineState {
     access: Access,
     stage: i32,

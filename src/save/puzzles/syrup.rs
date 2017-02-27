@@ -47,7 +47,6 @@ const SOLVED_BLUE_TOGGLED: &'static [i32] = &[5, 7, 11, 16];
 
 // ========================================================================= //
 
-#[derive(Default)]
 pub struct SyrupState {
     access: Access,
     next_color: PrimaryColor,

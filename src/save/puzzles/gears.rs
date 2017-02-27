@@ -133,17 +133,6 @@ impl GearsState {
     }
 }
 
-impl Default for GearsState {
-    fn default() -> GearsState {
-        GearsState {
-            access: Default::default(),
-            positions: INITIAL_POSITIONS.to_vec(),
-            elinsa_row: INITIAL_ELINSA_ROW,
-            is_initial: true,
-        }
-    }
-}
-
 impl PuzzleState for GearsState {
     fn location(&self) -> Location { Location::ShiftGears }
 

@@ -514,10 +514,6 @@ impl Board {
     }
 }
 
-impl Default for Board {
-    fn default() -> Board { Board::new() }
-}
-
 // ========================================================================= //
 
 #[cfg(test)]

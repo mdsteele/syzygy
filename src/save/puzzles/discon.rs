@@ -17,7 +17,6 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use std::default::Default;
 use toml;
 
 use save::{Access, Device, DeviceGrid, Direction, Location, PrimaryColor};
@@ -113,15 +112,6 @@ impl DisconState {
         grid.set(2, 4, Device::Mirror, Direction::South);
         grid.set_is_modified(true);
         grid
-    }
-}
-
-impl Default for DisconState {
-    fn default() -> DisconState {
-        DisconState {
-            access: Default::default(),
-            grid: DisconState::initial_grid(),
-        }
     }
 }
 

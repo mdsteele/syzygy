@@ -17,7 +17,6 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use std::default::Default;
 use toml;
 
 use super::location::Location;
@@ -36,7 +35,6 @@ const LOCATION_KEY: &'static str = "location";
 
 // ========================================================================= //
 
-#[derive(Default)]
 pub struct Game {
     pub location: Location,
     pub prolog: PrologState,
@@ -67,7 +65,7 @@ pub struct Game {
 
 impl Game {
     pub fn new() -> Game {
-        let mut game: Game = Default::default();
+        let mut game = Game::from_toml(toml::Value::Boolean(false));
         game.location = Location::Prolog;
         game
     }
@@ -210,6 +208,22 @@ impl Game {
             Location::TreadLightly => &mut self.tread_lightly,
             Location::WreckedAngle => &mut self.wrecked_angle,
         }
+    }
+}
+
+// ========================================================================= //
+
+#[cfg(test)]
+mod tests {
+    use save::{Access, Location, PuzzleState};
+    use super::Game;
+
+    #[test]
+    fn new_game() {
+        let game = Game::new();
+        assert_eq!(game.location, Location::Prolog);
+        assert!(!game.ever_clicked_info);
+        assert_eq!(game.prolog.access(), Access::Unvisited);
     }
 }
 

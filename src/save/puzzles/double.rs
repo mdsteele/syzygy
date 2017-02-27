@@ -66,7 +66,6 @@ const WORD_CLUES: &'static [(&'static str, &'static str)] = &[
 
 // ========================================================================= //
 
-#[derive(Default)]
 pub struct DoubleState {
     access: Access,
     done: BTreeSet<i32>,

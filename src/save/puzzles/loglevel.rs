@@ -71,16 +71,6 @@ impl LogLevelState {
     pub fn crossword_mut(&mut self) -> &mut CrosswordState { &mut self.words }
 }
 
-impl Default for LogLevelState {
-    fn default() -> LogLevelState {
-        LogLevelState {
-            access: Default::default(),
-            words: CrosswordState::blank(ValidChars::LettersAndNumbers,
-                                         SOLVED_WORDS),
-        }
-    }
-}
-
 impl PuzzleState for LogLevelState {
     fn location(&self) -> Location { Location::LogLevel }
 

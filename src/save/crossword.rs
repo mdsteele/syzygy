@@ -62,12 +62,6 @@ impl CrosswordState {
         }
     }
 
-    pub fn blank(valid: ValidChars, solved_words: &[&str]) -> CrosswordState {
-        let mut crossword = CrosswordState::new(valid, solved_words);
-        crossword.reset();
-        crossword
-    }
-
     pub fn from_toml(array: toml::value::Array, valid: ValidChars,
                      solved: &[&str])
                      -> CrosswordState {

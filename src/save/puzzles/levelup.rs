@@ -71,16 +71,6 @@ impl LevelUpState {
     pub fn crossword_mut(&mut self) -> &mut CrosswordState { &mut self.words }
 }
 
-impl Default for LevelUpState {
-    fn default() -> LevelUpState {
-        LevelUpState {
-            access: Default::default(),
-            words: CrosswordState::blank(ValidChars::LettersAndSymbols,
-                                         SOLVED_WORDS),
-        }
-    }
-}
-
 impl PuzzleState for LevelUpState {
     fn location(&self) -> Location { Location::LevelUp }
 

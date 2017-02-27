@@ -43,7 +43,6 @@ const SOLVED_TOGGLED_2: &'static [i32] = &[9, 7, 0, 10, 8, 4, 2];
 
 // ========================================================================= //
 
-#[derive(Default)]
 pub struct TreadState {
     access: Access,
     toggled: Vec<i32>,

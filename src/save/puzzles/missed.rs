@@ -17,7 +17,6 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use std::default::Default;
 use toml;
 
 use save::{Access, Device, DeviceGrid, Direction, Location, PrimaryColor};
@@ -126,15 +125,6 @@ impl MissedState {
         grid.set(8, 4, Device::Mirror, Direction::South);
         grid.set_is_modified(true);
         grid
-    }
-}
-
-impl Default for MissedState {
-    fn default() -> MissedState {
-        MissedState {
-            access: Default::default(),
-            grid: MissedState::initial_grid(),
-        }
     }
 }
 

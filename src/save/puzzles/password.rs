@@ -187,22 +187,6 @@ impl PasswordState {
     }
 }
 
-impl Default for PasswordState {
-    fn default() -> PasswordState {
-        PasswordState {
-            access: Default::default(),
-            active_slot: 0,
-            crosswords: [(false, CrosswordState::blank(VALID, ELINSA_WORDS)),
-                         (false, CrosswordState::blank(VALID, ARGONY_WORDS)),
-                         (false, CrosswordState::blank(VALID, TEZURE_WORDS)),
-                         (false, CrosswordState::blank(VALID, YTTRIS_WORDS)),
-                         (false, CrosswordState::blank(VALID, UGRENT_WORDS)),
-                         (false, CrosswordState::blank(VALID, RELYNG_WORDS))],
-            sliders: INIT_SLIDERS,
-        }
-    }
-}
-
 impl PuzzleState for PasswordState {
     fn location(&self) -> Location { Location::PasswordFile }
 

@@ -214,16 +214,6 @@ impl LaneState {
     fn empty_grid() -> Vec<i8> { vec![0; GRID_SIZE] }
 }
 
-impl Default for LaneState {
-    fn default() -> LaneState {
-        LaneState {
-            access: Default::default(),
-            grid: LaneState::empty_grid(),
-            stage: 0,
-        }
-    }
-}
-
 impl PuzzleState for LaneState {
     fn location(&self) -> Location { Location::MemoryLane }
 

@@ -25,7 +25,6 @@ use super::super::util::ACCESS_KEY;
 
 // ========================================================================= //
 
-#[derive(Default)]
 pub struct BlackState {
     access: Access,
 }

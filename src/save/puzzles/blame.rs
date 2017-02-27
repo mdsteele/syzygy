@@ -125,17 +125,6 @@ impl BlameState {
     }
 }
 
-impl Default for BlameState {
-    fn default() -> BlameState {
-        BlameState {
-            access: Default::default(),
-            positions: INITIAL_POSITIONS.to_vec(),
-            elinsa_row: INITIAL_ELINSA_ROW,
-            is_initial: true,
-        }
-    }
-}
-
 impl PuzzleState for BlameState {
     fn location(&self) -> Location { Location::ShiftTheBlame }
 

@@ -119,17 +119,6 @@ impl GroundState {
     }
 }
 
-impl Default for GroundState {
-    fn default() -> GroundState {
-        GroundState {
-            access: Default::default(),
-            positions: INITIAL_POSITIONS.to_vec(),
-            elinsa_row: INITIAL_ELINSA_ROW,
-            is_initial: true,
-        }
-    }
-}
-
 impl PuzzleState for GroundState {
     fn location(&self) -> Location { Location::ShiftingGround }
 

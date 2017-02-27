@@ -32,7 +32,6 @@ const SOLVED_TOGGLED: &'static [i32] = &[0, 3, 4, 9, 10, 13, 15];
 
 // ========================================================================= //
 
-#[derive(Default)]
 pub struct AtticState {
     access: Access,
     toggled: BTreeSet<i32>,

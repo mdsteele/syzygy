@@ -18,7 +18,6 @@
 // +--------------------------------------------------------------------------+
 
 use std::char;
-use std::default::Default;
 use toml;
 
 use save::{Access, Location};
@@ -97,16 +96,6 @@ impl FictionState {
         self.letters = INITIAL_LETTERS.to_vec();
         for &index in &self.sequence {
             apply_transformation(&mut self.letters, index);
-        }
-    }
-}
-
-impl Default for FictionState {
-    fn default() -> FictionState {
-        FictionState {
-            access: Default::default(),
-            sequence: Vec::new(),
-            letters: INITIAL_LETTERS.to_vec(),
         }
     }
 }

@@ -17,56 +17,42 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod attic;
-mod black;
-mod blame;
-mod cube;
-mod discon;
-mod dots;
-mod double;
-mod failure;
-mod fiction;
-mod gears;
-mod ground;
-mod lane;
-mod levelup;
-mod line;
-mod loglevel;
-mod missed;
-mod password;
-mod prolog;
-mod puzzle;
-mod sauce;
-mod star;
-mod syrup;
-mod they;
-mod tread;
-mod wrecked;
+use elements::{Ast, Scene, TalkPos, TalkStyle};
+use gui::{Resources, Sound};
 
-pub use self::attic::AtticState;
-pub use self::black::BlackState;
-pub use self::blame::BlameState;
-pub use self::cube::CubeState;
-pub use self::discon::DisconState;
-pub use self::dots::DotsState;
-pub use self::double::DoubleState;
-pub use self::failure::FailureState;
-pub use self::fiction::FictionState;
-pub use self::gears::GearsState;
-pub use self::ground::GroundState;
-pub use self::lane::LaneState;
-pub use self::levelup::LevelUpState;
-pub use self::line::LineState;
-pub use self::loglevel::LogLevelState;
-pub use self::missed::MissedState;
-pub use self::password::PasswordState;
-pub use self::prolog::PrologState;
-pub use self::puzzle::PuzzleState;
-pub use self::sauce::SauceState;
-pub use self::star::{StarState, WordDir};
-pub use self::syrup::SyrupState;
-pub use self::they::TheYState;
-pub use self::tread::TreadState;
-pub use self::wrecked::WreckedState;
+// ========================================================================= //
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::SetBg("star_crossed"),
+            Ast::Wait(0.5),
+            Ast::Place(0, "chars/ugrent", 0, (-16, 272)),
+            Ast::Slide(0, (122, 272), false, true, 1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE,
+                      "No security breaches so\n\
+                       far that I can see."),
+        ]),
+    ];
+    Ast::compile_scene(resources, ast)
+}
+
+// ========================================================================= //
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::solve_puzzle_chime()),
+            Ast::Queue(0, 1), // Animate final word.
+            Ast::Wait(2.0),
+            Ast::Queue(0, 0), // Cancel animating final word.
+        ]),
+    ];
+    Ast::compile_scene(resources, ast)
+}
 
 // ========================================================================= //

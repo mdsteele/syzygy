@@ -205,6 +205,9 @@ fn main() {
                         Location::ShiftingGround => {
                             modes::run_shifting_ground(&mut window, game)
                         }
+                        Location::StarCrossed => {
+                            modes::run_star_crossed(&mut window, game)
+                        }
                         Location::SystemFailure => {
                             modes::run_system_failure(&mut window, game)
                         }

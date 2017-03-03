@@ -43,7 +43,7 @@ const DASHBOARD_CHIPS: &'static [(i32, i32, Location)] = &[
     (377, 71, Location::MissedConnections),
     (167, 113, Location::ALightInTheAttic),
     (209, 113, Location::ALightInTheAttic),
-    (251, 113, Location::ALightInTheAttic),
+    (251, 113, Location::StarCrossed),
     (293, 113, Location::ALightInTheAttic),
     (335, 113, Location::ALightInTheAttic),
     (377, 113, Location::ShiftTheBlame),

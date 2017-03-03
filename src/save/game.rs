@@ -19,14 +19,13 @@
 
 use toml;
 
-use super::location::Location;
-use super::puzzles::{AtticState, BlackState, BlameState, CubeState,
-                     DisconState, DotsState, DoubleState, FailureState,
-                     FictionState, GearsState, GroundState, LaneState,
-                     LevelUpState, LineState, LogLevelState, MissedState,
-                     PasswordState, PrologState, PuzzleState, SauceState,
-                     SyrupState, TheYState, TreadState, WreckedState};
-use super::util::{pop_table, to_table};
+use save::{AtticState, BlackState, BlameState, CubeState, DisconState,
+           DotsState, DoubleState, FailureState, FictionState, GearsState,
+           GroundState, LaneState, LevelUpState, LineState, Location,
+           LogLevelState, MissedState, PasswordState, PrologState, PuzzleState,
+           SauceState, StarState, SyrupState, TheYState, TreadState,
+           WreckedState};
+use save::util::{pop_table, to_table};
 
 // ========================================================================= //
 
@@ -56,6 +55,7 @@ pub struct Game {
     pub shift_gears: GearsState,
     pub shift_the_blame: BlameState,
     pub shifting_ground: GroundState,
+    pub star_crossed: StarState,
     pub system_failure: FailureState,
     pub the_y_factor: TheYState,
     pub tread_lightly: TreadState,
@@ -113,6 +113,8 @@ impl Game {
                 pop_table(table_ref, Location::ShiftTheBlame.key())),
             shifting_ground: GroundState::from_toml(
                 pop_table(table_ref, Location::ShiftingGround.key())),
+            star_crossed: StarState::from_toml(
+                pop_table(table_ref, Location::StarCrossed.key())),
             system_failure: FailureState::from_toml(
                 pop_table(table_ref, Location::SystemFailure.key())),
             the_y_factor: TheYState::from_toml(
@@ -174,6 +176,7 @@ impl Game {
             Location::ShiftGears => &self.shift_gears,
             Location::ShiftTheBlame => &self.shift_the_blame,
             Location::ShiftingGround => &self.shifting_ground,
+            Location::StarCrossed => &self.star_crossed,
             Location::SystemFailure => &self.system_failure,
             Location::TheYFactor => &self.the_y_factor,
             Location::TreadLightly => &self.tread_lightly,
@@ -203,6 +206,7 @@ impl Game {
             Location::ShiftGears => &mut self.shift_gears,
             Location::ShiftTheBlame => &mut self.shift_the_blame,
             Location::ShiftingGround => &mut self.shifting_ground,
+            Location::StarCrossed => &mut self.star_crossed,
             Location::SystemFailure => &mut self.system_failure,
             Location::TheYFactor => &mut self.the_y_factor,
             Location::TreadLightly => &mut self.tread_lightly,

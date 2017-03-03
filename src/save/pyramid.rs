@@ -136,7 +136,7 @@ impl Iterator for CoordsIter {
 
 // ========================================================================= //
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum Move {
     Place {
         at: Coords,
@@ -171,12 +171,8 @@ impl Board {
         }
     }
 
-    pub fn from_toml(array: toml::value::Array) -> Board {
-        let mut cells: Vec<i8> = array.into_iter()
-                                      .map(to_i8)
-                                      .filter(|&v| Team::is_valid_value(v))
-                                      .collect();
-        cells.resize(NUM_CELLS, 0);
+    fn from_cells(cells: Vec<i8>) -> Board {
+        debug_assert_eq!(cells.len(), NUM_CELLS);
         let you = cells.iter().filter(|&&v| v == YOU_VALUE).count() as i32;
         let srb = cells.iter().filter(|&&v| v == SRB_VALUE).count() as i32;
         if you > STARTING_PIECES || srb > STARTING_PIECES {
@@ -187,6 +183,15 @@ impl Board {
             you: STARTING_PIECES - you,
             srb: STARTING_PIECES - srb,
         }
+    }
+
+    pub fn from_toml(array: toml::value::Array) -> Board {
+        let mut cells: Vec<i8> = array.into_iter()
+                                      .map(to_i8)
+                                      .filter(|&v| Team::is_valid_value(v))
+                                      .collect();
+        cells.resize(NUM_CELLS, 0);
+        Board::from_cells(cells)
     }
 
     pub fn to_toml(&self) -> toml::Value {
@@ -404,9 +409,15 @@ impl Board {
                 best_moves.push(mov);
             }
         }
-        if cfg!(debug_assertions) && best_moves.len() > 1 {
-            println!("Choosing randomly between {} equally-good moves.",
-                     best_moves.len());
+        if cfg!(debug_assertions) {
+            if best_moves.len() > 1 {
+                println!("Choosing randomly between {} equally-good moves \
+                          (score = {})",
+                         best_moves.len(),
+                         best_score);
+            } else {
+                println!("Found single best move (score = {})", best_score);
+            }
         }
         rand::sample(&mut rand::thread_rng(), best_moves, 1)
             .pop()
@@ -519,9 +530,10 @@ impl Board {
 #[cfg(test)]
 mod tests {
     use std::collections::BTreeSet;
+    use std::f64;
 
     use save::util::to_array;
-    use super::{Board, Coords, NUM_CELLS, Team};
+    use super::{Board, Coords, Move, NUM_CELLS, Team};
 
     #[test]
     fn team_values() {
@@ -599,7 +611,41 @@ mod tests {
         assert_eq!(actual_removals, expected_removals);
     }
 
-    // TODO: add tests for minimax
+    #[test]
+    #[cfg_attr(rustfmt, rustfmt_skip)]
+    fn board_minimax() {
+        // Create a board where, if you go first, you will always lose, but the
+        // SRB goes first, it can win by doing a jump.
+        let board = Board::from_cells(vec![0,
+                                         0, 0,
+                                       1, 2, 0,
+                                     2, 1, 1, 2,
+                                   1, 1, 2, 2, 1,
+                                 1, 2, 2, 1, 1, 2,
+                               2, 2, 1, 1, 2, 2, 1,
+                             1, 1, 2, 2, 1, 1, 2, 2]);
+        assert_eq!(board.you_supply(), 2);
+        assert_eq!(board.srb_supply(), 2);
+        // Test that best_srb_move() finds the winning move.
+        assert_eq!(board.best_srb_move(), Move::Jump {
+            from: Coords::new(4, 3),
+            to: Coords::new(6, 0),
+            formation: vec![],
+            remove: vec![],
+        });
+        // With high enough minimax depth, we can see that you definitely lose
+        // if you go first (score 0), and the SRB wins if it goes first (score
+        // infinity).
+        assert_eq!(board.minimax(9, 0.0, f64::INFINITY, Team::You), 0.0);
+        assert_eq!(board.minimax(9, 0.0, f64::INFINITY, Team::SRB),
+                   f64::INFINITY);
+        // With a minimax depth of one, we can only see the results of the
+        // first move: if you make a move, you end up with a supply of 1
+        // vs. the SRB's 2 (score 1/2), but if the SRB makes a move, it can
+        // maintain the 2/2 supply ratio by making a jump (score 1).
+        assert_eq!(board.minimax(1, 0.0, f64::INFINITY, Team::You), 0.5);
+        assert_eq!(board.minimax(1, 0.0, f64::INFINITY, Team::SRB), 1.0);
+    }
 }
 
 // ========================================================================= //

@@ -21,7 +21,7 @@ use toml;
 
 use save::{AtticState, BlackState, BlameState, CubeState, DisconState,
            DotsState, DoubleState, FailureState, FictionState, GearsState,
-           GroundState, LaneState, LevelUpState, LineState, Location,
+           GroundState, JogState, LaneState, LevelUpState, LineState, Location,
            LogLevelState, MissedState, PasswordState, PrologState, PuzzleState,
            SauceState, StarState, SyrupState, TheYState, TreadState,
            WreckedState};
@@ -46,6 +46,7 @@ pub struct Game {
     pub disconnected: DisconState,
     pub double_cross: DoubleState,
     pub fact_or_fiction: FictionState,
+    pub jog_your_memory: JogState,
     pub level_up: LevelUpState,
     pub light_syrup: SyrupState,
     pub log_level: LogLevelState,
@@ -95,6 +96,8 @@ impl Game {
                 pop_table(table_ref, Location::DoubleCross.key())),
             fact_or_fiction: FictionState::from_toml(
                 pop_table(table_ref, Location::FactOrFiction.key())),
+            jog_your_memory: JogState::from_toml(
+                pop_table(table_ref, Location::JogYourMemory.key())),
             level_up: LevelUpState::from_toml(
                 pop_table(table_ref, Location::LevelUp.key())),
             light_syrup: SyrupState::from_toml(
@@ -167,6 +170,7 @@ impl Game {
             Location::Disconnected => &self.disconnected,
             Location::DoubleCross => &self.double_cross,
             Location::FactOrFiction => &self.fact_or_fiction,
+            Location::JogYourMemory => &self.jog_your_memory,
             Location::LevelUp => &self.level_up,
             Location::LightSyrup => &self.light_syrup,
             Location::LogLevel => &self.log_level,
@@ -197,6 +201,7 @@ impl Game {
             Location::Disconnected => &mut self.disconnected,
             Location::DoubleCross => &mut self.double_cross,
             Location::FactOrFiction => &mut self.fact_or_fiction,
+            Location::JogYourMemory => &mut self.jog_your_memory,
             Location::LevelUp => &mut self.level_up,
             Location::LightSyrup => &mut self.light_syrup,
             Location::LogLevel => &mut self.log_level,

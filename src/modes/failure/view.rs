@@ -59,7 +59,7 @@ const DASHBOARD_CHIPS: &'static [(i32, i32, Location)] = &[
     (293, 197, Location::BlackAndBlue),
     (335, 197, Location::DoubleCross),
     (377, 197, Location::LightSyrup),
-    (167, 239, Location::ALightInTheAttic),
+    (167, 239, Location::JogYourMemory),
     (209, 239, Location::ConnectTheDots),
     (251, 239, Location::CubeTangle),
     (293, 239, Location::FactOrFiction),

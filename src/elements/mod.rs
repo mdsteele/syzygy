@@ -23,6 +23,7 @@ mod dialog;
 mod fade;
 mod hud;
 mod lasers;
+pub mod memory;
 mod paragraph;
 mod puzzle;
 pub mod shift;

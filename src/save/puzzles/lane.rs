@@ -17,55 +17,59 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use rand;
 use std::cmp::min;
 use toml;
 
 use save::{Access, Location};
+use save::memory::{Grid, Shape};
+use save::util::{ACCESS_KEY, pop_array, to_u32};
 use super::PuzzleState;
-use super::super::util::{ACCESS_KEY, pop_array, to_i32, to_u32};
 
 // ========================================================================= //
 
 const GRID_KEY: &'static str = "grid";
 const STAGE_KEY: &'static str = "stage";
 
-const NUM_COLS: i32 = 6;
-const NUM_ROWS: i32 = 4;
-const GRID_SIZE: usize = (NUM_COLS * NUM_ROWS) as usize;
+const NUM_COLS: usize = 6;
+const NUM_ROWS: usize = 4;
 const NUM_SYMBOLS: i32 = 6;
 
+enum Stage {
+    Place(Shape),
+    Remove(i8),
+}
+
 #[cfg_attr(rustfmt, rustfmt_skip)]
-const STAGES: &'static [(i8, [i8; 9], &'static [(i8, usize)])] = &[
-    (0, [0, 1, 0, 0, 1, 1, 0, 1, 0], &[]),
-    (0, [0, 0, 0, 2, 2, 2, 0, 0, 2], &[(1, 1)]),
-    (0, [0, 0, 0, 3, 3, 0, 3, 3, 0], &[(1, 2), (2, 1)]),
-    (0, [0, 0, 0, 5, 5, 5, 5, 0, 0], &[(1, 1), (2, 1), (3, 2)]),
-    (1, [0, 0, 0, 0, 0, 0, 0, 0, 0], &[(5, 1)]),
-    (0, [0, 6, 6, 0, 6, 0, 0, 6, 0], &[(2, 1), (3, 2), (5, 1)]),
-    (3, [0, 0, 0, 0, 0, 0, 0, 0, 0], &[(5, 1), (6, 2)]),
-    (0, [0, 4, 0, 4, 4, 0, 4, 0, 0], &[(2, 1), (6, 1)]),
-    (2, [0, 0, 0, 0, 0, 0, 0, 0, 0], &[(4, 2), (5, 1)]),
-    (5, [0, 0, 0, 0, 0, 0, 0, 0, 0], &[(4, 1), (6, 1)]),
-    (6, [0, 0, 0, 0, 0, 0, 0, 0, 0], &[]),
-    (0, [0, 3, 0, 3, 3, 3, 0, 0, 0], &[]),
-    (0, [0, 0, 0, 0, 2, 2, 2, 2, 0], &[(3, 2)]),
-    (0, [0, 1, 1, 0, 1, 0, 0, 1, 0], &[(3, 1), (2, 1)]),
-    (0, [5, 5, 0, 0, 5, 0, 0, 5, 0], &[(1, 1), (2, 2), (4, 1)]),
-    (4, [0, 0, 0, 0, 0, 0, 0, 0, 0], &[(2, 1), (5, 3)]),
-    (2, [0, 0, 0, 0, 0, 0, 0, 0, 0], &[(1, 1)]),
-    (0, [0, 0, 0, 6, 6, 6, 6, 0, 0], &[(1, 1), (3, 1)]),
-    (3, [0, 0, 0, 0, 0, 0, 0, 0, 0], &[(6, 1), (5, 1)]),
-    (5, [0, 0, 0, 0, 0, 0, 0, 0, 0], &[(1, 1), (6, 2)]),
-    (1, [0, 0, 0, 0, 0, 0, 0, 0, 0], &[(6, 1)]),
-    (6, [0, 0, 0, 0, 0, 0, 0, 0, 0], &[]),
+const STAGES: &'static [Stage] = &[
+    Stage::Place(Shape([0, 1, 0, 0, 1, 1, 0, 1, 0])),
+    Stage::Place(Shape([0, 0, 0, 2, 2, 2, 0, 0, 2])),
+    Stage::Place(Shape([0, 0, 0, 3, 3, 0, 3, 3, 0])),
+    Stage::Place(Shape([0, 0, 0, 5, 5, 5, 5, 0, 0])),
+    Stage::Remove(1),
+    Stage::Place(Shape([0, 6, 6, 0, 6, 0, 0, 6, 0])),
+    Stage::Remove(3),
+    Stage::Place(Shape([0, 4, 0, 4, 4, 0, 4, 0, 0])),
+    Stage::Remove(2),
+    Stage::Remove(5),
+    Stage::Remove(6),
+    Stage::Place(Shape([0, 3, 0, 3, 3, 3, 0, 0, 0])),
+    Stage::Place(Shape([0, 0, 0, 0, 2, 2, 2, 2, 0])),
+    Stage::Place(Shape([0, 1, 1, 0, 1, 0, 0, 1, 0])),
+    Stage::Place(Shape([5, 5, 0, 0, 5, 0, 0, 5, 0])),
+    Stage::Remove(4),
+    Stage::Remove(2),
+    Stage::Place(Shape([0, 0, 0, 6, 6, 6, 6, 0, 0])),
+    Stage::Remove(3),
+    Stage::Remove(5),
+    Stage::Remove(1),
+    Stage::Remove(6),
 ];
 
 // ========================================================================= //
 
 pub struct LaneState {
     access: Access,
-    grid: Vec<i8>,
+    grid: Grid,
     stage: usize,
 }
 
@@ -78,13 +82,9 @@ impl LaneState {
             min(table.remove(STAGE_KEY).map(to_u32).unwrap_or(0) as usize,
                 STAGES.len() - 1)
         };
-        let mut grid: Vec<i8> = pop_array(&mut table, GRID_KEY)
-            .into_iter()
-            .map(to_i32)
-            .filter(|&val| -NUM_SYMBOLS <= val && val <= NUM_SYMBOLS)
-            .map(|val| val as i8)
-            .collect();
-        grid.resize(GRID_SIZE, 0);
+        let grid = Grid::from_toml(NUM_COLS,
+                                   NUM_ROWS,
+                                   pop_array(&mut table, GRID_KEY));
         LaneState {
             access: access,
             grid: grid,
@@ -94,40 +94,35 @@ impl LaneState {
 
     pub fn solve(&mut self) {
         self.access = Access::Solved;
-        self.grid = LaneState::empty_grid();
+        self.grid.clear();
         self.stage = STAGES.len();
     }
-
-    pub fn num_cols(&self) -> i32 { NUM_COLS }
-
-    pub fn num_rows(&self) -> i32 { NUM_ROWS }
 
     pub fn total_num_stages(&self) -> usize { STAGES.len() }
 
     pub fn current_stage(&self) -> usize { self.stage }
 
-    pub fn grid(&self) -> &Vec<i8> { &self.grid }
+    pub fn grid(&self) -> &Grid { &self.grid }
 
-    pub fn symbol_at(&self, col: i32, row: i32) -> Option<i8> {
-        if col >= 0 && col < NUM_COLS && row >= 0 && row < NUM_ROWS {
-            let value = self.grid[(row * NUM_COLS + col) as usize];
-            if value == 0 { None } else { Some(value.abs()) }
-        } else {
-            None
-        }
-    }
+    pub fn grid_mut(&mut self) -> &mut Grid { &mut self.grid }
 
-    pub fn next_shape(&self) -> Option<&'static [i8; 9]> {
-        if self.stage < STAGES.len() && STAGES[self.stage].0 == 0 {
-            Some(&STAGES[self.stage].1)
+    pub fn next_shape(&self) -> Option<Shape> {
+        if self.stage < STAGES.len() {
+            match STAGES[self.stage] {
+                Stage::Place(ref shape) => Some(shape.clone()),
+                Stage::Remove(_) => None,
+            }
         } else {
             None
         }
     }
 
     pub fn next_remove(&self) -> Option<i8> {
-        if self.stage < STAGES.len() && STAGES[self.stage].0 != 0 {
-            Some(STAGES[self.stage].0)
+        if self.stage < STAGES.len() {
+            match STAGES[self.stage] {
+                Stage::Place(_) => None,
+                Stage::Remove(symbol) => Some(symbol),
+            }
         } else {
             None
         }
@@ -135,83 +130,40 @@ impl LaneState {
 
     pub fn try_place_shape(&mut self, col: i32, row: i32) -> Option<i8> {
         if let Some(shape) = self.next_shape() {
-            let mut symbols: Vec<(i8, usize)> = Vec::new();
-            for (index, &symbol) in shape.iter().enumerate() {
-                if symbol != 0 {
-                    let col = col + (index as i32 % 3);
-                    let row = row + (index as i32 / 3);
-                    if (col < 0 || col >= NUM_COLS) ||
-                       (row < 0 || row >= NUM_ROWS) {
-                        return None;
-                    }
-                    let index = (row * NUM_COLS + col) as usize;
-                    if self.grid[index] != 0 {
-                        return None;
-                    }
-                    symbols.push((symbol, index));
-                }
+            if self.grid.try_place_shape(&shape, col, row) {
+                self.advance();
+                return shape.symbol();
             }
-            debug_assert!(!symbols.is_empty());
-            for &(symbol, index) in &symbols {
-                self.grid[index] = symbol;
-            }
-            self.advance();
-            Some(symbols[0].0)
-        } else {
-            None
         }
+        None
     }
 
     pub fn can_remove_symbol(&self, symbol: i8) -> bool {
         assert!(symbol > 0 && symbol as i32 <= NUM_SYMBOLS);
-        for &value in self.grid.iter() {
-            if value == symbol {
-                return false;
-            }
-        }
-        true
+        self.next_remove() == Some(symbol)
+    }
+
+    pub fn decay_symbol_all(&mut self, symbol: i8) {
+        self.grid.decay_symbol(symbol, NUM_COLS * NUM_ROWS);
     }
 
     pub fn remove_symbol(&mut self, symbol: i8) {
         assert!(symbol > 0 && symbol as i32 <= NUM_SYMBOLS);
-        let mut failure = false;
-        for value in self.grid.iter_mut() {
-            if *value == symbol {
-                failure = true;
-                break;
-            } else if *value == -symbol {
-                *value = 0;
-            }
-        }
-        if failure {
-            self.reset();
-        } else if self.next_remove() == Some(symbol) {
+        if self.can_remove_symbol(symbol) {
+            self.grid.remove_symbol(symbol);
             self.advance();
+        } else {
+            self.reset();
         }
     }
 
     fn advance(&mut self) {
         debug_assert!(self.stage < STAGES.len());
-        for &(symbol, num) in STAGES[self.stage as usize].2 {
-            let mut indices: Vec<usize> = Vec::new();
-            for (index, &value) in self.grid.iter().enumerate() {
-                if value == symbol {
-                    indices.push(index);
-                }
-            }
-            let sample = rand::sample(&mut rand::thread_rng(), indices, num);
-            debug_assert_eq!(sample.len(), num);
-            for index in sample {
-                self.grid[index] = -self.grid[index];
-            }
-        }
         self.stage += 1;
         if self.stage == STAGES.len() {
             self.access = Access::Solved;
         }
     }
-
-    fn empty_grid() -> Vec<i8> { vec![0; GRID_SIZE] }
 }
 
 impl PuzzleState for LaneState {
@@ -224,7 +176,7 @@ impl PuzzleState for LaneState {
     fn can_reset(&self) -> bool { self.stage > 0 }
 
     fn reset(&mut self) {
-        self.grid = LaneState::empty_grid();
+        self.grid.clear();
         self.stage = 0;
     }
 
@@ -234,11 +186,7 @@ impl PuzzleState for LaneState {
         if !self.access.is_solved() {
             table.insert(STAGE_KEY.to_string(),
                          toml::Value::Integer(self.stage as i64));
-            let grid = self.grid
-                           .iter()
-                           .map(|&val| toml::Value::Integer(val as i64))
-                           .collect();
-            table.insert(GRID_KEY.to_string(), toml::Value::Array(grid));
+            table.insert(GRID_KEY.to_string(), self.grid.to_toml());
         }
         toml::Value::Table(table)
     }
@@ -249,57 +197,36 @@ impl PuzzleState for LaneState {
 #[cfg(test)]
 mod tests {
     use std::collections::BTreeSet;
-    use super::{NUM_SYMBOLS, STAGES};
+
+    use super::{NUM_SYMBOLS, STAGES, Stage};
 
     #[test]
     fn stages_are_well_formed() {
         let mut symbols_on_board = BTreeSet::new();
-        let mut num_symbols_in_use = vec![0; NUM_SYMBOLS as usize + 1];
-        for (stage, &(free, shape, decay)) in STAGES.iter().enumerate() {
-            if free != 0 {
-                assert!(free > 0 && free as i32 <= NUM_SYMBOLS);
-                assert!(symbols_on_board.contains(&free),
-                        "Stage {} frees {}, but it's not on the board.",
-                        stage,
-                        free);
-                assert_eq!(num_symbols_in_use[free as usize], 0);
-                for &symbol in &shape {
-                    assert_eq!(symbol, 0);
-                }
-                symbols_on_board.remove(&free);
-            } else {
-                let mut num_symbols = 0;
-                for &symbol in &shape {
-                    assert!(symbol >= 0 && symbol as i32 <= NUM_SYMBOLS);
-                    if symbol > 0 {
+        for (index, stage) in STAGES.iter().enumerate() {
+            match stage {
+                &Stage::Place(ref shape) => {
+                    let mut num_symbols = 0;
+                    for (_, symbol) in shape.tiles() {
+                        assert!(symbol as i32 <= NUM_SYMBOLS);
                         num_symbols += 1;
                         symbols_on_board.insert(symbol);
-                        num_symbols_in_use[symbol as usize] += 1;
                     }
+                    assert_eq!(num_symbols, 4);
                 }
-                assert_eq!(num_symbols, 4);
-            }
-            for &(symbol, num) in decay {
-                assert!(symbol > 0 && symbol as i32 <= NUM_SYMBOLS);
-                assert!(symbols_on_board.contains(&symbol),
-                        "Stage {} decays {}, but it's not on the board.",
-                        stage,
-                        symbol);
-                assert!(num_symbols_in_use[symbol as usize] >= num,
-                        "Stage {} decays {} by {}, but only {} are in use.",
-                        stage,
-                        symbol,
-                        num,
-                        num_symbols_in_use[symbol as usize]);
-                num_symbols_in_use[symbol as usize] -= num;
+                &Stage::Remove(symbol) => {
+                    assert!(symbol > 0 && symbol as i32 <= NUM_SYMBOLS);
+                    assert!(symbols_on_board.contains(&symbol),
+                            "Stage {} frees {}, but it's not on the board.",
+                            index,
+                            symbol);
+                    symbols_on_board.remove(&symbol);
+                }
             }
         }
         assert!(symbols_on_board.is_empty(),
                 "At the end of the puzzle, {:?} are still on the board.",
                 symbols_on_board);
-        for count in num_symbols_in_use {
-            assert_eq!(count, 0);
-        }
     }
 }
 

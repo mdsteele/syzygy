@@ -25,11 +25,12 @@ mod device;
 mod direction;
 mod game;
 mod location;
+pub mod memory;
 mod path;
 mod prefs;
 mod puzzles;
 pub mod pyramid;
-mod util;
+pub mod util;
 
 pub use self::access::Access;
 pub use self::color::PrimaryColor;
@@ -43,10 +44,10 @@ pub use self::path::get_default_save_file_path;
 pub use self::prefs::Prefs;
 pub use self::puzzles::{AtticState, BlackState, BlameState, CubeState,
                         DisconState, DotsState, DoubleState, FailureState,
-                        FictionState, GearsState, GroundState, LaneState,
-                        LevelUpState, LineState, LogLevelState, MissedState,
-                        PasswordState, PrologState, PuzzleState, SauceState,
-                        StarState, SyrupState, TheYState, TreadState, WordDir,
-                        WreckedState};
+                        FictionState, GearsState, GroundState, JogState,
+                        LaneState, LevelUpState, LineState, LogLevelState,
+                        MissedState, PasswordState, PrologState, PuzzleState,
+                        SauceState, StarState, SyrupState, TheYState,
+                        TreadState, WordDir, WreckedState};
 
 // ========================================================================= //

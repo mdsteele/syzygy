@@ -17,7 +17,6 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use sdl2::rect::Rect;
 use super::action::Action;
 use super::canvas::Canvas;
 use super::event::Event;
@@ -76,42 +75,6 @@ impl<S, A> Element<S, A> for GroupElement<S, A> {
             }
         }
         action
-    }
-}
-
-// ========================================================================= //
-
-pub struct SubrectElement<E> {
-    subrect: Rect,
-    element: E,
-}
-
-impl<E> SubrectElement<E> {
-    pub fn new(element: E, subrect: Rect) -> SubrectElement<E> {
-        SubrectElement {
-            subrect: subrect,
-            element: element,
-        }
-    }
-}
-
-impl<S, A, E: Element<S, A>> Element<S, A> for SubrectElement<E> {
-    fn draw(&self, state: &S, canvas: &mut Canvas) {
-        let mut subcanvas = canvas.subcanvas(self.subrect);
-        self.element.draw(state, &mut subcanvas);
-    }
-
-    fn handle_event(&mut self, event: &Event, state: &mut S) -> Action<A> {
-        match event {
-            &Event::MouseDown(pt) => {
-                if !self.subrect.contains(pt) {
-                    return Action::ignore();
-                }
-            }
-            _ => {}
-        }
-        let event = event.translate(-self.subrect.x(), -self.subrect.y());
-        self.element.handle_event(&event, state)
     }
 }
 

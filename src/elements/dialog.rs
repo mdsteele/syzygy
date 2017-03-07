@@ -20,8 +20,8 @@
 use std::cmp;
 use std::rc::Rc;
 
-use gui::{Action, Align, Canvas, Element, Event, Font, GroupElement, Point,
-          Rect, Resources, Sprite, SubrectElement};
+use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
+          Sprite};
 use super::paragraph::Paragraph;
 
 // ========================================================================= //
@@ -37,7 +37,7 @@ pub struct DialogBox<A> {
     rect: Rect,
     bg_sprites: Vec<Sprite>,
     paragraph: Paragraph,
-    elements: GroupElement<(), A>,
+    buttons: Vec<DialogButton<A>>,
 }
 
 impl<A: 'static + Clone> DialogBox<A> {
@@ -64,13 +64,13 @@ impl<A: 'static + Clone> DialogBox<A> {
             rect
         };
         let elements = {
-            let mut elements: Vec<Box<Element<(), A>>> = Vec::new();
+            let mut elements: Vec<DialogButton<A>> = Vec::new();
             let top = rect.bottom() - MARGIN - BUTTON_HEIGHT as i32;
             let mut left = rect.right() - MARGIN - BUTTON_WIDTH as i32;
             for (label, value) in buttons.into_iter().rev() {
                 let rect = Rect::new(left, top, BUTTON_WIDTH, BUTTON_HEIGHT);
-                let button = DialogButton::new(resources, label, value);
-                elements.push(Box::new(SubrectElement::new(button, rect)));
+                let button = DialogButton::new(resources, rect, label, value);
+                elements.push(button);
                 left -= BUTTON_WIDTH as i32 + BUTTON_SPACING;
             }
             elements
@@ -79,16 +79,13 @@ impl<A: 'static + Clone> DialogBox<A> {
             rect: rect,
             bg_sprites: resources.get_sprites("dialog_box"),
             paragraph: paragraph,
-            elements: GroupElement::new(elements),
+            buttons: elements,
         }
     }
 }
 
-impl<A> Element<(), A> for DialogBox<A> {
+impl<A: 'static + Clone> Element<(), A> for DialogBox<A> {
     fn draw(&self, state: &(), canvas: &mut Canvas) {
-        if cfg!(debug_assertions) {
-            println!("Drawing dialog box.");
-        }
         {
             let mut canvas = canvas.subcanvas(self.rect);
             canvas.fill_rect((200, 200, 200),
@@ -121,11 +118,11 @@ impl<A> Element<(), A> for DialogBox<A> {
                 self.paragraph.draw(&mut canvas);
             }
         }
-        self.elements.draw(state, canvas);
+        self.buttons.draw(state, canvas);
     }
 
     fn handle_event(&mut self, event: &Event, state: &mut ()) -> Action<A> {
-        self.elements.handle_event(event, state)
+        self.buttons.handle_event(event, state)
     }
 }
 
@@ -134,16 +131,18 @@ impl<A> Element<(), A> for DialogBox<A> {
 struct DialogButton<A> {
     sprite: Sprite,
     font: Rc<Font>,
+    rect: Rect,
     label: String,
     value: A,
 }
 
 impl<A> DialogButton<A> {
-    fn new(resources: &mut Resources, label: String, value: A)
+    fn new(resources: &mut Resources, rect: Rect, label: String, value: A)
            -> DialogButton<A> {
         DialogButton {
             sprite: resources.get_sprites("dialog_button")[0].clone(),
             font: resources.get_font("roman"),
+            rect: rect,
             label: label,
             value: value,
         }
@@ -152,6 +151,7 @@ impl<A> DialogButton<A> {
 
 impl<A: Clone> Element<(), A> for DialogButton<A> {
     fn draw(&self, _: &(), canvas: &mut Canvas) {
+        let mut canvas = canvas.subcanvas(self.rect);
         canvas.draw_sprite(&self.sprite, Point::new(0, 0));
         let start = Point::new(self.sprite.width() as i32 / 2, 13);
         canvas.draw_text(&self.font, Align::Center, start, &self.label);
@@ -159,7 +159,7 @@ impl<A: Clone> Element<(), A> for DialogButton<A> {
 
     fn handle_event(&mut self, event: &Event, _: &mut ()) -> Action<A> {
         match event {
-            &Event::MouseDown(_) => {
+            &Event::MouseDown(pt) if self.rect.contains(pt) => {
                 Action::redraw().and_return(self.value.clone())
             }
             _ => Action::ignore(),

@@ -19,8 +19,8 @@
 
 use std::rc::Rc;
 
-use gui::{Action, Align, Canvas, Element, Event, Font, GroupElement, Point,
-          Rect, Resources, Sound, Sprite, SubrectElement};
+use gui::{Action, Align, Canvas, Element, Event, Font, GroupElement, Rect,
+          Resources, Sound, Sprite};
 use elements::{DialogBox, FadeStyle, ScreenFade};
 use save::SaveData;
 
@@ -65,7 +65,7 @@ impl View {
             let mut rect =
                 Rect::new(0, 0, START_BUTTON_WIDTH, START_BUTTON_HEIGHT);
             rect.center_on(visible.center());
-            SubrectElement::new(StartGameButton::new(resources), rect)
+            StartGameButton::new(resources, rect)
         }));
         if !cfg!(any(target_os = "android", target_os = "ios")) {
             elements.push(Box::new({
@@ -75,7 +75,7 @@ impl View {
                                      BOTTOM_BUTTONS_MARGIN,
                                      FULLSCREEN_BUTTON_WIDTH,
                                      BOTTOM_BUTTONS_HEIGHT);
-                SubrectElement::new(FullscreenButton::new(resources), rect)
+                FullscreenButton::new(resources, rect)
             }));
             elements.push(Box::new({
                 let rect = Rect::new(visible.right() - BOTTOM_BUTTONS_MARGIN -
@@ -85,7 +85,7 @@ impl View {
                                      BOTTOM_BUTTONS_MARGIN,
                                      QUIT_BUTTON_WIDTH,
                                      BOTTOM_BUTTONS_HEIGHT);
-                SubrectElement::new(QuitButton::new(resources), rect)
+                QuitButton::new(resources, rect)
             }));
         }
         elements.push(Box::new({
@@ -97,7 +97,7 @@ impl View {
                                  BOTTOM_BUTTONS_MARGIN,
                                  ABOUT_BUTTON_WIDTH,
                                  BOTTOM_BUTTONS_HEIGHT);
-            SubrectElement::new(AboutButton::new(resources), rect)
+            AboutButton::new(resources, rect)
         }));
         elements.push(Box::new({
             let rect = Rect::new(visible.left() + BOTTOM_BUTTONS_MARGIN +
@@ -109,7 +109,7 @@ impl View {
                                  BOTTOM_BUTTONS_MARGIN,
                                  ERASE_BUTTON_WIDTH,
                                  BOTTOM_BUTTONS_HEIGHT);
-            SubrectElement::new(EraseGameButton::new(resources), rect)
+            EraseGameButton::new(resources, rect)
         }));
         View {
             screen_fade: ScreenFade::new(resources, FadeStyle::Uniform),
@@ -145,14 +145,16 @@ impl Element<SaveData, Cmd> for View {
 struct FullscreenButton {
     to_fullscreen_icon: Sprite,
     to_windowed_icon: Sprite,
+    rect: Rect,
 }
 
 impl FullscreenButton {
-    fn new(resources: &mut Resources) -> FullscreenButton {
+    fn new(resources: &mut Resources, rect: Rect) -> FullscreenButton {
         let sprites = resources.get_sprites("fullscreen");
         FullscreenButton {
             to_fullscreen_icon: sprites[0].clone(),
             to_windowed_icon: sprites[1].clone(),
+            rect: rect,
         }
     }
 }
@@ -164,13 +166,13 @@ impl Element<SaveData, Cmd> for FullscreenButton {
         } else {
             &self.to_fullscreen_icon
         };
-        canvas.draw_sprite(icon, Point::new(0, 0));
+        canvas.draw_sprite(icon, self.rect.top_left());
     }
 
     fn handle_event(&mut self, event: &Event, data: &mut SaveData)
                     -> Action<Cmd> {
         match event {
-            &Event::MouseDown(_) => {
+            &Event::MouseDown(pt) if self.rect.contains(pt) => {
                 let full = !data.prefs().fullscreen();
                 Action::redraw().and_return(Cmd::SetFullscreen(full))
             }
@@ -183,29 +185,32 @@ impl Element<SaveData, Cmd> for FullscreenButton {
 
 struct StartGameButton {
     font: Rc<Font>,
+    rect: Rect,
 }
 
 impl StartGameButton {
-    fn new(resources: &mut Resources) -> StartGameButton {
-        StartGameButton { font: resources.get_font("roman") }
+    fn new(resources: &mut Resources, rect: Rect) -> StartGameButton {
+        StartGameButton {
+            font: resources.get_font("roman"),
+            rect: rect,
+        }
     }
 }
 
 impl Element<SaveData, Cmd> for StartGameButton {
     fn draw(&self, data: &SaveData, canvas: &mut Canvas) {
-        let rect = canvas.rect();
         let label = if data.game().is_some() {
             "Continue"
         } else {
             "New Game"
         };
-        canvas.draw_text(&self.font, Align::Center, rect.center(), label);
+        canvas.draw_text(&self.font, Align::Center, self.rect.center(), label);
     }
 
     fn handle_event(&mut self, event: &Event, _data: &mut SaveData)
                     -> Action<Cmd> {
         match event {
-            &Event::MouseDown(_) => {
+            &Event::MouseDown(pt) if self.rect.contains(pt) => {
                 Action::redraw().and_return(Cmd::StartGame)
             }
             _ => Action::ignore(),
@@ -217,21 +222,24 @@ impl Element<SaveData, Cmd> for StartGameButton {
 
 struct EraseGameButton {
     font: Rc<Font>,
+    rect: Rect,
 }
 
 impl EraseGameButton {
-    fn new(resources: &mut Resources) -> EraseGameButton {
-        EraseGameButton { font: resources.get_font("roman") }
+    fn new(resources: &mut Resources, rect: Rect) -> EraseGameButton {
+        EraseGameButton {
+            font: resources.get_font("roman"),
+            rect: rect,
+        }
     }
 }
 
 impl Element<SaveData, Cmd> for EraseGameButton {
     fn draw(&self, data: &SaveData, canvas: &mut Canvas) {
         if data.game().is_some() {
-            let rect = canvas.rect();
             canvas.draw_text(&self.font,
                              Align::Center,
-                             rect.center(),
+                             self.rect.center(),
                              "Erase Game");
         }
     }
@@ -239,7 +247,8 @@ impl Element<SaveData, Cmd> for EraseGameButton {
     fn handle_event(&mut self, event: &Event, data: &mut SaveData)
                     -> Action<Cmd> {
         match event {
-            &Event::MouseDown(_) if data.game().is_some() => {
+            &Event::MouseDown(pt) if self.rect.contains(pt) &&
+                                     data.game().is_some() => {
                 Action::redraw()
                     .and_play_sound(Sound::beep())
                     .and_return(Cmd::EraseGame)
@@ -253,24 +262,30 @@ impl Element<SaveData, Cmd> for EraseGameButton {
 
 struct AboutButton {
     font: Rc<Font>,
+    rect: Rect,
 }
 
 impl AboutButton {
-    fn new(resources: &mut Resources) -> AboutButton {
-        AboutButton { font: resources.get_font("roman") }
+    fn new(resources: &mut Resources, rect: Rect) -> AboutButton {
+        AboutButton {
+            font: resources.get_font("roman"),
+            rect: rect,
+        }
     }
 }
 
 impl Element<SaveData, Cmd> for AboutButton {
     fn draw(&self, _: &SaveData, canvas: &mut Canvas) {
-        let rect = canvas.rect();
-        canvas.draw_text(&self.font, Align::Center, rect.center(), "About");
+        canvas.draw_text(&self.font,
+                         Align::Center,
+                         self.rect.center(),
+                         "About");
     }
 
     fn handle_event(&mut self, event: &Event, _data: &mut SaveData)
                     -> Action<Cmd> {
         match event {
-            &Event::MouseDown(_) => {
+            &Event::MouseDown(pt) if self.rect.contains(pt) => {
                 Action::redraw().and_return(Cmd::ShowAboutBox)
             }
             _ => Action::ignore(),
@@ -282,24 +297,32 @@ impl Element<SaveData, Cmd> for AboutButton {
 
 struct QuitButton {
     font: Rc<Font>,
+    rect: Rect,
 }
 
 impl QuitButton {
-    fn new(resources: &mut Resources) -> QuitButton {
-        QuitButton { font: resources.get_font("roman") }
+    fn new(resources: &mut Resources, rect: Rect) -> QuitButton {
+        QuitButton {
+            font: resources.get_font("roman"),
+            rect: rect,
+        }
     }
 }
 
 impl Element<SaveData, Cmd> for QuitButton {
     fn draw(&self, _: &SaveData, canvas: &mut Canvas) {
-        let rect = canvas.rect();
-        canvas.draw_text(&self.font, Align::Center, rect.center(), "Quit");
+        canvas.draw_text(&self.font,
+                         Align::Center,
+                         self.rect.center(),
+                         "Quit");
     }
 
     fn handle_event(&mut self, event: &Event, _data: &mut SaveData)
                     -> Action<Cmd> {
         match event {
-            &Event::MouseDown(_) => Action::redraw().and_return(Cmd::Quit),
+            &Event::MouseDown(pt) if self.rect.contains(pt) => {
+                Action::redraw().and_return(Cmd::Quit)
+            }
             _ => Action::ignore(),
         }
     }

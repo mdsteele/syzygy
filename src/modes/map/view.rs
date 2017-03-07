@@ -21,8 +21,7 @@ use std::cmp::min;
 use std::collections::HashMap;
 
 use elements::{FadeStyle, Hud, HudCmd, HudInput, ScreenFade};
-use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sprite,
-          SubrectElement};
+use gui::{Action, Canvas, Element, Event, Rect, Resources, Sprite};
 use save::{Access, Game, Location};
 
 // ========================================================================= //
@@ -73,7 +72,7 @@ pub enum Cmd {
 pub struct View {
     screen_fade: ScreenFade<Cmd>,
     hud: Hud,
-    nodes: Vec<SubrectElement<PuzzleNode>>,
+    nodes: Vec<PuzzleNode>,
     paths: Vec<Rect>,
     selected: Option<Location>,
 }
@@ -87,11 +86,10 @@ impl View {
         let mut paths = Vec::new();
         for &(location, (x, y)) in NODES {
             if game.is_unlocked(location) {
-                let node = PuzzleNode::new(resources, location, game);
                 let left = x - NODE_WIDTH as i32 / 2;
                 let top = y - NODE_HEIGHT as i32 / 2;
                 let rect = Rect::new(left, top, NODE_WIDTH, NODE_HEIGHT);
-                nodes.push(SubrectElement::new(node, rect));
+                nodes.push(PuzzleNode::new(resources, rect, location, game));
                 for prereq in &location.prereqs() {
                     if let Some(&(px, py)) = locations.get(prereq) {
                         let w = (px - x).abs() as u32;
@@ -181,11 +179,13 @@ impl Element<Game, Cmd> for View {
 
 struct PuzzleNode {
     icon: Sprite,
+    rect: Rect,
     loc: Location,
 }
 
 impl PuzzleNode {
-    fn new(resources: &mut Resources, location: Location, game: &Game)
+    fn new(resources: &mut Resources, rect: Rect, location: Location,
+           game: &Game)
            -> PuzzleNode {
         let index = if game.has_been_solved(location) {
             1
@@ -197,6 +197,7 @@ impl PuzzleNode {
         };
         PuzzleNode {
             icon: resources.get_sprites("puzzle_nodes")[index].clone(),
+            rect: rect,
             loc: location,
         }
     }
@@ -204,10 +205,9 @@ impl PuzzleNode {
 
 impl Element<Option<Location>, Location> for PuzzleNode {
     fn draw(&self, selected: &Option<Location>, canvas: &mut Canvas) {
-        canvas.draw_sprite(&self.icon, Point::new(0, 0));
+        canvas.draw_sprite(&self.icon, self.rect.top_left());
         if *selected == Some(self.loc) {
-            let rect = canvas.rect();
-            canvas.draw_rect((255, 255, 255), rect);
+            canvas.draw_rect((255, 255, 255), self.rect);
         }
     }
 
@@ -215,7 +215,7 @@ impl Element<Option<Location>, Location> for PuzzleNode {
                     selected: &mut Option<Location>)
                     -> Action<Location> {
         match event {
-            &Event::MouseDown(_) => {
+            &Event::MouseDown(pt) if self.rect.contains(pt) => {
                 if *selected == Some(self.loc) {
                     Action::redraw().and_return(self.loc)
                 } else {

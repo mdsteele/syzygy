@@ -21,8 +21,8 @@ use std::cmp;
 use std::rc::Rc;
 
 use elements::Paragraph;
-use gui::{Action, Align, Canvas, Element, Event, Font, GroupElement, KeyMod,
-          Keycode, Point, Rect, Resources, Sound, Sprite, SubrectElement};
+use gui::{Action, Align, Canvas, Element, Event, Font, KeyMod, Keycode, Point,
+          Rect, Resources, Sound, Sprite};
 use save::{Access, Location};
 
 // ========================================================================= //
@@ -61,8 +61,9 @@ pub enum HudCmd {
 // ========================================================================= //
 
 pub struct Hud {
+    namebox: HudNamebox,
     buttons: Vec<HudButton>,
-    elements: GroupElement<HudInput, HudCmd>,
+    pause: PauseIndicator,
 }
 
 impl Hud {
@@ -80,41 +81,34 @@ impl Hud {
             HudButton::new(resources, location, HudCmd::Reset, cx + 210, bot),
             HudButton::new(resources, location, HudCmd::Replay, cx + 160, bot),
         ];
-        let elements: Vec<Box<Element<HudInput, HudCmd>>> = vec![
-            Box::new(PauseIndicator::new(resources, visible)),
-            Hud::namebox(resources, cx, bot),
-        ];
         Hud {
+            namebox: Hud::namebox(resources, cx, bot),
             buttons: buttons,
-            elements: GroupElement::new(elements),
+            pause: PauseIndicator::new(resources, visible),
         }
     }
 
     pub fn flash_info_button(&mut self) { self.buttons[2].set_flashing(true); }
 
     fn namebox(resources: &mut Resources, center_x: i32, bottom: i32)
-               -> Box<Element<HudInput, HudCmd>> {
-        let namebox = HudNamebox::new(resources);
+               -> HudNamebox {
         let left = center_x - NAMEBOX_WIDTH as i32 / 2;
         let top = bottom - NAMEBOX_HEIGHT as i32;
         let rect = Rect::new(left, top, NAMEBOX_WIDTH, NAMEBOX_HEIGHT);
-        Box::new(SubrectElement::new(namebox, rect))
+        HudNamebox::new(resources, rect)
     }
 }
 
 impl Element<HudInput, HudCmd> for Hud {
     fn draw(&self, input: &HudInput, canvas: &mut Canvas) {
-        self.elements.draw(input, canvas);
+        self.namebox.draw(input, canvas);
         self.buttons.draw(input, canvas);
+        self.pause.draw(input, canvas);
     }
 
     fn handle_event(&mut self, event: &Event, input: &mut HudInput)
                     -> Action<HudCmd> {
-        let mut action = self.buttons.handle_event(event, input);
-        if !action.should_stop() {
-            action.merge(self.elements.handle_event(event, input));
-        }
-        action
+        self.buttons.handle_event(event, input)
     }
 }
 
@@ -258,28 +252,24 @@ impl Element<HudInput, HudCmd> for HudButton {
 struct HudNamebox {
     sprites: Vec<Sprite>,
     font: Rc<Font>,
+    rect: Rect,
 }
 
 impl HudNamebox {
-    fn new(resources: &mut Resources) -> HudNamebox {
+    fn new(resources: &mut Resources, rect: Rect) -> HudNamebox {
         HudNamebox {
             sprites: resources.get_sprites("hud/namebox"),
             font: resources.get_font("roman"),
+            rect: rect,
         }
     }
-}
 
-impl Element<HudInput, HudCmd> for HudNamebox {
     fn draw(&self, input: &HudInput, canvas: &mut Canvas) {
+        let mut canvas = canvas.subcanvas(self.rect);
         canvas.draw_sprite(&self.sprites[0], Point::new(0, 0));
         canvas.fill_rect((200, 200, 200), Rect::new(2, 2, 110, 14));
         let start = Point::new(canvas.width() as i32 / 2, 12);
         canvas.draw_text(&self.font, Align::Center, start, input.name);
-    }
-
-    fn handle_event(&mut self, _event: &Event, _input: &mut HudInput)
-                    -> Action<HudCmd> {
-        Action::ignore()
     }
 }
 
@@ -321,9 +311,7 @@ impl PauseIndicator {
             inner_rect: inner_rect,
         }
     }
-}
 
-impl Element<HudInput, HudCmd> for PauseIndicator {
     fn draw(&self, input: &HudInput, canvas: &mut Canvas) {
         if input.is_paused {
             canvas.fill_rect((255, 255, 255), self.outer_rect);
@@ -331,10 +319,6 @@ impl Element<HudInput, HudCmd> for PauseIndicator {
             let mut canvas = canvas.subcanvas(self.inner_rect);
             self.paragraph.draw(&mut canvas);
         }
-    }
-
-    fn handle_event(&mut self, _: &Event, _: &mut HudInput) -> Action<HudCmd> {
-        Action::ignore()
     }
 }
 

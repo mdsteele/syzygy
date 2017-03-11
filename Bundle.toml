@@ -1,0 +1,12 @@
+name = "System Syzygy"
+identifier = "io.github.mdsteele.syzygy"
+resources = ["data"]
+copyright = "Copyright 2016 Matthew D. Steele"
+long_description = """
+System Syzygy is a story and a puzzle game, in the style of Cliff Johnson's
+_The Fool's Errand_ and _3 in Three_, and of Andrew Plotkin's _System's
+Twilight_.  As you move through the game, solving a variety of different kinds
+of puzzles, the game tells the story a piece at a time.  By the end of the
+game, all the different puzzles and pieces of the story come together into a
+single meta-puzzle.
+"""

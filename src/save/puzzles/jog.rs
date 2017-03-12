@@ -34,20 +34,17 @@ const NUM_COLS: usize = 6;
 const NUM_ROWS: usize = 4;
 const NUM_SYMBOLS: i32 = 6;
 
-// TODO: design puzzle, and add test for well-formed-ness
+// TODO: Finish designing this puzzle.
 #[cfg_attr(rustfmt, rustfmt_skip)]
 const SHAPES: &'static [(Shape, &'static [(i8, usize)])] = &[
-    (Shape([0, 1, 0, 0, 1, 1, 0, 1, 0]), &[]),
-    (Shape([0, 0, 0, 2, 2, 2, 0, 0, 2]), &[(1, 1)]),
-    (Shape([0, 0, 0, 3, 3, 0, 3, 3, 0]), &[(1, 2), (2, 1)]),
-    (Shape([0, 0, 0, 5, 5, 5, 5, 0, 0]), &[(1, 1), (2, 1), (3, 2), (5, 1)]),
-    (Shape([0, 6, 6, 0, 6, 0, 0, 6, 0]), &[(2, 1), (3, 2), (5, 2), (6, 2)]),
-    (Shape([0, 4, 0, 4, 4, 0, 4, 0, 0]), &[(2, 1), (4, 3), (5, 1), (6, 2)]),
-    (Shape([0, 3, 0, 3, 3, 3, 0, 0, 0]), &[]),
-    (Shape([0, 0, 0, 0, 2, 2, 2, 2, 0]), &[(3, 2)]),
-    (Shape([0, 1, 1, 0, 1, 0, 0, 1, 0]), &[(3, 1), (2, 1)]),
-    (Shape([5, 5, 0, 0, 5, 0, 0, 5, 0]), &[(1, 2), (2, 3), (4, 1), (5, 3)]),
-    (Shape([0, 0, 0, 6, 6, 6, 6, 0, 0]), &[(1, 2), (3, 1), (5, 1), (6, 4)]),
+    (Shape([0, 2, 0, 2, 2, 0, 0, 2, 0]), &[]),
+    (Shape([0, 6, 6, 0, 6, 0, 0, 6, 6]), &[(2, 4)]),
+];
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+const REMOVALS: &'static [&'static [(i8, usize)]] = &[
+    &[(6, 5)],
+    &[],
 ];
 
 // ========================================================================= //
@@ -85,10 +82,10 @@ impl JogState {
         self.access = Access::Solved;
         self.grid.clear();
         self.num_placed = SHAPES.len();
-        self.num_removed = SHAPES.len();
+        self.num_removed = REMOVALS.len();
     }
 
-    pub fn total_num_steps(&self) -> usize { 2 * SHAPES.len() }
+    pub fn total_num_steps(&self) -> usize { SHAPES.len() + REMOVALS.len() }
 
     pub fn current_step(&self) -> usize { self.num_placed + self.num_removed }
 
@@ -126,8 +123,11 @@ impl JogState {
         assert!(symbol > 0 && symbol as i32 <= NUM_SYMBOLS);
         if self.grid.can_remove_symbol(symbol) {
             self.grid.remove_symbol(symbol);
+            for &(symbol, num) in REMOVALS[self.num_removed] {
+                self.grid.decay_symbol(symbol, num);
+            }
             self.num_removed += 1;
-            if self.num_removed == SHAPES.len() {
+            if self.num_removed == REMOVALS.len() {
                 self.access = Access::Solved;
             }
         } else {
@@ -160,6 +160,58 @@ impl PuzzleState for JogState {
             table.insert(GRID_KEY.to_string(), self.grid.to_toml());
         }
         toml::Value::Table(table)
+    }
+}
+
+// ========================================================================= //
+
+#[cfg(test)]
+mod tests {
+    use std::collections::{HashMap, VecDeque};
+    use std::iter::FromIterator;
+
+    use super::{NUM_SYMBOLS, REMOVALS, SHAPES};
+
+    #[test]
+    fn steps_are_well_formed() {
+        assert_eq!(SHAPES.len(), REMOVALS.len());
+        let mut num_symbols_in_use = HashMap::new();
+        let mut num_removed = 0;
+        for &(ref shape, decay) in SHAPES.iter() {
+            let add_symbol = shape.symbol().unwrap();
+            assert!((add_symbol as i32) <= NUM_SYMBOLS);
+            assert_eq!(num_symbols_in_use.get(&add_symbol)
+                                         .cloned()
+                                         .unwrap_or(0),
+                       0);
+            for &(symbol, _) in decay {
+                assert!(symbol != add_symbol,
+                        "Can't decay {} while adding it.",
+                        symbol);
+            }
+            num_symbols_in_use.insert(add_symbol, shape.tiles().count());
+            let mut decay_queue = VecDeque::from_iter(decay);
+            while let Some(&(symbol, num)) = decay_queue.pop_front() {
+                assert!((symbol as i32) <= NUM_SYMBOLS);
+                let old_count =
+                    num_symbols_in_use.get(&symbol).cloned().unwrap_or(0);
+                assert!(old_count >= num,
+                        "Can't decay {} by {} (only {} are in use).",
+                        symbol,
+                        num,
+                        old_count);
+                let new_count = old_count - num;
+                num_symbols_in_use.insert(symbol, new_count);
+                if new_count == 0 {
+                    decay_queue.extend(REMOVALS[num_removed]);
+                    num_removed += 1;
+                }
+            }
+        }
+        for (symbol, count) in num_symbols_in_use.into_iter() {
+            assert_eq!(count, 0, "Symbol {} still in use at the end.", symbol);
+        }
+        assert_eq!(num_removed, REMOVALS.len());
     }
 }
 

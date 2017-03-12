@@ -241,14 +241,14 @@ Repaired nodes are marked in green.";
 
 #[cfg(test)]
 mod tests {
-    use std::collections::BTreeSet;
+    use std::collections::HashSet;
 
     use save::Location;
     use super::NODES;
 
     #[test]
     fn all_locations_represented_on_map() {
-        let mut locations: BTreeSet<Location> =
+        let mut locations: HashSet<Location> =
             Location::all().iter().cloned().collect();
         locations.remove(&Location::Map);
         for &(loc, _) in NODES {

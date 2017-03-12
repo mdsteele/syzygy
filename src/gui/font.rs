@@ -19,20 +19,20 @@
 
 use ahi;
 use sdl2::render::Renderer;
-use std::collections::BTreeMap;
+use std::collections::HashMap;
 use super::sprite::Sprite;
 
 // ========================================================================= //
 
 pub struct Font {
-    glyphs: BTreeMap<char, Glyph>,
+    glyphs: HashMap<char, Glyph>,
     default_glyph: Glyph,
     baseline: i32,
 }
 
 impl Font {
     pub fn new(renderer: &Renderer, font: &ahi::Font) -> Font {
-        let mut glyphs = BTreeMap::new();
+        let mut glyphs = HashMap::new();
         for chr in font.chars() {
             glyphs.insert(chr, Glyph::new(renderer, &font[chr]));
         }

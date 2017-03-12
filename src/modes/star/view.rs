@@ -18,7 +18,7 @@
 // +--------------------------------------------------------------------------+
 
 use std::cmp;
-use std::collections::BTreeSet;
+use std::collections::HashSet;
 use std::rc::Rc;
 
 use elements::{PuzzleCmd, PuzzleCore, PuzzleView};
@@ -203,11 +203,11 @@ impl LetterColumns {
 
     fn rect(&self) -> Rect { Rect::new(256, 56, 240, 240) }
 
-    fn hilighted_coords(&self) -> BTreeSet<(i32, i32)> {
+    fn hilighted_coords(&self) -> HashSet<(i32, i32)> {
         if let Some(ref drag) = self.drag {
             drag.hilighted_coords()
         } else {
-            BTreeSet::new()
+            HashSet::new()
         }
     }
 }
@@ -320,8 +320,8 @@ impl Drag {
         }
     }
 
-    fn hilighted_coords(&self) -> BTreeSet<(i32, i32)> {
-        let mut result = BTreeSet::new();
+    fn hilighted_coords(&self) -> HashSet<(i32, i32)> {
+        let mut result = HashSet::new();
         let mut pt = Point::new(self.start_col, self.start_row);
         for _ in 0..self.length {
             result.insert((pt.x(), pt.y()));

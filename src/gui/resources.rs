@@ -19,7 +19,7 @@
 
 use ahi;
 use sdl2::render::Renderer;
-use std::collections::BTreeMap;
+use std::collections::HashMap;
 use std::fs::File;
 use std::io;
 use std::mem;
@@ -66,17 +66,17 @@ impl<'a> Drop for Resources<'a> {
 // ========================================================================= //
 
 pub struct ResourceCache {
-    backgrounds: BTreeMap<String, Rc<Background>>,
-    fonts: BTreeMap<String, Rc<Font>>,
-    sprites: BTreeMap<String, Vec<Sprite>>,
+    backgrounds: HashMap<String, Rc<Background>>,
+    fonts: HashMap<String, Rc<Font>>,
+    sprites: HashMap<String, Vec<Sprite>>,
 }
 
 impl ResourceCache {
     pub fn new() -> ResourceCache {
         ResourceCache {
-            backgrounds: BTreeMap::new(),
-            fonts: BTreeMap::new(),
-            sprites: BTreeMap::new(),
+            backgrounds: HashMap::new(),
+            fonts: HashMap::new(),
+            sprites: HashMap::new(),
         }
     }
 
@@ -137,8 +137,7 @@ impl ResourceCache {
     /// Removes entries from the cache that are not currently used outside of
     /// the cache itself.
     fn scrub_unused(&mut self) {
-        let mut fonts = BTreeMap::new();
-        mem::swap(&mut fonts, &mut self.fonts);
+        let fonts = mem::replace(&mut self.fonts, HashMap::new());
         for (name, font) in fonts.into_iter() {
             if let Err(font) = Rc::try_unwrap(font) {
                 self.fonts.insert(name, font);

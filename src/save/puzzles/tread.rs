@@ -17,7 +17,6 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use std::collections::BTreeSet;
 use toml;
 
 use save::{Access, Location};
@@ -55,13 +54,13 @@ impl TreadState {
         let toggled = if access == Access::Solved {
             SOLVED_TOGGLED_1.iter().cloned().collect()
         } else {
-            let set: BTreeSet<i32> = pop_array(&mut table, TOGGLED_KEY)
+            let vec: Vec<i32> = pop_array(&mut table, TOGGLED_KEY)
                 .iter()
                 .filter_map(toml::Value::as_integer)
                 .filter(|&idx| 0 <= idx && idx < 12)
                 .map(|idx| idx as i32)
                 .collect();
-            set.into_iter().take(LETTERS.len()).collect()
+            vec.into_iter().take(LETTERS.len()).collect()
         };
         let mut state = TreadState {
             access: access,
@@ -187,6 +186,32 @@ impl PuzzleState for TreadState {
             table.insert(TOGGLED_KEY.to_string(), toml::Value::Array(toggled));
         }
         toml::Value::Table(table)
+    }
+}
+
+// ========================================================================= //
+
+#[cfg(test)]
+mod tests {
+    use toml;
+
+    use save::PuzzleState;
+    use save::util::to_table;
+    use super::TreadState;
+
+    #[test]
+    fn toml_round_trip() {
+        let mut state = TreadState::from_toml(toml::value::Table::new());
+        assert_eq!(state.next_label(), Some('T'));
+        state.push_toggle((3, 1));
+        assert_eq!(state.next_label(), Some('A'));
+        state.push_toggle((3, 3));
+        assert_eq!(state.next_label(), Some('S'));
+        state.push_toggle((3, 2));
+        let state = TreadState::from_toml(to_table(state.to_toml()));
+        assert_eq!(state.toggled_label((3, 1)), Some('T'));
+        assert_eq!(state.toggled_label((3, 2)), Some('S'));
+        assert_eq!(state.toggled_label((3, 3)), Some('A'));
     }
 }
 

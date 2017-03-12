@@ -196,13 +196,13 @@ impl PuzzleState for LaneState {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::BTreeSet;
+    use std::collections::HashSet;
 
     use super::{NUM_SYMBOLS, STAGES, Stage};
 
     #[test]
     fn stages_are_well_formed() {
-        let mut symbols_on_board = BTreeSet::new();
+        let mut symbols_on_board = HashSet::new();
         for (index, stage) in STAGES.iter().enumerate() {
             match stage {
                 &Stage::Place(ref shape) => {

@@ -18,7 +18,7 @@
 // +--------------------------------------------------------------------------+
 
 use rand;
-use std::collections::BTreeSet;
+use std::collections::HashSet;
 use toml;
 
 use save::util::to_i8;
@@ -83,7 +83,7 @@ impl Grid {
     }
 
     pub fn num_distinct_symbols(&self) -> usize {
-        let mut symbols = BTreeSet::new();
+        let mut symbols = HashSet::new();
         for (_, symbol) in self.tiles() {
             symbols.insert(symbol);
         }

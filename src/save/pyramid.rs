@@ -19,7 +19,7 @@
 
 use rand;
 use std::cmp;
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::{HashMap, HashSet};
 use toml;
 
 use save::util::to_i8;
@@ -76,7 +76,7 @@ impl Team {
 
 // ========================================================================= //
 
-#[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Coords {
     row: i32,
     col: i32,
@@ -271,8 +271,8 @@ impl Board {
         (col == 7 - row || self.get(Coords::new(row + 1, col)) == 0)
     }
 
-    pub fn possible_move_starts(&self, team: Team) -> BTreeSet<Coords> {
-        let mut results = BTreeSet::new();
+    pub fn possible_move_starts(&self, team: Team) -> HashSet<Coords> {
+        let mut results = HashSet::new();
         let value = team.value();
         for coords in Coords::all() {
             if self.can_place_at(coords) {
@@ -291,8 +291,8 @@ impl Board {
         results
     }
 
-    pub fn possible_jump_dests(&self, from: Coords) -> BTreeSet<Coords> {
-        let mut results = BTreeSet::new();
+    pub fn possible_jump_dests(&self, from: Coords) -> HashSet<Coords> {
+        let mut results = HashSet::new();
         let board = self.with_removed(from);
         for coords in Coords::all_above_row(from.row()) {
             if board.can_place_at(coords) {
@@ -302,8 +302,8 @@ impl Board {
         results
     }
 
-    pub fn possible_removals(&self, team: Team) -> BTreeSet<Coords> {
-        let mut results = BTreeSet::new();
+    pub fn possible_removals(&self, team: Team) -> HashSet<Coords> {
+        let mut results = HashSet::new();
         let value = team.value();
         for coords in Coords::all() {
             if self.get(coords) == value && self.can_remove_from(coords) {
@@ -506,7 +506,7 @@ impl Board {
     }
 
     fn all_removals(&self, team: Team) -> Vec<(Vec<Coords>, Board)> {
-        let mut results = BTreeMap::new();
+        let mut results = HashMap::new();
         for coords1 in self.possible_removals(team) {
             let board2 = self.with_removed(coords1);
             let removals2 = board2.possible_removals(team);
@@ -529,7 +529,7 @@ impl Board {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::BTreeSet;
+    use std::collections::HashSet;
     use std::f64;
 
     use save::util::to_array;
@@ -552,7 +552,7 @@ mod tests {
 
     #[test]
     fn coords_index() {
-        let mut indices = BTreeSet::new();
+        let mut indices = HashSet::new();
         for coords in Coords::all() {
             let index = coords.index();
             assert!(index < NUM_CELLS);

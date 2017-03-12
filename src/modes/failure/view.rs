@@ -17,7 +17,7 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use std::collections::BTreeSet;
+use std::collections::HashSet;
 use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 use std::thread;
@@ -276,10 +276,10 @@ const ANIM_FORMATION_SLOWDOWN: i32 = 2;
 const ANIM_VICTORY_SLOWDOWN: i32 = 2;
 
 enum PyramidStep {
-    YouReady { possible: BTreeSet<Coords> },
+    YouReady { possible: HashSet<Coords> },
     YouJumping {
         from: Coords,
-        possible: BTreeSet<Coords>,
+        possible: HashSet<Coords>,
     },
     YouAnimatePlace { anim: i32, at: Coords },
     YouAnimateJump { anim: i32, from: Coords, to: Coords },
@@ -287,7 +287,7 @@ enum PyramidStep {
     YouRemoving {
         formation: Vec<Coords>,
         so_far: Vec<Coords>,
-        possible: BTreeSet<Coords>,
+        possible: HashSet<Coords>,
     },
     YouAnimateRemove {
         anim: i32,
@@ -366,7 +366,7 @@ impl PyramidStep {
         step
     }
 
-    fn hilighted_tiles(&self) -> BTreeSet<Coords> {
+    fn hilighted_tiles(&self) -> HashSet<Coords> {
         match self {
             &PyramidStep::YouJumping { from, .. } => {
                 [from].iter().cloned().collect()
@@ -381,16 +381,16 @@ impl PyramidStep {
             &PyramidStep::SrbAnimateRemove { ref formation, .. } => {
                 formation.iter().cloned().collect()
             }
-            _ => BTreeSet::new(),
+            _ => HashSet::new(),
         }
     }
 
-    fn possible_coords(&self) -> BTreeSet<Coords> {
+    fn possible_coords(&self) -> HashSet<Coords> {
         match self {
             &PyramidStep::YouReady { ref possible, .. } |
             &PyramidStep::YouJumping { ref possible, .. } |
             &PyramidStep::YouRemoving { ref possible, .. } => possible.clone(),
-            _ => BTreeSet::new(),
+            _ => HashSet::new(),
         }
     }
 
@@ -843,14 +843,14 @@ horizontally or diagonally.";
 
 #[cfg(test)]
 mod tests {
-    use std::collections::BTreeSet;
+    use std::collections::HashSet;
 
     use save::Location;
     use super::DASHBOARD_CHIPS;
 
     #[test]
     fn all_puzzles_represented_on_dashboard() {
-        let mut locations: BTreeSet<Location> =
+        let mut locations: HashSet<Location> =
             Location::all().iter().cloned().collect();
         locations.remove(&Location::Map);
         locations.remove(&Location::Prolog);

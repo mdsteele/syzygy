@@ -604,6 +604,9 @@ mod tests {
                  .map(|(remove, _)| remove)
                  .collect();
         actual_removals.sort();
+        for removal in actual_removals.iter_mut() {
+            removal.sort();
+        }
         let expected_removals =
             vec![vec![Coords::new(0, 1), Coords::new(1, 1)],
                  vec![Coords::new(0, 2), Coords::new(1, 1)],

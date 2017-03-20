@@ -17,26 +17,38 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod crossword;
-pub mod cutscene;
-mod dialog;
-mod fade;
-mod hud;
-mod lasers;
-pub mod memory;
-mod paragraph;
-mod progress;
-mod puzzle;
-pub mod shift;
+use std::cmp;
 
-pub use self::crossword::CrosswordView;
-pub use self::cutscene::{Ast, Scene, TalkPos, TalkStyle, Theater};
-pub use self::dialog::DialogBox;
-pub use self::fade::{FadeStyle, ScreenFade};
-pub use self::hud::{Hud, HudCmd, HudInput};
-pub use self::lasers::{DangerSign, LaserCmd, LaserField};
-pub use self::paragraph::Paragraph;
-pub use self::progress::ProgressBar;
-pub use self::puzzle::{PuzzleCmd, PuzzleCore, PuzzleView};
+use gui::{Canvas, Rect};
+
+// ========================================================================= //
+
+pub struct ProgressBar {
+    left: i32,
+    top: i32,
+    width: u32,
+    color: (u8, u8, u8),
+}
+
+impl ProgressBar {
+    pub fn new((left, top): (i32, i32), width: u32, color: (u8, u8, u8))
+               -> ProgressBar {
+        ProgressBar {
+            left: left + 1,
+            top: top + 1,
+            width: if width > 2 { width - 2 } else { 0 },
+            color: color,
+        }
+    }
+
+    pub fn draw(&self, value: u32, maximum: u32, canvas: &mut Canvas) {
+        let value = cmp::min(value, maximum);
+        if value > 0 {
+            let width = self.width * value / maximum;
+            let rect = Rect::new(self.left, self.top, width, 14);
+            canvas.fill_rect(self.color, rect);
+        }
+    }
+}
 
 // ========================================================================= //

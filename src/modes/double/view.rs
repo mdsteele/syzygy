@@ -20,7 +20,7 @@
 use std::ascii::AsciiExt;
 use std::rc::Rc;
 
-use elements::{PuzzleCmd, PuzzleCore, PuzzleView};
+use elements::{ProgressBar, PuzzleCmd, PuzzleCore, PuzzleView};
 use gui::{Action, Align, Canvas, Element, Event, Font, Keycode, Point, Rect,
           Resources, Sound, Sprite};
 use modes::SOLVED_INFO_TEXT;
@@ -31,6 +31,7 @@ use super::scenes::{compile_intro_scene, compile_outro_scene};
 
 pub struct View {
     core: PuzzleCore<()>,
+    progress: ProgressBar,
     input: InputDisplay,
     clue: ClueDisplay,
     arrows: Vec<ArrowButton>,
@@ -46,6 +47,7 @@ impl View {
         let core = PuzzleCore::new(resources, visible, state, intro, outro);
         let mut view = View {
             core: core,
+            progress: ProgressBar::new((240, 160), 96, (95, 95, 95)),
             input: InputDisplay::new(resources),
             clue: ClueDisplay::new(resources),
             arrows: vec![ArrowButton::new(resources, false),
@@ -69,6 +71,8 @@ impl Element<Game, PuzzleCmd> for View {
         let state = &game.double_cross;
         self.core.draw_back_layer(canvas);
         if !state.is_solved() || self.text_timer > 0 {
+            self.progress
+                .draw(state.num_clues_done(), state.total_num_clues(), canvas);
             self.input.draw(state, canvas);
             self.clue.draw(state, canvas);
             self.arrows.draw(state, canvas);
@@ -236,11 +240,6 @@ impl Element<DoubleState, ()> for ClueDisplay {
                          Align::Center,
                          Point::new(288, 94),
                          state.current_clue());
-        let num_done = state.num_clues_done();
-        if num_done > 0 {
-            let width = 94 * num_done / state.total_num_clues();
-            canvas.fill_rect((95, 95, 95), Rect::new(241, 161, width, 14));
-        }
     }
 
     fn handle_event(&mut self, _: &Event, _: &mut DoubleState) -> Action<()> {

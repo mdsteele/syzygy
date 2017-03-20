@@ -17,7 +17,7 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use elements::{Paragraph, PuzzleCmd, PuzzleCore, PuzzleView};
+use elements::{Paragraph, ProgressBar, PuzzleCmd, PuzzleCore, PuzzleView};
 use elements::memory::{FLIP_SLOWDOWN, MemoryGridView, NextShapeView};
 use gui::{Action, Align, Canvas, Element, Event, Point, Rect, Resources, Sound,
           Sprite};
@@ -38,6 +38,7 @@ pub struct View {
     next: NextShapeView,
     free: FreeSymbolView,
     progress: ProgressBar,
+    progress_adjust: u32,
     prompt: PromptView,
     remove_countdown: i32,
 }
@@ -56,7 +57,8 @@ impl View {
                                       state.grid()),
             next: NextShapeView::new(resources, "memory/lane", (96, 64)),
             free: FreeSymbolView::new(resources, (448, 112)),
-            progress: ProgressBar::new((112, 176)),
+            progress: ProgressBar::new((112, 176), 80, (191, 191, 0)),
+            progress_adjust: 0,
             prompt: PromptView::new(resources),
             remove_countdown: 0,
         };
@@ -75,7 +77,11 @@ impl Element<Game, PuzzleCmd> for View {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
         let state = &game.memory_lane;
         self.core.draw_back_layer(canvas);
-        self.progress.draw(state, canvas);
+        if !state.is_solved() {
+            let value = state.current_stage() as u32 + self.progress_adjust;
+            let maximum = state.total_num_stages() as u32;
+            self.progress.draw(value, maximum, canvas);
+        }
         self.free.draw(state, canvas);
         self.grid.draw(state.grid(), canvas);
         if self.remove_countdown == 0 && !self.next.is_dragging() {
@@ -96,7 +102,7 @@ impl Element<Game, PuzzleCmd> for View {
             if self.remove_countdown == REMOVE_SOUND_AT {
                 let symbol = self.grid.flip_symbol();
                 let sound = if state.can_remove_symbol(symbol) {
-                    self.progress.adjust = 1;
+                    self.progress_adjust = 1;
                     Sound::mid_puzzle_chime()
                 } else {
                     Sound::talk_annoyed_hi()
@@ -104,7 +110,7 @@ impl Element<Game, PuzzleCmd> for View {
                 action.merge(Action::redraw().and_play_sound(sound));
             }
             if self.remove_countdown == 0 {
-                self.progress.adjust = 0;
+                self.progress_adjust = 0;
                 state.remove_symbol(self.grid.flip_symbol());
                 self.grid.clear_flip();
                 if state.is_solved() {
@@ -188,35 +194,6 @@ impl FreeSymbolView {
         if let Some(symbol) = state.next_remove() {
             let index = (symbol - 1) as usize * 2;
             canvas.draw_sprite(&self.symbol_sprites[index], self.top_left);
-        }
-    }
-}
-
-// ========================================================================= //
-
-struct ProgressBar {
-    left: i32,
-    top: i32,
-    adjust: usize,
-}
-
-impl ProgressBar {
-    fn new((left, top): (i32, i32)) -> ProgressBar {
-        ProgressBar {
-            left: left + 1,
-            top: top + 1,
-            adjust: 0,
-        }
-    }
-
-    fn draw(&self, state: &LaneState, canvas: &mut Canvas) {
-        if !state.is_solved() {
-            let stage = state.current_stage() + self.adjust;
-            if stage > 0 {
-                let width = (78 * stage / state.total_num_stages()) as u32;
-                canvas.fill_rect((191, 191, 0),
-                                 Rect::new(self.left, self.top, width, 14));
-            }
         }
     }
 }

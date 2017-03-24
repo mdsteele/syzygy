@@ -45,15 +45,14 @@ impl View {
                -> View {
         let intro = compile_intro_scene(resources);
         let outro = compile_outro_scene(resources);
-        let core = PuzzleCore::new(resources, visible, state, intro, outro);
         let mut view = View {
-            core: core,
+            core: PuzzleCore::new(resources, visible, state, intro, outro),
             grid: MemoryGridView::new(resources,
                                       "memory/jog",
-                                      (208, 64),
+                                      (256, 176),
                                       state.grid()),
-            next: NextShapeView::new(resources, "memory/jog", (96, 64)),
-            progress: ProgressBar::new((112, 176), 80, (191, 191, 0)),
+            next: NextShapeView::new(resources, "memory/jog", (96, 208)),
+            progress: ProgressBar::new((104, 176), 80, (191, 191, 0)),
             progress_adjust: 0,
             remove_countdown: 0,
         };

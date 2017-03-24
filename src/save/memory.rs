@@ -52,6 +52,14 @@ pub struct Grid {
 }
 
 impl Grid {
+    pub fn new(width: usize, height: usize) -> Grid {
+        Grid {
+            width: width,
+            height: height,
+            values: vec![0; width * height],
+        }
+    }
+
     pub fn from_toml(width: usize, height: usize, array: toml::value::Array)
                      -> Grid {
         let mut values: Vec<i8> = array.into_iter().map(to_i8).collect();

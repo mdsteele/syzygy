@@ -30,20 +30,39 @@ use super::PuzzleState;
 const GRID_KEY: &'static str = "grid";
 const NUM_PLACED_KEY: &'static str = "placed";
 
-const NUM_COLS: usize = 6;
+const NUM_COLS: usize = 7;
 const NUM_ROWS: usize = 4;
 const NUM_SYMBOLS: i32 = 6;
 
-// TODO: Finish designing this puzzle.
 #[cfg_attr(rustfmt, rustfmt_skip)]
 const SHAPES: &'static [(Shape, &'static [(i8, usize)])] = &[
     (Shape([0, 2, 0, 2, 2, 0, 0, 2, 0]), &[]),
-    (Shape([0, 6, 6, 0, 6, 0, 0, 6, 6]), &[(2, 4)]),
+    (Shape([0, 6, 6, 0, 6, 0, 0, 6, 6]), &[(2, 1)]),
+    (Shape([0, 5, 0, 5, 5, 0, 0, 5, 5]), &[(2, 1), (6, 2)]),
+    (Shape([0, 1, 1, 1, 1, 0, 1, 0, 0]), &[(2, 1), (5, 1), (6, 1)]),
+    (Shape([3, 0, 0, 3, 0, 0, 3, 3, 3]), &[(1, 1), (2, 1), (5, 1), (6, 1)]),
+    (Shape([4, 4, 0, 0, 4, 0, 4, 4, 0]), &[(1, 2), (3, 1), (5, 1)]),
+    (Shape([2, 2, 0, 0, 2, 0, 0, 2, 0]), &[(3, 2), (4, 1), (6, 1)]),
+    (Shape([1, 1, 1, 0, 1, 0, 0, 1, 0]), &[(2, 1), (3, 1), (5, 1)]),
+    (Shape([0, 6, 6, 0, 6, 6, 0, 6, 0]), &[(1, 1), (4, 1)]),
+    (Shape([0, 5, 5, 0, 5, 0, 5, 5, 0]), &[(2, 1), (6, 2)]),
+    (Shape([0, 3, 0, 3, 3, 3, 0, 3, 0]), &[(1, 1), (5, 3)]),
+    (Shape([4, 4, 0, 4, 4, 4, 0, 4, 4]), &[(3, 3), (5, 2)]),
 ];
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
 const REMOVALS: &'static [&'static [(i8, usize)]] = &[
-    &[(6, 5)],
+    &[(1, 2), (5, 1)],
+    &[(3, 1), (4, 1)],
+    &[(2, 1), (4, 1)],
+    &[(2, 1), (4, 1)],
+    &[(1, 1)],
+    &[(6, 3)],
+    &[(1, 1)],
+    &[(1, 1)],
+    &[(3, 1)],
+    &[(3, 1), (4, 4)],
+    &[(4, 3)],
     &[],
 ];
 
@@ -59,22 +78,28 @@ pub struct JogState {
 impl JogState {
     pub fn from_toml(mut table: toml::value::Table) -> JogState {
         let access = Access::from_toml(table.get(ACCESS_KEY));
-        let num_placed = if access.is_solved() {
-            SHAPES.len()
+        let (grid, num_placed, num_removed) = if access.is_solved() {
+            (Grid::new(NUM_COLS, NUM_ROWS), SHAPES.len(), REMOVALS.len())
         } else {
-            min(table.remove(NUM_PLACED_KEY).map(to_u32).unwrap_or(0) as usize,
-                SHAPES.len() - 1)
+            let num_placed =
+                min(table.remove(NUM_PLACED_KEY).map(to_u32).unwrap_or(0) as
+                    usize,
+                    SHAPES.len());
+            let grid = Grid::from_toml(NUM_COLS,
+                                       NUM_ROWS,
+                                       pop_array(&mut table, GRID_KEY));
+            let distinct = grid.num_distinct_symbols();
+            if distinct <= num_placed {
+                (grid, num_placed, num_placed - distinct)
+            } else {
+                (Grid::new(NUM_COLS, NUM_ROWS), 0, 0)
+            }
         };
-        let grid = Grid::from_toml(NUM_COLS,
-                                   NUM_ROWS,
-                                   pop_array(&mut table, GRID_KEY));
-        let distinct = grid.num_distinct_symbols();
-        assert!(distinct <= num_placed); // TODO: don't panic
         JogState {
             access: access,
             grid: grid,
             num_placed: num_placed,
-            num_removed: num_placed - distinct,
+            num_removed: num_removed,
         }
     }
 

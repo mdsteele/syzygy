@@ -27,6 +27,7 @@ mod game;
 mod location;
 pub mod memory;
 mod path;
+pub mod plane;
 mod prefs;
 mod puzzles;
 pub mod pyramid;
@@ -47,7 +48,7 @@ pub use self::puzzles::{AtticState, BlackState, BlameState, CubeState,
                         FictionState, GearsState, GroundState, JogState,
                         LaneState, LevelUpState, LineState, LogLevelState,
                         MissedState, PasswordState, PrologState, PuzzleState,
-                        SauceState, StarState, SyrupState, TheYState,
-                        TreadState, WordDir, WreckedState};
+                        SauceState, SimpleState, StarState, SyrupState,
+                        TheYState, TreadState, WordDir, WreckedState};
 
 // ========================================================================= //

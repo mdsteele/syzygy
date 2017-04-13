@@ -43,7 +43,7 @@ const WORD_CLUES: &'static [(&'static str, &'static str)] = &[
     ("FAST SLOW", "to abstain from food / dim-witted"),
     ("TIGHT LOOSE", "miserly / at large"),
     ("RISE FALL", "a hill / autumn"),
-    ("LIVING DEAD", "a sufficient income / absolute"),
+    ("LIVING DEAD", "a sufficient income / absolutely"),
     ("HARD SOFT", "alcoholic / quiet"),
     ("BACK FRONT", "to support / to pay in advance"),
     ("IN OUT", "fashionable / three strikes"),

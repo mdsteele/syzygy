@@ -23,8 +23,8 @@ use save::{AtticState, BlackState, BlameState, CubeState, DisconState,
            DotsState, DoubleState, FailureState, FictionState, GearsState,
            GroundState, JogState, LaneState, LevelUpState, LineState, Location,
            LogLevelState, MissedState, PasswordState, PrologState, PuzzleState,
-           SauceState, StarState, SyrupState, TheYState, TreadState,
-           WreckedState};
+           SauceState, SimpleState, StarState, SyrupState, TheYState,
+           TreadState, WreckedState};
 use save::util::{pop_table, to_table};
 
 // ========================================================================= //
@@ -53,6 +53,7 @@ pub struct Game {
     pub memory_lane: LaneState,
     pub missed_connections: MissedState,
     pub password_file: PasswordState,
+    pub plane_and_simple: SimpleState,
     pub shift_gears: GearsState,
     pub shift_the_blame: BlameState,
     pub shifting_ground: GroundState,
@@ -110,6 +111,8 @@ impl Game {
                 pop_table(table_ref, Location::MissedConnections.key())),
             password_file: PasswordState::from_toml(
                 pop_table(table_ref, Location::PasswordFile.key())),
+            plane_and_simple: SimpleState::from_toml(
+                pop_table(table_ref, Location::PlaneAndSimple.key())),
             shift_gears: GearsState::from_toml(
                 pop_table(table_ref, Location::ShiftGears.key())),
             shift_the_blame: BlameState::from_toml(
@@ -177,6 +180,7 @@ impl Game {
             Location::MemoryLane => &self.memory_lane,
             Location::MissedConnections => &self.missed_connections,
             Location::PasswordFile => &self.password_file,
+            Location::PlaneAndSimple => &self.plane_and_simple,
             Location::ShiftGears => &self.shift_gears,
             Location::ShiftTheBlame => &self.shift_the_blame,
             Location::ShiftingGround => &self.shifting_ground,
@@ -208,6 +212,7 @@ impl Game {
             Location::MemoryLane => &mut self.memory_lane,
             Location::MissedConnections => &mut self.missed_connections,
             Location::PasswordFile => &mut self.password_file,
+            Location::PlaneAndSimple => &mut self.plane_and_simple,
             Location::ShiftGears => &mut self.shift_gears,
             Location::ShiftTheBlame => &mut self.shift_the_blame,
             Location::ShiftingGround => &mut self.shifting_ground,

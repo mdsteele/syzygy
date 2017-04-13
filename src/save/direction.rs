@@ -84,6 +84,22 @@ impl Direction {
         }
     }
 
+    pub fn from_delta(delta: Point) -> Direction {
+        if delta.x().abs() < delta.y().abs() {
+            if delta.y() < 0 {
+                Direction::North
+            } else {
+                Direction::South
+            }
+        } else {
+            if delta.x() < 0 {
+                Direction::West
+            } else {
+                Direction::East
+            }
+        }
+    }
+
     pub fn opposite(self) -> Direction {
         match self {
             Direction::East => Direction::West,
@@ -126,9 +142,17 @@ mod tests {
 
     #[test]
     fn toml_round_trip() {
-        for original in ALL_DIRECTIONS {
+        for &original in ALL_DIRECTIONS {
             let result = Direction::from_toml(Some(&original.to_toml()));
-            assert_eq!(result, *original);
+            assert_eq!(result, original);
+        }
+    }
+
+    #[test]
+    fn delta_round_trip() {
+        for &original in ALL_DIRECTIONS {
+            let result = Direction::from_delta(original.delta());
+            assert_eq!(result, original);
         }
     }
 

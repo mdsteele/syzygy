@@ -199,6 +199,9 @@ fn main() {
                         Location::PasswordFile => {
                             modes::run_password_file(&mut window, game)
                         }
+                        Location::PlaneAndSimple => {
+                            modes::run_plane_and_simple(&mut window, game)
+                        }
                         Location::ShiftGears => {
                             modes::run_shift_gears(&mut window, game)
                         }

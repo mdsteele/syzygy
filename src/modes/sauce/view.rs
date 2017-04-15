@@ -126,11 +126,11 @@ impl Element<Game, PuzzleCmd> for View {
                 if done {
                     self.input.set_text(prefix);
                     self.text_timer = 20;
-                    action = action.and_play_sound(Sound::mid_puzzle_chime());
+                    action.also_play_sound(Sound::mid_puzzle_chime());
                 } else if error {
                     self.text_timer = 5;
                     self.text_prefix = Some(prefix);
-                    action = action.and_play_sound(Sound::talk_annoyed_hi());
+                    action.also_play_sound(Sound::talk_annoyed_hi());
                 } else {
                     self.input.set_text(prefix);
                 }

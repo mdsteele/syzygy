@@ -445,7 +445,7 @@ impl Element<DeviceGrid, LaserCmd> for LaserField {
                     let mut action = Action::redraw();
                     if !drag.moved {
                         drag.moved = true;
-                        action = action.and_play_sound(Sound::device_pickup());
+                        action.also_play_sound(Sound::device_pickup());
                     }
                     return action;
                 }

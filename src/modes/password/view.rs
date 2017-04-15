@@ -161,7 +161,7 @@ impl Element<Game, PuzzleCmd> for View {
                             self.crosswords[idx].reset_cursor();
                             self.crosswords[idx].animate_center_word();
                             let sound = Sound::solve_puzzle_chime();
-                            action = action.and_play_sound(sound);
+                            action.also_play_sound(sound);
                             self.display_crossword_speech(state);
                             self.core.clear_undo_redo();
                         } else {
@@ -185,8 +185,7 @@ impl Element<Game, PuzzleCmd> for View {
                             state.set_active_slot(slot);
                             self.crosswords[slot as usize].reset_cursor();
                             if self.display_crossword_speech(state) {
-                                action =
-                                    action.and_play_sound(Sound::talk_hi());
+                                action.also_play_sound(Sound::talk_hi());
                             }
                             action.merge(Action::redraw().and_stop());
                         }

@@ -86,7 +86,7 @@ impl Element<Game, PuzzleCmd> for View {
             if self.retry_countdown == 0 {
                 state.set_sequence(Vec::new());
                 self.letters.reset(state);
-                action = action.and_play_sound(Sound::talk_annoyed_hi());
+                action.also_play_sound(Sound::talk_annoyed_hi());
                 action.merge(Action::redraw());
             }
         }
@@ -107,7 +107,7 @@ impl Element<Game, PuzzleCmd> for View {
                 } else {
                     self.core.push_undo(state.sequence().clone());
                     let sound = Sound::transform_step(state.sequence().len());
-                    action = action.and_play_sound(sound);
+                    action.also_play_sound(sound);
                     if state.sequence().len() == 6 {
                         self.retry_countdown = RETRY_DELAY;
                     }

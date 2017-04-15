@@ -115,7 +115,7 @@ impl Element<Game, PuzzleCmd> for View {
             if let Some(&pt) = subaction.value() {
                 let (col, row) = self.grid.coords_for_point(pt);
                 if let Some(symbol) = state.try_place_shape(col, row) {
-                    action = action.and_play_sound(Sound::device_drop());
+                    action.also_play_sound(Sound::device_drop());
                     self.grid.place_symbol(symbol);
                 }
             }
@@ -125,7 +125,7 @@ impl Element<Game, PuzzleCmd> for View {
            event == &Event::ClockTick {
             let subaction = self.grid.handle_event(event, state.grid_mut());
             if let Some(&symbol) = subaction.value() {
-                action = action.and_play_sound(Sound::device_rotate());
+                action.also_play_sound(Sound::device_rotate());
                 self.grid.reveal_symbol(symbol);
                 self.remove_countdown = REMOVE_DELAY;
             }

@@ -83,7 +83,7 @@ impl Element<Game, PuzzleCmd> for View {
             let subaction = self.columns.handle_event(event, state);
             if let Some(&(col, row, dir, len)) = subaction.value() {
                 if state.try_remove_word(col, row, dir, len) {
-                    action = action.and_play_sound(Sound::mid_puzzle_chime());
+                    action.also_play_sound(Sound::mid_puzzle_chime());
                     self.columns.animate_fall(col, row, dir, len);
                     if state.is_solved() {
                         self.core.begin_outro_scene();

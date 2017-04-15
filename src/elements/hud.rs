@@ -178,11 +178,11 @@ impl HudButton {
     fn click_action(&self) -> Action<HudCmd> {
         let mut action = Action::redraw().and_return(self.value);
         if self.value == HudCmd::Undo {
-            action = action.and_play_sound(Sound::undo());
+            action.also_play_sound(Sound::undo());
         } else if self.value == HudCmd::Redo {
-            action = action.and_play_sound(Sound::redo());
+            action.also_play_sound(Sound::redo());
         } else if self.value == HudCmd::Reset {
-            action = action.and_play_sound(Sound::reset());
+            action.also_play_sound(Sound::reset());
         }
         action
     }

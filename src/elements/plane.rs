@@ -89,16 +89,29 @@ impl Element<PlaneGrid, ()> for PlaneGridView {
     fn draw(&self, grid: &PlaneGrid, canvas: &mut Canvas) {
         let mut canvas = canvas.subcanvas(self.rect(grid));
         canvas.clear((64, 64, 64));
-        for (&coords, &obj) in grid.objects() {
-            let sprite_index = match obj {
-                PlaneObj::Wall => 0,
-                PlaneObj::Cross => 1,
-                PlaneObj::PurpleNode => 2,
-                PlaneObj::RedNode => 3,
-                PlaneObj::BlueNode => 4,
-            };
-            let sprite = &self.obj_sprites[sprite_index];
-            canvas.draw_sprite(sprite, coords * TILE_SIZE as i32);
+        let grid_rect = grid.rect();
+        for row in grid_rect.top()..grid_rect.bottom() {
+            for col in grid_rect.left()..grid_rect.right() {
+                let coords = Point::new(col, row);
+                if let Some(&obj) = grid.objects().get(&coords) {
+                    let sprite_index = match obj {
+                        PlaneObj::Wall => 0,
+                        PlaneObj::Cross => 1,
+                        PlaneObj::PurpleNode => 2,
+                        PlaneObj::RedNode => 3,
+                        PlaneObj::BlueNode => 4,
+                    };
+                    let sprite = &self.obj_sprites[sprite_index];
+                    canvas.draw_sprite(sprite, coords * TILE_SIZE as i32);
+                } else {
+                    let pt = coords * TILE_SIZE as i32;
+                    let rect = Rect::new(pt.x() + 1,
+                                         pt.y() + 1,
+                                         TILE_SIZE - 2,
+                                         TILE_SIZE - 2);
+                    canvas.draw_rect((72, 72, 72), rect);
+                }
+            }
         }
         for pipe in grid.pipes() {
             debug_assert!(pipe.len() >= 2);

@@ -19,12 +19,12 @@
 
 use toml;
 
-use save::{AtticState, BlackState, BlameState, CubeState, DisconState,
-           DotsState, DoubleState, FailureState, FictionState, GearsState,
-           GroundState, JogState, LaneState, LevelUpState, LineState, Location,
-           LogLevelState, MissedState, PasswordState, PrologState, PuzzleState,
-           SauceState, SimpleState, StarState, SyrupState, TheYState,
-           TreadState, WreckedState};
+use save::{AtticState, BlackState, BlameState, CubeState, DayState,
+           DisconState, DotsState, DoubleState, FailureState, FictionState,
+           GearsState, GroundState, JogState, LaneState, LevelUpState,
+           LineState, Location, LogLevelState, MissedState, PasswordState,
+           PrologState, PuzzleState, SauceState, SimpleState, StarState,
+           SyrupState, TheYState, TreadState, WreckedState};
 use save::util::{pop_table, to_table};
 
 // ========================================================================= //
@@ -54,6 +54,7 @@ pub struct Game {
     pub missed_connections: MissedState,
     pub password_file: PasswordState,
     pub plane_and_simple: SimpleState,
+    pub plane_as_day: DayState,
     pub shift_gears: GearsState,
     pub shift_the_blame: BlameState,
     pub shifting_ground: GroundState,
@@ -113,6 +114,8 @@ impl Game {
                 pop_table(table_ref, Location::PasswordFile.key())),
             plane_and_simple: SimpleState::from_toml(
                 pop_table(table_ref, Location::PlaneAndSimple.key())),
+            plane_as_day: DayState::from_toml(
+                pop_table(table_ref, Location::PlaneAsDay.key())),
             shift_gears: GearsState::from_toml(
                 pop_table(table_ref, Location::ShiftGears.key())),
             shift_the_blame: BlameState::from_toml(
@@ -181,6 +184,7 @@ impl Game {
             Location::MissedConnections => &self.missed_connections,
             Location::PasswordFile => &self.password_file,
             Location::PlaneAndSimple => &self.plane_and_simple,
+            Location::PlaneAsDay => &self.plane_as_day,
             Location::ShiftGears => &self.shift_gears,
             Location::ShiftTheBlame => &self.shift_the_blame,
             Location::ShiftingGround => &self.shifting_ground,
@@ -213,6 +217,7 @@ impl Game {
             Location::MissedConnections => &mut self.missed_connections,
             Location::PasswordFile => &mut self.password_file,
             Location::PlaneAndSimple => &mut self.plane_and_simple,
+            Location::PlaneAsDay => &mut self.plane_as_day,
             Location::ShiftGears => &mut self.shift_gears,
             Location::ShiftTheBlame => &mut self.shift_the_blame,
             Location::ShiftingGround => &mut self.shifting_ground,

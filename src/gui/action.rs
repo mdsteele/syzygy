@@ -64,6 +64,10 @@ impl<A> Action<A> {
         self
     }
 
+    pub fn also_play_sound(&mut self, sound: Sound) {
+        self.sounds.push(sound);
+    }
+
     pub fn and_stop(mut self) -> Action<A> {
         self.value = Value::Stop;
         self

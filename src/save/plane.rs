@@ -30,7 +30,20 @@ use save::util::{to_array, to_i32};
 pub enum PlaneObj {
     Wall,
     Cross,
-    Node,
+    PurpleNode,
+    RedNode,
+    BlueNode,
+}
+
+impl PlaneObj {
+    pub fn is_node(self) -> bool {
+        match self {
+            PlaneObj::Wall | PlaneObj::Cross => false,
+            PlaneObj::PurpleNode | PlaneObj::RedNode | PlaneObj::BlueNode => {
+                true
+            }
+        }
+    }
 }
 
 #[derive(Clone, Copy)]
@@ -116,7 +129,7 @@ impl PlaneGrid {
 
     fn pipe_piece_at(&self, coords: Point, is_vertical: bool) -> PipePiece {
         let obj = self.objects.get(&coords).cloned();
-        if obj == Some(PlaneObj::Node) {
+        if obj.map(PlaneObj::is_node).unwrap_or(false) {
             return PipePiece::EmptyOrNode(true);
         }
         let is_cross = obj == Some(PlaneObj::Cross);
@@ -296,18 +309,26 @@ impl PlaneGrid {
     }
 
     pub fn all_nodes_are_connected(&self) -> bool {
-        let mut nodes = HashSet::new();
+        let mut purple_nodes = Vec::new();
+        let mut red_nodes = Vec::new();
+        let mut blue_nodes = Vec::new();
         for (&pt, &obj) in self.objects.iter() {
-            if obj == PlaneObj::Node {
-                nodes.insert(pt);
+            match obj {
+                PlaneObj::PurpleNode => purple_nodes.push(pt),
+                PlaneObj::RedNode => red_nodes.push(pt),
+                PlaneObj::BlueNode => blue_nodes.push(pt),
+                _ => {}
             }
         }
         let mut node_pairs = HashSet::new();
-        for node1 in nodes.iter() {
-            for node2 in nodes.iter() {
-                if node1 != node2 {
-                    node_pairs.insert((node1, node2));
-                }
+        for (index1, node1) in purple_nodes.iter().enumerate() {
+            for node2 in purple_nodes[(index1 + 1)..].iter() {
+                node_pairs.insert((node1, node2));
+            }
+        }
+        for node1 in red_nodes.iter() {
+            for node2 in blue_nodes.iter() {
+                node_pairs.insert((node1, node2));
             }
         }
         for pipe in self.pipes.iter() {

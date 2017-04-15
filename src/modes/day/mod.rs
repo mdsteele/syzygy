@@ -17,27 +17,22 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod crossword;
-pub mod cutscene;
-mod dialog;
-mod fade;
-mod hud;
-mod lasers;
-pub mod memory;
-mod paragraph;
-pub mod plane;
-mod progress;
-mod puzzle;
-pub mod shift;
+mod scenes;
+mod view;
 
-pub use self::crossword::CrosswordView;
-pub use self::cutscene::{Ast, Scene, TalkPos, TalkStyle, Theater};
-pub use self::dialog::DialogBox;
-pub use self::fade::{FadeStyle, ScreenFade};
-pub use self::hud::{Hud, HudCmd, HudInput};
-pub use self::lasers::{DangerSign, LaserCmd, LaserField};
-pub use self::paragraph::Paragraph;
-pub use self::progress::ProgressBar;
-pub use self::puzzle::{PuzzleCmd, PuzzleCore, PuzzleView};
+use gui::Window;
+use modes::{Mode, run_puzzle};
+use save::Game;
+use self::view::View;
+
+// ========================================================================= //
+
+pub fn run_plane_as_day(window: &mut Window, game: &mut Game) -> Mode {
+    let view = {
+        let visible_rect = window.visible_rect();
+        View::new(&mut window.resources(), visible_rect, &game.plane_as_day)
+    };
+    run_puzzle(window, game, view)
+}
 
 // ========================================================================= //

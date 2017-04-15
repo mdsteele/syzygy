@@ -21,7 +21,7 @@ use elements::{PuzzleCmd, PuzzleCore, PuzzleView};
 use elements::plane::PlaneGridView;
 use gui::{Action, Canvas, Element, Event, Rect, Resources, Sound};
 use modes::SOLVED_INFO_TEXT;
-use save::{Game, PuzzleState, SimpleState};
+use save::{DayState, Game, PuzzleState};
 use super::scenes::{compile_intro_scene, compile_outro_scene};
 
 // ========================================================================= //
@@ -32,14 +32,14 @@ pub struct View {
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect, state: &SimpleState)
+    pub fn new(resources: &mut Resources, visible: Rect, state: &DayState)
                -> View {
         let intro = compile_intro_scene(resources);
         let outro = compile_outro_scene(resources);
         let core = PuzzleCore::new(resources, visible, state, intro, outro);
         let mut view = View {
             core: core,
-            grid: PlaneGridView::new(resources, 100, 50),
+            grid: PlaneGridView::new(resources, 100, 40),
         };
         view.drain_queue();
         view
@@ -54,7 +54,7 @@ impl View {
 
 impl Element<Game, PuzzleCmd> for View {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
-        let state = &game.plane_and_simple;
+        let state = &game.plane_as_day;
         self.core.draw_back_layer(canvas);
         self.grid.draw(state.grid(), canvas);
         self.core.draw_middle_layer(canvas);
@@ -63,7 +63,7 @@ impl Element<Game, PuzzleCmd> for View {
 
     fn handle_event(&mut self, event: &Event, game: &mut Game)
                     -> Action<PuzzleCmd> {
-        let state = &mut game.plane_and_simple;
+        let state = &mut game.plane_as_day;
         let mut action = self.core.handle_event(event, state);
         self.drain_queue();
         if !action.should_stop() && !state.is_solved() {
@@ -89,7 +89,7 @@ impl Element<Game, PuzzleCmd> for View {
 
 impl PuzzleView for View {
     fn info_text(&self, game: &Game) -> &'static str {
-        if game.plane_and_simple.is_solved() {
+        if game.plane_as_day.is_solved() {
             SOLVED_INFO_TEXT
         } else {
             INFO_BOX_TEXT
@@ -109,13 +109,13 @@ impl PuzzleView for View {
     }
 
     fn reset(&mut self, game: &mut Game) {
-        let state = &mut game.plane_and_simple;
+        let state = &mut game.plane_as_day;
         self.core.clear_undo_redo();
         state.reset();
     }
 
     fn solve(&mut self, game: &mut Game) {
-        let state = &mut game.plane_and_simple;
+        let state = &mut game.plane_as_day;
         state.solve();
         self.core.begin_outro_scene();
         self.drain_queue();
@@ -125,8 +125,8 @@ impl PuzzleView for View {
 // ========================================================================= //
 
 const INFO_BOX_TEXT: &'static str = "\
-Your goal is to connect each purple node to each other
-purple node.
+Your goal is to connect each red node to each blue
+node.
 
 Drag across the grid with $M{your finger}{the mouse} to create or
 remove pipes between the nodes.";

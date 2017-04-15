@@ -30,59 +30,68 @@ use super::super::util::{ACCESS_KEY, pop_array, to_i32};
 const PIPES_KEY: &'static str = "pipes";
 const STAGE_KEY: &'static str = "stage";
 
-const FIRST_STAGE: i32 = 2;
-const LAST_STAGE: i32 = 5;
+const FIRST_STAGE: i32 = 1;
+const LAST_STAGE: i32 = 4;
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+const FIRST_STAGE_WALLS: &'static [(i32, i32)] = &[
+    (0, 0), (2, 0), (4, 0), (6, 0), (8, 0), (10, 0), (12, 0),
+    (0, 1), (2, 1), (4, 1), (6, 1), (10, 1),
+    (6, 2), (8, 2), (11, 2),
+    (1, 3), (2, 3), (4, 3), (6, 3), (8, 3), (10, 3), (12, 3),
+    (2, 4), (3, 4), (4, 4), (6, 4), (8, 4), (11, 4), (12, 4),
+    (0, 5), (4, 5), (8, 5), (9, 5), (10, 5),
+    (2, 6), (4, 6), (5, 6), (7, 6), (12, 6),
+    (1, 7), (4, 7), (6, 7), (7, 7), (9, 7), (11, 7),
+    (1, 8), (6, 8), (9, 8),
+];
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
 const SOLVED_PIPES: &'static [&'static [(i32, i32)]] = &[
-    &[(4, 3), (5, 3), (6, 3)],
-    &[(4, 3), (4, 4), (3, 4), (2, 4)],
-    &[(4, 3), (3, 3), (3, 4), (3, 5), (4, 5), (5, 5)],
-    &[(4, 3), (4, 2), (4, 1), (5, 1), (6, 1), (7, 1), (7, 2), (8, 2), (8, 3),
-      (8, 4), (8, 5), (7, 5)],
-    &[(6, 3), (6, 2), (5, 2), (4, 2), (3, 2), (2, 2), (2, 3), (2, 4)],
-    &[(6, 3), (6, 4), (5, 4), (5, 5)],
-    &[(6, 3), (7, 3), (7, 4), (7, 5)],
-    &[(2, 4), (1, 4), (1, 5), (1, 6), (1, 7), (2, 7), (3, 7), (4, 7), (5, 7),
-      (5, 6), (5, 5)],
-    &[(2, 4), (2, 5), (2, 6), (3, 6), (4, 6), (5, 6), (6, 6), (7, 6), (7, 5)],
-    &[(5, 5), (6, 5), (7, 5)],
+    &[(8, 2), (8, 1), (7, 1), (6, 1), (5, 1), (4, 1), (3, 1), (2, 1), (1, 1),
+      (1, 2), (1, 3)],
+    &[(8, 2), (9, 2), (9, 3)],
+    &[(8, 2), (7, 2), (6, 2), (6, 3), (6, 4)],
+    &[(8, 2), (8, 3), (8, 4), (8, 5), (8, 6), (7, 6), (6, 6), (5, 6), (4, 6)],
+    &[(2, 3), (1, 3)],
+    &[(2, 3), (2, 2), (3, 2), (4, 2), (5, 2), (5, 3), (6, 3), (7, 3), (8, 3),
+      (9, 3)],
+    &[(2, 3), (2, 4), (3, 4), (4, 4), (5, 4), (6, 4)],
+    &[(2, 3), (3, 3), (4, 3), (4, 4), (4, 5), (4, 6)],
+    &[(11, 4), (12, 4), (12, 3), (12, 2), (12, 1), (11, 1), (10, 1), (9, 1),
+      (9, 0), (8, 0), (7, 0), (6, 0), (5, 0), (4, 0), (3, 0), (2, 0), (1, 0),
+      (0, 0), (0, 1), (0, 2), (0, 3), (1, 3)],
+    &[(11, 4), (11, 3), (10, 3), (9, 3)],
+    &[(11, 4), (10, 4), (10, 5), (9, 5), (8, 5), (7, 5), (7, 4), (6, 4)],
+    &[(11, 4), (11, 5), (11, 6), (10, 6), (10, 7), (9, 7), (8, 7), (7, 7),
+      (6, 7), (5, 7), (4, 7), (4, 6)],
+    &[(1, 5), (1, 4), (1, 3)],
+    &[(1, 5), (1, 6), (1, 7), (1, 8), (2, 8), (3, 8), (4, 8), (5, 8), (6, 8),
+      (7, 8), (8, 8), (9, 8), (9, 7), (9, 6), (9, 5), (9, 4), (9, 3)],
+    &[(1, 5), (2, 5), (3, 5), (4, 5), (5, 5), (6, 5), (6, 4)],
+    &[(1, 5), (0, 5), (0, 6), (0, 7), (1, 7), (2, 7), (3, 7), (3, 6), (4, 6)],
 ];
 
 // ========================================================================= //
 
-pub struct SimpleState {
+pub struct DayState {
     access: Access,
     grid: PlaneGrid,
     stage: i32,
 }
 
-impl SimpleState {
+impl DayState {
     fn initial_grid() -> PlaneGrid {
-        let mut grid = PlaneGrid::new(Rect::new(0, 0, 10, 9));
-        for row in 0..9 {
-            for col in 0..10 {
-                grid.place_object(col, row, PlaneObj::Wall);
-            }
+        let mut grid = PlaneGrid::new(Rect::new(0, 0, 13, 9));
+        for &(col, row) in FIRST_STAGE_WALLS {
+            grid.place_object(col, row, PlaneObj::Wall);
         }
-        grid.remove_object(3, 1);
-        grid.remove_object(4, 1);
-        grid.remove_object(5, 1);
-        grid.remove_object(3, 2);
-        grid.remove_object(5, 2);
-        grid.remove_object(2, 3);
-        grid.remove_object(3, 3);
-        grid.remove_object(5, 3);
-        grid.place_object(2, 4, PlaneObj::PurpleNode);
-        grid.remove_object(4, 4);
-        grid.remove_object(5, 4);
-        grid.place_object(5, 5, PlaneObj::PurpleNode);
-        grid.remove_object(2, 6);
-        grid.remove_object(4, 6);
+        grid.place_object(9, 3, PlaneObj::BlueNode);
+        grid.place_object(1, 5, PlaneObj::RedNode);
         grid
     }
 
-    pub fn from_toml(mut table: toml::value::Table) -> SimpleState {
+    pub fn from_toml(mut table: toml::value::Table) -> DayState {
         let access = Access::from_toml(table.get(ACCESS_KEY));
         let mut stage = table.remove(STAGE_KEY)
                              .map(to_i32)
@@ -90,9 +99,9 @@ impl SimpleState {
         if stage < FIRST_STAGE || stage > LAST_STAGE {
             stage = FIRST_STAGE;
         }
-        let mut state = SimpleState {
+        let mut state = DayState {
             access: access,
-            grid: SimpleState::initial_grid(),
+            grid: DayState::initial_grid(),
             stage: FIRST_STAGE,
         };
         while state.stage < stage {
@@ -140,58 +149,61 @@ impl SimpleState {
         debug_assert!(self.stage < LAST_STAGE);
         self.stage += 1;
         match self.stage {
+            2 => {
+                self.grid.remove_object(6, 2);
+                self.grid.remove_object(4, 3);
+                self.grid.remove_object(10, 3);
+                self.grid.remove_object(3, 4);
+                self.grid.place_object(6, 4, PlaneObj::BlueNode);
+                self.grid.remove_object(8, 4);
+                self.grid.place_object(11, 4, PlaneObj::RedNode);
+            }
             3 => {
-                self.grid.place_object(6, 3, PlaneObj::PurpleNode);
-                self.grid.remove_object(6, 4);
-                self.grid.remove_object(2, 5);
-                self.grid.remove_object(4, 5);
-                self.grid.remove_object(3, 6);
-                self.grid.remove_object(6, 6);
+                self.grid.remove_object(0, 1);
+                self.grid.remove_object(2, 1);
+                self.grid.remove_object(4, 1);
+                self.grid.remove_object(6, 1);
+                self.grid.remove_object(10, 1);
+                self.grid.place_object(8, 2, PlaneObj::RedNode);
+                self.grid.place_object(1, 3, PlaneObj::BlueNode);
+                self.grid.place_object(6, 3, PlaneObj::Cross);
+                self.grid.place_object(8, 3, PlaneObj::Cross);
+                self.grid.remove_object(5, 6);
+                self.grid.remove_object(7, 6);
+                self.grid.remove_object(1, 8);
             }
             4 => {
-                self.grid.remove_object(1, 1);
-                self.grid.remove_object(1, 2);
-                self.grid.remove_object(2, 2);
-                self.grid.remove_object(6, 2);
-                self.grid.remove_object(1, 3);
-                self.grid.place_object(4, 3, PlaneObj::PurpleNode);
-                self.grid.remove_object(1, 4);
-                self.grid.remove_object(6, 5);
-                self.grid.remove_object(1, 6);
-            }
-            5 => {
-                self.grid.remove_object(6, 1);
-                self.grid.remove_object(7, 1);
-                self.grid.place_object(4, 2, PlaneObj::Cross);
-                self.grid.remove_object(7, 2);
-                self.grid.remove_object(8, 2);
-                self.grid.remove_object(7, 3);
-                self.grid.remove_object(8, 3);
-                self.grid.place_object(3, 4, PlaneObj::Cross);
-                self.grid.remove_object(7, 4);
-                self.grid.remove_object(8, 4);
-                self.grid.remove_object(1, 5);
-                self.grid.remove_object(3, 5);
-                self.grid.place_object(7, 5, PlaneObj::PurpleNode);
-                self.grid.remove_object(8, 5);
-                self.grid.place_object(5, 6, PlaneObj::Cross);
-                self.grid.remove_object(7, 6);
-                self.grid.remove_object(8, 6);
-                self.grid.remove_object(1, 7);
-                self.grid.remove_object(2, 7);
-                self.grid.remove_object(3, 7);
+                self.grid.remove_object(0, 0);
+                self.grid.remove_object(2, 0);
+                self.grid.remove_object(4, 0);
+                self.grid.remove_object(6, 0);
+                self.grid.remove_object(8, 0);
+                self.grid.place_object(2, 3, PlaneObj::RedNode);
+                self.grid.remove_object(12, 3);
+                self.grid.remove_object(2, 4);
+                self.grid.place_object(4, 4, PlaneObj::Cross);
+                self.grid.remove_object(12, 4);
+                self.grid.remove_object(0, 5);
+                self.grid.place_object(4, 5, PlaneObj::Cross);
+                self.grid.place_object(8, 5, PlaneObj::Cross);
+                self.grid.place_object(9, 5, PlaneObj::Cross);
+                self.grid.remove_object(10, 5);
+                self.grid.place_object(4, 6, PlaneObj::BlueNode);
+                self.grid.place_object(1, 7, PlaneObj::Cross);
                 self.grid.remove_object(4, 7);
-                self.grid.remove_object(5, 7);
                 self.grid.remove_object(6, 7);
-                self.grid.remove_object(8, 7);
+                self.grid.remove_object(7, 7);
+                self.grid.place_object(9, 7, PlaneObj::Cross);
+                self.grid.remove_object(6, 8);
+                self.grid.remove_object(9, 8);
             }
             _ => panic!("bad stage: {}", self.stage),
         }
     }
 }
 
-impl PuzzleState for SimpleState {
-    fn location(&self) -> Location { Location::PlaneAndSimple }
+impl PuzzleState for DayState {
+    fn location(&self) -> Location { Location::PlaneAsDay }
 
     fn access(&self) -> Access { self.access }
 
@@ -202,7 +214,7 @@ impl PuzzleState for SimpleState {
     fn reset(&mut self) { self.grid.remove_all_pipes(); }
 
     fn replay(&mut self) {
-        self.grid = SimpleState::initial_grid();
+        self.grid = DayState::initial_grid();
         self.stage = FIRST_STAGE;
         self.access = Access::BeginReplay;
     }

@@ -202,6 +202,9 @@ fn main() {
                         Location::PlaneAndSimple => {
                             modes::run_plane_and_simple(&mut window, game)
                         }
+                        Location::PlaneAsDay => {
+                            modes::run_plane_as_day(&mut window, game)
+                        }
                         Location::ShiftGears => {
                             modes::run_shift_gears(&mut window, game)
                         }

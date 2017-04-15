@@ -17,27 +17,40 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod crossword;
-pub mod cutscene;
-mod dialog;
-mod fade;
-mod hud;
-mod lasers;
-pub mod memory;
-mod paragraph;
-pub mod plane;
-mod progress;
-mod puzzle;
-pub mod shift;
+use elements::{Ast, Scene, TalkPos, TalkStyle};
+use gui::{Resources, Sound};
 
-pub use self::crossword::CrosswordView;
-pub use self::cutscene::{Ast, Scene, TalkPos, TalkStyle, Theater};
-pub use self::dialog::DialogBox;
-pub use self::fade::{FadeStyle, ScreenFade};
-pub use self::hud::{Hud, HudCmd, HudInput};
-pub use self::lasers::{DangerSign, LaserCmd, LaserField};
-pub use self::paragraph::Paragraph;
-pub use self::progress::ProgressBar;
-pub use self::puzzle::{PuzzleCmd, PuzzleCore, PuzzleView};
+// ========================================================================= //
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
+    let ast = vec![
+        Ast::Seq(vec![
+            // TODO: Make a background for "Plane as Day".
+            Ast::SetBg("missed_connections"),
+            Ast::Place(0, "chars/tezure", 0, (-16, 304)),
+            Ast::Slide(0, (304, 304), true, true, 1.0),
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE, "Let's have a look."),
+        ]),
+    ];
+    Ast::compile_scene(resources, ast)
+}
+
+// ========================================================================= //
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::solve_puzzle_chime()),
+            Ast::Wait(1.0),
+            Ast::Slide(0, (592, 304), true, false, 1.0),
+            Ast::Remove(0),
+        ]),
+    ];
+    Ast::compile_scene(resources, ast)
+}
 
 // ========================================================================= //

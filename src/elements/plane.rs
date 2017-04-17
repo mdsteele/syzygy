@@ -18,10 +18,18 @@
 // +--------------------------------------------------------------------------+
 
 use num_integer::div_floor;
+use std::mem;
 
 use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sprite};
 use save::Direction;
 use save::plane::{PlaneGrid, PlaneObj};
+
+// ========================================================================= //
+
+pub enum PlaneCmd {
+    Changed,
+    PushUndo(Vec<(Point, Point)>),
+}
 
 // ========================================================================= //
 
@@ -33,6 +41,7 @@ pub struct PlaneGridView {
     obj_sprites: Vec<Sprite>,
     pipe_sprites: Vec<Sprite>,
     drag_from: Option<Point>,
+    changes: Vec<(Point, Point)>,
 }
 
 impl PlaneGridView {
@@ -44,7 +53,13 @@ impl PlaneGridView {
             obj_sprites: resources.get_sprites("plane/objects"),
             pipe_sprites: resources.get_sprites("plane/pipes"),
             drag_from: None,
+            changes: Vec::new(),
         }
+    }
+
+    pub fn cancel_drag_and_clear_changes(&mut self) {
+        self.drag_from = None;
+        self.changes.clear();
     }
 
     fn rect(&self, grid: &PlaneGrid) -> Rect {
@@ -85,7 +100,7 @@ impl PlaneGridView {
     }
 }
 
-impl Element<PlaneGrid, ()> for PlaneGridView {
+impl Element<PlaneGrid, PlaneCmd> for PlaneGridView {
     fn draw(&self, grid: &PlaneGrid, canvas: &mut Canvas) {
         let mut canvas = canvas.subcanvas(self.rect(grid));
         canvas.clear((64, 64, 64));
@@ -150,7 +165,7 @@ impl Element<PlaneGrid, ()> for PlaneGridView {
     }
 
     fn handle_event(&mut self, event: &Event, grid: &mut PlaneGrid)
-                    -> Action<()> {
+                    -> Action<PlaneCmd> {
         match event {
             &Event::MouseDown(pt) if self.rect(grid).contains(pt) => {
                 self.drag_from = self.pt_to_coords(grid, pt);
@@ -161,7 +176,9 @@ impl Element<PlaneGrid, ()> for PlaneGridView {
                     if let Some(coords2) = self.pt_to_coords(grid, pt) {
                         self.drag_from = Some(coords2);
                         if grid.toggle_pipe(coords1, coords2) {
-                            return Action::redraw().and_return(());
+                            self.changes.push((coords1, coords2));
+                            return Action::redraw()
+                                .and_return(PlaneCmd::Changed);
                         }
                     }
                 }
@@ -169,7 +186,12 @@ impl Element<PlaneGrid, ()> for PlaneGridView {
             }
             &Event::MouseUp => {
                 self.drag_from = None;
-                Action::ignore()
+                if self.changes.is_empty() {
+                    Action::ignore()
+                } else {
+                    let vec = mem::replace(&mut self.changes, Vec::new());
+                    Action::redraw().and_return(PlaneCmd::PushUndo(vec))
+                }
             }
             _ => Action::ignore(),
         }

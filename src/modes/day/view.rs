@@ -18,8 +18,8 @@
 // +--------------------------------------------------------------------------+
 
 use elements::{PuzzleCmd, PuzzleCore, PuzzleView};
-use elements::plane::PlaneGridView;
-use gui::{Action, Canvas, Element, Event, Rect, Resources, Sound};
+use elements::plane::{PlaneCmd, PlaneGridView};
+use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sound};
 use modes::SOLVED_INFO_TEXT;
 use save::{DayState, Game, PuzzleState};
 use super::scenes::{compile_intro_scene, compile_outro_scene};
@@ -27,7 +27,7 @@ use super::scenes::{compile_intro_scene, compile_outro_scene};
 // ========================================================================= //
 
 pub struct View {
-    core: PuzzleCore<()>,
+    core: PuzzleCore<Vec<(Point, Point)>>,
     grid: PlaneGridView,
 }
 
@@ -67,19 +67,25 @@ impl Element<Game, PuzzleCmd> for View {
         let mut action = self.core.handle_event(event, state);
         self.drain_queue();
         if !action.should_stop() && !state.is_solved() {
-            let subaction = self.grid.handle_event(event, state.grid_mut());
-            if let Some(&()) = subaction.value() {
-                if state.advance_stage_if_done() {
-                    self.core.clear_undo_redo();
-                    if state.is_solved() {
-                        self.core.begin_outro_scene();
-                    } else {
-                        action.also_play_sound(Sound::mid_puzzle_chime());
-                        // TODO animate grid changes
+            let mut subaction = self.grid
+                                    .handle_event(event, state.grid_mut());
+            match subaction.take_value() {
+                Some(PlaneCmd::Changed) => {
+                    if state.advance_stage_if_done() {
+                        self.core.clear_undo_redo();
+                        self.grid.cancel_drag_and_clear_changes();
+                        if state.is_solved() {
+                            self.core.begin_outro_scene();
+                        } else {
+                            action.also_play_sound(Sound::mid_puzzle_chime());
+                            // TODO animate grid changes
+                        }
                     }
-                } else {
-                    // TODO push undo
                 }
+                Some(PlaneCmd::PushUndo(changes)) => {
+                    self.core.push_undo(changes);
+                }
+                None => {}
             }
             action.merge(subaction.but_no_value());
         }
@@ -96,15 +102,19 @@ impl PuzzleView for View {
         }
     }
 
-    fn undo(&mut self, _game: &mut Game) {
-        if let Some(_) = self.core.pop_undo() {
-            // TODO implement undo
+    fn undo(&mut self, game: &mut Game) {
+        if let Some(changes) = self.core.pop_undo() {
+            for &(coords1, coords2) in changes.iter().rev() {
+                game.plane_as_day.grid_mut().toggle_pipe(coords1, coords2);
+            }
         }
     }
 
-    fn redo(&mut self, _game: &mut Game) {
-        if let Some(_) = self.core.pop_redo() {
-            // TODO implement redo
+    fn redo(&mut self, game: &mut Game) {
+        if let Some(changes) = self.core.pop_redo() {
+            for &(coords1, coords2) in changes.iter() {
+                game.plane_as_day.grid_mut().toggle_pipe(coords1, coords2);
+            }
         }
     }
 

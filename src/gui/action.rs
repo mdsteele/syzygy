@@ -113,6 +113,17 @@ impl<A> Action<A> {
         }
     }
 
+    pub fn take_value(&mut self) -> Option<A> {
+        match self.value {
+            Value::Continue | Value::Stop => return None,
+            Value::Return(_) => {}
+        }
+        match mem::replace(&mut self.value, Value::Stop) {
+            Value::Return(value) => Some(value),
+            _ => unreachable!(),
+        }
+    }
+
     pub fn merge(&mut self, mut action: Action<A>) {
         self.redraw |= action.redraw;
         self.sounds.append(&mut action.sounds);

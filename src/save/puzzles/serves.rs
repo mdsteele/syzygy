@@ -20,7 +20,7 @@
 use std::cmp::min;
 use toml;
 
-use save::{Access, Direction, Location};
+use save::{Access, Location};
 use save::memory::{Grid, Shape};
 use save::util::{ACCESS_KEY, pop_array, to_u32};
 use super::PuzzleState;
@@ -30,58 +30,53 @@ use super::PuzzleState;
 const GRID_KEY: &'static str = "grid";
 const NUM_PLACED_KEY: &'static str = "placed";
 
-const NUM_COLS: usize = 4;
-const NUM_ROWS: usize = 6;
+const NUM_COLS: usize = 7;
+const NUM_ROWS: usize = 4;
 const NUM_SYMBOLS: i32 = 6;
 
-// TODO: design this puzzle
 #[cfg_attr(rustfmt, rustfmt_skip)]
-const SHAPES: &'static [(Shape, &'static [(i8, usize)],
-                         Option<Direction>)] = &[
-    (Shape([0, 2, 0, 2, 2, 0, 0, 2, 0]), &[], None),
-    (Shape([0, 6, 6, 0, 6, 0, 0, 6, 6]), &[(2, 1)], Some(Direction::South)),
-    (Shape([0, 5, 0, 5, 5, 0, 0, 5, 5]), &[(2, 1), (6, 2)],
-     Some(Direction::North)),
-    (Shape([0, 1, 1, 1, 1, 0, 1, 0, 0]), &[(2, 1), (5, 1), (6, 1)],
-     Some(Direction::East)),
-    (Shape([3, 0, 0, 3, 0, 0, 3, 3, 3]), &[(1, 1), (2, 1), (5, 1), (6, 1)],
-     Some(Direction::West)),
-    (Shape([4, 4, 0, 0, 4, 0, 4, 4, 0]), &[(1, 2), (3, 1), (5, 1)], None),
-    (Shape([2, 2, 0, 0, 2, 0, 0, 2, 0]), &[(3, 2), (4, 1), (6, 1)], None),
-    (Shape([1, 1, 1, 0, 1, 0, 0, 1, 0]), &[(2, 1), (3, 1), (5, 1)], None),
-    (Shape([0, 6, 6, 0, 6, 6, 0, 6, 0]), &[(1, 1), (4, 1)], None),
-    (Shape([0, 5, 5, 0, 5, 0, 5, 5, 0]), &[(2, 1), (6, 2)], None),
-    (Shape([0, 3, 0, 3, 3, 3, 0, 3, 0]), &[(1, 1), (5, 3)], None),
-    (Shape([4, 4, 0, 4, 4, 4, 0, 4, 4]), &[(3, 3), (5, 2)], None),
+const SHAPES: &'static [(Shape, &'static [(i8, usize)])] = &[
+    (Shape([0, 2, 0, 2, 2, 0, 0, 2, 0]), &[]),
+    (Shape([0, 6, 6, 0, 6, 0, 0, 6, 6]), &[(2, 1)]),
+    (Shape([0, 5, 0, 5, 5, 0, 0, 5, 5]), &[(2, 1), (6, 2)]),
+    (Shape([0, 1, 1, 1, 1, 0, 1, 0, 0]), &[(2, 1), (5, 1), (6, 1)]),
+    (Shape([3, 0, 0, 3, 0, 0, 3, 3, 3]), &[(1, 1), (2, 1), (5, 1), (6, 1)]),
+    (Shape([4, 4, 0, 0, 4, 0, 4, 4, 0]), &[(1, 2), (3, 1), (5, 1)]),
+    (Shape([2, 2, 0, 0, 2, 0, 0, 2, 0]), &[(3, 2), (4, 1), (6, 1)]),
+    (Shape([1, 1, 1, 0, 1, 0, 0, 1, 0]), &[(2, 1), (3, 1), (5, 1)]),
+    (Shape([0, 6, 6, 0, 6, 6, 0, 6, 0]), &[(1, 1), (4, 1)]),
+    (Shape([0, 5, 5, 0, 5, 0, 5, 5, 0]), &[(2, 1), (6, 2)]),
+    (Shape([0, 3, 0, 3, 3, 3, 0, 3, 0]), &[(1, 1), (5, 3)]),
+    (Shape([4, 4, 0, 4, 4, 4, 0, 4, 4]), &[(3, 3), (5, 2)]),
 ];
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-const REMOVALS: &'static [(&'static [(i8, usize)], Option<Direction>)] = &[
-    (&[(1, 2), (5, 1)], None),
-    (&[(3, 1), (4, 1)], None),
-    (&[(2, 1), (4, 1)], None),
-    (&[(2, 1), (4, 1)], None),
-    (&[(1, 1)], None),
-    (&[(6, 3)], None),
-    (&[(1, 1)], None),
-    (&[(1, 1)], None),
-    (&[(3, 1)], None),
-    (&[(3, 1), (4, 4)], None),
-    (&[(4, 3)], None),
-    (&[], None),
+const REMOVALS: &'static [&'static [(i8, usize)]] = &[
+    &[(1, 2), (5, 1)],
+    &[(3, 1), (4, 1)],
+    &[(2, 1), (4, 1)],
+    &[(2, 1), (4, 1)],
+    &[(1, 1)],
+    &[(6, 3)],
+    &[(1, 1)],
+    &[(1, 1)],
+    &[(3, 1)],
+    &[(3, 1), (4, 4)],
+    &[(4, 3)],
+    &[],
 ];
 
 // ========================================================================= //
 
-pub struct JogState {
+pub struct ServesState {
     access: Access,
     grid: Grid,
     num_placed: usize,
     num_removed: usize,
 }
 
-impl JogState {
-    pub fn from_toml(mut table: toml::value::Table) -> JogState {
+impl ServesState {
+    pub fn from_toml(mut table: toml::value::Table) -> ServesState {
         let access = Access::from_toml(table.get(ACCESS_KEY));
         let (grid, num_placed, num_removed) = if access.is_solved() {
             (Grid::new(NUM_COLS, NUM_ROWS), SHAPES.len(), REMOVALS.len())
@@ -100,7 +95,7 @@ impl JogState {
                 (Grid::new(NUM_COLS, NUM_ROWS), 0, 0)
             }
         };
-        JogState {
+        ServesState {
             access: access,
             grid: grid,
             num_placed: num_placed,
@@ -137,10 +132,6 @@ impl JogState {
                 for &(symbol, num) in SHAPES[self.num_placed].1 {
                     self.grid.decay_symbol(symbol, num);
                 }
-                if let Some(dir) = SHAPES[self.num_placed].2 {
-                    // TODO: animate shifting tiles
-                    self.grid.shift_tiles(dir);
-                }
                 self.num_placed += 1;
                 return shape.symbol();
             }
@@ -157,11 +148,8 @@ impl JogState {
         assert!(symbol > 0 && symbol as i32 <= NUM_SYMBOLS);
         if self.grid.can_remove_symbol(symbol) {
             self.grid.remove_symbol(symbol);
-            for &(symbol, num) in REMOVALS[self.num_removed].0 {
+            for &(symbol, num) in REMOVALS[self.num_removed] {
                 self.grid.decay_symbol(symbol, num);
-            }
-            if let Some(dir) = REMOVALS[self.num_removed].1 {
-                self.grid.shift_tiles(dir);
             }
             self.num_removed += 1;
             if self.num_removed == REMOVALS.len() {
@@ -173,8 +161,8 @@ impl JogState {
     }
 }
 
-impl PuzzleState for JogState {
-    fn location(&self) -> Location { Location::JogYourMemory }
+impl PuzzleState for ServesState {
+    fn location(&self) -> Location { Location::IfMemoryServes }
 
     fn access(&self) -> Access { self.access }
 
@@ -214,7 +202,7 @@ mod tests {
         assert_eq!(SHAPES.len(), REMOVALS.len());
         let mut num_symbols_in_use = HashMap::new();
         let mut num_removed = 0;
-        for &(ref shape, decay, _) in SHAPES.iter() {
+        for &(ref shape, decay) in SHAPES.iter() {
             let add_symbol = shape.symbol().unwrap();
             assert!((add_symbol as i32) <= NUM_SYMBOLS);
             assert_eq!(num_symbols_in_use.get(&add_symbol)
@@ -240,7 +228,7 @@ mod tests {
                 let new_count = old_count - num;
                 num_symbols_in_use.insert(symbol, new_count);
                 if new_count == 0 {
-                    decay_queue.extend(REMOVALS[num_removed].0);
+                    decay_queue.extend(REMOVALS[num_removed]);
                     num_removed += 1;
                 }
             }

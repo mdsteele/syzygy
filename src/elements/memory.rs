@@ -87,9 +87,16 @@ impl MemoryGridView {
 
 impl Element<Grid, i8> for MemoryGridView {
     fn draw(&self, grid: &Grid, canvas: &mut Canvas) {
-        canvas.fill_rect((31, 31, 31), self.rect);
+        let mut canvas = canvas.subcanvas(self.rect);
+        canvas.clear((31, 31, 31));
+        for row in 0..grid.num_rows() {
+            for col in 0..grid.num_cols() {
+                let rect = Rect::new(32 * col, 32 * row, 32, 32);
+                canvas.draw_rect((26, 26, 26), rect);
+            }
+        }
         for ((col, row), value) in grid.tiles() {
-            let pt = self.rect.top_left() + Point::new(32 * col, 32 * row);
+            let pt = Point::new(32 * col, 32 * row);
             let symbol = value.abs();
             let tile_index = if self.flip_symbol == symbol {
                 let base = if self.flip_countdown > 0 {

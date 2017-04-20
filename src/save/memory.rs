@@ -21,6 +21,7 @@ use rand;
 use std::collections::HashSet;
 use toml;
 
+use save::Direction;
 use save::util::to_i8;
 
 // ========================================================================= //
@@ -165,6 +166,64 @@ impl Grid {
         let sample = rand::sample(&mut rand::thread_rng(), indices, num);
         for index in sample {
             self.values[index] = -self.values[index];
+        }
+    }
+
+    pub fn shift_tiles(&mut self, direction: Direction) {
+        if direction.is_vertical() {
+            let mut col_values = Vec::with_capacity(self.width);
+            for col in 0..self.width {
+                let mut values = Vec::new();
+                for row in 0..self.height {
+                    let value = &mut self.values[row * self.width + col];
+                    if *value != 0 {
+                        values.push(*value);
+                        *value = 0;
+                    }
+                }
+                col_values.push(values);
+            }
+            for col in 0..self.width {
+                let values = &col_values[col];
+                debug_assert!(values.len() <= self.height);
+                let mut row = if direction == Direction::North {
+                    0
+                } else {
+                    debug_assert_eq!(direction, Direction::South);
+                    self.height - values.len()
+                };
+                for &value in values.iter() {
+                    self.values[row * self.width + col] = value;
+                    row += 1;
+                }
+            }
+        } else {
+            let mut row_values = Vec::with_capacity(self.height);
+            for row in 0..self.height {
+                let mut values = Vec::new();
+                for col in 0..self.width {
+                    let value = &mut self.values[row * self.width + col];
+                    if *value != 0 {
+                        values.push(*value);
+                        *value = 0;
+                    }
+                }
+                row_values.push(values);
+            }
+            for row in 0..self.height {
+                let values = &row_values[row];
+                debug_assert!(values.len() <= self.width);
+                let mut col = if direction == Direction::West {
+                    0
+                } else {
+                    debug_assert_eq!(direction, Direction::East);
+                    self.width - values.len()
+                };
+                for &value in values.iter() {
+                    self.values[row * self.width + col] = value;
+                    col += 1;
+                }
+            }
         }
     }
 }

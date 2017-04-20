@@ -17,12 +17,11 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use elements::{Paragraph, ProgressBar, PuzzleCmd, PuzzleCore, PuzzleView};
+use elements::{ProgressBar, PuzzleCmd, PuzzleCore, PuzzleView};
 use elements::memory::{FLIP_SLOWDOWN, MemoryGridView, NextShapeView};
-use gui::{Action, Align, Canvas, Element, Event, Point, Rect, Resources, Sound,
-          Sprite};
+use gui::{Action, Canvas, Element, Event, Rect, Resources, Sound};
 use modes::SOLVED_INFO_TEXT;
-use save::{Direction, Game, LaneState, PuzzleState};
+use save::{Direction, Game, PuzzleState, ServesState};
 use super::scenes::{compile_intro_scene, compile_outro_scene};
 
 // ========================================================================= //
@@ -36,33 +35,28 @@ pub struct View {
     core: PuzzleCore<()>,
     grid: MemoryGridView,
     next: NextShapeView,
-    free: FreeSymbolView,
     progress: ProgressBar,
     progress_adjust: u32,
-    prompt: PromptView,
     remove_countdown: i32,
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect, state: &LaneState)
+    pub fn new(resources: &mut Resources, visible: Rect, state: &ServesState)
                -> View {
         let intro = compile_intro_scene(resources);
         let outro = compile_outro_scene(resources);
-        let core = PuzzleCore::new(resources, visible, state, intro, outro);
         let mut view = View {
-            core: core,
+            core: PuzzleCore::new(resources, visible, state, intro, outro),
             grid: MemoryGridView::new(resources,
-                                      "memory/lane",
-                                      (208, 64),
+                                      "memory/serves",
+                                      (256, 176),
                                       state.grid()),
-            next: NextShapeView::new(resources, "memory/lane", (96, 64)),
-            free: FreeSymbolView::new(resources, (448, 112)),
-            progress: ProgressBar::new((112, 176),
+            next: NextShapeView::new(resources, "memory/serves", (96, 208)),
+            progress: ProgressBar::new((104, 176),
                                        Direction::East,
                                        80,
                                        (191, 191, 0)),
             progress_adjust: 0,
-            prompt: PromptView::new(resources),
             remove_countdown: 0,
         };
         view.drain_queue();
@@ -78,18 +72,14 @@ impl View {
 
 impl Element<Game, PuzzleCmd> for View {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
-        let state = &game.memory_lane;
+        let state = &game.if_memory_serves;
         self.core.draw_back_layer(canvas);
         if !state.is_solved() {
-            let value = state.current_stage() as u32 + self.progress_adjust;
-            let maximum = state.total_num_stages() as u32;
+            let value = state.current_step() as u32 + self.progress_adjust;
+            let maximum = state.total_num_steps() as u32;
             self.progress.draw(value, maximum, canvas);
         }
-        self.free.draw(state, canvas);
         self.grid.draw(state.grid(), canvas);
-        if self.remove_countdown == 0 && !self.next.is_dragging() {
-            self.prompt.draw(state, canvas);
-        }
         self.core.draw_middle_layer(canvas);
         self.next.draw(&state.next_shape(), canvas);
         self.core.draw_front_layer(canvas, state);
@@ -97,7 +87,7 @@ impl Element<Game, PuzzleCmd> for View {
 
     fn handle_event(&mut self, event: &Event, game: &mut Game)
                     -> Action<PuzzleCmd> {
-        let state = &mut game.memory_lane;
+        let state = &mut game.if_memory_serves;
         let mut action = self.core.handle_event(event, state);
         self.drain_queue();
         if event == &Event::ClockTick && self.remove_countdown > 0 {
@@ -138,14 +128,9 @@ impl Element<Game, PuzzleCmd> for View {
            event == &Event::ClockTick {
             let subaction = self.grid.handle_event(event, state.grid_mut());
             if let Some(&symbol) = subaction.value() {
-                if state.next_remove().is_some() {
-                    if state.can_remove_symbol(symbol) {
-                        state.decay_symbol_all(symbol);
-                    }
-                    action.also_play_sound(Sound::device_rotate());
-                    self.grid.reveal_symbol(symbol);
-                    self.remove_countdown = REMOVE_DELAY;
-                }
+                action.also_play_sound(Sound::device_rotate());
+                self.grid.reveal_symbol(symbol);
+                self.remove_countdown = REMOVE_DELAY;
             }
             action.merge(subaction.but_no_value());
         }
@@ -155,7 +140,7 @@ impl Element<Game, PuzzleCmd> for View {
 
 impl PuzzleView for View {
     fn info_text(&self, game: &Game) -> &'static str {
-        if game.memory_lane.is_solved() {
+        if game.if_memory_serves.is_solved() {
             SOLVED_INFO_TEXT
         } else {
             INFO_BOX_TEXT
@@ -168,84 +153,13 @@ impl PuzzleView for View {
 
     fn reset(&mut self, game: &mut Game) {
         self.core.clear_undo_redo();
-        game.memory_lane.reset();
+        game.if_memory_serves.reset();
     }
 
     fn solve(&mut self, game: &mut Game) {
-        game.memory_lane.solve();
+        game.if_memory_serves.solve();
         self.core.begin_outro_scene();
         self.drain_queue();
-    }
-}
-
-// ========================================================================= //
-
-struct FreeSymbolView {
-    top_left: Point,
-    symbol_sprites: Vec<Sprite>,
-}
-
-impl FreeSymbolView {
-    fn new(resources: &mut Resources, top_left: (i32, i32)) -> FreeSymbolView {
-        FreeSymbolView {
-            top_left: Point::from(top_left),
-            symbol_sprites: resources.get_sprites("memory/lane"),
-        }
-    }
-
-    fn draw(&self, state: &LaneState, canvas: &mut Canvas) {
-        if let Some(symbol) = state.next_remove() {
-            let index = (symbol - 1) as usize * 2;
-            canvas.draw_sprite(&self.symbol_sprites[index], self.top_left);
-        }
-    }
-}
-
-// ========================================================================= //
-
-const PLACE_PROMPT: &'static str = "Drag the shape on the left onto the \
-                                    center grid.";
-const REMOVE_PROMPT: &'static str = "$M{Tap}{Click} any tile in the center \
-                                     grid that had the symbol on the right.";
-
-struct PromptView {
-    place: Paragraph,
-    remove: Paragraph,
-}
-
-impl PromptView {
-    fn new(resources: &mut Resources) -> PromptView {
-        PromptView {
-            place: Paragraph::new(resources,
-                                  "roman",
-                                  Align::Center,
-                                  PLACE_PROMPT),
-            remove: Paragraph::new(resources,
-                                   "roman",
-                                   Align::Center,
-                                   REMOVE_PROMPT),
-        }
-    }
-
-    fn draw(&self, state: &LaneState, canvas: &mut Canvas) {
-        let paragraph = if state.next_shape().is_some() {
-            Some(&self.place)
-        } else if state.next_remove().is_some() {
-            Some(&self.remove)
-        } else {
-            None
-        };
-        if let Some(paragraph) = paragraph {
-            let width = paragraph.min_width() + 8;
-            let height = paragraph.height();
-            let left = (canvas.width() / 2) as i32 - width / 2;
-            let rect = Rect::new(left, 291, width as u32, height + 4);
-            canvas.fill_rect((192, 192, 192), rect);
-            canvas.draw_rect((128, 128, 128), rect);
-            let rect = Rect::new(rect.x(), rect.y() + 2, rect.width(), height);
-            let mut canvas = canvas.subcanvas(rect);
-            paragraph.draw(&mut canvas);
-        }
     }
 }
 
@@ -256,12 +170,14 @@ Your goal is to place (and later remove) each group of tiles
 on the grid.
 
 When a group of tiles appears on the left, use $M{your finger}{the mouse} to
-drag it onto the grid on the right.  The tiles will then flip over.
+drag it onto the grid on the right.  The tiles will then flip over;
+the backs of the tiles will be green.
 
-At certain points, you will be prompted to remove a group of
-tiles from the grid that had a given symbol.  $M{Tap}{Click} any of the
-tiles on the grid that had that symbol to remove all of them.
-However, if you accidentally remove a tile with the wrong
-symbol,  you will have to start over.";
+Tiles will eventually turn from green to gray; once all tiles
+with a given symbol are gray, they may be safely removed.
+You can remove a group of tiles at any time by $M{tapp}{click}ing any
+of the tiles on the grid that had that symbol.  However, if you
+accidentally remove a tile that's still green, you will have to
+start over.";
 
 // ========================================================================= //

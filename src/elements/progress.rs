@@ -20,23 +20,27 @@
 use std::cmp;
 
 use gui::{Canvas, Rect};
+use save::Direction;
 
 // ========================================================================= //
 
 pub struct ProgressBar {
     left: i32,
     top: i32,
-    width: u32,
+    dir: Direction,
+    length: u32,
     color: (u8, u8, u8),
 }
 
 impl ProgressBar {
-    pub fn new((left, top): (i32, i32), width: u32, color: (u8, u8, u8))
+    pub fn new((left, top): (i32, i32), dir: Direction, length: u32,
+               color: (u8, u8, u8))
                -> ProgressBar {
         ProgressBar {
             left: left + 1,
             top: top + 1,
-            width: if width > 2 { width - 2 } else { 0 },
+            dir: dir,
+            length: if length > 2 { length - 2 } else { 0 },
             color: color,
         }
     }
@@ -44,8 +48,23 @@ impl ProgressBar {
     pub fn draw(&self, value: u32, maximum: u32, canvas: &mut Canvas) {
         let value = cmp::min(value, maximum);
         if value > 0 {
-            let width = self.width * value / maximum;
-            let rect = Rect::new(self.left, self.top, width, 14);
+            let length = self.length * value / maximum;
+            let rect = match self.dir {
+                Direction::East => Rect::new(self.left, self.top, length, 14),
+                Direction::South => Rect::new(self.left, self.top, 14, length),
+                Direction::West => {
+                    Rect::new(self.left + self.length as i32 - length as i32,
+                              self.top,
+                              length,
+                              14)
+                }
+                Direction::North => {
+                    Rect::new(self.left,
+                              self.top + self.length as i32 - length as i32,
+                              14,
+                              length)
+                }
+            };
             canvas.fill_rect(self.color, rect);
         }
     }

@@ -178,6 +178,9 @@ fn main() {
                         Location::FactOrFiction => {
                             modes::run_fact_or_fiction(&mut window, game)
                         }
+                        Location::IfMemoryServes => {
+                            modes::run_if_memory_serves(&mut window, game)
+                        }
                         Location::JogYourMemory => {
                             modes::run_jog_your_memory(&mut window, game)
                         }

@@ -21,7 +21,7 @@ use elements::{ProgressBar, PuzzleCmd, PuzzleCore, PuzzleView};
 use elements::memory::{FLIP_SLOWDOWN, MemoryGridView, NextShapeView};
 use gui::{Action, Canvas, Element, Event, Rect, Resources, Sound};
 use modes::SOLVED_INFO_TEXT;
-use save::{Game, JogState, PuzzleState};
+use save::{Direction, Game, JogState, PuzzleState};
 use super::scenes::{compile_intro_scene, compile_outro_scene};
 
 // ========================================================================= //
@@ -49,10 +49,13 @@ impl View {
             core: PuzzleCore::new(resources, visible, state, intro, outro),
             grid: MemoryGridView::new(resources,
                                       "memory/jog",
-                                      (256, 176),
+                                      (352, 80),
                                       state.grid()),
-            next: NextShapeView::new(resources, "memory/jog", (96, 208)),
-            progress: ProgressBar::new((104, 176), 80, (191, 191, 0)),
+            next: NextShapeView::new(resources, "memory/jog", (192, 208)),
+            progress: ProgressBar::new((160, 224),
+                                       Direction::North,
+                                       64,
+                                       (191, 191, 0)),
             progress_adjust: 0,
             remove_countdown: 0,
         };

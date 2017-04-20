@@ -27,8 +27,8 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
             Ast::SetBg("jog_your_memory"),
-            Ast::Place(0, "chars/ugrent", 0, (-16, 128)),
-            Ast::Slide(0, (122, 128), false, true, 1.0),
+            Ast::Place(0, "chars/ugrent", 0, (-16, 144)),
+            Ast::Slide(0, (122, 144), false, true, 1.0),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(0, TalkStyle::Normal, TalkPos::NE,
                       "Let's solve a puzzle."),
@@ -49,7 +49,7 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
             Ast::Talk(0, TalkStyle::Normal, TalkPos::NE, "Much better."),
         ]),
         Ast::Seq(vec![
-            Ast::Slide(0, (-16, 128), true, false, 0.5),
+            Ast::Slide(0, (-16, 144), true, false, 0.5),
             Ast::Remove(0),
         ]),
     ];

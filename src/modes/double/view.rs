@@ -24,7 +24,7 @@ use elements::{ProgressBar, PuzzleCmd, PuzzleCore, PuzzleView};
 use gui::{Action, Align, Canvas, Element, Event, Font, Keycode, Point, Rect,
           Resources, Sound, Sprite};
 use modes::SOLVED_INFO_TEXT;
-use save::{DoubleState, Game, PuzzleState};
+use save::{Direction, DoubleState, Game, PuzzleState};
 use super::scenes::{compile_intro_scene, compile_outro_scene};
 
 // ========================================================================= //
@@ -47,7 +47,10 @@ impl View {
         let core = PuzzleCore::new(resources, visible, state, intro, outro);
         let mut view = View {
             core: core,
-            progress: ProgressBar::new((240, 160), 96, (95, 95, 95)),
+            progress: ProgressBar::new((240, 160),
+                                       Direction::East,
+                                       96,
+                                       (95, 95, 95)),
             input: InputDisplay::new(resources),
             clue: ClueDisplay::new(resources),
             arrows: vec![ArrowButton::new(resources, false),

@@ -31,7 +31,7 @@ const VALID: ValidChars = ValidChars::Letters;
 const ACTIVE_SLOT_KEY: &'static str = "slot";
 const ELINSA_KEY: &'static str = "elisna";
 const ARGONY_KEY: &'static str = "argony";
-const TEZURE_KEY: &'static str = "tezure";
+const MEZURE_KEY: &'static str = "mezure";
 const YTTRIS_KEY: &'static str = "yttris";
 const UGRENT_KEY: &'static str = "ugrent";
 const RELYNG_KEY: &'static str = "relyng";
@@ -49,7 +49,7 @@ const ARGONY_WORDS: &'static [&'static str] = &["VENERATED",
                                                 "HISTORY",
                                                 "EXPERIENCE",
                                                 "ELDERLY"];
-const TEZURE_WORDS: &'static [&'static str] = &["DETERMINED",
+const MEZURE_WORDS: &'static [&'static str] = &["DETERMINED",
                                                 "TEAMWORK",
                                                 "ORGANIZED",
                                                 "DUTIFUL",
@@ -112,7 +112,7 @@ impl PasswordState {
             active_slot: active_slot,
             crosswords: [load(&mut table, access, ELINSA_KEY, ELINSA_WORDS),
                          load(&mut table, access, ARGONY_KEY, ARGONY_WORDS),
-                         load(&mut table, access, TEZURE_KEY, TEZURE_WORDS),
+                         load(&mut table, access, MEZURE_KEY, MEZURE_WORDS),
                          load(&mut table, access, YTTRIS_KEY, YTTRIS_WORDS),
                          load(&mut table, access, UGRENT_KEY, UGRENT_WORDS),
                          load(&mut table, access, RELYNG_KEY, RELYNG_WORDS)],
@@ -124,7 +124,7 @@ impl PasswordState {
         self.access = Access::Solved;
         self.crosswords = [(true, CrosswordState::new(VALID, ELINSA_WORDS)),
                            (true, CrosswordState::new(VALID, ARGONY_WORDS)),
-                           (true, CrosswordState::new(VALID, TEZURE_WORDS)),
+                           (true, CrosswordState::new(VALID, MEZURE_WORDS)),
                            (true, CrosswordState::new(VALID, YTTRIS_WORDS)),
                            (true, CrosswordState::new(VALID, UGRENT_WORDS)),
                            (true, CrosswordState::new(VALID, RELYNG_WORDS))];
@@ -152,7 +152,7 @@ impl PasswordState {
         let words = match slot {
             0 => ELINSA_WORDS,
             1 => ARGONY_WORDS,
-            2 => TEZURE_WORDS,
+            2 => MEZURE_WORDS,
             3 => YTTRIS_WORDS,
             4 => UGRENT_WORDS,
             5 => RELYNG_WORDS,
@@ -234,7 +234,7 @@ impl PuzzleState for PasswordState {
                          self.crosswords[0].1.to_toml());
             table.insert(ARGONY_KEY.to_string(),
                          self.crosswords[1].1.to_toml());
-            table.insert(TEZURE_KEY.to_string(),
+            table.insert(MEZURE_KEY.to_string(),
                          self.crosswords[2].1.to_toml());
             table.insert(YTTRIS_KEY.to_string(),
                          self.crosswords[3].1.to_toml());

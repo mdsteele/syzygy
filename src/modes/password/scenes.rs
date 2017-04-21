@@ -27,7 +27,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
             Ast::SetBg("password_file"),
-            Ast::Place(2, "chars/tezure", 0, (-16, 160)),
+            Ast::Place(2, "chars/mezure", 0, (-16, 160)),
             Ast::Slide(2, (96, 160), false, true, 1.0),
             Ast::Place(3, "chars/yttris", 0, (592, 160)),
             Ast::Slide(3, (480, 160), false, true, 1.0),

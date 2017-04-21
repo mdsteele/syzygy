@@ -37,7 +37,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         ]),
         Ast::Par(vec![
             Ast::Seq(vec![
-                Ast::Place(0, "chars/tezure", 0, (-16, 80)),
+                Ast::Place(0, "chars/mezure", 0, (-16, 80)),
                 Ast::Slide(0, (140, 80), true, true, 1.0),
                 Ast::Sound(Sound::talk_hi()),
                 Ast::Talk(0, TalkStyle::Normal, TalkPos::SE,
@@ -52,7 +52,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(0, TalkStyle::Normal, TalkPos::SE,
-                      "I'm Tezure, the new administrator\n\
+                      "I'm Mezure, the new administrator\n\
                        process.  Who are you?"),
         ]),
         Ast::Seq(vec![

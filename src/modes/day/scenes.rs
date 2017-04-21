@@ -28,7 +28,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             // TODO: Make a background for "Plane as Day".
             Ast::SetBg("missed_connections"),
-            Ast::Place(0, "chars/tezure", 0, (-16, 304)),
+            Ast::Place(0, "chars/mezure", 0, (-16, 304)),
             Ast::Slide(0, (304, 304), true, true, 1.0),
             Ast::Wait(0.5),
             Ast::Sound(Sound::talk_hi()),

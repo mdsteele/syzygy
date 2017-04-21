@@ -28,7 +28,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::SetBg("the_y_factor"),
             Ast::Wait(0.25),
-            Ast::Place(0, "chars/tezure", 0, (-16, 256)),
+            Ast::Place(0, "chars/mezure", 0, (-16, 256)),
             Ast::Slide(0, (64, 256), false, true, 0.75),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(0, TalkStyle::Normal, TalkPos::NE, "Whoa.")
@@ -77,7 +77,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(0, TalkStyle::Normal, TalkPos::NE,
                       "I'm not actually a\n\
-                       traveller.  I'm Tezure, the\n\
+                       traveller.  I'm Mezure, the\n\
                        new administrator process.")
         ]),
         Ast::Seq(vec![

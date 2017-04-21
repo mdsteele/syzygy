@@ -28,7 +28,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::SetBg("a_light_in_the_attic"),
             Ast::Dark(true),
-            Ast::Place(0, "chars/tezure", 0, (-16, 320)),
+            Ast::Place(0, "chars/mezure", 0, (-16, 320)),
             Ast::Light(0, true),
             Ast::Slide(0, (88, 320), true, true, 1.0),
             Ast::Sound(Sound::talk_hi()),
@@ -128,7 +128,7 @@ pub fn compile_argony_midscene(resources: &mut Resources) -> Scene {
 }
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-pub fn compile_tezure_midscene(resources: &mut Resources) -> Scene {
+pub fn compile_mezure_midscene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_thought()),
@@ -201,7 +201,7 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(0, TalkStyle::Normal, TalkPos::NE,
-                      "I'm Tezure.  Pleased to meet you."),
+                      "I'm Mezure.  Pleased to meet you."),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),

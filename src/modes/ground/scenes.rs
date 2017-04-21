@@ -182,7 +182,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(1, TalkStyle::Normal, TalkPos::NE,
                       "Oh!  You must have met that\n\
-                       new admin process, Tezure!"),
+                       new admin process, Mezure!"),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_lo()),

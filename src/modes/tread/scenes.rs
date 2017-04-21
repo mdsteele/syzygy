@@ -27,7 +27,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
             Ast::SetBg("tread_lightly"),
-            Ast::Place(0, "chars/tezure", 0, (-16, 288)),
+            Ast::Place(0, "chars/mezure", 0, (-16, 288)),
             Ast::Slide(0, (144, 288), false, false, 1.0),
             Ast::Sound(Sound::small_jump()),
             Ast::Jump(0, (186, 304), 0.5),

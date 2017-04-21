@@ -54,7 +54,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             ]),
             Ast::Seq(vec![
                 Ast::Wait(0.5),
-                Ast::Place(0, "chars/tezure", 0, (-16, 96)),
+                Ast::Place(0, "chars/mezure", 0, (-16, 96)),
                 Ast::Slide(0, (244, 96), true, true, 1.25),
                 Ast::Sound(Sound::talk_hi()),
                 Ast::Talk(0, TalkStyle::Normal, TalkPos::SW,
@@ -209,7 +209,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
 // ========================================================================= //
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-pub fn compile_tezure_midscene(resources: &mut Resources) -> Scene {
+pub fn compile_mezure_midscene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),

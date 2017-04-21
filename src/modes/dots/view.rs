@@ -28,7 +28,7 @@ use super::scenes;
 
 pub struct View {
     core: PuzzleCore<LaserCmd>,
-    tezure_midscene: Scene,
+    mezure_midscene: Scene,
     laser_field: LaserField,
     danger_sign: DangerSign,
     box_open: bool,
@@ -42,7 +42,7 @@ impl View {
         let core = PuzzleCore::new(resources, visible, state, intro, outro);
         let mut view = View {
             core: core,
-            tezure_midscene: scenes::compile_tezure_midscene(resources),
+            mezure_midscene: scenes::compile_mezure_midscene(resources),
             laser_field: LaserField::new(resources, 168, 152, state.grid()),
             danger_sign: DangerSign::new(resources,
                                          (272, 208),
@@ -98,7 +98,7 @@ impl Element<Game, PuzzleCmd> for View {
         if !action.should_stop() {
             if let &Event::MouseDown(pt) = event {
                 if let Some(0) = self.core.theater().actor_at_point(pt) {
-                    self.core.inject_scene(self.tezure_midscene.clone());
+                    self.core.inject_scene(self.mezure_midscene.clone());
                     self.drain_queue();
                 }
             }

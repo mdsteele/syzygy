@@ -28,7 +28,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             // TODO: Make a background for "Level Up".
             Ast::SetBg("log_level"),
-            Ast::Place(0, "chars/tezure", 0, (-16, 160)),
+            Ast::Place(0, "chars/mezure", 0, (-16, 160)),
             Ast::Slide(0, (140, 160), false, true, 1.0),
         ]),
     ];

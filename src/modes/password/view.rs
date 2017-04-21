@@ -58,13 +58,13 @@ impl View {
             speech_bubble: resources.get_sprites("speech/normal"),
             paragraphs: [make_speech(resources, TalkPos::E, ELINSA_SPEECH),
                          make_speech(resources, TalkPos::W, ARGONY_SPEECH),
-                         make_speech(resources, TalkPos::NE, TEZURE_SPEECH),
+                         make_speech(resources, TalkPos::NE, MEZURE_SPEECH),
                          make_speech(resources, TalkPos::NW, YTTRIS_SPEECH),
                          make_speech(resources, TalkPos::E, UGRENT_SPEECH),
                          make_speech(resources, TalkPos::W, RELYNG_SPEECH)],
             crosswords: [CrosswordView::new(resources, 264, 116, ELINSA_OFFS),
                          CrosswordView::new(resources, 264, 116, ARGONY_OFFS),
-                         CrosswordView::new(resources, 276, 116, TEZURE_OFFS),
+                         CrosswordView::new(resources, 276, 116, MEZURE_OFFS),
                          CrosswordView::new(resources, 276, 116, YTTRIS_OFFS),
                          CrosswordView::new(resources, 212, 116, UGRENT_OFFS),
                          CrosswordView::new(resources, 276, 116, RELYNG_OFFS)],
@@ -263,7 +263,7 @@ const BOX_USIZE: u32 = 24;
 const BOX_SIZE: i32 = BOX_USIZE as i32;
 const SLIDER_LEFT: i32 = 216;
 const SLIDER_TOP: i32 = 178;
-const SLIDER_WORDS: [&'static str; 6] = ["ELINSA", "ARGONY", "TEZURE",
+const SLIDER_WORDS: [&'static str; 6] = ["ELINSA", "ARGONY", "MEZURE",
                                          "YTTRIS", "UGRENT", "RELYNG"];
 
 struct SliderDrag {
@@ -385,7 +385,7 @@ like you can expect it to work out well.";
 const ARGONY_SPEECH: &'static str = "\
 Those who don't learn from the past won't
 have much luck in the future either.";
-const TEZURE_SPEECH: &'static str = "\
+const MEZURE_SPEECH: &'static str = "\
 I may be new around here, but I'm committed
 to helping us all to get through this.";
 const YTTRIS_SPEECH: &'static str = "\
@@ -407,8 +407,8 @@ const ELINSA_OFFS: &'static [(i32, &'static str)] =
     &[(5, ""), (5, ""), (5, ""), (6, ""), (2, ""), (4, "")];
 const ARGONY_OFFS: &'static [(i32, &'static str)] =
     &[(5, ""), (2, ""), (7, ""), (4, ""), (7, ""), (6, "")];
-const TEZURE_OFFS: &'static [(i32, &'static str)] =
-    &[(2, ""), (1, ""), (6, ""), (1, ""), (5, ""), (4, "")];
+const MEZURE_OFFS: &'static [(i32, &'static str)] =
+    &[(5, ""), (1, ""), (6, ""), (1, ""), (5, ""), (4, "")];
 const YTTRIS_OFFS: &'static [(i32, &'static str)] =
     &[(5, ""), (3, ""), (4, ""), (3, ""), (5, ""), (4, "")];
 const UGRENT_OFFS: &'static [(i32, &'static str)] =

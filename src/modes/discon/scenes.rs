@@ -38,7 +38,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             ]),
             Ast::Seq(vec![
                 Ast::Wait(0.75),
-                Ast::Place(0, "chars/tezure", 0, (-16, 304)),
+                Ast::Place(0, "chars/mezure", 0, (-16, 304)),
                 Ast::Slide(0, (302, 304), false, true, 1.0),
             ]),
         ]),

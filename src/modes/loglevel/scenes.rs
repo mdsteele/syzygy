@@ -28,7 +28,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::SetBg("log_level"),
             Ast::Place(1, "chars/system", 0, (352, 208)),
-            Ast::Place(0, "chars/tezure", 0, (-16, 160)),
+            Ast::Place(0, "chars/mezure", 0, (-16, 160)),
             Ast::Slide(0, (162, 160), false, false, 0.5),
             Ast::Par(vec![
                 Ast::Sound(Sound::talk_hi()),

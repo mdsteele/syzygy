@@ -27,7 +27,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
             Ast::SetBg("black_and_blue"),
-            Ast::Place(0, "chars/tezure", 0, (-16, 320)),
+            Ast::Place(0, "chars/mezure", 0, (-16, 320)),
             Ast::Slide(0, (304, 320), true, true, 1.0),
             Ast::Wait(0.5),
             Ast::Sound(Sound::talk_hi()),

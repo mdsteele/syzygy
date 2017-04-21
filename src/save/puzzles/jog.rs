@@ -18,6 +18,7 @@
 // +--------------------------------------------------------------------------+
 
 use std::cmp::min;
+use std::collections::HashMap;
 use toml;
 
 use save::{Access, Direction, Location};
@@ -34,41 +35,32 @@ const NUM_COLS: usize = 4;
 const NUM_ROWS: usize = 6;
 const NUM_SYMBOLS: i32 = 6;
 
-// TODO: design this puzzle
 #[cfg_attr(rustfmt, rustfmt_skip)]
-const SHAPES: &'static [(Shape, &'static [(i8, usize)],
-                         Option<Direction>)] = &[
-    (Shape([0, 2, 0, 2, 2, 0, 0, 2, 0]), &[], None),
-    (Shape([0, 6, 6, 0, 6, 0, 0, 6, 6]), &[(2, 1)], Some(Direction::South)),
-    (Shape([0, 5, 0, 5, 5, 0, 0, 5, 5]), &[(2, 1), (6, 2)],
-     Some(Direction::North)),
-    (Shape([0, 1, 1, 1, 1, 0, 1, 0, 0]), &[(2, 1), (5, 1), (6, 1)],
-     Some(Direction::East)),
-    (Shape([3, 0, 0, 3, 0, 0, 3, 3, 3]), &[(1, 1), (2, 1), (5, 1), (6, 1)],
-     Some(Direction::West)),
-    (Shape([4, 4, 0, 0, 4, 0, 4, 4, 0]), &[(1, 2), (3, 1), (5, 1)], None),
-    (Shape([2, 2, 0, 0, 2, 0, 0, 2, 0]), &[(3, 2), (4, 1), (6, 1)], None),
-    (Shape([1, 1, 1, 0, 1, 0, 0, 1, 0]), &[(2, 1), (3, 1), (5, 1)], None),
-    (Shape([0, 6, 6, 0, 6, 6, 0, 6, 0]), &[(1, 1), (4, 1)], None),
-    (Shape([0, 5, 5, 0, 5, 0, 5, 5, 0]), &[(2, 1), (6, 2)], None),
-    (Shape([0, 3, 0, 3, 3, 3, 0, 3, 0]), &[(1, 1), (5, 3)], None),
-    (Shape([4, 4, 0, 4, 4, 4, 0, 4, 4]), &[(3, 3), (5, 2)], None),
+const SHAPES: &'static [(Shape, &'static [(i8, usize)], Direction)] = &[
+    (Shape([0, 3, 0, 0, 3, 0, 3, 3, 0]), &[], Direction::South),
+    (Shape([0, 0, 0, 4, 4, 4, 0, 4, 0]), &[(3, 2)], Direction::South),
+    (Shape([0, 0, 0, 1, 1, 1, 0, 0, 0]), &[(3, 1), (4, 1)], Direction::South),
+    (Shape([6, 6, 0, 0, 6, 6, 0, 0, 0]), &[(1, 1), (4, 2)], Direction::North),
+    (Shape([0, 5, 0, 0, 5, 5, 0, 0, 5]), &[(4, 1), (6, 2)], Direction::South),
+    (Shape([2, 2, 0, 0, 2, 0, 0, 2, 0]), &[(3, 1), (5, 2)], Direction::West),
+    (Shape([0, 0, 4, 4, 4, 4, 0, 0, 0]), &[(2, 2)], Direction::East),
+    (Shape([0, 5, 0, 0, 5, 0, 0, 5, 5]), &[(1, 1), (4, 2), (6, 1)],
+     Direction::North),
+    (Shape([0, 3, 0, 3, 3, 3, 0, 3, 0]), &[(2, 1), (4, 1), (5, 2)],
+     Direction::South),
 ];
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-const REMOVALS: &'static [(&'static [(i8, usize)], Option<Direction>)] = &[
-    (&[(1, 2), (5, 1)], None),
-    (&[(3, 1), (4, 1)], None),
-    (&[(2, 1), (4, 1)], None),
-    (&[(2, 1), (4, 1)], None),
-    (&[(1, 1)], None),
-    (&[(6, 3)], None),
-    (&[(1, 1)], None),
-    (&[(1, 1)], None),
-    (&[(3, 1)], None),
-    (&[(3, 1), (4, 4)], None),
-    (&[(4, 3)], None),
-    (&[], None),
+const REMOVALS: &'static [&'static [(i8, usize)]] = &[
+    &[(5, 2)],  // 4
+    &[(6, 1)], // 3 or 5
+    &[(1, 1)], // 5 or 3
+    &[(4, 1)], // 1 or 6
+    &[(5, 1)], // 6 or 1
+    &[(3, 2), (5, 1)], // 4
+    &[(2, 1), (3, 2)], // 5
+    &[(3, 1)], // 2
+    &[], // 3
 ];
 
 // ========================================================================= //
@@ -78,6 +70,7 @@ pub struct JogState {
     grid: Grid,
     num_placed: usize,
     num_removed: usize,
+    gravity: Direction,
 }
 
 impl JogState {
@@ -100,11 +93,17 @@ impl JogState {
                 (Grid::new(NUM_COLS, NUM_ROWS), 0, 0)
             }
         };
+        let gravity = if num_placed == 0 {
+            Direction::South
+        } else {
+            SHAPES[num_placed - 1].2
+        };
         JogState {
             access: access,
             grid: grid,
             num_placed: num_placed,
             num_removed: num_removed,
+            gravity: gravity,
         }
     }
 
@@ -131,18 +130,19 @@ impl JogState {
         }
     }
 
-    pub fn try_place_shape(&mut self, col: i32, row: i32) -> Option<i8> {
+    pub fn try_place_shape
+        (&mut self, col: i32, row: i32)
+         -> Option<(i8, HashMap<(i32, i32), (i32, i32)>)> {
         if let Some(shape) = self.next_shape() {
             if self.grid.try_place_shape(&shape, col, row) {
                 for &(symbol, num) in SHAPES[self.num_placed].1 {
                     self.grid.decay_symbol(symbol, num);
                 }
-                if let Some(dir) = SHAPES[self.num_placed].2 {
-                    // TODO: animate shifting tiles
-                    self.grid.shift_tiles(dir);
-                }
+                self.gravity = SHAPES[self.num_placed].2;
+                let shifts = self.grid.shift_tiles(self.gravity);
                 self.num_placed += 1;
-                return shape.symbol();
+                let symbol = shape.symbol().unwrap();
+                return Some((symbol, shifts));
             }
         }
         None
@@ -153,16 +153,16 @@ impl JogState {
         self.grid.can_remove_symbol(symbol)
     }
 
-    pub fn remove_symbol(&mut self, symbol: i8) {
+    pub fn remove_symbol(&mut self, symbol: i8)
+                         -> HashMap<(i32, i32), (i32, i32)> {
+        let mut shifts = HashMap::new();
         assert!(symbol > 0 && symbol as i32 <= NUM_SYMBOLS);
         if self.grid.can_remove_symbol(symbol) {
             self.grid.remove_symbol(symbol);
-            for &(symbol, num) in REMOVALS[self.num_removed].0 {
+            for &(symbol, num) in REMOVALS[self.num_removed] {
                 self.grid.decay_symbol(symbol, num);
             }
-            if let Some(dir) = REMOVALS[self.num_removed].1 {
-                self.grid.shift_tiles(dir);
-            }
+            shifts = self.grid.shift_tiles(self.gravity);
             self.num_removed += 1;
             if self.num_removed == REMOVALS.len() {
                 self.access = Access::Solved;
@@ -170,6 +170,7 @@ impl JogState {
         } else {
             self.reset();
         }
+        shifts
     }
 }
 
@@ -240,7 +241,7 @@ mod tests {
                 let new_count = old_count - num;
                 num_symbols_in_use.insert(symbol, new_count);
                 if new_count == 0 {
-                    decay_queue.extend(REMOVALS[num_removed].0);
+                    decay_queue.extend(REMOVALS[num_removed]);
                     num_removed += 1;
                 }
             }

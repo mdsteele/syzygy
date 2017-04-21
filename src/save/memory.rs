@@ -18,7 +18,7 @@
 // +--------------------------------------------------------------------------+
 
 use rand;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use toml;
 
 use save::Direction;
@@ -169,7 +169,9 @@ impl Grid {
         }
     }
 
-    pub fn shift_tiles(&mut self, direction: Direction) {
+    pub fn shift_tiles(&mut self, direction: Direction)
+                       -> HashMap<(i32, i32), (i32, i32)> {
+        let mut shifts = HashMap::new();
         if direction.is_vertical() {
             let mut col_values = Vec::with_capacity(self.width);
             for col in 0..self.width {
@@ -177,7 +179,7 @@ impl Grid {
                 for row in 0..self.height {
                     let value = &mut self.values[row * self.width + col];
                     if *value != 0 {
-                        values.push(*value);
+                        values.push((*value, row));
                         *value = 0;
                     }
                 }
@@ -192,8 +194,12 @@ impl Grid {
                     debug_assert_eq!(direction, Direction::South);
                     self.height - values.len()
                 };
-                for &value in values.iter() {
+                for &(value, old_row) in values.iter() {
                     self.values[row * self.width + col] = value;
+                    if row != old_row {
+                        shifts.insert((col as i32, row as i32),
+                                      (col as i32, old_row as i32));
+                    }
                     row += 1;
                 }
             }
@@ -204,7 +210,7 @@ impl Grid {
                 for col in 0..self.width {
                     let value = &mut self.values[row * self.width + col];
                     if *value != 0 {
-                        values.push(*value);
+                        values.push((*value, col));
                         *value = 0;
                     }
                 }
@@ -219,12 +225,17 @@ impl Grid {
                     debug_assert_eq!(direction, Direction::East);
                     self.width - values.len()
                 };
-                for &value in values.iter() {
+                for &(value, old_col) in values.iter() {
                     self.values[row * self.width + col] = value;
+                    if col != old_col {
+                        shifts.insert((col as i32, row as i32),
+                                      (old_col as i32, row as i32));
+                    }
                     col += 1;
                 }
             }
         }
+        shifts
     }
 }
 

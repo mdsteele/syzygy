@@ -112,7 +112,8 @@ impl Element<Game, PuzzleCmd> for View {
                 action.merge(Action::redraw());
             }
         }
-        if !action.should_stop() {
+        if (!action.should_stop() && self.remove_countdown == 0) ||
+           event == &Event::ClockTick {
             let subaction = self.next
                                 .handle_event(event, &mut state.next_shape());
             if let Some(&pt) = subaction.value() {

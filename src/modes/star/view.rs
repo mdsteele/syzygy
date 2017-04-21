@@ -250,8 +250,8 @@ impl Element<StarState, (i32, i32, WordDir, i32)> for LetterColumns {
                 for &mut (_, ref mut gap, ref mut speed) in
                     self.fall_anim.iter_mut() {
                     if *gap > 0 {
-                        *gap = cmp::max(0, *gap + *speed);
-                        *speed -= 1;
+                        *gap = cmp::max(0, *gap - *speed);
+                        *speed += 1;
                         redraw = true;
                     }
                 }

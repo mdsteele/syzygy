@@ -104,27 +104,33 @@ impl Element<Game, PuzzleCmd> for View {
             }
             if self.remove_countdown == 0 {
                 self.progress_adjust = 0;
-                state.remove_symbol(self.grid.flip_symbol());
+                let shifts = state.remove_symbol(self.grid.flip_symbol());
                 self.grid.clear_flip();
+                self.grid.shift_tiles(shifts);
                 if state.is_solved() {
                     self.core.begin_outro_scene();
                 }
                 action.merge(Action::redraw());
             }
         }
-        if !action.should_stop() {
+        if (!action.should_stop() && self.remove_countdown == 0 &&
+            !self.grid.is_shifting()) ||
+           event == &Event::ClockTick {
             let subaction = self.next
                                 .handle_event(event, &mut state.next_shape());
             if let Some(&pt) = subaction.value() {
                 let (col, row) = self.grid.coords_for_point(pt);
-                if let Some(symbol) = state.try_place_shape(col, row) {
+                if let Some((symbol, shifts)) =
+                    state.try_place_shape(col, row) {
                     action.also_play_sound(Sound::device_drop());
                     self.grid.place_symbol(symbol);
+                    self.grid.shift_tiles(shifts);
                 }
             }
             action.merge(subaction.but_no_value());
         }
-        if (!action.should_stop() && self.remove_countdown == 0) ||
+        if (!action.should_stop() && self.remove_countdown == 0 &&
+            !self.grid.is_shifting()) ||
            event == &Event::ClockTick {
             let subaction = self.grid.handle_event(event, state.grid_mut());
             if let Some(&symbol) = subaction.value() {

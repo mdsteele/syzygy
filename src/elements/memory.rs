@@ -18,6 +18,8 @@
 // +--------------------------------------------------------------------------+
 
 use num_integer::div_floor;
+use std::cmp;
+use std::collections::{HashMap, HashSet};
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
 use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sound,
@@ -36,6 +38,7 @@ pub struct MemoryGridView {
     rect: Rect,
     tile_sprites: Vec<Sprite>,
     symbol_sprites: Vec<Sprite>,
+    tile_shifts: HashMap<(i32, i32), ((i32, i32), i32)>,
     flip_countdown: i32,
     flip_symbol: i8,
 }
@@ -51,6 +54,7 @@ impl MemoryGridView {
                             32 * grid.num_rows() as u32),
             tile_sprites: resources.get_sprites("memory/tiles"),
             symbol_sprites: resources.get_sprites(symbols_name),
+            tile_shifts: HashMap::new(),
             flip_countdown: 0,
             flip_symbol: 0,
         }
@@ -80,6 +84,17 @@ impl MemoryGridView {
         self.flip_countdown = 0;
     }
 
+    pub fn shift_tiles(&mut self, shifts: HashMap<(i32, i32), (i32, i32)>) {
+        for ((to_col, to_row), (from_col, from_row)) in shifts.into_iter() {
+            self.tile_shifts.insert((to_col, to_row),
+                                    (((from_col - to_col) * 32,
+                                      (from_row - to_row) * 32),
+                                     0));
+        }
+    }
+
+    pub fn is_shifting(&self) -> bool { !self.tile_shifts.is_empty() }
+
     fn flip_tile_offset(&self) -> i32 {
         self.flip_countdown.abs() / FLIP_SLOWDOWN
     }
@@ -96,7 +111,10 @@ impl Element<Grid, i8> for MemoryGridView {
             }
         }
         for ((col, row), value) in grid.tiles() {
-            let pt = Point::new(32 * col, 32 * row);
+            let mut pt = Point::new(32 * col, 32 * row);
+            if let Some(&((dx, dy), _)) = self.tile_shifts.get(&(col, row)) {
+                pt = pt + Point::new(dx, dy);
+            }
             let symbol = value.abs();
             let tile_index = if self.flip_symbol == symbol {
                 let base = if self.flip_countdown > 0 {
@@ -126,6 +144,30 @@ impl Element<Grid, i8> for MemoryGridView {
     fn handle_event(&mut self, event: &Event, grid: &mut Grid) -> Action<i8> {
         match event {
             &Event::ClockTick => {
+                let mut redraw = false;
+                let mut finished = HashSet::new();
+                for (&coords, entry) in self.tile_shifts.iter_mut() {
+                    let ((ref mut dx, ref mut dy), ref mut speed) = *entry;
+                    if *dx < 0 {
+                        *dx = cmp::min(0, *dx + *speed);
+                    } else {
+                        *dx = cmp::max(0, *dx - *speed);
+                    }
+                    if *dy < 0 {
+                        *dy = cmp::min(0, *dy + *speed);
+                    } else {
+                        *dy = cmp::max(0, *dy - *speed);
+                    }
+                    if *dx == 0 && *dy == 0 {
+                        finished.insert(coords);
+                    } else {
+                        *speed += 1;
+                    }
+                    redraw = true;
+                }
+                for coords in finished.iter() {
+                    self.tile_shifts.remove(coords);
+                }
                 if self.flip_symbol != 0 &&
                    self.flip_countdown > -FLIP_COUNTDOWN_MAX {
                     let old_offset = self.flip_tile_offset();
@@ -134,10 +176,9 @@ impl Element<Grid, i8> for MemoryGridView {
                     if self.flip_countdown == 0 {
                         self.flip_symbol = 0;
                     }
-                    Action::redraw_if(old_offset != new_offset)
-                } else {
-                    Action::ignore()
+                    redraw |= old_offset != new_offset;
                 }
+                Action::redraw_if(redraw)
             }
             &Event::MouseDown(pt) if self.rect.contains(pt) &&
                                      self.flip_symbol == 0 => {

@@ -56,6 +56,7 @@ const NODES: &'static [(Location, (i32, i32))] = &[
     (Location::ShiftingGround, (150, 250)),
     (Location::StarCrossed, (275, 225)),
     (Location::SystemFailure, (360, 200)),
+    (Location::SystemSyzygy, (440, 200)),
     (Location::TheYFactor, (100, 200)),
     (Location::TreadLightly, (300, 50)),
     (Location::WreckedAngle, (100, 250)),

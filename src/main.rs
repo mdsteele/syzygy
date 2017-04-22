@@ -223,6 +223,9 @@ fn main() {
                         Location::SystemFailure => {
                             modes::run_system_failure(&mut window, game)
                         }
+                        Location::SystemSyzygy => {
+                            modes::run_system_syzygy(&mut window, game)
+                        }
                         Location::TheYFactor => {
                             modes::run_the_y_factor(&mut window, game)
                         }

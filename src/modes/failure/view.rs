@@ -856,6 +856,7 @@ mod tests {
         locations.remove(&Location::Prolog);
         locations.remove(&Location::SystemFailure);
         locations.remove(&Location::PasswordFile);
+        locations.remove(&Location::SystemSyzygy);
         for &(_, _, loc) in DASHBOARD_CHIPS {
             locations.remove(&loc);
         }

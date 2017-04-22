@@ -299,7 +299,7 @@ fn tick_radius(lit: bool, radius: &mut i32) -> bool {
 // ========================================================================= //
 
 const INFO_BOX_TEXT: &'static str = "\
-Your goal is to turn all twenty-five lights WHITE.
+Your goal is to turn all twenty-one lights WHITE.
 
 $M{Tap}{Click} one of the lights to change the color of that
 light and of the adjacent lights.  Your first move will

@@ -17,8 +17,8 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use elements::{DangerSign, LaserCmd, LaserField, PuzzleCmd, PuzzleCore,
-               PuzzleView, Scene};
+use elements::{PuzzleCmd, PuzzleCore, PuzzleView, Scene};
+use elements::lasers::{DangerSign, LaserCmd, LaserField};
 use gui::{Action, Canvas, Element, Event, Rect, Resources};
 use modes::SOLVED_INFO_TEXT;
 use save::{DotsState, Game, PuzzleState};

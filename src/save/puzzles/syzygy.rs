@@ -20,7 +20,8 @@
 use toml;
 
 use gui::Rect;
-use save::{Access, Location};
+use save::{Access, Direction, Location, PrimaryColor};
+use save::device::{Device, DeviceGrid};
 use save::plane::{PlaneGrid, PlaneObj};
 use super::PuzzleState;
 use super::super::util::{ACCESS_KEY, pop_array};
@@ -31,7 +32,7 @@ const STAGE_KEY: &'static str = "stage";
 // const YTTRIS_KEY: &'static str = "yttris";
 // const ARGONY_KEY: &'static str = "argony";
 const ELINSA_KEY: &'static str = "elinsa";
-// const UGRENT_KEY: &'static str = "ugrent";
+const UGRENT_KEY: &'static str = "ugrent";
 // const RELYNG_KEY: &'static str = "relyng";
 // const MEZURE_KEY: &'static str = "mezure";
 
@@ -84,6 +85,7 @@ pub struct SyzygyState {
     access: Access,
     stage: SyzygyStage,
     elinsa: PlaneGrid,
+    ugrent: DeviceGrid,
 }
 
 impl SyzygyState {
@@ -102,15 +104,46 @@ impl SyzygyState {
         grid
     }
 
+    fn ugrent_initial_grid() -> DeviceGrid {
+        let mut grid = DeviceGrid::new(7, 5);
+        grid.set(0, 0, Device::Emitter(PrimaryColor::Red), Direction::South);
+        grid.set(3, 0, Device::Detector(PrimaryColor::Red), Direction::East);
+        grid.set(6, 2, Device::Detector(PrimaryColor::Green), Direction::West);
+        grid.set(3, 3, Device::Wall, Direction::East);
+        grid.set(0, 4, Device::Emitter(PrimaryColor::Green), Direction::North);
+        grid.set(3, 4, Device::Detector(PrimaryColor::Blue), Direction::East);
+
+        grid.set(2, 0, Device::Mirror, Direction::East);
+        grid.set(2, 1, Device::Mirror, Direction::South);
+        grid.set(2, 2, Device::Mirror, Direction::East);
+        grid.set(2, 3, Device::Mirror, Direction::South);
+        grid.set(2, 4, Device::Mirror, Direction::East);
+        grid.set(3, 1, Device::Mixer, Direction::East);
+        grid.set(3, 2, Device::Mixer, Direction::East);
+        grid.set(4, 1, Device::Splitter, Direction::East);
+        grid.set(4, 2, Device::Splitter, Direction::East);
+        grid.set(4, 3, Device::Splitter, Direction::East);
+        grid.set(5, 0, Device::Mirror, Direction::South);
+        grid.set(5, 1, Device::Mirror, Direction::East);
+        grid.set(5, 2, Device::Mirror, Direction::South);
+        grid.set(5, 3, Device::Mirror, Direction::East);
+        grid.set(5, 4, Device::Mirror, Direction::South);
+        grid
+    }
+
     pub fn from_toml(mut table: toml::value::Table) -> SyzygyState {
         let access = Access::from_toml(table.get(ACCESS_KEY));
         let stage = SyzygyStage::from_toml(table.get(STAGE_KEY));
         let mut elinsa = SyzygyState::elinsa_initial_grid();
         elinsa.set_pipes_from_toml(pop_array(&mut table, ELINSA_KEY));
+        let ugrent =
+            DeviceGrid::from_toml(pop_array(&mut table, UGRENT_KEY),
+                                  &SyzygyState::ugrent_initial_grid());
         SyzygyState {
             access: access,
             stage: stage,
             elinsa: elinsa,
+            ugrent: ugrent,
         }
     }
 
@@ -134,6 +167,10 @@ impl SyzygyState {
     pub fn elinsa_grid(&self) -> &PlaneGrid { &self.elinsa }
 
     pub fn elinsa_grid_mut(&mut self) -> &mut PlaneGrid { &mut self.elinsa }
+
+    pub fn ugrent_grid(&self) -> &DeviceGrid { &self.ugrent }
+
+    pub fn ugrent_grid_mut(&mut self) -> &mut DeviceGrid { &mut self.ugrent }
 }
 
 impl PuzzleState for SyzygyState {
@@ -146,6 +183,7 @@ impl PuzzleState for SyzygyState {
     fn can_reset(&self) -> bool {
         match self.stage {
             SyzygyStage::Elinsa => !self.elinsa.pipes().is_empty(),
+            SyzygyStage::Ugrent => self.ugrent.is_modified(),
             _ => false, // TODO
         }
     }
@@ -153,6 +191,9 @@ impl PuzzleState for SyzygyState {
     fn reset(&mut self) {
         match self.stage {
             SyzygyStage::Elinsa => self.elinsa.remove_all_pipes(),
+            SyzygyStage::Ugrent => {
+                self.ugrent = SyzygyState::ugrent_initial_grid();
+            }
             _ => {} // TODO
         }
     }
@@ -160,6 +201,7 @@ impl PuzzleState for SyzygyState {
     fn replay(&mut self) {
         self.stage = SyzygyStage::first();
         self.elinsa.remove_all_pipes();
+        self.ugrent = SyzygyState::ugrent_initial_grid();
         // TODO others
         self.access = Access::BeginReplay;
     }
@@ -170,6 +212,9 @@ impl PuzzleState for SyzygyState {
         if !self.is_solved() {
             table.insert(STAGE_KEY.to_string(), self.stage.to_toml());
             table.insert(ELINSA_KEY.to_string(), self.elinsa.pipes_to_toml());
+            if self.ugrent.is_modified() {
+                table.insert(UGRENT_KEY.to_string(), self.ugrent.to_toml());
+            }
         }
         toml::Value::Table(table)
     }

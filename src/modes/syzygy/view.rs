@@ -18,17 +18,27 @@
 // +--------------------------------------------------------------------------+
 
 use elements::{PuzzleCmd, PuzzleCore, PuzzleView};
+use elements::lasers::{LaserCmd, LaserField};
 use elements::plane::{PlaneCmd, PlaneGridView};
-use gui::{Action, Canvas, Element, Event, Rect, Resources, Sound};
+use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sound};
 use modes::SOLVED_INFO_TEXT;
 use save::{Game, PuzzleState, SyzygyStage, SyzygyState};
 use super::scenes::{compile_intro_scene, compile_outro_scene};
 
 // ========================================================================= //
 
+#[derive(Clone)]
+enum UndoRedo {
+    Elinsa(Vec<(Point, Point)>),
+    Ugrent(LaserCmd),
+}
+
+// ========================================================================= //
+
 pub struct View {
-    core: PuzzleCore<()>,
+    core: PuzzleCore<UndoRedo>,
     elinsa: PlaneGridView,
+    ugrent: LaserField,
 }
 
 impl View {
@@ -40,6 +50,7 @@ impl View {
         let mut view = View {
             core: core,
             elinsa: PlaneGridView::new(resources, 150, 140),
+            ugrent: LaserField::new(resources, 175, 140, state.ugrent_grid()),
         };
         view.drain_queue();
         view
@@ -59,6 +70,9 @@ impl Element<Game, PuzzleCmd> for View {
         match state.stage() {
             SyzygyStage::Elinsa => {
                 self.elinsa.draw(state.elinsa_grid(), canvas);
+            }
+            SyzygyStage::Ugrent => {
+                self.ugrent.draw(state.ugrent_grid(), canvas);
             }
             _ => {} // TODO
         }
@@ -86,12 +100,30 @@ impl Element<Game, PuzzleCmd> for View {
                                 action.also_play_sound(sound);
                             }
                         }
-                        Some(PlaneCmd::PushUndo(_changes)) => {
-                            // TODO push undo
+                        Some(PlaneCmd::PushUndo(changes)) => {
+                            self.core.push_undo(UndoRedo::Elinsa(changes));
                         }
                         None => {}
                     }
                     action.merge(subaction.but_no_value());
+                }
+                SyzygyStage::Ugrent => {
+                    if !action.should_stop() {
+                        let subaction =
+                            self.ugrent
+                                .handle_event(event, state.ugrent_grid_mut());
+                        if let Some(&cmd) = subaction.value() {
+                            let grid = state.ugrent_grid();
+                            if self.ugrent.all_detectors_satisfied(grid) {
+                                // TODO advance stage
+                                let sound = Sound::solve_puzzle_chime();
+                                action.also_play_sound(sound);
+                            } else {
+                                self.core.push_undo(UndoRedo::Ugrent(cmd));
+                            }
+                        }
+                        action.merge(subaction.but_no_value());
+                    }
                 }
                 _ => {} // TODO
             }
@@ -117,13 +149,13 @@ impl PuzzleView for View {
     }
 
     fn undo(&mut self, _game: &mut Game) {
-        if let Some(()) = self.core.pop_undo() {
+        if let Some(_) = self.core.pop_undo() {
             // TODO: support undo
         }
     }
 
     fn redo(&mut self, _game: &mut Game) {
-        if let Some(()) = self.core.pop_redo() {
+        if let Some(_) = self.core.pop_redo() {
             // TODO: support redo
         }
     }
@@ -132,6 +164,7 @@ impl PuzzleView for View {
         let state = &mut game.system_syzygy;
         self.core.clear_undo_redo();
         state.reset();
+        self.ugrent.recalculate_lasers(state.ugrent_grid());
     }
 
     fn solve(&mut self, game: &mut Game) {
@@ -160,7 +193,7 @@ Drag across the grid with $M{your finger}{the mouse} to create or
 remove pipes between the nodes.";
 
 const UGRENT_INFO_BOX_TEXT: &'static str = "\
-Your goal is to activate each detector in the center with
+Your goal is to activate each detector on the right with
 the appropriate color of laser.
 
 Drag mirrors and other objects with $M{your finger}{the mouse} to

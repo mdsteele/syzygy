@@ -19,7 +19,8 @@
 
 use toml;
 
-use save::{Access, Device, DeviceGrid, Direction, Location, PrimaryColor};
+use save::{Access, Direction, Location, PrimaryColor};
+use save::device::{Device, DeviceGrid};
 use super::PuzzleState;
 use super::super::util::{ACCESS_KEY, pop_array};
 

@@ -23,7 +23,8 @@ use std::rc::Rc;
 
 use gui::{Action, Align, Canvas, Element, Event, FRAME_DELAY_MILLIS, Font,
           Point, Rect, Resources, Sound, Sprite};
-use save::{Device, DeviceGrid, Direction, PrimaryColor};
+use save::{Direction, PrimaryColor};
+use save::device::{Device, DeviceGrid};
 
 // ========================================================================= //
 
@@ -128,7 +129,7 @@ impl LaserField {
             Device::Emitter(color) => {
                 canvas.draw_sprite_transformed(&self.wall_sprites[3],
                                                center,
-                                               dir.degrees(),
+                                               -dir.degrees(),
                                                dir.is_vertical(),
                                                false);
                 let i = match color {
@@ -141,7 +142,7 @@ impl LaserField {
             Device::Detector(color) => {
                 canvas.draw_sprite_transformed(&self.wall_sprites[3],
                                                center,
-                                               dir.degrees(),
+                                               -dir.degrees(),
                                                dir.is_vertical(),
                                                false);
                 let i = match color {

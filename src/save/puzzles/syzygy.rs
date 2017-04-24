@@ -17,6 +17,7 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
+use std::collections::HashSet;
 use toml;
 
 use gui::Rect;
@@ -24,7 +25,7 @@ use save::{Access, Direction, Location, PrimaryColor};
 use save::device::{Device, DeviceGrid};
 use save::plane::{PlaneGrid, PlaneObj};
 use super::PuzzleState;
-use super::super::util::{ACCESS_KEY, pop_array};
+use super::super::util::{ACCESS_KEY, pop_array, to_i32};
 
 // ========================================================================= //
 
@@ -33,8 +34,13 @@ const STAGE_KEY: &'static str = "stage";
 // const ARGONY_KEY: &'static str = "argony";
 const ELINSA_KEY: &'static str = "elinsa";
 const UGRENT_KEY: &'static str = "ugrent";
-// const RELYNG_KEY: &'static str = "relyng";
+const RELYNG_LIGHTS_KEY: &'static str = "relyng_lights";
+const RELYNG_NEXT_KEY: &'static str = "relyng_next";
 // const MEZURE_KEY: &'static str = "mezure";
+
+const RELYNG_NUM_COLS: i32 = 5;
+const RELYNG_NUM_ROWS: i32 = 4;
+const RELYNG_INIT_NEXT: char = '+';
 
 // ========================================================================= //
 
@@ -86,6 +92,8 @@ pub struct SyzygyState {
     stage: SyzygyStage,
     elinsa: PlaneGrid,
     ugrent: DeviceGrid,
+    relyng_lights: HashSet<i32>,
+    relyng_next: char,
 }
 
 impl SyzygyState {
@@ -139,11 +147,30 @@ impl SyzygyState {
         let ugrent =
             DeviceGrid::from_toml(pop_array(&mut table, UGRENT_KEY),
                                   &SyzygyState::ugrent_initial_grid());
+        let relyng_next = match table.get(RELYNG_NEXT_KEY)
+                                     .and_then(toml::Value::as_str)
+                                     .unwrap_or("") {
+            "+" => '+',
+            "N" => 'N',
+            "X" => 'X',
+            "Z" => 'Z',
+            _ => RELYNG_INIT_NEXT,
+        };
+        let relyng_lights =
+            pop_array(&mut table, RELYNG_LIGHTS_KEY)
+                .into_iter()
+                .map(to_i32)
+                .filter(|&idx| {
+                    0 <= idx && idx < RELYNG_NUM_COLS * RELYNG_NUM_ROWS
+                })
+                .collect();
         SyzygyState {
             access: access,
             stage: stage,
             elinsa: elinsa,
             ugrent: ugrent,
+            relyng_next: relyng_next,
+            relyng_lights: relyng_lights,
         }
     }
 
@@ -168,9 +195,99 @@ impl SyzygyState {
 
     pub fn elinsa_grid_mut(&mut self) -> &mut PlaneGrid { &mut self.elinsa }
 
+    fn reset_elinsa(&mut self) { self.elinsa.remove_all_pipes() }
+
     pub fn ugrent_grid(&self) -> &DeviceGrid { &self.ugrent }
 
     pub fn ugrent_grid_mut(&mut self) -> &mut DeviceGrid { &mut self.ugrent }
+
+    fn reset_ugrent(&mut self) {
+        self.ugrent = SyzygyState::ugrent_initial_grid();
+    }
+
+    pub fn relyng_is_lit(&self, (col, row): (i32, i32)) -> bool {
+        debug_assert!(col >= 0 && col < RELYNG_NUM_COLS);
+        debug_assert!(row >= 0 && row < RELYNG_NUM_ROWS);
+        !self.relyng_lights.contains(&(row * RELYNG_NUM_COLS + col))
+    }
+
+    pub fn relyng_is_done(&self) -> bool {
+        self.relyng_lights.len() ==
+        (RELYNG_NUM_COLS * RELYNG_NUM_ROWS) as usize
+    }
+
+    pub fn relyng_next_shape(&self) -> char { self.relyng_next }
+
+    pub fn relyng_toggle(&mut self, (col, row): (i32, i32)) {
+        self.relyng_toggle_shape(col, row);
+        self.relyng_next = match self.relyng_next {
+            '+' => 'N',
+            'N' => 'X',
+            'X' => 'Z',
+            'Z' => '+',
+            _ => unreachable!(),
+        };
+    }
+
+    pub fn relyng_untoggle(&mut self, (col, row): (i32, i32)) {
+        self.relyng_next = match self.relyng_next {
+            '+' => 'Z',
+            'N' => '+',
+            'X' => 'N',
+            'Z' => 'X',
+            _ => unreachable!(),
+        };
+        self.relyng_toggle_shape(col, row);
+    }
+
+    fn relyng_toggle_shape(&mut self, col: i32, row: i32) {
+        match self.relyng_next {
+            '+' => {
+                self.relyng_toggle_light(col, row);
+                self.relyng_toggle_light(col + 1, row);
+                self.relyng_toggle_light(col, row + 1);
+                self.relyng_toggle_light(col - 1, row);
+                self.relyng_toggle_light(col, row - 1);
+            }
+            'N' => {
+                self.relyng_toggle_light(col, row);
+                self.relyng_toggle_light(col - 1, row);
+                self.relyng_toggle_light(col - 1, row + 1);
+                self.relyng_toggle_light(col + 1, row);
+                self.relyng_toggle_light(col + 1, row - 1);
+            }
+            'X' => {
+                self.relyng_toggle_light(col, row);
+                self.relyng_toggle_light(col - 1, row - 1);
+                self.relyng_toggle_light(col + 1, row - 1);
+                self.relyng_toggle_light(col - 1, row + 1);
+                self.relyng_toggle_light(col + 1, row + 1);
+            }
+            'Z' => {
+                self.relyng_toggle_light(col, row);
+                self.relyng_toggle_light(col, row - 1);
+                self.relyng_toggle_light(col - 1, row - 1);
+                self.relyng_toggle_light(col, row + 1);
+                self.relyng_toggle_light(col + 1, row + 1);
+            }
+            _ => unreachable!(),
+        }
+    }
+
+    fn relyng_toggle_light(&mut self, col: i32, row: i32) {
+        if (col >= 0 && col < RELYNG_NUM_COLS) &&
+           (row >= 0 && row < RELYNG_NUM_ROWS) {
+            let index = row * RELYNG_NUM_COLS + col;
+            if !self.relyng_lights.remove(&index) {
+                self.relyng_lights.insert(index);
+            }
+        }
+    }
+
+    fn reset_relyng(&mut self) {
+        self.relyng_lights.clear();
+        self.relyng_next = RELYNG_INIT_NEXT;
+    }
 }
 
 impl PuzzleState for SyzygyState {
@@ -184,24 +301,25 @@ impl PuzzleState for SyzygyState {
         match self.stage {
             SyzygyStage::Elinsa => !self.elinsa.pipes().is_empty(),
             SyzygyStage::Ugrent => self.ugrent.is_modified(),
+            SyzygyStage::Relyng => !self.relyng_lights.is_empty(),
             _ => false, // TODO
         }
     }
 
     fn reset(&mut self) {
         match self.stage {
-            SyzygyStage::Elinsa => self.elinsa.remove_all_pipes(),
-            SyzygyStage::Ugrent => {
-                self.ugrent = SyzygyState::ugrent_initial_grid();
-            }
+            SyzygyStage::Elinsa => self.reset_elinsa(),
+            SyzygyStage::Ugrent => self.reset_ugrent(),
+            SyzygyStage::Relyng => self.reset_relyng(),
             _ => {} // TODO
         }
     }
 
     fn replay(&mut self) {
         self.stage = SyzygyStage::first();
-        self.elinsa.remove_all_pipes();
-        self.ugrent = SyzygyState::ugrent_initial_grid();
+        self.reset_elinsa();
+        self.reset_ugrent();
+        self.reset_relyng();
         // TODO others
         self.access = Access::BeginReplay;
     }
@@ -211,9 +329,31 @@ impl PuzzleState for SyzygyState {
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.is_solved() {
             table.insert(STAGE_KEY.to_string(), self.stage.to_toml());
-            table.insert(ELINSA_KEY.to_string(), self.elinsa.pipes_to_toml());
-            if self.ugrent.is_modified() {
-                table.insert(UGRENT_KEY.to_string(), self.ugrent.to_toml());
+            match self.stage {
+                SyzygyStage::Elinsa => {
+                    table.insert(ELINSA_KEY.to_string(),
+                                 self.elinsa.pipes_to_toml());
+                }
+                SyzygyStage::Ugrent => {
+                    if self.ugrent.is_modified() {
+                        table.insert(UGRENT_KEY.to_string(),
+                                     self.ugrent.to_toml());
+                    }
+                }
+                SyzygyStage::Relyng => {
+                    let lights =
+                        self.relyng_lights
+                            .iter()
+                            .map(|&idx| toml::Value::Integer(idx as i64))
+                            .collect();
+                    table.insert(RELYNG_LIGHTS_KEY.to_string(),
+                                 toml::Value::Array(lights));
+                    let mut next = String::new();
+                    next.push(self.relyng_next);
+                    table.insert(RELYNG_NEXT_KEY.to_string(),
+                                 toml::Value::String(next));
+                }
+                _ => {} // TODO
             }
         }
         toml::Value::Table(table)

@@ -193,7 +193,7 @@ impl ToggleLight {
     fn new(resources: &mut Resources, state: &AtticState,
            position: (i32, i32), label: char)
            -> ToggleLight {
-        let sprites = resources.get_sprites("toggle_light");
+        let sprites = resources.get_sprites("light/toggle");
         ToggleLight {
             frame_off: sprites[0].clone(),
             frame_on: sprites[1].clone(),
@@ -264,7 +264,7 @@ impl PassiveLight {
     fn new(resources: &mut Resources, state: &AtticState,
            position: (i32, i32))
            -> PassiveLight {
-        let sprites = resources.get_sprites("toggle_light");
+        let sprites = resources.get_sprites("light/toggle");
         let (col, row) = position;
         let sprite_index = if col == 5 {
             2

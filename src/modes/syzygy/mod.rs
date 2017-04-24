@@ -17,6 +17,7 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
+mod relyng;
 mod scenes;
 mod view;
 

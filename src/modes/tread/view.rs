@@ -183,7 +183,7 @@ impl ToggleLight {
            -> ToggleLight {
         ToggleLight {
             font: resources.get_font("block"),
-            frame: resources.get_sprites("toggle_light")[0].clone(),
+            frame: resources.get_sprites("light/toggle")[0].clone(),
             position: position,
             light_radius: if state.is_lit(position) {
                 TOGGLE_MAX_LIGHT_RADIUS
@@ -248,7 +248,7 @@ impl PassiveLight {
     fn new(resources: &mut Resources, state: &TreadState,
            position: (i32, i32))
            -> PassiveLight {
-        let sprites = resources.get_sprites("toggle_light");
+        let sprites = resources.get_sprites("light/toggle");
         let (col, row) = position;
         let sprite_index = if col == 5 {
             2

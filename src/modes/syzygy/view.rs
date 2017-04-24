@@ -23,6 +23,7 @@ use elements::plane::{PlaneCmd, PlaneGridView};
 use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sound};
 use modes::SOLVED_INFO_TEXT;
 use save::{Game, PuzzleState, SyzygyStage, SyzygyState};
+use super::relyng::LightsGrid;
 use super::scenes::{compile_intro_scene, compile_outro_scene};
 
 // ========================================================================= //
@@ -31,6 +32,7 @@ use super::scenes::{compile_intro_scene, compile_outro_scene};
 enum UndoRedo {
     Elinsa(Vec<(Point, Point)>),
     Ugrent(LaserCmd),
+    Relyng((i32, i32)),
 }
 
 // ========================================================================= //
@@ -39,6 +41,7 @@ pub struct View {
     core: PuzzleCore<UndoRedo>,
     elinsa: PlaneGridView,
     ugrent: LaserField,
+    relyng: LightsGrid,
 }
 
 impl View {
@@ -51,6 +54,7 @@ impl View {
             core: core,
             elinsa: PlaneGridView::new(resources, 150, 140),
             ugrent: LaserField::new(resources, 175, 140, state.ugrent_grid()),
+            relyng: LightsGrid::new(resources, 168, 140, state),
         };
         view.drain_queue();
         view
@@ -73,6 +77,9 @@ impl Element<Game, PuzzleCmd> for View {
             }
             SyzygyStage::Ugrent => {
                 self.ugrent.draw(state.ugrent_grid(), canvas);
+            }
+            SyzygyStage::Relyng => {
+                self.relyng.draw(state, canvas);
             }
             _ => {} // TODO
         }
@@ -108,22 +115,36 @@ impl Element<Game, PuzzleCmd> for View {
                     action.merge(subaction.but_no_value());
                 }
                 SyzygyStage::Ugrent => {
-                    if !action.should_stop() {
-                        let subaction =
-                            self.ugrent
-                                .handle_event(event, state.ugrent_grid_mut());
-                        if let Some(&cmd) = subaction.value() {
-                            let grid = state.ugrent_grid();
-                            if self.ugrent.all_detectors_satisfied(grid) {
-                                // TODO advance stage
-                                let sound = Sound::solve_puzzle_chime();
-                                action.also_play_sound(sound);
-                            } else {
-                                self.core.push_undo(UndoRedo::Ugrent(cmd));
-                            }
+                    let subaction = self.ugrent
+                                        .handle_event(event,
+                                                      state.ugrent_grid_mut());
+                    if let Some(&cmd) = subaction.value() {
+                        let grid = state.ugrent_grid();
+                        if self.ugrent.all_detectors_satisfied(grid) {
+                            self.core.clear_undo_redo();
+                            // TODO advance stage
+                            let sound = Sound::solve_puzzle_chime();
+                            action.also_play_sound(sound);
+                        } else {
+                            self.core.push_undo(UndoRedo::Ugrent(cmd));
                         }
-                        action.merge(subaction.but_no_value());
                     }
+                    action.merge(subaction.but_no_value());
+                }
+                SyzygyStage::Relyng => {
+                    let subaction = self.relyng.handle_event(event, state);
+                    if let Some(&pos) = subaction.value() {
+                        state.relyng_toggle(pos);
+                        if state.relyng_is_done() {
+                            self.core.clear_undo_redo();
+                            // TODO advance stage
+                            let sound = Sound::solve_puzzle_chime();
+                            action.also_play_sound(sound);
+                        } else {
+                            self.core.push_undo(UndoRedo::Relyng(pos));
+                        }
+                    }
+                    action.merge(subaction.but_no_value());
                 }
                 _ => {} // TODO
             }
@@ -148,15 +169,21 @@ impl PuzzleView for View {
         }
     }
 
-    fn undo(&mut self, _game: &mut Game) {
-        if let Some(_) = self.core.pop_undo() {
-            // TODO: support undo
+    fn undo(&mut self, game: &mut Game) {
+        let state = &mut game.system_syzygy;
+        match self.core.pop_undo() {
+            Some(UndoRedo::Relyng(pos)) => state.relyng_untoggle(pos),
+            Some(_) => {} // TODO other undos
+            None => {}
         }
     }
 
-    fn redo(&mut self, _game: &mut Game) {
-        if let Some(_) = self.core.pop_redo() {
-            // TODO: support redo
+    fn redo(&mut self, game: &mut Game) {
+        let state = &mut game.system_syzygy;
+        match self.core.pop_redo() {
+            Some(UndoRedo::Relyng(pos)) => state.relyng_toggle(pos),
+            Some(_) => {} // TODO other redos
+            None => {}
         }
     }
 

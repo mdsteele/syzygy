@@ -157,7 +157,7 @@ impl ToggleLight {
            -> ToggleLight {
         let (red, green, blue) = state.light_colors(position);
         ToggleLight {
-            frame: resources.get_sprites("toggle_light")[0].clone(),
+            frame: resources.get_sprites("light/toggle")[0].clone(),
             position: position,
             red_radius: if red { MAX_LIGHT_RADIUS } else { 0 },
             green_radius: if green { MAX_LIGHT_RADIUS } else { 0 },

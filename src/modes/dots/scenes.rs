@@ -209,7 +209,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
 // ========================================================================= //
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-pub fn compile_mezure_midscene(resources: &mut Resources) -> Scene {
+pub fn compile_mezure_midscene(resources: &mut Resources) -> (i32, Scene) {
     let ast = vec![
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
@@ -218,7 +218,7 @@ pub fn compile_mezure_midscene(resources: &mut Resources) -> Scene {
                        where the splitter goes..."),
         ]),
     ];
-    Ast::compile_scene(resources, ast)
+    (0, Ast::compile_scene(resources, ast))
 }
 
 // ========================================================================= //

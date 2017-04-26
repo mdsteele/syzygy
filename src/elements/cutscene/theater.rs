@@ -260,9 +260,26 @@ struct SpeechBubble {
 
 impl SpeechBubble {
     fn new(bubble_sprites: Vec<Sprite>, bg_color: (u8, u8, u8),
-           positioning: TalkPos, paragraph: Rc<Paragraph>, actor_rect: Rect)
+           mut positioning: TalkPos, paragraph: Rc<Paragraph>,
+           actor_rect: Rect)
            -> SpeechBubble {
         debug_assert_eq!(bubble_sprites.len(), 5);
+        if positioning == TalkPos::Auto {
+            let center = actor_rect.center();
+            positioning = if center.x() < 288 {
+                if center.y() < 192 {
+                    TalkPos::SE
+                } else {
+                    TalkPos::NE
+                }
+            } else {
+                if center.y() < 192 {
+                    TalkPos::SW
+                } else {
+                    TalkPos::NW
+                }
+            };
+        }
         let width = round_up_to_16(cmp::max(48,
                                             paragraph.min_width() +
                                             2 * SPEECH_MARGIN));
@@ -275,6 +292,7 @@ impl SpeechBubble {
             }
             TalkPos::W => actor_rect.left() - 10,
             TalkPos::E => actor_rect.right() + 10,
+            TalkPos::Auto => unreachable!(),
         };
         let tail_y = match positioning {
             TalkPos::W | TalkPos::E => {
@@ -282,27 +300,32 @@ impl SpeechBubble {
             }
             TalkPos::NW | TalkPos::NE => actor_rect.top() - 10,
             TalkPos::SW | TalkPos::SE => actor_rect.bottom() + 10,
+            TalkPos::Auto => unreachable!(),
         };
         let left = match positioning {
             TalkPos::NW | TalkPos::SW => tail_x + 16 - width,
             TalkPos::NE | TalkPos::SE => tail_x - 16,
             TalkPos::W => tail_x - 8 - width,
             TalkPos::E => tail_x + 8,
+            TalkPos::Auto => unreachable!(),
         };
         let top = match positioning {
             TalkPos::NW | TalkPos::NE => tail_y - 8 - height,
             TalkPos::SW | TalkPos::SE => tail_y + 8,
             TalkPos::W | TalkPos::E => tail_y + 8 - height,
+            TalkPos::Auto => unreachable!(),
         };
         let tail_dir = match positioning {
             TalkPos::E => Direction::East,
             TalkPos::SW | TalkPos::SE => Direction::South,
             TalkPos::W => Direction::West,
             TalkPos::NW | TalkPos::NE => Direction::North,
+            TalkPos::Auto => unreachable!(),
         };
         let tail_flip_vert = match positioning {
             TalkPos::NE | TalkPos::SW | TalkPos::W => true,
             TalkPos::NW | TalkPos::SE | TalkPos::E => false,
+            TalkPos::Auto => unreachable!(),
         };
         SpeechBubble {
             sprites: bubble_sprites,
@@ -395,8 +418,9 @@ fn round_up_to_16(mut size: i32) -> i32 {
 
 // ========================================================================= //
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Eq, PartialEq)]
 pub enum TalkPos {
+    Auto,
     NE,
     NW,
     E,

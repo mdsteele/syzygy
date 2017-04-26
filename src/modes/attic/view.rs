@@ -19,7 +19,7 @@
 
 use std::cmp;
 
-use elements::{PuzzleCmd, PuzzleCore, PuzzleView, Scene};
+use elements::{PuzzleCmd, PuzzleCore, PuzzleView};
 use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sprite};
 use modes::SOLVED_INFO_TEXT;
 use save::{AtticState, Game, PuzzleState};
@@ -29,8 +29,6 @@ use super::scenes;
 
 pub struct View {
     core: PuzzleCore<(i32, i32)>,
-    argony_midscene: Scene,
-    mezure_midscene: Scene,
     toggles: Vec<ToggleLight>,
     passives: Vec<PassiveLight>,
 }
@@ -38,13 +36,15 @@ pub struct View {
 impl View {
     pub fn new(resources: &mut Resources, visible: Rect, state: &AtticState)
                -> View {
-        let intro = scenes::compile_intro_scene(resources);
-        let outro = scenes::compile_outro_scene(resources);
-        let core = PuzzleCore::new(resources, visible, state, intro, outro);
+        let mut core = {
+            let intro = scenes::compile_intro_scene(resources);
+            let outro = scenes::compile_outro_scene(resources);
+            PuzzleCore::new(resources, visible, state, intro, outro)
+        };
+        core.add_extra_scene(scenes::compile_argony_midscene(resources));
+        core.add_extra_scene(scenes::compile_mezure_midscene(resources));
         let mut view = View {
             core: core,
-            argony_midscene: scenes::compile_argony_midscene(resources),
-            mezure_midscene: scenes::compile_mezure_midscene(resources),
             toggles: vec![ToggleLight::new(resources, state, (1, 1), 'C'),
                           ToggleLight::new(resources, state, (2, 1), 'Z'),
                           ToggleLight::new(resources, state, (3, 1), 'H'),
@@ -123,19 +123,8 @@ impl Element<Game, PuzzleCmd> for View {
             action.merge(self.passives.handle_event(event, state));
         }
         if !action.should_stop() {
-            if let &Event::MouseDown(pt) = event {
-                match self.core.theater().actor_at_point(pt) {
-                    Some(0) => {
-                        self.core.inject_scene(self.mezure_midscene.clone());
-                        self.drain_queue();
-                    }
-                    Some(1) => {
-                        self.core.inject_scene(self.argony_midscene.clone());
-                        self.drain_queue();
-                    }
-                    _ => {}
-                }
-            }
+            self.core.begin_character_scene_on_click(event);
+            self.drain_queue();
         }
         action
     }

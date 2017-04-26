@@ -203,6 +203,41 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
 // ========================================================================= //
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_elinsa_midscene(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_thought()),
+            Ast::Talk(0, TalkStyle::Thought, TalkPos::Auto,
+                      "I'm $ipretty$r sure it's possible\n\
+                       to do this without smacking myself\n\
+                       in the face with these platforms.")
+        ]),
+    ];
+    (0, Ast::compile_scene(resources, ast))
+}
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_yttris_midscene(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(1, TalkStyle::Normal, TalkPos::NE,
+                      "You can do it, Elinsa!\n\
+                       ...probably, anyway!")
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(0, TalkStyle::Normal, TalkPos::Auto,
+                      "Yes, thank you $iso$r much for\n\
+                       the vote of confidence, Yttris.")
+        ]),
+    ];
+    (1, Ast::compile_scene(resources, ast))
+}
+
+// ========================================================================= //
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
 pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![

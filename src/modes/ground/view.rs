@@ -26,7 +26,8 @@ use elements::shift::{ArrowPair, Platform};
 use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sound};
 use modes::SOLVED_INFO_TEXT;
 use save::{Game, GroundState, PuzzleState};
-use super::scenes::{ELINSA_SLOT, compile_intro_scene, compile_outro_scene};
+use super::scenes;
+use super::scenes::ELINSA_SLOT;
 
 // ========================================================================= //
 
@@ -42,9 +43,13 @@ impl View {
     #[cfg_attr(rustfmt, rustfmt_skip)]
     pub fn new(resources: &mut Resources, visible: Rect, state: &GroundState)
                -> View {
-        let intro = compile_intro_scene(resources);
-        let outro = compile_outro_scene(resources);
-        let core = PuzzleCore::new(resources, visible, state, intro, outro);
+        let mut core = {
+            let intro = scenes::compile_intro_scene(resources);
+            let outro = scenes::compile_outro_scene(resources);
+            PuzzleCore::new(resources, visible, state, intro, outro)
+        };
+        core.add_extra_scene(scenes::compile_elinsa_midscene(resources));
+        core.add_extra_scene(scenes::compile_yttris_midscene(resources));
         let mut view = View {
             core: core,
             animation: Scene::empty(),
@@ -346,6 +351,10 @@ impl Element<Game, PuzzleCmd> for View {
                 self.shift_platform(state, row, delta);
             }
             action.merge(subaction.but_no_value());
+        }
+        if !action.should_stop() {
+            self.core.begin_character_scene_on_click(event);
+            self.drain_queue();
         }
         action
     }

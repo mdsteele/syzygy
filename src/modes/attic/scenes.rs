@@ -115,7 +115,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
 // ========================================================================= //
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-pub fn compile_argony_midscene(resources: &mut Resources) -> Scene {
+pub fn compile_argony_midscene(resources: &mut Resources) -> (i32, Scene) {
     let ast = vec![
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
@@ -124,11 +124,11 @@ pub fn compile_argony_midscene(resources: &mut Resources) -> Scene {
                        start with the top row.")
         ]),
     ];
-    Ast::compile_scene(resources, ast)
+    (1, Ast::compile_scene(resources, ast))
 }
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-pub fn compile_mezure_midscene(resources: &mut Resources) -> Scene {
+pub fn compile_mezure_midscene(resources: &mut Resources) -> (i32, Scene) {
     let ast = vec![
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_thought()),
@@ -137,7 +137,7 @@ pub fn compile_mezure_midscene(resources: &mut Resources) -> Scene {
                        a light switch or something?")
         ]),
     ];
-    Ast::compile_scene(resources, ast)
+    (0, Ast::compile_scene(resources, ast))
 }
 
 // ========================================================================= //

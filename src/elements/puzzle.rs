@@ -17,6 +17,8 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
+use std::collections::HashMap;
+
 use elements::{FadeStyle, Hud, HudCmd, HudInput, Scene, ScreenFade, Theater};
 use gui::{Action, Canvas, Element, Event, Rect, Resources};
 use save::{Access, Game, PuzzleState};
@@ -55,6 +57,7 @@ pub struct PuzzleCore<U> {
     intro_scene: Scene,
     middle_scene: Option<Scene>,
     outro_scene: Scene,
+    extra_scenes: HashMap<i32, Scene>,
     hud: Hud,
     screen_fade: ScreenFade<PuzzleCmd>,
     undo_stack: Vec<U>,
@@ -81,6 +84,7 @@ impl<U: Clone> PuzzleCore<U> {
             intro_scene: intro_scene,
             middle_scene: None,
             outro_scene: outro_scene,
+            extra_scenes: HashMap::new(),
             hud: Hud::new(resources, visible, state.location()),
             screen_fade: ScreenFade::new(resources, FadeStyle::RightLeft),
             undo_stack: Vec::new(),
@@ -99,9 +103,24 @@ impl<U: Clone> PuzzleCore<U> {
         self.theater.drain_queue()
     }
 
-    pub fn inject_scene(&mut self, mut scene: Scene) {
-        scene.begin(&mut self.theater);
-        self.middle_scene = Some(scene);
+    pub fn add_extra_scene(&mut self, (key, scene): (i32, Scene)) {
+        self.extra_scenes.insert(key, scene);
+    }
+
+    pub fn begin_extra_scene(&mut self, key: i32) {
+        if let Some(scene) = self.extra_scenes.get(&key) {
+            let mut scene = scene.clone();
+            scene.begin(&mut self.theater);
+            self.middle_scene = Some(scene);
+        }
+    }
+
+    pub fn begin_character_scene_on_click(&mut self, event: &Event) {
+        if let &Event::MouseDown(pt) = event {
+            if let Some(key) = self.theater.actor_at_point(pt) {
+                self.begin_extra_scene(key);
+            }
+        }
     }
 
     pub fn begin_outro_scene(&mut self) {

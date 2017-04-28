@@ -28,8 +28,8 @@ use super::util::to_table;
 
 // ========================================================================= //
 
-const GAME_KEY: &'static str = "game";
-const PREFS_KEY: &'static str = "prefs";
+const GAME_KEY: &str = "game";
+const PREFS_KEY: &str = "prefs";
 
 // ========================================================================= //
 

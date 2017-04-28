@@ -28,47 +28,47 @@ use super::super::util::{ACCESS_KEY, pop_array, to_i32};
 
 const VALID: ValidChars = ValidChars::Letters;
 
-const ACTIVE_SLOT_KEY: &'static str = "slot";
-const ELINSA_KEY: &'static str = "elisna";
-const ARGONY_KEY: &'static str = "argony";
-const MEZURE_KEY: &'static str = "mezure";
-const YTTRIS_KEY: &'static str = "yttris";
-const UGRENT_KEY: &'static str = "ugrent";
-const RELYNG_KEY: &'static str = "relyng";
-const SLIDERS_KEY: &'static str = "sliders";
+const ACTIVE_SLOT_KEY: &str = "slot";
+const ELINSA_KEY: &str = "elisna";
+const ARGONY_KEY: &str = "argony";
+const MEZURE_KEY: &str = "mezure";
+const YTTRIS_KEY: &str = "yttris";
+const UGRENT_KEY: &str = "ugrent";
+const RELYNG_KEY: &str = "relyng";
+const SLIDERS_KEY: &str = "sliders";
 
-const ELINSA_WORDS: &'static [&'static str] = &["ENGINEERING",
-                                                "INTELLIGENCE",
-                                                "IMPATIENT",
-                                                "INDEPENDENCE",
-                                                "RESOURCEFUL",
-                                                "SARCASM"];
-const ARGONY_WORDS: &'static [&'static str] = &["VENERATED",
-                                                "PERSPECTIVE",
-                                                "KNOWLEDGE",
-                                                "HISTORY",
-                                                "EXPERIENCE",
-                                                "ELDERLY"];
-const MEZURE_WORDS: &'static [&'static str] = &["DETERMINED",
-                                                "TEAMWORK",
-                                                "ORGANIZED",
-                                                "DUTIFUL",
-                                                "JUNIOR",
-                                                "LEADERSHIP"];
-const YTTRIS_WORDS: &'static [&'static str] =
+const ELINSA_WORDS: &[&str] = &["ENGINEERING",
+                                "INTELLIGENCE",
+                                "IMPATIENT",
+                                "INDEPENDENCE",
+                                "RESOURCEFUL",
+                                "SARCASM"];
+const ARGONY_WORDS: &[&str] = &["VENERATED",
+                                "PERSPECTIVE",
+                                "KNOWLEDGE",
+                                "HISTORY",
+                                "EXPERIENCE",
+                                "ELDERLY"];
+const MEZURE_WORDS: &[&str] = &["DETERMINED",
+                                "TEAMWORK",
+                                "ORGANIZED",
+                                "DUTIFUL",
+                                "JUNIOR",
+                                "LEADERSHIP"];
+const YTTRIS_WORDS: &[&str] =
     &["ENERGY", "EMOTION", "SPONTANEOUS", "FEARFUL", "CREATIVE", "ARTISTIC"];
-const UGRENT_WORDS: &'static [&'static str] = &["CAUTION",
-                                                "GRUFF",
-                                                "PROTECTIVE",
-                                                "SECURITY",
-                                                "CONSERVATIVE",
-                                                "METICULOUS"];
-const RELYNG_WORDS: &'static [&'static str] = &["REALISM",
-                                                "SKEPTICISM",
-                                                "STEALTH",
-                                                "SECRECY",
-                                                "DUBIOUSNESS",
-                                                "INVESTIGATION"];
+const UGRENT_WORDS: &[&str] = &["CAUTION",
+                                "GRUFF",
+                                "PROTECTIVE",
+                                "SECURITY",
+                                "CONSERVATIVE",
+                                "METICULOUS"];
+const RELYNG_WORDS: &[&str] = &["REALISM",
+                                "SKEPTICISM",
+                                "STEALTH",
+                                "SECRECY",
+                                "DUBIOUSNESS",
+                                "INVESTIGATION"];
 
 const INIT_SLIDERS: [i32; 6] = [-3, -1, -4, -1, -4, -2];
 const SOLVED_SLIDERS: [i32; 6] = [-4, -5, -2, 0, -1, -3];

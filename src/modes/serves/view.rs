@@ -166,7 +166,7 @@ impl PuzzleView for View {
 
 // ========================================================================= //
 
-const INFO_BOX_TEXT: &'static str = "\
+const INFO_BOX_TEXT: &str = "\
 Your goal is to place (and later remove) each group of tiles
 on the grid.
 

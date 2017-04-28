@@ -135,10 +135,10 @@ mod tests {
     use gui::Point;
     use super::Direction;
 
-    const ALL_DIRECTIONS: &'static [Direction] = &[Direction::East,
-                                                   Direction::South,
-                                                   Direction::West,
-                                                   Direction::North];
+    const ALL_DIRECTIONS: &[Direction] = &[Direction::East,
+                                           Direction::South,
+                                           Direction::West,
+                                           Direction::North];
 
     #[test]
     fn toml_round_trip() {

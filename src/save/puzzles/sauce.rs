@@ -27,11 +27,11 @@ use super::super::util::{ACCESS_KEY, pop_array, to_i32};
 
 // ========================================================================= //
 
-const CURRENT_KEY: &'static str = "current";
-const DONE_KEY: &'static str = "done";
+const CURRENT_KEY: &str = "current";
+const DONE_KEY: &str = "done";
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-const WORD_CLUES: &'static [(&'static str, &'static str)] = &[
+const WORD_CLUES: &[(&str, &str)] = &[
     ("TOUGH BLUFF", "a difficult deception"),
     ("ROSE TOES", "blush-colored foot fingers"),
     ("BOOZE DUES", "liquor membership fees"),

@@ -489,7 +489,7 @@ impl PuzzleView for View {
 
 // ========================================================================= //
 
-const INFO_BOX_TEXT: &'static str = "\
+const INFO_BOX_TEXT: &str = "\
 Your goal is to help Elinsa reach the ledge in the
 upper-right corner.
 

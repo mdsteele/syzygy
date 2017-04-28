@@ -331,7 +331,7 @@ impl Element<SaveData, Cmd> for QuitButton {
 // ========================================================================= //
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-pub const ABOUT_BOX_TEXT: &'static str = "\
+pub const ABOUT_BOX_TEXT: &str = "\
 $C$f{block}SYSTEM SYZYGY$r$L\n\
 \n\
 Copyright 2012 Matthew D. Steele <mdsteele@alum.mit.edu>\n\

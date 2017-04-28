@@ -34,7 +34,7 @@ use super::scenes::{compile_intro_scene, compile_outro_scene};
 // ========================================================================= //
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-const DASHBOARD_CHIPS: &'static [(i32, i32, Location)] = &[
+const DASHBOARD_CHIPS: &[(i32, i32, Location)] = &[
     (167, 71, Location::ALightInTheAttic),
     (209, 71, Location::ALightInTheAttic),
     (251, 71, Location::ALightInTheAttic),
@@ -218,8 +218,8 @@ impl PuzzleView for View {
 // ========================================================================= //
 
 const DASH_ANIM_SLOWDOWN: i32 = 4;
-const DASH_ANIM_INDICES: &'static [usize] = &[4, 5, 6, 7, 8, 9, 10, 11, 12,
-                                              7, 6, 13, 14, 15];
+const DASH_ANIM_INDICES: &[usize] = &[4, 5, 6, 7, 8, 9, 10, 11, 12, 7, 6, 13,
+                                      14, 15];
 
 struct DashChip {
     sprites: Vec<Sprite>,
@@ -820,11 +820,11 @@ fn pt_to_coords(pt: Point) -> Option<Coords> {
 
 // ========================================================================= //
 
-const INFO_BOX_TEXT_1: &'static str = "\
+const INFO_BOX_TEXT_1: &str = "\
 Return here later, after you have repaired
 more areas of the ship.";
 
-const INFO_BOX_TEXT_2: &'static str = "\
+const INFO_BOX_TEXT_2: &str = "\
 Your goal is to beat the System Repair Bot at its own game.
 
 Each player starts out with a supply of 18 pieces to place, and

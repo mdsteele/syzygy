@@ -27,15 +27,15 @@ use super::PuzzleState;
 
 // ========================================================================= //
 
-const GRID_KEY: &'static str = "grid";
-const NUM_PLACED_KEY: &'static str = "placed";
+const GRID_KEY: &str = "grid";
+const NUM_PLACED_KEY: &str = "placed";
 
 const NUM_COLS: usize = 7;
 const NUM_ROWS: usize = 4;
 const NUM_SYMBOLS: i32 = 6;
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-const SHAPES: &'static [(Shape, &'static [(i8, usize)])] = &[
+const SHAPES: &[(Shape, &[(i8, usize)])] = &[
     (Shape([0, 2, 0, 2, 2, 0, 0, 2, 0]), &[]),
     (Shape([0, 6, 6, 0, 6, 0, 0, 6, 6]), &[(2, 1)]),
     (Shape([0, 5, 0, 5, 5, 0, 0, 5, 5]), &[(2, 1), (6, 2)]),
@@ -51,7 +51,7 @@ const SHAPES: &'static [(Shape, &'static [(i8, usize)])] = &[
 ];
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-const REMOVALS: &'static [&'static [(i8, usize)]] = &[
+const REMOVALS: &[&[(i8, usize)]] = &[
     &[(1, 2), (5, 1)],
     &[(3, 1), (4, 1)],
     &[(2, 1), (4, 1)],

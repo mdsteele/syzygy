@@ -311,7 +311,7 @@ impl Element<DoubleState, bool> for ArrowButton {
 
 // ========================================================================= //
 
-const INFO_BOX_TEXT: &'static str = "\
+const INFO_BOX_TEXT: &str = "\
 Your goal is to enter the word pairs hinted at by
 the clues.  Each pair of words will be antonyms.
 

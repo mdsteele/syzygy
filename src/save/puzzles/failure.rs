@@ -26,8 +26,8 @@ use super::super::util::{ACCESS_KEY, pop_array};
 
 // ========================================================================= //
 
-const BOARD_KEY: &'static str = "board";
-const MID_SCENE_DONE_KEY: &'static str = "mid_done";
+const BOARD_KEY: &str = "board";
+const MID_SCENE_DONE_KEY: &str = "mid_done";
 
 // ========================================================================= //
 

@@ -134,7 +134,7 @@ impl PuzzleView for View {
 
 // ========================================================================= //
 
-const INFO_BOX_TEXT: &'static str = "\
+const INFO_BOX_TEXT: &str = "\
 Your goal is to connect each purple node to each other
 purple node.
 

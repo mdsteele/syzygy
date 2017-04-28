@@ -25,14 +25,14 @@ use super::super::util::{ACCESS_KEY, pop_array, to_i32};
 
 // ========================================================================= //
 
-const ELINSA_ROW_KEY: &'static str = "elinsa";
-const POSITIONS_KEY: &'static str = "positions";
+const ELINSA_ROW_KEY: &str = "elinsa";
+const POSITIONS_KEY: &str = "positions";
 
 const NUM_ROWS: i32 = 7;
 const MAX_POSITION: i32 = 9;
 const MIN_ELINSA_ROW: i32 = -1;
 const MAX_ELINSA_ROW: i32 = NUM_ROWS;
-const INITIAL_POSITIONS: &'static [i32] = &[9, 9, 9, 9, 9, 9, 8];
+const INITIAL_POSITIONS: &[i32] = &[9, 9, 9, 9, 9, 9, 8];
 const INITIAL_ELINSA_ROW: i32 = MAX_ELINSA_ROW;
 
 // ========================================================================= //

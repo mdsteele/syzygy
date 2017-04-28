@@ -25,9 +25,9 @@ use super::util::{pop_array, to_i32, to_table};
 
 // ========================================================================= //
 
-const COORDS_KEY: &'static str = "coords";
-const DEVICE_KEY: &'static str = "device";
-const DIRECTION_KEY: &'static str = "direction";
+const COORDS_KEY: &str = "coords";
+const DEVICE_KEY: &str = "device";
+const DIRECTION_KEY: &str = "direction";
 
 // ========================================================================= //
 

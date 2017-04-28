@@ -30,7 +30,7 @@ const NODE_WIDTH: u32 = 24;
 const NODE_HEIGHT: u32 = 24;
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-const NODES: &'static [(Location, (i32, i32))] = &[
+const NODES: &[(Location, (i32, i32))] = &[
     (Location::Prolog, (75, 100)),
     (Location::ALightInTheAttic, (200, 50)),
     (Location::BlackAndBlue, (225, 75)),
@@ -234,7 +234,7 @@ impl Element<Option<Location>, Location> for PuzzleNode {
 
 // ========================================================================= //
 
-pub const INFO_BOX_TEXT: &'static str = "\
+pub const INFO_BOX_TEXT: &str = "\
 $M{Tap}{Click} on a system node to select it; $M{tap}{click} on it again to
 travel there.
 

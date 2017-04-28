@@ -28,10 +28,10 @@ use super::super::util::{ACCESS_KEY, pop_array, to_i32};
 
 // ========================================================================= //
 
-const FOUND_KEY: &'static str = "found";
+const FOUND_KEY: &str = "found";
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-const WORDS: &'static [(i32, &'static str, i32, i32, WordDir)] = &[
+const WORDS: &[(i32, &str, i32, i32, WordDir)] = &[
     ( 7, "Altair",    4, 3, WordDir::Horizontal),
     (13, "Canis",     5, 4, WordDir::Horizontal),
     (21, "Cetus",     0, 8, WordDir::DiagDown),
@@ -58,7 +58,7 @@ const WORDS: &'static [(i32, &'static str, i32, i32, WordDir)] = &[
     (15, "Vega",      1, 2, WordDir::Horizontal),
 ];
 
-const FINAL_WORD: &'static str = "SKEPTICISM";
+const FINAL_WORD: &str = "SKEPTICISM";
 
 // ========================================================================= //
 

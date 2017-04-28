@@ -263,8 +263,8 @@ const BOX_USIZE: u32 = 24;
 const BOX_SIZE: i32 = BOX_USIZE as i32;
 const SLIDER_LEFT: i32 = 216;
 const SLIDER_TOP: i32 = 178;
-const SLIDER_WORDS: [&'static str; 6] = ["ELINSA", "ARGONY", "MEZURE",
-                                         "YTTRIS", "UGRENT", "RELYNG"];
+const SLIDER_WORDS: [&str; 6] = ["ELINSA", "ARGONY", "MEZURE", "YTTRIS",
+                                 "UGRENT", "RELYNG"];
 
 struct SliderDrag {
     col: i32,
@@ -379,22 +379,22 @@ impl Element<PasswordState, (i32, i32)> for PasswordSlider {
 
 // ========================================================================= //
 
-const ELINSA_SPEECH: &'static str = "\
+const ELINSA_SPEECH: &str = "\
 If you don't do something yourself, it's not
 like you can expect it to work out well.";
-const ARGONY_SPEECH: &'static str = "\
+const ARGONY_SPEECH: &str = "\
 Those who don't learn from the past won't
 have much luck in the future either.";
-const MEZURE_SPEECH: &'static str = "\
+const MEZURE_SPEECH: &str = "\
 I may be new around here, but I'm committed
 to helping us all to get through this.";
-const YTTRIS_SPEECH: &'static str = "\
+const YTTRIS_SPEECH: &str = "\
 I feel frightened, yet inspired!
 Who knows what will happen next?";
-const UGRENT_SPEECH: &'static str = "\
+const UGRENT_SPEECH: &str = "\
 Don't get sloppy, or you're
 going to endanger us all.";
-const RELYNG_SPEECH: &'static str = "\
+const RELYNG_SPEECH: &str = "\
 Sometimes you have to hide your
 own cards to uncover the truth.";
 
@@ -403,20 +403,20 @@ fn make_speech(resources: &mut Resources, pos: TalkPos, text: &str)
     (Rc::new(Paragraph::new(resources, "roman", Align::Center, text)), pos)
 }
 
-const ELINSA_OFFS: &'static [(i32, &'static str)] =
-    &[(5, ""), (5, ""), (5, ""), (6, ""), (2, ""), (4, "")];
-const ARGONY_OFFS: &'static [(i32, &'static str)] =
-    &[(5, ""), (2, ""), (7, ""), (4, ""), (7, ""), (6, "")];
-const MEZURE_OFFS: &'static [(i32, &'static str)] =
-    &[(5, ""), (1, ""), (6, ""), (1, ""), (5, ""), (4, "")];
-const YTTRIS_OFFS: &'static [(i32, &'static str)] =
-    &[(5, ""), (3, ""), (4, ""), (3, ""), (5, ""), (4, "")];
-const UGRENT_OFFS: &'static [(i32, &'static str)] =
-    &[(2, ""), (0, ""), (1, ""), (1, ""), (2, ""), (2, "")];
-const RELYNG_OFFS: &'static [(i32, &'static str)] =
-    &[(0, ""), (2, ""), (4, ""), (6, ""), (7, ""), (7, "")];
+const ELINSA_OFFS: &[(i32, &str)] = &[(5, ""), (5, ""), (5, ""), (6, ""),
+                                      (2, ""), (4, "")];
+const ARGONY_OFFS: &[(i32, &str)] = &[(5, ""), (2, ""), (7, ""), (4, ""),
+                                      (7, ""), (6, "")];
+const MEZURE_OFFS: &[(i32, &str)] = &[(5, ""), (1, ""), (6, ""), (1, ""),
+                                      (5, ""), (4, "")];
+const YTTRIS_OFFS: &[(i32, &str)] = &[(5, ""), (3, ""), (4, ""), (3, ""),
+                                      (5, ""), (4, "")];
+const UGRENT_OFFS: &[(i32, &str)] = &[(2, ""), (0, ""), (1, ""), (1, ""),
+                                      (2, ""), (2, "")];
+const RELYNG_OFFS: &[(i32, &str)] = &[(0, ""), (2, ""), (4, ""), (6, ""),
+                                      (7, ""), (7, "")];
 
-const CROSSWORDS_INFO_BOX_TEXT: &'static str = "\
+const CROSSWORDS_INFO_BOX_TEXT: &str = "\
 Your goal is to fill in all six crosswords.
 
 $M{Tap}{Click} on each of the six characters to reveal their crossword.
@@ -431,7 +431,7 @@ for hints on how to find all the words.
 (Note that for this puzzle, the reset button will affect only the
 currently-selected crossword, not any of the others.)";
 
-const SLIDERS_INFO_BOX_TEXT: &'static str = "\
+const SLIDERS_INFO_BOX_TEXT: &str = "\
 Now that all six characters' crosswords have been filled in,
 you must drag the six columns up and down to form the final,
 six-letter password.

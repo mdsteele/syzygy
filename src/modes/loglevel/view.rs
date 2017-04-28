@@ -136,7 +136,7 @@ impl PuzzleView for View {
 // ========================================================================= //
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-const OFFSETS_CLUES: &'static [(i32, &'static str)] = &[
+const OFFSETS_CLUES: &[(i32, &str)] = &[
     (5, "relaxed or casual in manner or dress"),
     (1, "in Spanish, ``la'' rather than ``el''"),
     (1, "an animated TV show"),
@@ -149,7 +149,7 @@ const OFFSETS_CLUES: &'static [(i32, &'static str)] = &[
     (0, "to separate words with symbols"),
 ];
 
-const INFO_BOX_TEXT: &'static str = "\
+const INFO_BOX_TEXT: &str = "\
 Your goal is to fill in the crossword.
 
 $M{Tap}{Click} on a box to select it, then type in the

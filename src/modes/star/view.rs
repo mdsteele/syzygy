@@ -401,7 +401,7 @@ impl Drag {
 
 // ========================================================================= //
 
-const INFO_BOX_TEXT: &'static str = "\
+const INFO_BOX_TEXT: &str = "\
 Your goal is to remove all 24 listed words from the grid.
 
 Search across, down, and diagonally within the grid of letters

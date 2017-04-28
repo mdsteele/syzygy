@@ -26,9 +26,9 @@ use super::super::util::{ACCESS_KEY, pop_array};
 
 // ========================================================================= //
 
-const TOGGLED_KEY: &'static str = "toggled";
+const TOGGLED_KEY: &str = "toggled";
 
-const SOLVED_TOGGLED: &'static [i32] = &[0, 3, 4, 9, 10, 13, 15];
+const SOLVED_TOGGLED: &[i32] = &[0, 3, 4, 9, 10, 13, 15];
 
 // ========================================================================= //
 

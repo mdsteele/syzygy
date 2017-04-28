@@ -319,7 +319,7 @@ impl Element<TheYState, PuzzleCmd> for LettersView {
 
 // ========================================================================= //
 
-const INFO_BOX_TEXT: &'static str = "\
+const INFO_BOX_TEXT: &str = "\
 Your goal is to transform the starting word into a new word.
 There is only one possible new word that can be formed.
 

@@ -26,13 +26,11 @@ use super::super::util::{ACCESS_KEY, pop_array};
 
 // ========================================================================= //
 
-const SEQUENCE_KEY: &'static str = "sequence";
+const SEQUENCE_KEY: &str = "sequence";
 
-const INITIAL_LETTERS: &'static [char] = &['M', 'A', 'X', 'I', 'M', 'I', 'Z',
-                                           'E'];
-const SOLVED_LETTERS: &'static [char] = &['C', 'R', 'E', 'A', 'T', 'I', 'V',
-                                          'E'];
-const SOLVED_SEQUENCE: &'static [i8] = &[1, 0, 4, 5, 3, 2];
+const INITIAL_LETTERS: &[char] = &['M', 'A', 'X', 'I', 'M', 'I', 'Z', 'E'];
+const SOLVED_LETTERS: &[char] = &['C', 'R', 'E', 'A', 'T', 'I', 'V', 'E'];
+const SOLVED_SEQUENCE: &[i8] = &[1, 0, 4, 5, 3, 2];
 
 // ========================================================================= //
 

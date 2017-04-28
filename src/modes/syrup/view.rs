@@ -298,7 +298,7 @@ fn tick_radius(lit: bool, radius: &mut i32) -> bool {
 
 // ========================================================================= //
 
-const INFO_BOX_TEXT: &'static str = "\
+const INFO_BOX_TEXT: &str = "\
 Your goal is to turn all twenty-one lights WHITE.
 
 $M{Tap}{Click} one of the lights to change the color of that

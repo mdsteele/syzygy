@@ -29,14 +29,14 @@ use super::super::util::{ACCESS_KEY, pop_array};
 const NUM_COLS: i32 = 9;
 const NUM_ROWS: i32 = 7;
 
-const GRID_KEY: &'static str = "grid";
+const GRID_KEY: &str = "grid";
 
-const INITIAL_GRID: &'static [i8] =
+const INITIAL_GRID: &[i8] =
     &[2, 1, 2, 1, 2, -1, 2, 0, 1, -1, -1, 1, 2, 0, -1, -1, 2, 0, 0, 1, 2, 1,
       -1, 0, 1, 1, 2, 2, 0, -1, -1, 2, -1, -1, -1, 1, 2, 1, 0, 2, -1, 1, 2,
       2, 0, 0, -1, -1, -1, 1, 0, -1, 0, 1, 1, 0, 2, 2, 0, 1, -1, 2, 2];
 
-const SOLVED_GRID: &'static [i8] =
+const SOLVED_GRID: &[i8] =
     &[0, 0, 0, 1, 1, -1, 2, 2, 2, -1, -1, 0, 1, 1, -1, -1, 2, 2, 2, 2, 2, 0,
       -1, 0, 1, 1, 1, 2, 2, -1, -1, 0, -1, -1, -1, 1, 2, 2, 2, 0, -1, 0, 1,
       1, 1, 1, -1, -1, -1, 2, 2, -1, 0, 0, 1, 1, 1, 2, 2, 2, -1, 0, 0];

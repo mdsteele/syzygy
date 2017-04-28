@@ -203,10 +203,10 @@ impl FreeSymbolView {
 
 // ========================================================================= //
 
-const PLACE_PROMPT: &'static str = "Drag the shape on the left onto the \
-                                    center grid.";
-const REMOVE_PROMPT: &'static str = "$M{Tap}{Click} any tile in the center \
-                                     grid that had the symbol on the right.";
+const PLACE_PROMPT: &str = "Drag the shape on the left onto the \
+                            center grid.";
+const REMOVE_PROMPT: &str = "$M{Tap}{Click} any tile in the center \
+                             grid that had the symbol on the right.";
 
 struct PromptView {
     place: Paragraph,
@@ -251,7 +251,7 @@ impl PromptView {
 
 // ========================================================================= //
 
-const INFO_BOX_TEXT: &'static str = "\
+const INFO_BOX_TEXT: &str = "\
 Your goal is to place (and later remove) each group of tiles
 on the grid.
 

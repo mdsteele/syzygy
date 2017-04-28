@@ -375,7 +375,7 @@ fn tick_radius<A>(lit: bool, radius: &mut i32, max: i32) -> Action<A> {
 
 // ========================================================================= //
 
-const INFO_BOX_TEXT: &'static str = "\
+const INFO_BOX_TEXT: &str = "\
 Your goal is to turn all thirty lights OFF by placing seven
 letters onto the grid.
 

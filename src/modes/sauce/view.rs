@@ -311,7 +311,7 @@ impl Element<SauceState, bool> for ArrowButton {
 
 // ========================================================================= //
 
-const INFO_BOX_TEXT: &'static str = "\
+const INFO_BOX_TEXT: &str = "\
 Your goal is to enter the two-word phrases
 hinted at by the clues.  Each pair of words will
 rhyme.

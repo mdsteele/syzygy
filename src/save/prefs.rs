@@ -51,6 +51,6 @@ impl Prefs {
     }
 }
 
-const FULLSCREEN_KEY: &'static str = "fullscreen";
+const FULLSCREEN_KEY: &str = "fullscreen";
 
 // ========================================================================= //

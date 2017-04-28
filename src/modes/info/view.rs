@@ -57,7 +57,7 @@ impl<'a, S, A, E: Element<S, A>> Element<S, ()> for View<'a, A, E> {
 
 // ========================================================================= //
 
-pub const SOLVED_INFO_TEXT: &'static str = "\
+pub const SOLVED_INFO_TEXT: &str = "\
 This area has been repaired.
 
 Return to the map to select another scene.";

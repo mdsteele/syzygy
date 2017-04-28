@@ -26,11 +26,11 @@ use super::super::util::{ACCESS_KEY, pop_array, to_i32, to_u32};
 
 // ========================================================================= //
 
-const SEED_KEY: &'static str = "seed";
-const STAGE_KEY: &'static str = "stage";
+const SEED_KEY: &str = "seed";
+const STAGE_KEY: &str = "stage";
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-const GRIDS: &'static [(i32, char, char, &'static str)] = &[
+const GRIDS: &[(i32, char, char, &str)] = &[
     (4, 'K', 'N', "CDGHMOTWXYZ"), // 4x3 = 12
     (5, '9', '6', "BEFILORSZ12378"), // 5x3 = 15
     (4, 'A', 'V', "CDGJKPQRUWY4560"), // 4x4 = 16

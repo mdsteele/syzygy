@@ -203,23 +203,23 @@ impl PuzzleView for View {
 
 // ========================================================================= //
 
-const YTTRIS_INFO_BOX_TEXT: &'static str = "\
+const YTTRIS_INFO_BOX_TEXT: &str = "\
 Your goal is to turn the word TANGENT into the word COSINE.
 
 $M{Tap}{Click} on one of the six buttons at the top to transform the
 word.  Each button performs a different transformation.";
 
-const ARGONY_INFO_BOX_TEXT: &'static str = "\
+const ARGONY_INFO_BOX_TEXT: &str = "\
 Your goal is to TODO.";
 
-const ELINSA_INFO_BOX_TEXT: &'static str = "\
+const ELINSA_INFO_BOX_TEXT: &str = "\
 Your goal is to connect each red node to each blue
 node.  The purple node counts as both red and blue.
 
 Drag across the grid with $M{your finger}{the mouse} to create or
 remove pipes between the nodes.";
 
-const UGRENT_INFO_BOX_TEXT: &'static str = "\
+const UGRENT_INFO_BOX_TEXT: &str = "\
 Your goal is to activate each detector on the right with
 the appropriate color of laser.
 
@@ -227,14 +227,14 @@ Drag mirrors and other objects with $M{your finger}{the mouse} to
 move their positions in the grid.  $M{Tap}{Click} objects to rotate
 them.";
 
-const RELYNG_INFO_BOX_TEXT: &'static str = "\
+const RELYNG_INFO_BOX_TEXT: &str = "\
 Your goal is to turn all twenty lights OFF.
 
 $M{Tap}{Click} one of the lights to toggle that light and some
 of the adjacent lights.  The pattern of adjancent lights
 toggled will change after each move.";
 
-const MEZURE_INFO_BOX_TEXT: &'static str = "\
+const MEZURE_INFO_BOX_TEXT: &str = "\
 Your goal is to form the final, missing word.";
 
 // ========================================================================= //

@@ -122,7 +122,7 @@ impl Element<Game, Cmd> for View {
 
 // ========================================================================= //
 
-pub const INFO_BOX_TEXT: &'static str = "\
+pub const INFO_BOX_TEXT: &str = "\
 Return to the map to select another scene.";
 
 // ========================================================================= //

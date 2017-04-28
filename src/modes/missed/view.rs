@@ -213,7 +213,7 @@ impl Element<(), PuzzleCmd> for Blinkenlight {
 
 // ========================================================================= //
 
-const INFO_BOX_TEXT: &'static str = "\
+const INFO_BOX_TEXT: &str = "\
 Your goal is to activate each detector on the right with
 the appropriate color of laser.
 

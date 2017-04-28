@@ -382,7 +382,7 @@ impl Element<CubeState, PuzzleCmd> for SolutionDisplay {
 
 // ========================================================================= //
 
-const INFO_BOX_TEXT: &'static str = "\
+const INFO_BOX_TEXT: &str = "\
 Your goal is to arrange the front faces of the cubes in
 the large grid in the middle into the pattern shown on
 the small grid on the left.

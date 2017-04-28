@@ -30,8 +30,8 @@ use save::util::{pop_table, to_table};
 
 // ========================================================================= //
 
-const EVER_CLICKED_INFO_KEY: &'static str = "ever_clicked_info";
-const LOCATION_KEY: &'static str = "location";
+const EVER_CLICKED_INFO_KEY: &str = "ever_clicked_info";
+const LOCATION_KEY: &str = "location";
 
 // ========================================================================= //
 

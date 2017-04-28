@@ -25,11 +25,10 @@ use super::super::util::{ACCESS_KEY, pop_array};
 
 // ========================================================================= //
 
-const WORDS_KEY: &'static str = "words";
+const WORDS_KEY: &str = "words";
 
-const SOLVED_WORDS: &'static [&'static str] = &["COM#", "NON+ED", "*TLE",
-                                                ":IZE", "CU*D", "UN,N",
-                                                ":EL", "B@ON", "SUR+", ",NDS"];
+const SOLVED_WORDS: &[&str] = &["COM#", "NON+ED", "*TLE", ":IZE", "CU*D",
+                                "UN,N", ":EL", "B@ON", "SUR+", ",NDS"];
 
 // ========================================================================= //
 

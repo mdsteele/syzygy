@@ -29,14 +29,14 @@ use super::super::util::{ACCESS_KEY, pop_array, to_i32};
 
 // ========================================================================= //
 
-const STAGE_KEY: &'static str = "stage";
-// const YTTRIS_KEY: &'static str = "yttris";
-// const ARGONY_KEY: &'static str = "argony";
-const ELINSA_KEY: &'static str = "elinsa";
-const UGRENT_KEY: &'static str = "ugrent";
-const RELYNG_LIGHTS_KEY: &'static str = "relyng_lights";
-const RELYNG_NEXT_KEY: &'static str = "relyng_next";
-// const MEZURE_KEY: &'static str = "mezure";
+const STAGE_KEY: &str = "stage";
+// const YTTRIS_KEY: &str = "yttris";
+// const ARGONY_KEY: &str = "argony";
+const ELINSA_KEY: &str = "elinsa";
+const UGRENT_KEY: &str = "ugrent";
+const RELYNG_LIGHTS_KEY: &str = "relyng_lights";
+const RELYNG_NEXT_KEY: &str = "relyng_next";
+// const MEZURE_KEY: &str = "mezure";
 
 const RELYNG_NUM_COLS: i32 = 5;
 const RELYNG_NUM_ROWS: i32 = 4;
@@ -366,12 +366,12 @@ impl PuzzleState for SyzygyState {
 mod tests {
     use super::SyzygyStage;
 
-    const ALL_STAGES: &'static [SyzygyStage] = &[SyzygyStage::Yttris,
-                                                 SyzygyStage::Argony,
-                                                 SyzygyStage::Elinsa,
-                                                 SyzygyStage::Ugrent,
-                                                 SyzygyStage::Relyng,
-                                                 SyzygyStage::Mezure];
+    const ALL_STAGES: &[SyzygyStage] = &[SyzygyStage::Yttris,
+                                         SyzygyStage::Argony,
+                                         SyzygyStage::Elinsa,
+                                         SyzygyStage::Ugrent,
+                                         SyzygyStage::Relyng,
+                                         SyzygyStage::Mezure];
 
     #[test]
     fn stage_toml_round_trip() {

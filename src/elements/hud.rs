@@ -31,7 +31,7 @@ const BUTTON_HEIGHT: u32 = 16;
 const NAMEBOX_WIDTH: u32 = 114;
 const NAMEBOX_HEIGHT: u32 = 16;
 const SCROLL_SPEED: i32 = 2;
-const PAUSE_TEXT: &'static str = "$M{Tap}{Click} anywhere to continue";
+const PAUSE_TEXT: &str = "$M{Tap}{Click} anywhere to continue";
 const PAUSE_TEXT_MARGIN_HORZ: i32 = 5;
 const PAUSE_TEXT_MARGIN_VERT: i32 = 3;
 

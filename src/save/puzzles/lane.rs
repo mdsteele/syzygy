@@ -27,8 +27,8 @@ use super::PuzzleState;
 
 // ========================================================================= //
 
-const GRID_KEY: &'static str = "grid";
-const STAGE_KEY: &'static str = "stage";
+const GRID_KEY: &str = "grid";
+const STAGE_KEY: &str = "stage";
 
 const NUM_COLS: usize = 6;
 const NUM_ROWS: usize = 4;
@@ -40,7 +40,7 @@ enum Stage {
 }
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-const STAGES: &'static [Stage] = &[
+const STAGES: &[Stage] = &[
     Stage::Place(Shape([0, 1, 0, 0, 1, 1, 0, 1, 0])),
     Stage::Place(Shape([0, 0, 0, 2, 2, 2, 0, 0, 2])),
     Stage::Place(Shape([0, 0, 0, 3, 3, 0, 3, 3, 0])),

@@ -390,7 +390,7 @@ impl Element<WreckedState, PuzzleCmd> for SolutionDisplay {
 
 // ========================================================================= //
 
-const INFO_BOX_TEXT: &'static str = "\
+const INFO_BOX_TEXT: &str = "\
 Your goal is to arrange the large grid on the left into
 the pattern shown on the small grid on the right.
 

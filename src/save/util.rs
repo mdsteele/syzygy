@@ -22,7 +22,7 @@ use toml;
 
 // ========================================================================= //
 
-pub const ACCESS_KEY: &'static str = "access";
+pub const ACCESS_KEY: &str = "access";
 
 pub fn pop_array(table: &mut toml::value::Table, key: &str)
                  -> toml::value::Array {

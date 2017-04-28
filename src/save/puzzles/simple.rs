@@ -27,14 +27,14 @@ use super::super::util::{ACCESS_KEY, pop_array, to_i32};
 
 // ========================================================================= //
 
-const PIPES_KEY: &'static str = "pipes";
-const STAGE_KEY: &'static str = "stage";
+const PIPES_KEY: &str = "pipes";
+const STAGE_KEY: &str = "stage";
 
 const FIRST_STAGE: i32 = 2;
 const LAST_STAGE: i32 = 5;
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-const SOLVED_PIPES: &'static [&'static [(i32, i32)]] = &[
+const SOLVED_PIPES: &[&[(i32, i32)]] = &[
     &[(4, 3), (5, 3), (6, 3)],
     &[(4, 3), (4, 4), (3, 4), (2, 4)],
     &[(4, 3), (3, 3), (3, 4), (3, 5), (4, 5), (5, 5)],

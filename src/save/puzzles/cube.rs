@@ -25,15 +25,14 @@ use super::super::util::{ACCESS_KEY, pop_array};
 
 // ========================================================================= //
 
-const GRID_KEY: &'static str = "grid";
+const GRID_KEY: &str = "grid";
 
 const NUM_COLS: i32 = 4;
 const NUM_ROWS: i32 = 4;
 
-const INITIAL_GRID: &'static [i32] = &[23, 16, 18, 12, 15, 9, 17, 22, 21, 3,
-                                       8, 6, 19, 1, 4, 11];
-const SOLVED_GRID: &'static [i32] = &[4, 4, 3, 3, 4, 2, 2, 3, 1, 2, 2, 0, 1,
-                                      1, 0, 0];
+const INITIAL_GRID: &[i32] = &[23, 16, 18, 12, 15, 9, 17, 22, 21, 3, 8, 6,
+                               19, 1, 4, 11];
+const SOLVED_GRID: &[i32] = &[4, 4, 3, 3, 4, 2, 2, 3, 1, 2, 2, 0, 1, 1, 0, 0];
 
 // ========================================================================= //
 

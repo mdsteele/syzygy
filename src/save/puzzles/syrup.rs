@@ -26,24 +26,24 @@ use super::super::util::{ACCESS_KEY, pop_array};
 
 // ========================================================================= //
 
-const RED_TOGGLED_KEY: &'static str = "red";
-const GREEN_TOGGLED_KEY: &'static str = "green";
-const BLUE_TOGGLED_KEY: &'static str = "blue";
-const NEXT_COLOR_KEY: &'static str = "next";
+const RED_TOGGLED_KEY: &str = "red";
+const GREEN_TOGGLED_KEY: &str = "green";
+const BLUE_TOGGLED_KEY: &str = "blue";
+const NEXT_COLOR_KEY: &str = "next";
 
-const INITIAL_RED_GRID: &'static [bool] =
+const INITIAL_RED_GRID: &[bool] =
     &[true, true, true, true, false, true, true, true, false, true, true,
       true, true, false, true, false, true, true, false, true, true];
-const INITIAL_GREEN_GRID: &'static [bool] =
+const INITIAL_GREEN_GRID: &[bool] =
     &[true, false, true, false, false, true, true, true, false, false, true,
       false, true, true, false, false, true, true, true, true, true];
-const INITIAL_BLUE_GRID: &'static [bool] =
+const INITIAL_BLUE_GRID: &[bool] =
     &[true, false, true, true, false, false, false, false, true, true, true,
       true, true, true, true, false, true, false, true, true, false];
 
-const SOLVED_RED_TOGGLED: &'static [i32] = &[3, 8, 13, 14];
-const SOLVED_GREEN_TOGGLED: &'static [i32] = &[0, 4, 9, 10];
-const SOLVED_BLUE_TOGGLED: &'static [i32] = &[5, 7, 11, 16];
+const SOLVED_RED_TOGGLED: &[i32] = &[3, 8, 13, 14];
+const SOLVED_GREEN_TOGGLED: &[i32] = &[0, 4, 9, 10];
+const SOLVED_BLUE_TOGGLED: &[i32] = &[5, 7, 11, 16];
 
 // ========================================================================= //
 

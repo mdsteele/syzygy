@@ -25,20 +25,20 @@ use super::super::util::{ACCESS_KEY, pop_array};
 
 // ========================================================================= //
 
-const TOGGLED_KEY: &'static str = "toggled";
+const TOGGLED_KEY: &str = "toggled";
 
 const NUM_COLS: i32 = 4;
 const NUM_ROWS: i32 = 3;
 
-const INITIAL_GRID: &'static [bool] =
+const INITIAL_GRID: &[bool] =
     &[false, true, false, true, true, false, true, false, true, true, true,
       false, false, false, false, true, false, true, true, false, true,
       false, true, true, false, true, true, false, true, false];
 
-const LETTERS: &'static [char] = &['T', 'A', 'S', 'H', 'L', 'E', 'T'];
+const LETTERS: &[char] = &['T', 'A', 'S', 'H', 'L', 'E', 'T'];
 
-const SOLVED_TOGGLED_1: &'static [i32] = &[2, 7, 0, 10, 8, 4, 9];
-const SOLVED_TOGGLED_2: &'static [i32] = &[9, 7, 0, 10, 8, 4, 2];
+const SOLVED_TOGGLED_1: &[i32] = &[2, 7, 0, 10, 8, 4, 9];
+const SOLVED_TOGGLED_2: &[i32] = &[9, 7, 0, 10, 8, 4, 2];
 
 // ========================================================================= //
 

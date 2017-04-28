@@ -118,10 +118,7 @@ impl Theater {
             (255, 255, 255)
         };
         canvas.clear(bg_color);
-        for (&index, actor) in self.actors.iter() {
-            if index >= 0 {
-                break;
-            }
+        for (_, actor) in self.actors.range(..0) {
             actor.draw_actor(canvas);
         }
         if let Some(ref background) = self.background {
@@ -130,10 +127,8 @@ impl Theater {
     }
 
     pub fn draw_foreground(&self, canvas: &mut Canvas) {
-        for (&index, actor) in self.actors.iter() {
-            if index >= 0 {
-                actor.draw_actor(canvas);
-            }
+        for (_, actor) in self.actors.range(0..) {
+            actor.draw_actor(canvas);
         }
         if self.dark {
             let mut rects = vec![canvas.rect()];

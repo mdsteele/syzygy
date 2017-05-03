@@ -50,6 +50,7 @@ mod syzygy;
 mod they;
 mod title;
 mod tread;
+mod whatcha;
 mod wrecked;
 
 pub use self::attic::run_a_light_in_the_attic;
@@ -85,6 +86,7 @@ pub use self::syzygy::run_system_syzygy;
 pub use self::they::run_the_y_factor;
 pub use self::title::run_title_screen;
 pub use self::tread::run_tread_lightly;
+pub use self::whatcha::run_whatcha_column;
 pub use self::wrecked::run_wrecked_angle;
 
 // ========================================================================= //

@@ -53,6 +53,7 @@ pub enum Location {
     SystemSyzygy,
     TheYFactor,
     TreadLightly,
+    WhatchaColumn,
     WreckedAngle,
 }
 
@@ -90,6 +91,7 @@ impl Location {
             Location::SystemSyzygy => "System Syzygy",
             Location::TheYFactor => "The Y Factor",
             Location::TreadLightly => "Tread Lightly",
+            Location::WhatchaColumn => "Whatcha Column",
             Location::WreckedAngle => "Wrecked Angle",
         }
     }
@@ -125,6 +127,7 @@ impl Location {
             Location::SystemSyzygy => Location::Map,
             Location::TheYFactor => Location::FactOrFiction,
             Location::TreadLightly => Location::Map,
+            Location::WhatchaColumn => Location::Map,
             Location::WreckedAngle => Location::ShiftingGround,
         }
     }
@@ -160,6 +163,7 @@ impl Location {
             Location::SystemSyzygy => vec![Location::PasswordFile],
             Location::TheYFactor => vec![Location::Prolog],
             Location::TreadLightly => vec![Location::LightSyrup],
+            Location::WhatchaColumn => vec![Location::MissedConnections],
             Location::WreckedAngle => vec![Location::Prolog],
         }
     }
@@ -195,6 +199,7 @@ impl Location {
             Location::SystemSyzygy => "system_syzygy",
             Location::TheYFactor => "the_y_factor",
             Location::TreadLightly => "tread_lightly",
+            Location::WhatchaColumn => "whatcha_column",
             Location::WreckedAngle => "wrecked_angle",
         }
     }
@@ -248,6 +253,7 @@ const ALL_LOCATIONS: &[Location] = &[Location::Map,
                                      Location::SystemSyzygy,
                                      Location::TreadLightly,
                                      Location::TheYFactor,
+                                     Location::WhatchaColumn,
                                      Location::WreckedAngle];
 
 // ========================================================================= //

@@ -46,6 +46,7 @@ mod syrup;
 mod syzygy;
 mod they;
 mod tread;
+mod whatcha;
 mod wrecked;
 
 pub use self::attic::AtticState;
@@ -77,6 +78,7 @@ pub use self::syrup::SyrupState;
 pub use self::syzygy::{SyzygyStage, SyzygyState};
 pub use self::they::TheYState;
 pub use self::tread::TreadState;
+pub use self::whatcha::WhatchaState;
 pub use self::wrecked::WreckedState;
 
 // ========================================================================= //

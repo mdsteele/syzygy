@@ -25,7 +25,7 @@ use save::{AtticState, BlackState, BlameState, CubeState, DayState,
            LineState, Location, LogLevelState, MissedState, PasswordState,
            PrologState, PuzzleState, SauceState, ServesState, SimpleState,
            StarState, SyrupState, SyzygyState, TheYState, TreadState,
-           WreckedState};
+           WhatchaState, WreckedState};
 use save::util::{pop_table, to_table};
 
 // ========================================================================= //
@@ -65,6 +65,7 @@ pub struct Game {
     pub system_syzygy: SyzygyState,
     pub the_y_factor: TheYState,
     pub tread_lightly: TreadState,
+    pub whatcha_column: WhatchaState,
     pub wrecked_angle: WreckedState,
     pub ever_clicked_info: bool,
 }
@@ -137,6 +138,8 @@ impl Game {
                 pop_table(table_ref, Location::TheYFactor.key())),
             tread_lightly: TreadState::from_toml(
                 pop_table(table_ref, Location::TreadLightly.key())),
+            whatcha_column: WhatchaState::from_toml(
+                pop_table(table_ref, Location::WhatchaColumn.key())),
             wrecked_angle: WreckedState::from_toml(
                 pop_table(table_ref, Location::WreckedAngle.key())),
             ever_clicked_info: table_ref.get(EVER_CLICKED_INFO_KEY)
@@ -201,6 +204,7 @@ impl Game {
             Location::SystemSyzygy => &self.system_syzygy,
             Location::TheYFactor => &self.the_y_factor,
             Location::TreadLightly => &self.tread_lightly,
+            Location::WhatchaColumn => &self.whatcha_column,
             Location::WreckedAngle => &self.wrecked_angle,
         }
     }
@@ -236,6 +240,7 @@ impl Game {
             Location::SystemSyzygy => &mut self.system_syzygy,
             Location::TheYFactor => &mut self.the_y_factor,
             Location::TreadLightly => &mut self.tread_lightly,
+            Location::WhatchaColumn => &mut self.whatcha_column,
             Location::WreckedAngle => &mut self.wrecked_angle,
         }
     }

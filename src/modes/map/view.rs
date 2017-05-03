@@ -59,6 +59,7 @@ const NODES: &[(Location, (i32, i32))] = &[
     (Location::SystemSyzygy, (440, 200)),
     (Location::TheYFactor, (100, 200)),
     (Location::TreadLightly, (300, 50)),
+    (Location::WhatchaColumn, (250, 150)),
     (Location::WreckedAngle, (100, 250)),
 ];
 

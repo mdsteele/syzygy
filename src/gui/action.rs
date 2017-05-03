@@ -54,6 +54,8 @@ impl<A> Action<A> {
         }
     }
 
+    pub fn also_redraw(&mut self) { self.redraw = true; }
+
     pub fn and_play_sound(mut self, sound: Sound) -> Action<A> {
         self.sounds.push(sound);
         self

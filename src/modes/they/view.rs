@@ -87,7 +87,7 @@ impl Element<Game, PuzzleCmd> for View {
                 state.set_sequence(Vec::new());
                 self.letters.reset(state);
                 action.also_play_sound(Sound::talk_annoyed_hi());
-                action.merge(Action::redraw());
+                action.also_redraw();
             }
         }
         if !action.should_stop() {

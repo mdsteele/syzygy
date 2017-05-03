@@ -19,10 +19,10 @@
 
 use elements::Paragraph;
 use gui::{Align, Point, Resources, Sound};
-use super::scene::{DarkNode, JumpNode, LightNode, LoopNode, ParallelNode,
-                   PlaceNode, QueueNode, RemoveNode, Scene, SceneNode,
-                   SequenceNode, SetBgNode, SlideNode, SoundNode, TalkNode,
-                   WaitNode};
+use super::scene::{AnimNode, DarkNode, JumpNode, LightNode, LoopNode,
+                   ParallelNode, PlaceNode, QueueNode, RemoveNode, Scene,
+                   SceneNode, SequenceNode, SetBgNode, SlideNode, SoundNode,
+                   TalkNode, WaitNode};
 use super::theater::TalkPos;
 
 // ========================================================================= //
@@ -40,6 +40,7 @@ pub enum Ast {
     Seq(Vec<Ast>),
     Par(Vec<Ast>),
     Loop(i32, i32, Box<Ast>),
+    Anim(i32, &'static str, &'static [usize], i32),
     Dark(bool),
     Jump(i32, (i32, i32), f64),
     Light(i32, bool),
@@ -77,6 +78,14 @@ impl Ast {
             Ast::Loop(min, max, ast) => {
                 let max = if max <= 0 { None } else { Some(max) };
                 Box::new(LoopNode::new(ast.to_scene_node(resources), min, max))
+            }
+            Ast::Anim(slot, name, indices, slowdown) => {
+                let all_sprites = resources.get_sprites(name);
+                let mut anim_sprites = Vec::with_capacity(indices.len());
+                for &index in indices {
+                    anim_sprites.push(all_sprites[index].clone());
+                }
+                Box::new(AnimNode::new(slot, anim_sprites, slowdown))
             }
             Ast::Dark(dark) => Box::new(DarkNode::new(dark)),
             Ast::Jump(slot, (x, y), duration) => {

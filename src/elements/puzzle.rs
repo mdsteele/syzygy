@@ -199,6 +199,11 @@ impl<U: Clone> PuzzleCore<U> {
                                         state: &mut S)
                                         -> Action<PuzzleCmd> {
         let mut action = self.screen_fade.handle_event(event, &mut ());
+        if event == &Event::ClockTick {
+            if self.theater.tick_animations() {
+                action.also_redraw();
+            }
+        }
         if !action.should_stop() {
             let subaction = if let Some(ref mut scene) = self.middle_scene {
                 scene.handle_event(event, &mut self.theater)

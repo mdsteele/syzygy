@@ -22,10 +22,10 @@ mod scene;
 mod theater;
 
 pub use self::ast::{Ast, TalkStyle};
-pub use self::scene::{DarkNode, JumpNode, LightNode, LoopNode, ParallelNode,
-                      PlaceNode, QueueNode, RemoveNode, Scene, SceneNode,
-                      SequenceNode, SetBgNode, SlideNode, SoundNode, TalkNode,
-                      WaitNode};
+pub use self::scene::{AnimNode, DarkNode, JumpNode, LightNode, LoopNode,
+                      ParallelNode, PlaceNode, QueueNode, RemoveNode, Scene,
+                      SceneNode, SequenceNode, SetBgNode, SlideNode, SoundNode,
+                      TalkNode, WaitNode};
 pub use self::theater::{TalkPos, Theater};
 
 // ========================================================================= //

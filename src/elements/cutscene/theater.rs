@@ -57,6 +57,13 @@ impl Theater {
 
     pub fn remove_actor(&mut self, slot: i32) { self.actors.remove(&slot); }
 
+    pub fn set_actor_anim(&mut self, slot: i32, sprites: Vec<Sprite>,
+                          slowdown: i32) {
+        if let Some(actor) = self.actors.get_mut(&slot) {
+            actor.set_anim(sprites, slowdown);
+        }
+    }
+
     pub fn get_actor_position(&mut self, slot: i32) -> Option<Point> {
         self.actors.get(&slot).map(|actor| actor.position)
     }
@@ -151,6 +158,14 @@ impl Theater {
             actor.draw_speech(canvas);
         }
     }
+
+    pub fn tick_animations(&mut self) -> bool {
+        let mut redraw = false;
+        for (_, actor) in self.actors.iter_mut() {
+            redraw |= actor.tick_animation();
+        }
+        redraw
+    }
 }
 
 fn remove_rect(rects: &mut Vec<Rect>, remove: Rect) {
@@ -193,7 +208,9 @@ fn remove_rect(rects: &mut Vec<Rect>, remove: Rect) {
 // ========================================================================= //
 
 struct Actor {
-    sprite: Sprite,
+    sprites: Vec<Sprite>,
+    anim_slowdown: i32,
+    anim_step: i32,
     position: Point,
     light: Option<Sprite>,
     speech: Option<SpeechBubble>,
@@ -202,7 +219,9 @@ struct Actor {
 impl Actor {
     fn new(sprite: Sprite, position: Point) -> Actor {
         Actor {
-            sprite: sprite,
+            sprites: vec![sprite],
+            anim_slowdown: 0,
+            anim_step: 0,
             position: position,
             light: None,
             speech: None,
@@ -210,10 +229,18 @@ impl Actor {
     }
 
     fn rect(&self) -> Rect {
-        Rect::new(self.position.x() - self.sprite.width() as i32 / 2,
-                  self.position.y() - self.sprite.height() as i32,
-                  self.sprite.width(),
-                  self.sprite.height())
+        let sprite = &self.sprites[0];
+        Rect::new(self.position.x() - sprite.width() as i32 / 2,
+                  self.position.y() - sprite.height() as i32,
+                  sprite.width(),
+                  sprite.height())
+    }
+
+    fn set_anim(&mut self, sprites: Vec<Sprite>, slowdown: i32) {
+        if !sprites.is_empty() {
+            self.sprites = sprites;
+        }
+        self.anim_slowdown = if self.sprites.len() > 1 { slowdown } else { 0 };
     }
 
     fn set_speech(&mut self, bubble_sprites: Vec<Sprite>,
@@ -229,13 +256,28 @@ impl Actor {
     fn clear_speech(&mut self) { self.speech = None; }
 
     fn draw_actor(&self, canvas: &mut Canvas) {
-        canvas.draw_sprite(&self.sprite, self.rect().top_left());
+        canvas.draw_sprite(&self.sprites[0], self.rect().top_left());
     }
 
     fn draw_speech(&self, canvas: &mut Canvas) {
         if let Some(ref speech) = self.speech {
             speech.draw(canvas);
         }
+    }
+
+    fn tick_animation(&mut self) -> bool {
+        debug_assert!(!self.sprites.is_empty());
+        if self.anim_slowdown > 0 {
+            debug_assert!(self.sprites.len() > 1);
+            self.anim_step += 1;
+            if self.anim_step >= self.anim_slowdown {
+                self.anim_step = 0;
+                let sprite = self.sprites.remove(0);
+                self.sprites.push(sprite);
+                return true;
+            }
+        }
+        false
     }
 }
 

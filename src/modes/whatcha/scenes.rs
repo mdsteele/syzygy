@@ -22,12 +22,16 @@ use gui::{Resources, Sound};
 
 // ========================================================================= //
 
+const FIRE_INDICES: &[usize] = &[0, 1, 2, 3];
+
 #[cfg_attr(rustfmt, rustfmt_skip)]
 pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
             // TODO: Make a background for "Whatcha Column".
             Ast::SetBg("log_level"),
+            Ast::Place(-1, "chars/fire", 0, (144, 160)),
+            Ast::Anim(-1, "chars/fire", FIRE_INDICES, 2),
             Ast::Place(0, "chars/mezure", 0, (-16, 304)),
             Ast::Slide(0, (304, 304), true, true, 1.0),
             Ast::Wait(0.5),

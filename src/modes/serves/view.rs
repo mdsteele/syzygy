@@ -109,7 +109,7 @@ impl Element<Game, PuzzleCmd> for View {
                 if state.is_solved() {
                     self.core.begin_outro_scene();
                 }
-                action.merge(Action::redraw());
+                action.also_redraw();
             }
         }
         if (!action.should_stop() && self.remove_countdown == 0) ||

@@ -401,6 +401,35 @@ impl SceneNode for LoopNode {
 // ========================================================================= //
 
 #[derive(Clone)]
+pub struct AnimNode {
+    slot: i32,
+    sprites: Vec<Sprite>,
+    slowdown: i32,
+}
+
+impl AnimNode {
+    pub fn new(slot: i32, sprites: Vec<Sprite>, slowdown: i32) -> AnimNode {
+        AnimNode {
+            slot: slot,
+            sprites: sprites,
+            slowdown: slowdown,
+        }
+    }
+}
+
+impl SceneNode for AnimNode {
+    fn box_clone(&self) -> Box<SceneNode> { Box::new(self.clone()) }
+
+    fn begin(&mut self, theater: &mut Theater, _: bool) { self.skip(theater); }
+
+    fn skip(&mut self, theater: &mut Theater) {
+        theater.set_actor_anim(self.slot, self.sprites.clone(), self.slowdown);
+    }
+}
+
+// ========================================================================= //
+
+#[derive(Clone)]
 pub struct DarkNode {
     dark: bool,
 }

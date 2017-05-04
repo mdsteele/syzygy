@@ -91,6 +91,11 @@ impl Element<Game, Cmd> for View {
     fn handle_event(&mut self, event: &Event, game: &mut Game) -> Action<Cmd> {
         let state = &mut game.prolog;
         let mut action = self.screen_fade.handle_event(event, &mut ());
+        if event == &Event::ClockTick {
+            if self.theater.tick_animations() {
+                action.also_redraw();
+            }
+        }
         if !action.should_stop() {
             let subaction = self.scene.handle_event(event, &mut self.theater);
             action.merge(subaction.but_no_value());

@@ -29,6 +29,7 @@ use super::theater::TalkPos;
 
 #[derive(Clone, Copy)]
 pub enum TalkStyle {
+    Comm,
     Normal,
     System,
     Thought,
@@ -119,6 +120,9 @@ impl Ast {
             Ast::Talk(slot, style, pos, text) => {
                 let (bubble_name, color, init_font, init_align) =
                     match style {
+                        TalkStyle::Comm => {
+                            ("speech/comm", WHITE, "italic", Align::Center)
+                        }
                         TalkStyle::Normal => {
                             ("speech/normal", WHITE, "roman", Align::Center)
                         }

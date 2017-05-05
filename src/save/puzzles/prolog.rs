@@ -33,8 +33,6 @@ impl PrologState {
     pub fn from_toml(table: toml::value::Table) -> PrologState {
         PrologState { access: Access::from_toml(table.get(ACCESS_KEY)) }
     }
-
-    pub fn mark_solved(&mut self) { self.access = Access::Solved; }
 }
 
 impl PuzzleState for PrologState {
@@ -43,6 +41,10 @@ impl PuzzleState for PrologState {
     fn access(&self) -> Access { self.access }
 
     fn access_mut(&mut self) -> &mut Access { &mut self.access }
+
+    // This is called when the intro scene finishes.  Instead of marking the
+    // puzzle visited like normal, for the Prolog we just mark it solved.
+    fn visit(&mut self) { self.access = Access::Solved; }
 
     fn can_reset(&self) -> bool { false }
 

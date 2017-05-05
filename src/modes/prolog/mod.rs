@@ -17,10 +17,22 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod control;
 mod scenes;
 mod view;
 
-pub use self::control::run_prolog;
+use gui::Window;
+use modes::{Mode, run_puzzle};
+use save::Game;
+use self::view::View;
+
+// ========================================================================= //
+
+pub fn run_prolog(window: &mut Window, game: &mut Game) -> Mode {
+    let view = {
+        let visible_rect = window.visible_rect();
+        View::new(&mut window.resources(), visible_rect, &game.prolog)
+    };
+    run_puzzle(window, game, view)
+}
 
 // ========================================================================= //

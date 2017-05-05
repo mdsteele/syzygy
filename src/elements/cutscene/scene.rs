@@ -85,7 +85,9 @@ impl Scene {
         self.began = true;
     }
 
-    pub fn is_finished(&self) -> bool { self.index == self.nodes.len() }
+    pub fn is_finished(&self) -> bool {
+        self.began && self.index == self.nodes.len()
+    }
 
     pub fn is_paused(&self) -> bool {
         self.index < self.nodes.len() &&

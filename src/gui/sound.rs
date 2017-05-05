@@ -76,6 +76,12 @@ impl Sound {
         Sound::new(Wave::noise(8000.0).adshr(0.0, 0.0, 0.25, 0.0, 0.05) * 0.4)
     }
 
+    pub fn explosion_small() -> Sound {
+        Sound::new(Wave::noise(Wave::from(1500.0) + Wave::sine(20.0) * 250.0)
+            .adshr(0.0, 0.0, 0.5, 0.0, 0.5) *
+                   0.5)
+    }
+
     pub fn platform_shift(num_times: i32) -> Sound {
         Sound::new(Wave::noise(800.0)
             .adshr(0.071, 0.0, 1.0, 0.0, 0.142)

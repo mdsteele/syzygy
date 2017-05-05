@@ -46,7 +46,9 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
             Ast::Remove(0),
             Ast::Remove(1),
             Ast::SetBg("prolog_space"),
-            Ast::Wait(1.0), // TODO: Show ship 'splosion
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::explosion_small()), // TODO: Show ship 'splosion
+            Ast::Wait(0.5),
             Ast::SetBg("prolog_security"),
             Ast::Place(0, "chars/system", 0, (464, 208)),
             Ast::Place(1, "chars/ugrent", 0, (224, 240)),
@@ -67,7 +69,10 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
                        going on up there?"),
         ]),
         Ast::Seq(vec![
-            Ast::Wait(1.0), // TODO: Secondary explosion; screen shake
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::explosion_small()),
+            Ast::Shake(10),
+            Ast::Wait(0.5),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(1, TalkStyle::Normal, TalkPos::NE,
                       "Bridge, this is security!\n\
@@ -137,7 +142,10 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
                                ship-wide emergency."),
                 ]),
                 Ast::Seq(vec![
-                    Ast::Wait(1.0), // TODO: Secondary explosion; screen shake
+                    Ast::Wait(0.5),
+                    Ast::Sound(Sound::explosion_small()),
+                    Ast::Shake(10),
+                    Ast::Wait(0.5),
                     Ast::Sound(Sound::talk_lo()),
                     Ast::Talk(1, TalkStyle::Normal, TalkPos::NW,
                               "Gee, ya think?"),
@@ -223,7 +231,7 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(1, TalkStyle::Normal, TalkPos::NE,
                       "System, get a new administrator process\n\
-                       process spawned.  We're going to need one."),
+                       spawned.  We're going to need one."),
         ]),
         Ast::Seq(vec![
             Ast::Wait(1.0),

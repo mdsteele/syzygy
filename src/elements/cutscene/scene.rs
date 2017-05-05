@@ -642,6 +642,25 @@ impl SceneNode for SetBgNode {
 // ========================================================================= //
 
 #[derive(Clone)]
+pub struct ShakeNode {
+    amount: i32,
+}
+
+impl ShakeNode {
+    pub fn new(amount: i32) -> ShakeNode { ShakeNode { amount: amount } }
+}
+
+impl SceneNode for ShakeNode {
+    fn box_clone(&self) -> Box<SceneNode> { Box::new(self.clone()) }
+
+    fn begin(&mut self, theater: &mut Theater, _: bool) {
+        theater.add_shake(self.amount);
+    }
+}
+
+// ========================================================================= //
+
+#[derive(Clone)]
 pub struct SlideNode {
     progress: i32,
     duration: i32,

@@ -28,6 +28,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::SetBg("wrecked_angle"),
             Ast::Place(-1, "wrecked/bridge", 0, (432, 320)),
+            Ast::Place(2, "chars/system", 0, (480, 96)),
             Ast::Place(1, "chars/elinsa", 0, (348, 304)),
             Ast::Wait(1.0),
             Ast::Sound(Sound::talk_thought()),
@@ -250,6 +251,7 @@ pub fn compile_outro_scene(resources: &mut Resources, visible: Rect) -> Scene {
                 Ast::Jump(1, (432, 416), 0.75),
                 Ast::Wait(0.5),
                 Ast::Sound(Sound::character_collision()),
+                Ast::Shake(4),
                 Ast::Wait(0.5),
                 Ast::Place(1, "chars/elinsa", 0, (432, visible.bottom() + 32)),
                 Ast::Sound(Sound::talk_lo()),

@@ -33,6 +33,7 @@ pub struct Theater {
     actors: BTreeMap<i32, Actor>,
     queue: Vec<(i32, i32)>,
     sounds: Vec<Sound>,
+    shake: i32,
     dark: bool,
 }
 
@@ -43,6 +44,7 @@ impl Theater {
             actors: BTreeMap::new(),
             queue: Vec::new(),
             sounds: Vec::new(),
+            shake: 0,
             dark: false,
         }
     }
@@ -116,6 +118,24 @@ impl Theater {
         mem::replace(&mut self.sounds, Vec::new())
     }
 
+    pub fn shake_offset(&self) -> Point {
+        let dx = if self.shake <= 0 {
+            0
+        } else {
+            let magnitude = cmp::min(3, (self.shake + 1) / 2);
+            if self.shake % 2 == 0 {
+                -magnitude
+            } else {
+                magnitude
+            }
+        };
+        Point::new(dx, 0)
+    }
+
+    pub fn add_shake(&mut self, amount: i32) {
+        self.shake = cmp::max(self.shake, amount);
+    }
+
     pub fn set_dark(&mut self, dark: bool) { self.dark = dark; }
 
     pub fn draw_background(&self, canvas: &mut Canvas) {
@@ -129,7 +149,14 @@ impl Theater {
             actor.draw_actor(canvas);
         }
         if let Some(ref background) = self.background {
-            canvas.draw_background(background);
+            if self.shake <= 0 {
+                canvas.draw_background(background);
+            } else {
+                let offset = self.shake_offset();
+                let mut rect = canvas.rect();
+                rect.offset(offset.x(), offset.y());
+                canvas.subcanvas(rect).draw_background(background);
+            }
         }
     }
 
@@ -161,6 +188,10 @@ impl Theater {
 
     pub fn tick_animations(&mut self) -> bool {
         let mut redraw = false;
+        if self.shake > 0 {
+            self.shake -= 1;
+            redraw = true;
+        }
         for (_, actor) in self.actors.iter_mut() {
             redraw |= actor.tick_animation();
         }

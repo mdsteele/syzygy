@@ -17,8 +17,10 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
+use std::rc::Rc;
+
 use elements::{PuzzleCmd, PuzzleCore, PuzzleView, Scene};
-use gui::{Action, Canvas, Element, Event, Rect, Resources};
+use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources};
 use save::{Game, PrologState, PuzzleState};
 use super::scenes::compile_scene;
 
@@ -26,6 +28,7 @@ use super::scenes::compile_scene;
 
 pub struct View {
     core: PuzzleCore<()>,
+    status: StatusIndicator,
 }
 
 impl View {
@@ -34,14 +37,20 @@ impl View {
         let intro = compile_scene(resources);
         let outro = Scene::empty();
         let core = PuzzleCore::new(resources, visible, state, intro, outro);
-        let mut view = View { core: core };
+        let mut view = View {
+            core: core,
+            status: StatusIndicator::new(resources, 304, 64),
+        };
         view.drain_queue();
         view
     }
 
     fn drain_queue(&mut self) {
-        for (_, _) in self.core.drain_queue() {
-            // TODO drain queue
+        for (device, value) in self.core.drain_queue() {
+            match device {
+                1 => self.status.set_mode(value),
+                _ => {}
+            }
         }
     }
 }
@@ -50,6 +59,7 @@ impl Element<Game, PuzzleCmd> for View {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
         let state = &game.prolog;
         self.core.draw_back_layer(canvas);
+        self.status.draw(self.core.theater().shake_offset(), canvas);
         self.core.draw_middle_layer(canvas);
         self.core.draw_front_layer(canvas, state);
     }
@@ -57,8 +67,13 @@ impl Element<Game, PuzzleCmd> for View {
     fn handle_event(&mut self, event: &Event, game: &mut Game)
                     -> Action<PuzzleCmd> {
         let state = &mut game.prolog;
-        let action = self.core.handle_event(event, state);
+        let mut action = self.core.handle_event(event, state);
         self.drain_queue();
+        if event == &Event::ClockTick {
+            if self.status.tick_animation() {
+                action.also_redraw();
+            }
+        }
         if state.is_solved() {
             self.core.begin_outro_scene();
         }
@@ -76,6 +91,72 @@ impl PuzzleView for View {
     fn reset(&mut self, _game: &mut Game) {}
 
     fn solve(&mut self, _game: &mut Game) {}
+}
+
+// ========================================================================= //
+
+const STATUS_ON_FRAMES: i32 = 16;
+const STATUS_OFF_FRAMES: i32 = 8;
+
+struct StatusIndicator {
+    font: Rc<Font>,
+    left: i32,
+    top: i32,
+    mode: i32,
+    anim: i32,
+}
+
+impl StatusIndicator {
+    fn new(resources: &mut Resources, left: i32, top: i32) -> StatusIndicator {
+        StatusIndicator {
+            font: resources.get_font("roman"),
+            left: left,
+            top: top,
+            mode: 0,
+            anim: 0,
+        }
+    }
+
+    fn set_mode(&mut self, mode: i32) {
+        self.mode = mode;
+        self.anim = 0;
+    }
+
+    fn draw(&self, offset: Point, canvas: &mut Canvas) {
+        let (color, msg1, msg2) = match self.mode {
+            1 => ((63, 255, 63), "EVERYTHING", "IS FINE"),
+            2 => ((255, 63, 63), "NOTHING", "IS FINE"),
+            3 => ((255, 63, 63), "EVERYTHING", "IS RUINED"),
+            4 => ((255, 63, 63), "SOMETHING", "IS ON FIRE"),
+            _ => return,
+        };
+        let mut canvas = canvas.subcanvas(Rect::new(self.left + offset.x(),
+                                                    self.top + offset.y(),
+                                                    96,
+                                                    32));
+        if self.anim < STATUS_ON_FRAMES {
+            canvas.fill_rect(color, Rect::new(3, 3, 90, 14));
+            canvas.draw_text(&self.font,
+                             Align::Center,
+                             Point::new(48, 14),
+                             msg1);
+        } else {
+            canvas.fill_rect((47, 47, 63), Rect::new(3, 3, 90, 14));
+        }
+        canvas.draw_text(&self.font, Align::Center, Point::new(48, 28), msg2);
+    }
+
+    fn tick_animation(&mut self) -> bool {
+        self.anim += 1;
+        if self.anim == STATUS_ON_FRAMES {
+            true
+        } else if self.anim >= STATUS_ON_FRAMES + STATUS_OFF_FRAMES {
+            self.anim = 0;
+            true
+        } else {
+            false
+        }
+    }
 }
 
 // ========================================================================= //

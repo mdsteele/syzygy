@@ -35,6 +35,7 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Wait(1.0),
             Ast::SetBg("prolog_security"),
+            Ast::Queue(1, 1), // Show status indicator
             Ast::Place(0, "chars/system", 0, (464, 208)),
             Ast::Place(1, "chars/ugrent", 0, (224, 240)),
             Ast::Wait(1.0),
@@ -45,11 +46,14 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
             Ast::Wait(1.0),
             Ast::Remove(0),
             Ast::Remove(1),
+            Ast::Queue(1, 0), // Hide status indicator
             Ast::SetBg("prolog_space"),
             Ast::Wait(0.5),
             Ast::Sound(Sound::explosion_small()), // TODO: Show ship 'splosion
+            Ast::Shake(16),
             Ast::Wait(0.5),
             Ast::SetBg("prolog_security"),
+            Ast::Queue(1, 2), // Show status indicator
             Ast::Place(0, "chars/system", 0, (464, 208)),
             Ast::Place(1, "chars/ugrent", 0, (224, 240)),
             Ast::Wait(1.0),
@@ -90,6 +94,7 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
             Ast::Sound(Sound::small_jump()),
             Ast::Jump(1, (160, 304), 0.75),
             Ast::Slide(1, (-16, 304), false, false, 0.4),
+            Ast::Queue(1, 0), // Hide status indicator
             Ast::SetBg("prolog_bridge"),
             Ast::Place(0, "chars/system", 0, (432, 112)),
             Ast::Seq(FIRE_POSITIONS.iter().enumerate().map(|(index, &pos)| {
@@ -111,6 +116,7 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
                 Ast::Remove(FIRE_SLOTS_START + index as i32)
             }).collect()),
             Ast::SetBg("prolog_security"),
+            Ast::Queue(1, 3), // Show status indicator
             Ast::Place(0, "chars/system", 0, (464, 208)),
             Ast::Place(1, "chars/ugrent", 0, (-16, 304)),
             Ast::Slide(1, (144, 304), false, true, 0.3),
@@ -129,6 +135,7 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
                       "All hands, this is security!"),
         ]),
         Ast::Seq(vec![
+            Ast::Queue(1, 0), // Hide status indicator
             Ast::SetBg("wrecked_angle"),
             Ast::Place(-1, "wrecked/bridge", 0, (432, 320)),
             Ast::Place(0, "chars/system", 0, (480, 96)),
@@ -210,7 +217,6 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
                     Ast::Slide(-1, (200, 316), false, false, 0.75),
                     Ast::Wait(0.5),
                     Ast::Anim(-1, "chars/relyng", RELYNG_INDICES_1, 15),
-                    Ast::Wait(0.25),
                 ]),
             ]),
         ]),
@@ -220,6 +226,7 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
             Ast::Remove(-1),
             Ast::Wait(0.25),
             Ast::SetBg("prolog_security"),
+            Ast::Queue(1, 4), // Show status indicator
             Ast::Place(0, "chars/system", 0, (464, 208)),
             Ast::Place(1, "chars/ugrent", 0, (144, 304)),
             Ast::Wait(0.5),

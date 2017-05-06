@@ -145,14 +145,14 @@ impl Theater {
             (255, 255, 255)
         };
         canvas.clear(bg_color);
+        let offset = self.shake_offset();
         for (_, actor) in self.actors.range(..0) {
-            actor.draw_actor(canvas);
+            actor.draw_actor(canvas, offset);
         }
         if let Some(ref background) = self.background {
             if self.shake <= 0 {
                 canvas.draw_background(background);
             } else {
-                let offset = self.shake_offset();
                 let mut rect = canvas.rect();
                 rect.offset(offset.x(), offset.y());
                 canvas.subcanvas(rect).draw_background(background);
@@ -161,8 +161,9 @@ impl Theater {
     }
 
     pub fn draw_foreground(&self, canvas: &mut Canvas) {
+        let offset = self.shake_offset();
         for (_, actor) in self.actors.range(0..) {
-            actor.draw_actor(canvas);
+            actor.draw_actor(canvas, offset);
         }
         if self.dark {
             let mut rects = vec![canvas.rect()];
@@ -286,8 +287,8 @@ impl Actor {
 
     fn clear_speech(&mut self) { self.speech = None; }
 
-    fn draw_actor(&self, canvas: &mut Canvas) {
-        canvas.draw_sprite(&self.sprites[0], self.rect().top_left());
+    fn draw_actor(&self, canvas: &mut Canvas, offset: Point) {
+        canvas.draw_sprite(&self.sprites[0], self.rect().top_left() + offset);
     }
 
     fn draw_speech(&self, canvas: &mut Canvas) {

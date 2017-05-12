@@ -27,14 +27,16 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
             Ast::SetBg("prolog_space"),
+            Ast::Queue(2, 1), // Show large moving starfield
             Ast::Place(0, "chars/invis", 0, (224, 240)),
-            Ast::Wait(1.0), // TODO: Show ship flying through space
+            Ast::Wait(1.0), // TODO: Show the ship
             Ast::Talk(0, TalkStyle::System, TalkPos::NE,
                       "Somewhere in deep space..."),
         ]),
         Ast::Seq(vec![
             Ast::Wait(1.0),
             Ast::SetBg("prolog_security"),
+            Ast::Queue(2, 2), // Show moving stars through windows
             Ast::Queue(1, 1), // Show status indicator
             Ast::Place(0, "chars/system", 0, (464, 208)),
             Ast::Place(1, "chars/ugrent", 0, (224, 240)),
@@ -48,8 +50,10 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
             Ast::Remove(1),
             Ast::Queue(1, 0), // Hide status indicator
             Ast::SetBg("prolog_space"),
+            Ast::Queue(2, 1), // Show large moving starfield
             Ast::Wait(0.5),
             Ast::Sound(Sound::explosion_small()), // TODO: Show ship 'splosion
+            Ast::Queue(2, 0), // Hide moving stars
             Ast::Shake(16),
             Ast::Wait(0.5),
             Ast::SetBg("prolog_security"),

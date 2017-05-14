@@ -22,7 +22,7 @@ use elements::lasers::{DangerSign, LaserCmd, LaserField};
 use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sprite};
 use modes::SOLVED_INFO_TEXT;
 use save::{Game, MissedState, PuzzleState};
-use super::scenes::{compile_intro_scene, compile_outro_scene};
+use super::scenes;
 
 // ========================================================================= //
 
@@ -37,9 +37,12 @@ pub struct View {
 impl View {
     pub fn new(resources: &mut Resources, visible: Rect, state: &MissedState)
                -> View {
-        let intro = compile_intro_scene(resources);
-        let outro = compile_outro_scene(resources);
-        let core = PuzzleCore::new(resources, visible, state, intro, outro);
+        let mut core = {
+            let intro = scenes::compile_intro_scene(resources);
+            let outro = scenes::compile_outro_scene(resources);
+            PuzzleCore::new(resources, visible, state, intro, outro)
+        };
+        core.add_extra_scene(scenes::compile_mezure_midscene(resources));
         let mut view = View {
             core: core,
             laser_field: LaserField::new(resources, 104, 72, state.grid()),
@@ -105,6 +108,10 @@ impl Element<Game, PuzzleCmd> for View {
         }
         if !action.should_stop() && !self.box_open {
             action.merge(self.blinkenlights.handle_event(event, &mut ()));
+        }
+        if !action.should_stop() {
+            self.core.begin_character_scene_on_click(event);
+            self.drain_queue();
         }
         action
     }

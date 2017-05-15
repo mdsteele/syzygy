@@ -42,20 +42,10 @@ impl View {
         let intro = compile_intro_scene(resources);
         let outro = compile_outro_scene(resources);
         let core = PuzzleCore::new(resources, visible, state, intro, outro);
-        let mut view = View {
+        View {
             core: core,
             wordlist: WordList::new(resources),
             columns: LetterColumns::new(resources),
-        };
-        view.drain_queue();
-        view
-    }
-
-    fn drain_queue(&mut self) {
-        for (command, enable) in self.core.drain_queue() {
-            if command == 0 {
-                self.columns.animate_hilight(enable != 0);
-            }
         }
     }
 }
@@ -74,7 +64,6 @@ impl Element<Game, PuzzleCmd> for View {
                     -> Action<PuzzleCmd> {
         let state = &mut game.star_crossed;
         let mut action = self.core.handle_event(event, state);
-        self.drain_queue();
         if !action.should_stop() {
             let subaction = self.wordlist.handle_event(event, state);
             action.merge(subaction.but_no_value());
@@ -87,7 +76,6 @@ impl Element<Game, PuzzleCmd> for View {
                     self.columns.animate_fall(col, row, dir, len);
                     if state.is_solved() {
                         self.core.begin_outro_scene();
-                        self.drain_queue();
                     }
                 }
             }
@@ -118,7 +106,14 @@ impl PuzzleView for View {
     fn solve(&mut self, game: &mut Game) {
         game.star_crossed.solve();
         self.core.begin_outro_scene();
-        self.drain_queue();
+    }
+
+    fn drain_queue(&mut self) {
+        for (command, enable) in self.core.drain_queue() {
+            if command == 0 {
+                self.columns.animate_hilight(enable != 0);
+            }
+        }
     }
 }
 

@@ -37,18 +37,10 @@ impl View {
         let intro = compile_intro_scene(resources);
         let outro = compile_outro_scene(resources);
         let core = PuzzleCore::new(resources, visible, state, intro, outro);
-        let mut view = View {
+        View {
             core: core,
             grid: CubeGrid::new(resources, 232, 72),
             solution: SolutionDisplay::new(resources),
-        };
-        view.drain_queue();
-        view
-    }
-
-    fn drain_queue(&mut self) {
-        for (_, index) in self.core.drain_queue() {
-            self.solution.set_index(index);
         }
     }
 }
@@ -67,13 +59,11 @@ impl Element<Game, PuzzleCmd> for View {
                     -> Action<PuzzleCmd> {
         let state = &mut game.cube_tangle;
         let mut action = self.core.handle_event(event, state);
-        self.drain_queue();
         if !action.should_stop() {
             let subaction = self.grid.handle_event(event, state);
             if let Some(&(dir, rank, by)) = subaction.value() {
                 if state.is_solved() {
                     self.core.begin_outro_scene();
-                    self.drain_queue();
                 } else {
                     self.core.push_undo((dir, rank, by));
                 }
@@ -116,7 +106,12 @@ impl PuzzleView for View {
     fn solve(&mut self, game: &mut Game) {
         game.cube_tangle.solve();
         self.core.begin_outro_scene();
-        self.drain_queue();
+    }
+
+    fn drain_queue(&mut self) {
+        for (_, index) in self.core.drain_queue() {
+            self.solution.set_index(index);
+        }
     }
 }
 

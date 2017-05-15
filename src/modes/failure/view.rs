@@ -87,7 +87,7 @@ impl View {
         let outro = compile_outro_scene(resources);
         let state = &game.system_failure;
         let core = PuzzleCore::new(resources, visible, state, intro, outro);
-        let mut view = View {
+        View {
             core: core,
             dashboard: DASHBOARD_CHIPS.iter()
                                       .map(|&(x, y, loc)| {
@@ -95,14 +95,6 @@ impl View {
                                       })
                                       .collect(),
             pyramid: PyramidView::new(resources, state),
-        };
-        view.drain_queue();
-        view
-    }
-
-    fn drain_queue(&mut self) {
-        for (_, _) in self.core.drain_queue() {
-            // TODO drain queue
         }
     }
 }
@@ -124,7 +116,6 @@ impl Element<Game, PuzzleCmd> for View {
                     -> Action<PuzzleCmd> {
         let mut action = self.core
                              .handle_event(event, &mut game.system_failure);
-        self.drain_queue();
         if !game.system_failure.mid_scene_is_done() {
             if !action.should_stop() {
                 action.merge(self.dashboard
@@ -211,7 +202,12 @@ impl PuzzleView for View {
     fn solve(&mut self, game: &mut Game) {
         game.system_failure.solve();
         self.core.begin_outro_scene();
-        self.drain_queue();
+    }
+
+    fn drain_queue(&mut self) {
+        for (_, _) in self.core.drain_queue() {
+            // TODO drain queue
+        }
     }
 }
 

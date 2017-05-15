@@ -75,17 +75,10 @@ impl View {
                 crossword.set_center_word_hilighted(true);
             }
         }
-        view.drain_queue();
         if state.is_visited() && !state.is_solved() {
             view.display_crossword_speech(state);
         }
         view
-    }
-
-    fn drain_queue(&mut self) {
-        for (_, _) in self.core.drain_queue() {
-            // TODO drain queue
-        }
     }
 
     fn display_crossword_speech(&mut self, state: &PasswordState) -> bool {
@@ -126,7 +119,6 @@ impl Element<Game, PuzzleCmd> for View {
                     -> Action<PuzzleCmd> {
         let state = &mut game.password_file;
         let mut action = self.core.handle_event(event, state);
-        self.drain_queue();
         if !action.should_stop() {
             if state.all_crosswords_done() {
                 let subaction = self.slider.handle_event(event, state);
@@ -253,7 +245,12 @@ impl PuzzleView for View {
             crossword.reset_cursor();
         }
         self.core.begin_outro_scene();
-        self.drain_queue();
+    }
+
+    fn drain_queue(&mut self) {
+        for (_, _) in self.core.drain_queue() {
+            // TODO drain queue
+        }
     }
 }
 

@@ -45,7 +45,7 @@ impl View {
                -> View {
         let intro = compile_intro_scene(resources);
         let outro = compile_outro_scene(resources);
-        let mut view = View {
+        View {
             core: PuzzleCore::new(resources, visible, state, intro, outro),
             grid: MemoryGridView::new(resources,
                                       "memory/serves",
@@ -58,14 +58,6 @@ impl View {
                                        (191, 191, 0)),
             progress_adjust: 0,
             remove_countdown: 0,
-        };
-        view.drain_queue();
-        view
-    }
-
-    fn drain_queue(&mut self) {
-        for (_, _) in self.core.drain_queue() {
-            // TODO: drain queue
         }
     }
 }
@@ -89,7 +81,6 @@ impl Element<Game, PuzzleCmd> for View {
                     -> Action<PuzzleCmd> {
         let state = &mut game.if_memory_serves;
         let mut action = self.core.handle_event(event, state);
-        self.drain_queue();
         if event == &Event::ClockTick && self.remove_countdown > 0 {
             self.remove_countdown -= 1;
             if self.remove_countdown == REMOVE_SOUND_AT {
@@ -160,7 +151,12 @@ impl PuzzleView for View {
     fn solve(&mut self, game: &mut Game) {
         game.if_memory_serves.solve();
         self.core.begin_outro_scene();
-        self.drain_queue();
+    }
+
+    fn drain_queue(&mut self) {
+        for (_, _) in self.core.drain_queue() {
+            // TODO: drain queue
+        }
     }
 }
 

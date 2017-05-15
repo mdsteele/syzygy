@@ -41,18 +41,10 @@ impl View {
         let intro = compile_intro_scene(resources);
         let outro = compile_outro_scene(resources, visible);
         let core = PuzzleCore::new(resources, visible, state, intro, outro);
-        let mut view = View {
+        View {
             core: core,
             grid: WreckedGrid::new(resources, 84, 132),
             solution: SolutionDisplay::new(resources),
-        };
-        view.drain_queue();
-        view
-    }
-
-    fn drain_queue(&mut self) {
-        for (_, index) in self.core.drain_queue() {
-            self.solution.set_index(index);
         }
     }
 }
@@ -71,7 +63,6 @@ impl Element<Game, PuzzleCmd> for View {
                     -> Action<PuzzleCmd> {
         let state = &mut game.wrecked_angle;
         let mut action = self.core.handle_event(event, state);
-        self.drain_queue();
         if !action.should_stop() {
             let subaction = self.grid.handle_event(event, state);
             if let Some(&(dir, rank, by)) = subaction.value() {
@@ -80,7 +71,6 @@ impl Element<Game, PuzzleCmd> for View {
                         println!("Puzzle solved, beginning outro.");
                     }
                     self.core.begin_outro_scene();
-                    self.drain_queue();
                 } else {
                     self.core.push_undo((dir, rank, by));
                 }
@@ -123,7 +113,12 @@ impl PuzzleView for View {
     fn solve(&mut self, game: &mut Game) {
         game.wrecked_angle.solve();
         self.core.begin_outro_scene();
-        self.drain_queue();
+    }
+
+    fn drain_queue(&mut self) {
+        for (_, index) in self.core.drain_queue() {
+            self.solution.set_index(index);
+        }
     }
 }
 

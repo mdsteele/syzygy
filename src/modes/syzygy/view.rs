@@ -50,19 +50,11 @@ impl View {
         let intro = compile_intro_scene(resources);
         let outro = compile_outro_scene(resources);
         let core = PuzzleCore::new(resources, visible, state, intro, outro);
-        let mut view = View {
+        View {
             core: core,
             elinsa: PlaneGridView::new(resources, 150, 140),
             ugrent: LaserField::new(resources, 175, 140, state.ugrent_grid()),
             relyng: LightsGrid::new(resources, 168, 140, state),
-        };
-        view.drain_queue();
-        view
-    }
-
-    fn drain_queue(&mut self) {
-        for (_, _) in self.core.drain_queue() {
-            // TODO drain queue
         }
     }
 }
@@ -91,7 +83,6 @@ impl Element<Game, PuzzleCmd> for View {
                     -> Action<PuzzleCmd> {
         let state = &mut game.system_syzygy;
         let mut action = self.core.handle_event(event, state);
-        self.drain_queue();
         if !action.should_stop() && !state.is_solved() {
             match state.stage() {
                 SyzygyStage::Elinsa => {
@@ -197,7 +188,12 @@ impl PuzzleView for View {
     fn solve(&mut self, game: &mut Game) {
         game.system_syzygy.solve();
         self.core.begin_outro_scene();
-        self.drain_queue();
+    }
+
+    fn drain_queue(&mut self) {
+        for (_, _) in self.core.drain_queue() {
+            // TODO drain queue
+        }
     }
 }
 

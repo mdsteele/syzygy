@@ -43,7 +43,7 @@ impl View {
         };
         core.add_extra_scene(scenes::compile_argony_midscene(resources));
         core.add_extra_scene(scenes::compile_mezure_midscene(resources));
-        let mut view = View {
+        View {
             core: core,
             toggles: vec![ToggleLight::new(resources, state, (1, 1), 'C'),
                           ToggleLight::new(resources, state, (2, 1), 'Z'),
@@ -77,14 +77,6 @@ impl View {
                            PassiveLight::new(resources, state, (5, 2)),
                            PassiveLight::new(resources, state, (5, 3)),
                            PassiveLight::new(resources, state, (5, 4))],
-        };
-        view.drain_queue();
-        view
-    }
-
-    fn drain_queue(&mut self) {
-        for (index, enable) in self.core.drain_queue() {
-            self.toggles[index as usize].set_hilight(enable != 0);
         }
     }
 }
@@ -103,7 +95,6 @@ impl Element<Game, PuzzleCmd> for View {
                     -> Action<PuzzleCmd> {
         let state = &mut game.a_light_in_the_attic;
         let mut action = self.core.handle_event(event, state);
-        self.drain_queue();
         if !action.should_stop() {
             let subaction = self.toggles.handle_event(event, state);
             if let Some(&position) = subaction.value() {
@@ -121,7 +112,6 @@ impl Element<Game, PuzzleCmd> for View {
         }
         if !action.should_stop() {
             self.core.begin_character_scene_on_click(event);
-            self.drain_queue();
         }
         action
     }
@@ -156,7 +146,12 @@ impl PuzzleView for View {
     fn solve(&mut self, game: &mut Game) {
         game.a_light_in_the_attic.solve();
         self.core.begin_outro_scene();
-        self.drain_queue();
+    }
+
+    fn drain_queue(&mut self) {
+        for (index, enable) in self.core.drain_queue() {
+            self.toggles[index as usize].set_hilight(enable != 0);
+        }
     }
 }
 

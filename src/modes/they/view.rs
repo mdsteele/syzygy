@@ -44,7 +44,7 @@ impl View {
         let intro = scenes::compile_intro_scene(resources);
         let outro = scenes::compile_outro_scene(resources);
         let core = PuzzleCore::new(resources, visible, state, intro, outro);
-        let mut view = View {
+        View {
             core: core,
             buttons: vec![TransformButton::new(resources, state, 0),
                           TransformButton::new(resources, state, 1),
@@ -54,14 +54,6 @@ impl View {
                           TransformButton::new(resources, state, 5)],
             letters: LettersView::new(resources, state),
             retry_countdown: 0,
-        };
-        view.drain_queue();
-        view
-    }
-
-    fn drain_queue(&mut self) {
-        for (_, _) in self.core.drain_queue() {
-            // TODO: drain queue
         }
     }
 }
@@ -80,7 +72,6 @@ impl Element<Game, PuzzleCmd> for View {
                     -> Action<PuzzleCmd> {
         let state = &mut game.the_y_factor;
         let mut action = self.core.handle_event(event, state);
-        self.drain_queue();
         if event == &Event::ClockTick && self.retry_countdown > 0 {
             self.retry_countdown -= 1;
             if self.retry_countdown == 0 {
@@ -163,9 +154,14 @@ impl PuzzleView for View {
         let state = &mut game.the_y_factor;
         state.solve();
         self.letters.reset(state);
-        self.core.begin_outro_scene();
-        self.drain_queue();
         self.retry_countdown = 0;
+        self.core.begin_outro_scene();
+    }
+
+    fn drain_queue(&mut self) {
+        for (_, _) in self.core.drain_queue() {
+            // TODO: drain queue
+        }
     }
 }
 

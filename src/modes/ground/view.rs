@@ -74,25 +74,10 @@ impl View {
             platforms_and_arrows_visible: true,
         };
         view.animation.begin(view.core.theater_mut());
-        view.drain_queue();
         if state.is_visited() && !state.is_solved() {
             view.update_elinsa_position(state);
         }
         view
-    }
-
-    fn drain_queue(&mut self) {
-        for (row, pos) in self.core.drain_queue() {
-            if row >= 0 && row < self.platforms.len() as i32 {
-                self.platforms[row as usize].set_goal(pos);
-            } else if row == -1 {
-                self.platforms_and_arrows_visible = pos != 0;
-            } else if row == -2 {
-                for platform in self.platforms.iter_mut() {
-                    platform.move_to_goal();
-                }
-            }
-        }
     }
 
     fn platform_top(&self, row: i32) -> i32 {
@@ -354,7 +339,6 @@ impl Element<Game, PuzzleCmd> for View {
         }
         if !action.should_stop() {
             self.core.begin_character_scene_on_click(event);
-            self.drain_queue();
         }
         action
     }
@@ -408,7 +392,20 @@ impl PuzzleView for View {
         self.update_platform_positions(state);
         self.update_elinsa_position(state);
         self.core.begin_outro_scene();
-        self.drain_queue();
+    }
+
+    fn drain_queue(&mut self) {
+        for (row, pos) in self.core.drain_queue() {
+            if row >= 0 && row < self.platforms.len() as i32 {
+                self.platforms[row as usize].set_goal(pos);
+            } else if row == -1 {
+                self.platforms_and_arrows_visible = pos != 0;
+            } else if row == -2 {
+                for platform in self.platforms.iter_mut() {
+                    platform.move_to_goal();
+                }
+            }
+        }
     }
 }
 

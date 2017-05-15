@@ -38,7 +38,7 @@ impl View {
         let intro = compile_intro_scene(resources);
         let outro = compile_outro_scene(resources);
         let core = PuzzleCore::new(resources, visible, state, intro, outro);
-        let mut view = View {
+        View {
             core: core,
             toggles: vec![ToggleLight::new(resources, state, (1, 0)),
                           ToggleLight::new(resources, state, (2, 0)),
@@ -61,14 +61,6 @@ impl View {
                           ToggleLight::new(resources, state, (1, 4)),
                           ToggleLight::new(resources, state, (2, 4)),
                           ToggleLight::new(resources, state, (3, 4))],
-        };
-        view.drain_queue();
-        view
-    }
-
-    fn drain_queue(&mut self) {
-        for (index, color) in self.core.drain_queue() {
-            self.toggles[index as usize].set_hilight(color);
         }
     }
 }
@@ -86,7 +78,6 @@ impl Element<Game, PuzzleCmd> for View {
                     -> Action<PuzzleCmd> {
         let state = &mut game.light_syrup;
         let mut action = self.core.handle_event(event, state);
-        self.drain_queue();
         if !action.should_stop() {
             let subaction = self.toggles.handle_event(event, state);
             if let Some(&position) = subaction.value() {
@@ -132,7 +123,12 @@ impl PuzzleView for View {
     fn solve(&mut self, game: &mut Game) {
         game.light_syrup.solve();
         self.core.begin_outro_scene();
-        self.drain_queue();
+    }
+
+    fn drain_queue(&mut self) {
+        for (index, color) in self.core.drain_queue() {
+            self.toggles[index as usize].set_hilight(color);
+        }
     }
 }
 

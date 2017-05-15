@@ -37,21 +37,9 @@ impl View {
         let intro = compile_intro_scene(resources);
         let outro = compile_outro_scene(resources);
         let core = PuzzleCore::new(resources, visible, state, intro, outro);
-        let mut view = View {
+        View {
             core: core,
             crossword: CrosswordView::new(resources, 364, 56, OFFSETS_CLUES),
-        };
-        view.drain_queue();
-        view
-    }
-
-    fn drain_queue(&mut self) {
-        for entry in self.core.drain_queue() {
-            match entry {
-                (0, 0) => self.crossword.animate_center_word(),
-                (0, 1) => self.crossword.set_center_word_hilighted(true),
-                _ => {}
-            }
         }
     }
 }
@@ -69,7 +57,6 @@ impl Element<Game, PuzzleCmd> for View {
                     -> Action<PuzzleCmd> {
         let state = &mut game.level_up;
         let mut action = self.core.handle_event(event, state);
-        self.drain_queue();
         if !action.should_stop() &&
            (event == &Event::ClockTick || !state.is_solved()) {
             let subaction = self.crossword
@@ -124,7 +111,16 @@ impl PuzzleView for View {
         game.level_up.solve();
         self.crossword.reset_cursor();
         self.core.begin_outro_scene();
-        self.drain_queue();
+    }
+
+    fn drain_queue(&mut self) {
+        for entry in self.core.drain_queue() {
+            match entry {
+                (0, 0) => self.crossword.animate_center_word(),
+                (0, 1) => self.crossword.set_center_word_hilighted(true),
+                _ => {}
+            }
+        }
     }
 }
 

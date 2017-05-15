@@ -40,42 +40,12 @@ impl View {
         let intro = compile_scene(resources);
         let outro = Scene::empty();
         let core = PuzzleCore::new(resources, visible, state, intro, outro);
-        let mut view = View {
+        View {
             core: core,
             status: StatusIndicator::new(resources, 304, 64),
             stars_space: MovingStars::new(0, 0, 576, 384),
             stars_window1: MovingStars::new(144, 144, 64, 32),
             stars_window2: MovingStars::new(336, 144, 64, 32),
-        };
-        view.drain_queue();
-        view
-    }
-
-    fn drain_queue(&mut self) {
-        for (device, value) in self.core.drain_queue() {
-            match device {
-                1 => self.status.set_mode(value),
-                2 => {
-                    match value {
-                        1 => {
-                            self.stars_space.set_visible(true);
-                            self.stars_window1.set_visible(false);
-                            self.stars_window2.set_visible(false);
-                        }
-                        2 => {
-                            self.stars_space.set_visible(false);
-                            self.stars_window1.set_visible(true);
-                            self.stars_window2.set_visible(true);
-                        }
-                        _ => {
-                            self.stars_space.set_visible(false);
-                            self.stars_window1.set_visible(false);
-                            self.stars_window2.set_visible(false);
-                        }
-                    }
-                }
-                _ => {}
-            }
         }
     }
 }
@@ -96,7 +66,6 @@ impl Element<Game, PuzzleCmd> for View {
                     -> Action<PuzzleCmd> {
         let state = &mut game.prolog;
         let mut action = self.core.handle_event(event, state);
-        self.drain_queue();
         if event == &Event::ClockTick {
             if self.status.tick_animation() {
                 action.also_redraw();
@@ -128,6 +97,34 @@ impl PuzzleView for View {
     fn reset(&mut self, _game: &mut Game) {}
 
     fn solve(&mut self, _game: &mut Game) {}
+
+    fn drain_queue(&mut self) {
+        for (device, value) in self.core.drain_queue() {
+            match device {
+                1 => self.status.set_mode(value),
+                2 => {
+                    match value {
+                        1 => {
+                            self.stars_space.set_visible(true);
+                            self.stars_window1.set_visible(false);
+                            self.stars_window2.set_visible(false);
+                        }
+                        2 => {
+                            self.stars_space.set_visible(false);
+                            self.stars_window1.set_visible(true);
+                            self.stars_window2.set_visible(true);
+                        }
+                        _ => {
+                            self.stars_space.set_visible(false);
+                            self.stars_window1.set_visible(false);
+                            self.stars_window2.set_visible(false);
+                        }
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
 }
 
 // ========================================================================= //

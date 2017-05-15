@@ -37,17 +37,9 @@ impl View {
         let intro = compile_intro_scene(resources);
         let outro = compile_outro_scene(resources);
         let core = PuzzleCore::new(resources, visible, state, intro, outro);
-        let mut view = View {
+        View {
             core: core,
             grid: PlaneGridView::new(resources, 100, 50),
-        };
-        view.drain_queue();
-        view
-    }
-
-    fn drain_queue(&mut self) {
-        for (_, _) in self.core.drain_queue() {
-            // TODO drain queue
         }
     }
 }
@@ -65,7 +57,6 @@ impl Element<Game, PuzzleCmd> for View {
                     -> Action<PuzzleCmd> {
         let state = &mut game.plane_and_simple;
         let mut action = self.core.handle_event(event, state);
-        self.drain_queue();
         if !action.should_stop() && !state.is_solved() {
             let mut subaction = self.grid
                                     .handle_event(event, state.grid_mut());
@@ -125,10 +116,14 @@ impl PuzzleView for View {
     }
 
     fn solve(&mut self, game: &mut Game) {
-        let state = &mut game.plane_and_simple;
-        state.solve();
+        game.plane_and_simple.solve();
         self.core.begin_outro_scene();
-        self.drain_queue();
+    }
+
+    fn drain_queue(&mut self) {
+        for (_, _) in self.core.drain_queue() {
+            // TODO drain queue
+        }
     }
 }
 

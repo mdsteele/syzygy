@@ -41,7 +41,7 @@ impl View {
             let outro = scenes::compile_outro_scene(resources);
             PuzzleCore::new(resources, visible, state, intro, outro)
         };
-        let mut view = View {
+        View {
             core: core,
             rows: vec![TileRow::new(resources, 0, 300, 100),
                        TileRow::new(resources, 1, 300, 132),
@@ -49,14 +49,6 @@ impl View {
                        TileRow::new(resources, 3, 300, 196),
                        TileRow::new(resources, 4, 300, 228),
                        TileRow::new(resources, 5, 300, 260)],
-        };
-        view.drain_queue();
-        view
-    }
-
-    fn drain_queue(&mut self) {
-        for (_, _) in self.core.drain_queue() {
-            // TODO: drain queue
         }
     }
 }
@@ -74,7 +66,6 @@ impl Element<Game, PuzzleCmd> for View {
                     -> Action<PuzzleCmd> {
         let state = &mut game.point_of_order;
         let mut action = self.core.handle_event(event, state);
-        self.drain_queue();
         if !action.should_stop() {
             let subaction = self.rows.handle_event(event, state);
             if let Some(&(old_index, new_index)) = subaction.value() {
@@ -82,7 +73,6 @@ impl Element<Game, PuzzleCmd> for View {
                 state.move_tile(old_index, new_index);
                 if state.is_solved() {
                     self.core.begin_outro_scene();
-                    self.drain_queue();
                 } else if state.current_row() > old_row {
                     self.core.clear_undo_redo();
                 } else {
@@ -93,7 +83,6 @@ impl Element<Game, PuzzleCmd> for View {
         }
         if !action.should_stop() {
             self.core.begin_character_scene_on_click(event);
-            self.drain_queue();
         }
         action
     }
@@ -128,7 +117,12 @@ impl PuzzleView for View {
     fn solve(&mut self, game: &mut Game) {
         game.point_of_order.solve();
         self.core.begin_outro_scene();
-        self.drain_queue();
+    }
+
+    fn drain_queue(&mut self) {
+        for (_, _) in self.core.drain_queue() {
+            // TODO: drain queue
+        }
     }
 }
 

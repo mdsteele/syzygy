@@ -35,15 +35,7 @@ impl View {
         let intro = compile_intro_scene(resources);
         let outro = compile_outro_scene(resources);
         let core = PuzzleCore::new(resources, visible, state, intro, outro);
-        let mut view = View { core: core };
-        view.drain_queue();
-        view
-    }
-
-    fn drain_queue(&mut self) {
-        for (_, _) in self.core.drain_queue() {
-            // TODO drain queue
-        }
+        View { core: core }
     }
 }
 
@@ -59,7 +51,6 @@ impl Element<Game, PuzzleCmd> for View {
                     -> Action<PuzzleCmd> {
         let state = &mut game.black_and_blue;
         let action = self.core.handle_event(event, state);
-        self.drain_queue();
         action
     }
 }
@@ -95,7 +86,12 @@ impl PuzzleView for View {
         let state = &mut game.black_and_blue;
         state.solve();
         self.core.begin_outro_scene();
-        self.drain_queue();
+    }
+
+    fn drain_queue(&mut self) {
+        for (_, _) in self.core.drain_queue() {
+            // TODO drain queue
+        }
     }
 }
 

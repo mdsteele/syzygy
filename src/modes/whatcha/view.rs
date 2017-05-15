@@ -42,17 +42,9 @@ impl View {
         let intro = compile_intro_scene(resources);
         let outro = compile_outro_scene(resources);
         let core = PuzzleCore::new(resources, visible, state, intro, outro);
-        let mut view = View {
+        View {
             core: core,
             columns: Columns::new(resources, 300, 200),
-        };
-        view.drain_queue();
-        view
-    }
-
-    fn drain_queue(&mut self) {
-        for _ in self.core.drain_queue() {
-            // TODO drain queue
         }
     }
 }
@@ -70,7 +62,6 @@ impl Element<Game, PuzzleCmd> for View {
                     -> Action<PuzzleCmd> {
         let state = &mut game.whatcha_column;
         let mut action = self.core.handle_event(event, state);
-        self.drain_queue();
         if !action.should_stop() {
             let subaction = self.columns.handle_event(event, state);
             if let Some(&(col, by)) = subaction.value() {
@@ -116,7 +107,12 @@ impl PuzzleView for View {
     fn solve(&mut self, game: &mut Game) {
         game.whatcha_column.solve();
         self.core.begin_outro_scene();
-        self.drain_queue();
+    }
+
+    fn drain_queue(&mut self) {
+        for _ in self.core.drain_queue() {
+            // TODO drain queue
+        }
     }
 }
 

@@ -42,7 +42,7 @@ impl View {
         let intro = compile_intro_scene(resources);
         let outro = compile_outro_scene(resources);
         let core = PuzzleCore::new(resources, visible, state, intro, outro);
-        let mut view = View {
+        View {
             core: core,
             toggles: vec![ToggleLight::new(resources, state, (1, 1)),
                           ToggleLight::new(resources, state, (2, 1)),
@@ -75,18 +75,6 @@ impl View {
                            PassiveLight::new(resources, state, (0, 2)),
                            PassiveLight::new(resources, state, (0, 1))],
             next: NextLetter::new(resources),
-        };
-        view.drain_queue();
-        view
-    }
-
-    fn drain_queue(&mut self) {
-        for (index, enable) in self.core.drain_queue() {
-            if index < 0 {
-                self.next.visible = enable != 0;
-            } else if (index as usize) < self.toggles.len() {
-                self.toggles[index as usize].set_hilight(enable != 0);
-            }
         }
     }
 }
@@ -106,7 +94,6 @@ impl Element<Game, PuzzleCmd> for View {
                     -> Action<PuzzleCmd> {
         let state = &mut game.tread_lightly;
         let mut action = self.core.handle_event(event, state);
-        self.drain_queue();
         if !action.should_stop() {
             let subaction = self.toggles.handle_event(event, state);
             if let Some(&position) = subaction.value() {
@@ -159,7 +146,16 @@ impl PuzzleView for View {
     fn solve(&mut self, game: &mut Game) {
         game.tread_lightly.solve();
         self.core.begin_outro_scene();
-        self.drain_queue();
+    }
+
+    fn drain_queue(&mut self) {
+        for (index, enable) in self.core.drain_queue() {
+            if index < 0 {
+                self.next.visible = enable != 0;
+            } else if (index as usize) < self.toggles.len() {
+                self.toggles[index as usize].set_hilight(enable != 0);
+            }
+        }
     }
 }
 

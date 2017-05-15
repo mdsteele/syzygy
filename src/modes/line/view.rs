@@ -40,50 +40,11 @@ impl View {
         let intro = compile_intro_scene(resources);
         let outro = compile_outro_scene(resources);
         let core = PuzzleCore::new(resources, visible, state, intro, outro);
-        let mut view = View {
+        View {
             core: core,
             grid1: LetterGrid::new(resources, 80, 48, false),
             grid2: LetterGrid::new(resources, 320, 48, true),
             answers: AnswersDisplay::new(resources, 168, 272),
-        };
-        view.drain_queue();
-        view
-    }
-
-    fn drain_queue(&mut self) {
-        for entry in self.core.drain_queue() {
-            match entry {
-                (0, -1) => {
-                    self.grid1.override_grid = Some(Vec::new());
-                    self.grid2.override_grid = Some(Vec::new());
-                }
-                (0, 0) => {
-                    self.grid1.override_grid = None;
-                    self.grid2.override_grid = None;
-                }
-                (0, 1) => {
-                    self.grid1.override_grid = Some("SAFE".chars().collect());
-                    self.grid2.override_grid = Some("FACE".chars().collect());
-                }
-                (1, index) => {
-                    if index >= 0 {
-                        self.grid1.selected = Some(index as usize);
-                    } else {
-                        self.grid1.selected = None;
-                    }
-                }
-                (2, index) => {
-                    if index >= 0 {
-                        self.grid2.selected = Some(index as usize);
-                    } else {
-                        self.grid2.selected = None;
-                    }
-                }
-                (3, hide) => {
-                    self.answers.filtered = hide != 0;
-                }
-                _ => {}
-            }
         }
     }
 }
@@ -103,7 +64,6 @@ impl Element<Game, PuzzleCmd> for View {
                     -> Action<PuzzleCmd> {
         let state = &mut game.cross_the_line;
         let mut action = self.core.handle_event(event, state);
-        self.drain_queue();
         if !action.should_stop() {
             let mut subaction = self.grid1.handle_event(event, state);
             if !subaction.should_stop() {
@@ -154,7 +114,43 @@ impl PuzzleView for View {
     fn solve(&mut self, game: &mut Game) {
         game.cross_the_line.solve();
         self.core.begin_outro_scene();
-        self.drain_queue();
+    }
+
+    fn drain_queue(&mut self) {
+        for entry in self.core.drain_queue() {
+            match entry {
+                (0, -1) => {
+                    self.grid1.override_grid = Some(Vec::new());
+                    self.grid2.override_grid = Some(Vec::new());
+                }
+                (0, 0) => {
+                    self.grid1.override_grid = None;
+                    self.grid2.override_grid = None;
+                }
+                (0, 1) => {
+                    self.grid1.override_grid = Some("SAFE".chars().collect());
+                    self.grid2.override_grid = Some("FACE".chars().collect());
+                }
+                (1, index) => {
+                    if index >= 0 {
+                        self.grid1.selected = Some(index as usize);
+                    } else {
+                        self.grid1.selected = None;
+                    }
+                }
+                (2, index) => {
+                    if index >= 0 {
+                        self.grid2.selected = Some(index as usize);
+                    } else {
+                        self.grid2.selected = None;
+                    }
+                }
+                (3, hide) => {
+                    self.answers.filtered = hide != 0;
+                }
+                _ => {}
+            }
+        }
     }
 }
 

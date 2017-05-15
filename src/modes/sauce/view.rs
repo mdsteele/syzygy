@@ -45,7 +45,7 @@ impl View {
         let intro = compile_intro_scene(resources);
         let outro = compile_outro_scene(resources);
         let core = PuzzleCore::new(resources, visible, state, intro, outro);
-        let mut view = View {
+        View {
             core: core,
             progress: ProgressBar::new((240, 96),
                                        Direction::East,
@@ -57,14 +57,6 @@ impl View {
                          ArrowButton::new(resources, true)],
             text_timer: 0,
             text_prefix: None,
-        };
-        view.drain_queue();
-        view
-    }
-
-    fn drain_queue(&mut self) {
-        for (_, _) in self.core.drain_queue() {
-            // TODO: drain queue
         }
     }
 }
@@ -88,7 +80,6 @@ impl Element<Game, PuzzleCmd> for View {
                     -> Action<PuzzleCmd> {
         let state = &mut game.cross_sauce;
         let mut action = self.core.handle_event(event, state);
-        self.drain_queue();
         if !action.should_stop() && event == &Event::ClockTick {
             if self.text_timer > 0 {
                 self.text_timer -= 1;
@@ -165,7 +156,12 @@ impl PuzzleView for View {
     fn solve(&mut self, game: &mut Game) {
         game.cross_sauce.solve();
         self.core.begin_outro_scene();
-        self.drain_queue();
+    }
+
+    fn drain_queue(&mut self) {
+        for (_, _) in self.core.drain_queue() {
+            // TODO: drain queue
+        }
     }
 }
 

@@ -43,7 +43,7 @@ impl View {
             PuzzleCore::new(resources, visible, state, intro, outro)
         };
         core.add_extra_scene(scenes::compile_mezure_midscene(resources));
-        let mut view = View {
+        View {
             core: core,
             laser_field: LaserField::new(resources, 104, 72, state.grid()),
             danger_sign: DangerSign::new(resources,
@@ -59,16 +59,6 @@ impl View {
                                 Blinkenlight::new(resources, 336, 160, 3),
                                 Blinkenlight::new(resources, 336, 192, 0)],
             box_open: false,
-        };
-        view.drain_queue();
-        view
-    }
-
-    fn drain_queue(&mut self) {
-        for (kind, value) in self.core.drain_queue() {
-            if kind == 0 {
-                self.box_open = value != 0;
-            }
         }
     }
 }
@@ -91,7 +81,6 @@ impl Element<Game, PuzzleCmd> for View {
                     -> Action<PuzzleCmd> {
         let state = &mut game.missed_connections;
         let mut action = self.core.handle_event(event, state);
-        self.drain_queue();
         if !action.should_stop() && self.box_open &&
            (event == &Event::ClockTick || !state.is_solved()) {
             let subaction = self.laser_field
@@ -111,7 +100,6 @@ impl Element<Game, PuzzleCmd> for View {
         }
         if !action.should_stop() {
             self.core.begin_character_scene_on_click(event);
-            self.drain_queue();
         }
         action
     }
@@ -168,7 +156,14 @@ impl PuzzleView for View {
         state.solve();
         self.laser_field.recalculate_lasers(state.grid());
         self.core.begin_outro_scene();
-        self.drain_queue();
+    }
+
+    fn drain_queue(&mut self) {
+        for (kind, value) in self.core.drain_queue() {
+            if kind == 0 {
+                self.box_open = value != 0;
+            }
+        }
     }
 }
 

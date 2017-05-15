@@ -48,6 +48,8 @@ pub trait PuzzleView: Element<Game, PuzzleCmd> {
     fn reset(&mut self, game: &mut Game);
 
     fn solve(&mut self, game: &mut Game);
+
+    fn drain_queue(&mut self);
 }
 
 // ========================================================================= //

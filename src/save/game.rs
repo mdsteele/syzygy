@@ -22,10 +22,10 @@ use toml;
 use save::{AtticState, BlackState, BlameState, CubeState, DayState,
            DisconState, DotsState, DoubleState, FailureState, FictionState,
            GearsState, GroundState, JogState, LaneState, LevelUpState,
-           LineState, Location, LogLevelState, MissedState, PasswordState,
-           PrologState, PuzzleState, SauceState, ServesState, SimpleState,
-           StarState, SyrupState, SyzygyState, TheYState, TreadState,
-           WhatchaState, WreckedState};
+           LineState, Location, LogLevelState, MissedState, OrderState,
+           PasswordState, PrologState, PuzzleState, SauceState, ServesState,
+           SimpleState, StarState, SyrupState, SyzygyState, TheYState,
+           TreadState, WhatchaState, WreckedState};
 use save::util::{pop_table, to_table};
 
 // ========================================================================= //
@@ -57,6 +57,7 @@ pub struct Game {
     pub password_file: PasswordState,
     pub plane_and_simple: SimpleState,
     pub plane_as_day: DayState,
+    pub point_of_order: OrderState,
     pub shift_gears: GearsState,
     pub shift_the_blame: BlameState,
     pub shifting_ground: GroundState,
@@ -122,6 +123,8 @@ impl Game {
                 pop_table(table_ref, Location::PlaneAndSimple.key())),
             plane_as_day: DayState::from_toml(
                 pop_table(table_ref, Location::PlaneAsDay.key())),
+            point_of_order: OrderState::from_toml(
+                pop_table(table_ref, Location::PointOfOrder.key())),
             shift_gears: GearsState::from_toml(
                 pop_table(table_ref, Location::ShiftGears.key())),
             shift_the_blame: BlameState::from_toml(
@@ -196,6 +199,7 @@ impl Game {
             Location::PasswordFile => &self.password_file,
             Location::PlaneAndSimple => &self.plane_and_simple,
             Location::PlaneAsDay => &self.plane_as_day,
+            Location::PointOfOrder => &self.point_of_order,
             Location::ShiftGears => &self.shift_gears,
             Location::ShiftTheBlame => &self.shift_the_blame,
             Location::ShiftingGround => &self.shifting_ground,
@@ -232,6 +236,7 @@ impl Game {
             Location::PasswordFile => &mut self.password_file,
             Location::PlaneAndSimple => &mut self.plane_and_simple,
             Location::PlaneAsDay => &mut self.plane_as_day,
+            Location::PointOfOrder => &mut self.point_of_order,
             Location::ShiftGears => &mut self.shift_gears,
             Location::ShiftTheBlame => &mut self.shift_the_blame,
             Location::ShiftingGround => &mut self.shifting_ground,

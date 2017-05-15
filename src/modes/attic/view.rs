@@ -109,9 +109,6 @@ impl Element<Game, PuzzleCmd> for View {
             if let Some(&position) = subaction.value() {
                 state.toggle(position);
                 if state.is_solved() {
-                    if cfg!(debug_assertions) {
-                        println!("Puzzle solved, beginning outro.");
-                    }
                     self.core.begin_outro_scene();
                 } else {
                     self.core.push_undo(position);

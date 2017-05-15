@@ -208,6 +208,9 @@ fn main() {
                         Location::PlaneAsDay => {
                             modes::run_plane_as_day(&mut window, game)
                         }
+                        Location::PointOfOrder => {
+                            modes::run_point_of_order(&mut window, game)
+                        }
                         Location::ShiftGears => {
                             modes::run_shift_gears(&mut window, game)
                         }

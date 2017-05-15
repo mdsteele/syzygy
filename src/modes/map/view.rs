@@ -51,6 +51,7 @@ const NODES: &[(Location, (i32, i32))] = &[
     (Location::PasswordFile, (400, 200)),
     (Location::PlaneAndSimple, (325, 225)),
     (Location::PlaneAsDay, (375, 225)),
+    (Location::PointOfOrder, (300, 150)),
     (Location::ShiftGears, (200, 250)),
     (Location::ShiftTheBlame, (275, 75)),
     (Location::ShiftingGround, (150, 250)),

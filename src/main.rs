@@ -157,6 +157,9 @@ fn main() {
                         Location::BlackAndBlue => {
                             modes::run_black_and_blue(&mut window, game)
                         }
+                        Location::ColumnAsIcyEm => {
+                            modes::run_column_as_icy_em(&mut window, game)
+                        }
                         Location::ConnectTheDots => {
                             modes::run_connect_the_dots(&mut window, game)
                         }

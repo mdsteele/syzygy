@@ -17,6 +17,7 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
+pub mod column;
 mod crossword;
 pub mod cutscene;
 mod dialog;

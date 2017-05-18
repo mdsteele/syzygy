@@ -21,11 +21,11 @@ use toml;
 
 use save::{AtticState, BlackState, BlameState, CubeState, DayState,
            DisconState, DotsState, DoubleState, FailureState, FictionState,
-           GearsState, GroundState, JogState, LaneState, LevelUpState,
-           LineState, Location, LogLevelState, MissedState, OrderState,
-           PasswordState, PrologState, PuzzleState, SauceState, ServesState,
-           SimpleState, StarState, SyrupState, SyzygyState, TheYState,
-           TreadState, WhatchaState, WreckedState};
+           GearsState, GroundState, IcyEmState, JogState, LaneState,
+           LevelUpState, LineState, Location, LogLevelState, MissedState,
+           OrderState, PasswordState, PrologState, PuzzleState, SauceState,
+           ServesState, SimpleState, StarState, SyrupState, SyzygyState,
+           TheYState, TreadState, WhatchaState, WreckedState};
 use save::util::{pop_table, to_table};
 
 // ========================================================================= //
@@ -40,6 +40,7 @@ pub struct Game {
     pub prolog: PrologState,
     pub a_light_in_the_attic: AtticState,
     pub black_and_blue: BlackState,
+    pub column_as_icy_em: IcyEmState,
     pub connect_the_dots: DotsState,
     pub cross_sauce: SauceState,
     pub cross_the_line: LineState,
@@ -89,6 +90,8 @@ impl Game {
                 pop_table(table_ref, Location::ALightInTheAttic.key())),
             black_and_blue: BlackState::from_toml(
                 pop_table(table_ref, Location::BlackAndBlue.key())),
+            column_as_icy_em: IcyEmState::from_toml(
+                pop_table(table_ref, Location::ColumnAsIcyEm.key())),
             connect_the_dots: DotsState::from_toml(
                 pop_table(table_ref, Location::ConnectTheDots.key())),
             cross_sauce: SauceState::from_toml(
@@ -182,6 +185,7 @@ impl Game {
             Location::Prolog => &self.prolog,
             Location::ALightInTheAttic => &self.a_light_in_the_attic,
             Location::BlackAndBlue => &self.black_and_blue,
+            Location::ColumnAsIcyEm => &self.column_as_icy_em,
             Location::ConnectTheDots => &self.connect_the_dots,
             Location::CrossSauce => &self.cross_sauce,
             Location::CrossTheLine => &self.cross_the_line,
@@ -219,6 +223,7 @@ impl Game {
             Location::Prolog => &mut self.prolog,
             Location::ALightInTheAttic => &mut self.a_light_in_the_attic,
             Location::BlackAndBlue => &mut self.black_and_blue,
+            Location::ColumnAsIcyEm => &mut self.column_as_icy_em,
             Location::ConnectTheDots => &mut self.connect_the_dots,
             Location::CrossSauce => &mut self.cross_sauce,
             Location::CrossTheLine => &mut self.cross_the_line,

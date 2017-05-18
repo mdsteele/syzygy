@@ -42,7 +42,7 @@ const DASHBOARD_CHIPS: &[(i32, i32, Location)] = &[
     (335, 71, Location::PointOfOrder),
     (377, 71, Location::MissedConnections),
     (167, 113, Location::JogYourMemory),
-    (209, 113, Location::ALightInTheAttic),
+    (209, 113, Location::ColumnAsIcyEm),
     (251, 113, Location::StarCrossed),
     (293, 113, Location::ALightInTheAttic),
     (335, 113, Location::PlaneAsDay),

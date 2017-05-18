@@ -30,23 +30,33 @@ const COLUMNS_KEY: &str = "columns";
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
 const COLUMNS_SPEC: &[(&str, i32, i32, &[(usize, i32)])] = &[
-    ("JAIL",  -2, 2, &[(0, 1), (3, 1)]),
-    ("BUST",  -2, 3, &[(0, 1), (1, 1), (2, 1)]),
-    ("SCANT", -2, 1, &[(0, 1), (2, 1), (4, 1)]),
-    ("LIONS", -2, 4, &[(1, 1), (3, 1), (5, 1)]),
-    ("LOAF",  -1, 0, &[(3, 1), (4, 1), (5, 1)]),
-    ("TURF",  -1, 1, &[(2, 1), (5, 1)]),
+    // First row:
+    ("ELF",  -1, 1, &[(0, 1), (7, 1), (1, 1), (8, 1), (6, -1), (13, -1)]),
+    ("HIDE", -2, 1, &[(0, -1), (7, -1), (1, 1), (8, 1), (2, -1), (9, -1)]),
+    ("SCAR", -2, 0, &[(2, 1), (9, 1), (4, 1), (11, 1)]),
+    ("RUNS", -2, 2, &[(0, -1), (7, -1), (3, 1), (10, 1), (6, -1), (13, -1)]),
+    ("FLED", -2, 2, &[(2, 1), (9, 1), (4, 1), (11, 1)]),
+    ("BURN", -2, 3, &[(4, -1), (11, -1), (5, 1), (12, 1), (6, -1), (13, -1)]),
+    ("SOL",  -1, 1, &[(0, -1), (7, -1), (5, 1), (12, 1), (6, 1), (13, 1)]),
+    // Second row:
+    ("IDS",  -1, 1, &[(0, 1), (7, 1), (1, 1), (8, 1), (6, -1), (13, -1)]),
+    ("LIES", -1, 1, &[(0, -1), (7, -1), (1, 1), (8, 1), (2, -1), (9, -1)]),
+    ("SCAM", -1, 0, &[(2, 1), (9, 1), (4, 1), (11, 1)]),
+    ("BLUR", -1, 2, &[(0, -1), (7, -1), (3, 1), (10, 1), (6, -1), (13, -1)]),
+    ("FAKE", -1, 2, &[(2, 1), (9, 1), (4, 1), (11, 1)]),
+    ("CODE", -1, 3, &[(4, -1), (11, -1), (5, 1), (12, 1), (6, -1), (13, -1)]),
+    ("SPY",  -1, 1, &[(0, -1), (7, -1), (5, 1), (12, 1), (6, 1), (13, 1)]),
 ];
 
 // ========================================================================= //
 
-pub struct WhatchaState {
+pub struct IcyEmState {
     access: Access,
     columns: Columns,
 }
 
-impl WhatchaState {
-    pub fn from_toml(mut table: toml::value::Table) -> WhatchaState {
+impl IcyEmState {
+    pub fn from_toml(mut table: toml::value::Table) -> IcyEmState {
         let access = Access::from_toml(table.get(ACCESS_KEY));
         let mut columns = Columns::from_toml(COLUMNS_SPEC,
                                              pop_array(&mut table,
@@ -54,7 +64,7 @@ impl WhatchaState {
         if access.is_solved() {
             columns.solve();
         }
-        WhatchaState {
+        IcyEmState {
             access: access,
             columns: columns,
         }
@@ -77,8 +87,8 @@ impl WhatchaState {
     }
 }
 
-impl PuzzleState for WhatchaState {
-    fn location(&self) -> Location { Location::WhatchaColumn }
+impl PuzzleState for IcyEmState {
+    fn location(&self) -> Location { Location::ColumnAsIcyEm }
 
     fn access(&self) -> Access { self.access }
 

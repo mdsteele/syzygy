@@ -17,40 +17,24 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod access;
-mod color;
-pub mod column;
-mod crossword;
-mod data;
-pub mod device;
-mod direction;
-mod game;
-mod location;
-pub mod memory;
-mod path;
-pub mod plane;
-mod prefs;
-mod puzzles;
-pub mod pyramid;
-pub mod util;
+mod scenes;
+mod view;
 
-pub use self::access::Access;
-pub use self::color::PrimaryColor;
-pub use self::crossword::{CrosswordState, ValidChars};
-pub use self::data::SaveData;
-pub use self::direction::Direction;
-pub use self::game::Game;
-pub use self::location::Location;
-pub use self::path::get_default_save_file_path;
-pub use self::prefs::Prefs;
-pub use self::puzzles::{AtticState, BlackState, BlameState, CubeState,
-                        DayState, DisconState, DotsState, DoubleState,
-                        FailureState, FictionState, GearsState, GroundState,
-                        IcyEmState, JogState, LaneState, LevelUpState,
-                        LineState, LogLevelState, MissedState, OrderState,
-                        PasswordState, PrologState, PuzzleState, SauceState,
-                        ServesState, SimpleState, StarState, SyrupState,
-                        SyzygyStage, SyzygyState, TheYState, TreadState,
-                        WhatchaState, WordDir, WreckedState};
+use gui::Window;
+use modes::{Mode, run_puzzle};
+use save::Game;
+use self::view::View;
+
+// ========================================================================= //
+
+pub fn run_column_as_icy_em(window: &mut Window, game: &mut Game) -> Mode {
+    let view = {
+        let visible_rect = window.visible_rect();
+        View::new(&mut window.resources(),
+                  visible_rect,
+                  &game.column_as_icy_em)
+    };
+    run_puzzle(window, game, view)
+}
 
 // ========================================================================= //

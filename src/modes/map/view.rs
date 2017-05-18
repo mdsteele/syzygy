@@ -34,6 +34,7 @@ const NODES: &[(Location, (i32, i32))] = &[
     (Location::Prolog, (75, 100)),
     (Location::ALightInTheAttic, (200, 50)),
     (Location::BlackAndBlue, (225, 75)),
+    (Location::ColumnAsIcyEm, (350, 150)),
     (Location::ConnectTheDots, (150, 150)),
     (Location::CrossSauce, (225, 225)),
     (Location::CrossTheLine, (125, 225)),

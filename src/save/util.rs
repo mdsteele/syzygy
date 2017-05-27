@@ -33,12 +33,28 @@ pub fn pop_array(table: &mut toml::value::Table, key: &str)
     }
 }
 
+pub fn pop_i32(table: &mut toml::value::Table, key: &str) -> i32 {
+    if let Some(value) = table.remove(key) {
+        to_i32(value)
+    } else {
+        0
+    }
+}
+
 pub fn pop_table(table: &mut toml::value::Table, key: &str)
                  -> toml::value::Table {
     if let Some(value) = table.remove(key) {
         to_table(value)
     } else {
         toml::value::Table::new()
+    }
+}
+
+pub fn pop_usize(table: &mut toml::value::Table, key: &str) -> usize {
+    if let Some(value) = table.remove(key) {
+        to_u32(value) as usize
+    } else {
+        0
     }
 }
 

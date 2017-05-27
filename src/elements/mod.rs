@@ -23,6 +23,7 @@ pub mod cutscene;
 mod dialog;
 mod fade;
 mod hud;
+pub mod ice;
 pub mod lasers;
 pub mod memory;
 mod paragraph;

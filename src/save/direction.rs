@@ -17,6 +17,7 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
+use num_integer::mod_floor;
 use toml;
 
 use gui::Point;
@@ -126,6 +127,15 @@ impl Direction {
             Direction::North => Direction::West,
         }
     }
+
+    pub fn rotated_ccw_by(self, by: i32) -> Direction {
+        match mod_floor(by, 4) {
+            1 => self.rotated_ccw(),
+            2 => self.opposite(),
+            3 => self.rotated_cw(),
+            _ => self,
+        }
+    }
 }
 
 // ========================================================================= //
@@ -158,23 +168,40 @@ mod tests {
 
     #[test]
     fn opposites() {
-        for original in ALL_DIRECTIONS {
+        for &original in ALL_DIRECTIONS {
             let opposite = original.opposite();
             assert!(original.is_parallel_to(opposite));
-            assert!(opposite.is_parallel_to(*original));
-            assert_eq!(opposite.opposite(), *original);
+            assert!(opposite.is_parallel_to(original));
+            assert_eq!(opposite.opposite(), original);
             assert_eq!(original.delta() + opposite.delta(), Point::new(0, 0));
         }
     }
 
     #[test]
     fn rotated() {
-        for original in ALL_DIRECTIONS {
+        for &original in ALL_DIRECTIONS {
             let rotated = original.rotated_cw();
             assert!(!original.is_parallel_to(rotated));
-            assert!(!rotated.is_parallel_to(*original));
+            assert!(!rotated.is_parallel_to(original));
             assert_eq!(rotated.rotated_cw(), original.opposite());
-            assert_eq!(rotated.rotated_ccw(), *original);
+            assert_eq!(rotated.rotated_ccw(), original);
+        }
+    }
+
+    #[test]
+    fn rotated_by() {
+        for &original in ALL_DIRECTIONS {
+            assert_eq!(original.rotated_ccw_by(0), original);
+            assert_eq!(original.rotated_ccw_by(1), original.rotated_ccw());
+            assert_eq!(original.rotated_ccw_by(-1), original.rotated_cw());
+            assert_eq!(original.rotated_ccw_by(2), original.opposite());
+            assert_eq!(original.rotated_ccw_by(-2), original.opposite());
+            assert_eq!(original.rotated_ccw_by(3), original.rotated_cw());
+            assert_eq!(original.rotated_ccw_by(-3), original.rotated_ccw());
+            assert_eq!(original.rotated_ccw_by(4), original);
+            assert_eq!(original.rotated_ccw_by(-4), original);
+            assert_eq!(original.rotated_ccw_by(5), original.rotated_ccw());
+            assert_eq!(original.rotated_ccw_by(-5), original.rotated_cw());
         }
     }
 }

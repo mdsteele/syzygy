@@ -181,6 +181,9 @@ fn main() {
                         Location::FactOrFiction => {
                             modes::run_fact_or_fiction(&mut window, game)
                         }
+                        Location::IceToMeetYou => {
+                            modes::run_ice_to_meet_you(&mut window, game)
+                        }
                         Location::IfMemoryServes => {
                             modes::run_if_memory_serves(&mut window, game)
                         }

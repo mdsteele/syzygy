@@ -22,10 +22,10 @@ use toml;
 use save::{AtticState, BlackState, BlameState, CubeState, DayState,
            DisconState, DotsState, DoubleState, FailureState, FictionState,
            GearsState, GroundState, IcyEmState, JogState, LaneState,
-           LevelUpState, LineState, Location, LogLevelState, MissedState,
-           OrderState, PasswordState, PrologState, PuzzleState, SauceState,
-           ServesState, SimpleState, StarState, SyrupState, SyzygyState,
-           TheYState, TreadState, WhatchaState, WreckedState};
+           LevelUpState, LineState, Location, LogLevelState, MeetState,
+           MissedState, OrderState, PasswordState, PrologState, PuzzleState,
+           SauceState, ServesState, SimpleState, StarState, SyrupState,
+           SyzygyState, TheYState, TreadState, WhatchaState, WreckedState};
 use save::util::{pop_table, to_table};
 
 // ========================================================================= //
@@ -48,6 +48,7 @@ pub struct Game {
     pub disconnected: DisconState,
     pub double_cross: DoubleState,
     pub fact_or_fiction: FictionState,
+    pub ice_to_meet_you: MeetState,
     pub if_memory_serves: ServesState,
     pub jog_your_memory: JogState,
     pub level_up: LevelUpState,
@@ -106,6 +107,8 @@ impl Game {
                 pop_table(table_ref, Location::DoubleCross.key())),
             fact_or_fiction: FictionState::from_toml(
                 pop_table(table_ref, Location::FactOrFiction.key())),
+            ice_to_meet_you: MeetState::from_toml(
+                pop_table(table_ref, Location::IceToMeetYou.key())),
             if_memory_serves: ServesState::from_toml(
                 pop_table(table_ref, Location::IfMemoryServes.key())),
             jog_your_memory: JogState::from_toml(
@@ -193,6 +196,7 @@ impl Game {
             Location::Disconnected => &self.disconnected,
             Location::DoubleCross => &self.double_cross,
             Location::FactOrFiction => &self.fact_or_fiction,
+            Location::IceToMeetYou => &self.ice_to_meet_you,
             Location::IfMemoryServes => &self.if_memory_serves,
             Location::JogYourMemory => &self.jog_your_memory,
             Location::LevelUp => &self.level_up,
@@ -231,6 +235,7 @@ impl Game {
             Location::Disconnected => &mut self.disconnected,
             Location::DoubleCross => &mut self.double_cross,
             Location::FactOrFiction => &mut self.fact_or_fiction,
+            Location::IceToMeetYou => &mut self.ice_to_meet_you,
             Location::IfMemoryServes => &mut self.if_memory_serves,
             Location::JogYourMemory => &mut self.jog_your_memory,
             Location::LevelUp => &mut self.level_up,

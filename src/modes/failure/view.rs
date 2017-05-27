@@ -55,7 +55,7 @@ const DASHBOARD_CHIPS: &[(i32, i32, Location)] = &[
     (377, 155, Location::ALightInTheAttic),
     (167, 197, Location::LogLevel),
     (209, 197, Location::ShiftGears),
-    (251, 197, Location::ALightInTheAttic),
+    (251, 197, Location::IceToMeetYou),
     (293, 197, Location::BlackAndBlue),
     (335, 197, Location::DoubleCross),
     (377, 197, Location::LightSyrup),

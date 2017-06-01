@@ -22,6 +22,7 @@ use toml;
 
 use gui::Rect;
 use save::{Access, Direction, Location, PrimaryColor};
+use save::column::Columns;
 use save::device::{Device, DeviceGrid};
 use save::plane::{PlaneGrid, PlaneObj};
 use super::PuzzleState;
@@ -30,13 +31,23 @@ use super::super::util::{ACCESS_KEY, pop_array, to_i32};
 // ========================================================================= //
 
 const STAGE_KEY: &str = "stage";
-// const YTTRIS_KEY: &str = "yttris";
+const YTTRIS_KEY: &str = "yttris";
 // const ARGONY_KEY: &str = "argony";
 const ELINSA_KEY: &str = "elinsa";
 const UGRENT_KEY: &str = "ugrent";
 const RELYNG_LIGHTS_KEY: &str = "relyng_lights";
 const RELYNG_NEXT_KEY: &str = "relyng_next";
 // const MEZURE_KEY: &str = "mezure";
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+const YTTRIS_COLUMNS_SPEC: &[(&str, i32, i32, &[(usize, i32)])] = &[
+    ("UNDO", -1, 3, &[(0, 1), (4,  2), (3,  3)]),
+    ("OPEN", -1, 2, &[(1, 1), (3, -2), (4,  3)]),
+    ("FILE", -1, 1, &[(2, 1), (0,  2), (5,  3)]),
+    ("BOLT", -1, 0, &[(3, 1), (5, -2), (1, -3)]),
+    ("PICK", -1, 1, &[(4, 1),          (0, -3)]),
+    ("KEYS", -1, 3, &[(5, 1), (2, -2), (4,  3)]),
+];
 
 const RELYNG_NUM_COLS: i32 = 5;
 const RELYNG_NUM_ROWS: i32 = 4;
@@ -90,6 +101,7 @@ impl SyzygyStage {
 pub struct SyzygyState {
     access: Access,
     stage: SyzygyStage,
+    yttris: Columns,
     elinsa: PlaneGrid,
     ugrent: DeviceGrid,
     relyng_lights: HashSet<i32>,
@@ -142,6 +154,8 @@ impl SyzygyState {
     pub fn from_toml(mut table: toml::value::Table) -> SyzygyState {
         let access = Access::from_toml(table.get(ACCESS_KEY));
         let stage = SyzygyStage::from_toml(table.get(STAGE_KEY));
+        let yttris = Columns::from_toml(YTTRIS_COLUMNS_SPEC,
+                                        pop_array(&mut table, YTTRIS_KEY));
         let mut elinsa = SyzygyState::elinsa_initial_grid();
         elinsa.set_pipes_from_toml(pop_array(&mut table, ELINSA_KEY));
         let ugrent =
@@ -167,6 +181,7 @@ impl SyzygyState {
         SyzygyState {
             access: access,
             stage: stage,
+            yttris: yttris,
             elinsa: elinsa,
             ugrent: ugrent,
             relyng_next: relyng_next,
@@ -174,6 +189,7 @@ impl SyzygyState {
         }
     }
 
+    // TODO: Solve stages one at a time.
     pub fn solve(&mut self) { self.access = Access::Solved; }
 
     pub fn stage(&self) -> SyzygyStage { self.stage }
@@ -190,6 +206,12 @@ impl SyzygyState {
         }
         false
     }
+
+    pub fn yttris_columns(&self) -> &Columns { &self.yttris }
+
+    pub fn yttris_columns_mut(&mut self) -> &mut Columns { &mut self.yttris }
+
+    fn reset_yttris(&mut self) { self.yttris.reset() }
 
     pub fn elinsa_grid(&self) -> &PlaneGrid { &self.elinsa }
 
@@ -299,6 +321,7 @@ impl PuzzleState for SyzygyState {
 
     fn can_reset(&self) -> bool {
         match self.stage {
+            SyzygyStage::Yttris => self.yttris.can_reset(),
             SyzygyStage::Elinsa => !self.elinsa.pipes().is_empty(),
             SyzygyStage::Ugrent => self.ugrent.is_modified(),
             SyzygyStage::Relyng => !self.relyng_lights.is_empty(),
@@ -308,6 +331,7 @@ impl PuzzleState for SyzygyState {
 
     fn reset(&mut self) {
         match self.stage {
+            SyzygyStage::Yttris => self.reset_yttris(),
             SyzygyStage::Elinsa => self.reset_elinsa(),
             SyzygyStage::Ugrent => self.reset_ugrent(),
             SyzygyStage::Relyng => self.reset_relyng(),
@@ -317,6 +341,7 @@ impl PuzzleState for SyzygyState {
 
     fn replay(&mut self) {
         self.stage = SyzygyStage::first();
+        self.reset_yttris();
         self.reset_elinsa();
         self.reset_ugrent();
         self.reset_relyng();
@@ -330,6 +355,10 @@ impl PuzzleState for SyzygyState {
         if !self.is_solved() {
             table.insert(STAGE_KEY.to_string(), self.stage.to_toml());
             match self.stage {
+                SyzygyStage::Yttris => {
+                    table.insert(YTTRIS_KEY.to_string(),
+                                 self.yttris.to_toml());
+                }
                 SyzygyStage::Elinsa => {
                     table.insert(ELINSA_KEY.to_string(),
                                  self.elinsa.pipes_to_toml());

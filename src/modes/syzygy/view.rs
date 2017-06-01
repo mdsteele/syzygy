@@ -18,6 +18,7 @@
 // +--------------------------------------------------------------------------+
 
 use elements::{PuzzleCmd, PuzzleCore, PuzzleView};
+use elements::column::ColumnsView;
 use elements::lasers::{LaserCmd, LaserField};
 use elements::plane::{PlaneCmd, PlaneGridView};
 use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sound};
@@ -30,6 +31,7 @@ use super::scenes::{compile_intro_scene, compile_outro_scene};
 
 #[derive(Clone)]
 enum UndoRedo {
+    Yttris(usize, i32),
     Elinsa(Vec<(Point, Point)>),
     Ugrent(LaserCmd),
     Relyng((i32, i32)),
@@ -39,6 +41,7 @@ enum UndoRedo {
 
 pub struct View {
     core: PuzzleCore<UndoRedo>,
+    yttris: ColumnsView,
     elinsa: PlaneGridView,
     ugrent: LaserField,
     relyng: LightsGrid,
@@ -52,6 +55,7 @@ impl View {
         let core = PuzzleCore::new(resources, visible, state, intro, outro);
         View {
             core: core,
+            yttris: ColumnsView::new(resources, 196, 180, 0),
             elinsa: PlaneGridView::new(resources, 150, 140),
             ugrent: LaserField::new(resources, 175, 140, state.ugrent_grid()),
             relyng: LightsGrid::new(resources, 168, 140, state),
@@ -64,6 +68,9 @@ impl Element<Game, PuzzleCmd> for View {
         let state = &game.system_syzygy;
         self.core.draw_back_layer(canvas);
         match state.stage() {
+            SyzygyStage::Yttris => {
+                self.yttris.draw(state.yttris_columns(), canvas);
+            }
             SyzygyStage::Elinsa => {
                 self.elinsa.draw(state.elinsa_grid(), canvas);
             }
@@ -85,6 +92,23 @@ impl Element<Game, PuzzleCmd> for View {
         let mut action = self.core.handle_event(event, state);
         if !action.should_stop() && !state.is_solved() {
             match state.stage() {
+                SyzygyStage::Yttris => {
+                    let subaction =
+                        self.yttris
+                            .handle_event(event, state.yttris_columns_mut());
+                    if let Some(&(col, by)) = subaction.value() {
+                        state.yttris_columns_mut().rotate_column(col, by);
+                        if state.yttris_columns().is_solved() {
+                            self.core.clear_undo_redo();
+                            // TODO advance stage
+                            let sound = Sound::solve_puzzle_chime();
+                            action.also_play_sound(sound);
+                        } else {
+                            self.core.push_undo(UndoRedo::Yttris(col, by));
+                        }
+                    }
+                    action.merge(subaction.but_no_value());
+                }
                 SyzygyStage::Elinsa => {
                     let mut subaction =
                         self.elinsa
@@ -163,6 +187,9 @@ impl PuzzleView for View {
     fn undo(&mut self, game: &mut Game) {
         let state = &mut game.system_syzygy;
         match self.core.pop_undo() {
+            Some(UndoRedo::Yttris(col, by)) => {
+                state.yttris_columns_mut().rotate_column(col, -by);
+            }
             Some(UndoRedo::Relyng(pos)) => state.relyng_untoggle(pos),
             Some(_) => {} // TODO other undos
             None => {}
@@ -172,6 +199,9 @@ impl PuzzleView for View {
     fn redo(&mut self, game: &mut Game) {
         let state = &mut game.system_syzygy;
         match self.core.pop_redo() {
+            Some(UndoRedo::Yttris(col, by)) => {
+                state.yttris_columns_mut().rotate_column(col, by);
+            }
             Some(UndoRedo::Relyng(pos)) => state.relyng_toggle(pos),
             Some(_) => {} // TODO other redos
             None => {}
@@ -200,10 +230,13 @@ impl PuzzleView for View {
 // ========================================================================= //
 
 const YTTRIS_INFO_BOX_TEXT: &str = "\
-Your goal is to turn the word TANGENT into the word COSINE.
+Your goal is to slide the columns of letters until the
+hilighted letters form a word horizontally across.
+There is only one possible word that can be formed.
 
-$M{Tap}{Click} on one of the six buttons at the top to transform the
-word.  Each button performs a different transformation.";
+Drag a column up or down with $M{your finger}{the mouse} to rotate
+its letters.  Moving one column may also cause other
+columns to move at the same time.";
 
 const ARGONY_INFO_BOX_TEXT: &str = "\
 Your goal is to TODO.";

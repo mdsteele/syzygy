@@ -31,21 +31,21 @@ const GRID_KEY: &str = "grid";
 
 // ========================================================================= //
 
-pub struct GoingState {
+pub struct RightState {
     access: Access,
     grid: ObjectGrid,
 }
 
-impl GoingState {
-    pub fn from_toml(mut table: toml::value::Table) -> GoingState {
+impl RightState {
+    pub fn from_toml(mut table: toml::value::Table) -> RightState {
         let access = Access::from_toml(table.get(ACCESS_KEY));
         let grid = if access == Access::Solved {
-            GoingState::solved_grid()
+            RightState::solved_grid()
         } else {
             let grid = pop_table(&mut table, GRID_KEY);
-            ObjectGrid::from_toml(grid, &GoingState::initial_grid())
+            ObjectGrid::from_toml(grid, &RightState::initial_grid())
         };
-        GoingState {
+        RightState {
             access: access,
             grid: grid,
         }
@@ -53,7 +53,7 @@ impl GoingState {
 
     pub fn solve(&mut self) {
         self.access = Access::Solved;
-        self.grid = GoingState::solved_grid();
+        self.grid = RightState::solved_grid();
     }
 
     pub fn grid(&self) -> &ObjectGrid { &self.grid }
@@ -95,18 +95,18 @@ impl GoingState {
     }
 
     fn initial_grid() -> ObjectGrid {
-        let mut grid = GoingState::base_grid();
+        let mut grid = RightState::base_grid();
         grid.add_ice_block(9, 0, Symbol::RedTriangle(Direction::North));
         grid.add_ice_block(1, 1, Symbol::BlueCircle);
         grid.add_ice_block(3, 4, Symbol::YellowRhombus(false));
         grid
     }
 
-    fn solved_grid() -> ObjectGrid { GoingState::base_grid().solved() }
+    fn solved_grid() -> ObjectGrid { RightState::base_grid().solved() }
 }
 
-impl PuzzleState for GoingState {
-    fn location(&self) -> Location { Location::IceGoing }
+impl PuzzleState for RightState {
+    fn location(&self) -> Location { Location::TheIceIsRight }
 
     fn access(&self) -> Access { self.access }
 
@@ -114,7 +114,7 @@ impl PuzzleState for GoingState {
 
     fn can_reset(&self) -> bool { self.grid.is_modified() }
 
-    fn reset(&mut self) { self.grid = GoingState::initial_grid(); }
+    fn reset(&mut self) { self.grid = RightState::initial_grid(); }
 
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();

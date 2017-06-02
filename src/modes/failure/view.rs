@@ -44,7 +44,7 @@ const DASHBOARD_CHIPS: &[(i32, i32, Location)] = &[
     (167, 113, Location::JogYourMemory),
     (209, 113, Location::ColumnAsIcyEm),
     (251, 113, Location::StarCrossed),
-    (293, 113, Location::IceGoing),
+    (293, 113, Location::TheIceIsRight),
     (335, 113, Location::PlaneAsDay),
     (377, 113, Location::ShiftTheBlame),
     (167, 155, Location::LevelUp),

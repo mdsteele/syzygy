@@ -21,10 +21,10 @@ use toml;
 
 use save::{AtticState, BlackState, BlameState, CubeState, DayState,
            DisconState, DotsState, DoubleState, FailureState, FictionState,
-           GearsState, GoingState, GroundState, IcyEmState, JogState,
-           LaneState, LevelUpState, LineState, Location, LogLevelState,
-           MeetState, MissedState, OrderState, PasswordState, PrologState,
-           PuzzleState, SauceState, ServesState, SimpleState, StarState,
+           GearsState, GroundState, IcyEmState, JogState, LaneState,
+           LevelUpState, LineState, Location, LogLevelState, MeetState,
+           MissedState, OrderState, PasswordState, PrologState, PuzzleState,
+           RightState, SauceState, ServesState, SimpleState, StarState,
            SyrupState, SyzygyState, TheYState, TreadState, WhatchaState,
            WreckedState};
 use save::util::{pop_table, to_table};
@@ -49,7 +49,6 @@ pub struct Game {
     pub disconnected: DisconState,
     pub double_cross: DoubleState,
     pub fact_or_fiction: FictionState,
-    pub ice_going: GoingState,
     pub ice_to_meet_you: MeetState,
     pub if_memory_serves: ServesState,
     pub jog_your_memory: JogState,
@@ -68,6 +67,7 @@ pub struct Game {
     pub star_crossed: StarState,
     pub system_failure: FailureState,
     pub system_syzygy: SyzygyState,
+    pub the_ice_is_right: RightState,
     pub the_y_factor: TheYState,
     pub tread_lightly: TreadState,
     pub whatcha_column: WhatchaState,
@@ -109,8 +109,6 @@ impl Game {
                 pop_table(table_ref, Location::DoubleCross.key())),
             fact_or_fiction: FictionState::from_toml(
                 pop_table(table_ref, Location::FactOrFiction.key())),
-            ice_going: GoingState::from_toml(
-                pop_table(table_ref, Location::IceGoing.key())),
             ice_to_meet_you: MeetState::from_toml(
                 pop_table(table_ref, Location::IceToMeetYou.key())),
             if_memory_serves: ServesState::from_toml(
@@ -147,6 +145,8 @@ impl Game {
                 pop_table(table_ref, Location::SystemFailure.key())),
             system_syzygy: SyzygyState::from_toml(
                 pop_table(table_ref, Location::SystemSyzygy.key())),
+            the_ice_is_right: RightState::from_toml(
+                pop_table(table_ref, Location::TheIceIsRight.key())),
             the_y_factor: TheYState::from_toml(
                 pop_table(table_ref, Location::TheYFactor.key())),
             tread_lightly: TreadState::from_toml(
@@ -200,7 +200,6 @@ impl Game {
             Location::Disconnected => &self.disconnected,
             Location::DoubleCross => &self.double_cross,
             Location::FactOrFiction => &self.fact_or_fiction,
-            Location::IceGoing => &self.ice_going,
             Location::IceToMeetYou => &self.ice_to_meet_you,
             Location::IfMemoryServes => &self.if_memory_serves,
             Location::JogYourMemory => &self.jog_your_memory,
@@ -219,6 +218,7 @@ impl Game {
             Location::StarCrossed => &self.star_crossed,
             Location::SystemFailure => &self.system_failure,
             Location::SystemSyzygy => &self.system_syzygy,
+            Location::TheIceIsRight => &self.the_ice_is_right,
             Location::TheYFactor => &self.the_y_factor,
             Location::TreadLightly => &self.tread_lightly,
             Location::WhatchaColumn => &self.whatcha_column,
@@ -240,7 +240,6 @@ impl Game {
             Location::Disconnected => &mut self.disconnected,
             Location::DoubleCross => &mut self.double_cross,
             Location::FactOrFiction => &mut self.fact_or_fiction,
-            Location::IceGoing => &mut self.ice_going,
             Location::IceToMeetYou => &mut self.ice_to_meet_you,
             Location::IfMemoryServes => &mut self.if_memory_serves,
             Location::JogYourMemory => &mut self.jog_your_memory,
@@ -259,6 +258,7 @@ impl Game {
             Location::StarCrossed => &mut self.star_crossed,
             Location::SystemFailure => &mut self.system_failure,
             Location::SystemSyzygy => &mut self.system_syzygy,
+            Location::TheIceIsRight => &mut self.the_ice_is_right,
             Location::TheYFactor => &mut self.the_y_factor,
             Location::TreadLightly => &mut self.tread_lightly,
             Location::WhatchaColumn => &mut self.whatcha_column,

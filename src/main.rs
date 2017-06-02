@@ -181,9 +181,6 @@ fn main() {
                         Location::FactOrFiction => {
                             modes::run_fact_or_fiction(&mut window, game)
                         }
-                        Location::IceGoing => {
-                            modes::run_ice_going(&mut window, game)
-                        }
                         Location::IceToMeetYou => {
                             modes::run_ice_to_meet_you(&mut window, game)
                         }
@@ -237,6 +234,9 @@ fn main() {
                         }
                         Location::SystemSyzygy => {
                             modes::run_system_syzygy(&mut window, game)
+                        }
+                        Location::TheIceIsRight => {
+                            modes::run_the_ice_is_right(&mut window, game)
                         }
                         Location::TheYFactor => {
                             modes::run_the_y_factor(&mut window, game)

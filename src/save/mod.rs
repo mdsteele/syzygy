@@ -46,11 +46,11 @@ pub use self::path::get_default_save_file_path;
 pub use self::prefs::Prefs;
 pub use self::puzzles::{AtticState, BlackState, BlameState, CubeState,
                         DayState, DisconState, DotsState, DoubleState,
-                        FailureState, FictionState, GearsState, GoingState,
-                        GroundState, IcyEmState, JogState, LaneState,
-                        LevelUpState, LineState, LogLevelState, MeetState,
-                        MissedState, OrderState, PasswordState, PrologState,
-                        PuzzleState, SauceState, ServesState, SimpleState,
+                        FailureState, FictionState, GearsState, GroundState,
+                        IcyEmState, JogState, LaneState, LevelUpState,
+                        LineState, LogLevelState, MeetState, MissedState,
+                        OrderState, PasswordState, PrologState, PuzzleState,
+                        RightState, SauceState, ServesState, SimpleState,
                         StarState, SyrupState, SyzygyStage, SyzygyState,
                         TheYState, TreadState, WhatchaState, WordDir,
                         WreckedState};

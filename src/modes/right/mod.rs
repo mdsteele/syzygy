@@ -27,10 +27,12 @@ use self::view::View;
 
 // ========================================================================= //
 
-pub fn run_ice_going(window: &mut Window, game: &mut Game) -> Mode {
+pub fn run_the_ice_is_right(window: &mut Window, game: &mut Game) -> Mode {
     let view = {
         let visible_rect = window.visible_rect();
-        View::new(&mut window.resources(), visible_rect, &game.ice_going)
+        View::new(&mut window.resources(),
+                  visible_rect,
+                  &game.the_ice_is_right)
     };
     run_puzzle(window, game, view)
 }

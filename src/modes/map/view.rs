@@ -42,6 +42,7 @@ const NODES: &[(Location, (i32, i32))] = &[
     (Location::Disconnected, (100, 150)),
     (Location::DoubleCross, (175, 225)),
     (Location::FactOrFiction, (150, 200)),
+    (Location::IceGoing, (400, 50)),
     (Location::IceToMeetYou, (350, 50)),
     (Location::IfMemoryServes, (225, 280)),
     (Location::JogYourMemory, (275, 280)),

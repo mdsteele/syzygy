@@ -22,7 +22,7 @@ use toml;
 
 use gui::Point;
 use save::Direction;
-use super::util::{pop_array, pop_i32, pop_usize, to_table};
+use super::util::{pop_array, pop_i32, to_table};
 
 // ========================================================================= //
 
@@ -32,8 +32,6 @@ const COL_KEY: &str = "col";
 const ROW_KEY: &str = "row";
 const DIRECTION_KEY: &str = "direction";
 const SYMBOL_KEY: &str = "symbol";
-
-const NUM_SYMBOLS: usize = 3;
 
 // ========================================================================= //
 
@@ -53,7 +51,7 @@ pub struct ObjectGrid {
     num_cols: i32,
     num_rows: i32,
     objects: HashMap<Point, Object>,
-    ice_blocks: HashMap<Point, (Direction, usize)>,
+    ice_blocks: HashMap<Point, Symbol>,
     is_modified: bool,
 }
 
@@ -75,14 +73,12 @@ impl ObjectGrid {
             let mut block_toml = to_table(block_toml);
             let col = pop_i32(&mut block_toml, COL_KEY);
             let row = pop_i32(&mut block_toml, ROW_KEY);
-            let dir = Direction::from_toml(block_toml.get(DIRECTION_KEY));
-            let symbol = pop_usize(&mut block_toml, SYMBOL_KEY);
+            let symbol = Symbol::from_toml(block_toml.get(SYMBOL_KEY));
             if (col < 0 || col >= default.num_cols) ||
-               (row < 0 || row >= default.num_rows) ||
-               symbol >= NUM_SYMBOLS {
+               (row < 0 || row >= default.num_rows) {
                 return default.clone();
             }
-            blocks.push((col, row, dir, symbol));
+            blocks.push((col, row, symbol));
         }
         if blocks.len() != default.ice_blocks.len() {
             return default.clone();
@@ -120,11 +116,11 @@ impl ObjectGrid {
         }
 
         grid.ice_blocks.clear();
-        for (col, row, dir, symbol) in blocks.into_iter() {
+        for (col, row, symbol) in blocks.into_iter() {
             if grid.ice_blocks.contains_key(&Point::new(col, row)) {
                 return default.clone();
             }
-            grid.add_ice_block(col, row, dir, symbol);
+            grid.add_ice_block(col, row, symbol);
         }
         grid.is_modified = grid.ice_blocks != default.ice_blocks ||
                            grid.objects != default.objects;
@@ -134,15 +130,13 @@ impl ObjectGrid {
     pub fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();
         let mut blocks = toml::value::Array::new();
-        for (&coords, &(direction, symbol)) in self.ice_blocks.iter() {
+        for (&coords, &symbol) in self.ice_blocks.iter() {
             let mut block = toml::value::Table::new();
             block.insert(COL_KEY.to_string(),
                          toml::Value::Integer(coords.x() as i64));
             block.insert(ROW_KEY.to_string(),
                          toml::Value::Integer(coords.y() as i64));
-            block.insert(DIRECTION_KEY.to_string(), direction.to_toml());
-            block.insert(SYMBOL_KEY.to_string(),
-                         toml::Value::Integer(symbol as i64));
+            block.insert(SYMBOL_KEY.to_string(), symbol.to_toml());
             blocks.push(toml::Value::Table(block));
         }
         table.insert(BLOCKS_KEY.to_string(), toml::Value::Array(blocks));
@@ -177,24 +171,19 @@ impl ObjectGrid {
 
     pub fn objects(&self) -> &HashMap<Point, Object> { &self.objects }
 
-    pub fn add_ice_block(&mut self, col: i32, row: i32, dir: Direction,
-                         symbol: usize) {
-        debug_assert!(symbol < NUM_SYMBOLS);
+    pub fn add_ice_block(&mut self, col: i32, row: i32, symbol: Symbol) {
         debug_assert!(col >= 0 && col < self.num_cols);
         debug_assert!(row >= 0 && row < self.num_rows);
         let coords = Point::new(col, row);
         debug_assert!(!self.ice_blocks.contains_key(&coords));
-        self.ice_blocks.insert(coords, (dir, symbol));
+        self.ice_blocks.insert(coords, symbol);
     }
 
-    pub fn ice_blocks(&self) -> &HashMap<Point, (Direction, usize)> {
-        &self.ice_blocks
-    }
+    pub fn ice_blocks(&self) -> &HashMap<Point, Symbol> { &self.ice_blocks }
 
     pub fn slide_ice_block(&mut self, coords: Point, slide_dir: Direction)
                            -> Option<BlockSlide> {
-        if let Some((mut block_dir, symbol)) =
-            self.ice_blocks.remove(&coords) {
+        if let Some(mut symbol) = self.ice_blocks.remove(&coords) {
             let delta = slide_dir.delta();
             let mut new_coords = coords;
             let mut pushed = None;
@@ -225,16 +214,16 @@ impl ObjectGrid {
                         pushed = Some(pp_coords);
                     }
                     Some(Object::Rotator) => {
-                        block_dir = block_dir.rotated_cw();
+                        symbol = symbol.rotated_ccw_by(-1);
                         rotated += 1;
                     }
-                    Some(Object::Goal(_, _)) => {}
+                    Some(Object::Goal(_)) => {}
                     None => {}
                 }
                 new_coords = next;
             }
             debug_assert!(!self.ice_blocks.contains_key(&new_coords));
-            self.ice_blocks.insert(new_coords, (block_dir, symbol));
+            self.ice_blocks.insert(new_coords, symbol);
             if new_coords != coords {
                 self.is_modified = true;
                 return Some(BlockSlide {
@@ -250,9 +239,9 @@ impl ObjectGrid {
     }
 
     pub fn undo_slide(&mut self, slide: &BlockSlide) {
-        if let Some((block_dir, symbol)) = self.ice_blocks.remove(&slide.to) {
-            let block_dir = block_dir.rotated_ccw_by(slide.rotated);
-            self.ice_blocks.insert(slide.from, (block_dir, symbol));
+        if let Some(symbol) = self.ice_blocks.remove(&slide.to) {
+            let symbol = symbol.rotated_ccw_by(slide.rotated);
+            self.ice_blocks.insert(slide.from, symbol);
             if let Some(pp_coords) = slide.pushed {
                 if let Some(&Object::PushPop(pp_dir)) =
                     self.objects.get(&pp_coords) {
@@ -274,13 +263,9 @@ impl ObjectGrid {
     }
 
     pub fn all_blocks_on_goals(&self) -> bool {
-        for (coords, &(block_dir, block_symbol)) in self.ice_blocks.iter() {
+        for (coords, &block_sym) in self.ice_blocks.iter() {
             match self.objects.get(coords) {
-                Some(&Object::Goal(goal_dir, goal_symbol)) if goal_dir ==
-                                                              block_dir &&
-                                                              goal_symbol ==
-                                                              block_symbol => {
-                }
+                Some(&Object::Goal(goal_sym)) if goal_sym == block_sym => {}
                 _ => return false,
             }
         }
@@ -290,8 +275,8 @@ impl ObjectGrid {
     pub fn solved(mut self) -> ObjectGrid {
         self.ice_blocks.clear();
         for (&coords, object) in self.objects.iter() {
-            if let &Object::Goal(dir, symbol) = object {
-                self.ice_blocks.insert(coords, (dir, symbol));
+            if let &Object::Goal(symbol) = object {
+                self.ice_blocks.insert(coords, symbol);
             }
         }
         self.is_modified = true;
@@ -301,13 +286,125 @@ impl ObjectGrid {
 
 // ========================================================================= //
 
-#[allow(dead_code)]
-#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Symbol {
+    RedTriangle(Direction),
+    GreenSquare,
+    BlueCircle,
+    YellowRhombus(bool),
+}
+
+impl Symbol {
+    pub fn from_toml(value: Option<&toml::Value>) -> Symbol {
+        if let Some(string) = value.and_then(toml::Value::as_str) {
+            match string {
+                "RTE" => Symbol::RedTriangle(Direction::East),
+                "RTS" => Symbol::RedTriangle(Direction::South),
+                "RTW" => Symbol::RedTriangle(Direction::West),
+                "RTN" => Symbol::RedTriangle(Direction::North),
+                "GS" => Symbol::GreenSquare,
+                "BC" => Symbol::BlueCircle,
+                "YRH" => Symbol::YellowRhombus(false),
+                "YRV" => Symbol::YellowRhombus(true),
+                _ => Symbol::BlueCircle,
+            }
+        } else {
+            Symbol::BlueCircle
+        }
+    }
+
+    fn to_toml(self) -> toml::Value {
+        let string = match self {
+            Symbol::RedTriangle(Direction::East) => "RTE",
+            Symbol::RedTriangle(Direction::South) => "RTS",
+            Symbol::RedTriangle(Direction::West) => "RTW",
+            Symbol::RedTriangle(Direction::North) => "RTN",
+            Symbol::GreenSquare => "GS",
+            Symbol::BlueCircle => "BC",
+            Symbol::YellowRhombus(false) => "YRH",
+            Symbol::YellowRhombus(true) => "YRV",
+        };
+        toml::Value::String(string.to_string())
+    }
+
+    fn rotated_ccw_by(self, by: i32) -> Symbol {
+        match self {
+            Symbol::RedTriangle(dir) => {
+                Symbol::RedTriangle(dir.rotated_ccw_by(by))
+            }
+            Symbol::GreenSquare => Symbol::GreenSquare,
+            Symbol::BlueCircle => Symbol::BlueCircle,
+            Symbol::YellowRhombus(vertical) => {
+                Symbol::YellowRhombus(vertical ^ (by % 2 != 0))
+            }
+        }
+    }
+
+    pub fn sprite_index(self) -> usize {
+        match self {
+            Symbol::RedTriangle(_) => 0,
+            Symbol::GreenSquare => 1,
+            Symbol::BlueCircle => 2,
+            Symbol::YellowRhombus(_) => 3,
+        }
+    }
+
+    pub fn sprite_degrees(self) -> i32 {
+        match self {
+            Symbol::RedTriangle(dir) => dir.degrees(),
+            Symbol::GreenSquare => 0,
+            Symbol::BlueCircle => 0,
+            Symbol::YellowRhombus(false) => 0,
+            Symbol::YellowRhombus(true) => 90,
+        }
+    }
+}
+
+// ========================================================================= //
+
+#[derive(Clone, Copy, Eq, PartialEq)]
 pub enum Object {
     Wall,
     PushPop(Direction),
     Rotator,
-    Goal(Direction, usize),
+    Goal(Symbol),
+}
+
+// ========================================================================= //
+
+#[cfg(test)]
+mod tests {
+    use save::Direction;
+    use super::Symbol;
+
+    const ALL_SYMBOLS: &[Symbol] = &[Symbol::RedTriangle(Direction::East),
+                                     Symbol::RedTriangle(Direction::South),
+                                     Symbol::RedTriangle(Direction::West),
+                                     Symbol::RedTriangle(Direction::North),
+                                     Symbol::GreenSquare,
+                                     Symbol::BlueCircle,
+                                     Symbol::YellowRhombus(false),
+                                     Symbol::YellowRhombus(true)];
+
+    #[test]
+    fn symbol_toml_round_trip() {
+        for &original in ALL_SYMBOLS {
+            let result = Symbol::from_toml(Some(&original.to_toml()));
+            assert_eq!(result, original);
+        }
+    }
+
+    #[test]
+    fn symbol_rotated_by() {
+        assert_eq!(Symbol::RedTriangle(Direction::North).rotated_ccw_by(-1),
+                   Symbol::RedTriangle(Direction::East));
+        assert_eq!(Symbol::GreenSquare.rotated_ccw_by(1), Symbol::GreenSquare);
+        assert_eq!(Symbol::BlueCircle.rotated_ccw_by(2), Symbol::BlueCircle);
+        assert_eq!(Symbol::YellowRhombus(true).rotated_ccw_by(-1),
+                   Symbol::YellowRhombus(false));
+        assert_eq!(Symbol::YellowRhombus(true).rotated_ccw_by(2),
+                   Symbol::YellowRhombus(true));
+    }
 }
 
 // ========================================================================= //

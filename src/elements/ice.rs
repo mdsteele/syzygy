@@ -133,20 +133,21 @@ impl Element<ObjectGrid, (Point, Direction)> for GridView {
                 Object::Rotator => {
                     canvas.draw_sprite_centered(&self.obj_sprites[3], center);
                 }
-                Object::Goal(direction, symbol) => {
+                Object::Goal(symbol) => {
                     canvas.draw_sprite_rotated(
-                        &self.symbol_sprites[2 * symbol + 1],
+                        &self.symbol_sprites[2 * symbol.sprite_index() + 1],
                         center,
-                        direction.degrees());
+                        symbol.sprite_degrees());
                 }
             }
         }
-        for (&coords, &(direction, symbol)) in grid.ice_blocks() {
+        for (&coords, &symbol) in grid.ice_blocks() {
             let center = coords * GRID_CELL_SIZE +
                          Point::new(GRID_CELL_SIZE / 2, GRID_CELL_SIZE / 2);
-            canvas.draw_sprite_rotated(&self.symbol_sprites[symbol * 2],
+            let sprite = &self.symbol_sprites[symbol.sprite_index() * 2];
+            canvas.draw_sprite_rotated(sprite,
                                        center,
-                                       direction.degrees());
+                                       symbol.sprite_degrees());
             canvas.draw_sprite_centered(&self.obj_sprites[0], center);
         }
     }

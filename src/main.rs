@@ -181,6 +181,9 @@ fn main() {
                         Location::FactOrFiction => {
                             modes::run_fact_or_fiction(&mut window, game)
                         }
+                        Location::IceGoing => {
+                            modes::run_ice_going(&mut window, game)
+                        }
                         Location::IceToMeetYou => {
                             modes::run_ice_to_meet_you(&mut window, game)
                         }

@@ -50,14 +50,6 @@ pub fn pop_table(table: &mut toml::value::Table, key: &str)
     }
 }
 
-pub fn pop_usize(table: &mut toml::value::Table, key: &str) -> usize {
-    if let Some(value) = table.remove(key) {
-        to_u32(value) as usize
-    } else {
-        0
-    }
-}
-
 pub fn to_array(value: toml::Value) -> toml::value::Array {
     match value {
         toml::Value::Array(array) => array,

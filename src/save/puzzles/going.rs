@@ -31,21 +31,21 @@ const GRID_KEY: &str = "grid";
 
 // ========================================================================= //
 
-pub struct MeetState {
+pub struct GoingState {
     access: Access,
     grid: ObjectGrid,
 }
 
-impl MeetState {
-    pub fn from_toml(mut table: toml::value::Table) -> MeetState {
+impl GoingState {
+    pub fn from_toml(mut table: toml::value::Table) -> GoingState {
         let access = Access::from_toml(table.get(ACCESS_KEY));
         let grid = if access == Access::Solved {
-            MeetState::solved_grid()
+            GoingState::solved_grid()
         } else {
             let grid = pop_table(&mut table, GRID_KEY);
-            ObjectGrid::from_toml(grid, &MeetState::initial_grid())
+            ObjectGrid::from_toml(grid, &GoingState::initial_grid())
         };
-        MeetState {
+        GoingState {
             access: access,
             grid: grid,
         }
@@ -53,7 +53,7 @@ impl MeetState {
 
     pub fn solve(&mut self) {
         self.access = Access::Solved;
-        self.grid = MeetState::solved_grid();
+        self.grid = GoingState::solved_grid();
     }
 
     pub fn grid(&self) -> &ObjectGrid { &self.grid }
@@ -70,42 +70,43 @@ impl MeetState {
     }
 
     fn base_grid() -> ObjectGrid {
-        let mut grid = ObjectGrid::new(7, 7);
-        grid.add_object(0, 0, Object::Wall);
-        grid.add_object(1, 0, Object::Wall);
-        grid.add_object(2, 0, Object::Wall);
-        grid.add_object(0,
-                        1,
-                        Object::Goal(Symbol::RedTriangle(Direction::North)));
-        grid.add_object(1, 1, Object::Wall);
-        grid.add_object(4, 1, Object::Wall);
-        grid.add_object(5, 1, Object::Goal(Symbol::BlueCircle));
-        grid.add_object(0, 3, Object::Wall);
-        grid.add_object(1, 3, Object::Wall);
-        grid.add_object(2, 3, Object::Wall);
-        grid.add_object(4, 3, Object::Goal(Symbol::GreenSquare));
+        let mut grid = ObjectGrid::new(10, 6);
+        grid.add_object(3, 1, Object::Wall);
+        grid.add_object(4, 1, Object::PushPop(Direction::East));
+        grid.add_object(7, 1, Object::Wall);
+        grid.add_object(8, 1, Object::Wall);
+        grid.add_object(9, 1, Object::Wall);
+        grid.add_object(2,
+                        2,
+                        Object::Goal(Symbol::RedTriangle(Direction::West)));
+        grid.add_object(3, 2, Object::Rotator);
+        grid.add_object(3, 3, Object::Wall);
+        grid.add_object(4, 3, Object::Wall);
+        grid.add_object(5, 3, Object::Wall);
         grid.add_object(6, 3, Object::Wall);
-        grid.add_object(2, 4, Object::PushPop(Direction::South));
-        grid.add_object(1, 5, Object::Wall);
-        grid.add_object(4, 5, Object::Wall);
-        grid.add_object(5, 5, Object::Wall);
-        grid.add_object(0, 6, Object::Wall);
+        grid.add_object(7, 3, Object::Wall);
+        grid.add_object(8, 3, Object::Wall);
+        grid.add_object(9, 3, Object::Wall);
+        grid.add_object(0, 4, Object::Wall);
+        grid.add_object(1, 4, Object::Goal(Symbol::BlueCircle));
+        grid.add_object(5, 4, Object::Goal(Symbol::YellowRhombus(true)));
+        grid.add_object(6, 4, Object::PushPop(Direction::South));
         grid
     }
 
     fn initial_grid() -> ObjectGrid {
-        let mut grid = MeetState::base_grid();
-        grid.add_ice_block(4, 0, Symbol::BlueCircle);
-        grid.add_ice_block(0, 2, Symbol::GreenSquare);
-        grid.add_ice_block(0, 4, Symbol::RedTriangle(Direction::North));
+        let mut grid = GoingState::base_grid();
+        grid.add_ice_block(9, 0, Symbol::RedTriangle(Direction::North));
+        grid.add_ice_block(1, 1, Symbol::BlueCircle);
+        grid.add_ice_block(3, 4, Symbol::YellowRhombus(false));
         grid
     }
 
-    fn solved_grid() -> ObjectGrid { MeetState::base_grid().solved() }
+    fn solved_grid() -> ObjectGrid { GoingState::base_grid().solved() }
 }
 
-impl PuzzleState for MeetState {
-    fn location(&self) -> Location { Location::IceToMeetYou }
+impl PuzzleState for GoingState {
+    fn location(&self) -> Location { Location::IceGoing }
 
     fn access(&self) -> Access { self.access }
 
@@ -113,7 +114,7 @@ impl PuzzleState for MeetState {
 
     fn can_reset(&self) -> bool { self.grid.is_modified() }
 
-    fn reset(&mut self) { self.grid = MeetState::initial_grid(); }
+    fn reset(&mut self) { self.grid = GoingState::initial_grid(); }
 
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();

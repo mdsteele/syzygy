@@ -21,7 +21,7 @@ use toml;
 
 use gui::Point;
 use save::{Access, Direction, Location};
-use save::ice::{BlockSlide, Object, ObjectGrid, Symbol};
+use save::ice::{BlockSlide, Object, ObjectGrid, Symbol, Transform};
 use save::util::{ACCESS_KEY, pop_table};
 use super::PuzzleState;
 
@@ -31,21 +31,21 @@ const GRID_KEY: &str = "grid";
 
 // ========================================================================= //
 
-pub struct RightState {
+pub struct VirtueState {
     access: Access,
     grid: ObjectGrid,
 }
 
-impl RightState {
-    pub fn from_toml(mut table: toml::value::Table) -> RightState {
+impl VirtueState {
+    pub fn from_toml(mut table: toml::value::Table) -> VirtueState {
         let access = Access::from_toml(table.get(ACCESS_KEY));
         let grid = if access == Access::Solved {
-            RightState::solved_grid()
+            VirtueState::solved_grid()
         } else {
             let grid = pop_table(&mut table, GRID_KEY);
-            ObjectGrid::from_toml(grid, &RightState::initial_grid())
+            ObjectGrid::from_toml(grid, &VirtueState::initial_grid())
         };
-        RightState {
+        VirtueState {
             access: access,
             grid: grid,
         }
@@ -53,7 +53,7 @@ impl RightState {
 
     pub fn solve(&mut self) {
         self.access = Access::Solved;
-        self.grid = RightState::solved_grid();
+        self.grid = VirtueState::solved_grid();
     }
 
     pub fn grid(&self) -> &ObjectGrid { &self.grid }
@@ -70,43 +70,44 @@ impl RightState {
     }
 
     fn base_grid() -> ObjectGrid {
-        let red = Symbol::RedTriangle(Direction::West);
-        let yellow = Symbol::YellowRhombus(true, false);
-        let mut grid = ObjectGrid::new(10, 6);
-        grid.add_object(3, 1, Object::Wall);
-        grid.add_object(4, 1, Object::PushPop(Direction::East));
-        grid.add_object(7, 1, Object::Wall);
-        grid.add_object(8, 1, Object::Wall);
-        grid.add_object(9, 1, Object::Wall);
-        grid.add_object(2, 2, Object::Goal(red));
-        grid.add_object(3, 2, Object::Rotator);
+        let red = Symbol::RedTriangle(Direction::East);
+        let yellow = Symbol::YellowRhombus(true, true);
+        let purple = Symbol::PurpleCheckmark(Transform::identity());
+        let mut grid = ObjectGrid::new(8, 7);
+        grid.add_object(7, 0, Object::Wall);
+        grid.add_object(6, 1, Object::Wall);
+        grid.add_object(7, 1, Object::Goal(yellow));
+        grid.add_object(5, 2, Object::PushPop(Direction::North));
+        grid.add_object(0, 3, Object::Goal(red));
+        grid.add_object(1, 3, Object::Wall);
+        grid.add_object(2, 3, Object::Reflector(true));
         grid.add_object(3, 3, Object::Wall);
-        grid.add_object(4, 3, Object::Wall);
+        grid.add_object(4, 3, Object::Rotator);
         grid.add_object(5, 3, Object::Wall);
         grid.add_object(6, 3, Object::Wall);
         grid.add_object(7, 3, Object::Wall);
-        grid.add_object(8, 3, Object::Wall);
-        grid.add_object(9, 3, Object::Wall);
-        grid.add_object(0, 4, Object::Wall);
-        grid.add_object(1, 4, Object::Goal(Symbol::BlueCircle));
-        grid.add_object(5, 4, Object::Goal(yellow));
-        grid.add_object(6, 4, Object::PushPop(Direction::South));
+        grid.add_object(3, 4, Object::PushPop(Direction::South));
+        grid.add_object(2, 5, Object::Wall);
+        grid.add_object(6, 5, Object::Wall);
+        grid.add_object(7, 5, Object::Goal(purple));
+        grid.add_object(7, 6, Object::Wall);
         grid
     }
 
     fn initial_grid() -> ObjectGrid {
-        let mut grid = RightState::base_grid();
-        grid.add_ice_block(9, 0, Symbol::RedTriangle(Direction::North));
-        grid.add_ice_block(1, 1, Symbol::BlueCircle);
-        grid.add_ice_block(3, 4, Symbol::YellowRhombus(false, false));
+        let mut grid = VirtueState::base_grid();
+        grid.add_ice_block(2, 0, Symbol::RedTriangle(Direction::South));
+        let transform = Transform::identity().flipped_horz().rotated_cw();
+        grid.add_ice_block(7, 2, Symbol::PurpleCheckmark(transform));
+        grid.add_ice_block(7, 4, Symbol::YellowRhombus(false, false));
         grid
     }
 
-    fn solved_grid() -> ObjectGrid { RightState::base_grid().solved() }
+    fn solved_grid() -> ObjectGrid { VirtueState::base_grid().solved() }
 }
 
-impl PuzzleState for RightState {
-    fn location(&self) -> Location { Location::TheIceIsRight }
+impl PuzzleState for VirtueState {
+    fn location(&self) -> Location { Location::VirtueOrIce }
 
     fn access(&self) -> Access { self.access }
 
@@ -114,7 +115,7 @@ impl PuzzleState for RightState {
 
     fn can_reset(&self) -> bool { self.grid.is_modified() }
 
-    fn reset(&mut self) { self.grid = RightState::initial_grid(); }
+    fn reset(&mut self) { self.grid = VirtueState::initial_grid(); }
 
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();

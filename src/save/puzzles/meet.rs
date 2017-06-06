@@ -70,13 +70,12 @@ impl MeetState {
     }
 
     fn base_grid() -> ObjectGrid {
+        let red = Symbol::RedTriangle(Direction::North);
         let mut grid = ObjectGrid::new(7, 7);
         grid.add_object(0, 0, Object::Wall);
         grid.add_object(1, 0, Object::Wall);
         grid.add_object(2, 0, Object::Wall);
-        grid.add_object(0,
-                        1,
-                        Object::Goal(Symbol::RedTriangle(Direction::North)));
+        grid.add_object(0, 1, Object::Goal(red));
         grid.add_object(1, 1, Object::Wall);
         grid.add_object(4, 1, Object::Wall);
         grid.add_object(5, 1, Object::Goal(Symbol::BlueCircle));

@@ -21,7 +21,7 @@ use elements::{PuzzleCmd, PuzzleCore, PuzzleView};
 use elements::ice::GridView;
 use gui::{Action, Canvas, Element, Event, Rect, Resources};
 use modes::SOLVED_INFO_TEXT;
-use save::{Game, PuzzleState, RightState};
+use save::{Game, PuzzleState, VirtueState};
 use save::ice::BlockSlide;
 use super::scenes;
 
@@ -33,7 +33,7 @@ pub struct View {
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect, state: &RightState)
+    pub fn new(resources: &mut Resources, visible: Rect, state: &VirtueState)
                -> View {
         let core = {
             let intro = scenes::compile_intro_scene(resources);
@@ -49,7 +49,7 @@ impl View {
 
 impl Element<Game, PuzzleCmd> for View {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
-        let state = &game.the_ice_is_right;
+        let state = &game.virtue_or_ice;
         self.core.draw_back_layer(canvas);
         self.grid.draw(state.grid(), canvas);
         self.core.draw_middle_layer(canvas);
@@ -58,7 +58,7 @@ impl Element<Game, PuzzleCmd> for View {
 
     fn handle_event(&mut self, event: &Event, game: &mut Game)
                     -> Action<PuzzleCmd> {
-        let state = &mut game.the_ice_is_right;
+        let state = &mut game.virtue_or_ice;
         let mut action = self.core.handle_event(event, state);
         if !action.should_stop() {
             let subaction = self.grid.handle_event(event, state.grid_mut());
@@ -83,7 +83,7 @@ impl Element<Game, PuzzleCmd> for View {
 
 impl PuzzleView for View {
     fn info_text(&self, game: &Game) -> &'static str {
-        if game.the_ice_is_right.is_solved() {
+        if game.virtue_or_ice.is_solved() {
             SOLVED_INFO_TEXT
         } else {
             INFO_BOX_TEXT
@@ -92,23 +92,23 @@ impl PuzzleView for View {
 
     fn undo(&mut self, game: &mut Game) {
         if let Some(slide) = self.core.pop_undo() {
-            game.the_ice_is_right.grid_mut().undo_slide(&slide);
+            game.virtue_or_ice.grid_mut().undo_slide(&slide);
         }
     }
 
     fn redo(&mut self, game: &mut Game) {
         if let Some(slide) = self.core.pop_redo() {
-            game.the_ice_is_right.grid_mut().redo_slide(&slide);
+            game.virtue_or_ice.grid_mut().redo_slide(&slide);
         }
     }
 
     fn reset(&mut self, game: &mut Game) {
         self.core.clear_undo_redo();
-        game.the_ice_is_right.reset();
+        game.virtue_or_ice.reset();
     }
 
     fn solve(&mut self, game: &mut Game) {
-        game.the_ice_is_right.solve();
+        game.virtue_or_ice.solve();
         self.core.begin_outro_scene();
     }
 
@@ -124,7 +124,7 @@ impl PuzzleView for View {
 const INFO_BOX_TEXT: &str = "\
 Your goal is to slide the blocks of ice until each one
 covers its matching symbol on the grid, in the same
-orientation.
+orientation and chirality.
 
 Drag one of the ice blocks up, down, left, or right with
 $M{your finger}{the mouse} to slide it in that direction.";

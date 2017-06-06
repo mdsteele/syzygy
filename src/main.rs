@@ -244,6 +244,9 @@ fn main() {
                         Location::TreadLightly => {
                             modes::run_tread_lightly(&mut window, game)
                         }
+                        Location::VirtueOrIce => {
+                            modes::run_virtue_or_ice(&mut window, game)
+                        }
                         Location::WhatchaColumn => {
                             modes::run_whatcha_column(&mut window, game)
                         }

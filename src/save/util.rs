@@ -50,10 +50,29 @@ pub fn pop_table(table: &mut toml::value::Table, key: &str)
     }
 }
 
+/// Removes and returns a value from a table.  If the key isn't in the table,
+/// returns a value of false (the closest thing `toml` has to null).
+pub fn pop_value(table: &mut toml::value::Table, key: &str) -> toml::Value {
+    if let Some(value) = table.remove(key) {
+        value
+    } else {
+        toml::Value::Boolean(false)
+    }
+}
+
+/// Coerces a `toml` value to an array.  If the value is not already an array,
+/// returns the empty array.
 pub fn to_array(value: toml::Value) -> toml::value::Array {
     match value {
         toml::Value::Array(array) => array,
         _ => toml::value::Array::new(),
+    }
+}
+
+pub fn to_bool(value: toml::Value) -> bool {
+    match value {
+        toml::Value::Boolean(boolean) => boolean,
+        _ => false,
     }
 }
 
@@ -87,6 +106,8 @@ pub fn to_i8(value: toml::Value) -> i8 {
     }
 }
 
+/// Coerces a `toml` value to a string.  If the value is not already a string,
+/// returns the empty string.
 pub fn to_string(value: toml::Value) -> String {
     match value {
         toml::Value::String(string) => string,
@@ -94,6 +115,8 @@ pub fn to_string(value: toml::Value) -> String {
     }
 }
 
+/// Coerces a `toml` value to a table.  If the value is not already a table,
+/// returns the empty table.
 pub fn to_table(value: toml::Value) -> toml::value::Table {
     match value {
         toml::Value::Table(table) => table,

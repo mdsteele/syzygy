@@ -25,8 +25,8 @@ use save::{AtticState, BlackState, BlameState, CubeState, DayState,
            LevelUpState, LineState, Location, LogLevelState, MeetState,
            MissedState, OrderState, PasswordState, PrologState, PuzzleState,
            RightState, SauceState, ServesState, SimpleState, StarState,
-           SyrupState, SyzygyState, TheYState, TreadState, WhatchaState,
-           WreckedState};
+           SyrupState, SyzygyState, TheYState, TreadState, VirtueState,
+           WhatchaState, WreckedState};
 use save::util::{pop_table, to_table};
 
 // ========================================================================= //
@@ -70,6 +70,7 @@ pub struct Game {
     pub the_ice_is_right: RightState,
     pub the_y_factor: TheYState,
     pub tread_lightly: TreadState,
+    pub virtue_or_ice: VirtueState,
     pub whatcha_column: WhatchaState,
     pub wrecked_angle: WreckedState,
     pub ever_clicked_info: bool,
@@ -151,6 +152,8 @@ impl Game {
                 pop_table(table_ref, Location::TheYFactor.key())),
             tread_lightly: TreadState::from_toml(
                 pop_table(table_ref, Location::TreadLightly.key())),
+            virtue_or_ice: VirtueState::from_toml(
+                pop_table(table_ref, Location::VirtueOrIce.key())),
             whatcha_column: WhatchaState::from_toml(
                 pop_table(table_ref, Location::WhatchaColumn.key())),
             wrecked_angle: WreckedState::from_toml(
@@ -221,6 +224,7 @@ impl Game {
             Location::TheIceIsRight => &self.the_ice_is_right,
             Location::TheYFactor => &self.the_y_factor,
             Location::TreadLightly => &self.tread_lightly,
+            Location::VirtueOrIce => &self.virtue_or_ice,
             Location::WhatchaColumn => &self.whatcha_column,
             Location::WreckedAngle => &self.wrecked_angle,
         }
@@ -261,6 +265,7 @@ impl Game {
             Location::TheIceIsRight => &mut self.the_ice_is_right,
             Location::TheYFactor => &mut self.the_y_factor,
             Location::TreadLightly => &mut self.tread_lightly,
+            Location::VirtueOrIce => &mut self.virtue_or_ice,
             Location::WhatchaColumn => &mut self.whatcha_column,
             Location::WreckedAngle => &mut self.wrecked_angle,
         }

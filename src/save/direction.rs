@@ -136,6 +136,14 @@ impl Direction {
             _ => self,
         }
     }
+
+    #[cfg(test)]
+    pub fn all() -> Vec<Direction> {
+        vec![Direction::East,
+             Direction::South,
+             Direction::West,
+             Direction::North]
+    }
 }
 
 // ========================================================================= //
@@ -145,14 +153,9 @@ mod tests {
     use gui::Point;
     use super::Direction;
 
-    const ALL_DIRECTIONS: &[Direction] = &[Direction::East,
-                                           Direction::South,
-                                           Direction::West,
-                                           Direction::North];
-
     #[test]
     fn toml_round_trip() {
-        for &original in ALL_DIRECTIONS {
+        for original in Direction::all() {
             let result = Direction::from_toml(Some(&original.to_toml()));
             assert_eq!(result, original);
         }
@@ -160,7 +163,7 @@ mod tests {
 
     #[test]
     fn delta_round_trip() {
-        for &original in ALL_DIRECTIONS {
+        for original in Direction::all() {
             let result = Direction::from_delta(original.delta());
             assert_eq!(result, original);
         }
@@ -168,7 +171,7 @@ mod tests {
 
     #[test]
     fn opposites() {
-        for &original in ALL_DIRECTIONS {
+        for original in Direction::all() {
             let opposite = original.opposite();
             assert!(original.is_parallel_to(opposite));
             assert!(opposite.is_parallel_to(original));
@@ -179,7 +182,7 @@ mod tests {
 
     #[test]
     fn rotated() {
-        for &original in ALL_DIRECTIONS {
+        for original in Direction::all() {
             let rotated = original.rotated_cw();
             assert!(!original.is_parallel_to(rotated));
             assert!(!rotated.is_parallel_to(original));
@@ -190,7 +193,7 @@ mod tests {
 
     #[test]
     fn rotated_by() {
-        for &original in ALL_DIRECTIONS {
+        for original in Direction::all() {
             assert_eq!(original.rotated_ccw_by(0), original);
             assert_eq!(original.rotated_ccw_by(1), original.rotated_ccw());
             assert_eq!(original.rotated_ccw_by(-1), original.rotated_cw());

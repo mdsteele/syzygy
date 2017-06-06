@@ -133,11 +133,18 @@ impl Element<ObjectGrid, (Point, Direction)> for GridView {
                 Object::Rotator => {
                     canvas.draw_sprite_centered(&self.obj_sprites[3], center);
                 }
+                Object::Reflector(vertical) => {
+                    canvas.draw_sprite_rotated(&self.obj_sprites[4],
+                                               center,
+                                               if vertical { 90 } else { 0 });
+                }
                 Object::Goal(symbol) => {
-                    canvas.draw_sprite_rotated(
+                    canvas.draw_sprite_transformed(
                         &self.symbol_sprites[2 * symbol.sprite_index() + 1],
                         center,
-                        symbol.sprite_degrees());
+                        symbol.sprite_degrees(),
+                        false,
+                        symbol.sprite_mirrored());
                 }
             }
         }
@@ -145,9 +152,11 @@ impl Element<ObjectGrid, (Point, Direction)> for GridView {
             let center = coords * GRID_CELL_SIZE +
                          Point::new(GRID_CELL_SIZE / 2, GRID_CELL_SIZE / 2);
             let sprite = &self.symbol_sprites[symbol.sprite_index() * 2];
-            canvas.draw_sprite_rotated(sprite,
-                                       center,
-                                       symbol.sprite_degrees());
+            canvas.draw_sprite_transformed(sprite,
+                                           center,
+                                           symbol.sprite_degrees(),
+                                           false,
+                                           symbol.sprite_mirrored());
             canvas.draw_sprite_centered(&self.obj_sprites[0], center);
         }
     }

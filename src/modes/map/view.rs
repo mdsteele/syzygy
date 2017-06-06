@@ -63,6 +63,7 @@ const NODES: &[(Location, (i32, i32))] = &[
     (Location::TheIceIsRight, (400, 50)),
     (Location::TheYFactor, (100, 200)),
     (Location::TreadLightly, (300, 50)),
+    (Location::VirtueOrIce, (450, 50)),
     (Location::WhatchaColumn, (250, 150)),
     (Location::WreckedAngle, (100, 250)),
 ];

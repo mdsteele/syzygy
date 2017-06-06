@@ -57,6 +57,7 @@ pub enum Location {
     TheIceIsRight,
     TheYFactor,
     TreadLightly,
+    VirtueOrIce,
     WhatchaColumn,
     WreckedAngle,
 }
@@ -99,6 +100,7 @@ impl Location {
             Location::TheIceIsRight => "The Ice is Right",
             Location::TheYFactor => "The Y Factor",
             Location::TreadLightly => "Tread Lightly",
+            Location::VirtueOrIce => "Virtue or Ice",
             Location::WhatchaColumn => "Whatcha Column",
             Location::WreckedAngle => "Wrecked Angle",
         }
@@ -136,9 +138,10 @@ impl Location {
             Location::StarCrossed => Location::Map,
             Location::SystemFailure => Location::PasswordFile,
             Location::SystemSyzygy => Location::Map,
-            Location::TheIceIsRight => Location::Map,
+            Location::TheIceIsRight => Location::VirtueOrIce,
             Location::TheYFactor => Location::FactOrFiction,
             Location::TreadLightly => Location::IceToMeetYou,
+            Location::VirtueOrIce => Location::Map,
             Location::WhatchaColumn => Location::PointOfOrder,
             Location::WreckedAngle => Location::ShiftingGround,
         }
@@ -179,6 +182,7 @@ impl Location {
             Location::TheIceIsRight => vec![Location::IceToMeetYou],
             Location::TheYFactor => vec![Location::Prolog],
             Location::TreadLightly => vec![Location::LightSyrup],
+            Location::VirtueOrIce => vec![Location::TheIceIsRight],
             Location::WhatchaColumn => vec![Location::MissedConnections],
             Location::WreckedAngle => vec![Location::Prolog],
         }
@@ -219,6 +223,7 @@ impl Location {
             Location::TheIceIsRight => "the_ice_is_right",
             Location::TheYFactor => "the_y_factor",
             Location::TreadLightly => "tread_lightly",
+            Location::VirtueOrIce => "virtue_or_ice",
             Location::WhatchaColumn => "whatcha_column",
             Location::WreckedAngle => "wrecked_angle",
         }
@@ -277,6 +282,7 @@ const ALL_LOCATIONS: &[Location] = &[Location::Map,
                                      Location::TheIceIsRight,
                                      Location::TheYFactor,
                                      Location::TreadLightly,
+                                     Location::VirtueOrIce,
                                      Location::WhatchaColumn,
                                      Location::WreckedAngle];
 

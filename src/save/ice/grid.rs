@@ -22,7 +22,8 @@ use toml;
 
 use gui::Point;
 use save::Direction;
-use super::util::{pop_array, pop_i32, to_table};
+use save::ice::{Symbol, Transform};
+use save::util::{pop_array, pop_i32, pop_value, to_table};
 
 // ========================================================================= //
 
@@ -41,7 +42,7 @@ pub struct BlockSlide {
     direction: Direction,
     to: Point,
     pushed: Option<Point>,
-    rotated: i32,
+    transform: Transform,
 }
 
 // ========================================================================= //
@@ -73,7 +74,8 @@ impl ObjectGrid {
             let mut block_toml = to_table(block_toml);
             let col = pop_i32(&mut block_toml, COL_KEY);
             let row = pop_i32(&mut block_toml, ROW_KEY);
-            let symbol = Symbol::from_toml(block_toml.get(SYMBOL_KEY));
+            let symbol = Symbol::from_toml(pop_value(&mut block_toml,
+                                                     SYMBOL_KEY));
             if (col < 0 || col >= default.num_cols) ||
                (row < 0 || row >= default.num_rows) {
                 return default.clone();
@@ -183,11 +185,11 @@ impl ObjectGrid {
 
     pub fn slide_ice_block(&mut self, coords: Point, slide_dir: Direction)
                            -> Option<BlockSlide> {
-        if let Some(mut symbol) = self.ice_blocks.remove(&coords) {
+        if let Some(symbol) = self.ice_blocks.remove(&coords) {
             let delta = slide_dir.delta();
             let mut new_coords = coords;
             let mut pushed = None;
-            let mut rotated = 0;
+            let mut transform = Transform::identity();
             loop {
                 let next = new_coords + delta;
                 if (next.x() < 0 || next.x() >= self.num_cols) ||
@@ -214,8 +216,13 @@ impl ObjectGrid {
                         pushed = Some(pp_coords);
                     }
                     Some(Object::Rotator) => {
-                        symbol = symbol.rotated_ccw_by(-1);
-                        rotated += 1;
+                        transform = transform.rotated_cw();
+                    }
+                    Some(Object::Reflector(false)) => {
+                        transform = transform.flipped_horz();
+                    }
+                    Some(Object::Reflector(true)) => {
+                        transform = transform.flipped_vert();
                     }
                     Some(Object::Goal(_)) => {}
                     None => {}
@@ -223,7 +230,7 @@ impl ObjectGrid {
                 new_coords = next;
             }
             debug_assert!(!self.ice_blocks.contains_key(&new_coords));
-            self.ice_blocks.insert(new_coords, symbol);
+            self.ice_blocks.insert(new_coords, symbol.transformed(transform));
             if new_coords != coords {
                 self.is_modified = true;
                 return Some(BlockSlide {
@@ -231,7 +238,7 @@ impl ObjectGrid {
                     direction: slide_dir,
                     to: new_coords,
                     pushed: pushed,
-                    rotated: rotated,
+                    transform: transform,
                 });
             }
         }
@@ -240,7 +247,7 @@ impl ObjectGrid {
 
     pub fn undo_slide(&mut self, slide: &BlockSlide) {
         if let Some(symbol) = self.ice_blocks.remove(&slide.to) {
-            let symbol = symbol.rotated_ccw_by(slide.rotated);
+            let symbol = symbol.transformed(slide.transform.inverse());
             self.ice_blocks.insert(slide.from, symbol);
             if let Some(pp_coords) = slide.pushed {
                 if let Some(&Object::PushPop(pp_dir)) =
@@ -286,125 +293,13 @@ impl ObjectGrid {
 
 // ========================================================================= //
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum Symbol {
-    RedTriangle(Direction),
-    GreenSquare,
-    BlueCircle,
-    YellowRhombus(bool),
-}
-
-impl Symbol {
-    pub fn from_toml(value: Option<&toml::Value>) -> Symbol {
-        if let Some(string) = value.and_then(toml::Value::as_str) {
-            match string {
-                "RTE" => Symbol::RedTriangle(Direction::East),
-                "RTS" => Symbol::RedTriangle(Direction::South),
-                "RTW" => Symbol::RedTriangle(Direction::West),
-                "RTN" => Symbol::RedTriangle(Direction::North),
-                "GS" => Symbol::GreenSquare,
-                "BC" => Symbol::BlueCircle,
-                "YRH" => Symbol::YellowRhombus(false),
-                "YRV" => Symbol::YellowRhombus(true),
-                _ => Symbol::BlueCircle,
-            }
-        } else {
-            Symbol::BlueCircle
-        }
-    }
-
-    fn to_toml(self) -> toml::Value {
-        let string = match self {
-            Symbol::RedTriangle(Direction::East) => "RTE",
-            Symbol::RedTriangle(Direction::South) => "RTS",
-            Symbol::RedTriangle(Direction::West) => "RTW",
-            Symbol::RedTriangle(Direction::North) => "RTN",
-            Symbol::GreenSquare => "GS",
-            Symbol::BlueCircle => "BC",
-            Symbol::YellowRhombus(false) => "YRH",
-            Symbol::YellowRhombus(true) => "YRV",
-        };
-        toml::Value::String(string.to_string())
-    }
-
-    fn rotated_ccw_by(self, by: i32) -> Symbol {
-        match self {
-            Symbol::RedTriangle(dir) => {
-                Symbol::RedTriangle(dir.rotated_ccw_by(by))
-            }
-            Symbol::GreenSquare => Symbol::GreenSquare,
-            Symbol::BlueCircle => Symbol::BlueCircle,
-            Symbol::YellowRhombus(vertical) => {
-                Symbol::YellowRhombus(vertical ^ (by % 2 != 0))
-            }
-        }
-    }
-
-    pub fn sprite_index(self) -> usize {
-        match self {
-            Symbol::RedTriangle(_) => 0,
-            Symbol::GreenSquare => 1,
-            Symbol::BlueCircle => 2,
-            Symbol::YellowRhombus(_) => 3,
-        }
-    }
-
-    pub fn sprite_degrees(self) -> i32 {
-        match self {
-            Symbol::RedTriangle(dir) => dir.degrees(),
-            Symbol::GreenSquare => 0,
-            Symbol::BlueCircle => 0,
-            Symbol::YellowRhombus(false) => 0,
-            Symbol::YellowRhombus(true) => 90,
-        }
-    }
-}
-
-// ========================================================================= //
-
 #[derive(Clone, Copy, Eq, PartialEq)]
 pub enum Object {
     Wall,
     PushPop(Direction),
     Rotator,
+    Reflector(bool),
     Goal(Symbol),
-}
-
-// ========================================================================= //
-
-#[cfg(test)]
-mod tests {
-    use save::Direction;
-    use super::Symbol;
-
-    const ALL_SYMBOLS: &[Symbol] = &[Symbol::RedTriangle(Direction::East),
-                                     Symbol::RedTriangle(Direction::South),
-                                     Symbol::RedTriangle(Direction::West),
-                                     Symbol::RedTriangle(Direction::North),
-                                     Symbol::GreenSquare,
-                                     Symbol::BlueCircle,
-                                     Symbol::YellowRhombus(false),
-                                     Symbol::YellowRhombus(true)];
-
-    #[test]
-    fn symbol_toml_round_trip() {
-        for &original in ALL_SYMBOLS {
-            let result = Symbol::from_toml(Some(&original.to_toml()));
-            assert_eq!(result, original);
-        }
-    }
-
-    #[test]
-    fn symbol_rotated_by() {
-        assert_eq!(Symbol::RedTriangle(Direction::North).rotated_ccw_by(-1),
-                   Symbol::RedTriangle(Direction::East));
-        assert_eq!(Symbol::GreenSquare.rotated_ccw_by(1), Symbol::GreenSquare);
-        assert_eq!(Symbol::BlueCircle.rotated_ccw_by(2), Symbol::BlueCircle);
-        assert_eq!(Symbol::YellowRhombus(true).rotated_ccw_by(-1),
-                   Symbol::YellowRhombus(false));
-        assert_eq!(Symbol::YellowRhombus(true).rotated_ccw_by(2),
-                   Symbol::YellowRhombus(true));
-    }
 }
 
 // ========================================================================= //

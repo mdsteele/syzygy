@@ -31,6 +31,8 @@ const SOLVED_WORDS: &[&str] = &["IN4MAL", "FEMI9", "CAR2N", "1DERFUL",
                                 "4EN6", "PER48", "42ITOUS", "PHY6", "QUI9",
                                 "PUNC28"];
 
+const VALID_CHARS: ValidChars = ValidChars::LettersAndNumbers;
+
 // ========================================================================= //
 
 pub struct LogLevelState {
@@ -42,10 +44,10 @@ impl LogLevelState {
     pub fn from_toml(mut table: toml::value::Table) -> LogLevelState {
         let access = Access::from_toml(table.get(ACCESS_KEY));
         let words = if access == Access::Solved {
-            CrosswordState::new(ValidChars::LettersAndNumbers, SOLVED_WORDS)
+            CrosswordState::new(VALID_CHARS, SOLVED_WORDS)
         } else {
             CrosswordState::from_toml(pop_array(&mut table, WORDS_KEY),
-                                      ValidChars::LettersAndNumbers,
+                                      VALID_CHARS,
                                       SOLVED_WORDS)
         };
         LogLevelState {
@@ -56,8 +58,7 @@ impl LogLevelState {
 
     pub fn solve(&mut self) {
         self.access = Access::Solved;
-        self.words = CrosswordState::new(ValidChars::LettersAndNumbers,
-                                         SOLVED_WORDS);
+        self.words = CrosswordState::new(VALID_CHARS, SOLVED_WORDS);
     }
 
     pub fn check_if_solved(&mut self) {

@@ -190,6 +190,9 @@ fn main() {
                         Location::JogYourMemory => {
                             modes::run_jog_your_memory(&mut window, game)
                         }
+                        Location::LevelHeaded => {
+                            modes::run_level_headed(&mut window, game)
+                        }
                         Location::LevelUp => {
                             modes::run_level_up(&mut window, game)
                         }

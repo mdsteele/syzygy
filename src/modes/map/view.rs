@@ -45,6 +45,7 @@ const NODES: &[(Location, (i32, i32))] = &[
     (Location::IceToMeetYou, (350, 50)),
     (Location::IfMemoryServes, (225, 280)),
     (Location::JogYourMemory, (275, 280)),
+    (Location::LevelHeaded, (275, 125)),
     (Location::LevelUp, (225, 125)),
     (Location::LightSyrup, (250, 50)),
     (Location::LogLevel, (125, 175)),

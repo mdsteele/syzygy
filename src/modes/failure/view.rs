@@ -36,7 +36,7 @@ use super::scenes::{compile_intro_scene, compile_outro_scene};
 #[cfg_attr(rustfmt, rustfmt_skip)]
 const DASHBOARD_CHIPS: &[(i32, i32, Location)] = &[
     (167, 71, Location::VirtueOrIce),
-    (209, 71, Location::ALightInTheAttic),
+    (209, 71, Location::LevelHeaded),
     (251, 71, Location::ALightInTheAttic),
     (293, 71, Location::TreadLightly),
     (335, 71, Location::PointOfOrder),

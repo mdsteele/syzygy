@@ -21,12 +21,12 @@ use toml;
 
 use save::{AtticState, BlackState, BlameState, CubeState, DayState,
            DisconState, DotsState, DoubleState, FailureState, FictionState,
-           GearsState, GroundState, IcyEmState, JogState, LaneState,
-           LevelUpState, LineState, Location, LogLevelState, MeetState,
-           MissedState, OrderState, PasswordState, PrologState, PuzzleState,
-           RightState, SauceState, ServesState, SimpleState, StarState,
-           SyrupState, SyzygyState, TheYState, TreadState, VirtueState,
-           WhatchaState, WreckedState};
+           GearsState, GroundState, HeadedState, IcyEmState, JogState,
+           LaneState, LevelUpState, LineState, Location, LogLevelState,
+           MeetState, MissedState, OrderState, PasswordState, PrologState,
+           PuzzleState, RightState, SauceState, ServesState, SimpleState,
+           StarState, SyrupState, SyzygyState, TheYState, TreadState,
+           VirtueState, WhatchaState, WreckedState};
 use save::util::{pop_table, to_table};
 
 // ========================================================================= //
@@ -52,6 +52,7 @@ pub struct Game {
     pub ice_to_meet_you: MeetState,
     pub if_memory_serves: ServesState,
     pub jog_your_memory: JogState,
+    pub level_headed: HeadedState,
     pub level_up: LevelUpState,
     pub light_syrup: SyrupState,
     pub log_level: LogLevelState,
@@ -116,6 +117,8 @@ impl Game {
                 pop_table(table_ref, Location::IfMemoryServes.key())),
             jog_your_memory: JogState::from_toml(
                 pop_table(table_ref, Location::JogYourMemory.key())),
+            level_headed: HeadedState::from_toml(
+                pop_table(table_ref, Location::LevelHeaded.key())),
             level_up: LevelUpState::from_toml(
                 pop_table(table_ref, Location::LevelUp.key())),
             light_syrup: SyrupState::from_toml(
@@ -206,6 +209,7 @@ impl Game {
             Location::IceToMeetYou => &self.ice_to_meet_you,
             Location::IfMemoryServes => &self.if_memory_serves,
             Location::JogYourMemory => &self.jog_your_memory,
+            Location::LevelHeaded => &self.level_headed,
             Location::LevelUp => &self.level_up,
             Location::LightSyrup => &self.light_syrup,
             Location::LogLevel => &self.log_level,
@@ -247,6 +251,7 @@ impl Game {
             Location::IceToMeetYou => &mut self.ice_to_meet_you,
             Location::IfMemoryServes => &mut self.if_memory_serves,
             Location::JogYourMemory => &mut self.jog_your_memory,
+            Location::LevelHeaded => &mut self.level_headed,
             Location::LevelUp => &mut self.level_up,
             Location::LightSyrup => &mut self.light_syrup,
             Location::LogLevel => &mut self.log_level,

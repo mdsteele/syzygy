@@ -27,20 +27,20 @@ use super::super::util::{ACCESS_KEY, pop_array};
 
 const WORDS_KEY: &str = "words";
 
-const SOLVED_WORDS: &[&str] = &["COM#", "NON+ED", "*TLE", ":IZE", "CU*D",
-                                "UN,N", ":EL", "B@ON", "SUR+", ",NDS"];
+const SOLVED_WORDS: &[&str] = &["BHIVE", "KPER", "ZNON", "YTEN", "LDER",
+                                "QBALL", "XTATIC", "CBED", "ILID"];
 
-const VALID_CHARS: ValidChars = ValidChars::LettersAndSymbols;
+const VALID_CHARS: ValidChars = ValidChars::Letters;
 
 // ========================================================================= //
 
-pub struct LevelUpState {
+pub struct HeadedState {
     access: Access,
     words: CrosswordState,
 }
 
-impl LevelUpState {
-    pub fn from_toml(mut table: toml::value::Table) -> LevelUpState {
+impl HeadedState {
+    pub fn from_toml(mut table: toml::value::Table) -> HeadedState {
         let access = Access::from_toml(table.get(ACCESS_KEY));
         let words = if access == Access::Solved {
             CrosswordState::new(VALID_CHARS, SOLVED_WORDS)
@@ -49,7 +49,7 @@ impl LevelUpState {
                                       VALID_CHARS,
                                       SOLVED_WORDS)
         };
-        LevelUpState {
+        HeadedState {
             access: access,
             words: words,
         }
@@ -71,8 +71,8 @@ impl LevelUpState {
     pub fn crossword_mut(&mut self) -> &mut CrosswordState { &mut self.words }
 }
 
-impl PuzzleState for LevelUpState {
-    fn location(&self) -> Location { Location::LevelUp }
+impl PuzzleState for HeadedState {
+    fn location(&self) -> Location { Location::LevelHeaded }
 
     fn access(&self) -> Access { self.access }
 

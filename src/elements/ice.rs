@@ -18,15 +18,22 @@
 // +--------------------------------------------------------------------------+
 
 use num_integer::div_floor;
+use std::cmp;
 
 use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sprite};
+use gui::Sound;
 use save::Direction;
-use save::ice::{BlockSlide, Object, ObjectGrid};
+use save::ice::{BlockSlide, Object, ObjectGrid, Transform};
 
 // ========================================================================= //
 
 const GRID_CELL_SIZE: i32 = 32;
+
 const SWIPE_THRESHOLD: i32 = 15;
+
+const SLIDE_START_SPEED: i32 = 5;
+const SLIDE_MAX_SPEED: i32 = 45;
+const SLIDE_ACCEL: i32 = 8;
 
 // ========================================================================= //
 
@@ -81,11 +88,29 @@ impl GridDrag {
 
 // ========================================================================= //
 
+struct SlideAnimation {
+    slide_dir: Direction,
+    to_coords: Point,
+    remaining_dist: i32,
+    speed: i32,
+    pushed: Option<Point>,
+    transform: Transform,
+}
+
+impl SlideAnimation {
+    fn cell_dist(&self) -> i32 {
+        (self.remaining_dist + GRID_CELL_SIZE - 1) / GRID_CELL_SIZE
+    }
+}
+
+// ========================================================================= //
+
 pub struct GridView {
     rect: Rect,
     obj_sprites: Vec<Sprite>,
     symbol_sprites: Vec<Sprite>,
     drag: Option<GridDrag>,
+    animation: Option<SlideAnimation>,
 }
 
 impl GridView {
@@ -101,11 +126,75 @@ impl GridView {
             obj_sprites: resources.get_sprites("ice/objects"),
             symbol_sprites: resources.get_sprites("ice/symbols"),
             drag: None,
+            animation: None,
         }
     }
 
-    pub fn animate_slide(&mut self, _slide: &BlockSlide) {
-        // TODO
+    pub fn animate_slide(&mut self, slide: &BlockSlide) {
+        self.drag = None;
+        self.animation = Some(SlideAnimation {
+            slide_dir: slide.direction(),
+            to_coords: slide.to_coords(),
+            remaining_dist: GRID_CELL_SIZE * slide.distance(),
+            speed: SLIDE_START_SPEED,
+            pushed: slide.pushed(),
+            transform: slide.transform().inverse(),
+        });
+    }
+
+    pub fn reset_animation(&mut self) {
+        self.drag = None;
+        self.animation = None;
+    }
+
+    fn cell_rect(&self, coords: Point) -> Rect {
+        Rect::new(coords.x() * GRID_CELL_SIZE,
+                  coords.y() * GRID_CELL_SIZE,
+                  GRID_CELL_SIZE as u32,
+                  GRID_CELL_SIZE as u32)
+    }
+
+    fn draw_push_pop(&self, coords: Point, direction: Direction,
+                     canvas: &mut Canvas) {
+        if let Some(ref anim) = self.animation {
+            if let Some(pushed) = anim.pushed {
+                if pushed == coords {
+                    {
+                        let rect = self.cell_rect(coords);
+                        let mut canvas = canvas.subcanvas(rect);
+                        let center = canvas.rect().center() -
+                                     anim.slide_dir.delta() *
+                                     anim.remaining_dist;
+                        self.draw_push_pop_at(center, direction, &mut canvas);
+                    }
+                    {
+                        let rect = self.cell_rect(anim.to_coords);
+                        let mut canvas = canvas.subcanvas(rect);
+                        let center =
+                            canvas.rect().center() +
+                            anim.slide_dir.delta() *
+                            cmp::max(0, GRID_CELL_SIZE - anim.remaining_dist);
+                        self.draw_push_pop_at(center,
+                                              direction.opposite(),
+                                              &mut canvas);
+                    }
+                    return;
+                }
+            }
+        }
+        let center = coords * GRID_CELL_SIZE +
+                     Point::new(GRID_CELL_SIZE / 2, GRID_CELL_SIZE / 2);
+        self.draw_push_pop_at(center, direction, canvas);
+    }
+
+    fn draw_push_pop_at(&self, center: Point, direction: Direction,
+                        canvas: &mut Canvas) {
+        canvas.draw_sprite_transformed(&self.obj_sprites[2],
+                                       center,
+                                       direction.degrees(),
+                                       false,
+                                       (direction == Direction::South ||
+                                        direction == Direction::West));
     }
 }
 
@@ -121,14 +210,7 @@ impl Element<ObjectGrid, (Point, Direction)> for GridView {
                     canvas.draw_sprite_centered(&self.obj_sprites[1], center);
                 }
                 Object::PushPop(direction) => {
-                    canvas.draw_sprite_transformed(&self.obj_sprites[2],
-                                                   center,
-                                                   direction.degrees(),
-                                                   false,
-                                                   (direction ==
-                                                    Direction::South ||
-                                                    direction ==
-                                                    Direction::West));
+                    self.draw_push_pop(coords, direction, &mut canvas);
                 }
                 Object::Rotator => {
                     canvas.draw_sprite_centered(&self.obj_sprites[3], center);
@@ -149,8 +231,17 @@ impl Element<ObjectGrid, (Point, Direction)> for GridView {
             }
         }
         for (&coords, &symbol) in grid.ice_blocks() {
-            let center = coords * GRID_CELL_SIZE +
-                         Point::new(GRID_CELL_SIZE / 2, GRID_CELL_SIZE / 2);
+            let mut center = coords * GRID_CELL_SIZE +
+                             Point::new(GRID_CELL_SIZE / 2,
+                                        GRID_CELL_SIZE / 2);
+            let mut symbol = symbol;
+            if let Some(ref anim) = self.animation {
+                if anim.to_coords == coords {
+                    center = center -
+                             anim.slide_dir.delta() * anim.remaining_dist;
+                    symbol = symbol.transformed(anim.transform);
+                }
+            }
             let sprite = &self.symbol_sprites[symbol.sprite_index() * 2];
             canvas.draw_sprite_transformed(sprite,
                                            center,
@@ -164,13 +255,51 @@ impl Element<ObjectGrid, (Point, Direction)> for GridView {
     fn handle_event(&mut self, event: &Event, grid: &mut ObjectGrid)
                     -> Action<(Point, Direction)> {
         match event {
-            &Event::MouseDown(pt) if self.rect.contains(pt) => {
+            &Event::ClockTick => {
+                if let Some(mut anim) = self.animation.take() {
+                    let old_dist = anim.cell_dist();
+                    anim.remaining_dist -= anim.speed;
+                    anim.speed = cmp::min(anim.speed + SLIDE_ACCEL,
+                                          SLIDE_MAX_SPEED);
+                    let mut action = Action::redraw();
+                    if anim.remaining_dist > 0 {
+                        let new_dist = anim.cell_dist();
+                        if new_dist != old_dist {
+                            let coords = anim.to_coords -
+                                         anim.slide_dir.delta() * new_dist;
+                            match grid.objects().get(&coords) {
+                                Some(&Object::Rotator) => {
+                                    // TODO: play sound
+                                    anim.transform = anim.transform
+                                                         .rotated_cw()
+                                }
+                                Some(&Object::Reflector(false)) => {
+                                    // TODO: play sound
+                                    anim.transform = anim.transform
+                                                         .flipped_horz()
+                                }
+                                Some(&Object::Reflector(true)) => {
+                                    // TODO: play sound
+                                    anim.transform = anim.transform
+                                                         .flipped_vert()
+                                }
+                                _ => {}
+                            }
+                        }
+                        self.animation = Some(anim);
+                    } else {
+                        action.also_play_sound(Sound::device_rotate());
+                    }
+                    return action;
+                }
+            }
+            &Event::MouseDown(pt) if self.animation.is_none() => {
                 let col = div_floor(pt.x() - self.rect.left(), GRID_CELL_SIZE);
                 let row = div_floor(pt.y() - self.rect.top(), GRID_CELL_SIZE);
                 let coords = Point::new(col, row);
                 if grid.ice_blocks().contains_key(&coords) {
                     self.drag = Some(GridDrag::new(coords, pt));
-                    // TODO: play sound
+                    // TODO: play "grab" sound
                     return Action::ignore().and_stop();
                 }
             }
@@ -185,7 +314,7 @@ impl Element<ObjectGrid, (Point, Direction)> for GridView {
                     GridSwipe::Reset => self.drag = None,
                     GridSwipe::Swipe(coords, dir) => {
                         self.drag = None;
-                        // TODO: play sound
+                        // TODO: play "slide" sound
                         return Action::redraw().and_return((coords, dir));
                     }
                 }

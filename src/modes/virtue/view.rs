@@ -64,10 +64,10 @@ impl Element<Game, PuzzleCmd> for View {
             let subaction = self.grid.handle_event(event, state.grid_mut());
             if let Some(&(coords, dir)) = subaction.value() {
                 if let Some(slide) = state.slide_ice_block(coords, dir) {
+                    self.grid.animate_slide(&slide);
                     if state.is_solved() {
                         self.core.begin_outro_scene();
                     } else {
-                        self.grid.animate_slide(&slide);
                         self.core.push_undo(slide);
                     }
                 }
@@ -93,22 +93,26 @@ impl PuzzleView for View {
     fn undo(&mut self, game: &mut Game) {
         if let Some(slide) = self.core.pop_undo() {
             game.virtue_or_ice.grid_mut().undo_slide(&slide);
+            self.grid.reset_animation();
         }
     }
 
     fn redo(&mut self, game: &mut Game) {
         if let Some(slide) = self.core.pop_redo() {
             game.virtue_or_ice.grid_mut().redo_slide(&slide);
+            self.grid.reset_animation();
         }
     }
 
     fn reset(&mut self, game: &mut Game) {
         self.core.clear_undo_redo();
         game.virtue_or_ice.reset();
+        self.grid.reset_animation();
     }
 
     fn solve(&mut self, game: &mut Game) {
         game.virtue_or_ice.solve();
+        self.grid.reset_animation();
         self.core.begin_outro_scene();
     }
 

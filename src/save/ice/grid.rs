@@ -45,6 +45,25 @@ pub struct BlockSlide {
     transform: Transform,
 }
 
+impl BlockSlide {
+    pub fn direction(&self) -> Direction { self.direction }
+
+    pub fn to_coords(&self) -> Point { self.to }
+
+    pub fn distance(&self) -> i32 {
+        if self.to.y() == self.from.y() {
+            (self.to.x() - self.from.x()).abs()
+        } else {
+            debug_assert_eq!(self.to.x(), self.from.x());
+            (self.to.y() - self.from.y()).abs()
+        }
+    }
+
+    pub fn pushed(&self) -> Option<Point> { self.pushed }
+
+    pub fn transform(&self) -> Transform { self.transform }
+}
+
 // ========================================================================= //
 
 #[derive(Clone)]

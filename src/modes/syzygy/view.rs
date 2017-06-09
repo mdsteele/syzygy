@@ -17,13 +17,13 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use elements::{PuzzleCmd, PuzzleCore, PuzzleView};
+use elements::{self, PuzzleCmd, PuzzleCore, PuzzleView};
 use elements::column::ColumnsView;
 use elements::lasers::{LaserCmd, LaserField};
 use elements::plane::{PlaneCmd, PlaneGridView};
 use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sound};
 use modes::SOLVED_INFO_TEXT;
-use save::{Game, PuzzleState, SyzygyStage, SyzygyState};
+use save::{self, Game, PuzzleState, SyzygyStage, SyzygyState};
 use super::relyng::LightsGrid;
 use super::scenes::{compile_intro_scene, compile_outro_scene};
 
@@ -32,6 +32,7 @@ use super::scenes::{compile_intro_scene, compile_outro_scene};
 #[derive(Clone)]
 enum UndoRedo {
     Yttris(usize, i32),
+    Argony(save::ice::BlockSlide),
     Elinsa(Vec<(Point, Point)>),
     Ugrent(LaserCmd),
     Relyng((i32, i32)),
@@ -42,6 +43,7 @@ enum UndoRedo {
 pub struct View {
     core: PuzzleCore<UndoRedo>,
     yttris: ColumnsView,
+    argony: elements::ice::GridView,
     elinsa: PlaneGridView,
     ugrent: LaserField,
     relyng: LightsGrid,
@@ -56,6 +58,10 @@ impl View {
         View {
             core: core,
             yttris: ColumnsView::new(resources, 196, 180, 0),
+            argony: elements::ice::GridView::new(resources,
+                                                 112,
+                                                 140,
+                                                 state.argony_grid()),
             elinsa: PlaneGridView::new(resources, 150, 140),
             ugrent: LaserField::new(resources, 175, 140, state.ugrent_grid()),
             relyng: LightsGrid::new(resources, 168, 140, state),
@@ -70,6 +76,9 @@ impl Element<Game, PuzzleCmd> for View {
         match state.stage() {
             SyzygyStage::Yttris => {
                 self.yttris.draw(state.yttris_columns(), canvas);
+            }
+            SyzygyStage::Argony => {
+                self.argony.draw(state.argony_grid(), canvas);
             }
             SyzygyStage::Elinsa => {
                 self.elinsa.draw(state.elinsa_grid(), canvas);
@@ -105,6 +114,27 @@ impl Element<Game, PuzzleCmd> for View {
                             action.also_play_sound(sound);
                         } else {
                             self.core.push_undo(UndoRedo::Yttris(col, by));
+                        }
+                    }
+                    action.merge(subaction.but_no_value());
+                }
+                SyzygyStage::Argony => {
+                    let subaction = self.argony
+                                        .handle_event(event,
+                                                      state.argony_grid_mut());
+                    if let Some(&(coords, dir)) = subaction.value() {
+                        if let Some(slide) = state.argony_grid_mut()
+                                                  .slide_ice_block(coords,
+                                                                   dir) {
+                            self.argony.animate_slide(&slide);
+                            if state.is_solved() {
+                                self.core.clear_undo_redo();
+                                // TODO advance stage
+                                let sound = Sound::solve_puzzle_chime();
+                                action.also_play_sound(sound);
+                            } else {
+                                self.core.push_undo(UndoRedo::Argony(slide));
+                            }
                         }
                     }
                     action.merge(subaction.but_no_value());
@@ -239,7 +269,12 @@ its letters.  Moving one column may also cause other
 columns to move at the same time.";
 
 const ARGONY_INFO_BOX_TEXT: &str = "\
-Your goal is to TODO.";
+Your goal is to slide the blocks of ice until each one
+covers its matching symbol on the grid, in the same
+orientation and chirality.
+
+Drag one of the ice blocks up, down, left, or right with
+$M{your finger}{the mouse} to slide it in that direction.";
 
 const ELINSA_INFO_BOX_TEXT: &str = "\
 Your goal is to connect each red node to each blue

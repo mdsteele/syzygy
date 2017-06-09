@@ -32,6 +32,9 @@ pub enum Symbol {
     BlueCircle,
     YellowRhombus(bool, bool),
     PurpleCheckmark(Transform),
+    CyanQ(Transform),
+    CyanU(Transform),
+    CyanA(Transform),
 }
 
 impl Symbol {
@@ -52,6 +55,18 @@ impl Symbol {
             "PC" => {
                 let transform = Transform::from_toml(table.get("transform"));
                 Symbol::PurpleCheckmark(transform)
+            }
+            "CQ" => {
+                let transform = Transform::from_toml(table.get("transform"));
+                Symbol::CyanQ(transform)
+            }
+            "CU" => {
+                let transform = Transform::from_toml(table.get("transform"));
+                Symbol::CyanU(transform)
+            }
+            "CA" => {
+                let transform = Transform::from_toml(table.get("transform"));
+                Symbol::CyanA(transform)
             }
             _ => Symbol::BlueCircle,
         }
@@ -77,6 +92,18 @@ impl Symbol {
                 table.insert("transform".to_string(), transform.to_toml());
                 "PC"
             }
+            Symbol::CyanQ(transform) => {
+                table.insert("transform".to_string(), transform.to_toml());
+                "CQ"
+            }
+            Symbol::CyanU(transform) => {
+                table.insert("transform".to_string(), transform.to_toml());
+                "CU"
+            }
+            Symbol::CyanA(transform) => {
+                table.insert("transform".to_string(), transform.to_toml());
+                "CA"
+            }
         };
         table.insert("shape".to_string(),
                      toml::Value::String(shape.to_string()));
@@ -97,6 +124,9 @@ impl Symbol {
             Symbol::PurpleCheckmark(trans) => {
                 Symbol::PurpleCheckmark(trans.compose(transform))
             }
+            Symbol::CyanQ(trans) => Symbol::CyanQ(trans.compose(transform)),
+            Symbol::CyanU(trans) => Symbol::CyanU(trans.compose(transform)),
+            Symbol::CyanA(trans) => Symbol::CyanA(trans.compose(transform)),
         }
     }
 
@@ -107,6 +137,9 @@ impl Symbol {
             Symbol::BlueCircle => 2,
             Symbol::YellowRhombus(_, _) => 3,
             Symbol::PurpleCheckmark(_) => 4,
+            Symbol::CyanQ(_) => 5,
+            Symbol::CyanU(_) => 6,
+            Symbol::CyanA(_) => 7,
         }
     }
 
@@ -117,7 +150,10 @@ impl Symbol {
             Symbol::BlueCircle => 0,
             Symbol::YellowRhombus(false, _) => 0,
             Symbol::YellowRhombus(true, _) => 90,
-            Symbol::PurpleCheckmark(trans) => trans.degrees(),
+            Symbol::PurpleCheckmark(transform) |
+            Symbol::CyanQ(transform) |
+            Symbol::CyanU(transform) |
+            Symbol::CyanA(transform) => transform.degrees(),
         }
     }
 
@@ -127,7 +163,10 @@ impl Symbol {
             Symbol::GreenSquare => false,
             Symbol::BlueCircle => false,
             Symbol::YellowRhombus(_, mirrored) => mirrored,
-            Symbol::PurpleCheckmark(trans) => trans.is_mirrored(),
+            Symbol::PurpleCheckmark(transform) |
+            Symbol::CyanQ(transform) |
+            Symbol::CyanU(transform) |
+            Symbol::CyanA(transform) => transform.is_mirrored(),
         }
     }
 
@@ -146,6 +185,9 @@ impl Symbol {
         }
         for trans in Transform::all() {
             symbols.push(Symbol::PurpleCheckmark(trans));
+            symbols.push(Symbol::CyanQ(trans));
+            symbols.push(Symbol::CyanU(trans));
+            symbols.push(Symbol::CyanA(trans));
         }
         symbols
     }

@@ -24,15 +24,16 @@ use gui::Rect;
 use save::{Access, Direction, Location, PrimaryColor};
 use save::column::Columns;
 use save::device::{Device, DeviceGrid};
+use save::ice::{Object, ObjectGrid, Symbol, Transform};
 use save::plane::{PlaneGrid, PlaneObj};
 use super::PuzzleState;
-use super::super::util::{ACCESS_KEY, pop_array, to_i32};
+use super::super::util::{ACCESS_KEY, pop_array, pop_table, to_i32};
 
 // ========================================================================= //
 
 const STAGE_KEY: &str = "stage";
 const YTTRIS_KEY: &str = "yttris";
-// const ARGONY_KEY: &str = "argony";
+const ARGONY_KEY: &str = "argony";
 const ELINSA_KEY: &str = "elinsa";
 const UGRENT_KEY: &str = "ugrent";
 const RELYNG_LIGHTS_KEY: &str = "relyng_lights";
@@ -102,6 +103,7 @@ pub struct SyzygyState {
     access: Access,
     stage: SyzygyStage,
     yttris: Columns,
+    argony: ObjectGrid,
     elinsa: PlaneGrid,
     ugrent: DeviceGrid,
     relyng_lights: HashSet<i32>,
@@ -109,6 +111,38 @@ pub struct SyzygyState {
 }
 
 impl SyzygyState {
+    fn argony_initial_grid() -> ObjectGrid {
+        let q_goal = Symbol::CyanQ(Transform::identity());
+        let u_goal = Symbol::CyanU(Transform::identity());
+        let a_goal = Symbol::CyanA(Transform::identity());
+        let d_goal = Symbol::CyanQ(Transform::identity().flipped_vert());
+        let mut grid = ObjectGrid::new(11, 5);
+        grid.add_object(5, 0, Object::Wall);
+        grid.add_object(1, 1, Object::Wall);
+        grid.add_object(5, 1, Object::Wall);
+        grid.add_object(1, 2, Object::Rotator);
+        grid.add_object(5, 2, Object::Reflector(false));
+        grid.add_object(10, 2, Object::Wall);
+        grid.add_object(1, 3, Object::Wall);
+        grid.add_object(5, 3, Object::Wall);
+        grid.add_object(10, 3, Object::PushPop(Direction::South));
+        grid.add_object(2, 4, Object::Goal(q_goal));
+        grid.add_object(4, 4, Object::Goal(u_goal));
+        grid.add_object(5, 4, Object::Wall);
+        grid.add_object(6, 4, Object::Goal(a_goal));
+        grid.add_object(8, 4, Object::Goal(d_goal));
+
+        let q_trans = Transform::identity().rotated_cw().rotated_cw();
+        let u_trans = Transform::identity().flipped_vert();
+        let a_trans = Transform::identity().rotated_cw().rotated_cw();
+        let d_trans = Transform::identity().flipped_vert();
+        grid.add_ice_block(6, 0, Symbol::CyanQ(q_trans));
+        grid.add_ice_block(7, 0, Symbol::CyanA(a_trans));
+        grid.add_ice_block(8, 0, Symbol::CyanU(u_trans));
+        grid.add_ice_block(9, 0, Symbol::CyanQ(d_trans));
+        grid
+    }
+
     fn elinsa_initial_grid() -> PlaneGrid {
         let mut grid = PlaneGrid::new(Rect::new(0, 0, 12, 6));
         grid.place_object(0, 0, PlaneObj::Wall);
@@ -156,6 +190,10 @@ impl SyzygyState {
         let stage = SyzygyStage::from_toml(table.get(STAGE_KEY));
         let yttris = Columns::from_toml(YTTRIS_COLUMNS_SPEC,
                                         pop_array(&mut table, YTTRIS_KEY));
+        let argony =
+            ObjectGrid::from_toml(pop_table(&mut table, ARGONY_KEY),
+                                  &SyzygyState::argony_initial_grid());
+
         let mut elinsa = SyzygyState::elinsa_initial_grid();
         elinsa.set_pipes_from_toml(pop_array(&mut table, ELINSA_KEY));
         let ugrent =
@@ -182,6 +220,7 @@ impl SyzygyState {
             access: access,
             stage: stage,
             yttris: yttris,
+            argony: argony,
             elinsa: elinsa,
             ugrent: ugrent,
             relyng_next: relyng_next,
@@ -212,6 +251,14 @@ impl SyzygyState {
     pub fn yttris_columns_mut(&mut self) -> &mut Columns { &mut self.yttris }
 
     fn reset_yttris(&mut self) { self.yttris.reset() }
+
+    pub fn argony_grid(&self) -> &ObjectGrid { &self.argony }
+
+    pub fn argony_grid_mut(&mut self) -> &mut ObjectGrid { &mut self.argony }
+
+    fn reset_argony(&mut self) {
+        self.argony = SyzygyState::argony_initial_grid();
+    }
 
     pub fn elinsa_grid(&self) -> &PlaneGrid { &self.elinsa }
 
@@ -322,6 +369,7 @@ impl PuzzleState for SyzygyState {
     fn can_reset(&self) -> bool {
         match self.stage {
             SyzygyStage::Yttris => self.yttris.can_reset(),
+            SyzygyStage::Argony => self.argony.is_modified(),
             SyzygyStage::Elinsa => !self.elinsa.pipes().is_empty(),
             SyzygyStage::Ugrent => self.ugrent.is_modified(),
             SyzygyStage::Relyng => !self.relyng_lights.is_empty(),
@@ -332,6 +380,7 @@ impl PuzzleState for SyzygyState {
     fn reset(&mut self) {
         match self.stage {
             SyzygyStage::Yttris => self.reset_yttris(),
+            SyzygyStage::Argony => self.reset_argony(),
             SyzygyStage::Elinsa => self.reset_elinsa(),
             SyzygyStage::Ugrent => self.reset_ugrent(),
             SyzygyStage::Relyng => self.reset_relyng(),
@@ -342,6 +391,7 @@ impl PuzzleState for SyzygyState {
     fn replay(&mut self) {
         self.stage = SyzygyStage::first();
         self.reset_yttris();
+        self.reset_argony();
         self.reset_elinsa();
         self.reset_ugrent();
         self.reset_relyng();
@@ -358,6 +408,12 @@ impl PuzzleState for SyzygyState {
                 SyzygyStage::Yttris => {
                     table.insert(YTTRIS_KEY.to_string(),
                                  self.yttris.to_toml());
+                }
+                SyzygyStage::Argony => {
+                    if self.argony.is_modified() {
+                        table.insert(ARGONY_KEY.to_string(),
+                                     self.argony.to_toml());
+                    }
                 }
                 SyzygyStage::Elinsa => {
                     table.insert(ELINSA_KEY.to_string(),

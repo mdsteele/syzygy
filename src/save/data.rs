@@ -70,9 +70,9 @@ impl SaveData {
     }
 
     pub fn save_to_disk(&mut self) -> io::Result<()> {
+        let string = self.to_toml().to_string();
         try!(fs::create_dir_all(self.path.parent().unwrap()));
         let mut file = try!(fs::File::create(&self.path));
-        let string = self.to_toml().to_string();
         try!(file.write_all(string.as_bytes()));
         if cfg!(debug_assertions) {
             println!("Saved game to disk.");

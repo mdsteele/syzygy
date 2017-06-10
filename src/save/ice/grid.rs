@@ -115,19 +115,10 @@ impl ObjectGrid {
         }
 
         let mut grid = default.clone();
-
-        // TODO: Replace all this with HashMap::retain() once Rust 1.18 is out.
-        let pp_coords: Vec<Point> = grid.objects
-                                        .iter()
-                                        .filter(|&(_, obj)| match obj {
-                                            &Object::PushPop(_) => true,
-                                            _ => false,
-                                        })
-                                        .map(|(&coords, _)| coords)
-                                        .collect();
-        for coords in pp_coords.iter() {
-            grid.objects.remove(coords);
-        }
+        grid.objects.retain(|_, obj| match obj {
+            &mut Object::PushPop(_) => false,
+            _ => true,
+        });
 
         for (col, row, dir) in push_pops.into_iter() {
             if grid.objects.contains_key(&Point::new(col, row)) {

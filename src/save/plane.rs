@@ -22,6 +22,7 @@ use std::collections::{HashMap, HashSet};
 use toml;
 
 use gui::{Point, Rect};
+use save::MixedColor;
 use save::util::{to_array, to_i32};
 
 // ========================================================================= //
@@ -32,14 +33,17 @@ pub enum PlaneObj {
     Cross,
     PurpleNode,
     RedNode,
+    GreenNode,
     BlueNode,
+    GrayNode,
 }
 
 impl PlaneObj {
     pub fn is_node(self) -> bool {
         match self {
             PlaneObj::Wall | PlaneObj::Cross => false,
-            PlaneObj::PurpleNode | PlaneObj::RedNode | PlaneObj::BlueNode => {
+            PlaneObj::PurpleNode | PlaneObj::RedNode |
+            PlaneObj::GreenNode | PlaneObj::BlueNode | PlaneObj::GrayNode => {
                 true
             }
         }
@@ -338,6 +342,40 @@ impl PlaneGrid {
             node_pairs.remove(&(end, start));
         }
         node_pairs.is_empty()
+    }
+
+    pub fn gray_node_colors(&self) -> HashMap<Point, MixedColor> {
+        let mut gray_nodes = HashMap::new();
+        for (&pt, &obj) in self.objects.iter() {
+            match obj {
+                PlaneObj::GrayNode => {
+                    gray_nodes.insert(pt, MixedColor::Black);
+                }
+                _ => {}
+            }
+        }
+        for pipe in self.pipes.iter() {
+            debug_assert!(!pipe.is_empty());
+            let start = pipe.first().unwrap();
+            let end = pipe.last().unwrap();
+            if let Some(color) = gray_nodes.get_mut(start) {
+                match self.objects.get(end) {
+                    Some(&PlaneObj::RedNode) => *color = color.with_red(),
+                    Some(&PlaneObj::GreenNode) => *color = color.with_green(),
+                    Some(&PlaneObj::BlueNode) => *color = color.with_blue(),
+                    _ => {}
+                }
+            }
+            if let Some(color) = gray_nodes.get_mut(end) {
+                match self.objects.get(start) {
+                    Some(&PlaneObj::RedNode) => *color = color.with_red(),
+                    Some(&PlaneObj::GreenNode) => *color = color.with_green(),
+                    Some(&PlaneObj::BlueNode) => *color = color.with_blue(),
+                    _ => {}
+                }
+            }
+        }
+        gray_nodes
     }
 }
 

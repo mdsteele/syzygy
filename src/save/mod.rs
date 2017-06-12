@@ -36,7 +36,7 @@ pub mod pyramid;
 pub mod util;
 
 pub use self::access::Access;
-pub use self::color::PrimaryColor;
+pub use self::color::{MixedColor, PrimaryColor};
 pub use self::crossword::{CrosswordState, ValidChars};
 pub use self::data::SaveData;
 pub use self::direction::Direction;

@@ -36,7 +36,7 @@ const SYMBOL_KEY: &str = "symbol";
 
 // ========================================================================= //
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct BlockSlide {
     from: Point,
     direction: Direction,

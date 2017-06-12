@@ -58,17 +58,127 @@ impl Default for PrimaryColor {
 
 // ========================================================================= //
 
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub enum MixedColor {
+    Black,
+    Red,
+    Green,
+    Yellow,
+    Blue,
+    Magenta,
+    Cyan,
+    White,
+}
+
+impl MixedColor {
+    pub fn from_rgb(red: bool, green: bool, blue: bool) -> MixedColor {
+        match (red, green, blue) {
+            (false, false, false) => MixedColor::Black,
+            (true, false, false) => MixedColor::Red,
+            (false, true, false) => MixedColor::Green,
+            (true, true, false) => MixedColor::Yellow,
+            (false, false, true) => MixedColor::Blue,
+            (true, false, true) => MixedColor::Magenta,
+            (false, true, true) => MixedColor::Cyan,
+            (true, true, true) => MixedColor::White,
+        }
+    }
+
+    pub fn has_red(self) -> bool {
+        match self {
+            MixedColor::Black => false,
+            MixedColor::Red => true,
+            MixedColor::Green => false,
+            MixedColor::Yellow => true,
+            MixedColor::Blue => false,
+            MixedColor::Magenta => true,
+            MixedColor::Cyan => false,
+            MixedColor::White => true,
+        }
+    }
+
+    pub fn has_green(self) -> bool {
+        match self {
+            MixedColor::Black => false,
+            MixedColor::Red => false,
+            MixedColor::Green => true,
+            MixedColor::Yellow => true,
+            MixedColor::Blue => false,
+            MixedColor::Magenta => false,
+            MixedColor::Cyan => true,
+            MixedColor::White => true,
+        }
+    }
+
+    pub fn has_blue(self) -> bool {
+        match self {
+            MixedColor::Black => false,
+            MixedColor::Red => false,
+            MixedColor::Green => false,
+            MixedColor::Yellow => false,
+            MixedColor::Blue => true,
+            MixedColor::Magenta => true,
+            MixedColor::Cyan => true,
+            MixedColor::White => true,
+        }
+    }
+
+    pub fn with_red(self) -> MixedColor {
+        MixedColor::from_rgb(true, self.has_green(), self.has_blue())
+    }
+
+    pub fn with_green(&mut self) -> MixedColor {
+        MixedColor::from_rgb(self.has_red(), true, self.has_blue())
+    }
+
+    pub fn with_blue(&mut self) -> MixedColor {
+        MixedColor::from_rgb(self.has_red(), self.has_green(), true)
+    }
+
+    #[cfg(test)]
+    pub fn all() -> Vec<MixedColor> {
+        vec![MixedColor::Black,
+             MixedColor::Red,
+             MixedColor::Green,
+             MixedColor::Yellow,
+             MixedColor::Blue,
+             MixedColor::Magenta,
+             MixedColor::Cyan,
+             MixedColor::White]
+    }
+}
+
+impl Default for MixedColor {
+    fn default() -> MixedColor { MixedColor::Red }
+}
+
+// ========================================================================= //
+
 #[cfg(test)]
 mod tests {
-    use super::PrimaryColor;
+    use super::{MixedColor, PrimaryColor};
 
     #[test]
-    fn toml_round_trip() {
+    fn primary_color_toml_round_trip() {
         let all =
             &[PrimaryColor::Red, PrimaryColor::Green, PrimaryColor::Blue];
-        for original in all {
+        for &original in all {
             let result = PrimaryColor::from_toml(Some(&original.to_toml()));
-            assert_eq!(result, *original);
+            assert_eq!(result, original);
+        }
+    }
+
+    #[test]
+    fn mixed_color_rgb() {
+        for &red in &[false, true] {
+            for &green in &[false, true] {
+                for &blue in &[false, true] {
+                    let color = MixedColor::from_rgb(red, green, blue);
+                    assert_eq!(color.has_red(), red);
+                    assert_eq!(color.has_green(), green);
+                    assert_eq!(color.has_blue(), blue);
+                }
+            }
         }
     }
 }

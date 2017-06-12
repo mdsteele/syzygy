@@ -130,6 +130,8 @@ impl GridView {
         }
     }
 
+    pub fn is_animating(&self) -> bool { self.animation.is_some() }
+
     pub fn animate_slide(&mut self, slide: &BlockSlide) {
         self.drag = None;
         self.animation = Some(SlideAnimation {
@@ -196,12 +198,9 @@ impl GridView {
                                        (direction == Direction::South ||
                                         direction == Direction::West));
     }
-}
 
-impl Element<ObjectGrid, (Point, Direction)> for GridView {
-    fn draw(&self, grid: &ObjectGrid, canvas: &mut Canvas) {
+    pub fn draw_objects(&self, grid: &ObjectGrid, canvas: &mut Canvas) {
         let mut canvas = canvas.subcanvas(self.rect);
-        canvas.clear((64, 64, 96));
         for (&coords, &object) in grid.objects() {
             let center = coords * GRID_CELL_SIZE +
                          Point::new(GRID_CELL_SIZE / 2, GRID_CELL_SIZE / 2);
@@ -230,6 +229,10 @@ impl Element<ObjectGrid, (Point, Direction)> for GridView {
                 }
             }
         }
+    }
+
+    pub fn draw_ice_blocks(&self, grid: &ObjectGrid, canvas: &mut Canvas) {
+        let mut canvas = canvas.subcanvas(self.rect);
         for (&coords, &symbol) in grid.ice_blocks() {
             let mut center = coords * GRID_CELL_SIZE +
                              Point::new(GRID_CELL_SIZE / 2,
@@ -250,6 +253,14 @@ impl Element<ObjectGrid, (Point, Direction)> for GridView {
                                            symbol.sprite_mirrored());
             canvas.draw_sprite_centered(&self.obj_sprites[0], center);
         }
+    }
+}
+
+impl Element<ObjectGrid, (Point, Direction)> for GridView {
+    fn draw(&self, grid: &ObjectGrid, canvas: &mut Canvas) {
+        canvas.fill_rect((64, 64, 96), self.rect);
+        self.draw_objects(grid, canvas);
+        self.draw_ice_blocks(grid, canvas);
     }
 
     fn handle_event(&mut self, event: &Event, grid: &mut ObjectGrid)

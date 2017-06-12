@@ -114,7 +114,9 @@ impl Element<PlaneGrid, PlaneCmd> for PlaneGridView {
                         PlaneObj::Cross => 1,
                         PlaneObj::PurpleNode => 2,
                         PlaneObj::RedNode => 3,
-                        PlaneObj::BlueNode => 4,
+                        PlaneObj::GreenNode => 4,
+                        PlaneObj::BlueNode => 5,
+                        PlaneObj::GrayNode => 6,
                     };
                     let sprite = &self.obj_sprites[sprite_index];
                     canvas.draw_sprite(sprite, coords * TILE_SIZE as i32);

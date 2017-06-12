@@ -20,8 +20,8 @@
 use std::collections::HashSet;
 use toml;
 
-use gui::Rect;
-use save::{Access, Direction, Location, PrimaryColor};
+use gui::{Point, Rect};
+use save::{Access, Direction, Location, MixedColor};
 use save::column::Columns;
 use save::device::{Device, DeviceGrid};
 use save::ice::{Object, ObjectGrid, Symbol, Transform};
@@ -38,7 +38,9 @@ const ELINSA_KEY: &str = "elinsa";
 const UGRENT_KEY: &str = "ugrent";
 const RELYNG_LIGHTS_KEY: &str = "relyng_lights";
 const RELYNG_NEXT_KEY: &str = "relyng_next";
-// const MEZURE_KEY: &str = "mezure";
+const MEZURE_COLUMNS_KEY: &str = "mezure_columns";
+const MEZURE_ICE_GRID_KEY: &str = "mezure_ice_grid";
+const MEZURE_PIPES_KEY: &str = "mezure_pipes";
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
 const YTTRIS_COLUMNS_SPEC: &[(&str, i32, i32, &[(usize, i32)])] = &[
@@ -53,6 +55,23 @@ const YTTRIS_COLUMNS_SPEC: &[(&str, i32, i32, &[(usize, i32)])] = &[
 const RELYNG_NUM_COLS: i32 = 5;
 const RELYNG_NUM_ROWS: i32 = 4;
 const RELYNG_INIT_NEXT: char = '+';
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+const MEZURE_COLUMNS_SPEC: &[(&str, i32, i32, &[(usize, i32)])] = &[
+    ("YTTRIS", -5, 0, &[]),
+    ("ARGONY", -5, 0, &[]),
+    ("ELINSA", -5, 5, &[]),
+    ("UGRENT", -5, 0, &[]),
+    ("RELYNG", -5, 2, &[]),
+    ("MEZURE", -5, 1, &[]),
+];
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+const MEZURE_GRAY_NODES_EMITTERS: &[((i32, i32), (i32, i32), Direction)] = &[
+    ((3, 2), (0, 6), Direction::North),
+    ((3, 4), (1, 6), Direction::North),
+    ((3, 6), (2, 6), Direction::North),
+];
 
 // ========================================================================= //
 
@@ -108,6 +127,10 @@ pub struct SyzygyState {
     ugrent: DeviceGrid,
     relyng_lights: HashSet<i32>,
     relyng_next: char,
+    mezure_columns: Columns,
+    mezure_ice_grid: ObjectGrid,
+    mezure_laser_grid: DeviceGrid,
+    mezure_pipe_grid: PlaneGrid,
 }
 
 impl SyzygyState {
@@ -160,12 +183,12 @@ impl SyzygyState {
 
     fn ugrent_initial_grid() -> DeviceGrid {
         let mut grid = DeviceGrid::new(7, 5);
-        grid.set(0, 0, Device::Emitter(PrimaryColor::Red), Direction::South);
-        grid.set(3, 0, Device::Detector(PrimaryColor::Red), Direction::East);
-        grid.set(6, 2, Device::Detector(PrimaryColor::Green), Direction::West);
+        grid.set(0, 0, Device::Emitter(MixedColor::Red), Direction::South);
+        grid.set(3, 0, Device::Detector(MixedColor::Red), Direction::East);
+        grid.set(6, 2, Device::Detector(MixedColor::Green), Direction::West);
         grid.set(3, 3, Device::Wall, Direction::East);
-        grid.set(0, 4, Device::Emitter(PrimaryColor::Green), Direction::North);
-        grid.set(3, 4, Device::Detector(PrimaryColor::Blue), Direction::East);
+        grid.set(0, 4, Device::Emitter(MixedColor::Green), Direction::North);
+        grid.set(3, 4, Device::Detector(MixedColor::Blue), Direction::East);
 
         grid.set(2, 0, Device::Mirror, Direction::East);
         grid.set(2, 1, Device::Mirror, Direction::South);
@@ -185,6 +208,46 @@ impl SyzygyState {
         grid
     }
 
+    fn mezure_initial_ice_grid() -> ObjectGrid {
+        let mut grid = ObjectGrid::new(3, 6);
+        grid.add_object(1, 2, Object::Wall);
+        grid.add_object(1, 1, Object::Rotator);
+        grid.add_ice_block(1, 0, Symbol::Mirror(true));
+        grid.add_ice_block(0, 2, Symbol::Mirror(true));
+        grid.add_ice_block(2, 2, Symbol::Mirror(true));
+        grid.add_ice_block(1, 3, Symbol::Mirror(true));
+        grid
+    }
+
+    fn mezure_initial_laser_grid() -> DeviceGrid {
+        let mut grid = DeviceGrid::new(4, 7);
+        for &(_, (col, row), dir) in MEZURE_GRAY_NODES_EMITTERS {
+            let device = Device::Emitter(MixedColor::Black);
+            grid.set(col, row, device, dir);
+        }
+        grid.set(1, 2, Device::Wall, Direction::East);
+        grid.set(3, 0, Device::Detector(MixedColor::Cyan), Direction::West);
+        grid.set(3, 1, Device::Detector(MixedColor::Magenta), Direction::West);
+        grid.set(3, 2, Device::Detector(MixedColor::Yellow), Direction::West);
+        grid.set(3, 3, Device::Detector(MixedColor::White), Direction::West);
+        grid.set(3, 4, Device::Detector(MixedColor::Cyan), Direction::West);
+        grid.set(3, 5, Device::Detector(MixedColor::Yellow), Direction::West);
+        grid.set(3, 6, Device::Wall, Direction::East);
+        grid
+    }
+
+    fn mezure_initial_pipe_grid() -> PlaneGrid {
+        let mut grid = PlaneGrid::new(Rect::new(0, 0, 4, 9));
+        grid.place_object(0, 0, PlaneObj::Wall);
+        grid.place_object(1, 1, PlaneObj::RedNode);
+        grid.place_object(1, 4, PlaneObj::GreenNode);
+        grid.place_object(1, 7, PlaneObj::BlueNode);
+        for &((col, row), _, _) in MEZURE_GRAY_NODES_EMITTERS {
+            grid.place_object(col, row, PlaneObj::GrayNode);
+        }
+        grid
+    }
+
     pub fn from_toml(mut table: toml::value::Table) -> SyzygyState {
         let access = Access::from_toml(table.get(ACCESS_KEY));
         let stage = SyzygyStage::from_toml(table.get(STAGE_KEY));
@@ -193,7 +256,6 @@ impl SyzygyState {
         let argony =
             ObjectGrid::from_toml(pop_table(&mut table, ARGONY_KEY),
                                   &SyzygyState::argony_initial_grid());
-
         let mut elinsa = SyzygyState::elinsa_initial_grid();
         elinsa.set_pipes_from_toml(pop_array(&mut table, ELINSA_KEY));
         let ugrent =
@@ -216,7 +278,16 @@ impl SyzygyState {
                     0 <= idx && idx < RELYNG_NUM_COLS * RELYNG_NUM_ROWS
                 })
                 .collect();
-        SyzygyState {
+        let mezure_columns = Columns::from_toml(MEZURE_COLUMNS_SPEC,
+                                                pop_array(&mut table,
+                                                          MEZURE_COLUMNS_KEY));
+        let mezure_ice_grid =
+            ObjectGrid::from_toml(pop_table(&mut table, MEZURE_ICE_GRID_KEY),
+                                  &SyzygyState::mezure_initial_ice_grid());
+        let mut mezure_pipe_grid = SyzygyState::mezure_initial_pipe_grid();
+        mezure_pipe_grid.set_pipes_from_toml(pop_array(&mut table,
+                                                       MEZURE_PIPES_KEY));
+        let mut state = SyzygyState {
             access: access,
             stage: stage,
             yttris: yttris,
@@ -225,7 +296,13 @@ impl SyzygyState {
             ugrent: ugrent,
             relyng_next: relyng_next,
             relyng_lights: relyng_lights,
-        }
+            mezure_columns: mezure_columns,
+            mezure_ice_grid: mezure_ice_grid,
+            mezure_laser_grid: SyzygyState::mezure_initial_laser_grid(),
+            mezure_pipe_grid: mezure_pipe_grid,
+        };
+        state.mezure_regenerate_laser_grid();
+        state
     }
 
     // TODO: Solve stages one at a time.
@@ -357,6 +434,62 @@ impl SyzygyState {
         self.relyng_lights.clear();
         self.relyng_next = RELYNG_INIT_NEXT;
     }
+
+    pub fn mezure_columns(&self) -> &Columns { &self.mezure_columns }
+
+    pub fn mezure_columns_mut(&mut self) -> &mut Columns {
+        &mut self.mezure_columns
+    }
+
+    pub fn mezure_ice_grid(&self) -> &ObjectGrid { &self.mezure_ice_grid }
+
+    pub fn mezure_ice_grid_mut(&mut self) -> &mut ObjectGrid {
+        &mut self.mezure_ice_grid
+    }
+
+    pub fn mezure_laser_grid(&self) -> &DeviceGrid { &self.mezure_laser_grid }
+
+    pub fn mezure_laser_grid_mut(&mut self) -> &mut DeviceGrid {
+        &mut self.mezure_laser_grid
+    }
+
+    pub fn mezure_pipe_grid(&self) -> &PlaneGrid { &self.mezure_pipe_grid }
+
+    pub fn mezure_pipe_grid_mut(&mut self) -> &mut PlaneGrid {
+        &mut self.mezure_pipe_grid
+    }
+
+    fn reset_mezure(&mut self) {
+        self.mezure_columns.reset();
+        self.mezure_ice_grid = SyzygyState::mezure_initial_ice_grid();
+        self.mezure_pipe_grid.remove_all_pipes();
+        self.mezure_regenerate_laser_grid();
+    }
+
+    pub fn mezure_regenerate_laser_grid(&mut self) {
+        self.mezure_laser_grid.clear_all_movable_objects();
+        for (&coords, &symbol) in self.mezure_ice_grid.ice_blocks() {
+            match symbol {
+                Symbol::Mirror(mirrored) => {
+                    let direction = if mirrored {
+                        Direction::South
+                    } else {
+                        Direction::East
+                    };
+                    self.mezure_laser_grid.set(coords.x(),
+                                               coords.y(),
+                                               Device::Mirror,
+                                               direction);
+                }
+                _ => {}
+            }
+        }
+        let gray_nodes = self.mezure_pipe_grid.gray_node_colors();
+        for &((gx, gy), (ex, ey), dir) in MEZURE_GRAY_NODES_EMITTERS {
+            let color = *gray_nodes.get(&Point::new(gx, gy)).unwrap();
+            self.mezure_laser_grid.set(ex, ey, Device::Emitter(color), dir);
+        }
+    }
 }
 
 impl PuzzleState for SyzygyState {
@@ -373,7 +506,11 @@ impl PuzzleState for SyzygyState {
             SyzygyStage::Elinsa => !self.elinsa.pipes().is_empty(),
             SyzygyStage::Ugrent => self.ugrent.is_modified(),
             SyzygyStage::Relyng => !self.relyng_lights.is_empty(),
-            _ => false, // TODO
+            SyzygyStage::Mezure => {
+                self.mezure_columns.can_reset() ||
+                self.mezure_ice_grid.is_modified() ||
+                !self.mezure_pipe_grid.pipes().is_empty()
+            }
         }
     }
 
@@ -384,7 +521,7 @@ impl PuzzleState for SyzygyState {
             SyzygyStage::Elinsa => self.reset_elinsa(),
             SyzygyStage::Ugrent => self.reset_ugrent(),
             SyzygyStage::Relyng => self.reset_relyng(),
-            _ => {} // TODO
+            SyzygyStage::Mezure => self.reset_mezure(),
         }
     }
 
@@ -395,7 +532,7 @@ impl PuzzleState for SyzygyState {
         self.reset_elinsa();
         self.reset_ugrent();
         self.reset_relyng();
-        // TODO others
+        self.reset_mezure();
         self.access = Access::BeginReplay;
     }
 
@@ -406,8 +543,10 @@ impl PuzzleState for SyzygyState {
             table.insert(STAGE_KEY.to_string(), self.stage.to_toml());
             match self.stage {
                 SyzygyStage::Yttris => {
-                    table.insert(YTTRIS_KEY.to_string(),
-                                 self.yttris.to_toml());
+                    if self.yttris.can_reset() {
+                        table.insert(YTTRIS_KEY.to_string(),
+                                     self.yttris.to_toml());
+                    }
                 }
                 SyzygyStage::Argony => {
                     if self.argony.is_modified() {
@@ -438,7 +577,20 @@ impl PuzzleState for SyzygyState {
                     table.insert(RELYNG_NEXT_KEY.to_string(),
                                  toml::Value::String(next));
                 }
-                _ => {} // TODO
+                SyzygyStage::Mezure => {
+                    if self.mezure_columns.can_reset() {
+                        table.insert(MEZURE_COLUMNS_KEY.to_string(),
+                                     self.mezure_columns.to_toml());
+                    }
+                    if self.mezure_ice_grid.is_modified() {
+                        table.insert(MEZURE_ICE_GRID_KEY.to_string(),
+                                     self.mezure_ice_grid.to_toml());
+                    }
+                    if !self.mezure_pipe_grid.pipes().is_empty() {
+                        table.insert(MEZURE_PIPES_KEY.to_string(),
+                                     self.mezure_pipe_grid.pipes_to_toml());
+                    }
+                }
             }
         }
         toml::Value::Table(table)

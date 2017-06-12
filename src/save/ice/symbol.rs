@@ -35,6 +35,7 @@ pub enum Symbol {
     CyanQ(Transform),
     CyanU(Transform),
     CyanA(Transform),
+    Mirror(bool),
 }
 
 impl Symbol {
@@ -67,6 +68,10 @@ impl Symbol {
             "CA" => {
                 let transform = Transform::from_toml(table.get("transform"));
                 Symbol::CyanA(transform)
+            }
+            "M" => {
+                let mirrored = to_bool(pop_value(&mut table, "mirrored"));
+                Symbol::Mirror(mirrored)
             }
             _ => Symbol::BlueCircle,
         }
@@ -104,6 +109,11 @@ impl Symbol {
                 table.insert("transform".to_string(), transform.to_toml());
                 "CA"
             }
+            Symbol::Mirror(mirrored) => {
+                table.insert("mirrored".to_string(),
+                             toml::Value::Boolean(mirrored));
+                "M"
+            }
         };
         table.insert("shape".to_string(),
                      toml::Value::String(shape.to_string()));
@@ -127,6 +137,10 @@ impl Symbol {
             Symbol::CyanQ(trans) => Symbol::CyanQ(trans.compose(transform)),
             Symbol::CyanU(trans) => Symbol::CyanU(trans.compose(transform)),
             Symbol::CyanA(trans) => Symbol::CyanA(trans.compose(transform)),
+            Symbol::Mirror(mirrored) => {
+                let mirrored = transform.apply_to_mirrored(mirrored);
+                Symbol::Mirror(transform.apply_to_vertical(mirrored))
+            }
         }
     }
 
@@ -140,6 +154,7 @@ impl Symbol {
             Symbol::CyanQ(_) => 5,
             Symbol::CyanU(_) => 6,
             Symbol::CyanA(_) => 7,
+            Symbol::Mirror(_) => 8,
         }
     }
 
@@ -154,6 +169,7 @@ impl Symbol {
             Symbol::CyanQ(transform) |
             Symbol::CyanU(transform) |
             Symbol::CyanA(transform) => transform.degrees(),
+            Symbol::Mirror(_) => 0,
         }
     }
 
@@ -167,6 +183,7 @@ impl Symbol {
             Symbol::CyanQ(transform) |
             Symbol::CyanU(transform) |
             Symbol::CyanA(transform) => transform.is_mirrored(),
+            Symbol::Mirror(mirrored) => mirrored,
         }
     }
 
@@ -178,10 +195,11 @@ impl Symbol {
         }
         symbols.push(Symbol::GreenSquare);
         symbols.push(Symbol::BlueCircle);
-        for &vertical in &[false, true] {
-            for &mirrored in &[false, true] {
+        for &mirrored in &[false, true] {
+            for &vertical in &[false, true] {
                 symbols.push(Symbol::YellowRhombus(vertical, mirrored));
             }
+            symbols.push(Symbol::Mirror(mirrored));
         }
         for trans in Transform::all() {
             symbols.push(Symbol::PurpleCheckmark(trans));
@@ -219,6 +237,8 @@ mod tests {
         assert_eq!(Symbol::BlueCircle.transformed(trans), Symbol::BlueCircle);
         assert_eq!(Symbol::YellowRhombus(true, true).transformed(trans),
                    Symbol::YellowRhombus(false, true));
+        assert_eq!(Symbol::Mirror(false).transformed(trans),
+                   Symbol::Mirror(true));
     }
 
     #[test]
@@ -231,6 +251,8 @@ mod tests {
         assert_eq!(Symbol::BlueCircle.transformed(trans), Symbol::BlueCircle);
         assert_eq!(Symbol::YellowRhombus(true, false).transformed(trans),
                    Symbol::YellowRhombus(true, true));
+        assert_eq!(Symbol::Mirror(false).transformed(trans),
+                   Symbol::Mirror(true));
     }
 }
 

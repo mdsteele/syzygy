@@ -19,7 +19,7 @@
 
 use toml;
 
-use save::{Access, Direction, Location, PrimaryColor};
+use save::{Access, Direction, Location, MixedColor};
 use save::device::{Device, DeviceGrid};
 use super::PuzzleState;
 use super::super::util::{ACCESS_KEY, pop_array};
@@ -63,23 +63,23 @@ impl MissedState {
 
     fn base_grid() -> DeviceGrid {
         let mut grid = DeviceGrid::new(10, 5);
-        grid.set(0, 0, Device::Emitter(PrimaryColor::Blue), Direction::East);
+        grid.set(0, 0, Device::Emitter(MixedColor::Blue), Direction::East);
         grid.set(2, 0, Device::Wall, Direction::East);
         grid.set(6, 0, Device::Wall, Direction::East);
-        grid.set(9, 0, Device::Detector(PrimaryColor::Red), Direction::West);
+        grid.set(9, 0, Device::Detector(MixedColor::Red), Direction::West);
         grid.set(0, 1, Device::Wall, Direction::East);
         grid.set(8, 1, Device::Wall, Direction::East);
         grid.set(9, 1, Device::Wall, Direction::East);
-        grid.set(0, 2, Device::Emitter(PrimaryColor::Green), Direction::East);
+        grid.set(0, 2, Device::Emitter(MixedColor::Green), Direction::East);
         grid.set(3, 2, Device::Wall, Direction::East);
         grid.set(4, 2, Device::Channel, Direction::South);
-        grid.set(9, 2, Device::Detector(PrimaryColor::Blue), Direction::West);
+        grid.set(9, 2, Device::Detector(MixedColor::Blue), Direction::West);
         grid.set(0, 3, Device::Wall, Direction::East);
         grid.set(9, 3, Device::Wall, Direction::East);
-        grid.set(0, 4, Device::Emitter(PrimaryColor::Green), Direction::East);
+        grid.set(0, 4, Device::Emitter(MixedColor::Green), Direction::East);
         grid.set(2, 4, Device::Wall, Direction::East);
         grid.set(7, 4, Device::Wall, Direction::East);
-        grid.set(9, 4, Device::Detector(PrimaryColor::Green), Direction::West);
+        grid.set(9, 4, Device::Detector(MixedColor::Green), Direction::West);
         grid
     }
 

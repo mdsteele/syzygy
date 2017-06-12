@@ -20,7 +20,7 @@
 use std::collections::HashMap;
 use toml;
 
-use save::{Direction, PrimaryColor};
+use save::{Direction, MixedColor};
 use super::util::{pop_array, to_i32, to_table};
 
 // ========================================================================= //
@@ -139,6 +139,19 @@ impl DeviceGrid {
         }
     }
 
+    pub fn clear_all_movable_objects(&mut self) {
+        for row in 0..self.num_rows {
+            for col in 0..self.num_cols {
+                let index = (row * self.num_cols + col) as usize;
+                if let Some((device, _)) = self.grid[index] {
+                    if device.is_moveable() {
+                        self.grid[index] = None;
+                    }
+                }
+            }
+        }
+    }
+
     pub fn rotate(&mut self, col: i32, row: i32) {
         if col >= 0 && col < self.num_cols && row >= 0 && row < self.num_rows {
             let index = (row * self.num_cols + col) as usize;
@@ -205,8 +218,8 @@ pub enum Device {
     Wall,
     Channel,
     CrossChannel,
-    Emitter(PrimaryColor),
-    Detector(PrimaryColor),
+    Emitter(MixedColor),
+    Detector(MixedColor),
     Mirror,
     Splitter,
     Mixer,
@@ -219,12 +232,22 @@ impl Device {
                 "O" => return Device::Wall,
                 "=" => return Device::Channel,
                 "+" => return Device::CrossChannel,
-                "Er" => return Device::Emitter(PrimaryColor::Red),
-                "Eg" => return Device::Emitter(PrimaryColor::Green),
-                "Eb" => return Device::Emitter(PrimaryColor::Blue),
-                "Dr" => return Device::Detector(PrimaryColor::Red),
-                "Dg" => return Device::Detector(PrimaryColor::Green),
-                "Db" => return Device::Detector(PrimaryColor::Blue),
+                "Ek" => return Device::Emitter(MixedColor::Black),
+                "Er" => return Device::Emitter(MixedColor::Red),
+                "Eg" => return Device::Emitter(MixedColor::Green),
+                "Ey" => return Device::Emitter(MixedColor::Yellow),
+                "Eb" => return Device::Emitter(MixedColor::Blue),
+                "Em" => return Device::Emitter(MixedColor::Magenta),
+                "Ec" => return Device::Emitter(MixedColor::Cyan),
+                "Ew" => return Device::Emitter(MixedColor::White),
+                "Dk" => return Device::Detector(MixedColor::Black),
+                "Dr" => return Device::Detector(MixedColor::Red),
+                "Dg" => return Device::Detector(MixedColor::Green),
+                "Dy" => return Device::Detector(MixedColor::Yellow),
+                "Db" => return Device::Detector(MixedColor::Blue),
+                "Dm" => return Device::Detector(MixedColor::Magenta),
+                "Dc" => return Device::Detector(MixedColor::Cyan),
+                "Dw" => return Device::Detector(MixedColor::White),
                 "/" => return Device::Mirror,
                 "T" => return Device::Splitter,
                 "M" => return Device::Mixer,
@@ -239,12 +262,22 @@ impl Device {
             Device::Wall => "O",
             Device::Channel => "=",
             Device::CrossChannel => "+",
-            Device::Emitter(PrimaryColor::Red) => "Er",
-            Device::Emitter(PrimaryColor::Green) => "Eg",
-            Device::Emitter(PrimaryColor::Blue) => "Eb",
-            Device::Detector(PrimaryColor::Red) => "Dr",
-            Device::Detector(PrimaryColor::Green) => "Dg",
-            Device::Detector(PrimaryColor::Blue) => "Db",
+            Device::Emitter(MixedColor::Black) => "Ek",
+            Device::Emitter(MixedColor::Red) => "Er",
+            Device::Emitter(MixedColor::Green) => "Eg",
+            Device::Emitter(MixedColor::Yellow) => "Ey",
+            Device::Emitter(MixedColor::Blue) => "Eb",
+            Device::Emitter(MixedColor::Magenta) => "Em",
+            Device::Emitter(MixedColor::Cyan) => "Ec",
+            Device::Emitter(MixedColor::White) => "Ew",
+            Device::Detector(MixedColor::Black) => "Dk",
+            Device::Detector(MixedColor::Red) => "Dr",
+            Device::Detector(MixedColor::Green) => "Dg",
+            Device::Detector(MixedColor::Yellow) => "Dy",
+            Device::Detector(MixedColor::Blue) => "Db",
+            Device::Detector(MixedColor::Magenta) => "Dm",
+            Device::Detector(MixedColor::Cyan) => "Dc",
+            Device::Detector(MixedColor::White) => "Dw",
             Device::Mirror => "/",
             Device::Splitter => "T",
             Device::Mixer => "M",
@@ -258,33 +291,36 @@ impl Device {
             _ => false,
         }
     }
+
+    #[cfg(test)]
+    pub fn all() -> Vec<Device> {
+        let mut devices = vec![Device::Wall,
+                               Device::Channel,
+                               Device::CrossChannel,
+                               Device::Mirror,
+                               Device::Splitter,
+                               Device::Mixer];
+        for color in MixedColor::all() {
+            devices.push(Device::Emitter(color));
+            devices.push(Device::Detector(color));
+        }
+        devices
+    }
 }
 
 // ========================================================================= //
 
 #[cfg(test)]
 mod tests {
-    use save::{Direction, PrimaryColor};
+    use save::Direction;
     use super::{Device, DeviceGrid};
     use super::super::util::to_array;
 
     #[test]
     fn device_toml_round_trip() {
-        let all = &[Device::Wall,
-                    Device::Channel,
-                    Device::CrossChannel,
-                    Device::Emitter(PrimaryColor::Red),
-                    Device::Emitter(PrimaryColor::Green),
-                    Device::Emitter(PrimaryColor::Blue),
-                    Device::Detector(PrimaryColor::Red),
-                    Device::Detector(PrimaryColor::Green),
-                    Device::Detector(PrimaryColor::Blue),
-                    Device::Mirror,
-                    Device::Splitter,
-                    Device::Mixer];
-        for original in all {
+        for original in Device::all() {
             let result = Device::from_toml(Some(&original.to_toml()));
-            assert_eq!(result, *original);
+            assert_eq!(result, original);
         }
     }
 

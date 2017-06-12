@@ -24,6 +24,7 @@ use elements::plane::{PlaneCmd, PlaneGridView};
 use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sound};
 use modes::SOLVED_INFO_TEXT;
 use save::{self, Game, PuzzleState, SyzygyStage, SyzygyState};
+use super::mezure::{MezureCmd, MezureView};
 use super::relyng::LightsGrid;
 use super::scenes::{compile_intro_scene, compile_outro_scene};
 
@@ -36,6 +37,7 @@ enum UndoRedo {
     Elinsa(Vec<(Point, Point)>),
     Ugrent(LaserCmd),
     Relyng((i32, i32)),
+    Mezure(MezureCmd),
 }
 
 // ========================================================================= //
@@ -47,6 +49,7 @@ pub struct View {
     elinsa: PlaneGridView,
     ugrent: LaserField,
     relyng: LightsGrid,
+    mezure: MezureView,
 }
 
 impl View {
@@ -65,6 +68,7 @@ impl View {
             elinsa: PlaneGridView::new(resources, 150, 140),
             ugrent: LaserField::new(resources, 175, 140, state.ugrent_grid()),
             relyng: LightsGrid::new(resources, 168, 140, state),
+            mezure: MezureView::new(resources, state),
         }
     }
 }
@@ -86,10 +90,8 @@ impl Element<Game, PuzzleCmd> for View {
             SyzygyStage::Ugrent => {
                 self.ugrent.draw(state.ugrent_grid(), canvas);
             }
-            SyzygyStage::Relyng => {
-                self.relyng.draw(state, canvas);
-            }
-            _ => {} // TODO
+            SyzygyStage::Relyng => self.relyng.draw(state, canvas),
+            SyzygyStage::Mezure => self.mezure.draw(state, canvas),
         }
         self.core.draw_middle_layer(canvas);
         self.core.draw_front_layer(canvas, state);
@@ -191,7 +193,13 @@ impl Element<Game, PuzzleCmd> for View {
                     }
                     action.merge(subaction.but_no_value());
                 }
-                _ => {} // TODO
+                SyzygyStage::Mezure => {
+                    let mut subaction = self.mezure.handle_event(event, state);
+                    if let Some(cmd) = subaction.take_value() {
+                        self.core.push_undo(UndoRedo::Mezure(cmd));
+                    }
+                    action.merge(subaction.but_no_value());
+                }
             }
         }
         action
@@ -243,6 +251,7 @@ impl PuzzleView for View {
         self.core.clear_undo_redo();
         state.reset();
         self.ugrent.recalculate_lasers(state.ugrent_grid());
+        self.mezure.refresh(state);
     }
 
     fn solve(&mut self, game: &mut Game) {

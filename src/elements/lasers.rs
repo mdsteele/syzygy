@@ -23,7 +23,7 @@ use std::rc::Rc;
 
 use gui::{Action, Align, Canvas, Element, Event, FRAME_DELAY_MILLIS, Font,
           Point, Rect, Resources, Sound, Sprite};
-use save::{Direction, PrimaryColor};
+use save::{Direction, MixedColor};
 use save::device::{Device, DeviceGrid};
 
 // ========================================================================= //
@@ -63,7 +63,7 @@ pub struct LaserField {
     sparks_sprites: Vec<Sprite>,
     wall_sprites: Vec<Sprite>,
     drag: Option<GridDrag>,
-    lasers: HashMap<(Point, Direction), (PrimaryColor, i32)>,
+    lasers: HashMap<(Point, Direction), (MixedColor, i32)>,
     sparks: HashMap<(Point, Direction), i32>,
     anim_counter: i32,
 }
@@ -132,12 +132,8 @@ impl LaserField {
                                                -dir.degrees(),
                                                dir.is_vertical(),
                                                false);
-                let i = match color {
-                    PrimaryColor::Red => 0,
-                    PrimaryColor::Green => 1,
-                    PrimaryColor::Blue => 2,
-                };
-                canvas.draw_sprite_centered(&self.gem_sprites[i], center);
+                let index = color_index(color);
+                canvas.draw_sprite_centered(&self.gem_sprites[index], center);
             }
             Device::Detector(color) => {
                 canvas.draw_sprite_transformed(&self.wall_sprites[3],
@@ -145,12 +141,8 @@ impl LaserField {
                                                -dir.degrees(),
                                                dir.is_vertical(),
                                                false);
-                let i = match color {
-                    PrimaryColor::Red => 3,
-                    PrimaryColor::Green => 4,
-                    PrimaryColor::Blue => 5,
-                };
-                canvas.draw_sprite_rotated(&self.gem_sprites[i],
+                let index = color_index(color) + 8;
+                canvas.draw_sprite_rotated(&self.gem_sprites[index],
                                            center,
                                            dir.degrees());
             }
@@ -184,7 +176,7 @@ impl LaserField {
         }
     }
 
-    fn clear_lasers(&mut self) {
+    pub fn clear_lasers(&mut self) {
         self.lasers.clear();
         self.sparks.clear();
     }
@@ -192,15 +184,17 @@ impl LaserField {
     pub fn recalculate_lasers(&mut self, grid: &DeviceGrid) {
         self.clear_lasers();
         let (num_cols, num_rows) = grid.size();
-        let mut queue: VecDeque<(Point, Direction, PrimaryColor)> =
+        let mut queue: VecDeque<(Point, Direction, MixedColor)> =
             VecDeque::new();
         for row in 0..num_rows {
             for col in 0..num_cols {
                 match grid.get(col, row) {
                     Some((Device::Emitter(color), dir)) => {
-                        let coords = Point::new(col, row);
-                        self.lasers.insert((coords, dir), (color, 10));
-                        queue.push_back((coords, dir, color));
+                        if color != MixedColor::Black {
+                            let coords = Point::new(col, row);
+                            self.lasers.insert((coords, dir), (color, 10));
+                            queue.push_back((coords, dir, color));
+                        }
                     }
                     _ => {}
                 }
@@ -300,24 +294,15 @@ impl LaserField {
             }
         }
     }
-}
 
-impl Element<DeviceGrid, LaserCmd> for LaserField {
-    fn draw(&self, grid: &DeviceGrid, canvas: &mut Canvas) {
+    pub fn draw_immovables(&self, grid: &DeviceGrid, canvas: &mut Canvas) {
         let (num_cols, num_rows) = grid.size();
-        {
-            let mut canvas = canvas.subcanvas(self.rect);
-            canvas.clear((64, 64, 64));
-            for row in 0..num_rows {
-                for col in 0..num_cols {
-                    if let Some(ref drag) = self.drag {
-                        if drag.from_pt != drag.to_pt &&
-                           row == drag.from_row &&
-                           col == drag.from_col {
-                            continue;
-                        }
-                    }
-                    if let Some((device, dir)) = grid.get(col, row) {
+        let mut canvas = canvas.subcanvas(self.rect);
+        canvas.clear((64, 64, 64));
+        for row in 0..num_rows {
+            for col in 0..num_cols {
+                if let Some((device, dir)) = grid.get(col, row) {
+                    if !device.is_moveable() {
                         let pt = Point::new(col * GRID_CELL_SIZE +
                                             GRID_CELL_SIZE / 2,
                                             row * GRID_CELL_SIZE +
@@ -326,52 +311,46 @@ impl Element<DeviceGrid, LaserCmd> for LaserField {
                     }
                 }
             }
-            for (&(coords, dir), &(laser_color, dist)) in self.lasers.iter() {
-                let fill_color = match laser_color {
-                    PrimaryColor::Red => (255, 64, 64),
-                    PrimaryColor::Green => (64, 255, 64),
-                    PrimaryColor::Blue => (64, 64, 255),
-                };
-                let mut fill_rect = match dir {
-                    Direction::East => {
-                        Rect::new(GRID_CELL_SIZE - dist,
-                                  (GRID_CELL_SIZE - LASER_THICKNESS) / 2,
-                                  dist as u32,
-                                  LASER_THICKNESS as u32)
+        }
+    }
+
+    fn draw_movables_bg(&self, grid: &DeviceGrid, canvas: &mut Canvas) {
+        let (num_cols, num_rows) = grid.size();
+        let mut canvas = canvas.subcanvas(self.rect);
+        for row in 0..num_rows {
+            for col in 0..num_cols {
+                if let Some(ref drag) = self.drag {
+                    if drag.from_pt != drag.to_pt && row == drag.from_row &&
+                       col == drag.from_col {
+                        continue;
                     }
-                    Direction::South => {
-                        Rect::new((GRID_CELL_SIZE - LASER_THICKNESS) / 2,
-                                  GRID_CELL_SIZE - dist,
-                                  LASER_THICKNESS as u32,
-                                  dist as u32)
+                }
+                if let Some((device, dir)) = grid.get(col, row) {
+                    if device.is_moveable() {
+                        let pt = Point::new(col * GRID_CELL_SIZE +
+                                            GRID_CELL_SIZE / 2,
+                                            row * GRID_CELL_SIZE +
+                                            GRID_CELL_SIZE / 2);
+                        self.draw_device_bg(&mut canvas, pt, device, dir);
                     }
-                    Direction::West => {
-                        Rect::new(0,
-                                  (GRID_CELL_SIZE - LASER_THICKNESS) / 2,
-                                  dist as u32,
-                                  LASER_THICKNESS as u32)
-                    }
-                    Direction::North => {
-                        Rect::new((GRID_CELL_SIZE - LASER_THICKNESS) / 2,
-                                  0,
-                                  LASER_THICKNESS as u32,
-                                  dist as u32)
-                    }
-                };
-                fill_rect.offset(coords.x() * GRID_CELL_SIZE,
-                                 coords.y() * GRID_CELL_SIZE);
-                canvas.fill_rect(fill_color, fill_rect);
+                }
             }
-            for row in 0..num_rows {
-                for col in 0..num_cols {
-                    if let Some(ref drag) = self.drag {
-                        if drag.from_pt != drag.to_pt &&
-                           row == drag.from_row &&
-                           col == drag.from_col {
-                            continue;
-                        }
+        }
+    }
+
+    fn draw_movables_fg(&self, grid: &DeviceGrid, canvas: &mut Canvas) {
+        let (num_cols, num_rows) = grid.size();
+        let mut canvas = canvas.subcanvas(self.rect);
+        for row in 0..num_rows {
+            for col in 0..num_cols {
+                if let Some(ref drag) = self.drag {
+                    if drag.from_pt != drag.to_pt && row == drag.from_row &&
+                       col == drag.from_col {
+                        continue;
                     }
-                    if let Some((device, dir)) = grid.get(col, row) {
+                }
+                if let Some((device, dir)) = grid.get(col, row) {
+                    if device.is_moveable() {
                         let pt = Point::new(col * GRID_CELL_SIZE +
                                             GRID_CELL_SIZE / 2,
                                             row * GRID_CELL_SIZE +
@@ -381,6 +360,54 @@ impl Element<DeviceGrid, LaserCmd> for LaserField {
                 }
             }
         }
+    }
+
+    pub fn draw_lasers(&self, canvas: &mut Canvas) {
+        let mut canvas = canvas.subcanvas(self.rect);
+        for (&(coords, dir), &(laser_color, dist)) in self.lasers.iter() {
+            let fill_color = match laser_color {
+                MixedColor::Black => unreachable!(),
+                MixedColor::Red => (255, 64, 64),
+                MixedColor::Green => (64, 255, 64),
+                MixedColor::Yellow => (255, 255, 64),
+                MixedColor::Blue => (64, 64, 255),
+                MixedColor::Magenta => (255, 64, 255),
+                MixedColor::Cyan => (64, 255, 255),
+                MixedColor::White => (255, 255, 255),
+            };
+            let mut fill_rect = match dir {
+                Direction::East => {
+                    Rect::new(GRID_CELL_SIZE - dist,
+                              (GRID_CELL_SIZE - LASER_THICKNESS) / 2,
+                              dist as u32,
+                              LASER_THICKNESS as u32)
+                }
+                Direction::South => {
+                    Rect::new((GRID_CELL_SIZE - LASER_THICKNESS) / 2,
+                              GRID_CELL_SIZE - dist,
+                              LASER_THICKNESS as u32,
+                              dist as u32)
+                }
+                Direction::West => {
+                    Rect::new(0,
+                              (GRID_CELL_SIZE - LASER_THICKNESS) / 2,
+                              dist as u32,
+                              LASER_THICKNESS as u32)
+                }
+                Direction::North => {
+                    Rect::new((GRID_CELL_SIZE - LASER_THICKNESS) / 2,
+                              0,
+                              LASER_THICKNESS as u32,
+                              dist as u32)
+                }
+            };
+            fill_rect.offset(coords.x() * GRID_CELL_SIZE,
+                             coords.y() * GRID_CELL_SIZE);
+            canvas.fill_rect(fill_color, fill_rect);
+        }
+    }
+
+    pub fn draw_sparks(&self, canvas: &mut Canvas) {
         for (&(coords, dir), &dist) in self.sparks.iter() {
             let center =
                 self.rect.top_left() +
@@ -393,6 +420,16 @@ impl Element<DeviceGrid, LaserCmd> for LaserField {
                                            self.anim_counter < ANIM_SLOWDOWN,
                                            false);
         }
+    }
+}
+
+impl Element<DeviceGrid, LaserCmd> for LaserField {
+    fn draw(&self, grid: &DeviceGrid, canvas: &mut Canvas) {
+        self.draw_immovables(grid, canvas);
+        self.draw_movables_bg(grid, canvas);
+        self.draw_lasers(canvas);
+        self.draw_movables_fg(grid, canvas);
+        self.draw_sparks(canvas);
         if let Some(ref drag) = self.drag {
             if drag.from_pt != drag.to_pt {
                 let center = self.rect.top_left() + drag.to_pt;
@@ -531,18 +568,30 @@ impl DangerSign {
 
 // ========================================================================= //
 
-fn mixer_output(color1: PrimaryColor, color2: PrimaryColor) -> PrimaryColor {
-    match (color1, color2) {
-        (PrimaryColor::Red, PrimaryColor::Red) => PrimaryColor::Red,
-        (PrimaryColor::Red, PrimaryColor::Green) => PrimaryColor::Blue,
-        (PrimaryColor::Red, PrimaryColor::Blue) => PrimaryColor::Green,
-        (PrimaryColor::Green, PrimaryColor::Red) => PrimaryColor::Blue,
-        (PrimaryColor::Green, PrimaryColor::Green) => PrimaryColor::Green,
-        (PrimaryColor::Green, PrimaryColor::Blue) => PrimaryColor::Red,
-        (PrimaryColor::Blue, PrimaryColor::Red) => PrimaryColor::Green,
-        (PrimaryColor::Blue, PrimaryColor::Green) => PrimaryColor::Red,
-        (PrimaryColor::Blue, PrimaryColor::Blue) => PrimaryColor::Blue,
+fn color_index(color: MixedColor) -> usize {
+    match color {
+        MixedColor::Black => 0,
+        MixedColor::Red => 1,
+        MixedColor::Green => 2,
+        MixedColor::Yellow => 3,
+        MixedColor::Blue => 4,
+        MixedColor::Magenta => 5,
+        MixedColor::Cyan => 6,
+        MixedColor::White => 7,
     }
+}
+
+fn mixer_output(color1: MixedColor, color2: MixedColor) -> MixedColor {
+    let red = (color1.has_red() && color2.has_red()) ||
+              (color1.has_green() && color2.has_blue()) ||
+              (color1.has_blue() && color2.has_green());
+    let green = (color1.has_green() && color2.has_green()) ||
+                (color1.has_red() && color2.has_blue()) ||
+                (color1.has_blue() && color2.has_red());
+    let blue = (color1.has_blue() && color2.has_blue()) ||
+               (color1.has_red() && color2.has_green()) ||
+               (color1.has_green() && color2.has_red());
+    MixedColor::from_rgb(red, green, blue)
 }
 
 // ========================================================================= //

@@ -132,7 +132,6 @@ impl<A> Action<A> {
         self.value.merge(action.value);
     }
 
-    #[allow(dead_code)]
     pub fn map<B, F: FnOnce(A) -> B>(self, f: F) -> Action<B> {
         Action {
             redraw: self.redraw,
@@ -148,6 +147,7 @@ impl<A> Action<A> {
 
 // ========================================================================= //
 
+#[derive(Debug, Eq, PartialEq)]
 enum Value<A> {
     Continue,
     Stop,
@@ -158,7 +158,13 @@ impl<A> Value<A> {
     fn merge(&mut self, other: Value<A>) {
         match other {
             Value::Continue => {}
-            _ => {
+            Value::Stop => {
+                match *self {
+                    Value::Continue => *self = other,
+                    _ => {}
+                }
+            }
+            Value::Return(_) => {
                 *self = other;
             }
         }
@@ -170,6 +176,52 @@ impl<A> Value<A> {
             Value::Stop => Value::Stop,
             Value::Return(a) => Value::Return(f(a)),
         }
+    }
+}
+
+// ========================================================================= //
+
+#[cfg(test)]
+mod tests {
+    use super::Value;
+
+    #[test]
+    fn merge_value() {
+        let mut value: Value<i32> = Value::Continue;
+        value.merge(Value::Continue);
+        assert_eq!(value, Value::Continue);
+
+        let mut value: Value<i32> = Value::Continue;
+        value.merge(Value::Stop);
+        assert_eq!(value, Value::Stop);
+
+        let mut value: Value<i32> = Value::Continue;
+        value.merge(Value::Return(3));
+        assert_eq!(value, Value::Return(3));
+
+        let mut value: Value<i32> = Value::Stop;
+        value.merge(Value::Continue);
+        assert_eq!(value, Value::Stop);
+
+        let mut value: Value<i32> = Value::Stop;
+        value.merge(Value::Stop);
+        assert_eq!(value, Value::Stop);
+
+        let mut value: Value<i32> = Value::Stop;
+        value.merge(Value::Return(3));
+        assert_eq!(value, Value::Return(3));
+
+        let mut value: Value<i32> = Value::Return(5);
+        value.merge(Value::Continue);
+        assert_eq!(value, Value::Return(5));
+
+        let mut value: Value<i32> = Value::Return(5);
+        value.merge(Value::Stop);
+        assert_eq!(value, Value::Return(5));
+
+        let mut value: Value<i32> = Value::Return(5);
+        value.merge(Value::Return(3));
+        assert_eq!(value, Value::Return(3));
     }
 }
 

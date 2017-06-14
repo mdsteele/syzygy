@@ -18,6 +18,7 @@
 // +--------------------------------------------------------------------------+
 
 use std::{i32, i8, u32};
+use std::collections::VecDeque;
 use toml;
 
 // ========================================================================= //
@@ -136,6 +137,62 @@ pub fn to_u32(value: toml::Value) -> u32 {
             }
         }
         _ => 0,
+    }
+}
+
+// ========================================================================= //
+
+pub fn rotate_deque<T>(deque: &mut VecDeque<T>, by: i32) {
+    let len = deque.len();
+    if by > 0 {
+        let by = (by as usize) % len;
+        if by > 0 {
+            let mut rest = deque.split_off(len - by);
+            rest.append(deque);
+            *deque = rest;
+        }
+    } else if by < 0 {
+        let by = ((-by) as usize) % len;
+        if by > 0 {
+            let mut rest = deque.split_off(by);
+            rest.append(deque);
+            *deque = rest;
+        }
+    }
+}
+
+// ========================================================================= //
+
+#[cfg(test)]
+mod tests {
+    use std::collections::VecDeque;
+
+    use super::rotate_deque;
+
+    #[test]
+    fn deque_rotation() {
+        let mut deque: VecDeque<i32> = [1, 2, 3, 4, 5]
+            .iter()
+            .cloned()
+            .collect();
+        rotate_deque(&mut deque, 0);
+        assert_eq!(deque.iter().cloned().collect::<Vec<i32>>(),
+                   vec![1, 2, 3, 4, 5]);
+        rotate_deque(&mut deque, 1);
+        assert_eq!(deque.iter().cloned().collect::<Vec<i32>>(),
+                   vec![5, 1, 2, 3, 4]);
+        rotate_deque(&mut deque, -2);
+        assert_eq!(deque.iter().cloned().collect::<Vec<i32>>(),
+                   vec![2, 3, 4, 5, 1]);
+        rotate_deque(&mut deque, 8);
+        assert_eq!(deque.iter().cloned().collect::<Vec<i32>>(),
+                   vec![4, 5, 1, 2, 3]);
+        rotate_deque(&mut deque, -14);
+        assert_eq!(deque.iter().cloned().collect::<Vec<i32>>(),
+                   vec![3, 4, 5, 1, 2]);
+        rotate_deque(&mut deque, 15);
+        assert_eq!(deque.iter().cloned().collect::<Vec<i32>>(),
+                   vec![3, 4, 5, 1, 2]);
     }
 }
 

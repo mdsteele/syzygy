@@ -181,6 +181,9 @@ fn main() {
                         Location::FactOrFiction => {
                             modes::run_fact_or_fiction(&mut window, game)
                         }
+                        Location::HexSpangled => {
+                            modes::run_hex_spangled(&mut window, game)
+                        }
                         Location::IceToMeetYou => {
                             modes::run_ice_to_meet_you(&mut window, game)
                         }

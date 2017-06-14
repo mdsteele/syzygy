@@ -21,12 +21,12 @@ use toml;
 
 use save::{AtticState, BlackState, BlameState, CubeState, DayState,
            DisconState, DotsState, DoubleState, FailureState, FictionState,
-           GearsState, GroundState, HeadedState, IcyEmState, JogState,
-           LaneState, LevelUpState, LineState, Location, LogLevelState,
-           MeetState, MissedState, OrderState, PasswordState, PrologState,
-           PuzzleState, RightState, SauceState, ServesState, SimpleState,
-           StarState, SyrupState, SyzygyState, TheYState, TreadState,
-           VirtueState, WhatchaState, WreckedState};
+           GearsState, GroundState, HeadedState, HexState, IcyEmState,
+           JogState, LaneState, LevelUpState, LineState, Location,
+           LogLevelState, MeetState, MissedState, OrderState, PasswordState,
+           PrologState, PuzzleState, RightState, SauceState, ServesState,
+           SimpleState, StarState, SyrupState, SyzygyState, TheYState,
+           TreadState, VirtueState, WhatchaState, WreckedState};
 use save::util::{pop_table, to_table};
 
 // ========================================================================= //
@@ -49,6 +49,7 @@ pub struct Game {
     pub disconnected: DisconState,
     pub double_cross: DoubleState,
     pub fact_or_fiction: FictionState,
+    pub hex_spangled: HexState,
     pub ice_to_meet_you: MeetState,
     pub if_memory_serves: ServesState,
     pub jog_your_memory: JogState,
@@ -111,6 +112,8 @@ impl Game {
                 pop_table(table_ref, Location::DoubleCross.key())),
             fact_or_fiction: FictionState::from_toml(
                 pop_table(table_ref, Location::FactOrFiction.key())),
+            hex_spangled: HexState::from_toml(
+                pop_table(table_ref, Location::HexSpangled.key())),
             ice_to_meet_you: MeetState::from_toml(
                 pop_table(table_ref, Location::IceToMeetYou.key())),
             if_memory_serves: ServesState::from_toml(
@@ -206,6 +209,7 @@ impl Game {
             Location::Disconnected => &self.disconnected,
             Location::DoubleCross => &self.double_cross,
             Location::FactOrFiction => &self.fact_or_fiction,
+            Location::HexSpangled => &self.hex_spangled,
             Location::IceToMeetYou => &self.ice_to_meet_you,
             Location::IfMemoryServes => &self.if_memory_serves,
             Location::JogYourMemory => &self.jog_your_memory,
@@ -248,6 +252,7 @@ impl Game {
             Location::Disconnected => &mut self.disconnected,
             Location::DoubleCross => &mut self.double_cross,
             Location::FactOrFiction => &mut self.fact_or_fiction,
+            Location::HexSpangled => &mut self.hex_spangled,
             Location::IceToMeetYou => &mut self.ice_to_meet_you,
             Location::IfMemoryServes => &mut self.if_memory_serves,
             Location::JogYourMemory => &mut self.jog_your_memory,

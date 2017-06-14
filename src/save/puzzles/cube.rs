@@ -227,7 +227,12 @@ fn rotate_vert(orientation: i32, by: i32) -> i32 {
 
 #[cfg(test)]
 mod tests {
-    use super::{INITIAL_GRID, NUM_COLS, NUM_ROWS, SOLVED_GRID, rotate_vert};
+    use toml;
+
+    use save::{Access, PuzzleState};
+    use save::util::{ACCESS_KEY, to_table};
+    use super::{CubeState, INITIAL_GRID, NUM_COLS, NUM_ROWS, SOLVED_GRID,
+                rotate_vert};
 
     #[test]
     fn grid_sizes() {
@@ -242,6 +247,40 @@ mod tests {
         assert_eq!(3, rotate_vert(2, 1));
         assert_eq!(0, rotate_vert(3, 1));
         assert_eq!(5, rotate_vert(4, 1));
+    }
+
+    #[test]
+    fn toml_round_trip() {
+        let mut state = CubeState::from_toml(toml::value::Table::new());
+        state.access = Access::Replaying;
+        state.grid = vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
+                          15];
+        state.is_initial = false;
+
+        let state = CubeState::from_toml(to_table(state.to_toml()));
+        assert_eq!(state.access, Access::Replaying);
+        assert_eq!(state.grid,
+                   vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
+        assert!(!state.is_initial);
+    }
+
+    #[test]
+    fn from_empty_toml() {
+        let state = CubeState::from_toml(toml::value::Table::new());
+        assert_eq!(state.access, Access::Unvisited);
+        assert_eq!(state.grid, INITIAL_GRID.to_vec());
+        assert!(state.is_initial);
+    }
+
+    #[test]
+    fn from_solved_toml() {
+        let mut table = toml::value::Table::new();
+        table.insert(ACCESS_KEY.to_string(), Access::Solved.to_toml());
+
+        let state = CubeState::from_toml(table);
+        assert_eq!(state.access, Access::Solved);
+        assert_eq!(state.grid, SOLVED_GRID.to_vec());
+        assert!(!state.is_initial);
     }
 }
 

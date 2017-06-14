@@ -149,3 +149,59 @@ impl PuzzleState for HexState {
 }
 
 // ========================================================================= //
+
+#[cfg(test)]
+mod tests {
+    use toml;
+
+    use save::{Access, PuzzleState};
+    use save::util::{ACCESS_KEY, to_table};
+    use super::{HexState, INITIAL_TOKENS, SOLVED_TOKENS, TOKENS_KEY};
+
+    #[test]
+    fn toml_round_trip() {
+        let mut state = HexState::from_toml(toml::value::Table::new());
+        state.access = Access::Replaying;
+        state.tokens = vec![0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 0,
+                            0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2];
+        state.is_initial = false;
+
+        let state = HexState::from_toml(to_table(state.to_toml()));
+        assert_eq!(state.access, Access::Replaying);
+        assert_eq!(state.tokens,
+                   vec![0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 0, 0,
+                        0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2]);
+        assert!(!state.is_initial);
+    }
+
+    #[test]
+    fn from_empty_toml() {
+        let state = HexState::from_toml(toml::value::Table::new());
+        assert_eq!(state.access, Access::Unvisited);
+        assert_eq!(state.tokens, INITIAL_TOKENS.to_vec());
+        assert!(state.is_initial);
+    }
+
+    #[test]
+    fn from_solved_toml() {
+        let mut table = toml::value::Table::new();
+        table.insert(ACCESS_KEY.to_string(), Access::Solved.to_toml());
+
+        let state = HexState::from_toml(table);
+        assert_eq!(state.access, Access::Solved);
+        assert_eq!(state.tokens, SOLVED_TOKENS.to_vec());
+        assert!(!state.is_initial);
+    }
+
+    #[test]
+    fn from_invalid_tokens_toml() {
+        let mut table = toml::value::Table::new();
+        table.insert(TOKENS_KEY.to_string(),
+                     toml::Value::Array(vec![toml::Value::Integer(0); 30]));
+        let state = HexState::from_toml(table);
+        assert_eq!(state.tokens, INITIAL_TOKENS.to_vec());
+        assert!(state.is_initial);
+    }
+}
+
+// ========================================================================= //

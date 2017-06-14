@@ -193,3 +193,54 @@ impl PuzzleState for LineState {
 }
 
 // ========================================================================= //
+
+#[cfg(test)]
+mod tests {
+    use toml;
+
+    use save::{Access, PuzzleState};
+    use save::util::{ACCESS_KEY, to_table};
+    use super::{GRIDS, LineState};
+
+    #[test]
+    fn toml_round_trip() {
+        let mut state = LineState::from_toml(toml::value::Table::new());
+        state.access = Access::Replaying;
+        state.stage = 7;
+        state.seed = [1, 2, 3, 4, 5, 6, 7, 8];
+        state.update_grids();
+        let grid1 = state.grid1.clone();
+        let grid2 = state.grid2.clone();
+
+        let state = LineState::from_toml(to_table(state.to_toml()));
+        assert_eq!(state.access, Access::Replaying);
+        assert_eq!(state.stage, 7);
+        assert_eq!(state.seed, [1, 2, 3, 4, 5, 6, 7, 8]);
+        assert_eq!(state.grid1, grid1);
+        assert_eq!(state.grid2, grid2);
+    }
+
+    #[test]
+    fn from_empty_toml() {
+        let state = LineState::from_toml(toml::value::Table::new());
+        assert_eq!(state.access, Access::Unvisited);
+        assert_eq!(state.stage, 0);
+        assert_eq!(state.grid1.len(), 12);
+        assert_eq!(state.grid2.len(), 12);
+        assert_ne!(state.seed, [0u32; 8]);
+    }
+
+    #[test]
+    fn from_solved_toml() {
+        let mut table = toml::value::Table::new();
+        table.insert(ACCESS_KEY.to_string(), Access::Solved.to_toml());
+
+        let state = LineState::from_toml(table);
+        assert_eq!(state.access, Access::Solved);
+        assert_eq!(state.stage, GRIDS.len() as i32);
+        assert!(state.grid1.is_empty());
+        assert!(state.grid2.is_empty());
+    }
+}
+
+// ========================================================================= //

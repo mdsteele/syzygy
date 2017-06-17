@@ -19,9 +19,11 @@
 
 use std::cmp::min;
 use std::collections::HashMap;
+use std::rc::Rc;
 
 use elements::{FadeStyle, Hud, HudCmd, HudInput, ScreenFade};
-use gui::{Action, Canvas, Element, Event, Rect, Resources, Sprite};
+use gui::{Action, Background, Canvas, Element, Event, Point, Rect, Resources,
+          Sprite};
 use save::{Access, Game, Location};
 
 // ========================================================================= //
@@ -30,44 +32,44 @@ const NODE_WIDTH: u32 = 24;
 const NODE_HEIGHT: u32 = 24;
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-const NODES: &[(Location, (i32, i32))] = &[
-    (Location::Prolog, (75, 100)),
-    (Location::ALightInTheAttic, (200, 50)),
-    (Location::BlackAndBlue, (225, 75)),
-    (Location::ColumnAsIcyEm, (350, 150)),
-    (Location::ConnectTheDots, (150, 150)),
-    (Location::CrossSauce, (225, 225)),
-    (Location::CrossTheLine, (125, 225)),
-    (Location::CubeTangle, (125, 280)),
-    (Location::Disconnected, (100, 150)),
-    (Location::DoubleCross, (175, 225)),
-    (Location::FactOrFiction, (150, 200)),
-    (Location::HexSpangled, (150, 310)),
-    (Location::IceToMeetYou, (350, 50)),
-    (Location::IfMemoryServes, (225, 280)),
-    (Location::JogYourMemory, (275, 280)),
-    (Location::LevelHeaded, (275, 125)),
-    (Location::LevelUp, (225, 125)),
-    (Location::LightSyrup, (250, 50)),
-    (Location::LogLevel, (125, 175)),
-    (Location::MemoryLane, (175, 280)),
-    (Location::MissedConnections, (200, 150)),
-    (Location::PasswordFile, (400, 200)),
-    (Location::PlaneAndSimple, (325, 225)),
-    (Location::PlaneAsDay, (375, 225)),
-    (Location::PointOfOrder, (300, 150)),
-    (Location::ShiftGears, (200, 250)),
-    (Location::ShiftTheBlame, (275, 75)),
-    (Location::ShiftingGround, (150, 250)),
-    (Location::StarCrossed, (275, 225)),
-    (Location::SystemFailure, (360, 200)),
-    (Location::SystemSyzygy, (440, 200)),
-    (Location::TheIceIsRight, (400, 50)),
-    (Location::TheYFactor, (100, 200)),
-    (Location::TreadLightly, (300, 50)),
-    (Location::VirtueOrIce, (450, 50)),
-    (Location::WhatchaColumn, (250, 150)),
-    (Location::WreckedAngle, (100, 250)),
+const NODES: &[(Location, (i32, i32), bool)] = &[
+    (Location::Prolog, (108, 160), false),
+    (Location::ALightInTheAttic, (224, 112), true),
+    (Location::BlackAndBlue, (416, 144), false),
+    (Location::ColumnAsIcyEm, (353, 210), false),
+    (Location::ConnectTheDots, (224, 48), false),
+    (Location::CrossSauce, (352, 48), false),
+    (Location::CrossTheLine, (176, 179), true),
+    (Location::CubeTangle, (304, 272), false),
+    (Location::Disconnected, (128, 224), false),
+    (Location::DoubleCross, (320, 48), false),
+    (Location::FactOrFiction, (208, 144), false),
+    (Location::HexSpangled, (336, 272), false),
+    (Location::IceToMeetYou, (353, 236), false),
+    (Location::IfMemoryServes, (432, 272), false),
+    (Location::JogYourMemory, (464, 272), false),
+    (Location::LevelHeaded, (192, 48), false),
+    (Location::LevelUp, (160, 48), false),
+    (Location::LightSyrup, (256, 112), false),
+    (Location::LogLevel, (160, 224), false),
+    (Location::MemoryLane, (400, 272), false),
+    (Location::MissedConnections, (256, 48), false),
+    (Location::PasswordFile, (224, 224), false),
+    (Location::PlaneAndSimple, (416, 48), false),
+    (Location::PlaneAsDay, (448, 48), false),
+    (Location::PointOfOrder, (288, 48), false),
+    (Location::ShiftGears, (128, 48), false),
+    (Location::ShiftTheBlame, (448, 144), false),
+    (Location::ShiftingGround, (272, 288), false),
+    (Location::StarCrossed, (384, 48), false),
+    (Location::SystemFailure, (192, 224), false),
+    (Location::SystemSyzygy, (208, 256), false),
+    (Location::TheIceIsRight, (383, 236), false),
+    (Location::TheYFactor, (176, 144), true),
+    (Location::TreadLightly, (288, 112), false),
+    (Location::VirtueOrIce, (383, 210), false),
+    (Location::WhatchaColumn, (64, 48), false),
+    (Location::WreckedAngle, (272, 256), true),
 ];
 
 // ========================================================================= //
@@ -84,6 +86,8 @@ pub enum Cmd {
 pub struct View {
     screen_fade: ScreenFade<Cmd>,
     hud: Hud,
+    background: Rc<Background>,
+    map_sprites: Vec<(Sprite, Point)>,
     nodes: Vec<PuzzleNode>,
     paths: Vec<Rect>,
     selected: Option<Location>,
@@ -91,12 +95,13 @@ pub struct View {
 
 impl View {
     pub fn new(resources: &mut Resources, visible: Rect, game: &Game) -> View {
-        let locations: HashMap<Location, (i32, i32)> = NODES.iter()
-                                                            .cloned()
-                                                            .collect();
+        let locations: HashMap<Location, (i32, i32)> =
+            NODES.iter()
+                 .map(|&(loc, pt, _)| (loc, pt))
+                 .collect();
         let mut nodes = Vec::new();
         let mut paths = Vec::new();
-        for &(location, (x, y)) in NODES {
+        for &(location, (x, y), invert) in NODES {
             if game.is_unlocked(location) {
                 let left = x - NODE_WIDTH as i32 / 2;
                 let top = y - NODE_HEIGHT as i32 / 2;
@@ -106,7 +111,7 @@ impl View {
                     if let Some(&(px, py)) = locations.get(prereq) {
                         let w = (px - x).abs() as u32;
                         let h = (py - y).abs() as u32;
-                        if w < h {
+                        if (w < h) ^ invert {
                             paths.push(Rect::new(min(x, px) - 2,
                                                  y - 2,
                                                  w + 4,
@@ -123,9 +128,29 @@ impl View {
                 }
             }
         }
+        let mut map_sprites = Vec::new();
+        {
+            let mut sprites = resources.get_sprites("map/icebox");
+            let is_open = game.is_unlocked(Location::IceToMeetYou) ||
+                          game.is_unlocked(Location::TheIceIsRight) ||
+                          game.is_unlocked(Location::VirtueOrIce) ||
+                          game.is_unlocked(Location::ColumnAsIcyEm);
+            let idx = if is_open { 1 } else { 0 };
+            map_sprites.push((sprites.swap_remove(idx), Point::new(336, 192)));
+        }
+        {
+            let sprites = resources.get_sprites("map/checkpoints");
+            map_sprites.push((sprites[0].clone(), Point::new(160, 160)));
+        }
+        if !game.is_unlocked(Location::SystemSyzygy) {
+            let sprites = resources.get_sprites("map/secret");
+            map_sprites.push((sprites[0].clone(), Point::new(160, 240)));
+        }
         View {
             screen_fade: ScreenFade::new(resources, FadeStyle::Radial),
             hud: Hud::new(resources, visible, Location::Map),
+            background: resources.get_background("map"),
+            map_sprites: map_sprites,
             nodes: nodes,
             paths: paths,
             selected: None,
@@ -147,9 +172,13 @@ impl View {
 
 impl Element<Game, Cmd> for View {
     fn draw(&self, _: &Game, canvas: &mut Canvas) {
-        canvas.clear((64, 128, 64));
+        canvas.clear(self.background.color());
+        canvas.draw_background(&self.background);
+        for &(ref sprite, point) in self.map_sprites.iter() {
+            canvas.draw_sprite(sprite, point);
+        }
         for &rect in &self.paths {
-            canvas.fill_rect((128, 0, 128), rect);
+            canvas.fill_rect((192, 128, 0), rect);
         }
         self.nodes.draw(&self.selected, canvas);
         self.hud.draw(&self.hud_input(), canvas);
@@ -208,7 +237,7 @@ impl PuzzleNode {
             0
         };
         PuzzleNode {
-            icon: resources.get_sprites("puzzle_nodes")[index].clone(),
+            icon: resources.get_sprites("map/nodes")[index].clone(),
             rect: rect,
             loc: location,
         }
@@ -263,7 +292,7 @@ mod tests {
         let mut locations: HashSet<Location> =
             Location::all().iter().cloned().collect();
         locations.remove(&Location::Map);
-        for &(loc, _) in NODES {
+        for &(loc, _, _) in NODES {
             locations.remove(&loc);
         }
         assert!(locations.is_empty(),

@@ -17,43 +17,39 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod access;
-mod color;
-pub mod column;
-mod crossword;
-mod data;
-pub mod device;
-mod direction;
-mod game;
-pub mod ice;
-mod location;
-pub mod memory;
-mod path;
-pub mod plane;
-mod prefs;
-mod puzzles;
-pub mod pyramid;
-pub mod util;
+use elements::{Ast, Scene, TalkPos, TalkStyle};
+use gui::{Resources, Sound};
 
-pub use self::access::Access;
-pub use self::color::{MixedColor, PrimaryColor};
-pub use self::crossword::{CrosswordState, ValidChars};
-pub use self::data::SaveData;
-pub use self::direction::Direction;
-pub use self::game::Game;
-pub use self::location::Location;
-pub use self::path::get_default_save_file_path;
-pub use self::prefs::Prefs;
-pub use self::puzzles::{AtticState, AutoState, BlackState, BlameState,
-                        CubeState, DayState, DisconState, DotsState,
-                        DoubleState, FailureState, FictionState, GearsState,
-                        GroundState, HeadedState, HexState, IcyEmState,
-                        JogState, LaneState, LevelUpState, LineState,
-                        LogLevelState, MeetState, MissedState, OrderState,
-                        PasswordState, PrologState, PuzzleState, RightState,
-                        SauceState, ServesState, SimpleState, StarState,
-                        SyrupState, SyzygyStage, SyzygyState, TheYState,
-                        TreadState, VirtueState, WhatchaState, WordDir,
-                        WreckedState};
+// ========================================================================= //
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::SetBg("autofac_tour"),
+            Ast::Wait(0.25),
+            Ast::Place(0, "chars/mezure", 0, (-16, 256)),
+            Ast::Slide(0, (100, 256), false, true, 0.75),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE, "Whoa.")
+        ]),
+    ];
+    Ast::compile_scene(resources, ast)
+}
+
+// ========================================================================= //
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::transform_final()),
+            Ast::Wait(2.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE, "That was easy!"),
+        ]),
+    ];
+    Ast::compile_scene(resources, ast)
+}
 
 // ========================================================================= //

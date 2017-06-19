@@ -17,12 +17,9 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use std::cmp::{max, min};
-use std::rc::Rc;
-
 use elements::{PuzzleCmd, PuzzleCore, PuzzleView};
-use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
-          Sound, Sprite};
+use elements::factor::{LettersView, TransformButton};
+use gui::{Action, Canvas, Element, Event, Rect, Resources, Sound};
 use modes::SOLVED_INFO_TEXT;
 use save::{Game, PuzzleState, TheYState};
 use super::scenes;
@@ -44,15 +41,17 @@ impl View {
         let intro = scenes::compile_intro_scene(resources);
         let outro = scenes::compile_outro_scene(resources);
         let core = PuzzleCore::new(resources, visible, state, intro, outro);
+        let buttons = resources.get_sprites("factor/they");
+        let seq = state.sequence();
         View {
             core: core,
-            buttons: vec![TransformButton::new(resources, state, 0),
-                          TransformButton::new(resources, state, 1),
-                          TransformButton::new(resources, state, 2),
-                          TransformButton::new(resources, state, 3),
-                          TransformButton::new(resources, state, 4),
-                          TransformButton::new(resources, state, 5)],
-            letters: LettersView::new(resources, state),
+            buttons: vec![TransformButton::new(&buttons, 0, seq, 128, 48),
+                          TransformButton::new(&buttons, 1, seq, 208, 48),
+                          TransformButton::new(&buttons, 2, seq, 288, 48),
+                          TransformButton::new(&buttons, 3, seq, 128, 96),
+                          TransformButton::new(&buttons, 4, seq, 208, 96),
+                          TransformButton::new(&buttons, 5, seq, 288, 96)],
+            letters: LettersView::new(resources, state.letters(), 344, 206),
             retry_countdown: 0,
         }
     }
@@ -62,8 +61,8 @@ impl Element<Game, PuzzleCmd> for View {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
         let state = &game.the_y_factor;
         self.core.draw_back_layer(canvas);
-        self.buttons.draw(state, canvas);
-        self.letters.draw(state, canvas);
+        self.buttons.draw(state.sequence(), canvas);
+        self.letters.draw(state.letters(), canvas);
         self.core.draw_middle_layer(canvas);
         self.core.draw_front_layer(canvas, state);
     }
@@ -76,22 +75,26 @@ impl Element<Game, PuzzleCmd> for View {
             self.retry_countdown -= 1;
             if self.retry_countdown == 0 {
                 state.set_sequence(Vec::new());
-                self.letters.reset(state);
+                self.letters.reset(state.letters());
                 action.also_play_sound(Sound::talk_annoyed_hi());
                 action.also_redraw();
             }
         }
         if !action.should_stop() {
-            action.merge(self.letters.handle_event(event, state));
+            let mut letters = state.letters().clone();
+            action.merge(self.letters
+                             .handle_event(event, &mut letters)
+                             .but_no_value());
         }
         if !action.should_stop() {
-            let subaction = self.buttons.handle_event(event, state);
+            let mut sequence = state.sequence().clone();
+            let subaction = self.buttons.handle_event(event, &mut sequence);
             if let Some(&index) = subaction.value() {
                 state.append(index);
                 if index == 5 {
                     self.letters.hilight_halves();
                 } else {
-                    self.letters.hilight_changed_letters(state);
+                    self.letters.hilight_changed_letters(state.letters());
                 }
                 if state.is_solved() {
                     self.core.begin_outro_scene();
@@ -124,7 +127,7 @@ impl PuzzleView for View {
             seq.pop();
             let state = &mut game.the_y_factor;
             state.set_sequence(seq);
-            self.letters.reset(state);
+            self.letters.reset(state.letters());
             self.retry_countdown = 0;
         }
     }
@@ -133,7 +136,7 @@ impl PuzzleView for View {
         if let Some(seq) = self.core.pop_redo() {
             let state = &mut game.the_y_factor;
             state.set_sequence(seq);
-            self.letters.reset(state);
+            self.letters.reset(state.letters());
             self.retry_countdown = if state.sequence().len() == 6 {
                 RETRY_DELAY
             } else {
@@ -146,14 +149,14 @@ impl PuzzleView for View {
         self.core.clear_undo_redo();
         let state = &mut game.the_y_factor;
         state.reset();
-        self.letters.reset(state);
+        self.letters.reset(state.letters());
         self.retry_countdown = 0;
     }
 
     fn solve(&mut self, game: &mut Game) {
         let state = &mut game.the_y_factor;
         state.solve();
-        self.letters.reset(state);
+        self.letters.reset(state.letters());
         self.retry_countdown = 0;
         self.core.begin_outro_scene();
     }
@@ -161,154 +164,6 @@ impl PuzzleView for View {
     fn drain_queue(&mut self) {
         for (_, _) in self.core.drain_queue() {
             // TODO: drain queue
-        }
-    }
-}
-
-// ========================================================================= //
-
-const ANIM_MIN: i32 = 0;
-const ANIM_MAX: i32 = 16;
-const ANIM_STEP: i32 = 6;
-
-struct TransformButton {
-    sprites: Vec<Sprite>,
-    index: i8,
-    anim: i32,
-}
-
-impl TransformButton {
-    fn new(resources: &mut Resources, state: &TheYState, index: i8)
-           -> TransformButton {
-        TransformButton {
-            sprites: resources.get_sprites("factor/they"),
-            index: index,
-            anim: if state.has_used(index) {
-                ANIM_MAX
-            } else {
-                ANIM_MIN
-            },
-        }
-    }
-
-    fn rect(&self) -> Rect {
-        let index = self.index as i32;
-        Rect::new(128 + 80 * (index % 3), 48 + 48 * (index / 3), 64, 32)
-    }
-}
-
-impl Element<TheYState, i8> for TransformButton {
-    fn draw(&self, _state: &TheYState, canvas: &mut Canvas) {
-        if self.anim < ANIM_MAX {
-            let rect = self.rect();
-            let rect = Rect::new(rect.x(),
-                                 rect.y() + self.anim,
-                                 rect.width(),
-                                 rect.height() - 2 * self.anim as u32);
-            let mut canvas = canvas.subcanvas(rect);
-            canvas.draw_sprite(&self.sprites[self.index as usize],
-                               Point::new(0, -self.anim));
-        }
-    }
-
-    fn handle_event(&mut self, event: &Event, state: &mut TheYState)
-                    -> Action<i8> {
-        match event {
-            &Event::ClockTick => {
-                if state.has_used(self.index) {
-                    if self.anim < ANIM_MAX {
-                        self.anim = min(ANIM_MAX, self.anim + ANIM_STEP);
-                        return Action::redraw();
-                    }
-                } else {
-                    if self.anim > ANIM_MIN {
-                        self.anim = max(ANIM_MIN, self.anim - ANIM_STEP);
-                        return Action::redraw();
-                    }
-                }
-                Action::ignore()
-            }
-            &Event::MouseDown(pt) if self.rect().contains(pt) &&
-                                     !state.has_used(self.index) => {
-                Action::redraw().and_return(self.index)
-            }
-            _ => Action::ignore(),
-        }
-    }
-}
-
-// ========================================================================= //
-
-const HILIGHT_FRAMES: i32 = 7;
-
-struct LettersView {
-    font: Rc<Font>,
-    letters: Vec<char>,
-    hilights: Vec<Rect>,
-    countdown: i32,
-}
-
-impl LettersView {
-    fn new(resources: &mut Resources, state: &TheYState) -> LettersView {
-        LettersView {
-            font: resources.get_font("block"),
-            letters: state.letters().clone(),
-            hilights: Vec::new(),
-            countdown: 0,
-        }
-    }
-
-    fn hilight_changed_letters(&mut self, state: &TheYState) {
-        self.hilights.clear();
-        for (position, &letter) in state.letters().iter().enumerate() {
-            if self.letters[position] != letter {
-                let rect = Rect::new(221 + 32 * position as i32, 195, 22, 22);
-                self.hilights.push(rect);
-            }
-        }
-        self.countdown = HILIGHT_FRAMES;
-    }
-
-    fn hilight_halves(&mut self) {
-        self.hilights.clear();
-        self.hilights.push(Rect::new(221, 195, 118, 22));
-        self.hilights.push(Rect::new(349, 195, 118, 22));
-        self.countdown = HILIGHT_FRAMES;
-    }
-
-    fn reset(&mut self, state: &TheYState) {
-        self.letters = state.letters().clone();
-        self.hilights.clear();
-        self.countdown = 0;
-    }
-}
-
-impl Element<TheYState, PuzzleCmd> for LettersView {
-    fn draw(&self, _state: &TheYState, canvas: &mut Canvas) {
-        for &hilight in &self.hilights {
-            canvas.fill_rect((255, 255, 191), hilight);
-        }
-        for (position, &letter) in self.letters.iter().enumerate() {
-            let pt = Point::new(232 + 32 * position as i32, 215);
-            canvas.draw_char(&self.font, Align::Center, pt, letter);
-        }
-    }
-
-    fn handle_event(&mut self, event: &Event, state: &mut TheYState)
-                    -> Action<PuzzleCmd> {
-        match event {
-            &Event::ClockTick => {
-                if self.countdown > 0 {
-                    self.countdown -= 1;
-                    if self.countdown == 0 {
-                        self.hilights.clear();
-                        self.letters = state.letters().clone();
-                        return Action::redraw();
-                    }
-                }
-                Action::ignore()
-            }
-            _ => Action::ignore(),
         }
     }
 }

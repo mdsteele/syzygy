@@ -35,6 +35,7 @@ const NODE_HEIGHT: u32 = 24;
 const NODES: &[(Location, (i32, i32), bool)] = &[
     (Location::Prolog, (108, 160), false),
     (Location::ALightInTheAttic, (224, 112), true),
+    (Location::AutofacTour, (240, 144), false),
     (Location::BlackAndBlue, (416, 144), false),
     (Location::ColumnAsIcyEm, (353, 210), false),
     (Location::ConnectTheDots, (224, 48), false),

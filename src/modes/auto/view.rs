@@ -21,7 +21,7 @@ use elements::{PuzzleCmd, PuzzleCore, PuzzleView};
 use elements::factor::{LettersView, TransformButton};
 use gui::{Action, Canvas, Element, Event, Rect, Resources, Sound};
 use modes::SOLVED_INFO_TEXT;
-use save::{FictionState, Game, PuzzleState};
+use save::{AutoState, Game, PuzzleState};
 use super::scenes;
 
 // ========================================================================= //
@@ -36,23 +36,21 @@ pub struct View {
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect,
-               state: &FictionState)
+    pub fn new(resources: &mut Resources, visible: Rect, state: &AutoState)
                -> View {
         let intro = scenes::compile_intro_scene(resources);
         let outro = scenes::compile_outro_scene(resources);
         let core = PuzzleCore::new(resources, visible, state, intro, outro);
-        let buttons = resources.get_sprites("factor/fiction");
+        let buttons = resources.get_sprites("factor/auto");
         let seq = state.sequence();
         View {
             core: core,
-            buttons: vec![TransformButton::new(&buttons, 0, seq, 96, 192),
-                          TransformButton::new(&buttons, 1, seq, 432, 192),
-                          TransformButton::new(&buttons, 2, seq, 96, 240),
-                          TransformButton::new(&buttons, 3, seq, 432, 240),
-                          TransformButton::new(&buttons, 4, seq, 96, 288),
-                          TransformButton::new(&buttons, 5, seq, 432, 288)],
-            letters: LettersView::new(resources, state.letters(), 296, 256),
+            buttons: vec![TransformButton::new(&buttons, 0, seq, 96, 272),
+                          TransformButton::new(&buttons, 1, seq, 176, 272),
+                          TransformButton::new(&buttons, 2, seq, 256, 272),
+                          TransformButton::new(&buttons, 3, seq, 336, 272),
+                          TransformButton::new(&buttons, 4, seq, 416, 272)],
+            letters: LettersView::new(resources, state.letters(), 288, 136),
             retry_countdown: 0,
         }
     }
@@ -60,7 +58,7 @@ impl View {
 
 impl Element<Game, PuzzleCmd> for View {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
-        let state = &game.fact_or_fiction;
+        let state = &game.autofac_tour;
         self.core.draw_back_layer(canvas);
         self.buttons.draw(state.sequence(), canvas);
         self.letters.draw(state.letters(), canvas);
@@ -70,7 +68,7 @@ impl Element<Game, PuzzleCmd> for View {
 
     fn handle_event(&mut self, event: &Event, game: &mut Game)
                     -> Action<PuzzleCmd> {
-        let state = &mut game.fact_or_fiction;
+        let state = &mut game.autofac_tour;
         let mut action = self.core.handle_event(event, state);
         if event == &Event::ClockTick && self.retry_countdown > 0 {
             self.retry_countdown -= 1;
@@ -93,10 +91,8 @@ impl Element<Game, PuzzleCmd> for View {
             if let Some(&index) = subaction.value() {
                 state.append(index);
                 match index {
-                    0 => self.letters.hilight_full(),
-                    1 => self.letters.hilight_halves(),
-                    3 => self.letters.hilight_positions(&[2]),
-                    5 => self.letters.hilight_all(),
+                    2 => self.letters.hilight_positions(&[4]),
+                    4 => self.letters.hilight_positions(&[5]),
                     _ => self.letters.hilight_changed_letters(state.letters()),
                 }
                 if state.is_solved() {
@@ -105,7 +101,7 @@ impl Element<Game, PuzzleCmd> for View {
                     self.core.push_undo(state.sequence().clone());
                     let sound = Sound::transform_step(state.sequence().len());
                     action.also_play_sound(sound);
-                    if state.sequence().len() == 6 {
+                    if state.sequence().len() == 5 {
                         self.retry_countdown = RETRY_DELAY;
                     }
                 }
@@ -118,7 +114,7 @@ impl Element<Game, PuzzleCmd> for View {
 
 impl PuzzleView for View {
     fn info_text(&self, game: &Game) -> &'static str {
-        if game.fact_or_fiction.is_solved() {
+        if game.autofac_tour.is_solved() {
             SOLVED_INFO_TEXT
         } else {
             INFO_BOX_TEXT
@@ -128,7 +124,7 @@ impl PuzzleView for View {
     fn undo(&mut self, game: &mut Game) {
         if let Some(mut seq) = self.core.pop_undo() {
             seq.pop();
-            let state = &mut game.fact_or_fiction;
+            let state = &mut game.autofac_tour;
             state.set_sequence(seq);
             self.letters.reset(state.letters());
             self.retry_countdown = 0;
@@ -137,10 +133,10 @@ impl PuzzleView for View {
 
     fn redo(&mut self, game: &mut Game) {
         if let Some(seq) = self.core.pop_redo() {
-            let state = &mut game.fact_or_fiction;
+            let state = &mut game.autofac_tour;
             state.set_sequence(seq);
             self.letters.reset(state.letters());
-            self.retry_countdown = if state.sequence().len() == 6 {
+            self.retry_countdown = if state.sequence().len() == 5 {
                 RETRY_DELAY
             } else {
                 0
@@ -150,14 +146,14 @@ impl PuzzleView for View {
 
     fn reset(&mut self, game: &mut Game) {
         self.core.clear_undo_redo();
-        let state = &mut game.fact_or_fiction;
+        let state = &mut game.autofac_tour;
         state.reset();
         self.letters.reset(state.letters());
         self.retry_countdown = 0;
     }
 
     fn solve(&mut self, game: &mut Game) {
-        let state = &mut game.fact_or_fiction;
+        let state = &mut game.autofac_tour;
         state.solve();
         self.letters.reset(state.letters());
         self.retry_countdown = 0;
@@ -177,7 +173,7 @@ const INFO_BOX_TEXT: &str = "\
 Your goal is to transform the starting word into a new word.
 There is only one possible new word that can be formed.
 
-$M{Tap}{Click} on one of the six buttons at the top to transform the
+$M{Tap}{Click} on one of the five buttons at the top to transform the
 word.  Each button performs a different transformation.";
 
 // ========================================================================= //

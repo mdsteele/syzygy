@@ -19,7 +19,7 @@
 
 use toml;
 
-use save::{AtticState, BlackState, BlameState, CubeState, DayState,
+use save::{AtticState, AutoState, BlackState, BlameState, CubeState, DayState,
            DisconState, DotsState, DoubleState, FailureState, FictionState,
            GearsState, GroundState, HeadedState, HexState, IcyEmState,
            JogState, LaneState, LevelUpState, LineState, Location,
@@ -40,6 +40,7 @@ pub struct Game {
     pub location: Location,
     pub prolog: PrologState,
     pub a_light_in_the_attic: AtticState,
+    pub autofac_tour: AutoState,
     pub black_and_blue: BlackState,
     pub column_as_icy_em: IcyEmState,
     pub connect_the_dots: DotsState,
@@ -94,6 +95,8 @@ impl Game {
                 pop_table(table_ref, Location::Prolog.key())),
             a_light_in_the_attic: AtticState::from_toml(
                 pop_table(table_ref, Location::ALightInTheAttic.key())),
+            autofac_tour: AutoState::from_toml(
+                pop_table(table_ref, Location::AutofacTour.key())),
             black_and_blue: BlackState::from_toml(
                 pop_table(table_ref, Location::BlackAndBlue.key())),
             column_as_icy_em: IcyEmState::from_toml(
@@ -200,6 +203,7 @@ impl Game {
             Location::Map => panic!("no PuzzleState for Map"),
             Location::Prolog => &self.prolog,
             Location::ALightInTheAttic => &self.a_light_in_the_attic,
+            Location::AutofacTour => &self.autofac_tour,
             Location::BlackAndBlue => &self.black_and_blue,
             Location::ColumnAsIcyEm => &self.column_as_icy_em,
             Location::ConnectTheDots => &self.connect_the_dots,
@@ -243,6 +247,7 @@ impl Game {
             Location::Map => panic!("no PuzzleState for Map"),
             Location::Prolog => &mut self.prolog,
             Location::ALightInTheAttic => &mut self.a_light_in_the_attic,
+            Location::AutofacTour => &mut self.autofac_tour,
             Location::BlackAndBlue => &mut self.black_and_blue,
             Location::ColumnAsIcyEm => &mut self.column_as_icy_em,
             Location::ConnectTheDots => &mut self.connect_the_dots,

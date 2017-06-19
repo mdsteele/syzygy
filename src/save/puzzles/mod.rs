@@ -18,6 +18,7 @@
 // +--------------------------------------------------------------------------+
 
 mod attic;
+mod auto;
 mod black;
 mod blame;
 mod cube;
@@ -57,6 +58,7 @@ mod whatcha;
 mod wrecked;
 
 pub use self::attic::AtticState;
+pub use self::auto::AutoState;
 pub use self::black::BlackState;
 pub use self::blame::BlameState;
 pub use self::cube::CubeState;

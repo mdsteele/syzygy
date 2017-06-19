@@ -21,6 +21,7 @@ pub mod column;
 mod crossword;
 pub mod cutscene;
 mod dialog;
+pub mod factor;
 mod fade;
 mod hud;
 pub mod ice;

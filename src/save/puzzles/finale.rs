@@ -17,43 +17,44 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod access;
-mod color;
-pub mod column;
-mod crossword;
-mod data;
-pub mod device;
-mod direction;
-mod game;
-pub mod ice;
-mod location;
-pub mod memory;
-mod path;
-pub mod plane;
-mod prefs;
-mod puzzles;
-pub mod pyramid;
-pub mod util;
+use toml;
 
-pub use self::access::Access;
-pub use self::color::{MixedColor, PrimaryColor};
-pub use self::crossword::{CrosswordState, ValidChars};
-pub use self::data::SaveData;
-pub use self::direction::Direction;
-pub use self::game::Game;
-pub use self::location::Location;
-pub use self::path::get_default_save_file_path;
-pub use self::prefs::Prefs;
-pub use self::puzzles::{AtticState, AutoState, BlackState, BlameState,
-                        CubeState, DayState, DisconState, DotsState,
-                        DoubleState, FailureState, FictionState, FinaleState,
-                        GearsState, GroundState, HeadedState, HexState,
-                        IcyEmState, JogState, LaneState, LevelUpState,
-                        LineState, LogLevelState, MeetState, MissedState,
-                        OrderState, PasswordState, PrologState, PuzzleState,
-                        RightState, SauceState, ServesState, SimpleState,
-                        StarState, SyrupState, SyzygyStage, SyzygyState,
-                        TheYState, TreadState, VirtueState, WhatchaState,
-                        WordDir, WreckedState};
+use save::{Access, Location};
+use super::PuzzleState;
+use super::super::util::ACCESS_KEY;
+
+// ========================================================================= //
+
+pub struct FinaleState {
+    access: Access,
+}
+
+impl FinaleState {
+    pub fn from_toml(table: toml::value::Table) -> FinaleState {
+        FinaleState { access: Access::from_toml(table.get(ACCESS_KEY)) }
+    }
+}
+
+impl PuzzleState for FinaleState {
+    fn location(&self) -> Location { Location::Finale }
+
+    fn access(&self) -> Access { self.access }
+
+    fn access_mut(&mut self) -> &mut Access { &mut self.access }
+
+    // This is called when the intro scene finishes.  Instead of marking the
+    // puzzle visited like normal, for the Finale we just mark it solved.
+    fn visit(&mut self) { self.access = Access::Solved; }
+
+    fn can_reset(&self) -> bool { false }
+
+    fn reset(&mut self) {}
+
+    fn to_toml(&self) -> toml::Value {
+        let mut table = toml::value::Table::new();
+        table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
+        toml::Value::Table(table)
+    }
+}
 
 // ========================================================================= //

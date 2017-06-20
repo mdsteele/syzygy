@@ -853,6 +853,7 @@ mod tests {
         locations.remove(&Location::SystemFailure);
         locations.remove(&Location::PasswordFile);
         locations.remove(&Location::SystemSyzygy);
+        locations.remove(&Location::Finale);
         for &(_, _, loc) in DASHBOARD_CHIPS {
             locations.remove(&loc);
         }

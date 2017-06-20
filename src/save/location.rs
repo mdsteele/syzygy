@@ -63,6 +63,7 @@ pub enum Location {
     VirtueOrIce,
     WhatchaColumn,
     WreckedAngle,
+    Finale,
 }
 
 impl Location {
@@ -109,6 +110,7 @@ impl Location {
             Location::VirtueOrIce => "Virtue or Ice",
             Location::WhatchaColumn => "Whatcha Column",
             Location::WreckedAngle => "Wrecked Angle",
+            Location::Finale => "Finale",
         }
     }
 
@@ -146,13 +148,14 @@ impl Location {
             Location::ShiftingGround => Location::CubeTangle,
             Location::StarCrossed => Location::Map,
             Location::SystemFailure => Location::PasswordFile,
-            Location::SystemSyzygy => Location::Map,
+            Location::SystemSyzygy => Location::Finale,
             Location::TheIceIsRight => Location::VirtueOrIce,
             Location::TheYFactor => Location::FactOrFiction,
             Location::TreadLightly => Location::IceToMeetYou,
             Location::VirtueOrIce => Location::Map,
             Location::WhatchaColumn => Location::PointOfOrder,
             Location::WreckedAngle => Location::ShiftingGround,
+            Location::Finale => Location::Map,
         }
     }
 
@@ -197,6 +200,7 @@ impl Location {
             Location::VirtueOrIce => vec![Location::TheIceIsRight],
             Location::WhatchaColumn => vec![],
             Location::WreckedAngle => vec![Location::Prolog],
+            Location::Finale => vec![Location::SystemSyzygy],
         }
     }
 
@@ -241,6 +245,7 @@ impl Location {
             Location::VirtueOrIce => "virtue_or_ice",
             Location::WhatchaColumn => "whatcha_column",
             Location::WreckedAngle => "wrecked_angle",
+            Location::Finale => "finale",
         }
     }
 
@@ -302,7 +307,8 @@ const ALL_LOCATIONS: &[Location] = &[Location::Map,
                                      Location::TreadLightly,
                                      Location::VirtueOrIce,
                                      Location::WhatchaColumn,
-                                     Location::WreckedAngle];
+                                     Location::WreckedAngle,
+                                     Location::Finale];
 
 // ========================================================================= //
 

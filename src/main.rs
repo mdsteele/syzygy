@@ -262,6 +262,9 @@ fn main() {
                         Location::WreckedAngle => {
                             modes::run_wrecked_angle(&mut window, game)
                         }
+                        Location::Finale => {
+                            modes::run_finale(&mut window, game)
+                        }
                     }
                 } else {
                     if cfg!(debug_assertions) {

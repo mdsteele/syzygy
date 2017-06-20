@@ -71,6 +71,7 @@ const NODES: &[(Location, (i32, i32), bool)] = &[
     (Location::VirtueOrIce, (383, 210), false),
     (Location::WhatchaColumn, (64, 48), false),
     (Location::WreckedAngle, (272, 256), true),
+    (Location::Finale, (176, 256), false),
 ];
 
 // ========================================================================= //

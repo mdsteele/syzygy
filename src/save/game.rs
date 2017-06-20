@@ -21,8 +21,8 @@ use toml;
 
 use save::{AtticState, AutoState, BlackState, BlameState, CubeState, DayState,
            DisconState, DotsState, DoubleState, FailureState, FictionState,
-           GearsState, GroundState, HeadedState, HexState, IcyEmState,
-           JogState, LaneState, LevelUpState, LineState, Location,
+           FinaleState, GearsState, GroundState, HeadedState, HexState,
+           IcyEmState, JogState, LaneState, LevelUpState, LineState, Location,
            LogLevelState, MeetState, MissedState, OrderState, PasswordState,
            PrologState, PuzzleState, RightState, SauceState, ServesState,
            SimpleState, StarState, SyrupState, SyzygyState, TheYState,
@@ -76,6 +76,7 @@ pub struct Game {
     pub virtue_or_ice: VirtueState,
     pub whatcha_column: WhatchaState,
     pub wrecked_angle: WreckedState,
+    pub finale: FinaleState,
     pub ever_clicked_info: bool,
 }
 
@@ -167,6 +168,8 @@ impl Game {
                 pop_table(table_ref, Location::WhatchaColumn.key())),
             wrecked_angle: WreckedState::from_toml(
                 pop_table(table_ref, Location::WreckedAngle.key())),
+            finale: FinaleState::from_toml(
+                pop_table(table_ref, Location::Finale.key())),
             ever_clicked_info: table_ref.get(EVER_CLICKED_INFO_KEY)
                                         .and_then(toml::Value::as_bool)
                                         .unwrap_or(false),
@@ -239,6 +242,7 @@ impl Game {
             Location::VirtueOrIce => &self.virtue_or_ice,
             Location::WhatchaColumn => &self.whatcha_column,
             Location::WreckedAngle => &self.wrecked_angle,
+            Location::Finale => &self.finale,
         }
     }
 
@@ -283,6 +287,7 @@ impl Game {
             Location::VirtueOrIce => &mut self.virtue_or_ice,
             Location::WhatchaColumn => &mut self.whatcha_column,
             Location::WreckedAngle => &mut self.wrecked_angle,
+            Location::Finale => &mut self.finale,
         }
     }
 }

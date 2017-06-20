@@ -18,6 +18,7 @@
 // +--------------------------------------------------------------------------+
 
 use std::char;
+use std::collections::HashSet;
 use toml;
 
 use save::{Access, Location};
@@ -46,12 +47,18 @@ impl FictionState {
         let sequence = if access.is_solved() {
             SOLVED_SEQUENCE.iter().cloned().collect()
         } else {
-            pop_array(&mut table, SEQUENCE_KEY)
+            let seq: Vec<i8> = pop_array(&mut table, SEQUENCE_KEY)
                 .iter()
                 .filter_map(toml::Value::as_integer)
                 .filter(|&idx| 0 <= idx && idx < 6)
                 .map(|idx| idx as i8)
-                .collect()
+                .collect();
+            let unique: HashSet<i8> = seq.iter().cloned().collect();
+            if unique.len() != seq.len() {
+                Vec::new()
+            } else {
+                seq
+            }
         };
         let mut state = FictionState {
             access: access,
@@ -167,6 +174,110 @@ fn apply_transformation(letters: &mut Vec<char>, index: i8) {
             letters[6] = old[1];
         }
         _ => panic!("bad transformation index: {}", index),
+    }
+}
+
+// ========================================================================= //
+
+#[cfg(test)]
+mod tests {
+    use toml;
+
+    use save::{Access, PuzzleState};
+    use save::util::{ACCESS_KEY, to_table};
+    use super::{FictionState, INITIAL_LETTERS, SEQUENCE_KEY, SOLVED_LETTERS,
+                SOLVED_SEQUENCE, apply_transformation};
+
+    #[test]
+    fn transform_letters() {
+        let mut letters = "AWESOME".chars().collect::<Vec<char>>();
+        apply_transformation(&mut letters, 0);
+        assert_eq!(letters, "AEEMOSW".chars().collect::<Vec<char>>());
+
+        let mut letters = "AWESOME".chars().collect::<Vec<char>>();
+        apply_transformation(&mut letters, 1);
+        assert_eq!(letters, "AEWSEMO".chars().collect::<Vec<char>>());
+
+        let mut letters = "AWESOME".chars().collect::<Vec<char>>();
+        apply_transformation(&mut letters, 2);
+        assert_eq!(letters, "HHESOME".chars().collect::<Vec<char>>());
+
+        let mut letters = "AWESOME".chars().collect::<Vec<char>>();
+        apply_transformation(&mut letters, 3);
+        assert_eq!(letters, "AWRSOME".chars().collect::<Vec<char>>());
+
+        let mut letters = "AWESOME".chars().collect::<Vec<char>>();
+        apply_transformation(&mut letters, 4);
+        assert_eq!(letters, "DWESOMH".chars().collect::<Vec<char>>());
+
+        let mut letters = "AWESOME".chars().collect::<Vec<char>>();
+        apply_transformation(&mut letters, 5);
+        assert_eq!(letters, "EAOMESW".chars().collect::<Vec<char>>());
+    }
+
+    #[test]
+    fn toml_round_trip() {
+        let mut state = FictionState::from_toml(toml::value::Table::new());
+        state.access = Access::Replaying;
+        state.append(3);
+        state.append(1);
+        state.append(4);
+        let letters = state.letters.clone();
+
+        let state = FictionState::from_toml(to_table(state.to_toml()));
+        assert_eq!(state.access, Access::Replaying);
+        assert_eq!(state.sequence, vec![3, 1, 4]);
+        assert_eq!(letters, state.letters);
+    }
+
+    #[test]
+    fn from_empty_toml() {
+        let state = FictionState::from_toml(toml::value::Table::new());
+        assert_eq!(state.access, Access::Unvisited);
+        assert_eq!(state.sequence, vec![]);
+        assert_eq!(state.letters, INITIAL_LETTERS.to_vec());
+    }
+
+    #[test]
+    fn from_solved_toml() {
+        let mut table = toml::value::Table::new();
+        table.insert(ACCESS_KEY.to_string(), Access::Solved.to_toml());
+
+        let state = FictionState::from_toml(table);
+        assert_eq!(state.access, Access::Solved);
+        assert_eq!(state.sequence, SOLVED_SEQUENCE.to_vec());
+        assert_eq!(state.letters, SOLVED_LETTERS.to_vec());
+    }
+
+    #[test]
+    fn from_valid_sequence_toml() {
+        let mut table = toml::value::Table::new();
+        table.insert(SEQUENCE_KEY.to_string(),
+                     toml::Value::Array(vec![toml::Value::Integer(1),
+                                             toml::Value::Integer(2),
+                                             toml::Value::Integer(3)]));
+        let state = FictionState::from_toml(table);
+        assert_eq!(state.sequence, vec![1, 2, 3]);
+    }
+
+    #[test]
+    fn from_invalid_repeat_sequence_toml() {
+        let mut table = toml::value::Table::new();
+        table.insert(SEQUENCE_KEY.to_string(),
+                     toml::Value::Array(vec![toml::Value::Integer(1); 2]));
+        let state = FictionState::from_toml(table);
+        assert_eq!(state.sequence, vec![]);
+        assert_eq!(state.letters, INITIAL_LETTERS.to_vec());
+    }
+
+    #[test]
+    fn from_invalid_index_sequence_toml() {
+        let mut table = toml::value::Table::new();
+        table.insert(SEQUENCE_KEY.to_string(),
+                     toml::Value::Array(vec![toml::Value::Integer(6)]));
+        let state = FictionState::from_toml(table);
+        assert_eq!(state.sequence, vec![]);
+        assert_eq!(state.letters, INITIAL_LETTERS.to_vec());
     }
 }
 

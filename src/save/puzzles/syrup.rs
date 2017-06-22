@@ -75,6 +75,7 @@ impl SyrupState {
             state.solve();
         } else {
             state.rebuild_grids();
+            state.check_if_solved();
         }
         state
     }
@@ -100,11 +101,7 @@ impl SyrupState {
             PrimaryColor::Green => PrimaryColor::Blue,
             PrimaryColor::Blue => PrimaryColor::Red,
         };
-        if self.red_grid.iter().all(|&r| r) &&
-           self.green_grid.iter().all(|&g| g) &&
-           self.blue_grid.iter().all(|&b| b) {
-            self.access = Access::Solved;
-        }
+        self.check_if_solved();
     }
 
     pub fn untoggle(&mut self, pos: (i32, i32)) {
@@ -157,6 +154,14 @@ impl SyrupState {
         rebuild_grid(&mut self.blue_grid,
                      &self.blue_toggled,
                      INITIAL_BLUE_GRID);
+    }
+
+    fn check_if_solved(&mut self) {
+        if self.red_grid.iter().all(|&r| r) &&
+           self.green_grid.iter().all(|&g| g) &&
+           self.blue_grid.iter().all(|&b| b) {
+            self.access = Access::Solved;
+        }
     }
 }
 
@@ -272,13 +277,125 @@ fn pop_toggled(mut table: &mut toml::value::Table, key: &str)
 
 #[cfg(test)]
 mod tests {
-    use super::{index_to_pos, pos_to_index};
+    use toml;
+
+    use save::{Access, PrimaryColor, PuzzleState};
+    use save::util::{ACCESS_KEY, to_table};
+    use super::{BLUE_TOGGLED_KEY, GREEN_TOGGLED_KEY, INITIAL_BLUE_GRID,
+                INITIAL_GREEN_GRID, INITIAL_RED_GRID, RED_TOGGLED_KEY,
+                SOLVED_BLUE_TOGGLED, SOLVED_GREEN_TOGGLED, SOLVED_RED_TOGGLED,
+                SyrupState, index_to_pos, pos_to_index};
 
     #[test]
     fn index_to_pos_to_index() {
         for index in 0..21 {
             assert_eq!(Some(index), pos_to_index(index_to_pos(index)));
         }
+    }
+
+    #[test]
+    fn toml_round_trip() {
+        let mut state = SyrupState::from_toml(toml::value::Table::new());
+        state.toggle((1, 1));
+        state.toggle((2, 2));
+        state.toggle((3, 3));
+        state.toggle((3, 2));
+        assert_eq!(state.next_color, PrimaryColor::Green);
+        let red_grid = state.red_grid.clone();
+        let green_grid = state.green_grid.clone();
+        let blue_grid = state.blue_grid.clone();
+
+        let state = SyrupState::from_toml(to_table(state.to_toml()));
+        assert_eq!(state.next_color, PrimaryColor::Green);
+        assert_eq!(state.red_toggled,
+                   vec![pos_to_index((1, 1)).unwrap(),
+                        pos_to_index((3, 2)).unwrap()]
+                       .into_iter()
+                       .collect());
+        assert_eq!(state.green_toggled,
+                   vec![pos_to_index((2, 2)).unwrap()].into_iter().collect());
+        assert_eq!(state.blue_toggled,
+                   vec![pos_to_index((3, 3)).unwrap()].into_iter().collect());
+        assert_eq!(state.red_grid, red_grid);
+        assert_eq!(state.green_grid, green_grid);
+        assert_eq!(state.blue_grid, blue_grid);
+    }
+
+    #[test]
+    fn from_empty_toml() {
+        let state = SyrupState::from_toml(toml::value::Table::new());
+        assert_eq!(state.access, Access::Unvisited);
+        assert_eq!(state.next_color, PrimaryColor::Red);
+        assert!(state.red_toggled.is_empty());
+        assert!(state.green_toggled.is_empty());
+        assert!(state.blue_toggled.is_empty());
+        assert_eq!(state.red_grid, INITIAL_RED_GRID.to_vec());
+        assert_eq!(state.green_grid, INITIAL_GREEN_GRID.to_vec());
+        assert_eq!(state.blue_grid, INITIAL_BLUE_GRID.to_vec());
+    }
+
+    #[test]
+    fn from_solved_toml() {
+        let mut table = toml::value::Table::new();
+        table.insert(ACCESS_KEY.to_string(), Access::Solved.to_toml());
+
+        let state = SyrupState::from_toml(table);
+        assert_eq!(state.access, Access::Solved);
+        assert_eq!(state.next_color, PrimaryColor::Red);
+        assert_eq!(state.red_toggled,
+                   SOLVED_RED_TOGGLED.iter().cloned().collect());
+        assert_eq!(state.green_toggled,
+                   SOLVED_GREEN_TOGGLED.iter().cloned().collect());
+        assert_eq!(state.blue_toggled,
+                   SOLVED_BLUE_TOGGLED.iter().cloned().collect());
+        assert!(state.red_grid.iter().all(|&lit| lit));
+        assert!(state.green_grid.iter().all(|&lit| lit));
+        assert!(state.blue_grid.iter().all(|&lit| lit));
+    }
+
+    #[test]
+    fn from_invalid_toggled_toml() {
+        let mut table = toml::value::Table::new();
+        table.insert(ACCESS_KEY.to_string(), Access::Unsolved.to_toml());
+        let toggled = toml::Value::Array(vec![-1, 0, 20, 21]
+            .into_iter()
+            .map(toml::Value::Integer)
+            .collect());
+        table.insert(RED_TOGGLED_KEY.to_string(), toggled.clone());
+        table.insert(GREEN_TOGGLED_KEY.to_string(), toggled.clone());
+        table.insert(BLUE_TOGGLED_KEY.to_string(), toggled.clone());
+
+        let state = SyrupState::from_toml(table);
+        assert_eq!(state.access, Access::Unsolved);
+        assert_eq!(state.red_toggled, vec![0, 20].into_iter().collect());
+        assert_eq!(state.green_toggled, vec![0, 20].into_iter().collect());
+        assert_eq!(state.blue_toggled, vec![0, 20].into_iter().collect());
+    }
+
+    #[test]
+    fn from_toggled_already_correct_toml() {
+        let mut table = toml::value::Table::new();
+        table.insert(ACCESS_KEY.to_string(), Access::Unsolved.to_toml());
+        let red = SOLVED_RED_TOGGLED.iter()
+                                    .map(|&t| toml::Value::Integer(t as i64))
+                                    .collect();
+        table.insert(RED_TOGGLED_KEY.to_string(), toml::Value::Array(red));
+        let green =
+            SOLVED_GREEN_TOGGLED.iter()
+                                .map(|&t| toml::Value::Integer(t as i64))
+                                .collect();
+        table.insert(GREEN_TOGGLED_KEY.to_string(), toml::Value::Array(green));
+        let blue =
+            SOLVED_BLUE_TOGGLED.iter()
+                               .map(|&t| toml::Value::Integer(t as i64))
+                               .collect();
+        table.insert(BLUE_TOGGLED_KEY.to_string(), toml::Value::Array(blue));
+
+        let state = SyrupState::from_toml(table);
+        assert_eq!(state.access, Access::Solved);
+        assert!(state.red_grid.iter().all(|&lit| lit));
+        assert!(state.green_grid.iter().all(|&lit| lit));
+        assert!(state.blue_grid.iter().all(|&lit| lit));
     }
 }
 

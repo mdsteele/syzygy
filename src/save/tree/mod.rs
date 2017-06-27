@@ -17,44 +17,10 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod access;
-mod color;
-pub mod column;
-mod crossword;
-mod data;
-pub mod device;
-mod direction;
-mod game;
-pub mod ice;
-mod location;
-pub mod memory;
-mod path;
-pub mod plane;
-mod prefs;
-mod puzzles;
-pub mod pyramid;
-pub mod tree;
-pub mod util;
+mod basic;
+mod redblack;
 
-pub use self::access::Access;
-pub use self::color::{MixedColor, PrimaryColor};
-pub use self::crossword::{CrosswordState, ValidChars};
-pub use self::data::SaveData;
-pub use self::direction::Direction;
-pub use self::game::Game;
-pub use self::location::Location;
-pub use self::path::get_default_save_file_path;
-pub use self::prefs::Prefs;
-pub use self::puzzles::{AtticState, AutoState, BlackState, BlameState,
-                        CubeState, DayState, DisconState, DotsState,
-                        DoubleState, FailureState, FictionState, FinaleState,
-                        GearsState, GroundState, HeadedState, HexState,
-                        IcyEmState, JogState, LaneState, LevelUpState,
-                        LineState, LogLevelState, MeetState, MissedState,
-                        OrderState, PasswordState, PrologState, PuzzleState,
-                        RightState, SauceState, ServesState, SimpleState,
-                        StarState, SyrupState, SyzygyStage, SyzygyState,
-                        TheYState, TreadState, VirtueState, WhatchaState,
-                        WordDir, WreckedState};
+pub use self::basic::{BasicTree, TreeOp};
+pub use self::redblack::RedBlackTree;
 
 // ========================================================================= //

@@ -166,8 +166,9 @@ pub fn rotate_deque<T>(deque: &mut VecDeque<T>, by: i32) {
 #[cfg(test)]
 mod tests {
     use std::collections::VecDeque;
+    use toml;
 
-    use super::rotate_deque;
+    use super::{rotate_deque, to_i32, to_i8, to_u32};
 
     #[test]
     fn deque_rotation() {
@@ -193,6 +194,40 @@ mod tests {
         rotate_deque(&mut deque, 15);
         assert_eq!(deque.iter().cloned().collect::<Vec<i32>>(),
                    vec![3, 4, 5, 1, 2]);
+    }
+
+    #[test]
+    fn value_to_i8() {
+        assert_eq!(to_i8(toml::Value::Boolean(false)), 0);
+        assert_eq!(to_i8(toml::Value::Boolean(true)), 0);
+        assert_eq!(to_i8(toml::Value::Integer(1)), 1);
+        assert_eq!(to_i8(toml::Value::Integer(127)), 127);
+        assert_eq!(to_i8(toml::Value::Integer(128)), 127);
+        assert_eq!(to_i8(toml::Value::Integer(-128)), -128);
+        assert_eq!(to_i8(toml::Value::Integer(-129)), -128);
+    }
+
+    #[test]
+    fn value_to_i32() {
+        assert_eq!(to_i32(toml::Value::Boolean(false)), 0);
+        assert_eq!(to_i32(toml::Value::Boolean(true)), 0);
+        assert_eq!(to_i32(toml::Value::Integer(-17)), -17);
+        assert_eq!(to_i32(toml::Value::Integer(2147483647)), 2147483647);
+        assert_eq!(to_i32(toml::Value::Integer(2147483648)), 2147483647);
+        assert_eq!(to_i32(toml::Value::Integer(-2147483648)), -2147483648);
+        assert_eq!(to_i32(toml::Value::Integer(-2147483649)), -2147483648);
+    }
+
+    #[test]
+    fn value_to_u32() {
+        assert_eq!(to_u32(toml::Value::Boolean(false)), 0);
+        assert_eq!(to_u32(toml::Value::Boolean(true)), 0);
+        assert_eq!(to_u32(toml::Value::Integer(-1)), 0);
+        assert_eq!(to_u32(toml::Value::Integer(1)), 1);
+        assert_eq!(to_u32(toml::Value::Integer(2147483648)), 2147483648);
+        assert_eq!(to_u32(toml::Value::Integer(4294967295)), 4294967295);
+        assert_eq!(to_u32(toml::Value::Integer(4294967296)), 4294967295);
+        assert_eq!(to_u32(toml::Value::Integer(-2147483648)), 0);
     }
 }
 

@@ -19,8 +19,8 @@
 
 use std::rc::Rc;
 
-use gui::{Action, Align, Canvas, Element, Event, Font, GroupElement, Rect,
-          Resources, Sound, Sprite};
+use gui::{Action, Align, Canvas, Element, Event, Font, GroupElement, Point,
+          Rect, Resources, Sound, Sprite};
 use elements::{DialogBox, FadeStyle, ScreenFade};
 use save::SaveData;
 
@@ -51,6 +51,8 @@ pub enum Cmd {
 pub struct View {
     screen_fade: ScreenFade<Cmd>,
     elements: GroupElement<SaveData, Cmd>,
+    title_font_1: Rc<Font>,
+    title_font_2: Rc<Font>,
 }
 
 impl View {
@@ -65,6 +67,7 @@ impl View {
             let mut rect =
                 Rect::new(0, 0, START_BUTTON_WIDTH, START_BUTTON_HEIGHT);
             rect.center_on(visible.center());
+            rect.offset(0, 35);
             StartGameButton::new(resources, rect)
         }));
         if !cfg!(any(target_os = "android", target_os = "ios")) {
@@ -114,13 +117,23 @@ impl View {
         View {
             screen_fade: ScreenFade::new(resources, FadeStyle::Uniform),
             elements: GroupElement::new(elements),
+            title_font_1: resources.get_font("title1"),
+            title_font_2: resources.get_font("title2"),
         }
     }
 }
 
 impl Element<SaveData, Cmd> for View {
     fn draw(&self, data: &SaveData, canvas: &mut Canvas) {
-        canvas.clear((64, 64, 128));
+        canvas.clear((16, 24, 16));
+        canvas.draw_text(&self.title_font_1,
+                         Align::Center,
+                         Point::new(288, 90),
+                         "SYSTEM");
+        canvas.draw_text(&self.title_font_2,
+                         Align::Center,
+                         Point::new(288, 165),
+                         "SYZYGY");
         self.elements.draw(data, canvas);
         self.screen_fade.draw(&(), canvas);
     }
@@ -199,6 +212,7 @@ impl StartGameButton {
 
 impl Element<SaveData, Cmd> for StartGameButton {
     fn draw(&self, data: &SaveData, canvas: &mut Canvas) {
+        canvas.fill_rect((200, 200, 200), self.rect);
         let label = if data.game().is_some() {
             "Continue"
         } else {
@@ -237,6 +251,7 @@ impl EraseGameButton {
 impl Element<SaveData, Cmd> for EraseGameButton {
     fn draw(&self, data: &SaveData, canvas: &mut Canvas) {
         if data.game().is_some() {
+            canvas.fill_rect((200, 200, 200), self.rect);
             canvas.draw_text(&self.font,
                              Align::Center,
                              self.rect.center(),
@@ -276,6 +291,7 @@ impl AboutButton {
 
 impl Element<SaveData, Cmd> for AboutButton {
     fn draw(&self, _: &SaveData, canvas: &mut Canvas) {
+        canvas.fill_rect((200, 200, 200), self.rect);
         canvas.draw_text(&self.font,
                          Align::Center,
                          self.rect.center(),
@@ -311,6 +327,7 @@ impl QuitButton {
 
 impl Element<SaveData, Cmd> for QuitButton {
     fn draw(&self, _: &SaveData, canvas: &mut Canvas) {
+        canvas.fill_rect((200, 200, 200), self.rect);
         canvas.draw_text(&self.font,
                          Align::Center,
                          self.rect.center(),

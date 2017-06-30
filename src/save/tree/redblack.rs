@@ -162,7 +162,7 @@ impl RedBlackTree {
         loop {
             if let Some(parent_key) = self.parent(key) {
                 if !self.is_red(parent_key) {
-                    debug_assert!(self.is_valid());
+                    debug_assert!(self.is_valid(), "ops: {:?}", ops);
                     return ops;
                 }
                 if let Some(aunt_key) = self.sibling(parent_key) {
@@ -180,7 +180,7 @@ impl RedBlackTree {
             } else {
                 debug_assert_eq!(self.root(), Some(key));
                 self.op_set_red(&mut ops, vec![(key, false)]);
-                debug_assert!(self.is_valid());
+                debug_assert!(self.is_valid(), "ops: {:?}", ops);
                 return ops;
             }
         }
@@ -211,7 +211,7 @@ impl RedBlackTree {
                 ops.push(TreeOp::RotateLeft(grandparent_key));
             }
         }
-        debug_assert!(self.is_valid());
+        debug_assert!(self.is_valid(), "ops: {:?}", ops);
         ops
     }
 
@@ -219,41 +219,45 @@ impl RedBlackTree {
         let mut ops: Vec<TreeOp> = Vec::new();
         let (mut child, mut parent, was_red) = if let Some(left_child_key) =
             self.left_child(key) {
-            let mut predecessor_key = left_child_key;
-            while let Some(next_key) = self.basic
-                                           .right_child(predecessor_key) {
-                predecessor_key = next_key;
-            }
-            let parent = if predecessor_key == left_child_key {
-                Some(predecessor_key)
+            if self.right_child(key).is_some() {
+                let mut predecessor_key = left_child_key;
+                while let Some(next_key) = self.basic
+                                               .right_child(predecessor_key) {
+                    predecessor_key = next_key;
+                }
+                let parent = if predecessor_key == left_child_key {
+                    Some(predecessor_key)
+                } else {
+                    self.parent(predecessor_key)
+                };
+                (self.left_child(predecessor_key),
+                 parent,
+                 self.is_red(predecessor_key))
             } else {
-                self.parent(predecessor_key)
-            };
-            (self.left_child(predecessor_key),
-             parent,
-             self.is_red(predecessor_key))
+                (Some(left_child_key), self.parent(key), self.is_red(key))
+            }
         } else {
             (self.right_child(key), self.parent(key), self.is_red(key))
         };
         if !self.basic.remove(key) {
-            debug_assert!(self.is_valid());
+            debug_assert!(self.is_valid(), "ops: {:?}", ops);
             return ops;
         }
         ops.push(TreeOp::Remove(key));
         if was_red {
-            debug_assert!(self.is_valid());
+            debug_assert!(self.is_valid(), "ops: {:?}", ops);
             return ops;
         }
         if let Some(child_key) = child {
             if self.is_red(child_key) {
                 self.op_set_red(&mut ops, vec![(child_key, false)]);
-                debug_assert!(self.is_valid());
+                debug_assert!(self.is_valid(), "ops: {:?}", ops);
                 return ops;
             }
         }
         loop {
             if self.root() == child {
-                debug_assert!(self.is_valid());
+                debug_assert!(self.is_valid(), "ops: {:?}", ops);
                 return ops;
             }
             let parent_key = parent.unwrap();
@@ -297,7 +301,7 @@ impl RedBlackTree {
                     self.op_set_red(&mut ops,
                                     vec![(sibling_key, true),
                                          (parent_key, false)]);
-                    debug_assert!(self.is_valid());
+                    debug_assert!(self.is_valid(), "ops: {:?}", ops);
                     return ops;
                 }
                 if sibling_key > parent_key && self.is_red_opt(left_niece) &&
@@ -339,7 +343,7 @@ impl RedBlackTree {
                 ops.push(TreeOp::RotateRight(parent_key));
             }
         }
-        debug_assert!(self.is_valid());
+        debug_assert!(self.is_valid(), "ops: {:?}", ops);
         ops
     }
 
@@ -505,6 +509,35 @@ mod tests {
                         (4, 4, false),
                         (5, 4, false),
                         (7, 5, true)]);
+    }
+
+    #[test]
+    fn removal_4() {
+        // 1*  4   6
+        //  \   \ /
+        //   2   5*
+        //    \ /
+        //     3
+        let mut tree = RedBlackTree::from_signature(vec![(1, 2, true),
+                                                         (2, 3, false),
+                                                         (3, 3, false),
+                                                         (4, 5, false),
+                                                         (5, 3, true),
+                                                         (6, 5, false)]);
+        assert_eq!(tree.len(), 6);
+
+        //     4   6
+        //      \ /
+        //   1   5*
+        //    \ /
+        //     3
+        tree.remove(2);
+        assert_eq!(tree.signature(),
+                   vec![(1, 3, false),
+                        (3, 3, false),
+                        (4, 5, false),
+                        (5, 3, true),
+                        (6, 5, false)]);
     }
 
     #[test]

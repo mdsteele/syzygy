@@ -158,8 +158,9 @@ const OP_ANIMATION_FRAMES: i32 = 10;
 
 struct TreeView {
     base: Point,
-    sprites: Vec<Sprite>,
     font: Rc<Font>,
+    fruit_sprites: Vec<Sprite>,
+    leaf_sprites: Vec<Sprite>,
     fruit: HashMap<i32, (Point, Point, Point)>,
     animation: Option<(BasicTree, Vec<TreeOp>, i32)>,
 }
@@ -172,8 +173,9 @@ impl TreeView {
         let fruit = (1..16).map(|key| (key, (pt, pt, pt))).collect();
         let mut view = TreeView {
             base: Point::new(base_x, base_y),
-            sprites: resources.get_sprites("tree/nodes"),
             font: resources.get_font("roman"),
+            fruit_sprites: resources.get_sprites("tree/nodes"),
+            leaf_sprites: resources.get_sprites("tree/leaves"),
             fruit: fruit,
             animation: None,
         };
@@ -298,9 +300,20 @@ impl Element<BlackState, TreeCmd> for TreeView {
         }
         // Fruit:
         for (&key, &(_, position, _)) in self.fruit.iter() {
-            let is_red = !tree.contains(key) || tree.is_red(key);
-            let sprite_index = if is_red { 1 } else { 0 };
-            canvas.draw_sprite_centered(&self.sprites[sprite_index], position);
+            let on_tree = tree.contains(key);
+            let is_red = !on_tree || tree.is_red(key);
+            if on_tree {
+                if tree.left_child(key).is_none() {
+                    canvas.draw_sprite(&self.leaf_sprites[0],
+                                       position + Point::new(-16, -14));
+                }
+                if tree.right_child(key).is_none() {
+                    canvas.draw_sprite(&self.leaf_sprites[1],
+                                       position + Point::new(7, -14));
+                }
+            }
+            let idx = if is_red { 1 } else { 0 };
+            canvas.draw_sprite_centered(&self.fruit_sprites[idx], position);
             canvas.draw_text(&self.font,
                              Align::Center,
                              position + Point::new(0, 4),
@@ -341,7 +354,8 @@ impl Element<BlackState, TreeCmd> for TreeView {
                 }
                 Action::redraw_if(redraw)
             }
-            &Event::MouseDown(pt) if self.animation.is_none() => {
+            &Event::MouseDown(pt) if self.animation.is_none() &&
+                                     !state.is_solved() => {
                 for (&key, &(_, position, _)) in self.fruit.iter() {
                     let delta = pt - position;
                     let sqdist = delta.x() * delta.x() + delta.y() * delta.y();

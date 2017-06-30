@@ -89,6 +89,8 @@ impl SyrupState {
         self.rebuild_grids();
     }
 
+    pub fn next_color(&self) -> PrimaryColor { self.next_color }
+
     pub fn light_colors(&self, pos: (i32, i32)) -> (bool, bool, bool) {
         let index = pos_to_index(pos).unwrap() as usize;
         (self.red_grid[index], self.green_grid[index], self.blue_grid[index])

@@ -22,7 +22,7 @@ use std::cmp;
 use elements::{PuzzleCmd, PuzzleCore, PuzzleView};
 use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sprite};
 use modes::SOLVED_INFO_TEXT;
-use save::{Game, PuzzleState, SyrupState};
+use save::{Game, PrimaryColor, PuzzleState, SyrupState};
 use super::scenes::{compile_intro_scene, compile_outro_scene};
 
 // ========================================================================= //
@@ -30,6 +30,7 @@ use super::scenes::{compile_intro_scene, compile_outro_scene};
 pub struct View {
     core: PuzzleCore<(i32, i32)>,
     toggles: Vec<ToggleLight>,
+    next: NextColor,
 }
 
 impl View {
@@ -61,6 +62,7 @@ impl View {
                           ToggleLight::new(resources, state, (1, 4)),
                           ToggleLight::new(resources, state, (2, 4)),
                           ToggleLight::new(resources, state, (3, 4))],
+            next: NextColor::new(resources),
         }
     }
 }
@@ -69,6 +71,7 @@ impl Element<Game, PuzzleCmd> for View {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
         let state = &game.light_syrup;
         self.core.draw_back_layer(canvas);
+        self.next.draw(state, canvas);
         self.core.draw_middle_layer(canvas);
         self.toggles.draw(state, canvas);
         self.core.draw_front_layer(canvas, state);
@@ -89,6 +92,9 @@ impl Element<Game, PuzzleCmd> for View {
                 }
             }
             action.merge(subaction.but_no_value());
+        }
+        if !action.should_stop() {
+            action.merge(self.next.handle_event(event, state));
         }
         action
     }
@@ -127,7 +133,11 @@ impl PuzzleView for View {
 
     fn drain_queue(&mut self) {
         for (index, color) in self.core.drain_queue() {
-            self.toggles[index as usize].set_hilight(color);
+            if index < 0 {
+                self.next.visible = color != 0;
+            } else if (index as usize) < self.toggles.len() {
+                self.toggles[index as usize].set_hilight(color);
+            }
         }
     }
 }
@@ -244,6 +254,44 @@ impl Element<SyrupState, (i32, i32)> for ToggleLight {
                                      !state.is_solved() => {
                 Action::redraw().and_return(self.position)
             }
+            _ => Action::ignore(),
+        }
+    }
+}
+
+// ========================================================================= //
+
+struct NextColor {
+    sprites: Vec<Sprite>,
+    visible: bool,
+}
+
+impl NextColor {
+    fn new(resources: &mut Resources) -> NextColor {
+        NextColor {
+            sprites: resources.get_sprites("light/color"),
+            visible: false,
+        }
+    }
+}
+
+impl Element<SyrupState, PuzzleCmd> for NextColor {
+    fn draw(&self, state: &SyrupState, canvas: &mut Canvas) {
+        if self.visible {
+            canvas.fill_rect((0, 0, 127), Rect::new(454, 70, 36, 36));
+            let sprite_index = match state.next_color() {
+                PrimaryColor::Red => 0,
+                PrimaryColor::Green => 1,
+                PrimaryColor::Blue => 2,
+            };
+            canvas.draw_sprite(&self.sprites[sprite_index],
+                               Point::new(461, 77));
+        }
+    }
+
+    fn handle_event(&mut self, event: &Event, _state: &mut SyrupState)
+                    -> Action<PuzzleCmd> {
+        match event {
             _ => Action::ignore(),
         }
     }

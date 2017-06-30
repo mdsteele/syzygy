@@ -22,19 +22,27 @@ use gui::{Resources, Sound};
 
 // ========================================================================= //
 
+const MEZURE: i32 = 0;
+const NEXT: i32 = 1;
+
+// ========================================================================= //
+
 #[cfg_attr(rustfmt, rustfmt_skip)]
 pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
-            // TODO: Make a background for "Light Syrup".
-            Ast::SetBg("tread_lightly"),
-            Ast::Place(0, "chars/mezure", 0, (-16, 288)),
-            Ast::Slide(0, (144, 288), false, false, 1.0),
-            Ast::Sound(Sound::small_jump()),
-            Ast::Jump(0, (186, 304), 0.5),
-            Ast::Slide(0, (215, 304), false, true, 0.35),
+            Ast::SetBg("light_syrup"),
+            Ast::Dark(true),
+            Ast::Place(MEZURE, "chars/mezure", 0, (-16, 288)),
+            Ast::Light(MEZURE, true),
+            Ast::Slide(MEZURE, (215, 288), false, false, 1.0),
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE, "Hmm."),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE, "Hmm."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Queue(-1, 1), // Show next-color view.
+            Ast::Place(NEXT, "chars/invis", 0, (472, 104)),
+            Ast::Light(NEXT, true),
         ]),
     ];
     Ast::compile_scene(resources, ast)
@@ -47,12 +55,12 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
             Ast::Sound(Sound::solve_puzzle_chime()),
+            Ast::Queue(-1, 0), // Hide next-color view.
             Ast::Wait(0.25),
-            Ast::Slide(0, (410, 304), true, false, 1.0),
-            Ast::Sound(Sound::small_jump()),
-            Ast::Jump(0, (448, 288), 0.5),
-            Ast::Slide(0, (592, 288), false, false, 0.5),
-            Ast::Remove(0),
+            Ast::Dark(false),
+            Ast::Remove(NEXT),
+            Ast::Slide(MEZURE, (592, 288), false, false, 1.0),
+            Ast::Remove(MEZURE),
         ]),
     ];
     Ast::compile_scene(resources, ast)

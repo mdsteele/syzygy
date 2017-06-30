@@ -132,6 +132,10 @@ impl View {
         }
         let mut map_sprites = Vec::new();
         {
+            let sprites = resources.get_sprites("map/checkpoints");
+            map_sprites.push((sprites[0].clone(), Point::new(160, 160)));
+        }
+        {
             let mut sprites = resources.get_sprites("map/icebox");
             let is_open = game.is_unlocked(Location::IceToMeetYou) ||
                           game.is_unlocked(Location::TheIceIsRight) ||
@@ -141,8 +145,11 @@ impl View {
             map_sprites.push((sprites.swap_remove(idx), Point::new(336, 192)));
         }
         {
-            let sprites = resources.get_sprites("map/checkpoints");
-            map_sprites.push((sprites[0].clone(), Point::new(160, 160)));
+            let sprites = resources.get_sprites("map/power");
+            map_sprites.push((sprites[0].clone(), Point::new(176, 96)));
+            map_sprites.push((sprites[1].clone(), Point::new(208, 96)));
+            map_sprites.push((sprites[2].clone(), Point::new(240, 96)));
+            map_sprites.push((sprites[3].clone(), Point::new(272, 96)));
         }
         if !game.is_unlocked(Location::SystemSyzygy) {
             let sprites = resources.get_sprites("map/secret");

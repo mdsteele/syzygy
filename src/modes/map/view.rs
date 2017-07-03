@@ -59,6 +59,7 @@ const NODES: &[(Location, (i32, i32), bool)] = &[
     (Location::PlaneAndSimple, (416, 48), false),
     (Location::PlaneAsDay, (448, 48), false),
     (Location::PointOfOrder, (288, 48), false),
+    (Location::PointOfView, (288, 80), false),
     (Location::ShiftGears, (128, 48), false),
     (Location::ShiftTheBlame, (448, 144), false),
     (Location::ShiftingGround, (272, 288), false),

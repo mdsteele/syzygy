@@ -226,6 +226,9 @@ fn main() {
                         Location::PointOfOrder => {
                             modes::run_point_of_order(&mut window, game)
                         }
+                        Location::PointOfView => {
+                            modes::run_point_of_view(&mut window, game)
+                        }
                         Location::ShiftGears => {
                             modes::run_shift_gears(&mut window, game)
                         }

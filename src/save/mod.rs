@@ -51,10 +51,10 @@ pub use self::puzzles::{AtticState, AutoState, BlackState, BlameState,
                         GearsState, GroundState, HeadedState, HexState,
                         IcyEmState, JogState, LaneState, LevelUpState,
                         LineState, LogLevelState, MeetState, MissedState,
-                        OrderState, PasswordState, PrologState, PuzzleState,
-                        RightState, SauceState, ServesState, SimpleState,
-                        StarState, SyrupState, SyzygyStage, SyzygyState,
-                        TheYState, TreadState, VirtueState, WhatchaState,
-                        WordDir, WreckedState};
+                        OrderState, PasswordState, PovState, PrologState,
+                        PuzzleState, RightState, SauceState, ServesState,
+                        SimpleState, StarState, SyrupState, SyzygyStage,
+                        SyzygyState, TheYState, TreadState, VirtueState,
+                        WhatchaState, WordDir, WreckedState};
 
 // ========================================================================= //

@@ -17,40 +17,22 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use elements::{Ast, Scene, TalkPos, TalkStyle};
-use gui::{Resources, Sound};
+mod scenes;
+mod view;
+
+use gui::Window;
+use modes::{Mode, run_puzzle};
+use save::Game;
+use self::view::View;
 
 // ========================================================================= //
 
-#[cfg_attr(rustfmt, rustfmt_skip)]
-pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
-    let ast = vec![
-        Ast::Seq(vec![
-            // TODO: make a background for "Point of Order"
-            Ast::SetBg("missed_connections"),
-            Ast::Place(0, "chars/mezure", 0, (-16, 304)),
-            Ast::Slide(0, (304, 304), true, true, 1.0),
-            Ast::Wait(0.5),
-            Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE, "Let's have a look."),
-        ]),
-    ];
-    Ast::compile_scene(resources, ast)
-}
-
-// ========================================================================= //
-
-#[cfg_attr(rustfmt, rustfmt_skip)]
-pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
-    let ast = vec![
-        Ast::Seq(vec![
-            Ast::Sound(Sound::solve_puzzle_chime()),
-            Ast::Wait(1.0),
-            Ast::Slide(0, (592, 304), true, false, 1.0),
-            Ast::Remove(0),
-        ]),
-    ];
-    Ast::compile_scene(resources, ast)
+pub fn run_point_of_view(window: &mut Window, game: &mut Game) -> Mode {
+    let view = {
+        let visible_rect = window.visible_rect();
+        View::new(&mut window.resources(), visible_rect, &game.point_of_view)
+    };
+    run_puzzle(window, game, view)
 }
 
 // ========================================================================= //

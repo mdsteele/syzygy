@@ -36,14 +36,14 @@ const NODES: &[(Location, (i32, i32), bool)] = &[
     (Location::Prolog, (108, 160), false),
     (Location::ALightInTheAttic, (224, 112), true),
     (Location::AutofacTour, (240, 144), false),
-    (Location::BlackAndBlue, (416, 144), false),
+    (Location::BlackAndBlue, (384, 128), false),
     (Location::ColumnAsIcyEm, (353, 210), false),
     (Location::ConnectTheDots, (224, 48), false),
     (Location::CrossSauce, (352, 48), false),
     (Location::CrossTheLine, (176, 179), true),
     (Location::CubeTangle, (304, 272), false),
     (Location::Disconnected, (128, 224), false),
-    (Location::DoubleCross, (320, 48), false),
+    (Location::DoubleCross, (320, 112), false),
     (Location::FactOrFiction, (208, 144), false),
     (Location::HexSpangled, (336, 272), false),
     (Location::IceToMeetYou, (353, 236), false),
@@ -58,10 +58,10 @@ const NODES: &[(Location, (i32, i32), bool)] = &[
     (Location::PasswordFile, (224, 224), false),
     (Location::PlaneAndSimple, (416, 48), false),
     (Location::PlaneAsDay, (448, 48), false),
-    (Location::PointOfOrder, (288, 48), false),
-    (Location::PointOfView, (288, 80), false),
+    (Location::PointOfOrder, (416, 96), false),
+    (Location::PointOfView, (288, 48), false),
     (Location::ShiftGears, (128, 48), false),
-    (Location::ShiftTheBlame, (448, 144), false),
+    (Location::ShiftTheBlame, (384, 96), false),
     (Location::ShiftingGround, (272, 288), false),
     (Location::StarCrossed, (384, 48), false),
     (Location::SystemFailure, (192, 224), false),
@@ -70,7 +70,7 @@ const NODES: &[(Location, (i32, i32), bool)] = &[
     (Location::TheYFactor, (176, 144), true),
     (Location::TreadLightly, (288, 112), false),
     (Location::VirtueOrIce, (383, 210), false),
-    (Location::WhatchaColumn, (64, 48), false),
+    (Location::WhatchaColumn, (352, 128), false),
     (Location::WreckedAngle, (272, 256), true),
     (Location::Finale, (176, 256), false),
 ];
@@ -133,8 +133,14 @@ impl View {
         }
         let mut map_sprites = Vec::new();
         {
+            let sprites = resources.get_sprites("map/biodome");
+            map_sprites.push((sprites[0].clone(), Point::new(336, 80)));
+            map_sprites.push((sprites[1].clone(), Point::new(400, 80)));
+        }
+        {
             let sprites = resources.get_sprites("map/checkpoints");
             map_sprites.push((sprites[0].clone(), Point::new(160, 160)));
+            map_sprites.push((sprites[1].clone(), Point::new(304, 96)));
         }
         {
             let mut sprites = resources.get_sprites("map/icebox");

@@ -225,9 +225,8 @@ impl TreeView {
         for key in 1..16 {
             if !positions.contains_key(&key) {
                 let y = match key {
-                    1 | 15 => 277,
-                    2 => 285,
-                    3 | 4 | 13 | 14 => 293,
+                    15 => 277,
+                    1 | 2 | 13 | 14 => 293,
                     _ => 309,
                 };
                 positions.insert(key, Point::new(104 + 24 * key, y));

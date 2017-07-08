@@ -81,9 +81,19 @@ impl Columns {
         &self.columns[col].linkages
     }
 
-    pub fn column_offset(&self, col: usize) -> i32 { self.columns[col].offset }
+    pub fn set_linkages(&mut self, col: usize, linkages: Vec<(usize, i32)>) {
+        debug_assert!(col < self.columns.len());
+        debug_assert!(linkages.iter().all(|&(i, _)| i < self.columns.len()));
+        self.columns[col].linkages = linkages;
+    }
+
+    pub fn column_offset(&self, col: usize) -> i32 {
+        debug_assert!(col < self.columns.len());
+        self.columns[col].offset
+    }
 
     pub fn column_position(&self, col: usize) -> i32 {
+        debug_assert!(col < self.columns.len());
         self.columns[col].current_position
     }
 
@@ -97,10 +107,12 @@ impl Columns {
     }
 
     pub fn column_word_len(&self, col: usize) -> usize {
+        debug_assert!(col < self.columns.len());
         self.columns[col].letters.len()
     }
 
     pub fn rotate_column(&mut self, col: usize, by: i32) {
+        debug_assert!(col < self.columns.len());
         let linkages = self.columns[col].linkages.clone();
         for (other, factor) in linkages.into_iter() {
             let column = &mut self.columns[other];

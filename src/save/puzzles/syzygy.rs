@@ -58,12 +58,12 @@ const RELYNG_INIT_NEXT: char = '+';
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
 const MEZURE_COLUMNS_SPEC: &[(&str, i32, i32, &[(usize, i32)])] = &[
-    ("YTTRIS", -5, 0, &[]),
-    ("ARGONY", -5, 0, &[]),
-    ("ELINSA", -5, 5, &[]),
-    ("UGRENT", -5, 0, &[]),
-    ("RELYNG", -5, 2, &[]),
-    ("MEZURE", -5, 1, &[]),
+    ("YTTRIS", -5, 0, &[(0, 1), (1, -1), (2, 1), (3, -1), (4, 1), (5, -1)]),
+    ("ARGONY", -5, 0, &[(0, -1), (1, 1), (2, -1), (3, 1), (4, -1), (5, 1)]),
+    ("ELINSA", -5, 5, &[(0, 1), (1, -1), (2, 1), (3, -1), (4, 1), (5, -1)]),
+    ("UGRENT", -5, 0, &[(0, -1), (1, 1), (2, -1), (3, 1), (4, -1), (5, 1)]),
+    ("RELYNG", -5, 2, &[(0, 1), (1, -1), (2, 1), (3, -1), (4, 1), (5, -1)]),
+    ("MEZURE", -5, 1, &[(0, -1), (1, 1), (2, -1), (3, 1), (4, -1), (5, 1)]),
 ];
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
@@ -128,6 +128,7 @@ pub struct SyzygyState {
     relyng_lights: HashSet<i32>,
     relyng_next: char,
     mezure_columns: Columns,
+    mezure_lights: [bool; 6],
     mezure_ice_grid: ObjectGrid,
     mezure_laser_grid: DeviceGrid,
     mezure_pipe_grid: PlaneGrid,
@@ -139,43 +140,43 @@ impl SyzygyState {
         let u_goal = Symbol::CyanU(Transform::identity());
         let a_goal = Symbol::CyanA(Transform::identity());
         let d_goal = Symbol::CyanQ(Transform::identity().flipped_vert());
-        let mut grid = ObjectGrid::new(11, 5);
-        grid.add_object(5, 0, Object::Wall);
+        let mut grid = ObjectGrid::new(9, 5);
+        grid.add_object(4, 0, Object::Wall);
         grid.add_object(1, 1, Object::Wall);
-        grid.add_object(5, 1, Object::Wall);
+        grid.add_object(4, 1, Object::Wall);
         grid.add_object(1, 2, Object::Rotator);
-        grid.add_object(5, 2, Object::Reflector(false));
-        grid.add_object(10, 2, Object::Wall);
+        grid.add_object(4, 2, Object::Reflector(false));
+        grid.add_object(8, 2, Object::Wall);
         grid.add_object(1, 3, Object::Wall);
-        grid.add_object(5, 3, Object::Wall);
-        grid.add_object(10, 3, Object::PushPop(Direction::South));
-        grid.add_object(2, 4, Object::Goal(q_goal));
-        grid.add_object(4, 4, Object::Goal(u_goal));
-        grid.add_object(5, 4, Object::Wall);
-        grid.add_object(6, 4, Object::Goal(a_goal));
-        grid.add_object(8, 4, Object::Goal(d_goal));
+        grid.add_object(4, 3, Object::Wall);
+        grid.add_object(8, 3, Object::PushPop(Direction::South));
+        grid.add_object(1, 4, Object::Goal(q_goal));
+        grid.add_object(3, 4, Object::Goal(u_goal));
+        grid.add_object(4, 4, Object::Wall);
+        grid.add_object(5, 4, Object::Goal(a_goal));
+        grid.add_object(7, 4, Object::Goal(d_goal));
 
         let q_trans = Transform::identity().rotated_cw().rotated_cw();
         let u_trans = Transform::identity().flipped_vert();
         let a_trans = Transform::identity().rotated_cw().rotated_cw();
         let d_trans = Transform::identity().flipped_vert();
-        grid.add_ice_block(6, 0, Symbol::CyanQ(q_trans));
-        grid.add_ice_block(7, 0, Symbol::CyanA(a_trans));
-        grid.add_ice_block(8, 0, Symbol::CyanU(u_trans));
-        grid.add_ice_block(9, 0, Symbol::CyanQ(d_trans));
+        grid.add_ice_block(5, 0, Symbol::CyanQ(q_trans));
+        grid.add_ice_block(6, 0, Symbol::CyanA(a_trans));
+        grid.add_ice_block(7, 0, Symbol::CyanU(u_trans));
+        grid.add_ice_block(8, 0, Symbol::CyanQ(d_trans));
         grid
     }
 
     fn elinsa_initial_grid() -> PlaneGrid {
-        let mut grid = PlaneGrid::new(Rect::new(0, 0, 12, 6));
+        let mut grid = PlaneGrid::new(Rect::new(0, 0, 10, 6));
         grid.place_object(0, 0, PlaneObj::Wall);
-        grid.place_object(9, 1, PlaneObj::BlueNode);
-        grid.place_object(10, 1, PlaneObj::Wall);
+        grid.place_object(7, 1, PlaneObj::BlueNode);
+        grid.place_object(8, 1, PlaneObj::Wall);
         grid.place_object(2, 2, PlaneObj::PurpleNode);
-        grid.place_object(9, 2, PlaneObj::Cross);
+        grid.place_object(7, 2, PlaneObj::Cross);
         grid.place_object(5, 3, PlaneObj::RedNode);
-        grid.place_object(9, 3, PlaneObj::Cross);
-        grid.place_object(11, 3, PlaneObj::BlueNode);
+        grid.place_object(7, 3, PlaneObj::Cross);
+        grid.place_object(9, 3, PlaneObj::BlueNode);
         grid.place_object(3, 4, PlaneObj::Wall);
         grid.place_object(1, 5, PlaneObj::RedNode);
         grid
@@ -297,6 +298,7 @@ impl SyzygyState {
             relyng_next: relyng_next,
             relyng_lights: relyng_lights,
             mezure_columns: mezure_columns,
+            mezure_lights: [true; 6],
             mezure_ice_grid: mezure_ice_grid,
             mezure_laser_grid: SyzygyState::mezure_initial_laser_grid(),
             mezure_pipe_grid: mezure_pipe_grid,
@@ -435,10 +437,19 @@ impl SyzygyState {
         self.relyng_next = RELYNG_INIT_NEXT;
     }
 
+    pub fn mezure_lights(&self) -> &[bool; 6] { &self.mezure_lights }
+
     pub fn mezure_columns(&self) -> &Columns { &self.mezure_columns }
 
     pub fn mezure_columns_mut(&mut self) -> &mut Columns {
         &mut self.mezure_columns
+    }
+
+    pub fn mezure_rotate_column(&mut self, col: usize, by: i32) {
+        self.mezure_columns.rotate_column(col, by);
+        if self.mezure_columns.is_solved() {
+            // TODO: mezure is solved
+        }
     }
 
     pub fn mezure_ice_grid(&self) -> &ObjectGrid { &self.mezure_ice_grid }
@@ -488,6 +499,29 @@ impl SyzygyState {
         for &((gx, gy), (ex, ey), dir) in MEZURE_GRAY_NODES_EMITTERS {
             let color = *gray_nodes.get(&Point::new(gx, gy)).unwrap();
             self.mezure_laser_grid.set(ex, ey, Device::Emitter(color), dir);
+        }
+    }
+
+    pub fn set_mezure_satisfied_detectors(&mut self,
+                                          positions: HashSet<(i32, i32)>) {
+        let mut satisfied = [false; 6];
+        for row in 0..6 {
+            satisfied[row as usize] = positions.contains(&(3, row));
+        }
+        for index in 0..6 {
+            self.mezure_lights[index] = !(satisfied[index] ^
+                                          satisfied[(index + 1) % 6] ^
+                                          satisfied[(index + 5) % 6]);
+        }
+        for index in 0..6 {
+            let linkages = if self.mezure_lights[index] {
+                let mut linkages = MEZURE_COLUMNS_SPEC[index].3.to_vec();
+                linkages.retain(|&(col, _)| self.mezure_lights[col]);
+                linkages
+            } else {
+                Vec::new()
+            };
+            self.mezure_columns.set_linkages(index, linkages);
         }
     }
 }

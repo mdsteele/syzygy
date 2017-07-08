@@ -18,7 +18,7 @@
 // +--------------------------------------------------------------------------+
 
 use std::cmp;
-use std::collections::{HashMap, VecDeque};
+use std::collections::{HashMap, HashSet, VecDeque};
 use std::rc::Rc;
 
 use gui::{Action, Align, Canvas, Element, Event, FRAME_DELAY_MILLIS, Font,
@@ -89,6 +89,29 @@ impl LaserField {
         };
         laser_field.recalculate_lasers(grid);
         laser_field
+    }
+
+    pub fn satisfied_detector_positions(&self, grid: &DeviceGrid)
+                                        -> HashSet<(i32, i32)> {
+        let mut positions = HashSet::new();
+        let (num_cols, num_rows) = grid.size();
+        for row in 0..num_rows {
+            for col in 0..num_cols {
+                match grid.get(col, row) {
+                    Some((Device::Detector(color), dir)) => {
+                        let coords = Point::new(col, row);
+                        match self.lasers.get(&(coords, dir)) {
+                            Some(&(laser, _)) if laser == color => {
+                                positions.insert((col, row));
+                            }
+                            _ => {}
+                        }
+                    }
+                    _ => {}
+                }
+            }
+        }
+        positions
     }
 
     pub fn all_detectors_satisfied(&self, grid: &DeviceGrid) -> bool {

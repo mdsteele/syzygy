@@ -27,6 +27,9 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
             Ast::SetBg("system_syzygy"),
+            Ast::Wait(1.0),
+            Ast::Queue(0, -1),  // Display "SYZYGY" on progress bar
+            Ast::Wait(2.0),
             Ast::Place(2, "chars/elinsa", 0, (-16, 80)),
             Ast::Slide(2, (250, 80), false, true, 1.0),
             Ast::Place(1, "chars/argony", 0, (-16, 80)),
@@ -39,6 +42,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Slide(4, (400, 80), false, true, 1.0),
             Ast::Place(5, "chars/mezure", 0, (592, 80)),
             Ast::Slide(5, (475, 80), false, true, 1.0),
+            Ast::Queue(0, -2),  // Finish progress bar animation
         ]),
     ];
     Ast::compile_scene(resources, ast)

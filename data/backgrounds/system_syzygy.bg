@@ -1,6 +1,7 @@
 @BG 15 15 15
 >caution_walls
 >girders
+>miniblocks
 
         BB                                                    BB
         BB                                                    BB
@@ -19,10 +20,10 @@ AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
         BB                BB                BB                BB
         BB                BB                BB                BB
         BB                BB                BB                BB
-        BB                BB                BB                BB
-        BB                BB                BB                BB
-        BB                BB                BB                BB
-        BB                BB                BB                BB
+        BB                BB          CACJCJBICJCJCJCJCJCJCJCJBICB
+        BB                BB          CG                        CH
+        BB                BB          CG                        CH
+        BB                BB          CCCICIBHCICICICICICICICIBHCD
         BB                BB                BB                BB
         BB                BB                BB                BB
         BB                BB                BB                BB

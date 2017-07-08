@@ -36,6 +36,7 @@ pub struct ColumnsView {
     left: i32,
     top: i32,
     row_spacing: i32,
+    hilights: HashMap<usize, (u8, u8, u8)>,
     adjust: HashMap<usize, i32>,
     drag: Option<(usize, i32, i32)>,
 }
@@ -49,9 +50,14 @@ impl ColumnsView {
             left: left,
             top: top,
             row_spacing: row_spacing,
+            hilights: HashMap::new(),
             adjust: HashMap::new(),
             drag: None,
         }
+    }
+
+    pub fn set_hilight_color(&mut self, col: usize, color: (u8, u8, u8)) {
+        self.hilights.insert(col, color);
     }
 
     fn column_rect(&self, columns: &Columns, col: usize) -> Rect {
@@ -85,12 +91,14 @@ impl Element<Columns, (usize, i32)> for ColumnsView {
         for col in 0..columns.num_columns() {
             let mut canvas = canvas.subcanvas(self.column_rect(columns, col));
             canvas.clear((0, 0, 0));
-            canvas.fill_rect((63, 31, 63),
-                             Rect::new(0,
-                                       -BOX_SIZE *
-                                       columns.column_offset(col),
-                                       BOX_USIZE,
-                                       BOX_USIZE));
+            let hilight_color =
+                self.hilights.get(&col).cloned().unwrap_or((63, 31, 63));
+            let hilight_rect = Rect::new(0,
+                                         -BOX_SIZE *
+                                         columns.column_offset(col),
+                                         BOX_USIZE,
+                                         BOX_USIZE);
+            canvas.fill_rect(hilight_color, hilight_rect);
             let height = canvas.height() as i32;
             let offset = mod_floor(self.column_scroll(columns, col), height);
             for (index, &chr) in columns.column_letters(col)
@@ -130,7 +138,8 @@ impl Element<Columns, (usize, i32)> for ColumnsView {
             }
             &Event::MouseDown(pt) => {
                 for col in 0..columns.num_columns() {
-                    if self.column_rect(columns, col).contains(pt) {
+                    if self.column_rect(columns, col).contains(pt) &&
+                       !columns.column_linkages(col).is_empty() {
                         self.drag = Some((col, pt.y(), pt.y()));
                         return Action::redraw();
                     }

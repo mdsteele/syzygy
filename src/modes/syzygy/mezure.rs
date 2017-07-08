@@ -21,7 +21,7 @@ use elements;
 use elements::column::ColumnsView;
 use elements::lasers::LaserField;
 use elements::plane::{PlaneCmd, PlaneGridView};
-use gui::{Action, Canvas, Element, Event, Point, Resources};
+use gui::{Action, Canvas, Element, Event, Point, Resources, Sprite};
 use save::SyzygyState;
 use save::ice::BlockSlide;
 
@@ -37,6 +37,7 @@ pub enum MezureCmd {
 // ========================================================================= //
 
 pub struct MezureView {
+    toggle_sprites: Vec<Sprite>,
     columns: ColumnsView,
     ice_grid: elements::ice::GridView,
     laser_grid: LaserField,
@@ -45,24 +46,41 @@ pub struct MezureView {
 }
 
 impl MezureView {
-    pub fn new(resources: &mut Resources, state: &SyzygyState) -> MezureView {
-        MezureView {
-            columns: ColumnsView::new(resources, 330, 250, 0),
+    pub fn new(resources: &mut Resources, state: &mut SyzygyState)
+               -> MezureView {
+        let mut view = MezureView {
+            toggle_sprites: resources.get_sprites("light/toggle"),
+            columns: ColumnsView::new(resources, 324, 236, 0),
             ice_grid: elements::ice::GridView::new(resources,
-                                                   192,
+                                                   176,
                                                    104,
                                                    state.mezure_ice_grid()),
             laser_grid: LaserField::new(resources,
-                                        192,
+                                        176,
                                         104,
                                         state.mezure_laser_grid()),
             pipe_grid: PlaneGridView::new(resources, 60, 104),
             animating_slide: false,
+        };
+        view.recalculate_lasers_and_lights(state);
+        view
+    }
+
+    fn recalculate_lasers_and_lights(&mut self, state: &mut SyzygyState) {
+        let positions = {
+            let grid = state.mezure_laser_grid();
+            self.laser_grid.recalculate_lasers(grid);
+            self.laser_grid.satisfied_detector_positions(grid)
+        };
+        state.set_mezure_satisfied_detectors(positions);
+        for (index, &lit) in state.mezure_lights().iter().enumerate() {
+            let color = if lit { (255, 255, 192) } else { (0, 0, 32) };
+            self.columns.set_hilight_color(index, color);
         }
     }
 
-    pub fn refresh(&mut self, state: &SyzygyState) {
-        self.laser_grid.recalculate_lasers(state.mezure_laser_grid());
+    pub fn refresh(&mut self, state: &mut SyzygyState) {
+        self.recalculate_lasers_and_lights(state);
         self.ice_grid.reset_animation();
     }
 }
@@ -76,13 +94,22 @@ impl Element<SyzygyState, MezureCmd> for MezureView {
         self.ice_grid.draw_ice_blocks(state.mezure_ice_grid(), canvas);
         self.laser_grid.draw_sparks(canvas);
         self.pipe_grid.draw(state.mezure_pipe_grid(), canvas);
+        for column in 0..6 {
+            let pt = Point::new(320 + 32 * column, 232);
+            canvas.draw_sprite(&self.toggle_sprites[0], pt);
+        }
     }
 
     fn handle_event(&mut self, event: &Event, state: &mut SyzygyState)
                     -> Action<MezureCmd> {
         let mut action = {
-            let columns = state.mezure_columns_mut();
-            let subaction = self.columns.handle_event(event, columns);
+            let subaction = {
+                let columns = state.mezure_columns_mut();
+                self.columns.handle_event(event, columns)
+            };
+            if let Some(&(col, by)) = subaction.value() {
+                state.mezure_rotate_column(col, by);
+            }
             subaction.map(|(col, by)| MezureCmd::Columns(col, by))
         };
         if !action.should_stop() {
@@ -104,8 +131,7 @@ impl Element<SyzygyState, MezureCmd> for MezureView {
         }
         if self.animating_slide && !self.ice_grid.is_animating() {
             self.animating_slide = false;
-            let grid = state.mezure_laser_grid();
-            self.laser_grid.recalculate_lasers(grid);
+            self.recalculate_lasers_and_lights(state);
             action.also_redraw();
         }
         if event == &Event::ClockTick {
@@ -121,8 +147,7 @@ impl Element<SyzygyState, MezureCmd> for MezureView {
             match subaction.take_value() {
                 Some(PlaneCmd::Changed) => {
                     state.mezure_regenerate_laser_grid();
-                    let grid = state.mezure_laser_grid();
-                    self.laser_grid.recalculate_lasers(grid);
+                    self.recalculate_lasers_and_lights(state);
                     action.also_redraw();
                 }
                 Some(PlaneCmd::PushUndo(pieces)) => {

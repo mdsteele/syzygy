@@ -17,11 +17,15 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
+use std::cmp;
+use std::rc::Rc;
+
 use elements::{self, PuzzleCmd, PuzzleCore, PuzzleView};
 use elements::column::ColumnsView;
 use elements::lasers::{LaserCmd, LaserField};
 use elements::plane::{PlaneCmd, PlaneGridView};
-use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sound};
+use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
+          Sound};
 use modes::SOLVED_INFO_TEXT;
 use save::{self, Game, PuzzleState, SyzygyStage, SyzygyState};
 use super::mezure::{MezureCmd, MezureView};
@@ -44,6 +48,7 @@ enum UndoRedo {
 
 pub struct View {
     core: PuzzleCore<UndoRedo>,
+    progress: SyzygyProgress,
     yttris: ColumnsView,
     argony: elements::ice::GridView,
     elinsa: PlaneGridView,
@@ -53,21 +58,23 @@ pub struct View {
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect, state: &SyzygyState)
+    pub fn new(resources: &mut Resources, visible: Rect,
+               state: &mut SyzygyState)
                -> View {
         let intro = compile_intro_scene(resources);
         let outro = compile_outro_scene(resources);
         let core = PuzzleCore::new(resources, visible, state, intro, outro);
         View {
             core: core,
-            yttris: ColumnsView::new(resources, 196, 180, 0),
+            progress: SyzygyProgress::new(resources, 320, 288),
+            yttris: ColumnsView::new(resources, 196, 156, 0),
             argony: elements::ice::GridView::new(resources,
-                                                 112,
-                                                 140,
+                                                 144,
+                                                 108,
                                                  state.argony_grid()),
-            elinsa: PlaneGridView::new(resources, 150, 140),
-            ugrent: LaserField::new(resources, 175, 140, state.ugrent_grid()),
-            relyng: LightsGrid::new(resources, 168, 140, state),
+            elinsa: PlaneGridView::new(resources, 168, 108),
+            ugrent: LaserField::new(resources, 176, 108, state.ugrent_grid()),
+            relyng: LightsGrid::new(resources, 168, 124, state),
             mezure: MezureView::new(resources, state),
         }
     }
@@ -77,6 +84,7 @@ impl Element<Game, PuzzleCmd> for View {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
         let state = &game.system_syzygy;
         self.core.draw_back_layer(canvas);
+        self.progress.draw(&(), canvas);
         match state.stage() {
             SyzygyStage::Yttris => {
                 self.yttris.draw(state.yttris_columns(), canvas);
@@ -101,6 +109,10 @@ impl Element<Game, PuzzleCmd> for View {
                     -> Action<PuzzleCmd> {
         let state = &mut game.system_syzygy;
         let mut action = self.core.handle_event(event, state);
+        if !action.should_stop() || event == &Event::ClockTick {
+            let subaction = self.progress.handle_event(event, &mut ());
+            action.merge(subaction.but_no_value());
+        }
         if !action.should_stop() && !state.is_solved() {
             match state.stage() {
                 SyzygyStage::Yttris => {
@@ -260,8 +272,134 @@ impl PuzzleView for View {
     }
 
     fn drain_queue(&mut self) {
-        for (_, _) in self.core.drain_queue() {
-            // TODO drain queue
+        for (device, command) in self.core.drain_queue() {
+            if device == 0 {
+                if command == -2 {
+                    self.progress.finish_animation();
+                } else if command == -1 {
+                    self.progress.start_display();
+                } else if command >= 0 && command <= 6 {
+                    self.progress.set_progress(command as usize);
+                }
+            }
+        }
+    }
+}
+
+// ========================================================================= //
+
+const BRIGHTNESS_SPEED: i32 = 26;
+const ANIM_DISPLAY_FRAMES: i32 = 2;
+
+enum ProgressAnim {
+    Display(i32),
+}
+
+struct SyzygyProgress {
+    left: i32,
+    top: i32,
+    font: Rc<Font>,
+    num_chars: usize,
+    brightness: [i32; 6],
+    goal_brightness: [i32; 6],
+    animation: Option<ProgressAnim>,
+}
+
+impl SyzygyProgress {
+    fn new(resources: &mut Resources, left: i32, top: i32) -> SyzygyProgress {
+        SyzygyProgress {
+            left: left,
+            top: top,
+            font: resources.get_font("block"),
+            num_chars: 0,
+            brightness: [0; 6],
+            goal_brightness: [0; 6],
+            animation: None,
+        }
+    }
+
+    fn rect(&self) -> Rect { Rect::new(self.left, self.top, 192, 32) }
+
+    fn start_display(&mut self) {
+        self.num_chars = 1;
+        self.brightness[0] = 255;
+        self.goal_brightness = [0; 6];
+        self.animation = Some(ProgressAnim::Display(ANIM_DISPLAY_FRAMES));
+    }
+
+    fn set_progress(&mut self, progress: usize) {
+        for (index, goal) in self.goal_brightness.iter_mut().enumerate() {
+            *goal = if index < progress { 200 } else { 0 };
+        }
+    }
+
+    fn finish_animation(&mut self) {
+        match self.animation.take() {
+            Some(ProgressAnim::Display(_)) => {
+                self.num_chars = 6;
+            }
+            None => {}
+        }
+        self.brightness = self.goal_brightness;
+    }
+}
+
+impl Element<(), ()> for SyzygyProgress {
+    fn draw(&self, _: &(), canvas: &mut Canvas) {
+        let mut canvas = canvas.subcanvas(self.rect());
+        for (index, &brightness) in self.brightness.iter().enumerate() {
+            debug_assert!(brightness >= 0 && brightness <= 255);
+            let color = (brightness as u8, 0, 0);
+            canvas.fill_rect(color, Rect::new(32 * (index as i32), 0, 32, 32));
+        }
+        for (index, chr) in "SYZYGY".chars().enumerate() {
+            if index >= self.num_chars {
+                break;
+            }
+            let pt = Point::new(16 + 32 * (index as i32), 25);
+            canvas.draw_char(&self.font, Align::Center, pt, chr);
+        }
+    }
+
+    fn handle_event(&mut self, event: &Event, _: &mut ()) -> Action<()> {
+        match event {
+            &Event::ClockTick => {
+                let mut redraw = false;
+                match self.animation.take() {
+                    Some(ProgressAnim::Display(frames)) => {
+                        let frames = frames - 1;
+                        if frames > 0 {
+                            self.animation =
+                                Some(ProgressAnim::Display(frames));
+                        } else {
+                            self.brightness[self.num_chars] = 255;
+                            self.num_chars += 1;
+                            redraw = true;
+                            if self.num_chars < 6 {
+                                let frames = ANIM_DISPLAY_FRAMES;
+                                self.animation =
+                                    Some(ProgressAnim::Display(frames));
+                            }
+                        }
+                    }
+                    None => {}
+                }
+                for index in 0..6 {
+                    let current = self.brightness[index];
+                    let goal = self.goal_brightness[index];
+                    if current < goal {
+                        self.brightness[index] =
+                            cmp::min(goal, current + BRIGHTNESS_SPEED);
+                        redraw = true;
+                    } else if current > goal {
+                        self.brightness[index] =
+                            cmp::max(goal, current - BRIGHTNESS_SPEED);
+                        redraw = true;
+                    }
+                }
+                Action::redraw_if(redraw)
+            }
+            _ => Action::ignore(),
         }
     }
 }

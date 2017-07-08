@@ -32,7 +32,9 @@ use self::view::View;
 pub fn run_system_syzygy(window: &mut Window, game: &mut Game) -> Mode {
     let view = {
         let visible_rect = window.visible_rect();
-        View::new(&mut window.resources(), visible_rect, &game.system_syzygy)
+        View::new(&mut window.resources(),
+                  visible_rect,
+                  &mut game.system_syzygy)
     };
     run_puzzle(window, game, view)
 }

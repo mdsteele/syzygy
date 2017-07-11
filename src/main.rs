@@ -223,6 +223,9 @@ fn main() {
                         Location::PlaneAsDay => {
                             modes::run_plane_as_day(&mut window, game)
                         }
+                        Location::PointOfNoReturn => {
+                            modes::run_point_of_no_return(&mut window, game)
+                        }
                         Location::PointOfOrder => {
                             modes::run_point_of_order(&mut window, game)
                         }

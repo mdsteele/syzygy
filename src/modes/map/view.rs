@@ -58,6 +58,7 @@ const NODES: &[(Location, (i32, i32), bool)] = &[
     (Location::PasswordFile, (224, 224), false),
     (Location::PlaneAndSimple, (416, 48), false),
     (Location::PlaneAsDay, (448, 48), false),
+    (Location::PointOfNoReturn, (320, 48), false),
     (Location::PointOfOrder, (416, 96), false),
     (Location::PointOfView, (288, 48), false),
     (Location::ShiftGears, (128, 48), false),
@@ -298,10 +299,11 @@ Repaired nodes are marked in green.";
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashSet;
+    use std::collections::{HashMap, HashSet};
 
+    use gui::Rect;
     use save::Location;
-    use super::NODES;
+    use super::{NODES, NODE_HEIGHT, NODE_WIDTH};
 
     #[test]
     fn all_locations_represented_on_map() {
@@ -314,6 +316,39 @@ mod tests {
         assert!(locations.is_empty(),
                 "Unrepresented locations: {:?}",
                 locations);
+    }
+
+    #[test]
+    fn no_repeated_locations_on_map() {
+        let mut locations: HashSet<Location> = HashSet::new();
+        for &(loc, _, _) in NODES {
+            assert!(!locations.contains(&loc), "Repeated: {:?}", loc);
+            locations.insert(loc);
+        }
+    }
+
+    #[test]
+    fn nodes_do_not_overlap_on_map() {
+        let rects: HashMap<Location, Rect> =
+            NODES.iter()
+                 .map(|&(loc, (x, y), _)| {
+                (loc,
+                 Rect::new(x - (NODE_WIDTH / 2) as i32,
+                           y - (NODE_HEIGHT / 2) as i32,
+                           NODE_WIDTH,
+                           NODE_HEIGHT))
+            })
+                 .collect();
+        for (&loc1, &rect1) in rects.iter() {
+            for (&loc2, &rect2) in rects.iter() {
+                if loc1 != loc2 {
+                    assert!(!rect1.has_intersection(rect2),
+                            "{:?} intersects {:?}",
+                            loc1,
+                            loc2);
+                }
+            }
+        }
     }
 }
 

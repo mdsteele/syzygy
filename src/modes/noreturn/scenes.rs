@@ -17,44 +17,44 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod access;
-mod color;
-pub mod column;
-mod crossword;
-mod data;
-pub mod device;
-mod direction;
-mod game;
-pub mod ice;
-mod location;
-pub mod memory;
-mod path;
-pub mod plane;
-mod prefs;
-mod puzzles;
-pub mod pyramid;
-pub mod tree;
-pub mod util;
+use elements::{Ast, Scene, TalkPos, TalkStyle};
+use gui::{Resources, Sound};
 
-pub use self::access::Access;
-pub use self::color::{MixedColor, PrimaryColor};
-pub use self::crossword::{CrosswordState, ValidChars};
-pub use self::data::SaveData;
-pub use self::direction::Direction;
-pub use self::game::Game;
-pub use self::location::Location;
-pub use self::path::get_default_save_file_path;
-pub use self::prefs::Prefs;
-pub use self::puzzles::{AtticState, AutoState, BlackState, BlameState,
-                        CubeState, DayState, DisconState, DotsState,
-                        DoubleState, FailureState, FictionState, FinaleState,
-                        GearsState, GroundState, HeadedState, HexState,
-                        IcyEmState, JogState, LaneState, LevelUpState,
-                        LineState, LogLevelState, MeetState, MissedState,
-                        NoReturnState, OrderState, PasswordState, PovState,
-                        PrologState, PuzzleState, RightState, SauceState,
-                        ServesState, SimpleState, StarState, SyrupState,
-                        SyzygyStage, SyzygyState, TheYState, TreadState,
-                        VirtueState, WhatchaState, WordDir, WreckedState};
+// ========================================================================= //
+
+pub const YTTRIS: i32 = 1;
+
+// ========================================================================= //
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::SetBg("point_of_no_return"),
+            Ast::Place(YTTRIS, "chars/yttris", 0, (-16, 176)),
+            Ast::Slide(YTTRIS, (100, 176), true, true, 1.0),
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NE,
+                      "Let's have a look."),
+        ]),
+    ];
+    Ast::compile_scene(resources, ast)
+}
+
+// ========================================================================= //
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::solve_puzzle_chime()),
+            Ast::Wait(1.0),
+            Ast::Slide(YTTRIS, (592, 176), true, false, 1.0),
+            Ast::Remove(YTTRIS),
+        ]),
+    ];
+    Ast::compile_scene(resources, ast)
+}
 
 // ========================================================================= //

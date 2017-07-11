@@ -72,7 +72,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         ]),
         Ast::Seq(vec![
             Ast::Slide(0, (592, 320), true, false, 0.75),
-            Ast::Place(0, "chars/elinsa", 0, (-16, 320)),
+            Ast::SetPos(0, (-16, 320)),
             Ast::SetBg("shifting_ground_2"),
             Ast::Queue(-1, 1), // Show platforms/arrows
             Ast::Place(1, "chars/yttris", 0, (112, 320)),

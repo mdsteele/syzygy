@@ -50,7 +50,7 @@ const DASHBOARD_CHIPS: &[(i32, i32, Location)] = &[
     (167, 155, Location::LevelUp),
     (209, 155, Location::HexSpangled),
     (251, 155, Location::WhatchaColumn),
-    (293, 155, Location::ALightInTheAttic),
+    (293, 155, Location::PointOfNoReturn),
     (335, 155, Location::CrossSauce),
     (377, 155, Location::PointOfView),
     (167, 197, Location::LogLevel),
@@ -860,6 +860,15 @@ mod tests {
         assert!(locations.is_empty(),
                 "Unrepresented puzzles: {:?}",
                 locations);
+    }
+
+    #[test]
+    fn no_repeated_locations_on_dashboard() {
+        let mut locations: HashSet<Location> = HashSet::new();
+        for &(_, _, loc) in DASHBOARD_CHIPS {
+            assert!(!locations.contains(&loc), "Repeated: {:?}", loc);
+            locations.insert(loc);
+        }
     }
 }
 

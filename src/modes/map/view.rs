@@ -28,52 +28,52 @@ use save::{Access, Game, Location};
 
 // ========================================================================= //
 
-const NODE_WIDTH: u32 = 24;
-const NODE_HEIGHT: u32 = 24;
+const NODE_WIDTH: u32 = 28;
+const NODE_HEIGHT: u32 = 28;
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
 const NODES: &[(Location, (i32, i32), bool)] = &[
-    (Location::Prolog, (108, 160), false),
+    (Location::Prolog, (112, 160), false),
     (Location::ALightInTheAttic, (224, 112), true),
     (Location::AutofacTour, (240, 144), false),
     (Location::BlackAndBlue, (384, 128), false),
-    (Location::ColumnAsIcyEm, (353, 210), false),
+    (Location::ColumnAsIcyEm, (416, 160), false),
     (Location::ConnectTheDots, (224, 48), false),
     (Location::CrossSauce, (352, 48), false),
     (Location::CrossTheLine, (176, 179), true),
-    (Location::CubeTangle, (304, 272), false),
-    (Location::Disconnected, (128, 224), false),
+    (Location::CubeTangle, (304, 256), false),
+    (Location::Disconnected, (112, 208), false),
     (Location::DoubleCross, (320, 112), false),
     (Location::FactOrFiction, (208, 144), false),
-    (Location::HexSpangled, (336, 272), false),
-    (Location::IceToMeetYou, (353, 236), false),
+    (Location::HexSpangled, (336, 256), false),
+    (Location::IceToMeetYou, (416, 192), false),
     (Location::IfMemoryServes, (432, 272), false),
     (Location::JogYourMemory, (464, 272), false),
-    (Location::LevelHeaded, (192, 48), false),
-    (Location::LevelUp, (160, 48), false),
+    (Location::LevelHeaded, (432, 128), false),
+    (Location::LevelUp, (480, 176), false),
     (Location::LightSyrup, (256, 112), false),
-    (Location::LogLevel, (160, 224), false),
-    (Location::MemoryLane, (400, 272), false),
+    (Location::LogLevel, (144, 208), false),
+    (Location::MemoryLane, (208, 179), false),
     (Location::MissedConnections, (256, 48), false),
-    (Location::PasswordFile, (224, 224), false),
+    (Location::PasswordFile, (224, 240), false),
     (Location::PlaneAndSimple, (416, 48), false),
     (Location::PlaneAsDay, (448, 48), false),
     (Location::PointOfNoReturn, (320, 48), false),
     (Location::PointOfOrder, (416, 96), false),
-    (Location::PointOfView, (288, 48), false),
+    (Location::PointOfView, (336, 288), false),
     (Location::ShiftGears, (128, 48), false),
     (Location::ShiftTheBlame, (384, 96), false),
     (Location::ShiftingGround, (272, 288), false),
     (Location::StarCrossed, (384, 48), false),
-    (Location::SystemFailure, (192, 224), false),
-    (Location::SystemSyzygy, (208, 256), false),
-    (Location::TheIceIsRight, (383, 236), false),
+    (Location::SystemFailure, (192, 240), true),
+    (Location::SystemSyzygy, (224, 272), false),
+    (Location::TheIceIsRight, (448, 192), false),
     (Location::TheYFactor, (176, 144), true),
     (Location::TreadLightly, (288, 112), false),
-    (Location::VirtueOrIce, (383, 210), false),
+    (Location::VirtueOrIce, (448, 160), true),
     (Location::WhatchaColumn, (352, 128), false),
-    (Location::WreckedAngle, (272, 256), true),
-    (Location::Finale, (176, 256), false),
+    (Location::WreckedAngle, (272, 256), false),
+    (Location::Finale, (192, 272), false),
 ];
 
 // ========================================================================= //
@@ -93,7 +93,8 @@ pub struct View {
     background: Rc<Background>,
     map_sprites: Vec<(Sprite, Point)>,
     nodes: Vec<PuzzleNode>,
-    paths: Vec<Rect>,
+    paths_outer: Vec<Rect>,
+    paths_inner: Vec<Rect>,
     selected: Option<Location>,
 }
 
@@ -104,7 +105,8 @@ impl View {
                  .map(|&(loc, pt, _)| (loc, pt))
                  .collect();
         let mut nodes = Vec::new();
-        let mut paths = Vec::new();
+        let mut paths_outer = Vec::new();
+        let mut paths_inner = Vec::new();
         for &(location, (x, y), invert) in NODES {
             if game.is_unlocked(location) {
                 let left = x - NODE_WIDTH as i32 / 2;
@@ -116,17 +118,47 @@ impl View {
                         let w = (px - x).abs() as u32;
                         let h = (py - y).abs() as u32;
                         if (w < h) ^ invert {
-                            paths.push(Rect::new(min(x, px) - 2,
-                                                 y - 2,
-                                                 w + 4,
-                                                 4));
-                            paths.push(Rect::new(px - 2, min(y, py), 4, h));
+                            if w > 0 {
+                                paths_outer.push(Rect::new(min(x, px) - 1,
+                                                           y - 2,
+                                                           w + 2,
+                                                           4));
+                                paths_inner.push(Rect::new(min(x, px),
+                                                           y - 1,
+                                                           w,
+                                                           2));
+                            }
+                            if h > 0 {
+                                paths_outer.push(Rect::new(px - 2,
+                                                           min(y, py) - 1,
+                                                           4,
+                                                           h + 2));
+                                paths_inner.push(Rect::new(px - 1,
+                                                           min(y, py),
+                                                           2,
+                                                           h));
+                            }
                         } else {
-                            paths.push(Rect::new(x - 2,
-                                                 min(y, py) - 2,
-                                                 4,
-                                                 h + 4));
-                            paths.push(Rect::new(min(x, px), py - 2, w, 4));
+                            if h > 0 {
+                                paths_outer.push(Rect::new(x - 2,
+                                                           min(y, py) - 1,
+                                                           4,
+                                                           h + 2));
+                                paths_inner.push(Rect::new(x - 1,
+                                                           min(y, py),
+                                                           2,
+                                                           h));
+                            }
+                            if w > 0 {
+                                paths_outer.push(Rect::new(min(x, px) - 1,
+                                                           py - 2,
+                                                           w + 2,
+                                                           4));
+                                paths_inner.push(Rect::new(min(x, px),
+                                                           py - 1,
+                                                           w,
+                                                           2));
+                            }
                         }
                     }
                 }
@@ -150,7 +182,7 @@ impl View {
                           game.is_unlocked(Location::VirtueOrIce) ||
                           game.is_unlocked(Location::ColumnAsIcyEm);
             let idx = if is_open { 1 } else { 0 };
-            map_sprites.push((sprites.swap_remove(idx), Point::new(336, 192)));
+            map_sprites.push((sprites.swap_remove(idx), Point::new(400, 144)));
         }
         {
             let sprites = resources.get_sprites("map/power");
@@ -169,7 +201,8 @@ impl View {
             background: resources.get_background("map"),
             map_sprites: map_sprites,
             nodes: nodes,
-            paths: paths,
+            paths_outer: paths_outer,
+            paths_inner: paths_inner,
             selected: None,
         }
     }
@@ -194,7 +227,10 @@ impl Element<Game, Cmd> for View {
         for &(ref sprite, point) in self.map_sprites.iter() {
             canvas.draw_sprite(sprite, point);
         }
-        for &rect in &self.paths {
+        for &rect in &self.paths_outer {
+            canvas.fill_rect((96, 64, 0), rect);
+        }
+        for &rect in &self.paths_inner {
             canvas.fill_rect((192, 128, 0), rect);
         }
         self.nodes.draw(&self.selected, canvas);
@@ -236,7 +272,8 @@ impl Element<Game, Cmd> for View {
 // ========================================================================= //
 
 struct PuzzleNode {
-    icon: Sprite,
+    sprites: Vec<Sprite>,
+    sprite_index: usize,
     rect: Rect,
     loc: Location,
 }
@@ -245,16 +282,18 @@ impl PuzzleNode {
     fn new(resources: &mut Resources, rect: Rect, location: Location,
            game: &Game)
            -> PuzzleNode {
-        let index = if game.has_been_solved(location) {
+        let sprite_index = if game.has_been_solved(location) {
             1
         } else if location == Location::SystemFailure &&
-                              !game.system_failure.mid_scene_is_done() {
+                                     !game.system_failure
+                                          .mid_scene_is_done() {
             2
         } else {
             0
         };
         PuzzleNode {
-            icon: resources.get_sprites("map/nodes")[index].clone(),
+            sprites: resources.get_sprites("map/nodes"),
+            sprite_index: sprite_index,
             rect: rect,
             loc: location,
         }
@@ -263,9 +302,10 @@ impl PuzzleNode {
 
 impl Element<Option<Location>, Location> for PuzzleNode {
     fn draw(&self, selected: &Option<Location>, canvas: &mut Canvas) {
-        canvas.draw_sprite(&self.icon, self.rect.top_left());
+        let top_left = self.rect.top_left();
+        canvas.draw_sprite(&self.sprites[self.sprite_index], top_left);
         if *selected == Some(self.loc) {
-            canvas.draw_rect((255, 255, 255), self.rect);
+            canvas.draw_sprite(&self.sprites[3], top_left);
         }
     }
 

@@ -22,7 +22,7 @@ use toml;
 
 // ========================================================================= //
 
-#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Location {
     Map,
     Prolog,
@@ -128,7 +128,7 @@ impl Location {
             Location::ColumnAsIcyEm => Location::Map,
             Location::ConnectTheDots => Location::MissedConnections,
             Location::CrossSauce => Location::StarCrossed,
-            Location::CrossTheLine => Location::Map,
+            Location::CrossTheLine => Location::MemoryLane,
             Location::CubeTangle => Location::HexSpangled,
             Location::Disconnected => Location::LogLevel,
             Location::DoubleCross => Location::WhatchaColumn,
@@ -138,24 +138,24 @@ impl Location {
             Location::IfMemoryServes => Location::JogYourMemory,
             Location::JogYourMemory => Location::Map,
             Location::LevelHeaded => Location::Map,
-            Location::LevelUp => Location::LevelHeaded,
+            Location::LevelUp => Location::VirtueOrIce,
             Location::LightSyrup => Location::TreadLightly,
             Location::LogLevel => Location::SystemFailure,
-            Location::MemoryLane => Location::JogYourMemory,
+            Location::MemoryLane => Location::Map,
             Location::MissedConnections => Location::Map,
             Location::PasswordFile => Location::SystemSyzygy,
             Location::PlaneAndSimple => Location::PlaneAsDay,
             Location::PlaneAsDay => Location::Map,
             Location::PointOfNoReturn => Location::Map,
             Location::PointOfOrder => Location::Map,
-            Location::PointOfView => Location::ColumnAsIcyEm,
+            Location::PointOfView => Location::Map,
             Location::ShiftGears => Location::Map,
             Location::ShiftTheBlame => Location::PointOfOrder,
             Location::ShiftingGround => Location::CubeTangle,
             Location::StarCrossed => Location::Map,
             Location::SystemFailure => Location::PasswordFile,
             Location::SystemSyzygy => Location::Finale,
-            Location::TheIceIsRight => Location::VirtueOrIce,
+            Location::TheIceIsRight => Location::LevelUp,
             Location::TheYFactor => Location::Map,
             Location::TreadLightly => Location::DoubleCross,
             Location::VirtueOrIce => Location::Map,
@@ -182,20 +182,20 @@ impl Location {
             Location::FactOrFiction => vec![],
             Location::HexSpangled => vec![Location::CubeTangle],
             Location::IceToMeetYou => vec![],
-            Location::IfMemoryServes => vec![Location::MemoryLane],
+            Location::IfMemoryServes => vec![],
             Location::JogYourMemory => vec![Location::IfMemoryServes],
-            Location::LevelHeaded => vec![Location::LevelUp],
-            Location::LevelUp => vec![],
+            Location::LevelHeaded => vec![Location::ColumnAsIcyEm],
+            Location::LevelUp => vec![Location::TheIceIsRight],
             Location::LightSyrup => vec![Location::ALightInTheAttic],
             Location::LogLevel => vec![Location::Disconnected],
-            Location::MemoryLane => vec![Location::HexSpangled],
+            Location::MemoryLane => vec![Location::CrossTheLine],
             Location::MissedConnections => vec![Location::ConnectTheDots],
             Location::PasswordFile => vec![Location::SystemFailure],
             Location::PlaneAndSimple => vec![],
             Location::PlaneAsDay => vec![Location::PlaneAndSimple],
             Location::PointOfNoReturn => vec![],
             Location::PointOfOrder => vec![Location::ShiftTheBlame],
-            Location::PointOfView => vec![],
+            Location::PointOfView => vec![Location::ShiftingGround],
             Location::ShiftGears => vec![],
             Location::ShiftTheBlame => vec![Location::BlackAndBlue],
             Location::ShiftingGround => vec![Location::WreckedAngle],
@@ -205,9 +205,9 @@ impl Location {
             Location::TheIceIsRight => vec![Location::IceToMeetYou],
             Location::TheYFactor => vec![Location::Prolog],
             Location::TreadLightly => vec![Location::LightSyrup],
-            Location::VirtueOrIce => vec![Location::TheIceIsRight],
+            Location::VirtueOrIce => vec![Location::LevelUp],
             Location::WhatchaColumn => vec![Location::DoubleCross],
-            Location::WreckedAngle => vec![Location::Prolog],
+            Location::WreckedAngle => vec![Location::LogLevel],
             Location::Finale => vec![Location::SystemSyzygy],
         }
     }
@@ -333,6 +333,22 @@ mod tests {
         for original in Location::all() {
             let result = Location::from_toml(Some(&original.to_toml()));
             assert_eq!(result, *original);
+        }
+    }
+
+    #[test]
+    fn come_from_prereq() {
+        for from in Location::all() {
+            let to = from.next();
+            if to != Location::Map {
+                let prereqs = to.prereqs();
+                assert!(prereqs.contains(&from),
+                        "{:?} leads to {:?}, but isn't one of its prereqs \
+                         ({:?})",
+                        from,
+                        to,
+                        prereqs);
+            }
         }
     }
 }

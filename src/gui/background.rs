@@ -47,12 +47,13 @@ impl Background {
         let red = try!(read_int(file.by_ref(), b' ')) as u8;
         let green = try!(read_int(file.by_ref(), b' ')) as u8;
         let blue = try!(read_int(file.by_ref(), b'\n')) as u8;
-        let mut tileset: Vec<Vec<Sprite>> = Vec::new();
+        let mut tileset: Vec<(String, Vec<Sprite>)> = Vec::new();
         loop {
             match try!(read_byte(file.by_ref())) {
                 b'>' => {
                     let filename = try!(read_string(file.by_ref(), b'\n'));
-                    tileset.push(get_sprites(&filename));
+                    let sprites = get_sprites(&filename);
+                    tileset.push((filename, sprites));
                 }
                 b'\n' => break,
                 byte => {
@@ -62,6 +63,7 @@ impl Background {
                 }
             }
         }
+        let mut used_file = vec![false; tileset.len()];
         let mut tiles: Vec<Option<Sprite>> = Vec::new();
         for _ in 0..NUM_ROWS {
             let mut col = 0;
@@ -82,12 +84,20 @@ impl Background {
                     tiles.push(None);
                 } else {
                     let file_index = try!(base62_index(byte1, tileset.len()));
-                    let sprites = &tileset[file_index];
+                    let sprites = &tileset[file_index].1;
                     let tile_index = try!(base62_index(byte2, sprites.len()));
                     let sprite = &sprites[tile_index];
                     tiles.push(Some(sprite.clone()));
+                    used_file[file_index] = true;
                 }
                 col += 1;
+            }
+        }
+        for file_index in 0..tileset.len() {
+            if !used_file[file_index] {
+                println!("WARNING: {:?} doesn't use {}",
+                         path,
+                         tileset[file_index].0);
             }
         }
         Ok(Background {

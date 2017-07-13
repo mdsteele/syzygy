@@ -40,7 +40,7 @@ impl View {
         let core = PuzzleCore::new(resources, visible, state, intro, outro);
         View {
             core: core,
-            columns: ColumnsView::new(resources, 200, 124, 0),
+            columns: ColumnsView::new(resources, 278, 108, 0),
         }
     }
 }

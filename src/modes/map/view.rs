@@ -33,46 +33,46 @@ const NODE_HEIGHT: u32 = 28;
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
 const NODES: &[(Location, (i32, i32), bool)] = &[
-    (Location::Prolog, (112, 160), false),
-    (Location::ALightInTheAttic, (224, 112), true),
-    (Location::AutofacTour, (240, 144), false),
+    (Location::Prolog, (112, 144), false),
+    (Location::ALightInTheAttic, (224, 112), false),
+    (Location::AutofacTour, (368, 160), false),
     (Location::BlackAndBlue, (384, 128), false),
     (Location::ColumnAsIcyEm, (416, 160), false),
-    (Location::ConnectTheDots, (224, 48), false),
-    (Location::CrossSauce, (352, 48), false),
-    (Location::CrossTheLine, (176, 179), true),
+    (Location::ConnectTheDots, (208, 208), false),
+    (Location::CrossSauce, (384, 288), false),
+    (Location::CrossTheLine, (160, 176), true),
     (Location::CubeTangle, (304, 256), false),
-    (Location::Disconnected, (112, 208), false),
+    (Location::Disconnected, (128, 208), false),
     (Location::DoubleCross, (320, 112), false),
-    (Location::FactOrFiction, (208, 144), false),
-    (Location::HexSpangled, (336, 256), false),
-    (Location::IceToMeetYou, (416, 192), false),
-    (Location::IfMemoryServes, (432, 272), false),
-    (Location::JogYourMemory, (464, 272), false),
-    (Location::LevelHeaded, (432, 128), false),
+    (Location::FactOrFiction, (480, 224), false),
+    (Location::HexSpangled, (304, 176), false),
+    (Location::IceToMeetYou, (416, 192), true),
+    (Location::IfMemoryServes, (384, 208), false),
+    (Location::JogYourMemory, (480, 256), false),
+    (Location::LevelHeaded, (440, 128), false),
     (Location::LevelUp, (480, 176), false),
     (Location::LightSyrup, (256, 112), false),
-    (Location::LogLevel, (144, 208), false),
-    (Location::MemoryLane, (208, 179), false),
-    (Location::MissedConnections, (256, 48), false),
+    (Location::LogLevel, (160, 208), false),
+    (Location::MemoryLane, (240, 176), false),
+    (Location::MissedConnections, (336, 208), true),
     (Location::PasswordFile, (224, 240), false),
-    (Location::PlaneAndSimple, (416, 48), false),
-    (Location::PlaneAsDay, (448, 48), false),
-    (Location::PointOfNoReturn, (320, 48), false),
+    (Location::PlaneAndSimple, (208, 176), false),
+    (Location::PlaneAsDay, (352, 256), false),
+    (Location::PointOfNoReturn, (448, 256), false),
     (Location::PointOfOrder, (416, 96), false),
     (Location::PointOfView, (336, 288), false),
-    (Location::ShiftGears, (128, 48), false),
+    (Location::ShiftGears, (432, 288), false),
     (Location::ShiftTheBlame, (384, 96), false),
     (Location::ShiftingGround, (272, 288), false),
-    (Location::StarCrossed, (384, 48), false),
+    (Location::StarCrossed, (432, 224), true),
     (Location::SystemFailure, (192, 240), true),
     (Location::SystemSyzygy, (224, 272), false),
     (Location::TheIceIsRight, (448, 192), false),
-    (Location::TheYFactor, (176, 144), true),
+    (Location::TheYFactor, (304, 144), true),
     (Location::TreadLightly, (288, 112), false),
     (Location::VirtueOrIce, (448, 160), true),
     (Location::WhatchaColumn, (352, 128), false),
-    (Location::WreckedAngle, (272, 256), false),
+    (Location::WreckedAngle, (272, 240), false),
     (Location::Finale, (192, 272), false),
 ];
 
@@ -172,8 +172,10 @@ impl View {
         }
         {
             let sprites = resources.get_sprites("map/checkpoints");
-            map_sprites.push((sprites[0].clone(), Point::new(160, 160)));
+            map_sprites.push((sprites[0].clone(), Point::new(144, 160)));
             map_sprites.push((sprites[1].clone(), Point::new(304, 96)));
+            map_sprites.push((sprites[2].clone(), Point::new(368, 272)));
+            map_sprites.push((sprites[3].clone(), Point::new(416, 208)));
         }
         {
             let mut sprites = resources.get_sprites("map/icebox");

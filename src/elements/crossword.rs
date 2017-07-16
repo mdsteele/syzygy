@@ -29,7 +29,6 @@ use save::CrosswordState;
 
 const BOX_USIZE: u32 = 24;
 const BOX_SIZE: i32 = BOX_USIZE as i32;
-const CLUE_MARGIN_VERT: i32 = 8;
 const ANIM_WORD_DELAY_FRAMES: i32 = 1;
 const ANIM_FADE_FRAMES: i32 = 5;
 
@@ -38,24 +37,30 @@ const ANIM_FADE_FRAMES: i32 = 5;
 pub struct CrosswordView {
     block_font: Rc<Font>,
     clue_font: Rc<Font>,
-    center_x: i32,
-    top: i32,
+    crossword_center_x: i32,
+    crossword_top: i32,
     offsets_and_clues: &'static [(i32, &'static str)],
+    clue_center_x: i32,
+    clue_top: i32,
     cursor: Option<(i32, i32)>,
     animation: Option<i32>,
 }
 
 impl CrosswordView {
-    pub fn new(resources: &mut Resources, center_x: i32, top: i32,
-               offsets_and_clues: &'static [(i32, &'static str)])
+    pub fn new(resources: &mut Resources,
+               (crossword_center_x, crossword_top): (i32, i32),
+               offsets_and_clues: &'static [(i32, &'static str)],
+               (clue_center_x, clue_top): (i32, i32))
                -> CrosswordView {
         assert!(!offsets_and_clues.is_empty());
         CrosswordView {
             block_font: resources.get_font("block"),
             clue_font: resources.get_font("roman"),
-            center_x: center_x,
-            top: top,
+            crossword_center_x: crossword_center_x,
+            crossword_top: crossword_top,
             offsets_and_clues: offsets_and_clues,
+            clue_center_x: clue_center_x,
+            clue_top: clue_top,
             cursor: None,
             animation: None,
         }
@@ -173,9 +178,10 @@ impl CrosswordView {
 impl Element<CrosswordState, (i32, i32, char)> for CrosswordView {
     fn draw(&self, state: &CrosswordState, canvas: &mut Canvas) {
         for (row, word) in state.words().iter().enumerate() {
-            let top = self.top + BOX_SIZE * row as i32;
+            let top = self.crossword_top + BOX_SIZE * row as i32;
             let offset = self.offsets_and_clues[row].0;
-            let word_left = self.center_x - BOX_SIZE / 2 - BOX_SIZE * offset;
+            let word_left = self.crossword_center_x - BOX_SIZE / 2 -
+                            BOX_SIZE * offset;
             for (index, &chr) in word.iter().enumerate() {
                 let index = index as i32;
                 let left = word_left + BOX_SIZE * index;
@@ -193,15 +199,13 @@ impl Element<CrosswordState, (i32, i32, char)> for CrosswordView {
             let clue = self.offsets_and_clues[row as usize].1;
             if !clue.is_empty() {
                 let width = max(0, self.clue_font.text_width(clue)) + 8;
-                let rect = Rect::new(self.center_x - width / 2,
-                                     self.top +
-                                     BOX_SIZE * state.words().len() as i32 +
-                                     CLUE_MARGIN_VERT,
+                let rect = Rect::new(self.clue_center_x - width / 2,
+                                     self.clue_top,
                                      width as u32,
                                      17);
                 canvas.fill_rect((192, 192, 192), rect);
                 canvas.draw_rect((128, 128, 128), rect);
-                let pt = Point::new(self.center_x, rect.top() + 12);
+                let pt = Point::new(self.clue_center_x, rect.top() + 12);
                 canvas.draw_text(&self.clue_font, Align::Center, pt, clue);
             }
         }
@@ -220,12 +224,12 @@ impl Element<CrosswordState, (i32, i32, char)> for CrosswordView {
                 }
             }
             &Event::MouseDown(pt) => {
-                let row = (pt.y() - self.top) / BOX_SIZE;
+                let row = (pt.y() - self.crossword_top) / BOX_SIZE;
                 if row < 0 || row >= state.words().len() as i32 {
                     return Action::ignore();
                 }
                 let offset = self.offsets_and_clues[row as usize].0;
-                let word_left = self.center_x - BOX_SIZE / 2 -
+                let word_left = self.crossword_center_x - BOX_SIZE / 2 -
                                 BOX_SIZE * offset;
                 let index = (pt.x() - word_left) / BOX_SIZE;
                 if index < 0 ||

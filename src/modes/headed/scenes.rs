@@ -26,10 +26,9 @@ use gui::{Resources, Sound};
 pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
-            // TODO: Make a background for "Level-Headed".
-            Ast::SetBg("log_level"),
-            Ast::Place(0, "chars/mezure", 0, (-16, 160)),
-            Ast::Slide(0, (140, 160), false, true, 1.0),
+            Ast::SetBg("level_headed"),
+            Ast::Place(0, "chars/mezure", 0, (-16, 192)),
+            Ast::Slide(0, (64, 192), false, true, 1.0),
         ]),
     ];
     Ast::compile_scene(resources, ast)

@@ -38,7 +38,10 @@ impl View {
         let core = PuzzleCore::new(resources, visible, state, intro, outro);
         View {
             core: core,
-            crossword: CrosswordView::new(resources, 364, 56, OFFSETS_CLUES),
+            crossword: CrosswordView::new(resources,
+                                          (427, 76),
+                                          OFFSETS_CLUES,
+                                          (416, 310)),
         }
     }
 }

@@ -42,7 +42,7 @@ impl View {
         };
         View {
             core: core,
-            grid: GridView::new(resources, 176, 44, state.grid()),
+            grid: GridView::new(resources, 80, 64, state.grid()),
         }
     }
 }

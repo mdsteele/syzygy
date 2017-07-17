@@ -74,23 +74,23 @@ impl VirtueState {
         let yellow = Symbol::YellowRhombus(true, true);
         let purple = Symbol::PurpleCheckmark(Transform::identity());
         let mut grid = ObjectGrid::new(8, 7);
-        grid.add_object(7, 0, Object::Wall);
-        grid.add_object(6, 1, Object::Wall);
+        grid.add_object(7, 0, Object::Gap);
+        grid.add_object(6, 1, Object::Gap);
         grid.add_object(7, 1, Object::Goal(yellow));
         grid.add_object(5, 2, Object::PushPop(Direction::North));
         grid.add_object(0, 3, Object::Goal(red));
-        grid.add_object(1, 3, Object::Wall);
+        grid.add_object(1, 3, Object::Gap);
         grid.add_object(2, 3, Object::Reflector(true));
-        grid.add_object(3, 3, Object::Wall);
+        grid.add_object(3, 3, Object::Gap);
         grid.add_object(4, 3, Object::Rotator);
-        grid.add_object(5, 3, Object::Wall);
-        grid.add_object(6, 3, Object::Wall);
-        grid.add_object(7, 3, Object::Wall);
+        grid.add_object(5, 3, Object::Gap);
+        grid.add_object(6, 3, Object::Gap);
+        grid.add_object(7, 3, Object::Gap);
         grid.add_object(3, 4, Object::PushPop(Direction::South));
-        grid.add_object(2, 5, Object::Wall);
-        grid.add_object(6, 5, Object::Wall);
+        grid.add_object(2, 5, Object::Gap);
+        grid.add_object(6, 5, Object::Gap);
         grid.add_object(7, 5, Object::Goal(purple));
-        grid.add_object(7, 6, Object::Wall);
+        grid.add_object(7, 6, Object::Gap);
         grid
     }
 

@@ -26,10 +26,9 @@ use gui::{Resources, Sound};
 pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
-            // TODO: make a background for "Virtue or Ice"
-            Ast::SetBg("column_as_icy_em"),
+            Ast::SetBg("virtue_or_ice"),
             Ast::Place(0, "chars/mezure", 0, (-16, 304)),
-            Ast::Slide(0, (304, 304), true, true, 1.0),
+            Ast::Slide(0, (404, 304), true, true, 1.0),
             Ast::Wait(0.5),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(0, TalkStyle::Normal, TalkPos::NE, "Let's have a look."),

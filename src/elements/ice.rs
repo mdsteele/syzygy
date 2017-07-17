@@ -205,6 +205,7 @@ impl GridView {
             let center = coords * GRID_CELL_SIZE +
                          Point::new(GRID_CELL_SIZE / 2, GRID_CELL_SIZE / 2);
             match object {
+                Object::Gap => {}
                 Object::Wall => {
                     canvas.draw_sprite_centered(&self.obj_sprites[1], center);
                 }
@@ -258,7 +259,24 @@ impl GridView {
 
 impl Element<ObjectGrid, (Point, Direction)> for GridView {
     fn draw(&self, grid: &ObjectGrid, canvas: &mut Canvas) {
-        canvas.fill_rect((64, 64, 96), self.rect);
+        let (cols, rows) = grid.size();
+        let objects = grid.objects();
+        for row in 0..rows {
+            for col in 0..cols {
+                match objects.get(&Point::new(col, row)) {
+                    Some(&Object::Gap) |
+                    Some(&Object::Wall) => {}
+                    _ => {
+                        let rect =
+                            Rect::new(self.rect.left() + col * GRID_CELL_SIZE,
+                                      self.rect.top() + row * GRID_CELL_SIZE,
+                                      GRID_CELL_SIZE as u32,
+                                      GRID_CELL_SIZE as u32);
+                        canvas.fill_rect((64, 64, 96), rect);
+                    }
+                }
+            }
+        }
         self.draw_objects(grid, canvas);
         self.draw_ice_blocks(grid, canvas);
     }

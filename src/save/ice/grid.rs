@@ -208,6 +208,7 @@ impl ObjectGrid {
                     break;
                 }
                 match self.objects.get(&next).cloned() {
+                    Some(Object::Gap) |
                     Some(Object::Wall) => break,
                     Some(Object::PushPop(pp_dir)) => {
                         if pp_dir != slide_dir.opposite() {
@@ -305,6 +306,7 @@ impl ObjectGrid {
 
 #[derive(Clone, Copy, Eq, PartialEq)]
 pub enum Object {
+    Gap,
     Wall,
     PushPop(Direction),
     Rotator,

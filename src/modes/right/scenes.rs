@@ -26,8 +26,7 @@ use gui::{Resources, Sound};
 pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
-            // TODO: make a background for "The Ice is Right"
-            Ast::SetBg("column_as_icy_em"),
+            Ast::SetBg("the_ice_is_right"),
             Ast::Place(0, "chars/mezure", 0, (-16, 304)),
             Ast::Slide(0, (304, 304), true, true, 1.0),
             Ast::Wait(0.5),

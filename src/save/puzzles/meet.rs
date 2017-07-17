@@ -72,23 +72,23 @@ impl MeetState {
     fn base_grid() -> ObjectGrid {
         let red = Symbol::RedTriangle(Direction::North);
         let mut grid = ObjectGrid::new(7, 7);
-        grid.add_object(0, 0, Object::Wall);
-        grid.add_object(1, 0, Object::Wall);
-        grid.add_object(2, 0, Object::Wall);
+        grid.add_object(0, 0, Object::Gap);
+        grid.add_object(1, 0, Object::Gap);
+        grid.add_object(2, 0, Object::Gap);
         grid.add_object(0, 1, Object::Goal(red));
-        grid.add_object(1, 1, Object::Wall);
-        grid.add_object(4, 1, Object::Wall);
+        grid.add_object(1, 1, Object::Gap);
+        grid.add_object(4, 1, Object::Gap);
         grid.add_object(5, 1, Object::Goal(Symbol::BlueCircle));
-        grid.add_object(0, 3, Object::Wall);
-        grid.add_object(1, 3, Object::Wall);
-        grid.add_object(2, 3, Object::Wall);
+        grid.add_object(0, 3, Object::Gap);
+        grid.add_object(1, 3, Object::Gap);
+        grid.add_object(2, 3, Object::Gap);
         grid.add_object(4, 3, Object::Goal(Symbol::GreenSquare));
-        grid.add_object(6, 3, Object::Wall);
+        grid.add_object(6, 3, Object::Gap);
         grid.add_object(2, 4, Object::PushPop(Direction::South));
-        grid.add_object(1, 5, Object::Wall);
-        grid.add_object(4, 5, Object::Wall);
-        grid.add_object(5, 5, Object::Wall);
-        grid.add_object(0, 6, Object::Wall);
+        grid.add_object(1, 5, Object::Gap);
+        grid.add_object(4, 5, Object::Gap);
+        grid.add_object(5, 5, Object::Gap);
+        grid.add_object(0, 6, Object::Gap);
         grid
     }
 

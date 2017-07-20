@@ -40,9 +40,9 @@ impl View {
         View {
             core: core,
             crossword: CrosswordView::new(resources,
-                                          (364, 56),
+                                          (392, 55),
                                           OFFSETS_CLUES,
-                                          (364, 304)),
+                                          (392, 305)),
         }
     }
 }

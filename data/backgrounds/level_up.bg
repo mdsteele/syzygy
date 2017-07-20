@@ -1,0 +1,30 @@
+@BG 10 15 25
+>blue_ells
+>green_pipes
+>teal_struts
+>girders
+
+                  DB                CICF
+                  DB                CJCE
+                  DB                CICF
+                  DB                CJCE    AFACACACAG
+                  DB                CICF    ADAAAAAAABCLCKCLCKCLCKCLCKCL
+ACACACACACACACAG  DB                CJCE    ADAAAAAAABCGCHCGCHCGCHCGCHCG
+AAAAAAAAAAAAAAAB  DB                CICF    ADAAAAAAAB
+AAAAAAAAAAALAEAH  DB                CJCE    ADAAAAAAAB
+AEAEAEAEAEAH      DB                CICF    ADAAAAAAAB
+                  DB                CJCE    ADAAAAAAAB
+                  DB                CICPCLCKADAAAAAAAB
+                  DB                CCCHCGCHADAAAAAAAB
+                  DB                        ADAAAAAAAB
+                  DB                        ADAAAAAAABCLCKCLCKCLCKCLCKCL
+                  DB                        ADAAAAAAABCGCHCGCHCGCHCGCHCG
+                  DB                        ADAAAAAAAB
+                  DB        CACKCLCKCLCKCLCKADAAAAAAAB
+ACACACACACACACAG  DB        CJCQCGCHCGCHCGCHADAAAAAAAB      BCBABABGBABA
+AAAAAAAAAAAAAAAB  DB        CICF            ADAAAAAAAB      BB    BFBABA
+AAAAAAAAAAALAEAH  DB        CJCE            ADAAAAAAAB      BB
+AAAAAAAAAAAB      DB        CICF            AIAEAEAEAH      BB
+AAAAAAAAAAAB      DB        CJCE                            BB
+AAAAAAALAEAH      DB        CICF                            BB
+AAAAAAAB          DB        CJCE                            BB

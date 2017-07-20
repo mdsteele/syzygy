@@ -26,8 +26,7 @@ use gui::{Resources, Sound};
 pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
-            // TODO: Make a background for "Plane as Day".
-            Ast::SetBg("missed_connections"),
+            Ast::SetBg("plane_as_day"),
             Ast::Place(0, "chars/mezure", 0, (-16, 304)),
             Ast::Slide(0, (304, 304), true, true, 1.0),
             Ast::Wait(0.5),

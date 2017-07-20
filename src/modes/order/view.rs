@@ -43,12 +43,12 @@ impl View {
         };
         View {
             core: core,
-            rows: vec![TileRow::new(resources, 0, 300, 100),
-                       TileRow::new(resources, 1, 300, 132),
-                       TileRow::new(resources, 2, 300, 164),
-                       TileRow::new(resources, 3, 300, 196),
-                       TileRow::new(resources, 4, 300, 228),
-                       TileRow::new(resources, 5, 300, 260)],
+            rows: vec![TileRow::new(resources, 0, 321, 95),
+                       TileRow::new(resources, 1, 321, 127),
+                       TileRow::new(resources, 2, 321, 159),
+                       TileRow::new(resources, 3, 322, 191),
+                       TileRow::new(resources, 4, 322, 223),
+                       TileRow::new(resources, 5, 322, 255)],
         }
     }
 }
@@ -225,7 +225,7 @@ impl Element<OrderState, (usize, usize)> for TileRow {
 
 // ========================================================================= //
 
-const TILE_SPACING: i32 = 28;
+const TILE_SPACING: i32 = 29;
 const TILE_SLIDE_SPEED: i32 = 6;
 
 struct TileDrag {

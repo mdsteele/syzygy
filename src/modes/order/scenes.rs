@@ -26,8 +26,7 @@ use gui::{Resources, Sound};
 pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
-            // TODO: make a background for "Point of Order"
-            Ast::SetBg("missed_connections"),
+            Ast::SetBg("point_of_order"),
             Ast::Place(0, "chars/mezure", 0, (-16, 304)),
             Ast::Slide(0, (304, 304), true, true, 1.0),
             Ast::Wait(0.5),

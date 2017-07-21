@@ -1,0 +1,30 @@
+@BG 20 10 20
+>miniblocks
+>purple_walls
+>green_pipes
+>girders
+
+                  DB                      DB      CBCB  CB    CB
+                  DB                      DB      CFCH  CFCD  CB
+              AAAJDIAJAJAJAJAJAJAJAJAJAJAJDIAJAB    CB    CB  CJCACACD
+  BGBHAJ  BC  AO                              AO    CFCACACH  CB    CFCA
+BDBJBIBDBKBJ  AO                              AO  AB      CFCACLCACACACA
+AAAH    BF    AO                              AO  BCAGAB      CB  CCCACD
+BDBKBDBDBNBKBDAO                              AO  BMBDBB  CCCACICACH  CF
+  BFAA    BF  AO                              AOAGBF      CB      CB
+  BMBDBB  BF  AO                              AOBDBLAJ    CFCGCACACMCACA
+AGBF    BGBJ  AO                              AO  BIBB      CB    CB
+BDBJ  ABBF    AO                              AO        CCCACE    CJCACA
+BDBH  BGBNBH  AO                              AO        CB    CCCACE
+BDBL  BFABBF  AO                              AO  ABBP  CB    CB    CCCA
+  BIBDBNBBBF  AO                              AOBDBDBDBHCFCACACICACACE
+AAABAA    BF  AO                              AO      BE
+BDBDBDBDBDBNBDAO                              AO
+              AMAJAJAJAJAJAJAJAJAJAJAJAJAJAJAJAN
+                  DB                      DB              BGBDBKBDBDBDBK
+                  DB                      DB        BGBDBDBJAABF  AAABBI
+BDBKBDBDBKBDBDBDBDBDBDBDBDBDBDBDBDBDBDBDBDBDBDBDBDBDBNBDBKBDBDBNBDBDBKBD
+BGBJ    BMBDBH    DB                BC    DB            BF          BF
+BJ      BF  BF    DB                BF    DB            BF          BIBD
+        BF  BF    DB        BGBDBDBKBJ    DB          BGBNBH
+        BF  BF    DB        BF    BF      DB          BF  BF

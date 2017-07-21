@@ -42,7 +42,7 @@ impl View {
             crossword: CrosswordView::new(resources,
                                           (392, 55),
                                           OFFSETS_CLUES,
-                                          (392, 305)),
+                                          (392, 310)),
         }
     }
 }

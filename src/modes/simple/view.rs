@@ -39,7 +39,7 @@ impl View {
         let core = PuzzleCore::new(resources, visible, state, intro, outro);
         View {
             core: core,
-            grid: PlaneGridView::new(resources, 100, 50),
+            grid: PlaneGridView::new(resources, 128, 48),
         }
     }
 }

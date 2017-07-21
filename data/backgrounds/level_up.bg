@@ -23,8 +23,8 @@ AEAEAEAEAEAH      DB                CICF    ADAAAAAAAB
                   DB        CACKCLCKCLCKCLCKADAAAAAAAB
 ACACACACACACACAG  DB        CJCQCGCHCGCHCGCHADAAAAAAAB      BCBABABGBABA
 AAAAAAAAAAAAAAAB  DB        CICF            ADAAAAAAAB      BB    BFBABA
-AAAAAAAAAAALAEAH  DB        CJCE            ADAAAAAAAB      BB
-AAAAAAAAAAAB      DB        CICF            AIAEAEAEAH      BB
+AAAAAAAAAAALAEAH  DB        CJCE            AIAEAEAEAH      BB
+AAAAAAAAAAAB      DB        CICF                            BB
 AAAAAAAAAAAB      DB        CJCE                            BB
 AAAAAAALAEAH      DB        CICF                            BB
 AAAAAAAB          DB        CJCE                            BB

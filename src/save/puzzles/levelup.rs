@@ -27,7 +27,7 @@ use super::super::util::{ACCESS_KEY, pop_array};
 
 const WORDS_KEY: &str = "words";
 
-const SOLVED_WORDS: &[&str] = &["COM#", "NON+ED", "*TLE", ":IZE", "CU*D",
+const SOLVED_WORDS: &[&str] = &["COM#", "NON+ED", "*TLE", ":IST", "CU*D",
                                 "UN,N", ":EL", "B@ON", "SUR+", ",NDS"];
 
 const VALID_CHARS: ValidChars = ValidChars::LettersAndSymbols;

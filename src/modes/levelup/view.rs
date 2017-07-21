@@ -134,7 +134,7 @@ const OFFSETS_CLUES: &[(i32, &str)] = &[
     (2, "a substance made of multiple elements"),
     (4, "perplexed; confounded"),
     (1, "to suddenly surprise or alarm someone"),
-    (1, "to settle a distant land"),
+    (1, "one who settles a distant land"),
     (0, "a sweet, creamy pastry filling"),
     (0, "somewhat rare"),
     (2, "military officier just below a general"),

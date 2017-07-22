@@ -1,0 +1,32 @@
+@BG 20 15 10
+>girders
+>caution_walls
+>blue_ells
+>green_pipes
+>miniblocks
+>bg_miniblocks
+
+                        AB                  AB
+                        AB                  AB
+                        AB                  AB
+                        AB                  AB
+                        AB                  AB
+BABABABABD              AB                  AB                    BCBABA
+CACACACB              BCBABABABABABABABABABABABD                    CDCA
+CACLCECH  BCBABABABD                                BCBABABABABD    CICE
+CECH        CDCACB                                    CDCACACB
+            CDCACB                                    CICMCLCH
+            CDCACBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACDCB
+            CDCACB                                      CDCBFH
+          CFCJCACB                                    ENEIEIEMAAAAAAAAAA
+AAAAAAAAAACDCACACB                                    EH    EGDADADADD
+          CDCACACBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEH    EGDADD  DFDA
+          CDCACACBFB                                  ELEJEJEK  DFDADD
+          CDCACACKCG                                    CDCBFB      DJDA
+          CDCACACACB                                CFCCCJCKCCCG    DFDA
+        CFCJCACACACBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACDCACACACACB
+AAAAAAAACDCACACACACB                                CDCACACACACBAAAAAAAA
+        CDCACACACACBFH                              CDCACACACACBFB
+        CDCACACACACBFH                              CDCACACACACBFH
+        CDCACACACACBFH                              CDCACACACACBFH
+        CDCACACACACBFH                              CDCACACACACBFH

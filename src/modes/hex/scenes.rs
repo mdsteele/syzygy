@@ -26,8 +26,7 @@ use gui::{Resources, Sound};
 pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
-            // TODO: Make a background for "Hex-Spangled"
-            Ast::SetBg("cube_tangle"),
+            Ast::SetBg("hex_spangled"),
             Ast::Wait(1.0),
             Ast::Queue(0, 1),
             Ast::Wait(1.0),

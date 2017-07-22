@@ -42,8 +42,8 @@ impl View {
         let core = PuzzleCore::new(resources, visible, state, intro, outro);
         View {
             core: core,
-            wheels: HexWheels::new(resources, 200, 70),
-            solution: SolutionDisplay::new(resources, 88, 120),
+            wheels: HexWheels::new(resources, 192, 144),
+            solution: SolutionDisplay::new(resources, 440, 200),
         }
     }
 }
@@ -217,6 +217,7 @@ struct HexWheel {
     index: usize,
     center: Point,
     wheel_sprites: Vec<Sprite>,
+    hub_sprites: Vec<Sprite>,
     drag: Option<WheelDrag>,
 }
 
@@ -227,6 +228,7 @@ impl HexWheel {
             index: index,
             center: Point::new(cx, cy),
             wheel_sprites: resources.get_sprites("hex/wheels"),
+            hub_sprites: resources.get_sprites("hex/hub"),
             drag: None,
         }
     }
@@ -239,6 +241,7 @@ impl Element<HexState, (usize, i32)> for HexWheel {
         let sprite = &self.wheel_sprites[mod_floor(rotation, 2) as usize];
         let angle = if mod_floor(rotation, 4) < 2 { 0 } else { 90 };
         canvas.draw_sprite_rotated(sprite, self.center, angle);
+        canvas.draw_sprite_centered(&self.hub_sprites[0], self.center);
     }
 
     fn handle_event(&mut self, event: &Event, _state: &mut HexState)

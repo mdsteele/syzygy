@@ -18,7 +18,7 @@
 // +--------------------------------------------------------------------------+
 
 use std::cmp::{max, min};
-use std::collections::BTreeSet;
+use std::collections::HashSet;
 use toml;
 
 use save::{Access, Location};
@@ -68,7 +68,7 @@ const WORD_CLUES: &[(&str, &str)] = &[
 
 pub struct SauceState {
     access: Access,
-    done: BTreeSet<i32>,
+    done: HashSet<i32>,
     current: i32,
 }
 
@@ -76,13 +76,12 @@ impl SauceState {
     pub fn from_toml(mut table: toml::value::Table) -> SauceState {
         let num_clues = WORD_CLUES.len() as i32;
         let mut access = Access::pop_from_table(&mut table, ACCESS_KEY);
-        let done: BTreeSet<i32> = if access == Access::Solved {
+        let done: HashSet<i32> = if access == Access::Solved {
             (0..num_clues).collect()
         } else {
-            Vec::<i32>::pop_from_table(&mut table, DONE_KEY)
-                .into_iter()
-                .filter(|&idx| 0 <= idx && idx < num_clues)
-                .collect()
+            let mut set = HashSet::<i32>::pop_from_table(&mut table, DONE_KEY);
+            set.retain(|&idx| 0 <= idx && idx < num_clues);
+            set
         };
         if done.len() == WORD_CLUES.len() {
             access = Access::Solved;

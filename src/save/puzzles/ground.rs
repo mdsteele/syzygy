@@ -20,7 +20,7 @@
 use toml;
 
 use save::{Access, Location};
-use save::util::{ACCESS_KEY, Tomlable, pop_array};
+use save::util::{ACCESS_KEY, Tomlable};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -46,12 +46,9 @@ pub struct GroundState {
 
 impl GroundState {
     pub fn from_toml(mut table: toml::value::Table) -> GroundState {
-        let mut positions: Vec<i32> = pop_array(&mut table, POSITIONS_KEY)
-            .iter()
-            .filter_map(toml::Value::as_integer)
-            .filter(|&pos| 0 <= pos && pos <= MAX_POSITION as i64)
-            .map(|idx| idx as i32)
-            .collect();
+        let mut positions = Vec::<i32>::pop_from_table(&mut table,
+                                                       POSITIONS_KEY);
+        positions.retain(|&pos| 0 <= pos && pos <= MAX_POSITION);
         if positions.len() != INITIAL_POSITIONS.len() {
             positions = INITIAL_POSITIONS.to_vec();
         }

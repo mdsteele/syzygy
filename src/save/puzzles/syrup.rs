@@ -17,11 +17,11 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use std::collections::BTreeSet;
+use std::collections::HashSet;
 use toml;
 
 use save::{Access, Location, PrimaryColor};
-use save::util::{ACCESS_KEY, Tomlable, pop_array};
+use save::util::{ACCESS_KEY, Tomlable};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -50,9 +50,9 @@ const SOLVED_BLUE_TOGGLED: &[i32] = &[5, 7, 11, 16];
 pub struct SyrupState {
     access: Access,
     next_color: PrimaryColor,
-    red_toggled: BTreeSet<i32>,
-    green_toggled: BTreeSet<i32>,
-    blue_toggled: BTreeSet<i32>,
+    red_toggled: HashSet<i32>,
+    green_toggled: HashSet<i32>,
+    blue_toggled: HashSet<i32>,
     red_grid: Vec<bool>,
     green_grid: Vec<bool>,
     blue_grid: Vec<bool>,
@@ -235,7 +235,7 @@ fn pos_to_index((col, row): (i32, i32)) -> Option<i32> {
     }
 }
 
-fn rebuild_grid(grid: &mut Vec<bool>, toggled: &BTreeSet<i32>,
+fn rebuild_grid(grid: &mut Vec<bool>, toggled: &HashSet<i32>,
                 initial: &[bool]) {
     *grid = initial.iter().cloned().collect();
     for &index in toggled {
@@ -257,23 +257,16 @@ fn rebuild_grid(grid: &mut Vec<bool>, toggled: &BTreeSet<i32>,
 }
 
 fn insert_toggled(table: &mut toml::value::Table, key: &str,
-                  tog: &BTreeSet<i32>) {
-    if !tog.is_empty() {
-        let vec = tog.iter()
-                     .map(|&idx| toml::Value::Integer(idx as i64))
-                     .collect();
-        table.insert(key.to_string(), toml::Value::Array(vec));
+                  toggled: &HashSet<i32>) {
+    if !toggled.is_empty() {
+        table.insert(key.to_string(), toggled.to_toml());
     }
 }
 
-fn pop_toggled(mut table: &mut toml::value::Table, key: &str)
-               -> BTreeSet<i32> {
-    pop_array(&mut table, key)
-        .iter()
-        .filter_map(toml::Value::as_integer)
-        .filter(|&idx| 0 <= idx && idx < 21)
-        .map(|idx| idx as i32)
-        .collect()
+fn pop_toggled(mut table: &mut toml::value::Table, key: &str) -> HashSet<i32> {
+    let mut toggled = HashSet::<i32>::pop_from_table(&mut table, key);
+    toggled.retain(|&idx| 0 <= idx && idx < 21);
+    toggled
 }
 
 // ========================================================================= //

@@ -18,7 +18,8 @@
 // +--------------------------------------------------------------------------+
 
 use std::{i32, i8, u32, u8, usize};
-use std::collections::VecDeque;
+use std::collections::{HashSet, VecDeque};
+use std::hash::Hash;
 use toml;
 
 use gui::Point;
@@ -162,6 +163,18 @@ impl Tomlable for u32 {
             }
             _ => 0,
         }
+    }
+}
+
+impl<T: Hash + Ord + Tomlable> Tomlable for HashSet<T> {
+    fn to_toml(&self) -> toml::Value {
+        let mut vector: Vec<&T> = self.iter().collect();
+        vector.sort();
+        toml::Value::Array(vector.into_iter().map(Tomlable::to_toml).collect())
+    }
+
+    fn from_toml(value: toml::Value) -> HashSet<T> {
+        to_array(value).into_iter().map(Tomlable::from_toml).collect()
     }
 }
 

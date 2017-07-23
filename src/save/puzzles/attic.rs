@@ -17,7 +17,7 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use std::collections::BTreeSet;
+use std::collections::HashSet;
 use toml;
 
 use save::{Access, Location};
@@ -34,7 +34,7 @@ const SOLVED_TOGGLED: &[i32] = &[0, 3, 4, 9, 10, 13, 15];
 
 pub struct AtticState {
     access: Access,
-    toggled: BTreeSet<i32>,
+    toggled: HashSet<i32>,
 }
 
 impl AtticState {
@@ -43,10 +43,10 @@ impl AtticState {
         let toggled = if access == Access::Solved {
             SOLVED_TOGGLED.iter().cloned().collect()
         } else {
-            Vec::<i32>::pop_from_table(&mut table, TOGGLED_KEY)
-                .into_iter()
-                .filter(|&idx| 0 <= idx && idx < 16)
-                .collect()
+            let mut toggled = HashSet::<i32>::pop_from_table(&mut table,
+                                                             TOGGLED_KEY);
+            toggled.retain(|&idx| 0 <= idx && idx < 16);
+            toggled
         };
         if toggled == SOLVED_TOGGLED.iter().cloned().collect() {
             access = Access::Solved;
@@ -190,8 +190,7 @@ impl PuzzleState for AtticState {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.is_solved() && !self.toggled.is_empty() {
-            let toggled = self.toggled.iter().map(|&i| i.to_toml()).collect();
-            table.insert(TOGGLED_KEY.to_string(), toml::Value::Array(toggled));
+            table.insert(TOGGLED_KEY.to_string(), self.toggled.to_toml());
         }
         toml::Value::Table(table)
     }

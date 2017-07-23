@@ -65,15 +65,15 @@ impl PlaneGridView {
     fn rect(&self, grid: &PlaneGrid) -> Rect {
         Rect::new(self.left,
                   self.top,
-                  grid.width() * TILE_SIZE,
-                  grid.height() * TILE_SIZE)
+                  grid.num_cols() * TILE_SIZE,
+                  grid.num_rows() * TILE_SIZE)
     }
 
     fn pt_to_coords(&self, grid: &PlaneGrid, pt: Point) -> Option<Point> {
         let col = div_floor(pt.x() - self.left, TILE_SIZE as i32);
         let row = div_floor(pt.y() - self.top, TILE_SIZE as i32);
         let coords = Point::new(col, row);
-        if grid.rect().contains(coords) {
+        if grid.contains_coords(coords) {
             Some(coords)
         } else {
             None
@@ -104,9 +104,8 @@ impl Element<PlaneGrid, PlaneCmd> for PlaneGridView {
     fn draw(&self, grid: &PlaneGrid, canvas: &mut Canvas) {
         let mut canvas = canvas.subcanvas(self.rect(grid));
         canvas.clear((64, 64, 64));
-        let grid_rect = grid.rect();
-        for row in grid_rect.top()..grid_rect.bottom() {
-            for col in grid_rect.left()..grid_rect.right() {
+        for row in 0..(grid.num_rows() as i32) {
+            for col in 0..(grid.num_cols() as i32) {
                 let coords = Point::new(col, row);
                 if let Some(&obj) = grid.objects().get(&coords) {
                     let sprite_index = match obj {

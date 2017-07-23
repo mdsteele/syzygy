@@ -19,7 +19,7 @@
 
 use toml;
 
-use gui::{Point, Rect};
+use gui::Point;
 use save::{Access, Location};
 use save::plane::{PlaneGrid, PlaneObj};
 use save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
@@ -59,7 +59,7 @@ pub struct SimpleState {
 
 impl SimpleState {
     fn initial_grid() -> PlaneGrid {
-        let mut grid = PlaneGrid::new(Rect::new(0, 0, 10, 9));
+        let mut grid = PlaneGrid::new(10, 9);
         for row in 0..9 {
             for col in 0..10 {
                 grid.place_object(col, row, PlaneObj::Wall);

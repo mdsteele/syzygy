@@ -21,7 +21,7 @@ use std::cmp;
 use std::collections::{HashMap, HashSet};
 use toml;
 
-use gui::{Point, Rect};
+use gui::Point;
 use save::MixedColor;
 use save::util::Tomlable;
 
@@ -61,15 +61,17 @@ enum PipePiece {
 // ========================================================================= //
 
 pub struct PlaneGrid {
-    rect: Rect,
+    num_cols: u32,
+    num_rows: u32,
     objects: HashMap<Point, PlaneObj>,
     pipes: Vec<Vec<Point>>,
 }
 
 impl PlaneGrid {
-    pub fn new(rect: Rect) -> PlaneGrid {
+    pub fn new(num_cols: u32, num_rows: u32) -> PlaneGrid {
         PlaneGrid {
-            rect: rect,
+            num_cols: num_cols,
+            num_rows: num_rows,
             objects: HashMap::new(),
             pipes: Vec::new(),
         }
@@ -92,17 +94,20 @@ impl PlaneGrid {
         }
     }
 
-    pub fn rect(&self) -> Rect { self.rect }
+    pub fn num_cols(&self) -> u32 { self.num_cols }
 
-    pub fn width(&self) -> u32 { self.rect.width() }
+    pub fn num_rows(&self) -> u32 { self.num_rows }
 
-    pub fn height(&self) -> u32 { self.rect.height() }
+    pub fn contains_coords(&self, pt: Point) -> bool {
+        (pt.x() >= 0 && (pt.x() as u32) < self.num_cols) &&
+        (pt.y() >= 0 && (pt.y() as u32) < self.num_rows)
+    }
 
     pub fn objects(&self) -> &HashMap<Point, PlaneObj> { &self.objects }
 
     pub fn place_object(&mut self, col: i32, row: i32, obj: PlaneObj) {
         let pt = Point::new(col, row);
-        debug_assert!(self.rect.contains(pt));
+        debug_assert!(self.contains_coords(pt));
         self.pipes.retain(|pipe| pipe.iter().all(|&coords| coords != pt));
         self.objects.insert(pt, obj);
     }
@@ -153,7 +158,7 @@ impl PlaneGrid {
     }
 
     pub fn toggle_pipe(&mut self, coords1: Point, coords2: Point) -> bool {
-        if !self.rect.contains(coords1) || !self.rect.contains(coords2) {
+        if !self.contains_coords(coords1) || !self.contains_coords(coords2) {
             return false;
         }
         let dx = coords2.x() - coords1.x();

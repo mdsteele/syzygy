@@ -20,7 +20,7 @@
 use std::collections::HashSet;
 use toml;
 
-use gui::{Point, Rect};
+use gui::Point;
 use save::{Access, Direction, Location, MixedColor};
 use save::column::Columns;
 use save::device::{Device, DeviceGrid};
@@ -170,7 +170,7 @@ impl SyzygyState {
     }
 
     fn elinsa_initial_grid() -> PlaneGrid {
-        let mut grid = PlaneGrid::new(Rect::new(0, 0, 10, 6));
+        let mut grid = PlaneGrid::new(10, 6);
         grid.place_object(0, 0, PlaneObj::Wall);
         grid.place_object(7, 1, PlaneObj::BlueNode);
         grid.place_object(8, 1, PlaneObj::Wall);
@@ -240,7 +240,7 @@ impl SyzygyState {
     }
 
     fn mezure_initial_pipe_grid() -> PlaneGrid {
-        let mut grid = PlaneGrid::new(Rect::new(0, 0, 4, 9));
+        let mut grid = PlaneGrid::new(4, 9);
         grid.place_object(0, 0, PlaneObj::Wall);
         grid.place_object(1, 1, PlaneObj::RedNode);
         grid.place_object(1, 4, PlaneObj::GreenNode);

@@ -23,7 +23,7 @@ use toml;
 
 use gui::{Point, Rect};
 use save::MixedColor;
-use save::util::{Tomlable, to_array};
+use save::util::Tomlable;
 
 // ========================================================================= //
 
@@ -79,13 +79,12 @@ impl PlaneGrid {
 
     pub fn set_pipes_from_toml(&mut self, pipes: toml::value::Array) {
         self.pipes.clear();
+        let pipes = Vec::<Vec<Point>>::from_toml(toml::Value::Array(pipes));
         for pipe in pipes.into_iter() {
-            let pipe = to_array(pipe);
             if !pipe.is_empty() {
                 let mut pipe = pipe.into_iter();
-                let mut p1 = Point::from_toml(pipe.next().unwrap());
+                let mut p1 = pipe.next().unwrap();
                 for p2 in pipe {
-                    let p2 = Point::from_toml(p2);
                     self.toggle_pipe(p1, p2);
                     p1 = p2;
                 }

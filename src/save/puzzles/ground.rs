@@ -20,7 +20,7 @@
 use toml;
 
 use save::{Access, Location};
-use save::util::{ACCESS_KEY, Tomlable};
+use save::util::{ACCESS_KEY, Tomlable, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -45,29 +45,6 @@ pub struct GroundState {
 }
 
 impl GroundState {
-    pub fn from_toml(mut table: toml::value::Table) -> GroundState {
-        let mut positions = Vec::<i32>::pop_from_table(&mut table,
-                                                       POSITIONS_KEY);
-        positions.retain(|&pos| 0 <= pos && pos <= MAX_POSITION);
-        if positions.len() != INITIAL_POSITIONS.len() {
-            positions = INITIAL_POSITIONS.to_vec();
-        }
-        let mut elinsa_row = table.remove(ELINSA_ROW_KEY)
-                                  .map(i32::from_toml)
-                                  .unwrap_or(INITIAL_ELINSA_ROW);
-        if elinsa_row < -1 || elinsa_row > MAX_ELINSA_ROW {
-            elinsa_row = INITIAL_ELINSA_ROW;
-        }
-        let is_initial = &positions as &[i32] == INITIAL_POSITIONS &&
-                         elinsa_row == INITIAL_ELINSA_ROW;
-        GroundState {
-            access: Access::pop_from_table(&mut table, ACCESS_KEY),
-            positions: positions,
-            elinsa_row: elinsa_row,
-            is_initial: is_initial,
-        }
-    }
-
     pub fn solve(&mut self) {
         self.access = Access::Solved;
         self.positions[0] = MAX_POSITION;
@@ -117,7 +94,7 @@ impl GroundState {
 }
 
 impl PuzzleState for GroundState {
-    fn location(&self) -> Location { Location::ShiftingGround }
+    fn location() -> Location { Location::ShiftingGround }
 
     fn access(&self) -> Access { self.access }
 
@@ -130,7 +107,9 @@ impl PuzzleState for GroundState {
         self.elinsa_row = INITIAL_ELINSA_ROW;
         self.is_initial = true;
     }
+}
 
+impl Tomlable for GroundState {
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
@@ -145,6 +124,30 @@ impl PuzzleState for GroundState {
         table.insert(ELINSA_ROW_KEY.to_string(),
                      toml::Value::Integer(self.elinsa_row as i64));
         toml::Value::Table(table)
+    }
+
+    fn from_toml(value: toml::Value) -> GroundState {
+        let mut table = to_table(value);
+        let mut positions = Vec::<i32>::pop_from_table(&mut table,
+                                                       POSITIONS_KEY);
+        positions.retain(|&pos| 0 <= pos && pos <= MAX_POSITION);
+        if positions.len() != INITIAL_POSITIONS.len() {
+            positions = INITIAL_POSITIONS.to_vec();
+        }
+        let mut elinsa_row = table.remove(ELINSA_ROW_KEY)
+                                  .map(i32::from_toml)
+                                  .unwrap_or(INITIAL_ELINSA_ROW);
+        if elinsa_row < -1 || elinsa_row > MAX_ELINSA_ROW {
+            elinsa_row = INITIAL_ELINSA_ROW;
+        }
+        let is_initial = &positions as &[i32] == INITIAL_POSITIONS &&
+                         elinsa_row == INITIAL_ELINSA_ROW;
+        GroundState {
+            access: Access::pop_from_table(&mut table, ACCESS_KEY),
+            positions: positions,
+            elinsa_row: elinsa_row,
+            is_initial: is_initial,
+        }
     }
 }
 

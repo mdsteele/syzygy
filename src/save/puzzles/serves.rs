@@ -22,7 +22,7 @@ use toml;
 
 use save::{Access, Location};
 use save::memory::{Grid, Shape};
-use save::util::{ACCESS_KEY, Tomlable, pop_array};
+use save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -76,32 +76,6 @@ pub struct ServesState {
 }
 
 impl ServesState {
-    pub fn from_toml(mut table: toml::value::Table) -> ServesState {
-        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
-        let (grid, num_placed, num_removed) = if access.is_solved() {
-            (Grid::new(NUM_COLS, NUM_ROWS), SHAPES.len(), REMOVALS.len())
-        } else {
-            let num_placed =
-                min(u32::pop_from_table(&mut table, NUM_PLACED_KEY) as usize,
-                    SHAPES.len());
-            let grid = Grid::from_toml(NUM_COLS,
-                                       NUM_ROWS,
-                                       pop_array(&mut table, GRID_KEY));
-            let distinct = grid.num_distinct_symbols();
-            if distinct <= num_placed {
-                (grid, num_placed, num_placed - distinct)
-            } else {
-                (Grid::new(NUM_COLS, NUM_ROWS), 0, 0)
-            }
-        };
-        ServesState {
-            access: access,
-            grid: grid,
-            num_placed: num_placed,
-            num_removed: num_removed,
-        }
-    }
-
     pub fn solve(&mut self) {
         self.access = Access::Solved;
         self.grid.clear();
@@ -161,7 +135,7 @@ impl ServesState {
 }
 
 impl PuzzleState for ServesState {
-    fn location(&self) -> Location { Location::IfMemoryServes }
+    fn location() -> Location { Location::IfMemoryServes }
 
     fn access(&self) -> Access { self.access }
 
@@ -174,7 +148,9 @@ impl PuzzleState for ServesState {
         self.num_placed = 0;
         self.num_removed = 0;
     }
+}
 
+impl Tomlable for ServesState {
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
@@ -184,6 +160,33 @@ impl PuzzleState for ServesState {
             table.insert(GRID_KEY.to_string(), self.grid.to_toml());
         }
         toml::Value::Table(table)
+    }
+
+    fn from_toml(value: toml::Value) -> ServesState {
+        let mut table = to_table(value);
+        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
+        let (grid, num_placed, num_removed) = if access.is_solved() {
+            (Grid::new(NUM_COLS, NUM_ROWS), SHAPES.len(), REMOVALS.len())
+        } else {
+            let num_placed =
+                min(u32::pop_from_table(&mut table, NUM_PLACED_KEY) as usize,
+                    SHAPES.len());
+            let grid = Grid::from_toml(NUM_COLS,
+                                       NUM_ROWS,
+                                       pop_array(&mut table, GRID_KEY));
+            let distinct = grid.num_distinct_symbols();
+            if distinct <= num_placed {
+                (grid, num_placed, num_placed - distinct)
+            } else {
+                (Grid::new(NUM_COLS, NUM_ROWS), 0, 0)
+            }
+        };
+        ServesState {
+            access: access,
+            grid: grid,
+            num_placed: num_placed,
+            num_removed: num_removed,
+        }
     }
 }
 

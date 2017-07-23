@@ -20,7 +20,7 @@
 use toml;
 
 use save::{Access, Direction, Location};
-use save::util::{ACCESS_KEY, Tomlable, pop_array};
+use save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -43,30 +43,6 @@ pub struct CubeState {
 }
 
 impl CubeState {
-    pub fn from_toml(mut table: toml::value::Table) -> CubeState {
-        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
-        let grid = if access == Access::Solved {
-            SOLVED_GRID.to_vec()
-        } else {
-            let mut grid: Vec<i32> = pop_array(&mut table, GRID_KEY)
-                .iter()
-                .filter_map(toml::Value::as_integer)
-                .filter(|&idx| 0 <= idx && idx < 24)
-                .map(|idx| idx as i32)
-                .collect();
-            if grid.len() != (NUM_COLS * NUM_ROWS) as usize {
-                grid = INITIAL_GRID.to_vec();
-            }
-            grid
-        };
-        let is_initial = &grid as &[i32] == INITIAL_GRID;
-        CubeState {
-            access: access,
-            grid: grid,
-            is_initial: is_initial,
-        }
-    }
-
     pub fn solve(&mut self) {
         self.access = Access::Solved;
         self.grid = SOLVED_GRID.to_vec();
@@ -105,7 +81,7 @@ impl CubeState {
 }
 
 impl PuzzleState for CubeState {
-    fn location(&self) -> Location { Location::CubeTangle }
+    fn location() -> Location { Location::CubeTangle }
 
     fn access(&self) -> Access { self.access }
 
@@ -117,7 +93,9 @@ impl PuzzleState for CubeState {
         self.grid = INITIAL_GRID.to_vec();
         self.is_initial = true;
     }
+}
 
+impl Tomlable for CubeState {
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
@@ -129,6 +107,31 @@ impl PuzzleState for CubeState {
             table.insert(GRID_KEY.to_string(), toml::Value::Array(grid));
         }
         toml::Value::Table(table)
+    }
+
+    fn from_toml(value: toml::Value) -> CubeState {
+        let mut table = to_table(value);
+        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
+        let grid = if access == Access::Solved {
+            SOLVED_GRID.to_vec()
+        } else {
+            let mut grid: Vec<i32> = pop_array(&mut table, GRID_KEY)
+                .iter()
+                .filter_map(toml::Value::as_integer)
+                .filter(|&idx| 0 <= idx && idx < 24)
+                .map(|idx| idx as i32)
+                .collect();
+            if grid.len() != (NUM_COLS * NUM_ROWS) as usize {
+                grid = INITIAL_GRID.to_vec();
+            }
+            grid
+        };
+        let is_initial = &grid as &[i32] == INITIAL_GRID;
+        CubeState {
+            access: access,
+            grid: grid,
+            is_initial: is_initial,
+        }
     }
 }
 
@@ -229,8 +232,8 @@ fn rotate_vert(orientation: i32, by: i32) -> i32 {
 mod tests {
     use toml;
 
-    use save::{Access, PuzzleState};
-    use save::util::{ACCESS_KEY, Tomlable, to_table};
+    use save::Access;
+    use save::util::{ACCESS_KEY, Tomlable};
     use super::{CubeState, INITIAL_GRID, NUM_COLS, NUM_ROWS, SOLVED_GRID,
                 rotate_vert};
 
@@ -251,13 +254,13 @@ mod tests {
 
     #[test]
     fn toml_round_trip() {
-        let mut state = CubeState::from_toml(toml::value::Table::new());
+        let mut state = CubeState::from_toml(toml::Value::Boolean(false));
         state.access = Access::Replaying;
         state.grid = vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
                           15];
         state.is_initial = false;
 
-        let state = CubeState::from_toml(to_table(state.to_toml()));
+        let state = CubeState::from_toml(state.to_toml());
         assert_eq!(state.access, Access::Replaying);
         assert_eq!(state.grid,
                    vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
@@ -266,7 +269,7 @@ mod tests {
 
     #[test]
     fn from_empty_toml() {
-        let state = CubeState::from_toml(toml::value::Table::new());
+        let state = CubeState::from_toml(toml::Value::Boolean(false));
         assert_eq!(state.access, Access::Unvisited);
         assert_eq!(state.grid, INITIAL_GRID.to_vec());
         assert!(state.is_initial);
@@ -277,7 +280,7 @@ mod tests {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), Access::Solved.to_toml());
 
-        let state = CubeState::from_toml(table);
+        let state = CubeState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Solved);
         assert_eq!(state.grid, SOLVED_GRID.to_vec());
         assert!(!state.is_initial);

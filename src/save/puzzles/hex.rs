@@ -21,7 +21,7 @@ use std::collections::VecDeque;
 use toml;
 
 use save::{Access, Location, PuzzleState};
-use save::util::{ACCESS_KEY, Tomlable, rotate_deque};
+use save::util::{ACCESS_KEY, Tomlable, rotate_deque, to_table};
 
 // ========================================================================= //
 
@@ -66,31 +66,6 @@ pub struct HexState {
 }
 
 impl HexState {
-    pub fn from_toml(mut table: toml::value::Table) -> HexState {
-        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
-        let tokens = if access.is_solved() {
-            SOLVED_TOKENS.to_vec()
-        } else {
-            let mut tokens = Vec::<u8>::pop_from_table(&mut table, TOKENS_KEY);
-            tokens.resize(INITIAL_TOKENS.len(), 0);
-            let mut init_sorted = INITIAL_TOKENS.to_vec();
-            init_sorted.sort();
-            let mut tokens_sorted = tokens.clone();
-            tokens_sorted.sort();
-            if tokens_sorted != init_sorted {
-                INITIAL_TOKENS.to_vec()
-            } else {
-                tokens
-            }
-        };
-        let is_initial = (&tokens as &[u8]) == INITIAL_TOKENS;
-        HexState {
-            access: access,
-            tokens: tokens,
-            is_initial: is_initial,
-        }
-    }
-
     pub fn solve(&mut self) {
         self.access = Access::Solved;
         self.tokens = SOLVED_TOKENS.to_vec();
@@ -116,7 +91,7 @@ impl HexState {
 }
 
 impl PuzzleState for HexState {
-    fn location(&self) -> Location { Location::HexSpangled }
+    fn location() -> Location { Location::HexSpangled }
 
     fn access(&self) -> Access { self.access }
 
@@ -128,7 +103,9 @@ impl PuzzleState for HexState {
         self.tokens = INITIAL_TOKENS.to_vec();
         self.is_initial = true;
     }
+}
 
+impl Tomlable for HexState {
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
@@ -141,6 +118,32 @@ impl PuzzleState for HexState {
         }
         toml::Value::Table(table)
     }
+
+    fn from_toml(value: toml::Value) -> HexState {
+        let mut table = to_table(value);
+        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
+        let tokens = if access.is_solved() {
+            SOLVED_TOKENS.to_vec()
+        } else {
+            let mut tokens = Vec::<u8>::pop_from_table(&mut table, TOKENS_KEY);
+            tokens.resize(INITIAL_TOKENS.len(), 0);
+            let mut init_sorted = INITIAL_TOKENS.to_vec();
+            init_sorted.sort();
+            let mut tokens_sorted = tokens.clone();
+            tokens_sorted.sort();
+            if tokens_sorted != init_sorted {
+                INITIAL_TOKENS.to_vec()
+            } else {
+                tokens
+            }
+        };
+        let is_initial = (&tokens as &[u8]) == INITIAL_TOKENS;
+        HexState {
+            access: access,
+            tokens: tokens,
+            is_initial: is_initial,
+        }
+    }
 }
 
 // ========================================================================= //
@@ -149,19 +152,19 @@ impl PuzzleState for HexState {
 mod tests {
     use toml;
 
-    use save::{Access, PuzzleState};
-    use save::util::{ACCESS_KEY, Tomlable, to_table};
+    use save::Access;
+    use save::util::{ACCESS_KEY, Tomlable};
     use super::{HexState, INITIAL_TOKENS, SOLVED_TOKENS, TOKENS_KEY};
 
     #[test]
     fn toml_round_trip() {
-        let mut state = HexState::from_toml(toml::value::Table::new());
+        let mut state = HexState::from_toml(toml::Value::Boolean(false));
         state.access = Access::Replaying;
         state.tokens = vec![0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 0,
                             0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2];
         state.is_initial = false;
 
-        let state = HexState::from_toml(to_table(state.to_toml()));
+        let state = HexState::from_toml(state.to_toml());
         assert_eq!(state.access, Access::Replaying);
         assert_eq!(state.tokens,
                    vec![0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 0, 0,
@@ -171,7 +174,7 @@ mod tests {
 
     #[test]
     fn from_empty_toml() {
-        let state = HexState::from_toml(toml::value::Table::new());
+        let state = HexState::from_toml(toml::Value::Boolean(false));
         assert_eq!(state.access, Access::Unvisited);
         assert_eq!(state.tokens, INITIAL_TOKENS.to_vec());
         assert!(state.is_initial);
@@ -182,7 +185,7 @@ mod tests {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), Access::Solved.to_toml());
 
-        let state = HexState::from_toml(table);
+        let state = HexState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Solved);
         assert_eq!(state.tokens, SOLVED_TOKENS.to_vec());
         assert!(!state.is_initial);
@@ -193,7 +196,7 @@ mod tests {
         let mut table = toml::value::Table::new();
         table.insert(TOKENS_KEY.to_string(),
                      toml::Value::Array(vec![toml::Value::Integer(0); 30]));
-        let state = HexState::from_toml(table);
+        let state = HexState::from_toml(toml::Value::Table(table));
         assert_eq!(state.tokens, INITIAL_TOKENS.to_vec());
         assert!(state.is_initial);
     }

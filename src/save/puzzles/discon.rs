@@ -21,7 +21,7 @@ use toml;
 
 use save::{Access, Direction, Location, MixedColor};
 use save::device::{Device, DeviceGrid};
-use save::util::{ACCESS_KEY, Tomlable, pop_array};
+use save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -36,20 +36,6 @@ pub struct DisconState {
 }
 
 impl DisconState {
-    pub fn from_toml(mut table: toml::value::Table) -> DisconState {
-        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
-        let grid = if access == Access::Solved {
-            DisconState::solved_grid()
-        } else {
-            let grid = pop_array(&mut table, GRID_KEY);
-            DeviceGrid::from_toml(grid, &DisconState::initial_grid())
-        };
-        DisconState {
-            access: access,
-            grid: grid,
-        }
-    }
-
     pub fn mark_solved(&mut self) { self.access = Access::Solved; }
 
     pub fn solve(&mut self) {
@@ -117,7 +103,7 @@ impl DisconState {
 }
 
 impl PuzzleState for DisconState {
-    fn location(&self) -> Location { Location::Disconnected }
+    fn location() -> Location { Location::Disconnected }
 
     fn access(&self) -> Access { self.access }
 
@@ -126,7 +112,9 @@ impl PuzzleState for DisconState {
     fn can_reset(&self) -> bool { self.grid.is_modified() }
 
     fn reset(&mut self) { self.grid = DisconState::initial_grid(); }
+}
 
+impl Tomlable for DisconState {
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
@@ -134,6 +122,21 @@ impl PuzzleState for DisconState {
             table.insert(GRID_KEY.to_string(), self.grid.to_toml());
         }
         toml::Value::Table(table)
+    }
+
+    fn from_toml(value: toml::Value) -> DisconState {
+        let mut table = to_table(value);
+        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
+        let grid = if access == Access::Solved {
+            DisconState::solved_grid()
+        } else {
+            let grid = pop_array(&mut table, GRID_KEY);
+            DeviceGrid::from_toml(grid, &DisconState::initial_grid())
+        };
+        DisconState {
+            access: access,
+            grid: grid,
+        }
     }
 }
 

@@ -22,7 +22,7 @@ use std::collections::HashSet;
 use toml;
 
 use save::{Access, Location};
-use save::util::{ACCESS_KEY, Tomlable};
+use save::util::{ACCESS_KEY, Tomlable, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -73,36 +73,6 @@ pub struct SauceState {
 }
 
 impl SauceState {
-    pub fn from_toml(mut table: toml::value::Table) -> SauceState {
-        let num_clues = WORD_CLUES.len() as i32;
-        let mut access = Access::pop_from_table(&mut table, ACCESS_KEY);
-        let done: HashSet<i32> = if access == Access::Solved {
-            (0..num_clues).collect()
-        } else {
-            let mut set = HashSet::<i32>::pop_from_table(&mut table, DONE_KEY);
-            set.retain(|&idx| 0 <= idx && idx < num_clues);
-            set
-        };
-        if done.len() == WORD_CLUES.len() {
-            access = Access::Solved;
-        }
-        let current = if access.is_solved() {
-            0
-        } else {
-            min(max(0, i32::pop_from_table(&mut table, CURRENT_KEY)),
-                num_clues - 1)
-        };
-        let mut state = SauceState {
-            access: access,
-            done: done,
-            current: current,
-        };
-        if !state.is_solved() && state.done.contains(&state.current) {
-            state.go_next();
-        }
-        state
-    }
-
     pub fn solve(&mut self) {
         self.access = Access::Solved;
         self.done = (0..(WORD_CLUES.len() as i32)).collect();
@@ -172,7 +142,7 @@ impl SauceState {
 }
 
 impl PuzzleState for SauceState {
-    fn location(&self) -> Location { Location::CrossSauce }
+    fn location() -> Location { Location::CrossSauce }
 
     fn access(&self) -> Access { self.access }
 
@@ -184,7 +154,9 @@ impl PuzzleState for SauceState {
         self.done.clear();
         self.current = 0;
     }
+}
 
+impl Tomlable for SauceState {
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
@@ -199,6 +171,37 @@ impl PuzzleState for SauceState {
         }
         toml::Value::Table(table)
     }
+
+    fn from_toml(value: toml::Value) -> SauceState {
+        let mut table = to_table(value);
+        let num_clues = WORD_CLUES.len() as i32;
+        let mut access = Access::pop_from_table(&mut table, ACCESS_KEY);
+        let done: HashSet<i32> = if access == Access::Solved {
+            (0..num_clues).collect()
+        } else {
+            let mut set = HashSet::<i32>::pop_from_table(&mut table, DONE_KEY);
+            set.retain(|&idx| 0 <= idx && idx < num_clues);
+            set
+        };
+        if done.len() == WORD_CLUES.len() {
+            access = Access::Solved;
+        }
+        let current = if access.is_solved() {
+            0
+        } else {
+            min(max(0, i32::pop_from_table(&mut table, CURRENT_KEY)),
+                num_clues - 1)
+        };
+        let mut state = SauceState {
+            access: access,
+            done: done,
+            current: current,
+        };
+        if !state.is_solved() && state.done.contains(&state.current) {
+            state.go_next();
+        }
+        state
+    }
 }
 
 // ========================================================================= //
@@ -207,20 +210,20 @@ impl PuzzleState for SauceState {
 mod tests {
     use toml;
 
-    use save::{Access, PuzzleState};
-    use save::util::{ACCESS_KEY, Tomlable, to_table};
+    use save::Access;
+    use save::util::{ACCESS_KEY, Tomlable};
     use super::{CURRENT_KEY, DONE_KEY, SauceState, WORD_CLUES};
 
     #[test]
     fn toml_round_trip() {
-        let mut state = SauceState::from_toml(toml::value::Table::new());
+        let mut state = SauceState::from_toml(toml::Value::Boolean(false));
         state.access = Access::Replaying;
         state.done.insert(3);
         state.done.insert(1);
         state.done.insert(4);
         state.current = 7;
 
-        let state = SauceState::from_toml(to_table(state.to_toml()));
+        let state = SauceState::from_toml(state.to_toml());
         assert_eq!(state.access, Access::Replaying);
         assert_eq!(state.done, vec![1, 3, 4].iter().cloned().collect());
         assert_eq!(state.current, 7);
@@ -228,7 +231,7 @@ mod tests {
 
     #[test]
     fn from_empty_toml() {
-        let state = SauceState::from_toml(toml::value::Table::new());
+        let state = SauceState::from_toml(toml::Value::Boolean(false));
         assert_eq!(state.access, Access::Unvisited);
         assert!(state.done.is_empty());
         assert_eq!(state.current, 0);
@@ -239,7 +242,7 @@ mod tests {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), Access::Solved.to_toml());
 
-        let state = SauceState::from_toml(table);
+        let state = SauceState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Solved);
         assert_eq!(state.done, (0..(WORD_CLUES.len() as i32)).collect());
         assert_eq!(state.current, 0);
@@ -252,7 +255,7 @@ mod tests {
         table.insert(CURRENT_KEY.to_string(),
                      toml::Value::Integer(WORD_CLUES.len() as i64));
 
-        let state = SauceState::from_toml(table);
+        let state = SauceState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Unsolved);
         assert!(state.done.is_empty());
         assert_eq!(state.current, (WORD_CLUES.len() as i32) - 1);
@@ -268,7 +271,7 @@ mod tests {
                                             .map(toml::Value::Integer)
                                             .collect()));
 
-        let state = SauceState::from_toml(table);
+        let state = SauceState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Unsolved);
         assert_eq!(state.done, vec![0, 5].iter().cloned().collect());
     }
@@ -283,7 +286,7 @@ mod tests {
                                              toml::Value::Integer(2),
                                              toml::Value::Integer(3)]));
 
-        let state = SauceState::from_toml(table);
+        let state = SauceState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Unsolved);
         assert_eq!(state.done, vec![1, 2, 3].iter().cloned().collect());
         assert_eq!(state.current, 4);
@@ -299,7 +302,7 @@ mod tests {
                          .map(toml::Value::Integer)
                          .collect()));
 
-        let state = SauceState::from_toml(table);
+        let state = SauceState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Solved);
         assert_eq!(state.done, (0..(WORD_CLUES.len() as i32)).collect());
         assert_eq!(state.current, 0);

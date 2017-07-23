@@ -22,7 +22,7 @@ use toml;
 
 use save::{Access, Location};
 use save::memory::{Grid, Shape};
-use save::util::{ACCESS_KEY, Tomlable, pop_array};
+use save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -74,24 +74,6 @@ pub struct LaneState {
 }
 
 impl LaneState {
-    pub fn from_toml(mut table: toml::value::Table) -> LaneState {
-        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
-        let stage = if access.is_solved() {
-            STAGES.len()
-        } else {
-            min(u32::pop_from_table(&mut table, STAGE_KEY) as usize,
-                STAGES.len() - 1)
-        };
-        let grid = Grid::from_toml(NUM_COLS,
-                                   NUM_ROWS,
-                                   pop_array(&mut table, GRID_KEY));
-        LaneState {
-            access: access,
-            grid: grid,
-            stage: stage,
-        }
-    }
-
     pub fn solve(&mut self) {
         self.access = Access::Solved;
         self.grid.clear();
@@ -167,7 +149,7 @@ impl LaneState {
 }
 
 impl PuzzleState for LaneState {
-    fn location(&self) -> Location { Location::MemoryLane }
+    fn location() -> Location { Location::MemoryLane }
 
     fn access(&self) -> Access { self.access }
 
@@ -179,7 +161,9 @@ impl PuzzleState for LaneState {
         self.grid.clear();
         self.stage = 0;
     }
+}
 
+impl Tomlable for LaneState {
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
@@ -189,6 +173,25 @@ impl PuzzleState for LaneState {
             table.insert(GRID_KEY.to_string(), self.grid.to_toml());
         }
         toml::Value::Table(table)
+    }
+
+    fn from_toml(value: toml::Value) -> LaneState {
+        let mut table = to_table(value);
+        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
+        let stage = if access.is_solved() {
+            STAGES.len()
+        } else {
+            min(u32::pop_from_table(&mut table, STAGE_KEY) as usize,
+                STAGES.len() - 1)
+        };
+        let grid = Grid::from_toml(NUM_COLS,
+                                   NUM_ROWS,
+                                   pop_array(&mut table, GRID_KEY));
+        LaneState {
+            access: access,
+            grid: grid,
+            stage: stage,
+        }
     }
 }
 

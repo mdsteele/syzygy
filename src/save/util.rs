@@ -69,7 +69,7 @@ pub fn to_table(value: toml::Value) -> toml::value::Table {
 pub trait Tomlable {
     fn to_toml(&self) -> toml::Value;
 
-    fn from_toml(value: toml::Value) -> Self;
+    fn from_toml(value: toml::Value) -> Self where Self: Sized;
 
     fn pop_from_table(table: &mut toml::value::Table, key: &str) -> Self
         where Self: Sized

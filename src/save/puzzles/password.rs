@@ -21,7 +21,7 @@ use std::cmp::{max, min};
 use toml;
 
 use save::{Access, CrosswordState, Location, ValidChars};
-use save::util::{ACCESS_KEY, Tomlable, pop_array};
+use save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -83,40 +83,6 @@ pub struct PasswordState {
 }
 
 impl PasswordState {
-    pub fn from_toml(mut table: toml::value::Table) -> PasswordState {
-        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
-        let active_slot =
-            max(0, min(5, i32::pop_from_table(&mut table, ACTIVE_SLOT_KEY)));
-        let sliders = if access == Access::Solved {
-            SOLVED_SLIDERS
-        } else {
-            let mut sliders = INIT_SLIDERS;
-            for (index, offset) in pop_array(&mut table, SLIDERS_KEY)
-                .iter()
-                .filter_map(toml::Value::as_integer)
-                .filter(|&off| -5 <= off && off <= 0)
-                .map(|off| off as i32)
-                .enumerate() {
-                if index >= sliders.len() {
-                    break;
-                }
-                sliders[index] = offset;
-            }
-            sliders
-        };
-        PasswordState {
-            access: access,
-            active_slot: active_slot,
-            crosswords: [load(&mut table, access, ELINSA_KEY, ELINSA_WORDS),
-                         load(&mut table, access, ARGONY_KEY, ARGONY_WORDS),
-                         load(&mut table, access, MEZURE_KEY, MEZURE_WORDS),
-                         load(&mut table, access, YTTRIS_KEY, YTTRIS_WORDS),
-                         load(&mut table, access, UGRENT_KEY, UGRENT_WORDS),
-                         load(&mut table, access, RELYNG_KEY, RELYNG_WORDS)],
-            sliders: sliders,
-        }
-    }
-
     pub fn solve(&mut self) {
         self.access = Access::Solved;
         self.crosswords = [(true, CrosswordState::new(VALID, ELINSA_WORDS)),
@@ -185,7 +151,7 @@ impl PasswordState {
 }
 
 impl PuzzleState for PasswordState {
-    fn location(&self) -> Location { Location::PasswordFile }
+    fn location() -> Location { Location::PasswordFile }
 
     fn access(&self) -> Access { self.access }
 
@@ -220,7 +186,9 @@ impl PuzzleState for PasswordState {
         self.sliders = INIT_SLIDERS;
         self.access = Access::BeginReplay;
     }
+}
 
+impl Tomlable for PasswordState {
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
@@ -247,6 +215,41 @@ impl PuzzleState for PasswordState {
                                                 .collect()));
         }
         toml::Value::Table(table)
+    }
+
+    fn from_toml(value: toml::Value) -> PasswordState {
+        let mut table = to_table(value);
+        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
+        let active_slot =
+            max(0, min(5, i32::pop_from_table(&mut table, ACTIVE_SLOT_KEY)));
+        let sliders = if access == Access::Solved {
+            SOLVED_SLIDERS
+        } else {
+            let mut sliders = INIT_SLIDERS;
+            for (index, offset) in pop_array(&mut table, SLIDERS_KEY)
+                .iter()
+                .filter_map(toml::Value::as_integer)
+                .filter(|&off| -5 <= off && off <= 0)
+                .map(|off| off as i32)
+                .enumerate() {
+                if index >= sliders.len() {
+                    break;
+                }
+                sliders[index] = offset;
+            }
+            sliders
+        };
+        PasswordState {
+            access: access,
+            active_slot: active_slot,
+            crosswords: [load(&mut table, access, ELINSA_KEY, ELINSA_WORDS),
+                         load(&mut table, access, ARGONY_KEY, ARGONY_WORDS),
+                         load(&mut table, access, MEZURE_KEY, MEZURE_WORDS),
+                         load(&mut table, access, YTTRIS_KEY, YTTRIS_WORDS),
+                         load(&mut table, access, UGRENT_KEY, UGRENT_WORDS),
+                         load(&mut table, access, RELYNG_KEY, RELYNG_WORDS)],
+            sliders: sliders,
+        }
     }
 }
 

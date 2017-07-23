@@ -26,7 +26,7 @@ use save::column::Columns;
 use save::device::{Device, DeviceGrid};
 use save::ice::{Object, ObjectGrid, Symbol, Transform};
 use save::plane::{PlaneGrid, PlaneObj};
-use save::util::{ACCESS_KEY, Tomlable, pop_array, pop_table};
+use save::util::{ACCESS_KEY, Tomlable, pop_array, pop_table, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -251,64 +251,6 @@ impl SyzygyState {
         grid
     }
 
-    pub fn from_toml(mut table: toml::value::Table) -> SyzygyState {
-        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
-        let stage = SyzygyStage::pop_from_table(&mut table, STAGE_KEY);
-        let yttris = Columns::from_toml(YTTRIS_COLUMNS_SPEC,
-                                        pop_array(&mut table, YTTRIS_KEY));
-        let argony =
-            ObjectGrid::from_toml(pop_table(&mut table, ARGONY_KEY),
-                                  &SyzygyState::argony_initial_grid());
-        let mut elinsa = SyzygyState::elinsa_initial_grid();
-        elinsa.set_pipes_from_toml(pop_array(&mut table, ELINSA_KEY));
-        let ugrent =
-            DeviceGrid::from_toml(pop_array(&mut table, UGRENT_KEY),
-                                  &SyzygyState::ugrent_initial_grid());
-        let relyng_next = match table.get(RELYNG_NEXT_KEY)
-                                     .and_then(toml::Value::as_str)
-                                     .unwrap_or("") {
-            "+" => '+',
-            "N" => 'N',
-            "X" => 'X',
-            "Z" => 'Z',
-            _ => RELYNG_INIT_NEXT,
-        };
-        let relyng_lights =
-            pop_array(&mut table, RELYNG_LIGHTS_KEY)
-                .into_iter()
-                .map(i32::from_toml)
-                .filter(|&idx| {
-                    0 <= idx && idx < RELYNG_NUM_COLS * RELYNG_NUM_ROWS
-                })
-                .collect();
-        let mezure_columns = Columns::from_toml(MEZURE_COLUMNS_SPEC,
-                                                pop_array(&mut table,
-                                                          MEZURE_COLUMNS_KEY));
-        let mezure_ice_grid =
-            ObjectGrid::from_toml(pop_table(&mut table, MEZURE_ICE_GRID_KEY),
-                                  &SyzygyState::mezure_initial_ice_grid());
-        let mut mezure_pipe_grid = SyzygyState::mezure_initial_pipe_grid();
-        mezure_pipe_grid.set_pipes_from_toml(pop_array(&mut table,
-                                                       MEZURE_PIPES_KEY));
-        let mut state = SyzygyState {
-            access: access,
-            stage: stage,
-            yttris: yttris,
-            argony: argony,
-            elinsa: elinsa,
-            ugrent: ugrent,
-            relyng_next: relyng_next,
-            relyng_lights: relyng_lights,
-            mezure_columns: mezure_columns,
-            mezure_lights: [true; 6],
-            mezure_ice_grid: mezure_ice_grid,
-            mezure_laser_grid: SyzygyState::mezure_initial_laser_grid(),
-            mezure_pipe_grid: mezure_pipe_grid,
-        };
-        state.mezure_regenerate_laser_grid();
-        state
-    }
-
     // TODO: Solve stages one at a time.
     pub fn solve(&mut self) { self.access = Access::Solved; }
 
@@ -529,7 +471,7 @@ impl SyzygyState {
 }
 
 impl PuzzleState for SyzygyState {
-    fn location(&self) -> Location { Location::SystemSyzygy }
+    fn location() -> Location { Location::SystemSyzygy }
 
     fn access(&self) -> Access { self.access }
 
@@ -571,7 +513,9 @@ impl PuzzleState for SyzygyState {
         self.reset_mezure();
         self.access = Access::BeginReplay;
     }
+}
 
+impl Tomlable for SyzygyState {
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
@@ -630,6 +574,65 @@ impl PuzzleState for SyzygyState {
             }
         }
         toml::Value::Table(table)
+    }
+
+    fn from_toml(value: toml::Value) -> SyzygyState {
+        let mut table = to_table(value);
+        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
+        let stage = SyzygyStage::pop_from_table(&mut table, STAGE_KEY);
+        let yttris = Columns::from_toml(YTTRIS_COLUMNS_SPEC,
+                                        pop_array(&mut table, YTTRIS_KEY));
+        let argony =
+            ObjectGrid::from_toml(pop_table(&mut table, ARGONY_KEY),
+                                  &SyzygyState::argony_initial_grid());
+        let mut elinsa = SyzygyState::elinsa_initial_grid();
+        elinsa.set_pipes_from_toml(pop_array(&mut table, ELINSA_KEY));
+        let ugrent =
+            DeviceGrid::from_toml(pop_array(&mut table, UGRENT_KEY),
+                                  &SyzygyState::ugrent_initial_grid());
+        let relyng_next = match table.get(RELYNG_NEXT_KEY)
+                                     .and_then(toml::Value::as_str)
+                                     .unwrap_or("") {
+            "+" => '+',
+            "N" => 'N',
+            "X" => 'X',
+            "Z" => 'Z',
+            _ => RELYNG_INIT_NEXT,
+        };
+        let relyng_lights =
+            pop_array(&mut table, RELYNG_LIGHTS_KEY)
+                .into_iter()
+                .map(i32::from_toml)
+                .filter(|&idx| {
+                    0 <= idx && idx < RELYNG_NUM_COLS * RELYNG_NUM_ROWS
+                })
+                .collect();
+        let mezure_columns = Columns::from_toml(MEZURE_COLUMNS_SPEC,
+                                                pop_array(&mut table,
+                                                          MEZURE_COLUMNS_KEY));
+        let mezure_ice_grid =
+            ObjectGrid::from_toml(pop_table(&mut table, MEZURE_ICE_GRID_KEY),
+                                  &SyzygyState::mezure_initial_ice_grid());
+        let mut mezure_pipe_grid = SyzygyState::mezure_initial_pipe_grid();
+        mezure_pipe_grid.set_pipes_from_toml(pop_array(&mut table,
+                                                       MEZURE_PIPES_KEY));
+        let mut state = SyzygyState {
+            access: access,
+            stage: stage,
+            yttris: yttris,
+            argony: argony,
+            elinsa: elinsa,
+            ugrent: ugrent,
+            relyng_next: relyng_next,
+            relyng_lights: relyng_lights,
+            mezure_columns: mezure_columns,
+            mezure_lights: [true; 6],
+            mezure_ice_grid: mezure_ice_grid,
+            mezure_laser_grid: SyzygyState::mezure_initial_laser_grid(),
+            mezure_pipe_grid: mezure_pipe_grid,
+        };
+        state.mezure_regenerate_laser_grid();
+        state
     }
 }
 

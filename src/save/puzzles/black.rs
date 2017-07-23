@@ -21,7 +21,7 @@ use toml;
 
 use save::{Access, Location};
 use save::tree::{RedBlackTree, TreeOp};
-use save::util::{ACCESS_KEY, Tomlable};
+use save::util::{ACCESS_KEY, Tomlable, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -46,29 +46,6 @@ pub struct BlackState {
 }
 
 impl BlackState {
-    pub fn from_toml(mut table: toml::value::Table) -> BlackState {
-        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
-        let mut tree = RedBlackTree::pop_from_table(&mut table, TREE_KEY);
-        let num_keys = tree.len();
-        if num_keys < MIN_KEYS_ON_TREE || num_keys > TOTAL_NUM_KEYS {
-            tree = BlackState::initial_tree();
-        } else if tree.keys()
-                      .into_iter()
-                      .any(|key| key < MIN_KEY || key > MAX_KEY) {
-            tree = BlackState::initial_tree();
-        }
-        let is_initial = tree == BlackState::initial_tree();
-        let mut state = BlackState {
-            access: access,
-            tree: tree,
-            is_initial: is_initial,
-        };
-        if !state.is_initial && !state.is_solved() {
-            state.check_if_solved();
-        }
-        state
-    }
-
     fn initial_tree() -> RedBlackTree {
         let mut tree = RedBlackTree::new();
         tree.insert(8);
@@ -168,7 +145,7 @@ impl BlackState {
 }
 
 impl PuzzleState for BlackState {
-    fn location(&self) -> Location { Location::BlackAndBlue }
+    fn location() -> Location { Location::BlackAndBlue }
 
     fn access(&self) -> Access { self.access }
 
@@ -180,7 +157,9 @@ impl PuzzleState for BlackState {
         self.tree = BlackState::initial_tree();
         self.is_initial = true;
     }
+}
 
+impl Tomlable for BlackState {
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
@@ -188,6 +167,30 @@ impl PuzzleState for BlackState {
             table.insert(TREE_KEY.to_string(), self.tree.to_toml());
         }
         toml::Value::Table(table)
+    }
+
+    fn from_toml(value: toml::Value) -> BlackState {
+        let mut table = to_table(value);
+        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
+        let mut tree = RedBlackTree::pop_from_table(&mut table, TREE_KEY);
+        let num_keys = tree.len();
+        if num_keys < MIN_KEYS_ON_TREE || num_keys > TOTAL_NUM_KEYS {
+            tree = BlackState::initial_tree();
+        } else if tree.keys()
+                      .into_iter()
+                      .any(|key| key < MIN_KEY || key > MAX_KEY) {
+            tree = BlackState::initial_tree();
+        }
+        let is_initial = tree == BlackState::initial_tree();
+        let mut state = BlackState {
+            access: access,
+            tree: tree,
+            is_initial: is_initial,
+        };
+        if !state.is_initial && !state.is_solved() {
+            state.check_if_solved();
+        }
+        state
     }
 }
 

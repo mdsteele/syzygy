@@ -87,7 +87,7 @@ impl<U: Clone> PuzzleCore<U> {
             middle_scene: None,
             outro_scene: outro_scene,
             extra_scenes: HashMap::new(),
-            hud: Hud::new(resources, visible, state.location()),
+            hud: Hud::new(resources, visible, S::location()),
             screen_fade: ScreenFade::new(resources, FadeStyle::RightLeft),
             undo_stack: Vec::new(),
             redo_stack: Vec::new(),
@@ -172,7 +172,7 @@ impl<U: Clone> PuzzleCore<U> {
                         !self.redo_stack.is_empty();
         }
         HudInput {
-            name: state.location().name(),
+            name: S::location().name(),
             access: state.access(),
             is_paused: scene.is_paused(),
             active: self.screen_fade.is_transparent() && scene.is_finished(),

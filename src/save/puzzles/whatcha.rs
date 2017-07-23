@@ -21,7 +21,7 @@ use toml;
 
 use save::{Access, Location};
 use save::column::Columns;
-use save::util::{ACCESS_KEY, Tomlable, pop_array};
+use save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -46,20 +46,6 @@ pub struct WhatchaState {
 }
 
 impl WhatchaState {
-    pub fn from_toml(mut table: toml::value::Table) -> WhatchaState {
-        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
-        let mut columns = Columns::from_toml(COLUMNS_SPEC,
-                                             pop_array(&mut table,
-                                                       COLUMNS_KEY));
-        if access.is_solved() {
-            columns.solve();
-        }
-        WhatchaState {
-            access: access,
-            columns: columns,
-        }
-    }
-
     pub fn solve(&mut self) {
         self.access = Access::Solved;
         self.columns.solve();
@@ -78,7 +64,7 @@ impl WhatchaState {
 }
 
 impl PuzzleState for WhatchaState {
-    fn location(&self) -> Location { Location::WhatchaColumn }
+    fn location() -> Location { Location::WhatchaColumn }
 
     fn access(&self) -> Access { self.access }
 
@@ -87,7 +73,9 @@ impl PuzzleState for WhatchaState {
     fn can_reset(&self) -> bool { self.columns.can_reset() }
 
     fn reset(&mut self) { self.columns.reset(); }
+}
 
+impl Tomlable for WhatchaState {
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
@@ -95,6 +83,21 @@ impl PuzzleState for WhatchaState {
             table.insert(COLUMNS_KEY.to_string(), self.columns.to_toml());
         }
         toml::Value::Table(table)
+    }
+
+    fn from_toml(value: toml::Value) -> WhatchaState {
+        let mut table = to_table(value);
+        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
+        let mut columns = Columns::from_toml(COLUMNS_SPEC,
+                                             pop_array(&mut table,
+                                                       COLUMNS_KEY));
+        if access.is_solved() {
+            columns.solve();
+        }
+        WhatchaState {
+            access: access,
+            columns: columns,
+        }
     }
 }
 

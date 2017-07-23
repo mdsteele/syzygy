@@ -20,7 +20,7 @@
 use toml;
 
 use save::{Access, Location};
-use save::util::{ACCESS_KEY, Tomlable};
+use save::util::{ACCESS_KEY, Tomlable, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -29,14 +29,8 @@ pub struct FinaleState {
     access: Access,
 }
 
-impl FinaleState {
-    pub fn from_toml(mut table: toml::value::Table) -> FinaleState {
-        FinaleState { access: Access::pop_from_table(&mut table, ACCESS_KEY) }
-    }
-}
-
 impl PuzzleState for FinaleState {
-    fn location(&self) -> Location { Location::Finale }
+    fn location() -> Location { Location::Finale }
 
     fn access(&self) -> Access { self.access }
 
@@ -49,11 +43,18 @@ impl PuzzleState for FinaleState {
     fn can_reset(&self) -> bool { false }
 
     fn reset(&mut self) {}
+}
 
+impl Tomlable for FinaleState {
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         toml::Value::Table(table)
+    }
+
+    fn from_toml(value: toml::Value) -> FinaleState {
+        let mut table = to_table(value);
+        FinaleState { access: Access::pop_from_table(&mut table, ACCESS_KEY) }
     }
 }
 

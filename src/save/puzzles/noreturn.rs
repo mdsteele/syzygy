@@ -21,7 +21,7 @@ use std::cmp;
 use toml;
 
 use save::{Access, Location};
-use save::util::{ACCESS_KEY, Tomlable, pop_array};
+use save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -49,36 +49,6 @@ pub struct NoReturnState {
 }
 
 impl NoReturnState {
-    pub fn from_toml(mut table: toml::value::Table) -> NoReturnState {
-        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
-        let order = if access.is_solved() {
-            SOLVED_ORDER
-        } else {
-            let mut order = [0; 8];
-            let order_toml = pop_array(&mut table, ORDER_KEY);
-            for (index, value) in order_toml.into_iter().enumerate() {
-                if index >= order.len() {
-                    break;
-                }
-                let value = i32::from_toml(value);
-                let value = cmp::max(0, value) as usize;
-                let value = cmp::min(value, order.len() - 1);
-                order[index] = value;
-            }
-            for (index, value) in order.clone().into_iter().enumerate() {
-                if order[..index].contains(value) {
-                    order = INITIAL_ORDER;
-                    break;
-                }
-            }
-            order
-        };
-        NoReturnState {
-            access: access,
-            order: order,
-        }
-    }
-
     pub fn solve(&mut self) {
         self.access = Access::Solved;
         self.order = SOLVED_ORDER;
@@ -139,7 +109,7 @@ impl NoReturnState {
 }
 
 impl PuzzleState for NoReturnState {
-    fn location(&self) -> Location { Location::PointOfNoReturn }
+    fn location() -> Location { Location::PointOfNoReturn }
 
     fn access(&self) -> Access { self.access }
 
@@ -148,12 +118,9 @@ impl PuzzleState for NoReturnState {
     fn can_reset(&self) -> bool { self.order != INITIAL_ORDER }
 
     fn reset(&mut self) { self.order = INITIAL_ORDER; }
+}
 
-    fn replay(&mut self) {
-        self.access = Access::BeginReplay;
-        self.order = INITIAL_ORDER;
-    }
-
+impl Tomlable for NoReturnState {
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
@@ -166,6 +133,37 @@ impl PuzzleState for NoReturnState {
         }
         toml::Value::Table(table)
     }
+
+    fn from_toml(value: toml::Value) -> NoReturnState {
+        let mut table = to_table(value);
+        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
+        let order = if access.is_solved() {
+            SOLVED_ORDER
+        } else {
+            let mut order = [0; 8];
+            let order_toml = pop_array(&mut table, ORDER_KEY);
+            for (index, value) in order_toml.into_iter().enumerate() {
+                if index >= order.len() {
+                    break;
+                }
+                let value = i32::from_toml(value);
+                let value = cmp::max(0, value) as usize;
+                let value = cmp::min(value, order.len() - 1);
+                order[index] = value;
+            }
+            for (index, value) in order.clone().into_iter().enumerate() {
+                if order[..index].contains(value) {
+                    order = INITIAL_ORDER;
+                    break;
+                }
+            }
+            order
+        };
+        NoReturnState {
+            access: access,
+            order: order,
+        }
+    }
 }
 
 // ========================================================================= //
@@ -175,23 +173,23 @@ mod tests {
     use toml;
 
     use save::{Access, PuzzleState};
-    use save::util::{ACCESS_KEY, Tomlable, to_table};
+    use save::util::{ACCESS_KEY, Tomlable};
     use super::{INITIAL_ORDER, NoReturnState, ORDER_KEY, SOLVED_ORDER};
 
     #[test]
     fn toml_round_trip() {
-        let mut state = NoReturnState::from_toml(toml::value::Table::new());
+        let mut state = NoReturnState::from_toml(toml::Value::Boolean(false));
         state.access = Access::Replaying;
         state.order = [3, 1, 4, 5, 2, 6, 7, 0];
 
-        let state = NoReturnState::from_toml(to_table(state.to_toml()));
+        let state = NoReturnState::from_toml(state.to_toml());
         assert_eq!(state.access, Access::Replaying);
         assert_eq!(state.order, [3, 1, 4, 5, 2, 6, 7, 0]);
     }
 
     #[test]
     fn from_empty_toml() {
-        let state = NoReturnState::from_toml(toml::value::Table::new());
+        let state = NoReturnState::from_toml(toml::Value::Boolean(false));
         assert_eq!(state.access, Access::Unvisited);
         assert_eq!(state.order, INITIAL_ORDER);
     }
@@ -201,14 +199,14 @@ mod tests {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), Access::Solved.to_toml());
 
-        let state = NoReturnState::from_toml(table);
+        let state = NoReturnState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Solved);
         assert_eq!(state.order, SOLVED_ORDER);
     }
 
     #[test]
     fn solve() {
-        let mut state = NoReturnState::from_toml(toml::value::Table::new());
+        let mut state = NoReturnState::from_toml(toml::Value::Boolean(false));
         state.order = SOLVED_ORDER;
         assert!(state.check_if_solved());
         assert!(state.is_solved());
@@ -225,7 +223,7 @@ mod tests {
             .collect();
         table.insert(ORDER_KEY.to_string(), toml::Value::Array(order));
 
-        let state = NoReturnState::from_toml(table);
+        let state = NoReturnState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Unsolved);
         assert_eq!(state.order, INITIAL_ORDER);
     }

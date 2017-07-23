@@ -22,7 +22,7 @@ use toml;
 use gui::{Point, Rect};
 use save::{Access, Location};
 use save::plane::{PlaneGrid, PlaneObj};
-use save::util::{ACCESS_KEY, Tomlable, pop_array};
+use save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -89,24 +89,6 @@ impl DayState {
         grid.place_object(9, 3, PlaneObj::BlueNode);
         grid.place_object(1, 5, PlaneObj::RedNode);
         grid
-    }
-
-    pub fn from_toml(mut table: toml::value::Table) -> DayState {
-        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
-        let mut stage = i32::pop_from_table(&mut table, STAGE_KEY);
-        if stage < FIRST_STAGE || stage > LAST_STAGE {
-            stage = FIRST_STAGE;
-        }
-        let mut state = DayState {
-            access: access,
-            grid: DayState::initial_grid(),
-            stage: FIRST_STAGE,
-        };
-        while state.stage < stage {
-            state.advance_stage();
-        }
-        state.grid.set_pipes_from_toml(pop_array(&mut table, PIPES_KEY));
-        state
     }
 
     pub fn solve(&mut self) {
@@ -201,7 +183,7 @@ impl DayState {
 }
 
 impl PuzzleState for DayState {
-    fn location(&self) -> Location { Location::PlaneAsDay }
+    fn location() -> Location { Location::PlaneAsDay }
 
     fn access(&self) -> Access { self.access }
 
@@ -216,7 +198,9 @@ impl PuzzleState for DayState {
         self.stage = FIRST_STAGE;
         self.access = Access::BeginReplay;
     }
+}
 
+impl Tomlable for DayState {
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
@@ -224,6 +208,25 @@ impl PuzzleState for DayState {
         table.insert(STAGE_KEY.to_string(),
                      toml::Value::Integer(self.stage as i64));
         toml::Value::Table(table)
+    }
+
+    fn from_toml(value: toml::Value) -> DayState {
+        let mut table = to_table(value);
+        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
+        let mut stage = i32::pop_from_table(&mut table, STAGE_KEY);
+        if stage < FIRST_STAGE || stage > LAST_STAGE {
+            stage = FIRST_STAGE;
+        }
+        let mut state = DayState {
+            access: access,
+            grid: DayState::initial_grid(),
+            stage: FIRST_STAGE,
+        };
+        while state.stage < stage {
+            state.advance_stage();
+        }
+        state.grid.set_pipes_from_toml(pop_array(&mut table, PIPES_KEY));
+        state
     }
 }
 

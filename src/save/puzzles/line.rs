@@ -21,7 +21,7 @@ use rand::{self, Rng, SeedableRng};
 use toml;
 
 use save::{Access, Location};
-use save::util::{ACCESS_KEY, Tomlable};
+use save::util::{ACCESS_KEY, Tomlable, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -54,40 +54,6 @@ pub struct LineState {
 }
 
 impl LineState {
-    pub fn from_toml(mut table: toml::value::Table) -> LineState {
-        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
-        let stage = if access == Access::Solved {
-            GRIDS.len() as i32
-        } else {
-            i32::pop_from_table(&mut table, STAGE_KEY)
-        };
-        let mut seed = [0; 8];
-        if access != Access::Solved {
-            let mut index = 0;
-            for value in Vec::<u32>::pop_from_table(&mut table, SEED_KEY)
-                .into_iter() {
-                seed[index] = value;
-                index += 1;
-                if index >= 8 {
-                    break;
-                }
-            }
-            while index < 8 {
-                seed[index] = rand::random();
-                index += 1;
-            }
-        }
-        let mut state = LineState {
-            access: access,
-            stage: stage,
-            seed: seed,
-            grid1: Vec::new(),
-            grid2: Vec::new(),
-        };
-        state.update_grids();
-        state
-    }
-
     pub fn solve(&mut self) {
         self.access = Access::Solved;
         self.stage = GRIDS.len() as i32;
@@ -161,7 +127,7 @@ impl LineState {
 }
 
 impl PuzzleState for LineState {
-    fn location(&self) -> Location { Location::CrossTheLine }
+    fn location() -> Location { Location::CrossTheLine }
 
     fn access(&self) -> Access { self.access }
 
@@ -173,7 +139,9 @@ impl PuzzleState for LineState {
         self.stage = 0;
         self.reseed();
     }
+}
 
+impl Tomlable for LineState {
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
@@ -189,6 +157,41 @@ impl PuzzleState for LineState {
         }
         toml::Value::Table(table)
     }
+
+    fn from_toml(value: toml::Value) -> LineState {
+        let mut table = to_table(value);
+        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
+        let stage = if access == Access::Solved {
+            GRIDS.len() as i32
+        } else {
+            i32::pop_from_table(&mut table, STAGE_KEY)
+        };
+        let mut seed = [0; 8];
+        if access != Access::Solved {
+            let mut index = 0;
+            for value in Vec::<u32>::pop_from_table(&mut table, SEED_KEY)
+                .into_iter() {
+                seed[index] = value;
+                index += 1;
+                if index >= 8 {
+                    break;
+                }
+            }
+            while index < 8 {
+                seed[index] = rand::random();
+                index += 1;
+            }
+        }
+        let mut state = LineState {
+            access: access,
+            stage: stage,
+            seed: seed,
+            grid1: Vec::new(),
+            grid2: Vec::new(),
+        };
+        state.update_grids();
+        state
+    }
 }
 
 // ========================================================================= //
@@ -197,13 +200,13 @@ impl PuzzleState for LineState {
 mod tests {
     use toml;
 
-    use save::{Access, PuzzleState};
-    use save::util::{ACCESS_KEY, Tomlable, to_table};
+    use save::Access;
+    use save::util::{ACCESS_KEY, Tomlable};
     use super::{GRIDS, LineState};
 
     #[test]
     fn toml_round_trip() {
-        let mut state = LineState::from_toml(toml::value::Table::new());
+        let mut state = LineState::from_toml(toml::Value::Boolean(false));
         state.access = Access::Replaying;
         state.stage = 7;
         state.seed = [1, 2, 3, 4, 5, 6, 7, 8];
@@ -211,7 +214,7 @@ mod tests {
         let grid1 = state.grid1.clone();
         let grid2 = state.grid2.clone();
 
-        let state = LineState::from_toml(to_table(state.to_toml()));
+        let state = LineState::from_toml(state.to_toml());
         assert_eq!(state.access, Access::Replaying);
         assert_eq!(state.stage, 7);
         assert_eq!(state.seed, [1, 2, 3, 4, 5, 6, 7, 8]);
@@ -221,7 +224,7 @@ mod tests {
 
     #[test]
     fn from_empty_toml() {
-        let state = LineState::from_toml(toml::value::Table::new());
+        let state = LineState::from_toml(toml::Value::Boolean(false));
         assert_eq!(state.access, Access::Unvisited);
         assert_eq!(state.stage, 0);
         assert_eq!(state.grid1.len(), 12);
@@ -234,7 +237,7 @@ mod tests {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), Access::Solved.to_toml());
 
-        let state = LineState::from_toml(table);
+        let state = LineState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Solved);
         assert_eq!(state.stage, GRIDS.len() as i32);
         assert!(state.grid1.is_empty());

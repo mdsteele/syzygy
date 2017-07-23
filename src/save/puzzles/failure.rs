@@ -21,7 +21,7 @@ use toml;
 
 use save::{Access, Location};
 use save::pyramid::{Board, Coords, Team};
-use save::util::{ACCESS_KEY, Tomlable};
+use save::util::{ACCESS_KEY, Tomlable, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -38,16 +38,6 @@ pub struct FailureState {
 }
 
 impl FailureState {
-    pub fn from_toml(mut table: toml::value::Table) -> FailureState {
-        FailureState {
-            access: Access::pop_from_table(&mut table, ACCESS_KEY),
-            mid_scene_done: table.get(MID_SCENE_DONE_KEY)
-                                 .and_then(toml::Value::as_bool)
-                                 .unwrap_or(false),
-            board: Board::pop_from_table(&mut table, BOARD_KEY),
-        }
-    }
-
     pub fn solve(&mut self) {
         self.access = Access::Solved;
         for coords in Coords::all() {
@@ -72,7 +62,7 @@ impl FailureState {
 }
 
 impl PuzzleState for FailureState {
-    fn location(&self) -> Location { Location::SystemFailure }
+    fn location() -> Location { Location::SystemFailure }
 
     fn access(&self) -> Access { self.access }
 
@@ -81,7 +71,9 @@ impl PuzzleState for FailureState {
     fn can_reset(&self) -> bool { !self.board.is_empty() }
 
     fn reset(&mut self) { self.board = Board::new(); }
+}
 
+impl Tomlable for FailureState {
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
@@ -91,6 +83,17 @@ impl PuzzleState for FailureState {
             table.insert(BOARD_KEY.to_string(), self.board.to_toml());
         }
         toml::Value::Table(table)
+    }
+
+    fn from_toml(value: toml::Value) -> FailureState {
+        let mut table = to_table(value);
+        FailureState {
+            access: Access::pop_from_table(&mut table, ACCESS_KEY),
+            mid_scene_done: table.get(MID_SCENE_DONE_KEY)
+                                 .and_then(toml::Value::as_bool)
+                                 .unwrap_or(false),
+            board: Board::pop_from_table(&mut table, BOARD_KEY),
+        }
     }
 }
 

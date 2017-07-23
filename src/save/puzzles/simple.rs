@@ -22,7 +22,7 @@ use toml;
 use gui::{Point, Rect};
 use save::{Access, Location};
 use save::plane::{PlaneGrid, PlaneObj};
-use save::util::{ACCESS_KEY, Tomlable, pop_array};
+use save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -80,26 +80,6 @@ impl SimpleState {
         grid.remove_object(2, 6);
         grid.remove_object(4, 6);
         grid
-    }
-
-    pub fn from_toml(mut table: toml::value::Table) -> SimpleState {
-        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
-        let mut stage = table.remove(STAGE_KEY)
-                             .map(i32::from_toml)
-                             .unwrap_or(FIRST_STAGE);
-        if stage < FIRST_STAGE || stage > LAST_STAGE {
-            stage = FIRST_STAGE;
-        }
-        let mut state = SimpleState {
-            access: access,
-            grid: SimpleState::initial_grid(),
-            stage: FIRST_STAGE,
-        };
-        while state.stage < stage {
-            state.advance_stage();
-        }
-        state.grid.set_pipes_from_toml(pop_array(&mut table, PIPES_KEY));
-        state
     }
 
     pub fn solve(&mut self) {
@@ -191,7 +171,7 @@ impl SimpleState {
 }
 
 impl PuzzleState for SimpleState {
-    fn location(&self) -> Location { Location::PlaneAndSimple }
+    fn location() -> Location { Location::PlaneAndSimple }
 
     fn access(&self) -> Access { self.access }
 
@@ -206,7 +186,9 @@ impl PuzzleState for SimpleState {
         self.stage = FIRST_STAGE;
         self.access = Access::BeginReplay;
     }
+}
 
+impl Tomlable for SimpleState {
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
@@ -214,6 +196,27 @@ impl PuzzleState for SimpleState {
         table.insert(STAGE_KEY.to_string(),
                      toml::Value::Integer(self.stage as i64));
         toml::Value::Table(table)
+    }
+
+    fn from_toml(value: toml::Value) -> SimpleState {
+        let mut table = to_table(value);
+        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
+        let mut stage = table.remove(STAGE_KEY)
+                             .map(i32::from_toml)
+                             .unwrap_or(FIRST_STAGE);
+        if stage < FIRST_STAGE || stage > LAST_STAGE {
+            stage = FIRST_STAGE;
+        }
+        let mut state = SimpleState {
+            access: access,
+            grid: SimpleState::initial_grid(),
+            stage: FIRST_STAGE,
+        };
+        while state.stage < stage {
+            state.advance_stage();
+        }
+        state.grid.set_pipes_from_toml(pop_array(&mut table, PIPES_KEY));
+        state
     }
 }
 

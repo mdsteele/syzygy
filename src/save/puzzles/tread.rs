@@ -20,7 +20,7 @@
 use toml;
 
 use save::{Access, Location};
-use save::util::{ACCESS_KEY, Tomlable, pop_array};
+use save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -49,33 +49,6 @@ pub struct TreadState {
 }
 
 impl TreadState {
-    pub fn from_toml(mut table: toml::value::Table) -> TreadState {
-        let mut access = Access::pop_from_table(&mut table, ACCESS_KEY);
-        let toggled = if access == Access::Solved {
-            SOLVED_TOGGLED_1.iter().cloned().collect()
-        } else {
-            let vec: Vec<i32> = pop_array(&mut table, TOGGLED_KEY)
-                .iter()
-                .filter_map(toml::Value::as_integer)
-                .filter(|&idx| 0 <= idx && idx < 12)
-                .map(|idx| idx as i32)
-                .collect();
-            vec.into_iter().take(LETTERS.len()).collect()
-        };
-        if (&toggled as &[i32]) == SOLVED_TOGGLED_1 ||
-           (&toggled as &[i32]) == SOLVED_TOGGLED_2 {
-            access = Access::Solved;
-        }
-        let mut state = TreadState {
-            access: access,
-            toggled: toggled,
-            grid: Vec::new(),
-        };
-        state.rebuild_grid();
-        debug_assert!(state.is_solved() ^ state.grid.iter().any(|&lit| lit));
-        state
-    }
-
     pub fn solve(&mut self) {
         self.access = Access::Solved;
         self.toggled = SOLVED_TOGGLED_1.iter().cloned().collect();
@@ -167,7 +140,7 @@ impl TreadState {
 }
 
 impl PuzzleState for TreadState {
-    fn location(&self) -> Location { Location::TreadLightly }
+    fn location() -> Location { Location::TreadLightly }
 
     fn access(&self) -> Access { self.access }
 
@@ -179,7 +152,9 @@ impl PuzzleState for TreadState {
         self.toggled.clear();
         self.rebuild_grid();
     }
+}
 
+impl Tomlable for TreadState {
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
@@ -192,6 +167,34 @@ impl PuzzleState for TreadState {
         }
         toml::Value::Table(table)
     }
+
+    fn from_toml(value: toml::Value) -> TreadState {
+        let mut table = to_table(value);
+        let mut access = Access::pop_from_table(&mut table, ACCESS_KEY);
+        let toggled = if access == Access::Solved {
+            SOLVED_TOGGLED_1.iter().cloned().collect()
+        } else {
+            let vec: Vec<i32> = pop_array(&mut table, TOGGLED_KEY)
+                .iter()
+                .filter_map(toml::Value::as_integer)
+                .filter(|&idx| 0 <= idx && idx < 12)
+                .map(|idx| idx as i32)
+                .collect();
+            vec.into_iter().take(LETTERS.len()).collect()
+        };
+        if (&toggled as &[i32]) == SOLVED_TOGGLED_1 ||
+           (&toggled as &[i32]) == SOLVED_TOGGLED_2 {
+            access = Access::Solved;
+        }
+        let mut state = TreadState {
+            access: access,
+            toggled: toggled,
+            grid: Vec::new(),
+        };
+        state.rebuild_grid();
+        debug_assert!(state.is_solved() ^ state.grid.iter().any(|&lit| lit));
+        state
+    }
 }
 
 // ========================================================================= //
@@ -200,14 +203,14 @@ impl PuzzleState for TreadState {
 mod tests {
     use toml;
 
-    use save::{Access, PuzzleState};
-    use save::util::{ACCESS_KEY, Tomlable, to_table};
+    use save::Access;
+    use save::util::{ACCESS_KEY, Tomlable};
     use super::{INITIAL_GRID, SOLVED_TOGGLED_1, SOLVED_TOGGLED_2, TOGGLED_KEY,
                 TreadState};
 
     #[test]
     fn toml_round_trip() {
-        let mut state = TreadState::from_toml(toml::value::Table::new());
+        let mut state = TreadState::from_toml(toml::Value::Boolean(false));
         assert_eq!(state.next_label(), Some('T'));
         state.push_toggle((3, 1));
         assert_eq!(state.next_label(), Some('A'));
@@ -216,7 +219,7 @@ mod tests {
         state.push_toggle((3, 2));
         let grid = state.grid.clone();
 
-        let state = TreadState::from_toml(to_table(state.to_toml()));
+        let state = TreadState::from_toml(state.to_toml());
         assert_eq!(state.toggled_label((3, 1)), Some('T'));
         assert_eq!(state.toggled_label((3, 2)), Some('S'));
         assert_eq!(state.toggled_label((3, 3)), Some('A'));
@@ -225,7 +228,7 @@ mod tests {
 
     #[test]
     fn from_empty_toml() {
-        let state = TreadState::from_toml(toml::value::Table::new());
+        let state = TreadState::from_toml(toml::Value::Boolean(false));
         assert_eq!(state.access, Access::Unvisited);
         assert!(state.toggled.is_empty());
         assert_eq!(state.grid, INITIAL_GRID.to_vec());
@@ -236,7 +239,7 @@ mod tests {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), Access::Solved.to_toml());
 
-        let state = TreadState::from_toml(table);
+        let state = TreadState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Solved);
         assert_eq!(state.toggled, SOLVED_TOGGLED_1.to_vec());
         assert!(state.grid.iter().all(|&lit| !lit));
@@ -252,7 +255,7 @@ mod tests {
                                                .map(toml::Value::Integer)
                                                .collect()));
 
-        let state = TreadState::from_toml(table);
+        let state = TreadState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Unsolved);
         assert_eq!(state.toggled, vec![0, 11]);
     }
@@ -267,7 +270,7 @@ mod tests {
                             .collect();
         table.insert(TOGGLED_KEY.to_string(), toml::Value::Array(toggled));
 
-        let state = TreadState::from_toml(table);
+        let state = TreadState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Solved);
         assert_eq!(state.toggled, SOLVED_TOGGLED_2.to_vec());
         assert!(state.grid.iter().all(|&lit| !lit));

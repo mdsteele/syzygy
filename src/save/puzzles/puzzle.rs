@@ -20,11 +20,12 @@
 use toml;
 
 use save::{Access, Location};
+use save::util::Tomlable;
 
 // ========================================================================= //
 
-pub trait PuzzleState {
-    fn location(&self) -> Location;
+pub trait PuzzleState: Tomlable {
+    fn location() -> Location where Self: Sized;
 
     fn access(&self) -> Access;
 
@@ -53,7 +54,11 @@ pub trait PuzzleState {
         *self.access_mut() = Access::BeginReplay;
     }
 
-    fn to_toml(&self) -> toml::Value;
+    fn pop_from_game_table(table: &mut toml::value::Table) -> Self
+        where Self: Sized
+    {
+        Self::pop_from_table(table, Self::location().key())
+    }
 }
 
 // ========================================================================= //

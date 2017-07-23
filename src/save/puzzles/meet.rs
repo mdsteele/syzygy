@@ -22,7 +22,7 @@ use toml;
 use gui::Point;
 use save::{Access, Direction, Location};
 use save::ice::{BlockSlide, Object, ObjectGrid, Symbol};
-use save::util::{ACCESS_KEY, Tomlable, pop_table};
+use save::util::{ACCESS_KEY, Tomlable, pop_table, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -37,20 +37,6 @@ pub struct MeetState {
 }
 
 impl MeetState {
-    pub fn from_toml(mut table: toml::value::Table) -> MeetState {
-        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
-        let grid = if access == Access::Solved {
-            MeetState::solved_grid()
-        } else {
-            let grid = pop_table(&mut table, GRID_KEY);
-            ObjectGrid::from_toml(grid, &MeetState::initial_grid())
-        };
-        MeetState {
-            access: access,
-            grid: grid,
-        }
-    }
-
     pub fn solve(&mut self) {
         self.access = Access::Solved;
         self.grid = MeetState::solved_grid();
@@ -104,7 +90,7 @@ impl MeetState {
 }
 
 impl PuzzleState for MeetState {
-    fn location(&self) -> Location { Location::IceToMeetYou }
+    fn location() -> Location { Location::IceToMeetYou }
 
     fn access(&self) -> Access { self.access }
 
@@ -113,7 +99,9 @@ impl PuzzleState for MeetState {
     fn can_reset(&self) -> bool { self.grid.is_modified() }
 
     fn reset(&mut self) { self.grid = MeetState::initial_grid(); }
+}
 
+impl Tomlable for MeetState {
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
@@ -121,6 +109,21 @@ impl PuzzleState for MeetState {
             table.insert(GRID_KEY.to_string(), self.grid.to_toml());
         }
         toml::Value::Table(table)
+    }
+
+    fn from_toml(value: toml::Value) -> MeetState {
+        let mut table = to_table(value);
+        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
+        let grid = if access == Access::Solved {
+            MeetState::solved_grid()
+        } else {
+            let grid = pop_table(&mut table, GRID_KEY);
+            ObjectGrid::from_toml(grid, &MeetState::initial_grid())
+        };
+        MeetState {
+            access: access,
+            grid: grid,
+        }
     }
 }
 

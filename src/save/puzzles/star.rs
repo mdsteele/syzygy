@@ -23,7 +23,7 @@ use toml;
 
 use gui::Point;
 use save::{Access, Location};
-use save::util::{ACCESS_KEY, Tomlable};
+use save::util::{ACCESS_KEY, Tomlable, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -90,25 +90,6 @@ pub struct StarState {
 }
 
 impl StarState {
-    pub fn from_toml(mut table: toml::value::Table) -> StarState {
-        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
-        let found = if access == Access::Solved {
-            (0..(WORDS.len() as i32)).into_iter().collect()
-        } else {
-            let num_words = WORDS.len() as i32;
-            let found = Vec::<i32>::pop_from_table(&mut table, FOUND_KEY);
-            found.into_iter().filter(|&i| 0 <= i && i < num_words).collect()
-        };
-
-        let mut state = StarState {
-            access: access,
-            found: found,
-            columns: Vec::new(),
-        };
-        state.regenerate_columns(); // TODO: don't panic if invalid
-        state
-    }
-
     pub fn solve(&mut self) {
         self.access = Access::Solved;
         for index in 0..self.num_words() {
@@ -188,7 +169,7 @@ impl StarState {
 }
 
 impl PuzzleState for StarState {
-    fn location(&self) -> Location { Location::StarCrossed }
+    fn location() -> Location { Location::StarCrossed }
 
     fn access(&self) -> Access { self.access }
 
@@ -200,7 +181,9 @@ impl PuzzleState for StarState {
         self.found.clear();
         self.regenerate_columns();
     }
+}
 
+impl Tomlable for StarState {
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
@@ -212,6 +195,26 @@ impl PuzzleState for StarState {
             table.insert(FOUND_KEY.to_string(), toml::Value::Array(found));
         }
         toml::Value::Table(table)
+    }
+
+    fn from_toml(value: toml::Value) -> StarState {
+        let mut table = to_table(value);
+        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
+        let found = if access == Access::Solved {
+            (0..(WORDS.len() as i32)).into_iter().collect()
+        } else {
+            let num_words = WORDS.len() as i32;
+            let found = Vec::<i32>::pop_from_table(&mut table, FOUND_KEY);
+            found.into_iter().filter(|&i| 0 <= i && i < num_words).collect()
+        };
+
+        let mut state = StarState {
+            access: access,
+            found: found,
+            columns: Vec::new(),
+        };
+        state.regenerate_columns(); // TODO: don't panic if invalid
+        state
     }
 }
 

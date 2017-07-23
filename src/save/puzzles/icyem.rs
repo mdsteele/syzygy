@@ -21,7 +21,7 @@ use toml;
 
 use save::{Access, Location};
 use save::column::Columns;
-use save::util::{ACCESS_KEY, Tomlable, pop_array};
+use save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -56,20 +56,6 @@ pub struct IcyEmState {
 }
 
 impl IcyEmState {
-    pub fn from_toml(mut table: toml::value::Table) -> IcyEmState {
-        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
-        let mut columns = Columns::from_toml(COLUMNS_SPEC,
-                                             pop_array(&mut table,
-                                                       COLUMNS_KEY));
-        if access.is_solved() {
-            columns.solve();
-        }
-        IcyEmState {
-            access: access,
-            columns: columns,
-        }
-    }
-
     pub fn solve(&mut self) {
         self.access = Access::Solved;
         self.columns.solve();
@@ -88,7 +74,7 @@ impl IcyEmState {
 }
 
 impl PuzzleState for IcyEmState {
-    fn location(&self) -> Location { Location::ColumnAsIcyEm }
+    fn location() -> Location { Location::ColumnAsIcyEm }
 
     fn access(&self) -> Access { self.access }
 
@@ -97,7 +83,9 @@ impl PuzzleState for IcyEmState {
     fn can_reset(&self) -> bool { self.columns.can_reset() }
 
     fn reset(&mut self) { self.columns.reset(); }
+}
 
+impl Tomlable for IcyEmState {
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
@@ -105,6 +93,21 @@ impl PuzzleState for IcyEmState {
             table.insert(COLUMNS_KEY.to_string(), self.columns.to_toml());
         }
         toml::Value::Table(table)
+    }
+
+    fn from_toml(value: toml::Value) -> IcyEmState {
+        let mut table = to_table(value);
+        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
+        let mut columns = Columns::from_toml(COLUMNS_SPEC,
+                                             pop_array(&mut table,
+                                                       COLUMNS_KEY));
+        if access.is_solved() {
+            columns.solve();
+        }
+        IcyEmState {
+            access: access,
+            columns: columns,
+        }
     }
 }
 

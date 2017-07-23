@@ -22,7 +22,7 @@ use std::collections::{HashMap, HashSet, VecDeque};
 use toml;
 
 use save::{Access, Location};
-use save::util::{ACCESS_KEY, Tomlable, rotate_deque};
+use save::util::{ACCESS_KEY, Tomlable, rotate_deque, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -72,41 +72,6 @@ pub struct PovState {
 }
 
 impl PovState {
-    pub fn from_toml(mut table: toml::value::Table) -> PovState {
-        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
-        let grid = if access.is_solved() {
-            SOLVED_GRID.iter().cloned().collect()
-        } else {
-            let mut grid = HashMap::new();
-            for entry in Vec::<Vec<i32>>::pop_from_table(&mut table,
-                                                         GRID_KEY)
-                             .into_iter() {
-                if entry.len() != 6 {
-                    continue;
-                }
-                let coords = (entry[0], entry[1]);
-                let mut tile = [0u8; 4];
-                for index in 0..4 {
-                    tile[index] = max(0, min(4, entry[2 + index])) as u8;
-                }
-                grid.insert(coords, tile);
-            }
-            if PovState::is_valid_grid(&grid) {
-                grid
-            } else {
-                INITIAL_GRID.iter().cloned().collect()
-            }
-        };
-        let mut state = PovState {
-            access: access,
-            grid: grid,
-            colors: [255; 20],
-            is_initial: true,
-        };
-        state.regenerate();
-        state
-    }
-
     fn is_valid_grid(grid: &HashMap<(i32, i32), [u8; 4]>) -> bool {
         if grid.len() != INITIAL_GRID.len() {
             return false;
@@ -269,7 +234,7 @@ impl PovState {
 }
 
 impl PuzzleState for PovState {
-    fn location(&self) -> Location { Location::PointOfView }
+    fn location() -> Location { Location::PointOfView }
 
     fn access(&self) -> Access { self.access }
 
@@ -281,7 +246,9 @@ impl PuzzleState for PovState {
         self.grid = INITIAL_GRID.iter().cloned().collect();
         self.regenerate();
     }
+}
 
+impl Tomlable for PovState {
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
@@ -300,6 +267,42 @@ impl PuzzleState for PovState {
         }
         toml::Value::Table(table)
     }
+
+    fn from_toml(value: toml::Value) -> PovState {
+        let mut table = to_table(value);
+        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
+        let grid = if access.is_solved() {
+            SOLVED_GRID.iter().cloned().collect()
+        } else {
+            let mut grid = HashMap::new();
+            for entry in Vec::<Vec<i32>>::pop_from_table(&mut table,
+                                                         GRID_KEY)
+                             .into_iter() {
+                if entry.len() != 6 {
+                    continue;
+                }
+                let coords = (entry[0], entry[1]);
+                let mut tile = [0u8; 4];
+                for index in 0..4 {
+                    tile[index] = max(0, min(4, entry[2 + index])) as u8;
+                }
+                grid.insert(coords, tile);
+            }
+            if PovState::is_valid_grid(&grid) {
+                grid
+            } else {
+                INITIAL_GRID.iter().cloned().collect()
+            }
+        };
+        let mut state = PovState {
+            access: access,
+            grid: grid,
+            colors: [255; 20],
+            is_initial: true,
+        };
+        state.regenerate();
+        state
+    }
 }
 
 fn rotate(mut tile: [u8; 4], by: i32) -> [u8; 4] {
@@ -317,13 +320,13 @@ fn rotate(mut tile: [u8; 4], by: i32) -> [u8; 4] {
 mod tests {
     use toml;
 
-    use save::{Access, PuzzleState};
-    use save::util::{ACCESS_KEY, Tomlable, to_table};
+    use save::Access;
+    use save::util::{ACCESS_KEY, Tomlable};
     use super::{GOALS, INITIAL_GRID, PovState};
 
     #[test]
     fn toml_round_trip() {
-        let mut state = PovState::from_toml(toml::value::Table::new());
+        let mut state = PovState::from_toml(toml::Value::Boolean(false));
         state.access = Access::Replaying;
         assert!(state.tile_at((0, 0)).is_some());
         state.move_tile((0, 0), (2, 0));
@@ -333,7 +336,7 @@ mod tests {
         let colors = state.colors.clone();
         assert!(!state.is_initial);
 
-        let state = PovState::from_toml(to_table(state.to_toml()));
+        let state = PovState::from_toml(state.to_toml());
         assert_eq!(state.access, Access::Replaying);
         assert_eq!(state.grid, grid);
         assert_eq!(state.colors, colors);
@@ -342,7 +345,7 @@ mod tests {
 
     #[test]
     fn from_empty_toml() {
-        let state = PovState::from_toml(toml::value::Table::new());
+        let state = PovState::from_toml(toml::Value::Boolean(false));
         assert_eq!(state.access, Access::Unvisited);
         assert_eq!(state.grid, INITIAL_GRID.iter().cloned().collect());
         assert!(state.is_initial);
@@ -353,7 +356,7 @@ mod tests {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), Access::Solved.to_toml());
 
-        let state = PovState::from_toml(table);
+        let state = PovState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Solved);
         assert_eq!(state.colors, GOALS);
         assert!(!state.is_initial);

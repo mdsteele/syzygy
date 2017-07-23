@@ -20,7 +20,7 @@
 use toml;
 
 use save::{Access, CrosswordState, Location, ValidChars};
-use save::util::{ACCESS_KEY, Tomlable, pop_array};
+use save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -40,21 +40,6 @@ pub struct HeadedState {
 }
 
 impl HeadedState {
-    pub fn from_toml(mut table: toml::value::Table) -> HeadedState {
-        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
-        let words = if access == Access::Solved {
-            CrosswordState::new(VALID_CHARS, SOLVED_WORDS)
-        } else {
-            CrosswordState::from_toml(pop_array(&mut table, WORDS_KEY),
-                                      VALID_CHARS,
-                                      SOLVED_WORDS)
-        };
-        HeadedState {
-            access: access,
-            words: words,
-        }
-    }
-
     pub fn solve(&mut self) {
         self.access = Access::Solved;
         self.words = CrosswordState::new(VALID_CHARS, SOLVED_WORDS);
@@ -72,7 +57,7 @@ impl HeadedState {
 }
 
 impl PuzzleState for HeadedState {
-    fn location(&self) -> Location { Location::LevelHeaded }
+    fn location() -> Location { Location::LevelHeaded }
 
     fn access(&self) -> Access { self.access }
 
@@ -81,7 +66,9 @@ impl PuzzleState for HeadedState {
     fn can_reset(&self) -> bool { self.words.can_reset() }
 
     fn reset(&mut self) { self.words.reset(); }
+}
 
+impl Tomlable for HeadedState {
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
@@ -89,6 +76,22 @@ impl PuzzleState for HeadedState {
             table.insert(WORDS_KEY.to_string(), self.words.to_toml());
         }
         toml::Value::Table(table)
+    }
+
+    fn from_toml(value: toml::Value) -> HeadedState {
+        let mut table = to_table(value);
+        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
+        let words = if access == Access::Solved {
+            CrosswordState::new(VALID_CHARS, SOLVED_WORDS)
+        } else {
+            CrosswordState::from_toml(pop_array(&mut table, WORDS_KEY),
+                                      VALID_CHARS,
+                                      SOLVED_WORDS)
+        };
+        HeadedState {
+            access: access,
+            words: words,
+        }
     }
 }
 

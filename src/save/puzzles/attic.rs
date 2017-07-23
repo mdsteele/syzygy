@@ -21,7 +21,7 @@ use std::collections::HashSet;
 use toml;
 
 use save::{Access, Location};
-use save::util::{ACCESS_KEY, Tomlable};
+use save::util::{ACCESS_KEY, Tomlable, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -38,25 +38,6 @@ pub struct AtticState {
 }
 
 impl AtticState {
-    pub fn from_toml(mut table: toml::value::Table) -> AtticState {
-        let mut access = Access::pop_from_table(&mut table, ACCESS_KEY);
-        let toggled = if access == Access::Solved {
-            SOLVED_TOGGLED.iter().cloned().collect()
-        } else {
-            let mut toggled = HashSet::<i32>::pop_from_table(&mut table,
-                                                             TOGGLED_KEY);
-            toggled.retain(|&idx| 0 <= idx && idx < 16);
-            toggled
-        };
-        if toggled == SOLVED_TOGGLED.iter().cloned().collect() {
-            access = Access::Solved;
-        }
-        AtticState {
-            access: access,
-            toggled: toggled,
-        }
-    }
-
     pub fn solve(&mut self) {
         self.access = Access::Solved;
         self.toggled = SOLVED_TOGGLED.iter().cloned().collect();
@@ -176,7 +157,7 @@ impl AtticState {
 }
 
 impl PuzzleState for AtticState {
-    fn location(&self) -> Location { Location::ALightInTheAttic }
+    fn location() -> Location { Location::ALightInTheAttic }
 
     fn access(&self) -> Access { self.access }
 
@@ -185,7 +166,9 @@ impl PuzzleState for AtticState {
     fn can_reset(&self) -> bool { !self.toggled.is_empty() }
 
     fn reset(&mut self) { self.toggled.clear(); }
+}
 
+impl Tomlable for AtticState {
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
@@ -193,6 +176,26 @@ impl PuzzleState for AtticState {
             table.insert(TOGGLED_KEY.to_string(), self.toggled.to_toml());
         }
         toml::Value::Table(table)
+    }
+
+    fn from_toml(value: toml::Value) -> AtticState {
+        let mut table = to_table(value);
+        let mut access = Access::pop_from_table(&mut table, ACCESS_KEY);
+        let toggled = if access == Access::Solved {
+            SOLVED_TOGGLED.iter().cloned().collect()
+        } else {
+            let mut toggled = HashSet::<i32>::pop_from_table(&mut table,
+                                                             TOGGLED_KEY);
+            toggled.retain(|&idx| 0 <= idx && idx < 16);
+            toggled
+        };
+        if toggled == SOLVED_TOGGLED.iter().cloned().collect() {
+            access = Access::Solved;
+        }
+        AtticState {
+            access: access,
+            toggled: toggled,
+        }
     }
 }
 
@@ -202,26 +205,26 @@ impl PuzzleState for AtticState {
 mod tests {
     use toml;
 
-    use save::{Access, PuzzleState};
-    use save::util::{ACCESS_KEY, Tomlable, to_table};
+    use save::Access;
+    use save::util::{ACCESS_KEY, Tomlable};
     use super::{AtticState, SOLVED_TOGGLED, TOGGLED_KEY};
 
     #[test]
     fn toml_round_trip() {
-        let mut state = AtticState::from_toml(toml::value::Table::new());
+        let mut state = AtticState::from_toml(toml::Value::Boolean(false));
         state.access = Access::Replaying;
         state.toggled.insert(3);
         state.toggled.insert(1);
         state.toggled.insert(4);
 
-        let state = AtticState::from_toml(to_table(state.to_toml()));
+        let state = AtticState::from_toml(state.to_toml());
         assert_eq!(state.access, Access::Replaying);
         assert_eq!(state.toggled, vec![1, 3, 4].into_iter().collect());
     }
 
     #[test]
     fn from_empty_toml() {
-        let state = AtticState::from_toml(toml::value::Table::new());
+        let state = AtticState::from_toml(toml::Value::Boolean(false));
         assert_eq!(state.access, Access::Unvisited);
         assert!(state.toggled.is_empty());
     }
@@ -231,7 +234,7 @@ mod tests {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), Access::Solved.to_toml());
 
-        let state = AtticState::from_toml(table);
+        let state = AtticState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Solved);
         assert_eq!(state.toggled, SOLVED_TOGGLED.iter().cloned().collect());
     }
@@ -246,7 +249,7 @@ mod tests {
                                                .map(toml::Value::Integer)
                                                .collect()));
 
-        let state = AtticState::from_toml(table);
+        let state = AtticState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Unsolved);
         assert_eq!(state.toggled, vec![0, 15].into_iter().collect());
     }
@@ -260,7 +263,7 @@ mod tests {
                                     .collect();
         table.insert(TOGGLED_KEY.to_string(), toml::Value::Array(toggled));
 
-        let state = AtticState::from_toml(table);
+        let state = AtticState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Solved);
         assert_eq!(state.toggled, SOLVED_TOGGLED.iter().cloned().collect());
     }

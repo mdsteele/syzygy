@@ -21,7 +21,7 @@ use std::cmp;
 use toml;
 
 use save::{Access, Location};
-use save::util::{ACCESS_KEY, Tomlable, pop_array};
+use save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -46,38 +46,6 @@ pub struct OrderState {
 }
 
 impl OrderState {
-    pub fn from_toml(mut table: toml::value::Table) -> OrderState {
-        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
-        let row = if access.is_solved() {
-            SOLVED_ORDERS.len()
-        } else {
-            let row = i32::pop_from_table(&mut table, ROW_KEY);
-            cmp::min(cmp::max(0, row) as usize, SOLVED_ORDERS.len() - 1)
-        };
-        let mut order = [0; 6];
-        for (index, value) in pop_array(&mut table, ORDER_KEY)
-            .into_iter()
-            .enumerate() {
-            if index >= order.len() {
-                break;
-            }
-            let value = i32::from_toml(value);
-            let value = cmp::min(cmp::max(0, value) as usize, order.len() - 1);
-            order[index] = value;
-        }
-        for (index, value) in order.clone().into_iter().enumerate() {
-            if order[..index].contains(value) {
-                order = *INITIAL_ORDER;
-                break;
-            }
-        }
-        OrderState {
-            access: access,
-            row: row,
-            order: order,
-        }
-    }
-
     pub fn solve(&mut self) {
         self.access = Access::Solved;
         self.row = SOLVED_ORDERS.len();
@@ -120,7 +88,7 @@ impl OrderState {
 }
 
 impl PuzzleState for OrderState {
-    fn location(&self) -> Location { Location::PointOfOrder }
+    fn location() -> Location { Location::PointOfOrder }
 
     fn access(&self) -> Access { self.access }
 
@@ -135,7 +103,9 @@ impl PuzzleState for OrderState {
         self.row = 0;
         self.order = *INITIAL_ORDER;
     }
+}
 
+impl Tomlable for OrderState {
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
@@ -150,6 +120,39 @@ impl PuzzleState for OrderState {
         }
         toml::Value::Table(table)
     }
+
+    fn from_toml(value: toml::Value) -> OrderState {
+        let mut table = to_table(value);
+        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
+        let row = if access.is_solved() {
+            SOLVED_ORDERS.len()
+        } else {
+            let row = i32::pop_from_table(&mut table, ROW_KEY);
+            cmp::min(cmp::max(0, row) as usize, SOLVED_ORDERS.len() - 1)
+        };
+        let mut order = [0; 6];
+        for (index, value) in pop_array(&mut table, ORDER_KEY)
+            .into_iter()
+            .enumerate() {
+            if index >= order.len() {
+                break;
+            }
+            let value = i32::from_toml(value);
+            let value = cmp::min(cmp::max(0, value) as usize, order.len() - 1);
+            order[index] = value;
+        }
+        for (index, value) in order.clone().into_iter().enumerate() {
+            if order[..index].contains(value) {
+                order = *INITIAL_ORDER;
+                break;
+            }
+        }
+        OrderState {
+            access: access,
+            row: row,
+            order: order,
+        }
+    }
 }
 
 // ========================================================================= //
@@ -158,18 +161,18 @@ impl PuzzleState for OrderState {
 mod tests {
     use toml;
 
-    use save::{Access, PuzzleState};
-    use save::util::{ACCESS_KEY, Tomlable, to_table};
+    use save::Access;
+    use save::util::{ACCESS_KEY, Tomlable};
     use super::{INITIAL_ORDER, ORDER_KEY, OrderState, ROW_KEY, SOLVED_ORDERS};
 
     #[test]
     fn toml_round_trip() {
-        let mut state = OrderState::from_toml(toml::value::Table::new());
+        let mut state = OrderState::from_toml(toml::Value::Boolean(false));
         state.access = Access::Replaying;
         state.row = 4;
         state.order = [3, 1, 4, 2, 5, 0];
 
-        let state = OrderState::from_toml(to_table(state.to_toml()));
+        let state = OrderState::from_toml(state.to_toml());
         assert_eq!(state.access, Access::Replaying);
         assert_eq!(state.row, 4);
         assert_eq!(state.order, [3, 1, 4, 2, 5, 0]);
@@ -177,7 +180,7 @@ mod tests {
 
     #[test]
     fn from_empty_toml() {
-        let state = OrderState::from_toml(toml::value::Table::new());
+        let state = OrderState::from_toml(toml::Value::Boolean(false));
         assert_eq!(state.access, Access::Unvisited);
         assert_eq!(state.row, 0);
         assert_eq!(state.order, *INITIAL_ORDER);
@@ -188,7 +191,7 @@ mod tests {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), Access::Solved.to_toml());
 
-        let state = OrderState::from_toml(table);
+        let state = OrderState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Solved);
         assert_eq!(state.row, SOLVED_ORDERS.len());
     }
@@ -197,12 +200,12 @@ mod tests {
     fn from_invalid_row_toml() {
         let mut table = toml::value::Table::new();
         table.insert(ROW_KEY.to_string(), toml::Value::Integer(77));
-        let state = OrderState::from_toml(table);
+        let state = OrderState::from_toml(toml::Value::Table(table));
         assert_eq!(state.row, SOLVED_ORDERS.len() - 1);
 
         let mut table = toml::value::Table::new();
         table.insert(ROW_KEY.to_string(), toml::Value::Integer(-77));
-        let state = OrderState::from_toml(table);
+        let state = OrderState::from_toml(toml::Value::Table(table));
         assert_eq!(state.row, 0);
     }
 
@@ -218,7 +221,7 @@ mod tests {
             .collect();
         table.insert(ORDER_KEY.to_string(), toml::Value::Array(order));
 
-        let state = OrderState::from_toml(table);
+        let state = OrderState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Unsolved);
         assert_eq!(state.row, 2);
         assert_eq!(state.order, *INITIAL_ORDER);

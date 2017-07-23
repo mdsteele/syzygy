@@ -20,7 +20,7 @@
 use toml;
 
 use save::{Access, CrosswordState, Location, ValidChars};
-use save::util::{ACCESS_KEY, Tomlable, pop_array};
+use save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -41,21 +41,6 @@ pub struct LogLevelState {
 }
 
 impl LogLevelState {
-    pub fn from_toml(mut table: toml::value::Table) -> LogLevelState {
-        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
-        let words = if access == Access::Solved {
-            CrosswordState::new(VALID_CHARS, SOLVED_WORDS)
-        } else {
-            CrosswordState::from_toml(pop_array(&mut table, WORDS_KEY),
-                                      VALID_CHARS,
-                                      SOLVED_WORDS)
-        };
-        LogLevelState {
-            access: access,
-            words: words,
-        }
-    }
-
     pub fn solve(&mut self) {
         self.access = Access::Solved;
         self.words = CrosswordState::new(VALID_CHARS, SOLVED_WORDS);
@@ -73,7 +58,7 @@ impl LogLevelState {
 }
 
 impl PuzzleState for LogLevelState {
-    fn location(&self) -> Location { Location::LogLevel }
+    fn location() -> Location { Location::LogLevel }
 
     fn access(&self) -> Access { self.access }
 
@@ -82,7 +67,9 @@ impl PuzzleState for LogLevelState {
     fn can_reset(&self) -> bool { self.words.can_reset() }
 
     fn reset(&mut self) { self.words.reset(); }
+}
 
+impl Tomlable for LogLevelState {
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
@@ -90,6 +77,22 @@ impl PuzzleState for LogLevelState {
             table.insert(WORDS_KEY.to_string(), self.words.to_toml());
         }
         toml::Value::Table(table)
+    }
+
+    fn from_toml(value: toml::Value) -> LogLevelState {
+        let mut table = to_table(value);
+        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
+        let words = if access == Access::Solved {
+            CrosswordState::new(VALID_CHARS, SOLVED_WORDS)
+        } else {
+            CrosswordState::from_toml(pop_array(&mut table, WORDS_KEY),
+                                      VALID_CHARS,
+                                      SOLVED_WORDS)
+        };
+        LogLevelState {
+            access: access,
+            words: words,
+        }
     }
 }
 

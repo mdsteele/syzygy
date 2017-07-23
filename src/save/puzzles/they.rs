@@ -22,7 +22,7 @@ use std::collections::HashSet;
 use toml;
 
 use save::{Access, Location};
-use save::util::{ACCESS_KEY, Tomlable};
+use save::util::{ACCESS_KEY, Tomlable, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -42,29 +42,6 @@ pub struct TheYState {
 }
 
 impl TheYState {
-    pub fn from_toml(mut table: toml::value::Table) -> TheYState {
-        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
-        let sequence = if access.is_solved() {
-            SOLVED_SEQUENCE.iter().cloned().collect()
-        } else {
-            let mut seq = Vec::<i8>::pop_from_table(&mut table, SEQUENCE_KEY);
-            seq.retain(|&idx| 0 <= idx && idx < 6);
-            let unique: HashSet<i8> = seq.iter().cloned().collect();
-            if unique.len() != seq.len() {
-                Vec::new()
-            } else {
-                seq
-            }
-        };
-        let mut state = TheYState {
-            access: access,
-            sequence: sequence,
-            letters: Vec::new(),
-        };
-        state.regenerate_letters_from_sequence();
-        state
-    }
-
     pub fn solve(&mut self) {
         self.access = Access::Solved;
         self.sequence = SOLVED_SEQUENCE.to_vec();
@@ -104,7 +81,7 @@ impl TheYState {
 }
 
 impl PuzzleState for TheYState {
-    fn location(&self) -> Location { Location::TheYFactor }
+    fn location() -> Location { Location::TheYFactor }
 
     fn access(&self) -> Access { self.access }
 
@@ -116,7 +93,9 @@ impl PuzzleState for TheYState {
         self.sequence.clear();
         self.regenerate_letters_from_sequence();
     }
+}
 
+impl Tomlable for TheYState {
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
@@ -128,6 +107,30 @@ impl PuzzleState for TheYState {
             table.insert(SEQUENCE_KEY.to_string(), toml::Value::Array(seq));
         }
         toml::Value::Table(table)
+    }
+
+    fn from_toml(value: toml::Value) -> TheYState {
+        let mut table = to_table(value);
+        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
+        let sequence = if access.is_solved() {
+            SOLVED_SEQUENCE.iter().cloned().collect()
+        } else {
+            let mut seq = Vec::<i8>::pop_from_table(&mut table, SEQUENCE_KEY);
+            seq.retain(|&idx| 0 <= idx && idx < 6);
+            let unique: HashSet<i8> = seq.iter().cloned().collect();
+            if unique.len() != seq.len() {
+                Vec::new()
+            } else {
+                seq
+            }
+        };
+        let mut state = TheYState {
+            access: access,
+            sequence: sequence,
+            letters: Vec::new(),
+        };
+        state.regenerate_letters_from_sequence();
+        state
     }
 }
 
@@ -190,8 +193,8 @@ fn apply_transformation(letters: &mut Vec<char>, index: i8) {
 mod tests {
     use toml;
 
-    use save::{Access, PuzzleState};
-    use save::util::{ACCESS_KEY, Tomlable, to_table};
+    use save::Access;
+    use save::util::{ACCESS_KEY, Tomlable};
     use super::{INITIAL_LETTERS, SEQUENCE_KEY, SOLVED_LETTERS, SOLVED_SEQUENCE,
                 TheYState, apply_transformation};
 
@@ -216,14 +219,14 @@ mod tests {
 
     #[test]
     fn toml_round_trip() {
-        let mut state = TheYState::from_toml(toml::value::Table::new());
+        let mut state = TheYState::from_toml(toml::Value::Boolean(false));
         state.access = Access::Replaying;
         state.append(3);
         state.append(1);
         state.append(4);
         let letters = state.letters.clone();
 
-        let state = TheYState::from_toml(to_table(state.to_toml()));
+        let state = TheYState::from_toml(state.to_toml());
         assert_eq!(state.access, Access::Replaying);
         assert_eq!(state.sequence, vec![3, 1, 4]);
         assert_eq!(letters, state.letters);
@@ -231,7 +234,7 @@ mod tests {
 
     #[test]
     fn from_empty_toml() {
-        let state = TheYState::from_toml(toml::value::Table::new());
+        let state = TheYState::from_toml(toml::Value::Boolean(false));
         assert_eq!(state.access, Access::Unvisited);
         assert_eq!(state.sequence, vec![]);
         assert_eq!(state.letters, INITIAL_LETTERS.to_vec());
@@ -242,7 +245,7 @@ mod tests {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), Access::Solved.to_toml());
 
-        let state = TheYState::from_toml(table);
+        let state = TheYState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Solved);
         assert_eq!(state.sequence, SOLVED_SEQUENCE.to_vec());
         assert_eq!(state.letters, SOLVED_LETTERS.to_vec());
@@ -255,7 +258,7 @@ mod tests {
                      toml::Value::Array(vec![toml::Value::Integer(1),
                                              toml::Value::Integer(2),
                                              toml::Value::Integer(3)]));
-        let state = TheYState::from_toml(table);
+        let state = TheYState::from_toml(toml::Value::Table(table));
         assert_eq!(state.sequence, vec![1, 2, 3]);
     }
 
@@ -264,7 +267,7 @@ mod tests {
         let mut table = toml::value::Table::new();
         table.insert(SEQUENCE_KEY.to_string(),
                      toml::Value::Array(vec![toml::Value::Integer(1); 2]));
-        let state = TheYState::from_toml(table);
+        let state = TheYState::from_toml(toml::Value::Table(table));
         assert_eq!(state.sequence, vec![]);
         assert_eq!(state.letters, INITIAL_LETTERS.to_vec());
     }
@@ -274,7 +277,7 @@ mod tests {
         let mut table = toml::value::Table::new();
         table.insert(SEQUENCE_KEY.to_string(),
                      toml::Value::Array(vec![toml::Value::Integer(6)]));
-        let state = TheYState::from_toml(table);
+        let state = TheYState::from_toml(toml::Value::Table(table));
         assert_eq!(state.sequence, vec![]);
         assert_eq!(state.letters, INITIAL_LETTERS.to_vec());
     }

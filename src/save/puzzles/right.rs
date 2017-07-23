@@ -22,7 +22,7 @@ use toml;
 use gui::Point;
 use save::{Access, Direction, Location};
 use save::ice::{BlockSlide, Object, ObjectGrid, Symbol};
-use save::util::{ACCESS_KEY, Tomlable, pop_table};
+use save::util::{ACCESS_KEY, Tomlable, pop_table, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -37,20 +37,6 @@ pub struct RightState {
 }
 
 impl RightState {
-    pub fn from_toml(mut table: toml::value::Table) -> RightState {
-        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
-        let grid = if access == Access::Solved {
-            RightState::solved_grid()
-        } else {
-            let grid = pop_table(&mut table, GRID_KEY);
-            ObjectGrid::from_toml(grid, &RightState::initial_grid())
-        };
-        RightState {
-            access: access,
-            grid: grid,
-        }
-    }
-
     pub fn solve(&mut self) {
         self.access = Access::Solved;
         self.grid = RightState::solved_grid();
@@ -106,7 +92,7 @@ impl RightState {
 }
 
 impl PuzzleState for RightState {
-    fn location(&self) -> Location { Location::TheIceIsRight }
+    fn location() -> Location { Location::TheIceIsRight }
 
     fn access(&self) -> Access { self.access }
 
@@ -115,7 +101,9 @@ impl PuzzleState for RightState {
     fn can_reset(&self) -> bool { self.grid.is_modified() }
 
     fn reset(&mut self) { self.grid = RightState::initial_grid(); }
+}
 
+impl Tomlable for RightState {
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
@@ -123,6 +111,21 @@ impl PuzzleState for RightState {
             table.insert(GRID_KEY.to_string(), self.grid.to_toml());
         }
         toml::Value::Table(table)
+    }
+
+    fn from_toml(value: toml::Value) -> RightState {
+        let mut table = to_table(value);
+        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
+        let grid = if access == Access::Solved {
+            RightState::solved_grid()
+        } else {
+            let grid = pop_table(&mut table, GRID_KEY);
+            ObjectGrid::from_toml(grid, &RightState::initial_grid())
+        };
+        RightState {
+            access: access,
+            grid: grid,
+        }
     }
 }
 

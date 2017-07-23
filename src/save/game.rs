@@ -28,7 +28,7 @@ use save::{AtticState, AutoState, BlackState, BlameState, CubeState, DayState,
            SauceState, ServesState, SimpleState, StarState, SyrupState,
            SyzygyState, TheYState, TreadState, VirtueState, WhatchaState,
            WreckedState};
-use save::util::{Tomlable, pop_table, to_table};
+use save::util::{Tomlable, to_table};
 
 // ========================================================================= //
 
@@ -95,91 +95,49 @@ impl Game {
         let table_ref = &mut table;
         Game {
             location: Location::pop_from_table(table_ref, LOCATION_KEY),
-            prolog: PrologState::from_toml(
-                pop_table(table_ref, Location::Prolog.key())),
-            a_light_in_the_attic: AtticState::from_toml(
-                pop_table(table_ref, Location::ALightInTheAttic.key())),
-            autofac_tour: AutoState::from_toml(
-                pop_table(table_ref, Location::AutofacTour.key())),
-            black_and_blue: BlackState::from_toml(
-                pop_table(table_ref, Location::BlackAndBlue.key())),
-            column_as_icy_em: IcyEmState::from_toml(
-                pop_table(table_ref, Location::ColumnAsIcyEm.key())),
-            connect_the_dots: DotsState::from_toml(
-                pop_table(table_ref, Location::ConnectTheDots.key())),
-            cross_sauce: SauceState::from_toml(
-                pop_table(table_ref, Location::CrossSauce.key())),
-            cross_the_line: LineState::from_toml(
-                pop_table(table_ref, Location::CrossTheLine.key())),
-            cube_tangle: CubeState::from_toml(
-                pop_table(table_ref, Location::CubeTangle.key())),
-            disconnected: DisconState::from_toml(
-                pop_table(table_ref, Location::Disconnected.key())),
-            double_cross: DoubleState::from_toml(
-                pop_table(table_ref, Location::DoubleCross.key())),
-            fact_or_fiction: FictionState::from_toml(
-                pop_table(table_ref, Location::FactOrFiction.key())),
-            hex_spangled: HexState::from_toml(
-                pop_table(table_ref, Location::HexSpangled.key())),
-            ice_to_meet_you: MeetState::from_toml(
-                pop_table(table_ref, Location::IceToMeetYou.key())),
-            if_memory_serves: ServesState::from_toml(
-                pop_table(table_ref, Location::IfMemoryServes.key())),
-            jog_your_memory: JogState::from_toml(
-                pop_table(table_ref, Location::JogYourMemory.key())),
-            level_headed: HeadedState::from_toml(
-                pop_table(table_ref, Location::LevelHeaded.key())),
-            level_up: LevelUpState::from_toml(
-                pop_table(table_ref, Location::LevelUp.key())),
-            light_syrup: SyrupState::from_toml(
-                pop_table(table_ref, Location::LightSyrup.key())),
-            log_level: LogLevelState::from_toml(
-                pop_table(table_ref, Location::LogLevel.key())),
-            memory_lane: LaneState::from_toml(
-                pop_table(table_ref, Location::MemoryLane.key())),
-            missed_connections: MissedState::from_toml(
-                pop_table(table_ref, Location::MissedConnections.key())),
-            password_file: PasswordState::from_toml(
-                pop_table(table_ref, Location::PasswordFile.key())),
-            plane_and_simple: SimpleState::from_toml(
-                pop_table(table_ref, Location::PlaneAndSimple.key())),
-            plane_as_day: DayState::from_toml(
-                pop_table(table_ref, Location::PlaneAsDay.key())),
-            point_of_no_return: NoReturnState::from_toml(
-                pop_table(table_ref, Location::PointOfNoReturn.key())),
-            point_of_order: OrderState::from_toml(
-                pop_table(table_ref, Location::PointOfOrder.key())),
-            point_of_view: PovState::from_toml(
-                pop_table(table_ref, Location::PointOfView.key())),
-            shift_gears: GearsState::from_toml(
-                pop_table(table_ref, Location::ShiftGears.key())),
-            shift_the_blame: BlameState::from_toml(
-                pop_table(table_ref, Location::ShiftTheBlame.key())),
-            shifting_ground: GroundState::from_toml(
-                pop_table(table_ref, Location::ShiftingGround.key())),
-            star_crossed: StarState::from_toml(
-                pop_table(table_ref, Location::StarCrossed.key())),
-            system_failure: FailureState::from_toml(
-                pop_table(table_ref, Location::SystemFailure.key())),
-            system_syzygy: SyzygyState::from_toml(
-                pop_table(table_ref, Location::SystemSyzygy.key())),
-            the_ice_is_right: RightState::from_toml(
-                pop_table(table_ref, Location::TheIceIsRight.key())),
-            the_y_factor: TheYState::from_toml(
-                pop_table(table_ref, Location::TheYFactor.key())),
-            tread_lightly: TreadState::from_toml(
-                pop_table(table_ref, Location::TreadLightly.key())),
-            virtue_or_ice: VirtueState::from_toml(
-                pop_table(table_ref, Location::VirtueOrIce.key())),
-            whatcha_column: WhatchaState::from_toml(
-                pop_table(table_ref, Location::WhatchaColumn.key())),
-            wrecked_angle: WreckedState::from_toml(
-                pop_table(table_ref, Location::WreckedAngle.key())),
-            finale: FinaleState::from_toml(
-                pop_table(table_ref, Location::Finale.key())),
-            ever_clicked_info: table_ref.get(EVER_CLICKED_INFO_KEY)
-                                        .and_then(toml::Value::as_bool)
-                                        .unwrap_or(false),
+            prolog: PrologState::pop_from_game_table(table_ref),
+            a_light_in_the_attic: AtticState::pop_from_game_table(table_ref),
+            autofac_tour: AutoState::pop_from_game_table(table_ref),
+            black_and_blue: BlackState::pop_from_game_table(table_ref),
+            column_as_icy_em: IcyEmState::pop_from_game_table(table_ref),
+            connect_the_dots: DotsState::pop_from_game_table(table_ref),
+            cross_sauce: SauceState::pop_from_game_table(table_ref),
+            cross_the_line: LineState::pop_from_game_table(table_ref),
+            cube_tangle: CubeState::pop_from_game_table(table_ref),
+            disconnected: DisconState::pop_from_game_table(table_ref),
+            double_cross: DoubleState::pop_from_game_table(table_ref),
+            fact_or_fiction: FictionState::pop_from_game_table(table_ref),
+            hex_spangled: HexState::pop_from_game_table(table_ref),
+            ice_to_meet_you: MeetState::pop_from_game_table(table_ref),
+            if_memory_serves: ServesState::pop_from_game_table(table_ref),
+            jog_your_memory: JogState::pop_from_game_table(table_ref),
+            level_headed: HeadedState::pop_from_game_table(table_ref),
+            level_up: LevelUpState::pop_from_game_table(table_ref),
+            light_syrup: SyrupState::pop_from_game_table(table_ref),
+            log_level: LogLevelState::pop_from_game_table(table_ref),
+            memory_lane: LaneState::pop_from_game_table(table_ref),
+            missed_connections: MissedState::pop_from_game_table(table_ref),
+            password_file: PasswordState::pop_from_game_table(table_ref),
+            plane_and_simple: SimpleState::pop_from_game_table(table_ref),
+            plane_as_day: DayState::pop_from_game_table(table_ref),
+            point_of_no_return: NoReturnState::pop_from_game_table(table_ref),
+            point_of_order: OrderState::pop_from_game_table(table_ref),
+            point_of_view: PovState::pop_from_game_table(table_ref),
+            shift_gears: GearsState::pop_from_game_table(table_ref),
+            shift_the_blame: BlameState::pop_from_game_table(table_ref),
+            shifting_ground: GroundState::pop_from_game_table(table_ref),
+            star_crossed: StarState::pop_from_game_table(table_ref),
+            system_failure: FailureState::pop_from_game_table(table_ref),
+            system_syzygy: SyzygyState::pop_from_game_table(table_ref),
+            the_ice_is_right: RightState::pop_from_game_table(table_ref),
+            the_y_factor: TheYState::pop_from_game_table(table_ref),
+            tread_lightly: TreadState::pop_from_game_table(table_ref),
+            virtue_or_ice: VirtueState::pop_from_game_table(table_ref),
+            whatcha_column: WhatchaState::pop_from_game_table(table_ref),
+            wrecked_angle: WreckedState::pop_from_game_table(table_ref),
+            finale: FinaleState::pop_from_game_table(table_ref),
+            ever_clicked_info: bool::pop_from_table(table_ref,
+                                                    EVER_CLICKED_INFO_KEY),
         }
     }
 

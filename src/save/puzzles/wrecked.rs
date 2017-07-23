@@ -21,7 +21,7 @@ use std::collections::VecDeque;
 use toml;
 
 use save::{Access, Direction, Location};
-use save::util::{ACCESS_KEY, Tomlable, rotate_deque};
+use save::util::{ACCESS_KEY, Tomlable, rotate_deque, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -50,33 +50,6 @@ pub struct WreckedState {
 }
 
 impl WreckedState {
-    pub fn from_toml(mut table: toml::value::Table) -> WreckedState {
-        let mut grid = Vec::<i8>::pop_from_table(&mut table, GRID_KEY);
-        let mut init_sorted = INITIAL_GRID.to_vec();
-        init_sorted.sort();
-        let mut grid_sorted = grid.clone();
-        grid_sorted.sort();
-        if grid_sorted != init_sorted {
-            grid = INITIAL_GRID.to_vec()
-        } else {
-            let init_neg: Vec<bool> = INITIAL_GRID.iter()
-                                                  .map(|&tile| tile < 0)
-                                                  .collect();
-            let grid_neg: Vec<bool> = grid.iter()
-                                          .map(|&tile| tile < 0)
-                                          .collect();
-            if grid_neg != init_neg {
-                grid = INITIAL_GRID.to_vec();
-            }
-        }
-        let is_initial = &grid as &[i8] == INITIAL_GRID;
-        WreckedState {
-            access: Access::pop_from_table(&mut table, ACCESS_KEY),
-            grid: grid,
-            is_initial: is_initial,
-        }
-    }
-
     pub fn solve(&mut self) {
         self.access = Access::Solved;
         self.grid = SOLVED_GRID.to_vec();
@@ -146,7 +119,7 @@ impl WreckedState {
 }
 
 impl PuzzleState for WreckedState {
-    fn location(&self) -> Location { Location::WreckedAngle }
+    fn location() -> Location { Location::WreckedAngle }
 
     fn access(&self) -> Access { self.access }
 
@@ -158,7 +131,9 @@ impl PuzzleState for WreckedState {
         self.grid = INITIAL_GRID.to_vec();
         self.is_initial = true;
     }
+}
 
+impl Tomlable for WreckedState {
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
@@ -171,6 +146,34 @@ impl PuzzleState for WreckedState {
         }
         toml::Value::Table(table)
     }
+
+    fn from_toml(value: toml::Value) -> WreckedState {
+        let mut table = to_table(value);
+        let mut grid = Vec::<i8>::pop_from_table(&mut table, GRID_KEY);
+        let mut init_sorted = INITIAL_GRID.to_vec();
+        init_sorted.sort();
+        let mut grid_sorted = grid.clone();
+        grid_sorted.sort();
+        if grid_sorted != init_sorted {
+            grid = INITIAL_GRID.to_vec()
+        } else {
+            let init_neg: Vec<bool> = INITIAL_GRID.iter()
+                                                  .map(|&tile| tile < 0)
+                                                  .collect();
+            let grid_neg: Vec<bool> = grid.iter()
+                                          .map(|&tile| tile < 0)
+                                          .collect();
+            if grid_neg != init_neg {
+                grid = INITIAL_GRID.to_vec();
+            }
+        }
+        let is_initial = &grid as &[i8] == INITIAL_GRID;
+        WreckedState {
+            access: Access::pop_from_table(&mut table, ACCESS_KEY),
+            grid: grid,
+            is_initial: is_initial,
+        }
+    }
 }
 
 // ========================================================================= //
@@ -180,11 +183,12 @@ mod tests {
     use toml;
 
     use save::Direction;
+    use save::util::Tomlable;
     use super::WreckedState;
 
     #[test]
     fn shift_east() {
-        let mut state = WreckedState::from_toml(toml::value::Table::new());
+        let mut state = WreckedState::from_toml(toml::Value::Boolean(false));
         state.shift_tiles(Direction::East, 0, 1);
         assert_eq!(state.tile_at(0, 0), Some(1));
         assert_eq!(state.tile_at(5, 0), None);
@@ -193,7 +197,7 @@ mod tests {
 
     #[test]
     fn shift_west() {
-        let mut state = WreckedState::from_toml(toml::value::Table::new());
+        let mut state = WreckedState::from_toml(toml::Value::Boolean(false));
         state.shift_tiles(Direction::West, 1, 1);
         assert_eq!(state.tile_at(1, 1), None);
         assert_eq!(state.tile_at(4, 1), Some(2));
@@ -202,7 +206,7 @@ mod tests {
 
     #[test]
     fn shift_south() {
-        let mut state = WreckedState::from_toml(toml::value::Table::new());
+        let mut state = WreckedState::from_toml(toml::Value::Boolean(false));
         state.shift_tiles(Direction::South, 0, 1);
         assert_eq!(state.tile_at(0, 0), Some(1));
         assert_eq!(state.tile_at(0, 1), None);
@@ -211,7 +215,7 @@ mod tests {
 
     #[test]
     fn shift_north() {
-        let mut state = WreckedState::from_toml(toml::value::Table::new());
+        let mut state = WreckedState::from_toml(toml::Value::Boolean(false));
         state.shift_tiles(Direction::North, 8, 1);
         assert_eq!(state.tile_at(8, 1), Some(2));
         assert_eq!(state.tile_at(8, 4), Some(1));

@@ -22,8 +22,8 @@ use toml;
 use gui::{Point, Rect};
 use save::{Access, Location};
 use save::plane::{PlaneGrid, PlaneObj};
+use save::util::{ACCESS_KEY, Tomlable, pop_array};
 use super::PuzzleState;
-use super::super::util::{ACCESS_KEY, pop_array, to_i32};
 
 // ========================================================================= //
 
@@ -92,10 +92,8 @@ impl DayState {
     }
 
     pub fn from_toml(mut table: toml::value::Table) -> DayState {
-        let access = Access::from_toml(table.get(ACCESS_KEY));
-        let mut stage = table.remove(STAGE_KEY)
-                             .map(to_i32)
-                             .unwrap_or(FIRST_STAGE);
+        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
+        let mut stage = i32::pop_from_table(&mut table, STAGE_KEY);
         if stage < FIRST_STAGE || stage > LAST_STAGE {
             stage = FIRST_STAGE;
         }

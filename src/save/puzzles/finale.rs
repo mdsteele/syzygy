@@ -20,8 +20,8 @@
 use toml;
 
 use save::{Access, Location};
+use save::util::{ACCESS_KEY, Tomlable};
 use super::PuzzleState;
-use super::super::util::ACCESS_KEY;
 
 // ========================================================================= //
 
@@ -30,8 +30,8 @@ pub struct FinaleState {
 }
 
 impl FinaleState {
-    pub fn from_toml(table: toml::value::Table) -> FinaleState {
-        FinaleState { access: Access::from_toml(table.get(ACCESS_KEY)) }
+    pub fn from_toml(mut table: toml::value::Table) -> FinaleState {
+        FinaleState { access: Access::pop_from_table(&mut table, ACCESS_KEY) }
     }
 }
 

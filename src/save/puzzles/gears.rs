@@ -21,8 +21,8 @@ use std::cmp::{max, min};
 use toml;
 
 use save::{Access, Location};
+use save::util::{ACCESS_KEY, Tomlable};
 use super::PuzzleState;
-use super::super::util::{ACCESS_KEY, pop_array, to_i32};
 
 // ========================================================================= //
 
@@ -46,10 +46,8 @@ pub struct GearsState {
 
 impl GearsState {
     pub fn from_toml(mut table: toml::value::Table) -> GearsState {
-        let mut positions: Vec<i32> = pop_array(&mut table, POSITIONS_KEY)
-            .into_iter()
-            .map(to_i32)
-            .collect();
+        let mut positions = Vec::<i32>::pop_from_table(&mut table,
+                                                       POSITIONS_KEY);
         if positions.len() != INITIAL_POSITIONS.len() {
             positions = INITIAL_POSITIONS.to_vec();
         } else {
@@ -61,7 +59,7 @@ impl GearsState {
             }
         }
         let mut elinsa_row = table.remove(ELINSA_ROW_KEY)
-                                  .map(to_i32)
+                                  .map(i32::from_toml)
                                   .unwrap_or(INITIAL_ELINSA_ROW);
         if elinsa_row < -1 || elinsa_row > MAX_ELINSA_ROW {
             elinsa_row = INITIAL_ELINSA_ROW;
@@ -69,7 +67,7 @@ impl GearsState {
         let is_initial = &positions as &[i32] == INITIAL_POSITIONS &&
                          elinsa_row == INITIAL_ELINSA_ROW;
         GearsState {
-            access: Access::from_toml(table.get(ACCESS_KEY)),
+            access: Access::pop_from_table(&mut table, ACCESS_KEY),
             positions: positions,
             elinsa_row: elinsa_row,
             is_initial: is_initial,

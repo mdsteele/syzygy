@@ -22,7 +22,7 @@ use toml;
 
 use save::{Access, Location};
 use save::memory::{Grid, Shape};
-use save::util::{ACCESS_KEY, pop_array, to_u32};
+use save::util::{ACCESS_KEY, Tomlable, pop_array};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -75,11 +75,11 @@ pub struct LaneState {
 
 impl LaneState {
     pub fn from_toml(mut table: toml::value::Table) -> LaneState {
-        let access = Access::from_toml(table.get(ACCESS_KEY));
+        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
         let stage = if access.is_solved() {
             STAGES.len()
         } else {
-            min(table.remove(STAGE_KEY).map(to_u32).unwrap_or(0) as usize,
+            min(u32::pop_from_table(&mut table, STAGE_KEY) as usize,
                 STAGES.len() - 1)
         };
         let grid = Grid::from_toml(NUM_COLS,

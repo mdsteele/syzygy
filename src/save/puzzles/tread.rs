@@ -20,8 +20,8 @@
 use toml;
 
 use save::{Access, Location};
+use save::util::{ACCESS_KEY, Tomlable, pop_array};
 use super::PuzzleState;
-use super::super::util::{ACCESS_KEY, pop_array};
 
 // ========================================================================= //
 
@@ -50,7 +50,7 @@ pub struct TreadState {
 
 impl TreadState {
     pub fn from_toml(mut table: toml::value::Table) -> TreadState {
-        let mut access = Access::from_toml(table.get(ACCESS_KEY));
+        let mut access = Access::pop_from_table(&mut table, ACCESS_KEY);
         let toggled = if access == Access::Solved {
             SOLVED_TOGGLED_1.iter().cloned().collect()
         } else {
@@ -201,7 +201,7 @@ mod tests {
     use toml;
 
     use save::{Access, PuzzleState};
-    use save::util::{ACCESS_KEY, to_table};
+    use save::util::{ACCESS_KEY, Tomlable, to_table};
     use super::{INITIAL_GRID, SOLVED_TOGGLED_1, SOLVED_TOGGLED_2, TOGGLED_KEY,
                 TreadState};
 

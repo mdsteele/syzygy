@@ -21,8 +21,8 @@ use toml;
 
 use save::{Access, Direction, Location, MixedColor};
 use save::device::{Device, DeviceGrid};
+use save::util::{ACCESS_KEY, Tomlable, pop_array};
 use super::PuzzleState;
-use super::super::util::{ACCESS_KEY, pop_array};
 
 // ========================================================================= //
 
@@ -37,7 +37,7 @@ pub struct MissedState {
 
 impl MissedState {
     pub fn from_toml(mut table: toml::value::Table) -> MissedState {
-        let access = Access::from_toml(table.get(ACCESS_KEY));
+        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
         let grid = if access == Access::Solved {
             MissedState::solved_grid()
         } else {

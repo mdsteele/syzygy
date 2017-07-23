@@ -21,8 +21,8 @@ use std::cmp;
 use toml;
 
 use save::{Access, Location};
+use save::util::{ACCESS_KEY, Tomlable, pop_array};
 use super::PuzzleState;
-use super::super::util::{ACCESS_KEY, pop_array, to_i32};
 
 // ========================================================================= //
 
@@ -50,7 +50,7 @@ pub struct NoReturnState {
 
 impl NoReturnState {
     pub fn from_toml(mut table: toml::value::Table) -> NoReturnState {
-        let access = Access::from_toml(table.get(ACCESS_KEY));
+        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
         let order = if access.is_solved() {
             SOLVED_ORDER
         } else {
@@ -60,7 +60,7 @@ impl NoReturnState {
                 if index >= order.len() {
                     break;
                 }
-                let value = to_i32(value);
+                let value = i32::from_toml(value);
                 let value = cmp::max(0, value) as usize;
                 let value = cmp::min(value, order.len() - 1);
                 order[index] = value;
@@ -175,7 +175,7 @@ mod tests {
     use toml;
 
     use save::{Access, PuzzleState};
-    use save::util::{ACCESS_KEY, to_table};
+    use save::util::{ACCESS_KEY, Tomlable, to_table};
     use super::{INITIAL_ORDER, NoReturnState, ORDER_KEY, SOLVED_ORDER};
 
     #[test]

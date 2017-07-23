@@ -20,6 +20,8 @@
 use std::default::Default;
 use toml;
 
+use save::util::Tomlable;
+
 // ========================================================================= //
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
@@ -264,9 +266,11 @@ impl Location {
             Location::Finale => "finale",
         }
     }
+}
 
-    pub fn from_toml(value: Option<&toml::Value>) -> Location {
-        if let Some(string) = value.and_then(toml::Value::as_str) {
+impl Tomlable for Location {
+    fn from_toml(value: toml::Value) -> Location {
+        if let Some(string) = value.as_str() {
             for &location in Location::all() {
                 if string == location.key() {
                     return location;
@@ -276,7 +280,7 @@ impl Location {
         Default::default()
     }
 
-    pub fn to_toml(self) -> toml::Value {
+    fn to_toml(&self) -> toml::Value {
         toml::Value::String(self.key().to_string())
     }
 }
@@ -332,12 +336,13 @@ const ALL_LOCATIONS: &[Location] = &[Location::Map,
 
 #[cfg(test)]
 mod tests {
+    use save::util::Tomlable;
     use super::Location;
 
     #[test]
     fn toml_round_trip() {
         for original in Location::all() {
-            let result = Location::from_toml(Some(&original.to_toml()));
+            let result = Location::from_toml(original.to_toml());
             assert_eq!(result, *original);
         }
     }

@@ -20,6 +20,8 @@
 use std::default::Default;
 use toml;
 
+use save::util::Tomlable;
+
 // ========================================================================= //
 
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
@@ -32,31 +34,6 @@ pub enum Access {
 }
 
 impl Access {
-    pub fn from_toml(value: Option<&toml::Value>) -> Access {
-        if let Some(string) = value.and_then(toml::Value::as_str) {
-            match string {
-                "unvisited" => return Access::Unvisited,
-                "unsolved" => return Access::Unsolved,
-                "solved" => return Access::Solved,
-                "begin_replay" => return Access::BeginReplay,
-                "replaying" => return Access::Replaying,
-                _ => {}
-            }
-        }
-        Default::default()
-    }
-
-    pub fn to_toml(self) -> toml::Value {
-        let string = match self {
-            Access::Unvisited => "unvisited",
-            Access::Unsolved => "unsolved",
-            Access::Solved => "solved",
-            Access::BeginReplay => "begin_replay",
-            Access::Replaying => "replaying",
-        };
-        toml::Value::String(string.to_string())
-    }
-
     pub fn has_been_solved(&self) -> bool { *self >= Access::Solved }
 
     pub fn is_solved(&self) -> bool { *self == Access::Solved }
@@ -84,10 +61,38 @@ impl Default for Access {
     fn default() -> Access { Access::Unvisited }
 }
 
+impl Tomlable for Access {
+    fn to_toml(&self) -> toml::Value {
+        let string = match *self {
+            Access::Unvisited => "unvisited",
+            Access::Unsolved => "unsolved",
+            Access::Solved => "solved",
+            Access::BeginReplay => "begin_replay",
+            Access::Replaying => "replaying",
+        };
+        toml::Value::String(string.to_string())
+    }
+
+    fn from_toml(value: toml::Value) -> Access {
+        if let Some(string) = value.as_str() {
+            match string {
+                "unvisited" => return Access::Unvisited,
+                "unsolved" => return Access::Unsolved,
+                "solved" => return Access::Solved,
+                "begin_replay" => return Access::BeginReplay,
+                "replaying" => return Access::Replaying,
+                _ => {}
+            }
+        }
+        Default::default()
+    }
+}
+
 // ========================================================================= //
 
 #[cfg(test)]
 mod tests {
+    use save::util::Tomlable;
     use super::Access;
 
     #[test]
@@ -97,9 +102,9 @@ mod tests {
                     Access::Solved,
                     Access::BeginReplay,
                     Access::Replaying];
-        for original in all {
-            let result = Access::from_toml(Some(&original.to_toml()));
-            assert_eq!(result, *original);
+        for &original in all.iter() {
+            let result = Access::from_toml(original.to_toml());
+            assert_eq!(result, original);
         }
     }
 }

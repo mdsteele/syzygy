@@ -20,6 +20,8 @@
 use std::default::Default;
 use toml;
 
+use save::util::Tomlable;
+
 // ========================================================================= //
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
@@ -29,9 +31,9 @@ pub enum PrimaryColor {
     Blue,
 }
 
-impl PrimaryColor {
-    pub fn from_toml(value: Option<&toml::Value>) -> PrimaryColor {
-        if let Some(string) = value.and_then(toml::Value::as_str) {
+impl Tomlable for PrimaryColor {
+    fn from_toml(value: toml::Value) -> PrimaryColor {
+        if let Some(string) = value.as_str() {
             match string {
                 "red" => return PrimaryColor::Red,
                 "green" => return PrimaryColor::Green,
@@ -42,8 +44,8 @@ impl PrimaryColor {
         Default::default()
     }
 
-    pub fn to_toml(self) -> toml::Value {
-        let string = match self {
+    fn to_toml(&self) -> toml::Value {
+        let string = match *self {
             PrimaryColor::Red => "red",
             PrimaryColor::Green => "green",
             PrimaryColor::Blue => "blue",
@@ -156,6 +158,7 @@ impl Default for MixedColor {
 
 #[cfg(test)]
 mod tests {
+    use save::util::Tomlable;
     use super::{MixedColor, PrimaryColor};
 
     #[test]
@@ -163,7 +166,7 @@ mod tests {
         let all =
             &[PrimaryColor::Red, PrimaryColor::Green, PrimaryColor::Blue];
         for &original in all {
-            let result = PrimaryColor::from_toml(Some(&original.to_toml()));
+            let result = PrimaryColor::from_toml(original.to_toml());
             assert_eq!(result, original);
         }
     }

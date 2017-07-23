@@ -22,7 +22,7 @@ use std::collections::{HashMap, HashSet};
 use toml;
 
 use save::Direction;
-use save::util::to_i8;
+use save::util::Tomlable;
 
 // ========================================================================= //
 
@@ -63,7 +63,7 @@ impl Grid {
 
     pub fn from_toml(width: usize, height: usize, array: toml::value::Array)
                      -> Grid {
-        let mut values: Vec<i8> = array.into_iter().map(to_i8).collect();
+        let mut values = Vec::<i8>::from_toml(toml::Value::Array(array));
         values.resize(width * height, 0);
         Grid {
             width: width,

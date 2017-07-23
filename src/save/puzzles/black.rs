@@ -21,7 +21,7 @@ use toml;
 
 use save::{Access, Location};
 use save::tree::{RedBlackTree, TreeOp};
-use save::util::{ACCESS_KEY, pop_value};
+use save::util::{ACCESS_KEY, Tomlable};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -47,9 +47,8 @@ pub struct BlackState {
 
 impl BlackState {
     pub fn from_toml(mut table: toml::value::Table) -> BlackState {
-        let access = Access::from_toml(table.get(ACCESS_KEY));
-        let mut tree = RedBlackTree::from_toml(pop_value(&mut table,
-                                                         TREE_KEY));
+        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
+        let mut tree = RedBlackTree::pop_from_table(&mut table, TREE_KEY);
         let num_keys = tree.len();
         if num_keys < MIN_KEYS_ON_TREE || num_keys > TOTAL_NUM_KEYS {
             tree = BlackState::initial_tree();

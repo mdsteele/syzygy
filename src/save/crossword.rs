@@ -19,7 +19,7 @@
 
 use toml;
 
-use super::util::to_string;
+use super::util::Tomlable;
 
 // ========================================================================= //
 
@@ -66,10 +66,10 @@ impl CrosswordState {
                      solved: &[&str])
                      -> CrosswordState {
         let mut words: Vec<Vec<char>> =
-            array.into_iter()
-                 .map(to_string)
-                 .map(|word| word.chars().collect())
-                 .collect();
+            Vec::<String>::from_toml(toml::Value::Array(array))
+                .into_iter()
+                .map(|word| word.chars().collect())
+                .collect();
         words.resize(solved.len(), Vec::new());
         for (row, word) in words.iter_mut().enumerate() {
             word.resize(solved[row].len(), ' ');

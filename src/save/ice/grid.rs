@@ -23,7 +23,7 @@ use toml;
 use gui::Point;
 use save::Direction;
 use save::ice::{Symbol, Transform};
-use save::util::{pop_array, pop_i32, pop_value, to_table};
+use save::util::{Tomlable, pop_array, to_table};
 
 // ========================================================================= //
 
@@ -91,10 +91,9 @@ impl ObjectGrid {
         let mut blocks = Vec::new();
         for block_toml in pop_array(&mut table, BLOCKS_KEY).into_iter() {
             let mut block_toml = to_table(block_toml);
-            let col = pop_i32(&mut block_toml, COL_KEY);
-            let row = pop_i32(&mut block_toml, ROW_KEY);
-            let symbol = Symbol::from_toml(pop_value(&mut block_toml,
-                                                     SYMBOL_KEY));
+            let col = i32::pop_from_table(&mut block_toml, COL_KEY);
+            let row = i32::pop_from_table(&mut block_toml, ROW_KEY);
+            let symbol = Symbol::pop_from_table(&mut block_toml, SYMBOL_KEY);
             if (col < 0 || col >= default.num_cols) ||
                (row < 0 || row >= default.num_rows) {
                 return default.clone();
@@ -108,9 +107,9 @@ impl ObjectGrid {
         let mut push_pops = Vec::new();
         for pp_toml in pop_array(&mut table, PUSH_POPS_KEY).into_iter() {
             let mut pp_toml = to_table(pp_toml);
-            let col = pop_i32(&mut pp_toml, COL_KEY);
-            let row = pop_i32(&mut pp_toml, ROW_KEY);
-            let dir = Direction::from_toml(pp_toml.get(DIRECTION_KEY));
+            let col = i32::pop_from_table(&mut pp_toml, COL_KEY);
+            let row = i32::pop_from_table(&mut pp_toml, ROW_KEY);
+            let dir = Direction::pop_from_table(&mut pp_toml, DIRECTION_KEY);
             push_pops.push((col, row, dir));
         }
 

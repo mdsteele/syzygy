@@ -20,7 +20,7 @@
 use std::collections::{HashMap, HashSet};
 use toml;
 
-use save::util::{to_array, to_i32};
+use save::util::Tomlable;
 
 // ========================================================================= //
 
@@ -66,31 +66,6 @@ impl BasicTree {
             nodes: HashMap::new(),
             root: None,
         }
-    }
-
-    pub fn from_toml(value: toml::Value) -> BasicTree {
-        let mut signature: Vec<(i32, i32, bool)> = Vec::new();
-        for item in to_array(value).into_iter() {
-            let item = to_array(item);
-            if item.len() != 3 {
-                continue;
-            }
-            let item: Vec<i32> = item.into_iter().map(to_i32).collect();
-            signature.push((item[0], item[1], item[2] != 0));
-        }
-        BasicTree::from_signature(signature)
-    }
-
-    pub fn to_toml(&self) -> toml::Value {
-        let mut array = toml::value::Array::new();
-        for (key, parent, is_red) in self.signature().into_iter() {
-            let mut item = toml::value::Array::new();
-            item.push(toml::Value::Integer(key as i64));
-            item.push(toml::Value::Integer(parent as i64));
-            item.push(toml::Value::Integer(if is_red { 1 } else { 0 }));
-            array.push(toml::Value::Array(item));
-        }
-        toml::Value::Array(array)
     }
 
     pub fn from_signature(signature: Vec<(i32, i32, bool)>) -> BasicTree {
@@ -512,10 +487,36 @@ impl BasicTree {
     }
 }
 
+impl Tomlable for BasicTree {
+    fn to_toml(&self) -> toml::Value {
+        let mut array = toml::value::Array::new();
+        for (key, parent, is_red) in self.signature().into_iter() {
+            let mut item = toml::value::Array::new();
+            item.push(toml::Value::Integer(key as i64));
+            item.push(toml::Value::Integer(parent as i64));
+            item.push(toml::Value::Integer(if is_red { 1 } else { 0 }));
+            array.push(toml::Value::Array(item));
+        }
+        toml::Value::Array(array)
+    }
+
+    fn from_toml(value: toml::Value) -> BasicTree {
+        let mut signature: Vec<(i32, i32, bool)> = Vec::new();
+        for item in Vec::<Vec<i32>>::from_toml(value).into_iter() {
+            if item.len() != 3 {
+                continue;
+            }
+            signature.push((item[0], item[1], item[2] != 0));
+        }
+        BasicTree::from_signature(signature)
+    }
+}
+
 // ========================================================================= //
 
 #[cfg(test)]
 mod tests {
+    use save::util::Tomlable;
     use super::BasicTree;
 
     #[test]

@@ -26,8 +26,8 @@ use save::column::Columns;
 use save::device::{Device, DeviceGrid};
 use save::ice::{Object, ObjectGrid, Symbol, Transform};
 use save::plane::{PlaneGrid, PlaneObj};
+use save::util::{ACCESS_KEY, Tomlable, pop_array, pop_table};
 use super::PuzzleState;
-use super::super::util::{ACCESS_KEY, pop_array, pop_table, to_i32};
 
 // ========================================================================= //
 
@@ -87,9 +87,11 @@ pub enum SyzygyStage {
 
 impl SyzygyStage {
     pub fn first() -> SyzygyStage { SyzygyStage::Yttris }
+}
 
-    pub fn from_toml(value: Option<&toml::Value>) -> SyzygyStage {
-        if let Some(string) = value.and_then(toml::Value::as_str) {
+impl Tomlable for SyzygyStage {
+    fn from_toml(value: toml::Value) -> SyzygyStage {
+        if let Some(string) = value.as_str() {
             match string {
                 "yttris" => return SyzygyStage::Yttris,
                 "argony" => return SyzygyStage::Argony,
@@ -103,8 +105,8 @@ impl SyzygyStage {
         SyzygyStage::first()
     }
 
-    pub fn to_toml(self) -> toml::Value {
-        let string = match self {
+    fn to_toml(&self) -> toml::Value {
+        let string = match *self {
             SyzygyStage::Yttris => "yttris",
             SyzygyStage::Argony => "argony",
             SyzygyStage::Elinsa => "elinsa",
@@ -250,8 +252,8 @@ impl SyzygyState {
     }
 
     pub fn from_toml(mut table: toml::value::Table) -> SyzygyState {
-        let access = Access::from_toml(table.get(ACCESS_KEY));
-        let stage = SyzygyStage::from_toml(table.get(STAGE_KEY));
+        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
+        let stage = SyzygyStage::pop_from_table(&mut table, STAGE_KEY);
         let yttris = Columns::from_toml(YTTRIS_COLUMNS_SPEC,
                                         pop_array(&mut table, YTTRIS_KEY));
         let argony =
@@ -274,7 +276,7 @@ impl SyzygyState {
         let relyng_lights =
             pop_array(&mut table, RELYNG_LIGHTS_KEY)
                 .into_iter()
-                .map(to_i32)
+                .map(i32::from_toml)
                 .filter(|&idx| {
                     0 <= idx && idx < RELYNG_NUM_COLS * RELYNG_NUM_ROWS
                 })
@@ -635,6 +637,7 @@ impl PuzzleState for SyzygyState {
 
 #[cfg(test)]
 mod tests {
+    use save::util::Tomlable;
     use super::SyzygyStage;
 
     const ALL_STAGES: &[SyzygyStage] = &[SyzygyStage::Yttris,
@@ -647,7 +650,7 @@ mod tests {
     #[test]
     fn stage_toml_round_trip() {
         for &original in ALL_STAGES {
-            let result = SyzygyStage::from_toml(Some(&original.to_toml()));
+            let result = SyzygyStage::from_toml(original.to_toml());
             assert_eq!(result, original);
         }
     }

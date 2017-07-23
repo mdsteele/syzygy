@@ -23,7 +23,7 @@ use toml;
 
 use gui::{Point, Rect};
 use save::MixedColor;
-use save::util::{to_array, to_i32};
+use save::util::{Tomlable, to_array};
 
 // ========================================================================= //
 
@@ -75,20 +75,7 @@ impl PlaneGrid {
         }
     }
 
-    pub fn pipes_to_toml(&self) -> toml::Value {
-        let mut pipes_toml = toml::value::Array::new();
-        for pipe in self.pipes.iter() {
-            let mut pipe_toml = toml::value::Array::new();
-            for &coords in pipe.iter() {
-                let mut coords_toml = toml::value::Array::new();
-                coords_toml.push(toml::Value::Integer(coords.x() as i64));
-                coords_toml.push(toml::Value::Integer(coords.y() as i64));
-                pipe_toml.push(toml::Value::Array(coords_toml));
-            }
-            pipes_toml.push(toml::Value::Array(pipe_toml));
-        }
-        toml::Value::Array(pipes_toml)
-    }
+    pub fn pipes_to_toml(&self) -> toml::Value { self.pipes.to_toml() }
 
     pub fn set_pipes_from_toml(&mut self, pipes: toml::value::Array) {
         self.pipes.clear();
@@ -96,9 +83,9 @@ impl PlaneGrid {
             let pipe = to_array(pipe);
             if !pipe.is_empty() {
                 let mut pipe = pipe.into_iter();
-                let mut p1 = point_from_toml(pipe.next().unwrap());
+                let mut p1 = Point::from_toml(pipe.next().unwrap());
                 for p2 in pipe {
-                    let p2 = point_from_toml(p2);
+                    let p2 = Point::from_toml(p2);
                     self.toggle_pipe(p1, p2);
                     p1 = p2;
                 }
@@ -377,19 +364,6 @@ impl PlaneGrid {
         }
         gray_nodes
     }
-}
-
-// ========================================================================= //
-
-fn point_from_toml(value: toml::Value) -> Point {
-    let mut array = to_array(value);
-    if array.len() < 2 {
-        return Point::new(0, 0);
-    }
-    array.truncate(2);
-    let y = to_i32(array.pop().unwrap());
-    let x = to_i32(array.pop().unwrap());
-    Point::new(x, y)
 }
 
 // ========================================================================= //

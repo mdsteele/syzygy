@@ -21,7 +21,7 @@ use std::collections::VecDeque;
 use toml;
 
 use save::{Access, Location, PuzzleState};
-use save::util::{ACCESS_KEY, pop_array, rotate_deque};
+use save::util::{ACCESS_KEY, Tomlable, rotate_deque};
 
 // ========================================================================= //
 
@@ -67,16 +67,11 @@ pub struct HexState {
 
 impl HexState {
     pub fn from_toml(mut table: toml::value::Table) -> HexState {
-        let access = Access::from_toml(table.get(ACCESS_KEY));
+        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
         let tokens = if access.is_solved() {
             SOLVED_TOKENS.to_vec()
         } else {
-            let mut tokens: Vec<u8> = pop_array(&mut table, TOKENS_KEY)
-                .iter()
-                .filter_map(toml::Value::as_integer)
-                .filter(|&token| 0 <= token && token < 3)
-                .map(|token| token as u8)
-                .collect();
+            let mut tokens = Vec::<u8>::pop_from_table(&mut table, TOKENS_KEY);
             tokens.resize(INITIAL_TOKENS.len(), 0);
             let mut init_sorted = INITIAL_TOKENS.to_vec();
             init_sorted.sort();
@@ -155,7 +150,7 @@ mod tests {
     use toml;
 
     use save::{Access, PuzzleState};
-    use save::util::{ACCESS_KEY, to_table};
+    use save::util::{ACCESS_KEY, Tomlable, to_table};
     use super::{HexState, INITIAL_TOKENS, SOLVED_TOKENS, TOKENS_KEY};
 
     #[test]

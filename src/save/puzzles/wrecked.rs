@@ -21,8 +21,8 @@ use std::collections::VecDeque;
 use toml;
 
 use save::{Access, Direction, Location};
+use save::util::{ACCESS_KEY, Tomlable, rotate_deque};
 use super::PuzzleState;
-use super::super::util::{ACCESS_KEY, pop_array, rotate_deque};
 
 // ========================================================================= //
 
@@ -51,12 +51,7 @@ pub struct WreckedState {
 
 impl WreckedState {
     pub fn from_toml(mut table: toml::value::Table) -> WreckedState {
-        let mut grid: Vec<i8> = pop_array(&mut table, GRID_KEY)
-            .iter()
-            .filter_map(toml::Value::as_integer)
-            .filter(|&tile| -1 <= tile && tile < 3)
-            .map(|tile| tile as i8)
-            .collect();
+        let mut grid = Vec::<i8>::pop_from_table(&mut table, GRID_KEY);
         let mut init_sorted = INITIAL_GRID.to_vec();
         init_sorted.sort();
         let mut grid_sorted = grid.clone();
@@ -76,7 +71,7 @@ impl WreckedState {
         }
         let is_initial = &grid as &[i8] == INITIAL_GRID;
         WreckedState {
-            access: Access::from_toml(table.get(ACCESS_KEY)),
+            access: Access::pop_from_table(&mut table, ACCESS_KEY),
             grid: grid,
             is_initial: is_initial,
         }

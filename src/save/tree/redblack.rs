@@ -19,6 +19,7 @@
 
 use toml;
 
+use save::util::Tomlable;
 use super::basic::{BasicTree, TreeOp};
 
 // ========================================================================= //
@@ -30,12 +31,6 @@ pub struct RedBlackTree {
 
 impl RedBlackTree {
     pub fn new() -> RedBlackTree { RedBlackTree { basic: BasicTree::new() } }
-
-    pub fn from_toml(value: toml::Value) -> RedBlackTree {
-        RedBlackTree::from_basic(BasicTree::from_toml(value))
-    }
-
-    pub fn to_toml(&self) -> toml::Value { self.basic.to_toml() }
 
     pub fn signature(&self) -> Vec<(i32, i32, bool)> { self.basic.signature() }
 
@@ -361,10 +356,19 @@ impl RedBlackTree {
     }
 }
 
+impl Tomlable for RedBlackTree {
+    fn to_toml(&self) -> toml::Value { self.basic.to_toml() }
+
+    fn from_toml(value: toml::Value) -> RedBlackTree {
+        RedBlackTree::from_basic(BasicTree::from_toml(value))
+    }
+}
+
 // ========================================================================= //
 
 #[cfg(test)]
 mod tests {
+    use save::util::Tomlable;
     use super::{RedBlackTree, TreeOp};
 
     #[test]

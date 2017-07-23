@@ -23,8 +23,8 @@ use toml;
 
 use gui::Point;
 use save::{Access, Location};
+use save::util::{ACCESS_KEY, Tomlable};
 use super::PuzzleState;
-use super::super::util::{ACCESS_KEY, pop_array, to_i32};
 
 // ========================================================================= //
 
@@ -91,16 +91,13 @@ pub struct StarState {
 
 impl StarState {
     pub fn from_toml(mut table: toml::value::Table) -> StarState {
-        let access = Access::from_toml(table.get(ACCESS_KEY));
+        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
         let found = if access == Access::Solved {
             (0..(WORDS.len() as i32)).into_iter().collect()
         } else {
             let num_words = WORDS.len() as i32;
-            pop_array(&mut table, FOUND_KEY)
-                .into_iter()
-                .map(to_i32)
-                .filter(|&idx| 0 <= idx && idx < num_words)
-                .collect()
+            let found = Vec::<i32>::pop_from_table(&mut table, FOUND_KEY);
+            found.into_iter().filter(|&i| 0 <= i && i < num_words).collect()
         };
 
         let mut state = StarState {

@@ -21,6 +21,7 @@ use num_integer::mod_floor;
 use toml;
 
 use save::Direction;
+use save::util::Tomlable;
 
 // ========================================================================= //
 
@@ -31,30 +32,6 @@ pub struct Transform {
 }
 
 impl Transform {
-    pub fn from_toml(value: Option<&toml::Value>) -> Transform {
-        if let Some(string) = value.and_then(toml::Value::as_str) {
-            match string {
-                "0F" => return Transform::new(0, false),
-                "0T" => return Transform::new(0, true),
-                "1F" => return Transform::new(1, false),
-                "1T" => return Transform::new(1, true),
-                "2F" => return Transform::new(2, false),
-                "2T" => return Transform::new(2, true),
-                "3F" => return Transform::new(3, false),
-                "3T" => return Transform::new(3, true),
-                _ => {}
-            }
-        }
-        Transform::identity()
-    }
-
-    pub fn to_toml(self) -> toml::Value {
-        debug_assert!(self.rotated_cw >= 0);
-        debug_assert!(self.rotated_cw < 4);
-        let mirrored = if self.mirrored { 'T' } else { 'F' };
-        toml::Value::String(format!("{}{}", self.rotated_cw, mirrored))
-    }
-
     fn new(rotated_cw: i32, mirrored: bool) -> Transform {
         Transform {
             rotated_cw: mod_floor(rotated_cw, 4),
@@ -130,17 +107,44 @@ impl Transform {
     }
 }
 
+impl Tomlable for Transform {
+    fn to_toml(&self) -> toml::Value {
+        debug_assert!(self.rotated_cw >= 0);
+        debug_assert!(self.rotated_cw < 4);
+        let mirrored = if self.mirrored { 'T' } else { 'F' };
+        toml::Value::String(format!("{}{}", self.rotated_cw, mirrored))
+    }
+
+    fn from_toml(value: toml::Value) -> Transform {
+        if let Some(string) = value.as_str() {
+            match string {
+                "0F" => return Transform::new(0, false),
+                "0T" => return Transform::new(0, true),
+                "1F" => return Transform::new(1, false),
+                "1T" => return Transform::new(1, true),
+                "2F" => return Transform::new(2, false),
+                "2T" => return Transform::new(2, true),
+                "3F" => return Transform::new(3, false),
+                "3T" => return Transform::new(3, true),
+                _ => {}
+            }
+        }
+        Transform::identity()
+    }
+}
+
 // ========================================================================= //
 
 #[cfg(test)]
 mod tests {
     use save::Direction;
+    use save::util::Tomlable;
     use super::Transform;
 
     #[test]
     fn toml_round_trip() {
         for original in Transform::all() {
-            let result = Transform::from_toml(Some(&original.to_toml()));
+            let result = Transform::from_toml(original.to_toml());
             assert_eq!(result, original);
         }
     }

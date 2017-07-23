@@ -21,7 +21,7 @@ use std::collections::HashMap;
 use toml;
 
 use save::{Direction, MixedColor};
-use super::util::{pop_array, to_i32, to_table};
+use save::util::{Tomlable, to_table};
 
 // ========================================================================= //
 
@@ -68,12 +68,12 @@ impl DeviceGrid {
         let mut actual_device_counts: HashMap<Device, i32> = HashMap::new();
         for value in array.into_iter() {
             let mut table = to_table(value);
-            let mut coords = pop_array(&mut table, COORDS_KEY);
+            let coords = Vec::<i32>::pop_from_table(&mut table, COORDS_KEY);
             if coords.len() != 2 {
                 return default.clone();
             }
-            let row = to_i32(coords.pop().unwrap());
-            let col = to_i32(coords.pop().unwrap());
+            let col = coords[0];
+            let row = coords[1];
             if (col < 0 || col >= grid.num_cols) ||
                (row < 0 || row >= grid.num_rows) {
                 return default.clone();
@@ -82,8 +82,8 @@ impl DeviceGrid {
             if grid.grid[index].is_some() {
                 return default.clone();
             }
-            let device = Device::from_toml(table.get(DEVICE_KEY));
-            let dir = Direction::from_toml(table.get(DIRECTION_KEY));
+            let device = Device::pop_from_table(&mut table, DEVICE_KEY);
+            let dir = Direction::pop_from_table(&mut table, DIRECTION_KEY);
             grid.grid[index] = Some((device, dir));
             *actual_device_counts.entry(device).or_insert(0) += 1;
         }
@@ -226,8 +226,60 @@ pub enum Device {
 }
 
 impl Device {
-    pub fn from_toml(value: Option<&toml::Value>) -> Device {
-        if let Some(string) = value.and_then(toml::Value::as_str) {
+    pub fn is_moveable(self) -> bool {
+        match self {
+            Device::Mirror | Device::Splitter | Device::Mixer => true,
+            _ => false,
+        }
+    }
+
+    #[cfg(test)]
+    pub fn all() -> Vec<Device> {
+        let mut devices = vec![Device::Wall,
+                               Device::Channel,
+                               Device::CrossChannel,
+                               Device::Mirror,
+                               Device::Splitter,
+                               Device::Mixer];
+        for color in MixedColor::all() {
+            devices.push(Device::Emitter(color));
+            devices.push(Device::Detector(color));
+        }
+        devices
+    }
+}
+
+impl Tomlable for Device {
+    fn to_toml(&self) -> toml::Value {
+        let string = match *self {
+            Device::Wall => "O",
+            Device::Channel => "=",
+            Device::CrossChannel => "+",
+            Device::Emitter(MixedColor::Black) => "Ek",
+            Device::Emitter(MixedColor::Red) => "Er",
+            Device::Emitter(MixedColor::Green) => "Eg",
+            Device::Emitter(MixedColor::Yellow) => "Ey",
+            Device::Emitter(MixedColor::Blue) => "Eb",
+            Device::Emitter(MixedColor::Magenta) => "Em",
+            Device::Emitter(MixedColor::Cyan) => "Ec",
+            Device::Emitter(MixedColor::White) => "Ew",
+            Device::Detector(MixedColor::Black) => "Dk",
+            Device::Detector(MixedColor::Red) => "Dr",
+            Device::Detector(MixedColor::Green) => "Dg",
+            Device::Detector(MixedColor::Yellow) => "Dy",
+            Device::Detector(MixedColor::Blue) => "Db",
+            Device::Detector(MixedColor::Magenta) => "Dm",
+            Device::Detector(MixedColor::Cyan) => "Dc",
+            Device::Detector(MixedColor::White) => "Dw",
+            Device::Mirror => "/",
+            Device::Splitter => "T",
+            Device::Mixer => "M",
+        };
+        toml::Value::String(string.to_string())
+    }
+
+    fn from_toml(value: toml::Value) -> Device {
+        if let Some(string) = value.as_str() {
             match string {
                 "O" => return Device::Wall,
                 "=" => return Device::Channel,
@@ -256,56 +308,6 @@ impl Device {
         }
         Device::Wall
     }
-
-    pub fn to_toml(self) -> toml::Value {
-        let string = match self {
-            Device::Wall => "O",
-            Device::Channel => "=",
-            Device::CrossChannel => "+",
-            Device::Emitter(MixedColor::Black) => "Ek",
-            Device::Emitter(MixedColor::Red) => "Er",
-            Device::Emitter(MixedColor::Green) => "Eg",
-            Device::Emitter(MixedColor::Yellow) => "Ey",
-            Device::Emitter(MixedColor::Blue) => "Eb",
-            Device::Emitter(MixedColor::Magenta) => "Em",
-            Device::Emitter(MixedColor::Cyan) => "Ec",
-            Device::Emitter(MixedColor::White) => "Ew",
-            Device::Detector(MixedColor::Black) => "Dk",
-            Device::Detector(MixedColor::Red) => "Dr",
-            Device::Detector(MixedColor::Green) => "Dg",
-            Device::Detector(MixedColor::Yellow) => "Dy",
-            Device::Detector(MixedColor::Blue) => "Db",
-            Device::Detector(MixedColor::Magenta) => "Dm",
-            Device::Detector(MixedColor::Cyan) => "Dc",
-            Device::Detector(MixedColor::White) => "Dw",
-            Device::Mirror => "/",
-            Device::Splitter => "T",
-            Device::Mixer => "M",
-        };
-        toml::Value::String(string.to_string())
-    }
-
-    pub fn is_moveable(self) -> bool {
-        match self {
-            Device::Mirror | Device::Splitter | Device::Mixer => true,
-            _ => false,
-        }
-    }
-
-    #[cfg(test)]
-    pub fn all() -> Vec<Device> {
-        let mut devices = vec![Device::Wall,
-                               Device::Channel,
-                               Device::CrossChannel,
-                               Device::Mirror,
-                               Device::Splitter,
-                               Device::Mixer];
-        for color in MixedColor::all() {
-            devices.push(Device::Emitter(color));
-            devices.push(Device::Detector(color));
-        }
-        devices
-    }
 }
 
 // ========================================================================= //
@@ -313,13 +315,13 @@ impl Device {
 #[cfg(test)]
 mod tests {
     use save::Direction;
+    use save::util::{Tomlable, to_array};
     use super::{Device, DeviceGrid};
-    use super::super::util::to_array;
 
     #[test]
     fn device_toml_round_trip() {
         for original in Device::all() {
-            let result = Device::from_toml(Some(&original.to_toml()));
+            let result = Device::from_toml(original.to_toml());
             assert_eq!(result, original);
         }
     }

@@ -20,7 +20,7 @@
 use num_integer::mod_floor;
 use toml;
 
-use save::util::to_i32;
+use save::util::Tomlable;
 
 // ========================================================================= //
 
@@ -59,7 +59,7 @@ impl Columns {
                 break;
             }
             let column = &mut columns[index];
-            let value = to_i32(value);
+            let value = i32::from_toml(value);
             if value >= 0 && (value as usize) < column.letters.len() {
                 column.current_position = value;
             }

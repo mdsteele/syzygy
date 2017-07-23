@@ -21,8 +21,8 @@ use toml;
 
 use save::{Access, Location};
 use save::pyramid::{Board, Coords, Team};
+use save::util::{ACCESS_KEY, Tomlable};
 use super::PuzzleState;
-use super::super::util::{ACCESS_KEY, pop_array};
 
 // ========================================================================= //
 
@@ -39,13 +39,12 @@ pub struct FailureState {
 
 impl FailureState {
     pub fn from_toml(mut table: toml::value::Table) -> FailureState {
-        let board_toml = pop_array(&mut table, BOARD_KEY);
         FailureState {
-            access: Access::from_toml(table.get(ACCESS_KEY)),
+            access: Access::pop_from_table(&mut table, ACCESS_KEY),
             mid_scene_done: table.get(MID_SCENE_DONE_KEY)
                                  .and_then(toml::Value::as_bool)
                                  .unwrap_or(false),
-            board: Board::from_toml(board_toml),
+            board: Board::pop_from_table(&mut table, BOARD_KEY),
         }
     }
 

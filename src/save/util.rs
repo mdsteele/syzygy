@@ -17,9 +17,11 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use std::{i32, i8, u32};
+use std::{i32, i8, u32, u8, usize};
 use std::collections::VecDeque;
 use toml;
+
+use gui::Point;
 
 // ========================================================================= //
 
@@ -34,30 +36,12 @@ pub fn pop_array(table: &mut toml::value::Table, key: &str)
     }
 }
 
-pub fn pop_i32(table: &mut toml::value::Table, key: &str) -> i32 {
-    if let Some(value) = table.remove(key) {
-        to_i32(value)
-    } else {
-        0
-    }
-}
-
 pub fn pop_table(table: &mut toml::value::Table, key: &str)
                  -> toml::value::Table {
     if let Some(value) = table.remove(key) {
         to_table(value)
     } else {
         toml::value::Table::new()
-    }
-}
-
-/// Removes and returns a value from a table.  If the key isn't in the table,
-/// returns a value of false (the closest thing `toml` has to null).
-pub fn pop_value(table: &mut toml::value::Table, key: &str) -> toml::Value {
-    if let Some(value) = table.remove(key) {
-        value
-    } else {
-        toml::Value::Boolean(false)
     }
 }
 
@@ -70,52 +54,6 @@ pub fn to_array(value: toml::Value) -> toml::value::Array {
     }
 }
 
-pub fn to_bool(value: toml::Value) -> bool {
-    match value {
-        toml::Value::Boolean(boolean) => boolean,
-        _ => false,
-    }
-}
-
-pub fn to_i32(value: toml::Value) -> i32 {
-    match value {
-        toml::Value::Integer(integer) => {
-            if integer > (i32::MAX as i64) {
-                i32::MAX
-            } else if integer < (i32::MIN as i64) {
-                i32::MIN
-            } else {
-                integer as i32
-            }
-        }
-        _ => 0,
-    }
-}
-
-pub fn to_i8(value: toml::Value) -> i8 {
-    match value {
-        toml::Value::Integer(integer) => {
-            if integer > (i8::MAX as i64) {
-                i8::MAX
-            } else if integer < (i8::MIN as i64) {
-                i8::MIN
-            } else {
-                integer as i8
-            }
-        }
-        _ => 0,
-    }
-}
-
-/// Coerces a `toml` value to a string.  If the value is not already a string,
-/// returns the empty string.
-pub fn to_string(value: toml::Value) -> String {
-    match value {
-        toml::Value::String(string) => string,
-        _ => String::new(),
-    }
-}
-
 /// Coerces a `toml` value to a table.  If the value is not already a table,
 /// returns the empty table.
 pub fn to_table(value: toml::Value) -> toml::value::Table {
@@ -125,18 +63,138 @@ pub fn to_table(value: toml::Value) -> toml::value::Table {
     }
 }
 
-pub fn to_u32(value: toml::Value) -> u32 {
-    match value {
-        toml::Value::Integer(integer) => {
-            if integer > (u32::MAX as i64) {
-                u32::MAX
-            } else if integer < (u32::MIN as i64) {
-                u32::MIN
-            } else {
-                integer as u32
-            }
+// ========================================================================= //
+
+pub trait Tomlable {
+    fn to_toml(&self) -> toml::Value;
+
+    fn from_toml(value: toml::Value) -> Self;
+
+    fn pop_from_table(table: &mut toml::value::Table, key: &str) -> Self
+        where Self: Sized
+    {
+        let value = table.remove(key).unwrap_or(toml::Value::Boolean(false));
+        Self::from_toml(value)
+    }
+}
+
+impl Tomlable for bool {
+    fn to_toml(&self) -> toml::Value { toml::Value::Boolean(*self) }
+
+    fn from_toml(value: toml::Value) -> bool {
+        match value {
+            toml::Value::Boolean(boolean) => boolean,
+            _ => false,
         }
-        _ => 0,
+    }
+}
+
+impl Tomlable for i8 {
+    fn to_toml(&self) -> toml::Value { toml::Value::Integer(*self as i64) }
+
+    fn from_toml(value: toml::Value) -> i8 {
+        match value {
+            toml::Value::Integer(integer) => {
+                if integer > (i8::MAX as i64) {
+                    i8::MAX
+                } else if integer < (i8::MIN as i64) {
+                    i8::MIN
+                } else {
+                    integer as i8
+                }
+            }
+            _ => 0,
+        }
+    }
+}
+
+impl Tomlable for i32 {
+    fn to_toml(&self) -> toml::Value { toml::Value::Integer(*self as i64) }
+
+    fn from_toml(value: toml::Value) -> i32 {
+        match value {
+            toml::Value::Integer(integer) => {
+                if integer > (i32::MAX as i64) {
+                    i32::MAX
+                } else if integer < (i32::MIN as i64) {
+                    i32::MIN
+                } else {
+                    integer as i32
+                }
+            }
+            _ => 0,
+        }
+    }
+}
+
+impl Tomlable for u8 {
+    fn to_toml(&self) -> toml::Value { toml::Value::Integer(*self as i64) }
+
+    fn from_toml(value: toml::Value) -> u8 {
+        match value {
+            toml::Value::Integer(integer) => {
+                if integer > (u8::MAX as i64) {
+                    u8::MAX
+                } else if integer < (u8::MIN as i64) {
+                    u8::MIN
+                } else {
+                    integer as u8
+                }
+            }
+            _ => 0,
+        }
+    }
+}
+
+impl Tomlable for u32 {
+    fn to_toml(&self) -> toml::Value { toml::Value::Integer(*self as i64) }
+
+    fn from_toml(value: toml::Value) -> u32 {
+        match value {
+            toml::Value::Integer(integer) => {
+                if integer > (u32::MAX as i64) {
+                    u32::MAX
+                } else if integer < (u32::MIN as i64) {
+                    u32::MIN
+                } else {
+                    integer as u32
+                }
+            }
+            _ => 0,
+        }
+    }
+}
+
+impl Tomlable for Point {
+    fn to_toml(&self) -> toml::Value { vec![self.x(), self.y()].to_toml() }
+
+    fn from_toml(value: toml::Value) -> Point {
+        let array = Vec::<i32>::from_toml(value);
+        if array.len() != 2 {
+            return Point::new(0, 0);
+        }
+        Point::new(array[0], array[1])
+    }
+}
+
+impl Tomlable for String {
+    fn to_toml(&self) -> toml::Value { toml::Value::String(self.clone()) }
+
+    fn from_toml(value: toml::Value) -> String {
+        match value {
+            toml::Value::String(string) => string,
+            _ => String::new(),
+        }
+    }
+}
+
+impl<T: Tomlable> Tomlable for Vec<T> {
+    fn to_toml(&self) -> toml::Value {
+        toml::Value::Array(self.iter().map(Tomlable::to_toml).collect())
+    }
+
+    fn from_toml(value: toml::Value) -> Vec<T> {
+        to_array(value).into_iter().map(Tomlable::from_toml).collect()
     }
 }
 
@@ -168,7 +226,7 @@ mod tests {
     use std::collections::VecDeque;
     use toml;
 
-    use super::{rotate_deque, to_i32, to_i8, to_u32};
+    use super::{Tomlable, rotate_deque};
 
     #[test]
     fn deque_rotation() {
@@ -197,37 +255,44 @@ mod tests {
     }
 
     #[test]
-    fn value_to_i8() {
-        assert_eq!(to_i8(toml::Value::Boolean(false)), 0);
-        assert_eq!(to_i8(toml::Value::Boolean(true)), 0);
-        assert_eq!(to_i8(toml::Value::Integer(1)), 1);
-        assert_eq!(to_i8(toml::Value::Integer(127)), 127);
-        assert_eq!(to_i8(toml::Value::Integer(128)), 127);
-        assert_eq!(to_i8(toml::Value::Integer(-128)), -128);
-        assert_eq!(to_i8(toml::Value::Integer(-129)), -128);
+    fn i8_to_toml() {
+        assert_eq!(i8::from_toml(toml::Value::Boolean(false)), 0);
+        assert_eq!(i8::from_toml(toml::Value::Boolean(true)), 0);
+        assert_eq!(i8::from_toml(toml::Value::Integer(1)), 1);
+        assert_eq!(i8::from_toml(toml::Value::Integer(127)), 127);
+        assert_eq!(i8::from_toml(toml::Value::Integer(128)), 127);
+        assert_eq!(i8::from_toml(toml::Value::Integer(-128)), -128);
+        assert_eq!(i8::from_toml(toml::Value::Integer(-129)), -128);
     }
 
     #[test]
-    fn value_to_i32() {
-        assert_eq!(to_i32(toml::Value::Boolean(false)), 0);
-        assert_eq!(to_i32(toml::Value::Boolean(true)), 0);
-        assert_eq!(to_i32(toml::Value::Integer(-17)), -17);
-        assert_eq!(to_i32(toml::Value::Integer(2147483647)), 2147483647);
-        assert_eq!(to_i32(toml::Value::Integer(2147483648)), 2147483647);
-        assert_eq!(to_i32(toml::Value::Integer(-2147483648)), -2147483648);
-        assert_eq!(to_i32(toml::Value::Integer(-2147483649)), -2147483648);
+    fn i32_to_toml() {
+        assert_eq!(i32::from_toml(toml::Value::Boolean(false)), 0);
+        assert_eq!(i32::from_toml(toml::Value::Boolean(true)), 0);
+        assert_eq!(i32::from_toml(toml::Value::Integer(-17)), -17);
+        assert_eq!(i32::from_toml(toml::Value::Integer(2147483647)),
+                   2147483647);
+        assert_eq!(i32::from_toml(toml::Value::Integer(2147483648)),
+                   2147483647);
+        assert_eq!(i32::from_toml(toml::Value::Integer(-2147483648)),
+                   -2147483648);
+        assert_eq!(i32::from_toml(toml::Value::Integer(-2147483649)),
+                   -2147483648);
     }
 
     #[test]
-    fn value_to_u32() {
-        assert_eq!(to_u32(toml::Value::Boolean(false)), 0);
-        assert_eq!(to_u32(toml::Value::Boolean(true)), 0);
-        assert_eq!(to_u32(toml::Value::Integer(-1)), 0);
-        assert_eq!(to_u32(toml::Value::Integer(1)), 1);
-        assert_eq!(to_u32(toml::Value::Integer(2147483648)), 2147483648);
-        assert_eq!(to_u32(toml::Value::Integer(4294967295)), 4294967295);
-        assert_eq!(to_u32(toml::Value::Integer(4294967296)), 4294967295);
-        assert_eq!(to_u32(toml::Value::Integer(-2147483648)), 0);
+    fn u32_to_toml() {
+        assert_eq!(u32::from_toml(toml::Value::Boolean(false)), 0);
+        assert_eq!(u32::from_toml(toml::Value::Boolean(true)), 0);
+        assert_eq!(u32::from_toml(toml::Value::Integer(-1)), 0);
+        assert_eq!(u32::from_toml(toml::Value::Integer(1)), 1);
+        assert_eq!(u32::from_toml(toml::Value::Integer(2147483648)),
+                   2147483648);
+        assert_eq!(u32::from_toml(toml::Value::Integer(4294967295)),
+                   4294967295);
+        assert_eq!(u32::from_toml(toml::Value::Integer(4294967296)),
+                   4294967295);
+        assert_eq!(u32::from_toml(toml::Value::Integer(-2147483648)), 0);
     }
 }
 

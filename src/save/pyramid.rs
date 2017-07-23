@@ -22,7 +22,7 @@ use std::cmp;
 use std::collections::{HashMap, HashSet};
 use toml;
 
-use save::util::to_i8;
+use save::util::Tomlable;
 
 // ========================================================================= //
 
@@ -183,24 +183,6 @@ impl Board {
             you: STARTING_PIECES - you,
             srb: STARTING_PIECES - srb,
         }
-    }
-
-    pub fn from_toml(array: toml::value::Array) -> Board {
-        let mut cells: Vec<i8> = array.into_iter()
-                                      .map(to_i8)
-                                      .filter(|&v| Team::is_valid_value(v))
-                                      .collect();
-        cells.resize(NUM_CELLS, 0);
-        Board::from_cells(cells)
-    }
-
-    pub fn to_toml(&self) -> toml::Value {
-        toml::Value::Array(self.cells
-                               .iter()
-                               .map(|&value| {
-                                   toml::Value::Integer(value as i64)
-                               })
-                               .collect())
     }
 
     pub fn is_empty(&self) -> bool {
@@ -525,6 +507,24 @@ impl Board {
     }
 }
 
+impl Tomlable for Board {
+    fn to_toml(&self) -> toml::Value {
+        toml::Value::Array(self.cells
+                               .iter()
+                               .map(|&value| {
+                                   toml::Value::Integer(value as i64)
+                               })
+                               .collect())
+    }
+
+    fn from_toml(value: toml::Value) -> Board {
+        let mut cells = Vec::<i8>::from_toml(value);
+        cells.retain(|&v| Team::is_valid_value(v));
+        cells.resize(NUM_CELLS, 0);
+        Board::from_cells(cells)
+    }
+}
+
 // ========================================================================= //
 
 #[cfg(test)]
@@ -532,7 +532,7 @@ mod tests {
     use std::collections::HashSet;
     use std::f64;
 
-    use save::util::to_array;
+    use save::util::Tomlable;
     use super::{Board, Coords, Move, NUM_CELLS, Team};
 
     #[test]
@@ -584,7 +584,7 @@ mod tests {
         board.set_piece_at(Coords::new(0, 5), Team::SRB);
         board.set_piece_at(Coords::new(1, 2), Team::You);
         let toml = board.to_toml();
-        let board2 = Board::from_toml(to_array(toml));
+        let board2 = Board::from_toml(toml);
         assert_eq!(board2.you, board.you);
         assert_eq!(board2.srb, board.srb);
         assert_eq!(board2.piece_at(Coords::new(1, 2)), Some(Team::You));

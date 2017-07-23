@@ -28,7 +28,7 @@ use save::{AtticState, AutoState, BlackState, BlameState, CubeState, DayState,
            SauceState, ServesState, SimpleState, StarState, SyrupState,
            SyzygyState, TheYState, TreadState, VirtueState, WhatchaState,
            WreckedState};
-use save::util::{pop_table, to_table};
+use save::util::{Tomlable, pop_table, to_table};
 
 // ========================================================================= //
 
@@ -94,7 +94,7 @@ impl Game {
         let mut table = to_table(value);
         let table_ref = &mut table;
         Game {
-            location: Location::from_toml(table_ref.get(LOCATION_KEY)),
+            location: Location::pop_from_table(table_ref, LOCATION_KEY),
             prolog: PrologState::from_toml(
                 pop_table(table_ref, Location::Prolog.key())),
             a_light_in_the_attic: AtticState::from_toml(

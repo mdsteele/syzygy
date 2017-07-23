@@ -21,8 +21,8 @@ use std::collections::BTreeSet;
 use toml;
 
 use save::{Access, Location};
+use save::util::{ACCESS_KEY, Tomlable};
 use super::PuzzleState;
-use super::super::util::{ACCESS_KEY, pop_array};
 
 // ========================================================================= //
 
@@ -39,15 +39,13 @@ pub struct AtticState {
 
 impl AtticState {
     pub fn from_toml(mut table: toml::value::Table) -> AtticState {
-        let mut access = Access::from_toml(table.get(ACCESS_KEY));
+        let mut access = Access::pop_from_table(&mut table, ACCESS_KEY);
         let toggled = if access == Access::Solved {
             SOLVED_TOGGLED.iter().cloned().collect()
         } else {
-            pop_array(&mut table, TOGGLED_KEY)
-                .iter()
-                .filter_map(toml::Value::as_integer)
+            Vec::<i32>::pop_from_table(&mut table, TOGGLED_KEY)
+                .into_iter()
                 .filter(|&idx| 0 <= idx && idx < 16)
-                .map(|idx| idx as i32)
                 .collect()
         };
         if toggled == SOLVED_TOGGLED.iter().cloned().collect() {
@@ -192,10 +190,7 @@ impl PuzzleState for AtticState {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.is_solved() && !self.toggled.is_empty() {
-            let toggled = self.toggled
-                              .iter()
-                              .map(|&idx| toml::Value::Integer(idx as i64))
-                              .collect();
+            let toggled = self.toggled.iter().map(|&i| i.to_toml()).collect();
             table.insert(TOGGLED_KEY.to_string(), toml::Value::Array(toggled));
         }
         toml::Value::Table(table)
@@ -209,7 +204,7 @@ mod tests {
     use toml;
 
     use save::{Access, PuzzleState};
-    use save::util::{ACCESS_KEY, to_table};
+    use save::util::{ACCESS_KEY, Tomlable, to_table};
     use super::{AtticState, SOLVED_TOGGLED, TOGGLED_KEY};
 
     #[test]

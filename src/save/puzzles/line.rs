@@ -21,8 +21,8 @@ use rand::{self, Rng, SeedableRng};
 use toml;
 
 use save::{Access, Location};
+use save::util::{ACCESS_KEY, Tomlable};
 use super::PuzzleState;
-use super::super::util::{ACCESS_KEY, pop_array, to_i32, to_u32};
 
 // ========================================================================= //
 
@@ -55,18 +55,17 @@ pub struct LineState {
 
 impl LineState {
     pub fn from_toml(mut table: toml::value::Table) -> LineState {
-        let access = Access::from_toml(table.get(ACCESS_KEY));
+        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
         let stage = if access == Access::Solved {
             GRIDS.len() as i32
         } else {
-            table.remove(STAGE_KEY).map(to_i32).unwrap_or(0)
+            i32::pop_from_table(&mut table, STAGE_KEY)
         };
         let mut seed = [0; 8];
         if access != Access::Solved {
             let mut index = 0;
-            for value in pop_array(&mut table, SEED_KEY)
-                .into_iter()
-                .map(to_u32) {
+            for value in Vec::<u32>::pop_from_table(&mut table, SEED_KEY)
+                .into_iter() {
                 seed[index] = value;
                 index += 1;
                 if index >= 8 {
@@ -199,7 +198,7 @@ mod tests {
     use toml;
 
     use save::{Access, PuzzleState};
-    use save::util::{ACCESS_KEY, to_table};
+    use save::util::{ACCESS_KEY, Tomlable, to_table};
     use super::{GRIDS, LineState};
 
     #[test]

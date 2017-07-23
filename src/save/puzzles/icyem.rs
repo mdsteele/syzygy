@@ -21,7 +21,7 @@ use toml;
 
 use save::{Access, Location};
 use save::column::Columns;
-use save::util::{ACCESS_KEY, pop_array};
+use save::util::{ACCESS_KEY, Tomlable, pop_array};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -57,7 +57,7 @@ pub struct IcyEmState {
 
 impl IcyEmState {
     pub fn from_toml(mut table: toml::value::Table) -> IcyEmState {
-        let access = Access::from_toml(table.get(ACCESS_KEY));
+        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
         let mut columns = Columns::from_toml(COLUMNS_SPEC,
                                              pop_array(&mut table,
                                                        COLUMNS_KEY));

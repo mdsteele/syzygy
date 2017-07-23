@@ -21,8 +21,8 @@ use std::cmp::{max, min};
 use toml;
 
 use save::{Access, CrosswordState, Location, ValidChars};
+use save::util::{ACCESS_KEY, Tomlable, pop_array};
 use super::PuzzleState;
-use super::super::util::{ACCESS_KEY, pop_array, to_i32};
 
 // ========================================================================= //
 
@@ -84,12 +84,9 @@ pub struct PasswordState {
 
 impl PasswordState {
     pub fn from_toml(mut table: toml::value::Table) -> PasswordState {
-        let access = Access::from_toml(table.get(ACCESS_KEY));
-        let active_slot = max(0,
-                              min(5,
-                                  table.remove(ACTIVE_SLOT_KEY)
-                                       .map(to_i32)
-                                       .unwrap_or(0)));
+        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
+        let active_slot =
+            max(0, min(5, i32::pop_from_table(&mut table, ACTIVE_SLOT_KEY)));
         let sliders = if access == Access::Solved {
             SOLVED_SLIDERS
         } else {

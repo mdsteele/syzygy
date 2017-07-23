@@ -21,6 +21,7 @@ use num_integer::mod_floor;
 use toml;
 
 use gui::Point;
+use save::util::Tomlable;
 
 // ========================================================================= //
 
@@ -33,29 +34,6 @@ pub enum Direction {
 }
 
 impl Direction {
-    pub fn from_toml(value: Option<&toml::Value>) -> Direction {
-        if let Some(string) = value.and_then(toml::Value::as_str) {
-            match string {
-                "E" => return Direction::East,
-                "S" => return Direction::South,
-                "W" => return Direction::West,
-                "N" => return Direction::North,
-                _ => {}
-            }
-        }
-        Direction::East
-    }
-
-    pub fn to_toml(self) -> toml::Value {
-        let string = match self {
-            Direction::East => "E",
-            Direction::South => "S",
-            Direction::West => "W",
-            Direction::North => "N",
-        };
-        toml::Value::String(string.to_string())
-    }
-
     pub fn degrees(self) -> i32 {
         match self {
             Direction::East => 0,
@@ -146,17 +124,43 @@ impl Direction {
     }
 }
 
+impl Tomlable for Direction {
+    fn to_toml(&self) -> toml::Value {
+        let string = match *self {
+            Direction::East => "E",
+            Direction::South => "S",
+            Direction::West => "W",
+            Direction::North => "N",
+        };
+        toml::Value::String(string.to_string())
+    }
+
+    fn from_toml(value: toml::Value) -> Direction {
+        if let Some(string) = value.as_str() {
+            match string {
+                "E" => return Direction::East,
+                "S" => return Direction::South,
+                "W" => return Direction::West,
+                "N" => return Direction::North,
+                _ => {}
+            }
+        }
+        Direction::East
+    }
+}
+
 // ========================================================================= //
 
 #[cfg(test)]
 mod tests {
     use gui::Point;
+    use save::util::Tomlable;
     use super::Direction;
 
     #[test]
     fn toml_round_trip() {
         for original in Direction::all() {
-            let result = Direction::from_toml(Some(&original.to_toml()));
+            let result = Direction::from_toml(original.to_toml());
             assert_eq!(result, original);
         }
     }

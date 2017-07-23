@@ -20,8 +20,8 @@
 use toml;
 
 use save::{Access, Location};
+use save::util::{ACCESS_KEY, Tomlable, pop_array};
 use super::PuzzleState;
-use super::super::util::{ACCESS_KEY, pop_array, to_i32};
 
 // ========================================================================= //
 
@@ -56,7 +56,7 @@ impl GroundState {
             positions = INITIAL_POSITIONS.to_vec();
         }
         let mut elinsa_row = table.remove(ELINSA_ROW_KEY)
-                                  .map(to_i32)
+                                  .map(i32::from_toml)
                                   .unwrap_or(INITIAL_ELINSA_ROW);
         if elinsa_row < -1 || elinsa_row > MAX_ELINSA_ROW {
             elinsa_row = INITIAL_ELINSA_ROW;
@@ -64,7 +64,7 @@ impl GroundState {
         let is_initial = &positions as &[i32] == INITIAL_POSITIONS &&
                          elinsa_row == INITIAL_ELINSA_ROW;
         GroundState {
-            access: Access::from_toml(table.get(ACCESS_KEY)),
+            access: Access::pop_from_table(&mut table, ACCESS_KEY),
             positions: positions,
             elinsa_row: elinsa_row,
             is_initial: is_initial,

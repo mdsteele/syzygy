@@ -21,7 +21,7 @@ use toml;
 
 use save::Direction;
 use save::ice::Transform;
-use save::util::{pop_value, to_bool, to_string, to_table};
+use save::util::{Tomlable, to_table};
 
 // ========================================================================= //
 
@@ -39,87 +39,6 @@ pub enum Symbol {
 }
 
 impl Symbol {
-    pub fn from_toml(value: toml::Value) -> Symbol {
-        let mut table = to_table(value);
-        match to_string(pop_value(&mut table, "shape")).as_str() {
-            "RT" => {
-                let direction = Direction::from_toml(table.get("direction"));
-                Symbol::RedTriangle(direction)
-            }
-            "GS" => Symbol::GreenSquare,
-            "BC" => Symbol::BlueCircle,
-            "YR" => {
-                let vertical = to_bool(pop_value(&mut table, "vertical"));
-                let mirrored = to_bool(pop_value(&mut table, "mirrored"));
-                Symbol::YellowRhombus(vertical, mirrored)
-            }
-            "PC" => {
-                let transform = Transform::from_toml(table.get("transform"));
-                Symbol::PurpleCheckmark(transform)
-            }
-            "CQ" => {
-                let transform = Transform::from_toml(table.get("transform"));
-                Symbol::CyanQ(transform)
-            }
-            "CU" => {
-                let transform = Transform::from_toml(table.get("transform"));
-                Symbol::CyanU(transform)
-            }
-            "CA" => {
-                let transform = Transform::from_toml(table.get("transform"));
-                Symbol::CyanA(transform)
-            }
-            "M" => {
-                let mirrored = to_bool(pop_value(&mut table, "mirrored"));
-                Symbol::Mirror(mirrored)
-            }
-            _ => Symbol::BlueCircle,
-        }
-    }
-
-    pub fn to_toml(self) -> toml::Value {
-        let mut table = toml::value::Table::new();
-        let shape = match self {
-            Symbol::RedTriangle(direction) => {
-                table.insert("direction".to_string(), direction.to_toml());
-                "RT"
-            }
-            Symbol::GreenSquare => "GS",
-            Symbol::BlueCircle => "BC",
-            Symbol::YellowRhombus(vertical, mirrored) => {
-                table.insert("vertical".to_string(),
-                             toml::Value::Boolean(vertical));
-                table.insert("mirrored".to_string(),
-                             toml::Value::Boolean(mirrored));
-                "YR"
-            }
-            Symbol::PurpleCheckmark(transform) => {
-                table.insert("transform".to_string(), transform.to_toml());
-                "PC"
-            }
-            Symbol::CyanQ(transform) => {
-                table.insert("transform".to_string(), transform.to_toml());
-                "CQ"
-            }
-            Symbol::CyanU(transform) => {
-                table.insert("transform".to_string(), transform.to_toml());
-                "CU"
-            }
-            Symbol::CyanA(transform) => {
-                table.insert("transform".to_string(), transform.to_toml());
-                "CA"
-            }
-            Symbol::Mirror(mirrored) => {
-                table.insert("mirrored".to_string(),
-                             toml::Value::Boolean(mirrored));
-                "M"
-            }
-        };
-        table.insert("shape".to_string(),
-                     toml::Value::String(shape.to_string()));
-        toml::Value::Table(table)
-    }
-
     pub fn transformed(self, transform: Transform) -> Symbol {
         match self {
             Symbol::RedTriangle(dir) => {
@@ -211,12 +130,96 @@ impl Symbol {
     }
 }
 
+impl Tomlable for Symbol {
+    fn to_toml(&self) -> toml::Value {
+        let mut table = toml::value::Table::new();
+        let shape = match *self {
+            Symbol::RedTriangle(direction) => {
+                table.insert("direction".to_string(), direction.to_toml());
+                "RT"
+            }
+            Symbol::GreenSquare => "GS",
+            Symbol::BlueCircle => "BC",
+            Symbol::YellowRhombus(vertical, mirrored) => {
+                table.insert("vertical".to_string(),
+                             toml::Value::Boolean(vertical));
+                table.insert("mirrored".to_string(),
+                             toml::Value::Boolean(mirrored));
+                "YR"
+            }
+            Symbol::PurpleCheckmark(transform) => {
+                table.insert("transform".to_string(), transform.to_toml());
+                "PC"
+            }
+            Symbol::CyanQ(transform) => {
+                table.insert("transform".to_string(), transform.to_toml());
+                "CQ"
+            }
+            Symbol::CyanU(transform) => {
+                table.insert("transform".to_string(), transform.to_toml());
+                "CU"
+            }
+            Symbol::CyanA(transform) => {
+                table.insert("transform".to_string(), transform.to_toml());
+                "CA"
+            }
+            Symbol::Mirror(mirrored) => {
+                table.insert("mirrored".to_string(),
+                             toml::Value::Boolean(mirrored));
+                "M"
+            }
+        };
+        table.insert("shape".to_string(),
+                     toml::Value::String(shape.to_string()));
+        toml::Value::Table(table)
+    }
+
+    fn from_toml(value: toml::Value) -> Symbol {
+        let mut table = to_table(value);
+        match String::pop_from_table(&mut table, "shape").as_str() {
+            "RT" => {
+                let dir = Direction::pop_from_table(&mut table, "direction");
+                Symbol::RedTriangle(dir)
+            }
+            "GS" => Symbol::GreenSquare,
+            "BC" => Symbol::BlueCircle,
+            "YR" => {
+                let vertical = bool::pop_from_table(&mut table, "vertical");
+                let mirrored = bool::pop_from_table(&mut table, "mirrored");
+                Symbol::YellowRhombus(vertical, mirrored)
+            }
+            "PC" => {
+                let trans = Transform::pop_from_table(&mut table, "transform");
+                Symbol::PurpleCheckmark(trans)
+            }
+            "CQ" => {
+                let trans = Transform::pop_from_table(&mut table, "transform");
+                Symbol::CyanQ(trans)
+            }
+            "CU" => {
+                let trans = Transform::pop_from_table(&mut table, "transform");
+                Symbol::CyanU(trans)
+            }
+            "CA" => {
+                let trans = Transform::pop_from_table(&mut table, "transform");
+                Symbol::CyanA(trans)
+            }
+            "M" => {
+                let mirrored = bool::pop_from_table(&mut table, "mirrored");
+                Symbol::Mirror(mirrored)
+            }
+            _ => Symbol::BlueCircle,
+        }
+    }
+}
+
 // ========================================================================= //
 
 #[cfg(test)]
 mod tests {
     use save::Direction;
     use save::ice::Transform;
+    use save::util::Tomlable;
     use super::Symbol;
 
     #[test]

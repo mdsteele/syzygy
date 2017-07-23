@@ -22,7 +22,7 @@ use std::collections::{HashMap, HashSet, VecDeque};
 use toml;
 
 use save::{Access, Location};
-use save::util::{ACCESS_KEY, pop_array, rotate_deque, to_array, to_i32};
+use save::util::{ACCESS_KEY, Tomlable, rotate_deque};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -73,17 +73,17 @@ pub struct PovState {
 
 impl PovState {
     pub fn from_toml(mut table: toml::value::Table) -> PovState {
-        let access = Access::from_toml(table.get(ACCESS_KEY));
+        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
         let grid = if access.is_solved() {
             SOLVED_GRID.iter().cloned().collect()
         } else {
             let mut grid = HashMap::new();
-            for entry in pop_array(&mut table, GRID_KEY).into_iter() {
-                let entry = to_array(entry);
+            for entry in Vec::<Vec<i32>>::pop_from_table(&mut table,
+                                                         GRID_KEY)
+                             .into_iter() {
                 if entry.len() != 6 {
                     continue;
                 }
-                let entry: Vec<i32> = entry.into_iter().map(to_i32).collect();
                 let coords = (entry[0], entry[1]);
                 let mut tile = [0u8; 4];
                 for index in 0..4 {
@@ -318,7 +318,7 @@ mod tests {
     use toml;
 
     use save::{Access, PuzzleState};
-    use save::util::{ACCESS_KEY, to_table};
+    use save::util::{ACCESS_KEY, Tomlable, to_table};
     use super::{GOALS, INITIAL_GRID, PovState};
 
     #[test]

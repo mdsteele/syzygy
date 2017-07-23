@@ -23,7 +23,7 @@ use toml;
 
 use save::{Access, Direction, Location};
 use save::memory::{Grid, Shape};
-use save::util::{ACCESS_KEY, pop_array, to_u32};
+use save::util::{ACCESS_KEY, Tomlable, pop_array};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -75,13 +75,12 @@ pub struct JogState {
 
 impl JogState {
     pub fn from_toml(mut table: toml::value::Table) -> JogState {
-        let access = Access::from_toml(table.get(ACCESS_KEY));
+        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
         let (grid, num_placed, num_removed) = if access.is_solved() {
             (Grid::new(NUM_COLS, NUM_ROWS), SHAPES.len(), REMOVALS.len())
         } else {
             let num_placed =
-                min(table.remove(NUM_PLACED_KEY).map(to_u32).unwrap_or(0) as
-                    usize,
+                min(u32::pop_from_table(&mut table, NUM_PLACED_KEY) as usize,
                     SHAPES.len());
             let grid = Grid::from_toml(NUM_COLS,
                                        NUM_ROWS,

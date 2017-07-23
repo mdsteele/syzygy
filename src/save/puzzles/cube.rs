@@ -20,8 +20,8 @@
 use toml;
 
 use save::{Access, Direction, Location};
+use save::util::{ACCESS_KEY, Tomlable, pop_array};
 use super::PuzzleState;
-use super::super::util::{ACCESS_KEY, pop_array};
 
 // ========================================================================= //
 
@@ -44,7 +44,7 @@ pub struct CubeState {
 
 impl CubeState {
     pub fn from_toml(mut table: toml::value::Table) -> CubeState {
-        let access = Access::from_toml(table.get(ACCESS_KEY));
+        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
         let grid = if access == Access::Solved {
             SOLVED_GRID.to_vec()
         } else {
@@ -230,7 +230,7 @@ mod tests {
     use toml;
 
     use save::{Access, PuzzleState};
-    use save::util::{ACCESS_KEY, to_table};
+    use save::util::{ACCESS_KEY, Tomlable, to_table};
     use super::{CubeState, INITIAL_GRID, NUM_COLS, NUM_ROWS, SOLVED_GRID,
                 rotate_vert};
 

@@ -22,7 +22,7 @@ use toml;
 use gui::Point;
 use save::{Access, Direction, Location};
 use save::ice::{BlockSlide, Object, ObjectGrid, Symbol};
-use save::util::{ACCESS_KEY, pop_table};
+use save::util::{ACCESS_KEY, Tomlable, pop_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -38,7 +38,7 @@ pub struct RightState {
 
 impl RightState {
     pub fn from_toml(mut table: toml::value::Table) -> RightState {
-        let access = Access::from_toml(table.get(ACCESS_KEY));
+        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
         let grid = if access == Access::Solved {
             RightState::solved_grid()
         } else {

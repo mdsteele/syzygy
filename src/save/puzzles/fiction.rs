@@ -22,8 +22,8 @@ use std::collections::HashSet;
 use toml;
 
 use save::{Access, Location};
+use save::util::{ACCESS_KEY, Tomlable};
 use super::PuzzleState;
-use super::super::util::{ACCESS_KEY, pop_array};
 
 // ========================================================================= //
 
@@ -43,16 +43,12 @@ pub struct FictionState {
 
 impl FictionState {
     pub fn from_toml(mut table: toml::value::Table) -> FictionState {
-        let access = Access::from_toml(table.get(ACCESS_KEY));
+        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
         let sequence = if access.is_solved() {
             SOLVED_SEQUENCE.iter().cloned().collect()
         } else {
-            let seq: Vec<i8> = pop_array(&mut table, SEQUENCE_KEY)
-                .iter()
-                .filter_map(toml::Value::as_integer)
-                .filter(|&idx| 0 <= idx && idx < 6)
-                .map(|idx| idx as i8)
-                .collect();
+            let mut seq = Vec::<i8>::pop_from_table(&mut table, SEQUENCE_KEY);
+            seq.retain(|&idx| 0 <= idx && idx < 6);
             let unique: HashSet<i8> = seq.iter().cloned().collect();
             if unique.len() != seq.len() {
                 Vec::new()
@@ -184,7 +180,7 @@ mod tests {
     use toml;
 
     use save::{Access, PuzzleState};
-    use save::util::{ACCESS_KEY, to_table};
+    use save::util::{ACCESS_KEY, Tomlable, to_table};
     use super::{FictionState, INITIAL_LETTERS, SEQUENCE_KEY, SOLVED_LETTERS,
                 SOLVED_SEQUENCE, apply_transformation};
 

@@ -21,8 +21,8 @@ use std::collections::BTreeSet;
 use toml;
 
 use save::{Access, Location, PrimaryColor};
+use save::util::{ACCESS_KEY, Tomlable, pop_array};
 use super::PuzzleState;
-use super::super::util::{ACCESS_KEY, pop_array};
 
 // ========================================================================= //
 
@@ -62,8 +62,9 @@ impl SyrupState {
     pub fn from_toml(mut table: toml::value::Table) -> SyrupState {
         let table_ref = &mut table;
         let mut state = SyrupState {
-            access: Access::from_toml(table_ref.get(ACCESS_KEY)),
-            next_color: PrimaryColor::from_toml(table_ref.get(NEXT_COLOR_KEY)),
+            access: Access::pop_from_table(table_ref, ACCESS_KEY),
+            next_color: PrimaryColor::pop_from_table(table_ref,
+                                                     NEXT_COLOR_KEY),
             red_toggled: pop_toggled(table_ref, RED_TOGGLED_KEY),
             green_toggled: pop_toggled(table_ref, GREEN_TOGGLED_KEY),
             blue_toggled: pop_toggled(table_ref, BLUE_TOGGLED_KEY),
@@ -282,7 +283,7 @@ mod tests {
     use toml;
 
     use save::{Access, PrimaryColor, PuzzleState};
-    use save::util::{ACCESS_KEY, to_table};
+    use save::util::{ACCESS_KEY, Tomlable, to_table};
     use super::{BLUE_TOGGLED_KEY, GREEN_TOGGLED_KEY, INITIAL_BLUE_GRID,
                 INITIAL_GREEN_GRID, INITIAL_RED_GRID, RED_TOGGLED_KEY,
                 SOLVED_BLUE_TOGGLED, SOLVED_GREEN_TOGGLED, SOLVED_RED_TOGGLED,

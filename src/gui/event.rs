@@ -28,7 +28,7 @@ pub use sdl2::keyboard::Keycode;
 
 struct ClockTick;
 
-#[derive(Clone, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Event {
     Quit,
     ClockTick,
@@ -92,7 +92,7 @@ impl Event {
 
 // ========================================================================= //
 
-#[derive(Clone, Copy, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct KeyMod {
     bits: u8,
 }
@@ -142,6 +142,32 @@ impl BitOr for KeyMod {
 
 impl BitOrAssign for KeyMod {
     fn bitor_assign(&mut self, rhs: KeyMod) { self.bits |= rhs.bits; }
+}
+
+// ========================================================================= //
+
+#[cfg(test)]
+mod tests {
+    use sdl2;
+
+    use gui::Point;
+    use super::{Event, KeyMod};
+
+    #[test]
+    fn keymod_from_sdl2() {
+        assert_eq!(KeyMod::from_sdl2(sdl2::keyboard::RSHIFTMOD),
+                   KeyMod::shift());
+        assert_eq!(KeyMod::from_sdl2(sdl2::keyboard::LSHIFTMOD |
+                                     sdl2::keyboard::RALTMOD),
+                   KeyMod::alt() | KeyMod::shift());
+    }
+
+    #[test]
+    fn translate_event() {
+        assert_eq!(Event::MouseDown(Point::new(100, 200)).translate(30, 40),
+                   Event::MouseDown(Point::new(130, 240)));
+        assert_eq!(Event::ClockTick.translate(30, 40), Event::ClockTick);
+    }
 }
 
 // ========================================================================= //

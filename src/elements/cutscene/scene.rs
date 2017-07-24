@@ -22,8 +22,14 @@ use std::rc::Rc;
 
 use elements::Paragraph;
 use gui::{Action, Background, Canvas, Element, Event, FRAME_DELAY_MILLIS,
-          Point, Sound, Sprite};
+          Keycode, Point, Sound, Sprite};
 use super::theater::{TalkPos, Theater};
+
+// ========================================================================= //
+
+const CLICKS_TO_SHOW_SKIP: i32 = 3;
+const FRAMES_BETWEEN_CLICKS: i32 = 10;
+const FRAMES_TO_HIDE_SKIP: i32 = 50;
 
 // ========================================================================= //
 
@@ -32,6 +38,8 @@ pub struct Scene {
     nodes: Vec<Box<SceneNode>>,
     index: usize,
     began: bool,
+    skip_clicks: i32,
+    skip_click_frames: i32,
 }
 
 impl Scene {
@@ -40,6 +48,8 @@ impl Scene {
             nodes: nodes,
             index: 0,
             began: false,
+            skip_clicks: 0,
+            skip_click_frames: 0,
         }
     }
 
@@ -70,6 +80,8 @@ impl Scene {
                     self.nodes[self.index].begin(theater, true);
                     changed = true;
                 } else {
+                    self.skip_clicks = 0;
+                    self.skip_click_frames = 0;
                     break;
                 }
             }
@@ -77,12 +89,16 @@ impl Scene {
         changed
     }
 
+    pub fn show_skip(&self) -> bool { self.skip_clicks >= CLICKS_TO_SHOW_SKIP }
+
     pub fn skip(&mut self, theater: &mut Theater) {
         while self.index < self.nodes.len() {
             self.nodes[self.index].skip(theater);
             self.index += 1;
         }
         self.began = true;
+        self.skip_clicks = 0;
+        self.skip_click_frames = 0;
     }
 
     pub fn is_finished(&self) -> bool {
@@ -112,10 +128,53 @@ impl Element<Theater, ()> for Scene {
                     -> Action<()> {
         let action = match event {
             &Event::Quit => Action::ignore(),
-            &Event::ClockTick => Action::redraw_if(self.tick(theater)),
-            &Event::MouseDown(_) if self.is_paused() => {
-                self.unpause();
-                Action::redraw().and_stop()
+            &Event::ClockTick => {
+                let mut redraw = self.tick(theater);
+                if self.skip_clicks > 0 {
+                    self.skip_click_frames -= 1;
+                    if self.skip_click_frames <= 0 {
+                        redraw = self.skip_clicks >= CLICKS_TO_SHOW_SKIP;
+                        self.skip_clicks = 0;
+                        self.skip_click_frames = 0;
+                    }
+                }
+                Action::redraw_if(redraw)
+            }
+            &Event::MouseDown(_) => {
+                if !self.began || self.is_finished() {
+                    Action::ignore()
+                } else {
+                    let mut redraw = false;
+                    if self.skip_clicks >= CLICKS_TO_SHOW_SKIP {
+                        self.skip_click_frames = FRAMES_TO_HIDE_SKIP;
+                    } else {
+                        self.skip_clicks += 1;
+                        if self.skip_clicks >= CLICKS_TO_SHOW_SKIP {
+                            self.skip_click_frames = FRAMES_TO_HIDE_SKIP;
+                            redraw = true;
+                        } else {
+                            self.skip_click_frames = FRAMES_BETWEEN_CLICKS;
+                        }
+                    }
+                    if self.is_paused() {
+                        self.unpause();
+                        redraw = true;
+                    }
+                    Action::redraw_if(redraw).and_stop()
+                }
+            }
+            &Event::KeyDown(Keycode::Escape, _) => {
+                if !self.began || self.is_finished() {
+                    Action::ignore()
+                } else {
+                    self.skip_click_frames = FRAMES_TO_HIDE_SKIP;
+                    if self.skip_clicks < CLICKS_TO_SHOW_SKIP {
+                        self.skip_clicks = CLICKS_TO_SHOW_SKIP;
+                        Action::redraw().and_stop()
+                    } else {
+                        Action::ignore().and_stop()
+                    }
+                }
             }
             _ => {
                 if !self.began || self.is_finished() {

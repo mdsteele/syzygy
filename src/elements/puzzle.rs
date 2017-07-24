@@ -175,6 +175,7 @@ impl<U: Clone> PuzzleCore<U> {
             name: S::location().name(),
             access: state.access(),
             is_paused: scene.is_paused(),
+            show_skip: scene.show_skip(),
             active: self.screen_fade.is_transparent() && scene.is_finished(),
             can_undo: !self.undo_stack.is_empty(),
             can_redo: !self.redo_stack.is_empty(),
@@ -207,6 +208,36 @@ impl<U: Clone> PuzzleCore<U> {
             }
         }
         if !action.should_stop() {
+            let mut input = self.hud_input(state);
+            let subaction = self.hud.handle_event(event, &mut input);
+            action.merge(match subaction.value() {
+                Some(&HudCmd::Back) => {
+                    self.screen_fade.fade_out_and_return(PuzzleCmd::Back);
+                    subaction.but_no_value()
+                }
+                Some(&HudCmd::Info) => subaction.but_return(PuzzleCmd::Info),
+                Some(&HudCmd::Undo) => subaction.but_return(PuzzleCmd::Undo),
+                Some(&HudCmd::Redo) => subaction.but_return(PuzzleCmd::Redo),
+                Some(&HudCmd::Reset) => subaction.but_return(PuzzleCmd::Reset),
+                Some(&HudCmd::Replay) => {
+                    self.screen_fade.fade_out_and_return(PuzzleCmd::Replay);
+                    subaction.but_no_value()
+                }
+                Some(&HudCmd::Solve) => subaction.but_return(PuzzleCmd::Solve),
+                Some(&HudCmd::Skip) => {
+                    if let Some(ref mut scene) = self.middle_scene {
+                        scene.skip(&mut self.theater);
+                    } else if state.is_solved() {
+                        self.outro_scene.skip(&mut self.theater);
+                    } else {
+                        self.intro_scene.skip(&mut self.theater);
+                    };
+                    subaction.but_no_value()
+                }
+                None => subaction.but_no_value(),
+            });
+        }
+        if !action.should_stop() {
             let subaction = if let Some(ref mut scene) = self.middle_scene {
                 scene.handle_event(event, &mut self.theater)
             } else if state.is_solved() {
@@ -228,26 +259,6 @@ impl<U: Clone> PuzzleCore<U> {
                 self.screen_fade.fade_out_and_return(PuzzleCmd::Next);
             }
             action.merge(subaction.but_no_value());
-        }
-        if !action.should_stop() {
-            let mut input = self.hud_input(state);
-            let subaction = self.hud.handle_event(event, &mut input);
-            action.merge(match subaction.value() {
-                Some(&HudCmd::Back) => {
-                    self.screen_fade.fade_out_and_return(PuzzleCmd::Back);
-                    subaction.but_no_value()
-                }
-                Some(&HudCmd::Info) => subaction.but_return(PuzzleCmd::Info),
-                Some(&HudCmd::Undo) => subaction.but_return(PuzzleCmd::Undo),
-                Some(&HudCmd::Redo) => subaction.but_return(PuzzleCmd::Redo),
-                Some(&HudCmd::Reset) => subaction.but_return(PuzzleCmd::Reset),
-                Some(&HudCmd::Replay) => {
-                    self.screen_fade.fade_out_and_return(PuzzleCmd::Replay);
-                    subaction.but_no_value()
-                }
-                Some(&HudCmd::Solve) => subaction.but_return(PuzzleCmd::Solve),
-                None => subaction.but_no_value(),
-            });
         }
         action
     }

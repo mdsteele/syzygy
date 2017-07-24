@@ -34,6 +34,9 @@ const SCROLL_SPEED: i32 = 2;
 const PAUSE_TEXT: &str = "$M{Tap}{Click} anywhere to continue";
 const PAUSE_TEXT_MARGIN_HORZ: i32 = 5;
 const PAUSE_TEXT_MARGIN_VERT: i32 = 3;
+const SKIP_TEXT: &str = "$M{Tap here}{Click here or press ESC} to skip scene";
+const SKIP_TEXT_MARGIN_HORZ: i32 = 5;
+const SKIP_TEXT_MARGIN_VERT: i32 = 3;
 
 // ========================================================================= //
 
@@ -41,6 +44,7 @@ pub struct HudInput {
     pub name: &'static str,
     pub access: Access,
     pub is_paused: bool,
+    pub show_skip: bool,
     pub active: bool,
     pub can_undo: bool,
     pub can_redo: bool,
@@ -56,6 +60,7 @@ pub enum HudCmd {
     Reset,
     Replay,
     Solve,
+    Skip,
 }
 
 // ========================================================================= //
@@ -64,6 +69,7 @@ pub struct Hud {
     namebox: HudNamebox,
     buttons: Vec<HudButton>,
     pause: PauseIndicator,
+    skip: SkipIndicator,
 }
 
 impl Hud {
@@ -85,6 +91,7 @@ impl Hud {
             namebox: Hud::namebox(resources, cx, bot),
             buttons: buttons,
             pause: PauseIndicator::new(resources, visible),
+            skip: SkipIndicator::new(resources, visible),
         }
     }
 
@@ -104,11 +111,16 @@ impl Element<HudInput, HudCmd> for Hud {
         self.namebox.draw(input, canvas);
         self.buttons.draw(input, canvas);
         self.pause.draw(input, canvas);
+        self.skip.draw(input, canvas);
     }
 
     fn handle_event(&mut self, event: &Event, input: &mut HudInput)
                     -> Action<HudCmd> {
-        self.buttons.handle_event(event, input)
+        let mut action = self.skip.handle_event(event, input);
+        if !action.should_stop() || event == &Event::ClockTick {
+            action.merge(self.buttons.handle_event(event, input));
+        }
+        action
     }
 }
 
@@ -140,6 +152,7 @@ impl HudButton {
             HudCmd::Reset => (10, 54),
             HudCmd::Replay => (12, 60),
             HudCmd::Solve => (14, 54),
+            HudCmd::Skip => panic!("HudButton HudCmd::Skip"),
         };
         let sprite = sprites[index].clone();
         let rect = Rect::new(center_x - sprite.width() as i32 / 2,
@@ -172,6 +185,7 @@ impl HudButton {
             HudCmd::Reset => active && input.can_reset && !solved,
             HudCmd::Replay => active && solved,
             HudCmd::Solve => active && input.access == Access::Replaying,
+            HudCmd::Skip => panic!("HudButton HudCmd::Skip"),
         }
     }
 
@@ -318,6 +332,72 @@ impl PauseIndicator {
             canvas.draw_rect((0, 0, 0), self.mid_rect);
             let mut canvas = canvas.subcanvas(self.inner_rect);
             self.paragraph.draw(&mut canvas);
+        }
+    }
+}
+
+// ========================================================================= //
+
+struct SkipIndicator {
+    paragraph: Paragraph,
+    outer_rect: Rect,
+    mid_rect: Rect,
+    inner_rect: Rect,
+}
+
+impl SkipIndicator {
+    fn new(resources: &mut Resources, visible: Rect) -> SkipIndicator {
+        let paragraph =
+            Paragraph::new(resources, "roman", Align::Center, SKIP_TEXT);
+        let inner_width = paragraph.min_width();
+        let outer_width = inner_width + 2 * SKIP_TEXT_MARGIN_HORZ;
+        let inner_height = paragraph.height();
+        let outer_height = inner_height + 2 * SKIP_TEXT_MARGIN_VERT as u32;
+        let outer_rect = Rect::new(visible.x() +
+                                   (visible.width() as i32 - outer_width) / 2,
+                                   visible.top() +
+                                   ((visible.height() - outer_height) as i32) /
+                                   3,
+                                   outer_width as u32,
+                                   outer_height);
+        let mid_rect = Rect::new(outer_rect.x() + 1,
+                                 outer_rect.y() + 1,
+                                 outer_rect.width() - 2,
+                                 outer_rect.height() - 2);
+        let inner_rect = Rect::new(outer_rect.x() + SKIP_TEXT_MARGIN_HORZ,
+                                   outer_rect.y() + SKIP_TEXT_MARGIN_VERT + 1,
+                                   inner_width as u32,
+                                   inner_height);
+        SkipIndicator {
+            paragraph: paragraph,
+            outer_rect: outer_rect,
+            mid_rect: mid_rect,
+            inner_rect: inner_rect,
+        }
+    }
+}
+
+impl Element<HudInput, HudCmd> for SkipIndicator {
+    fn draw(&self, input: &HudInput, canvas: &mut Canvas) {
+        if input.show_skip {
+            canvas.fill_rect((255, 255, 255), self.outer_rect);
+            canvas.draw_rect((0, 0, 0), self.mid_rect);
+            let mut canvas = canvas.subcanvas(self.inner_rect);
+            self.paragraph.draw(&mut canvas);
+        }
+    }
+
+    fn handle_event(&mut self, event: &Event, input: &mut HudInput)
+                    -> Action<HudCmd> {
+        match event {
+            &Event::MouseDown(pt) if input.show_skip &&
+                                     self.outer_rect.contains(pt) => {
+                Action::redraw().and_return(HudCmd::Skip)
+            }
+            &Event::KeyDown(Keycode::Escape, _) if input.show_skip => {
+                Action::redraw().and_return(HudCmd::Skip)
+            }
+            _ => Action::ignore(),
         }
     }
 }

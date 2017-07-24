@@ -214,6 +214,7 @@ impl View {
             name: self.selected.unwrap_or(Location::Map).name(),
             access: Access::Unvisited,
             is_paused: false,
+            show_skip: false,
             active: self.screen_fade.is_transparent(),
             can_undo: false,
             can_redo: false,

@@ -131,7 +131,7 @@ impl BlackState {
         ops
     }
 
-    fn check_if_solved(&mut self) {
+    fn check_if_solved(&mut self) -> bool {
         let mut height = 0;
         let mut key = 10;
         while let Some(parent_key) = self.tree.parent(key) {
@@ -140,6 +140,9 @@ impl BlackState {
         }
         if height >= 5 {
             self.access = Access::Solved;
+            true
+        } else {
+            false
         }
     }
 }
@@ -187,10 +190,60 @@ impl Tomlable for BlackState {
             tree: tree,
             is_initial: is_initial,
         };
-        if !state.is_initial && !state.is_solved() {
+        if state.is_solved() {
+            if !state.check_if_solved() {
+                state.solve();
+            }
+        } else if !state.is_initial {
             state.check_if_solved();
         }
         state
+    }
+}
+
+// ========================================================================= //
+
+#[cfg(test)]
+mod tests {
+    use toml;
+
+    use save::Access;
+    use save::util::{ACCESS_KEY, Tomlable};
+    use super::{BlackState, SOLVED_SIGNATURE};
+
+    #[test]
+    fn toml_round_trip() {
+        let mut state = BlackState::from_toml(toml::Value::Boolean(false));
+        state.access = Access::Replaying;
+        state.remove(3);
+        state.remove(1);
+        state.remove(4);
+        assert!(!state.is_initial);
+        let tree = state.tree().clone();
+
+        let state = BlackState::from_toml(state.to_toml());
+        assert_eq!(state.access, Access::Replaying);
+        assert!(!state.is_initial);
+        assert_eq!(state.tree(), tree);
+    }
+
+    #[test]
+    fn from_empty_toml() {
+        let state = BlackState::from_toml(toml::Value::Boolean(false));
+        assert_eq!(state.access, Access::Unvisited);
+        assert!(state.is_initial);
+        assert_eq!(state.tree(), &BlackState::initial_tree());
+    }
+
+    #[test]
+    fn from_solved_toml() {
+        let mut table = toml::value::Table::new();
+        table.insert(ACCESS_KEY.to_string(), Access::Solved.to_toml());
+
+        let state = BlackState::from_toml(toml::Value::Table(table));
+        assert_eq!(state.access, Access::Solved);
+        assert!(!state.is_initial);
+        assert_eq!(state.signature(), SOLVED_SIGNATURE);
     }
 }
 

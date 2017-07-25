@@ -72,7 +72,7 @@ impl Tomlable for LevelUpState {
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
-        if !self.is_solved() {
+        if !self.is_solved() && self.can_reset() {
             table.insert(WORDS_KEY.to_string(), self.words.to_toml());
         }
         toml::Value::Table(table)
@@ -92,6 +92,52 @@ impl Tomlable for LevelUpState {
             access: access,
             words: words,
         }
+    }
+}
+
+// ========================================================================= //
+
+#[cfg(test)]
+mod tests {
+    use toml;
+
+    use save::Access;
+    use save::util::{ACCESS_KEY, Tomlable};
+    use super::{LevelUpState, SOLVED_WORDS};
+
+    #[test]
+    fn toml_round_trip() {
+        let mut state = LevelUpState::from_toml(toml::Value::Boolean(false));
+        state.access = Access::Replaying;
+        state.crossword_mut().set_char(1, 0, 'H');
+        state.crossword_mut().set_char(1, 1, 'E');
+        state.crossword_mut().set_char(1, 2, 'L');
+        state.crossword_mut().set_char(1, 3, 'L');
+        state.crossword_mut().set_char(1, 4, 'O');
+        state.crossword_mut().set_char(1, 5, '!');
+
+        let state = LevelUpState::from_toml(state.to_toml());
+        assert_eq!(state.access, Access::Replaying);
+        assert!(state.words.can_reset());
+        assert_eq!(state.words.words()[1], vec!['H', 'E', 'L', 'L', 'O', '!']);
+    }
+
+    #[test]
+    fn from_empty_toml() {
+        let state = LevelUpState::from_toml(toml::Value::Boolean(false));
+        assert_eq!(state.access, Access::Unvisited);
+        assert!(!state.words.can_reset());
+        assert_eq!(state.words.words()[1], vec![' ', ' ', ' ', ' ', ' ', ' ']);
+    }
+
+    #[test]
+    fn from_solved_toml() {
+        let mut table = toml::value::Table::new();
+        table.insert(ACCESS_KEY.to_string(), Access::Solved.to_toml());
+
+        let state = LevelUpState::from_toml(toml::Value::Table(table));
+        assert_eq!(state.access, Access::Solved);
+        assert!(state.words.words_are(SOLVED_WORDS));
     }
 }
 

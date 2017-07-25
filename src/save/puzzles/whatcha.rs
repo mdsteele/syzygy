@@ -102,3 +102,62 @@ impl Tomlable for WhatchaState {
 }
 
 // ========================================================================= //
+
+#[cfg(test)]
+mod tests {
+    use toml;
+
+    use save::Access;
+    use save::util::{ACCESS_KEY, Tomlable};
+    use super::{COLUMNS_SPEC, WhatchaState};
+
+    #[test]
+    fn toml_round_trip() {
+        let mut state = WhatchaState::from_toml(toml::Value::Boolean(false));
+        state.access = Access::Replaying;
+        state.rotate_column(3, 1);
+        state.rotate_column(1, 2);
+        state.rotate_column(4, 3);
+        assert!(!state.columns.is_solved());
+        assert!(state.columns.can_reset());
+        let old_positions: Vec<i32> = (0..state.columns().num_columns())
+            .map(|col| state.columns().column_position(col))
+            .collect();
+
+        let state = WhatchaState::from_toml(state.to_toml());
+        assert_eq!(state.access, Access::Replaying);
+        assert!(!state.columns.is_solved());
+        assert!(state.columns.can_reset());
+        let new_positions: Vec<i32> = (0..state.columns().num_columns())
+            .map(|col| state.columns().column_position(col))
+            .collect();
+        assert_eq!(new_positions, old_positions);
+    }
+
+    #[test]
+    fn from_empty_toml() {
+        let state = WhatchaState::from_toml(toml::Value::Boolean(false));
+        assert_eq!(state.access, Access::Unvisited);
+        assert!(!state.columns.is_solved());
+        assert!(!state.columns.can_reset());
+    }
+
+    #[test]
+    fn from_solved_toml() {
+        let mut table = toml::value::Table::new();
+        table.insert(ACCESS_KEY.to_string(), Access::Solved.to_toml());
+
+        let state = WhatchaState::from_toml(toml::Value::Table(table));
+        assert_eq!(state.access, Access::Solved);
+        assert!(state.columns.is_solved());
+        let actual_positions: Vec<i32> = (0..state.columns().num_columns())
+            .map(|col| state.columns().column_position(col))
+            .collect();
+        let solved_positions: Vec<i32> = (0..state.columns().num_columns())
+            .map(|col| COLUMNS_SPEC[col].2)
+            .collect();
+        assert_eq!(actual_positions, solved_positions);
+    }
+}
+
+// ========================================================================= //

@@ -130,3 +130,55 @@ impl Tomlable for RightState {
 }
 
 // ========================================================================= //
+
+#[cfg(test)]
+mod tests {
+    use toml;
+
+    use gui::Point;
+    use save::{Access, Direction};
+    use save::util::{ACCESS_KEY, Tomlable};
+    use super::RightState;
+
+    #[test]
+    fn toml_round_trip() {
+        let mut state = RightState::from_toml(toml::Value::Boolean(false));
+        state.access = Access::Replaying;
+        let slide1 = state.slide_ice_block(Point::new(1, 1), Direction::North);
+        assert!(slide1.is_some());
+        let coords1 = slide1.unwrap().to_coords();
+        let slide2 = state.slide_ice_block(Point::new(3, 4), Direction::West);
+        assert!(slide2.is_some());
+        let coords2 = slide2.unwrap().to_coords();
+        assert!(state.grid().is_modified());
+        assert!(state.grid().ice_blocks().get(&coords1).is_some());
+        let symbol1 = state.grid().ice_blocks().get(&coords1).cloned();
+        assert!(state.grid().ice_blocks().get(&coords2).is_some());
+        let symbol2 = state.grid().ice_blocks().get(&coords2).cloned();
+
+        let state = RightState::from_toml(state.to_toml());
+        assert_eq!(state.access, Access::Replaying);
+        assert!(state.grid().is_modified());
+        assert_eq!(state.grid().ice_blocks().get(&coords1).cloned(), symbol1);
+        assert_eq!(state.grid().ice_blocks().get(&coords2).cloned(), symbol2);
+    }
+
+    #[test]
+    fn from_empty_toml() {
+        let state = RightState::from_toml(toml::Value::Boolean(false));
+        assert_eq!(state.access, Access::Unvisited);
+        assert!(!state.grid().is_modified());
+    }
+
+    #[test]
+    fn from_solved_toml() {
+        let mut table = toml::value::Table::new();
+        table.insert(ACCESS_KEY.to_string(), Access::Solved.to_toml());
+
+        let state = RightState::from_toml(toml::Value::Table(table));
+        assert_eq!(state.access, Access::Solved);
+        assert!(state.grid().is_modified());
+    }
+}
+
+// ========================================================================= //

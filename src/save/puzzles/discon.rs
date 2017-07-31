@@ -141,3 +141,51 @@ impl Tomlable for DisconState {
 }
 
 // ========================================================================= //
+
+#[cfg(test)]
+mod tests {
+    use toml;
+
+    use save::{Access, Direction, PuzzleState};
+    use save::device::Device;
+    use save::util::{ACCESS_KEY, Tomlable};
+    use super::DisconState;
+
+    #[test]
+    fn toml_round_trip() {
+        let mut state = DisconState::from_toml(toml::Value::Boolean(false));
+        state.access = Access::Replaying;
+        assert!(state.grid().get(1, 0).unwrap().0.is_moveable());
+        state.grid_mut().rotate(1, 0);
+        let entry = state.grid().get(1, 0);
+
+        let state = DisconState::from_toml(state.to_toml());
+        assert_eq!(state.access, Access::Replaying);
+        assert_eq!(state.grid.get(1, 0), entry);
+    }
+
+    #[test]
+    fn from_empty_toml() {
+        let state = DisconState::from_toml(toml::Value::Boolean(false));
+        assert_eq!(state.access, Access::Unvisited);
+        assert!(!state.can_reset());
+        assert_eq!(state.grid().get(1, 0),
+                   Some((Device::Mirror, Direction::East)));
+        assert_eq!(state.grid().get(2, 0), None);
+    }
+
+    #[test]
+    fn from_solved_toml() {
+        let mut table = toml::value::Table::new();
+        table.insert(ACCESS_KEY.to_string(), Access::Solved.to_toml());
+
+        let state = DisconState::from_toml(toml::Value::Table(table));
+        assert_eq!(state.access, Access::Solved);
+        assert!(state.can_reset());
+        assert_eq!(state.grid().get(1, 0), None);
+        assert_eq!(state.grid().get(2, 0),
+                   Some((Device::Mirror, Direction::South)));
+    }
+}
+
+// ========================================================================= //

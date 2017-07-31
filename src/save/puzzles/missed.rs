@@ -154,3 +154,52 @@ impl Tomlable for MissedState {
 }
 
 // ========================================================================= //
+
+#[cfg(test)]
+mod tests {
+    use toml;
+
+    use save::{Access, Direction, PuzzleState};
+    use save::device::Device;
+    use save::util::{ACCESS_KEY, Tomlable};
+    use super::MissedState;
+
+    #[test]
+    fn toml_round_trip() {
+        let mut state = MissedState::from_toml(toml::Value::Boolean(false));
+        state.access = Access::Replaying;
+        assert!(state.grid().get(5, 2).unwrap().0.is_moveable());
+        state.grid_mut().rotate(5, 2);
+        let entry = state.grid().get(5, 2);
+
+        let state = MissedState::from_toml(state.to_toml());
+        assert_eq!(state.access, Access::Replaying);
+        assert_eq!(state.grid.get(5, 2), entry);
+    }
+
+    #[test]
+    fn from_empty_toml() {
+        let state = MissedState::from_toml(toml::Value::Boolean(false));
+        assert_eq!(state.access, Access::Unvisited);
+        assert!(!state.can_reset());
+        assert_eq!(state.grid().get(1, 3),
+                   Some((Device::Mixer, Direction::East)));
+        assert_eq!(state.grid().get(5, 1), None);
+    }
+
+    #[test]
+    fn from_solved_toml() {
+        let mut table = toml::value::Table::new();
+        table.insert(ACCESS_KEY.to_string(), Access::Solved.to_toml());
+
+        let state = MissedState::from_toml(toml::Value::Table(table));
+        assert_eq!(state.access, Access::Solved);
+        assert!(state.can_reset());
+        assert_eq!(state.grid().get(1, 3),
+                   Some((Device::Mirror, Direction::South)));
+        assert_eq!(state.grid().get(5, 1),
+                   Some((Device::Mixer, Direction::East)));
+    }
+}
+
+// ========================================================================= //

@@ -59,3 +59,38 @@ impl Tomlable for FinaleState {
 }
 
 // ========================================================================= //
+
+#[cfg(test)]
+mod tests {
+    use toml;
+
+    use save::Access;
+    use save::util::{ACCESS_KEY, Tomlable};
+    use super::FinaleState;
+
+    #[test]
+    fn toml_round_trip() {
+        let mut state = FinaleState::from_toml(toml::Value::Boolean(false));
+        state.access = Access::Replaying;
+
+        let state = FinaleState::from_toml(state.to_toml());
+        assert_eq!(state.access, Access::Replaying);
+    }
+
+    #[test]
+    fn from_empty_toml() {
+        let state = FinaleState::from_toml(toml::Value::Boolean(false));
+        assert_eq!(state.access, Access::Unvisited);
+    }
+
+    #[test]
+    fn from_solved_toml() {
+        let mut table = toml::value::Table::new();
+        table.insert(ACCESS_KEY.to_string(), Access::Solved.to_toml());
+
+        let state = FinaleState::from_toml(toml::Value::Table(table));
+        assert_eq!(state.access, Access::Solved);
+    }
+}
+
+// ========================================================================= //

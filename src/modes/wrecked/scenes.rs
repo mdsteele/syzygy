@@ -253,7 +253,7 @@ pub fn compile_outro_scene(resources: &mut Resources, visible: Rect) -> Scene {
                 Ast::Sound(Sound::character_collision()),
                 Ast::Shake(4),
                 Ast::Wait(0.5),
-                Ast::Place(1, "chars/elinsa", 0, (432, visible.bottom() + 32)),
+                Ast::SetPos(1, (432, visible.bottom() + 32)),
                 Ast::Sound(Sound::talk_lo()),
                 Ast::Talk(1, TalkStyle::Normal, TalkPos::NW, "%#$$@&!!"),
             ]),

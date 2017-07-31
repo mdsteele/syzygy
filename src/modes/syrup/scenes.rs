@@ -18,13 +18,16 @@
 // +--------------------------------------------------------------------------+
 
 use elements::{Ast, Scene, TalkPos, TalkStyle};
-use gui::{Resources, Sound};
+use gui::{Rect, Resources, Sound};
 
 // ========================================================================= //
 
-const MEZURE: i32 = 0;
+const BRIDGE_START: i32 = -99;
+const MEZURE: i32 = 2;
 const NEXT: i32 = 1;
 const RELYNG: i32 = -1;
+const SPIKES: i32 = -100;
+const SYSTEM: i32 = 0;
 
 // ========================================================================= //
 
@@ -34,6 +37,8 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::SetBg("light_syrup"),
             Ast::Dark(true),
+            Ast::Place(SPIKES, "chars/spikes", 0, (264, 334)),
+            Ast::Place(SYSTEM, "chars/system", 0, (128, 80)),
             Ast::Wait(0.5),
             Ast::Place(RELYNG, "chars/relyng", 0, (160, 304)),
             Ast::Place(MEZURE, "chars/mezure", 0, (-16, 288)),
@@ -97,10 +102,14 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
-                      "Okay, calm down Mezure.\n\
-                       I should get these lights\n\
-                       turned on before I search\n\
-                       any farther."),
+                      "...Okay, calm down, Mezure."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                       "I should probably get these\n\
+                       lights turned on before I\n\
+                       search any farther."),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_lo()),
@@ -135,16 +144,94 @@ pub fn compile_mezure_midscene(resources: &mut Resources) -> (i32, Scene) {
 // ========================================================================= //
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
+pub fn compile_outro_scene(resources: &mut Resources, visible: Rect) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
             Ast::Sound(Sound::solve_puzzle_chime()),
+            Ast::Remove(NEXT),
             Ast::Queue(-1, 0), // Hide next-color view.
             Ast::Wait(0.25),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "Excellent!  Now, let's see what I\n\
+                       was about to run into in the dark...")
+        ]),
+        Ast::Seq(vec![
             Ast::Dark(false),
-            Ast::Remove(NEXT),
-            Ast::Slide(MEZURE, (592, 288), false, false, 1.0),
-            Ast::Remove(MEZURE),
+            Ast::Wait(1.0),
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "Oh.")
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "...You know, someone really needs to\n\
+                       get OSHA to take a look at this place.")
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "System, could you, uh, get me a\n\
+                       bridge over this spike pit?")
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::beep()),
+            Ast::Talk(SYSTEM, TalkStyle::System, TalkPos::SE,
+                      "Affirmative.  Extending bridge.")
+        ]),
+        Ast::Seq(vec![
+            Ast::Seq((0..8).map(|index| {
+                Ast::Seq(vec![
+                    Ast::Sound(Sound::platform_shift(1)),
+                    Ast::Place(BRIDGE_START + index, "tiles/miniblocks", 14,
+                               (220 + 16 * index, 304)),
+                    Ast::Wait(0.1),
+                ])
+            }).collect()),
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "Ah, thanks muchly.")
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(MEZURE, (170, 288), true, true, 0.5),
+            Ast::Slide(MEZURE, (592, 288), true, false, 1.2),
+            Ast::SetPos(MEZURE, (visible.right() + 16, 288)),
+            Ast::Wait(1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::W,
+                      "...Wait, why do we\n\
+                       even $ihave$r a spike pit?")
+        ]),
+        Ast::Seq(vec![
+            // Hilight L in red:
+            Ast::Queue(3, 1),
+            Ast::Wait(0.1),
+            Ast::Queue(8, 1),
+            Ast::Wait(0.1),
+            Ast::Queue(13, 1),
+            Ast::Wait(0.1),
+            Ast::Queue(14, 1),
+            Ast::Wait(0.5),
+            // Hilight L in green:
+            Ast::Queue(0, 2),
+            Ast::Wait(0.1),
+            Ast::Queue(4, 2),
+            Ast::Wait(0.1),
+            Ast::Queue(9, 2),
+            Ast::Wait(0.1),
+            Ast::Queue(10, 2),
+            Ast::Wait(0.5),
+            // Hilight & in blue:
+            Ast::Queue(5, 3),
+            Ast::Wait(0.1),
+            Ast::Queue(7, 3),
+            Ast::Wait(0.1),
+            Ast::Queue(11, 3),
+            Ast::Wait(0.1),
+            Ast::Queue(16, 3),
+            Ast::Wait(1.0),
         ]),
     ];
     Ast::compile_scene(resources, ast)

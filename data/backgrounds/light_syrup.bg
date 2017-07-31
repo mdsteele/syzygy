@@ -4,13 +4,15 @@
 >green_pipes
 >cyan_walls
 >bg_miniblocks
+>gray_blocks
+>miniblocks
 
               CB    CB                          DF  DF    DF
               CFCD  CB                          DF  DF    DF
-                CB  CB                          DF  DF    DF
-CACACACACACD    CB  CB        AB                DIDDDL    DFEH
-          CFCACACICACE        AB  AB  AB            DF  BFBCBG
-                            AAACAAACAAACAA          DIDDBDBABB
+            GAGJCBGBCB                          DF  DF    DF
+CACACACACACDGGFEFFGHCB        AB                DIDDDL    DFEH
+          CFCAFGFHCACE        AB  AB  AB            DF  BFBCBG
+            GCGIGIGD        AAACAAACAAACAA          DIDDBDBABB
             AE            AB  AB  AB  AB  AB            BIBEBH
             AB          AAACAAACAAACAAACAAACAAAA          AE
             AB            AB  AB  AB  AB  AB              AB

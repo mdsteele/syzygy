@@ -38,7 +38,7 @@ impl View {
                -> View {
         let mut core = {
             let intro = scenes::compile_intro_scene(resources);
-            let outro = scenes::compile_outro_scene(resources);
+            let outro = scenes::compile_outro_scene(resources, visible);
             PuzzleCore::new(resources, visible, state, intro, outro)
         };
         core.add_extra_scene(scenes::compile_mezure_midscene(resources));
@@ -186,8 +186,29 @@ impl ToggleLight {
 impl Element<SyrupState, (i32, i32)> for ToggleLight {
     fn draw(&self, _state: &SyrupState, canvas: &mut Canvas) {
         let mut canvas = canvas.subcanvas(self.rect());
-        if self.red_radius <= self.green_radius &&
-           self.red_radius <= self.blue_radius {
+        if self.hilight == 1 {
+            draw_light(&mut canvas,
+                       0,
+                       0,
+                       (0, 0, 0),
+                       MAX_LIGHT_RADIUS,
+                       (255, 0, 0));
+        } else if self.hilight == 2 {
+            draw_light(&mut canvas,
+                       0,
+                       0,
+                       (0, 0, 0),
+                       MAX_LIGHT_RADIUS,
+                       (0, 255, 0));
+        } else if self.hilight == 3 {
+            draw_light(&mut canvas,
+                       0,
+                       0,
+                       (0, 0, 0),
+                       MAX_LIGHT_RADIUS,
+                       (0, 0, 255));
+        } else if self.red_radius <= self.green_radius &&
+                  self.red_radius <= self.blue_radius {
             // Red is smallest.
             if self.green_radius <= self.blue_radius {
                 draw_light(&mut canvas,

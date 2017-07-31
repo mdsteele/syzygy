@@ -192,32 +192,98 @@ impl Tomlable for SimpleState {
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
-        table.insert(PIPES_KEY.to_string(), self.grid.pipes_to_toml());
-        table.insert(STAGE_KEY.to_string(),
-                     toml::Value::Integer(self.stage as i64));
+        if !self.is_solved() {
+            table.insert(STAGE_KEY.to_string(),
+                         toml::Value::Integer(self.stage as i64));
+            table.insert(PIPES_KEY.to_string(), self.grid.pipes_to_toml());
+        }
         toml::Value::Table(table)
     }
 
     fn from_toml(value: toml::Value) -> SimpleState {
         let mut table = to_table(value);
         let access = Access::pop_from_table(&mut table, ACCESS_KEY);
-        let mut stage = table.remove(STAGE_KEY)
-                             .map(i32::from_toml)
-                             .unwrap_or(FIRST_STAGE);
-        if stage < FIRST_STAGE || stage > LAST_STAGE {
-            stage = FIRST_STAGE;
-        }
         let mut state = SimpleState {
             access: access,
             grid: SimpleState::initial_grid(),
             stage: FIRST_STAGE,
         };
-        while state.stage < stage {
-            state.advance_stage();
+        if access.is_solved() {
+            state.solve();
+        } else {
+            let mut stage = i32::pop_from_table(&mut table, STAGE_KEY);
+            if stage < FIRST_STAGE || stage > LAST_STAGE {
+                stage = FIRST_STAGE;
+            }
+            while state.stage < stage {
+                state.advance_stage();
+            }
+            state.grid.set_pipes_from_toml(pop_array(&mut table, PIPES_KEY));
         }
-        state.grid.set_pipes_from_toml(pop_array(&mut table, PIPES_KEY));
         state
     }
+}
+
+// ========================================================================= //
+
+#[cfg(test)]
+mod tests {
+    use toml;
+
+    use gui::Point;
+    use save::Access;
+    use save::util::{ACCESS_KEY, Tomlable};
+    use super::{FIRST_STAGE, LAST_STAGE, STAGE_KEY, SimpleState};
+
+    #[test]
+    fn toml_round_trip() {
+        let mut state = SimpleState::from_toml(toml::Value::Boolean(false));
+        state.access = Access::Replaying;
+        state.stage = FIRST_STAGE + 1;
+        assert!(state.grid_mut()
+                     .toggle_pipe(Point::new(3, 1), Point::new(4, 1)));
+
+        let state = SimpleState::from_toml(state.to_toml());
+        assert_eq!(state.access, Access::Replaying);
+        assert_eq!(state.stage, FIRST_STAGE + 1);
+        assert_eq!(state.grid.pipes(),
+                   &vec![vec![Point::new(3, 1), Point::new(4, 1)]]);
+    }
+
+    #[test]
+    fn from_empty_toml() {
+        let state = SimpleState::from_toml(toml::Value::Boolean(false));
+        assert_eq!(state.access, Access::Unvisited);
+        assert_eq!(state.stage, FIRST_STAGE);
+        assert!(state.grid.pipes().is_empty());
+    }
+
+    #[test]
+    fn from_solved_toml() {
+        let mut table = toml::value::Table::new();
+        table.insert(ACCESS_KEY.to_string(), Access::Solved.to_toml());
+
+        let state = SimpleState::from_toml(toml::Value::Table(table));
+        assert_eq!(state.access, Access::Solved);
+        assert_eq!(state.stage, LAST_STAGE);
+        assert!(state.grid.all_nodes_are_connected());
+    }
+
+    #[test]
+    fn from_invalid_stage_toml() {
+        let mut table = toml::value::Table::new();
+        table.insert(STAGE_KEY.to_string(),
+                     toml::Value::Integer((FIRST_STAGE - 1) as i64));
+        let state = SimpleState::from_toml(toml::Value::Table(table));
+        assert_eq!(state.stage, FIRST_STAGE);
+
+        let mut table = toml::value::Table::new();
+        table.insert(STAGE_KEY.to_string(),
+                     toml::Value::Integer((LAST_STAGE + 1) as i64));
+        let state = SimpleState::from_toml(toml::Value::Table(table));
+        assert_eq!(state.stage, FIRST_STAGE);
+    }
+
 }
 
 // ========================================================================= //

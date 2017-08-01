@@ -76,6 +76,12 @@ impl Theater {
         }
     }
 
+    pub fn set_actor_sprite(&mut self, slot: i32, sprite: Sprite) {
+        if let Some(actor) = self.actors.get_mut(&slot) {
+            actor.set_sprite(sprite);
+        }
+    }
+
     pub fn set_actor_speech(&mut self, slot: i32,
                             bubble_sprites: Vec<Sprite>,
                             bg_color: (u8, u8, u8), talk_pos: TalkPos,
@@ -273,6 +279,12 @@ impl Actor {
             self.sprites = sprites;
         }
         self.anim_slowdown = if self.sprites.len() > 1 { slowdown } else { 0 };
+    }
+
+    fn set_sprite(&mut self, sprite: Sprite) {
+        self.sprites = vec![sprite];
+        self.anim_slowdown = 0;
+        self.anim_step = 0;
     }
 
     fn set_speech(&mut self, bubble_sprites: Vec<Sprite>,

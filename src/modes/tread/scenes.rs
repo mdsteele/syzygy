@@ -22,18 +22,134 @@ use gui::{Resources, Sound};
 
 // ========================================================================= //
 
+const MEZURE: i32 = 1;
+const RELYNG: i32 = -1;
+
+// ========================================================================= //
+
 #[cfg_attr(rustfmt, rustfmt_skip)]
 pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
             Ast::SetBg("tread_lightly"),
-            Ast::Place(0, "chars/mezure", 0, (-16, 288)),
-            Ast::Slide(0, (144, 288), false, false, 1.0),
-            Ast::Sound(Sound::small_jump()),
-            Ast::Jump(0, (186, 304), 0.5),
-            Ast::Slide(0, (215, 304), false, true, 0.35),
+            Ast::Wait(0.25),
+            Ast::Place(RELYNG, "chars/relyng", 1, (400, 336)),
+            Ast::Slide(RELYNG, (400, 320), false, true, 0.5),
+            Ast::Wait(0.5),
+            Ast::Par(vec![
+                Ast::Seq(vec![
+                    Ast::Wait(0.25),
+                    Ast::SetSprite(RELYNG, "chars/relyng", 0),
+                    Ast::Wait(0.1),
+                    Ast::Slide(RELYNG, (400, 336), true, false, 0.5),
+                ]),
+                Ast::Seq(vec![
+                    Ast::Place(MEZURE, "chars/mezure", 0, (-16, 288)),
+                    Ast::Slide(MEZURE, (144, 288), false, false, 1.0),
+                    Ast::Sound(Sound::small_jump()),
+                    Ast::Jump(MEZURE, (186, 304), 0.5),
+                    Ast::Slide(MEZURE, (215, 304), false, true, 0.35),
+                    Ast::Sound(Sound::talk_hi()),
+                    Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NW,
+                              "Hmm, at least the\n\
+                               lights are on in $ihere."),
+                ]),
+            ]),
+        ]),
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                          "I guess\n\
+                           that means--"),
+            ]),
+            Ast::Seq(vec![
+                Ast::Slide(MEZURE, (368, 304), true, false, 0.75),
+                Ast::Par(vec![
+                    Ast::Seq(vec![
+                        Ast::Sound(Sound::small_jump()),
+                        Ast::Jump(MEZURE, (354, 304), 0.5),
+                    ]),
+                    Ast::Seq(vec![
+                        Ast::Sound(Sound::talk_hi()),
+                        Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NW,
+                                  "Augh!"),
+                    ]),
+                ]),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.4),
+                Ast::Sound(Sound::small_jump()),
+                Ast::Jump(RELYNG, (400, 304), 0.75),
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NE,
+                          "And we can't have\n\
+                           that, now, can we?"),
+            ]),
+        ]),
+        Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE, "Hmm."),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NW,
+                      "Who are you!?  And what\n\
+                       are you doing sneaking\n\
+                       around here like that?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NW,
+                      "Ha!  Wouldn't you\n\
+                       like to know!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NW,
+                      "Um, yes.  $iI would.$r\n\
+                       That's why I asked."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(RELYNG, (386, 304), false, true, 0.15),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NW,
+                      "Well, kid, I should be asking\n\
+                       you the same question.  Just\n\
+                       who are $iyou$r?  I've never\n\
+                       seen you around here before."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NW,
+                      "My name's Mezure.  I'm, uh, the\n\
+                       new administrator process."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NW,
+                      "Ha!  A likely story.  Tell\n\
+                       me, Mezure, how do I know\n\
+                       you're not a saboteur?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_annoyed_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NW,
+                      "Oh, I dunno, because I'm actually\n\
+                       $ifixing things$r instead of sneaking\n\
+                       around and ambushing passersby\n\
+                       with annoying questions?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NW,
+                      "Leaving all the lights on\n\
+                       everywhere you go doesn't\n\
+                       count as ``fixing things,'' kid.\n\
+                       This node here is draining\n\
+                       unnecessary power."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NW,
+                      "If you know what's good for\n\
+                       you, you'll shut it down."),
         ]),
         Ast::Seq(vec![
             Ast::Queue(-1, 1), // Show next-letter view.
@@ -65,14 +181,14 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
             Ast::Wait(0.1),
             Ast::Queue(10, 1),
             Ast::Wait(0.1),
-            Ast::Light(0, true),
+            Ast::Light(MEZURE, true),
             Ast::Dark(true),
             Ast::Wait(0.5),
-            Ast::Slide(0, (410, 304), true, false, 1.0),
+            Ast::Slide(MEZURE, (410, 304), true, false, 1.0),
             Ast::Sound(Sound::small_jump()),
-            Ast::Jump(0, (448, 288), 0.5),
-            Ast::Slide(0, (592, 288), false, false, 0.5),
-            Ast::Remove(0),
+            Ast::Jump(MEZURE, (448, 288), 0.5),
+            Ast::Slide(MEZURE, (592, 288), false, false, 0.5),
+            Ast::Remove(MEZURE),
         ]),
     ];
     Ast::compile_scene(resources, ast)

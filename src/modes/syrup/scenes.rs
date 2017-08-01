@@ -223,7 +223,7 @@ pub fn compile_outro_scene(resources: &mut Resources, visible: Rect) -> Scene {
             Ast::Wait(0.1),
             Ast::Queue(10, 2),
             Ast::Wait(0.5),
-            // Hilight & in blue:
+            // Hilight Y in blue:
             Ast::Queue(5, 3),
             Ast::Wait(0.1),
             Ast::Queue(7, 3),

@@ -730,6 +730,33 @@ impl SceneNode for SetPosNode {
 // ========================================================================= //
 
 #[derive(Clone)]
+pub struct SetSpriteNode {
+    slot: i32,
+    sprite: Sprite,
+}
+
+impl SetSpriteNode {
+    pub fn new(slot: i32, sprite: Sprite) -> SetSpriteNode {
+        SetSpriteNode {
+            slot: slot,
+            sprite: sprite,
+        }
+    }
+}
+
+impl SceneNode for SetSpriteNode {
+    fn box_clone(&self) -> Box<SceneNode> { Box::new(self.clone()) }
+
+    fn begin(&mut self, theater: &mut Theater, _: bool) { self.skip(theater); }
+
+    fn skip(&mut self, theater: &mut Theater) {
+        theater.set_actor_sprite(self.slot, self.sprite.clone());
+    }
+}
+
+// ========================================================================= //
+
+#[derive(Clone)]
 pub struct ShakeNode {
     amount: i32,
 }

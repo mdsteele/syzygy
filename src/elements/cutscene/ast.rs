@@ -21,8 +21,9 @@ use elements::Paragraph;
 use gui::{Align, Point, Resources, Sound};
 use super::scene::{AnimNode, DarkNode, JumpNode, LightNode, LoopNode,
                    ParallelNode, PlaceNode, QueueNode, RemoveNode, Scene,
-                   SceneNode, SequenceNode, SetBgNode, SetPosNode, ShakeNode,
-                   SlideNode, SoundNode, TalkNode, WaitNode};
+                   SceneNode, SequenceNode, SetBgNode, SetPosNode,
+                   SetSpriteNode, ShakeNode, SlideNode, SoundNode, TalkNode,
+                   WaitNode};
 use super::theater::TalkPos;
 
 // ========================================================================= //
@@ -50,6 +51,7 @@ pub enum Ast {
     Remove(i32),
     SetBg(&'static str),
     SetPos(i32, (i32, i32)),
+    SetSprite(i32, &'static str, usize),
     Shake(i32),
     Slide(i32, (i32, i32), bool, bool, f64),
     Sound(Sound),
@@ -113,6 +115,10 @@ impl Ast {
             }
             Ast::SetPos(slot, (x, y)) => {
                 Box::new(SetPosNode::new(slot, Point::new(x, y)))
+            }
+            Ast::SetSprite(slot, name, index) => {
+                let sprite = resources.get_sprites(name)[index].clone();
+                Box::new(SetSpriteNode::new(slot, sprite))
             }
             Ast::Shake(amount) => Box::new(ShakeNode::new(amount)),
             Ast::Slide(slot, (x, y), accel, decel, duration) => {

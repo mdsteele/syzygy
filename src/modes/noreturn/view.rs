@@ -19,13 +19,14 @@
 
 use std::cmp;
 use std::collections::HashSet;
+use std::rc::Rc;
 
 use elements::{PuzzleCmd, PuzzleCore, PuzzleView, Scene};
 use elements::cutscene::{JumpNode, QueueNode, SceneNode, SequenceNode,
                          SetPosNode, ShakeNode, SlideNode, SoundNode};
 use elements::cutscene::WaitNode;
-use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sound};
-use gui::Sprite;
+use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
+          Sound, Sprite};
 use modes::SOLVED_INFO_TEXT;
 use save::{Game, NoReturnState, PuzzleState};
 use super::scenes::{self, YTTRIS};
@@ -240,6 +241,7 @@ const TILE_SIZE: i32 = TILE_USIZE as i32;
 
 struct TileBridge {
     sprites: Vec<Sprite>,
+    font: Rc<Font>,
     left: i32,
     top: i32,
     drag: Option<TileDrag>,
@@ -250,6 +252,7 @@ impl TileBridge {
     fn new(resources: &mut Resources, left: i32, top: i32) -> TileBridge {
         TileBridge {
             sprites: resources.get_sprites("point/no_return"),
+            font: resources.get_font("point"),
             left: left,
             top: top,
             drag: None,
@@ -280,8 +283,10 @@ impl TileBridge {
             canvas.draw_sprite(&self.sprites[bg_index], pt);
             let arrow_index = if value < 0 { 4 } else { 5 };
             canvas.draw_sprite(&self.sprites[arrow_index], pt);
-            let number_index = (value.abs() + 5) as usize;
-            canvas.draw_sprite(&self.sprites[number_index], pt);
+            canvas.draw_text(&self.font,
+                             Align::Center,
+                             pt + Point::new(12, 21),
+                             &format!("{}", value.abs()));
         }
     }
 }

@@ -99,6 +99,9 @@ impl Element<Game, PuzzleCmd> for View {
         if !action.should_stop() {
             action.merge(self.next.handle_event(event, state));
         }
+        if !action.should_stop() {
+            self.core.begin_character_scene_on_click(event);
+        }
         action
     }
 }

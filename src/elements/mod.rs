@@ -18,6 +18,7 @@
 // +--------------------------------------------------------------------------+
 
 pub mod column;
+pub mod cross;
 mod crossword;
 pub mod cutscene;
 mod dialog;

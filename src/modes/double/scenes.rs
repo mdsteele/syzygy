@@ -33,6 +33,9 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Talk(0, TalkStyle::Normal, TalkPos::NE,
                       "Let's solve a puzzle."),
         ]),
+        Ast::Seq(vec![
+            Ast::Queue(0, 1),  // Show clues.
+        ]),
     ];
     Ast::compile_scene(resources, ast)
 }
@@ -43,6 +46,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
 pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
+            Ast::Queue(0, 0),  // Hide clues.
             Ast::Sound(Sound::solve_puzzle_chime()),
             Ast::Wait(1.0),
             Ast::Sound(Sound::talk_hi()),

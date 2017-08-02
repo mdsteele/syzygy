@@ -83,7 +83,7 @@ impl DoubleState {
 
     pub fn num_clues_done(&self) -> u32 { self.done.len() as u32 }
 
-    pub fn current_clue(&self) -> &str {
+    pub fn current_clue(&self) -> &'static str {
         debug_assert!(self.current >= 0 &&
                       self.current < WORD_CLUES.len() as i32);
         WORD_CLUES[self.current as usize].1

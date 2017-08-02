@@ -17,12 +17,9 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use std::ascii::AsciiExt;
-use std::rc::Rc;
-
 use elements::{ProgressBar, PuzzleCmd, PuzzleCore, PuzzleView};
-use gui::{Action, Align, Canvas, Element, Event, Font, Keycode, Point, Rect,
-          Resources, Sound, Sprite};
+use elements::cross::{ClueDisplay, InputDisplay};
+use gui::{Action, Canvas, Element, Event, Rect, Resources, Sound};
 use modes::SOLVED_INFO_TEXT;
 use save::{Direction, DoubleState, Game, PuzzleState};
 use super::scenes::{compile_intro_scene, compile_outro_scene};
@@ -34,7 +31,6 @@ pub struct View {
     progress: ProgressBar,
     input: InputDisplay,
     clue: ClueDisplay,
-    arrows: Vec<ArrowButton>,
     text_timer: i32,
     text_prefix: Option<String>,
 }
@@ -51,10 +47,8 @@ impl View {
                                        Direction::East,
                                        96,
                                        (95, 95, 95)),
-            input: InputDisplay::new(resources),
-            clue: ClueDisplay::new(resources),
-            arrows: vec![ArrowButton::new(resources, false),
-                         ArrowButton::new(resources, true)],
+            input: InputDisplay::new(resources, 112),
+            clue: ClueDisplay::new(resources, 80),
             text_timer: 0,
             text_prefix: None,
         }
@@ -68,9 +62,8 @@ impl Element<Game, PuzzleCmd> for View {
         if !state.is_solved() || self.text_timer > 0 {
             self.progress
                 .draw(state.num_clues_done(), state.total_num_clues(), canvas);
-            self.input.draw(state, canvas);
-            self.clue.draw(state, canvas);
-            self.arrows.draw(state, canvas);
+            self.input.draw(&(), canvas);
+            self.clue.draw(&state.current_clue(), canvas);
         }
         self.core.draw_middle_layer(canvas);
         self.core.draw_front_layer(canvas, state);
@@ -98,7 +91,8 @@ impl Element<Game, PuzzleCmd> for View {
             }
         }
         if !action.should_stop() && self.text_timer == 0 {
-            let subaction = self.arrows.handle_event(event, state);
+            let subaction = self.clue.handle_event(event,
+                                                   &mut state.current_clue());
             if let Some(&next) = subaction.value() {
                 if next {
                     state.go_next();
@@ -110,11 +104,9 @@ impl Element<Game, PuzzleCmd> for View {
             }
             action.merge(subaction.but_no_value());
         }
-        if !action.should_stop() {
-            action.merge(self.clue.handle_event(event, state).but_no_value());
-        }
-        if !action.should_stop() && self.text_timer == 0 {
-            let subaction = self.input.handle_event(event, state);
+        if !action.should_stop() && self.text_timer == 0 &&
+           !state.is_solved() {
+            let subaction = self.input.handle_event(event, &mut ());
             if let Some(text) = subaction.value() {
                 let (prefix, error, done) = state.try_text(text);
                 if done {
@@ -159,148 +151,10 @@ impl PuzzleView for View {
     }
 
     fn drain_queue(&mut self) {
-        for (_, _) in self.core.drain_queue() {
-            // TODO: drain queue
-        }
-    }
-}
-
-// ========================================================================= //
-
-struct InputDisplay {
-    font: Rc<Font>,
-    text: String,
-}
-
-impl InputDisplay {
-    fn new(resources: &mut Resources) -> InputDisplay {
-        InputDisplay {
-            font: resources.get_font("block"),
-            text: String::new(),
-        }
-    }
-
-    fn set_text(&mut self, text: String) { self.text = text; }
-
-    fn clear_text(&mut self) { self.text.clear(); }
-}
-
-impl Element<DoubleState, String> for InputDisplay {
-    fn draw(&self, _: &DoubleState, canvas: &mut Canvas) {
-        if !self.text.is_empty() {
-            canvas.draw_text(&self.font,
-                             Align::Center,
-                             Point::new(288, 137),
-                             &self.text);
-        }
-    }
-
-    fn handle_event(&mut self, event: &Event, state: &mut DoubleState)
-                    -> Action<String> {
-        match event {
-            &Event::TextInput(ref text) if !state.is_solved() => {
-                let mut any = false;
-                for chr in text.chars() {
-                    if self.text.len() >= 16 {
-                        break;
-                    }
-                    let chr = chr.to_ascii_uppercase();
-                    if 'A' <= chr && chr <= 'Z' {
-                        self.text.push(chr);
-                        any = true;
-                    }
-                }
-                if any {
-                    Action::redraw().and_return(self.text.clone())
-                } else {
-                    Action::ignore()
-                }
+        for (device, command) in self.core.drain_queue() {
+            if device == 0 {
+                self.clue.set_visible(command != 0);
             }
-            _ => Action::ignore(),
-        }
-    }
-}
-
-// ========================================================================= //
-
-struct ClueDisplay {
-    font: Rc<Font>,
-}
-
-impl ClueDisplay {
-    fn new(resources: &mut Resources) -> ClueDisplay {
-        ClueDisplay { font: resources.get_font("system") }
-    }
-}
-
-impl Element<DoubleState, ()> for ClueDisplay {
-    fn draw(&self, state: &DoubleState, canvas: &mut Canvas) {
-        canvas.draw_text(&self.font,
-                         Align::Center,
-                         Point::new(288, 94),
-                         state.current_clue());
-    }
-
-    fn handle_event(&mut self, _: &Event, _: &mut DoubleState) -> Action<()> {
-        Action::ignore()
-    }
-}
-
-// ========================================================================= //
-
-struct ArrowButton {
-    sprites: Vec<Sprite>,
-    next: bool,
-    blink: i32,
-}
-
-impl ArrowButton {
-    fn new(resources: &mut Resources, next: bool) -> ArrowButton {
-        ArrowButton {
-            sprites: resources.get_sprites("shift/arrows"),
-            next: next,
-            blink: 0,
-        }
-    }
-
-    fn rect(&self) -> Rect {
-        let left = if self.next { 464 } else { 96 };
-        Rect::new(left, 80, 16, 16)
-    }
-
-    fn activate(&mut self) -> Action<bool> {
-        self.blink = 3;
-        Action::redraw().and_return(self.next)
-    }
-}
-
-impl Element<DoubleState, bool> for ArrowButton {
-    fn draw(&self, _: &DoubleState, canvas: &mut Canvas) {
-        let mut idx = if self.next { 2 } else { 0 };
-        if self.blink > 0 {
-            idx += 1;
-        }
-        canvas.draw_sprite(&self.sprites[idx], self.rect().top_left());
-    }
-
-    fn handle_event(&mut self, event: &Event, _state: &mut DoubleState)
-                    -> Action<bool> {
-        match event {
-            &Event::ClockTick => {
-                if self.blink > 0 {
-                    self.blink -= 1;
-                    if self.blink == 0 {
-                        return Action::redraw();
-                    }
-                }
-                Action::ignore()
-            }
-            &Event::MouseDown(pt) if self.rect().contains(pt) => {
-                self.activate()
-            }
-            &Event::KeyDown(Keycode::Left, _) if !self.next => self.activate(),
-            &Event::KeyDown(Keycode::Right, _) if self.next => self.activate(),
-            _ => Action::ignore(),
         }
     }
 }

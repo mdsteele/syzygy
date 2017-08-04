@@ -176,16 +176,14 @@ impl Location {
             Location::BlackAndBlue => vec![Location::ColumnAsIcyEm],
             Location::ColumnAsIcyEm => vec![Location::AutofacTour],
             Location::ConnectTheDots => vec![Location::LogLevel],
-            Location::CrossSauce => {
-                vec![Location::IfMemoryServes, Location::PointOfView]
-            }
+            Location::CrossSauce => vec![Location::PointOfView],
             Location::CrossTheLine => vec![Location::Prolog],
             Location::CubeTangle => vec![Location::ShiftingGround],
             Location::Disconnected => vec![Location::Prolog],
             Location::DoubleCross => vec![Location::TreadLightly],
             Location::FactOrFiction => vec![Location::StarCrossed],
             Location::HexSpangled => vec![Location::TheYFactor],
-            Location::IceToMeetYou => vec![Location::IfMemoryServes],
+            Location::IceToMeetYou => vec![Location::HexSpangled],
             Location::IfMemoryServes => vec![Location::MissedConnections],
             Location::JogYourMemory => vec![Location::PointOfNoReturn],
             Location::LevelHeaded => vec![Location::ColumnAsIcyEm],
@@ -201,7 +199,9 @@ impl Location {
             Location::PlaneAsDay => {
                 vec![Location::CubeTangle, Location::MissedConnections]
             }
-            Location::PointOfNoReturn => vec![Location::ShiftGears],
+            Location::PointOfNoReturn => {
+                vec![Location::IfMemoryServes, Location::ShiftGears]
+            }
             Location::PointOfOrder => vec![Location::ShiftTheBlame],
             Location::PointOfView => vec![Location::ShiftingGround],
             Location::ShiftGears => vec![Location::CrossSauce],

@@ -59,10 +59,10 @@ impl Element<Game, PuzzleCmd> for View {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
         let state = &game.double_cross;
         self.core.draw_back_layer(canvas);
+        self.input.draw(&(), canvas);
         if !state.is_solved() || self.text_timer > 0 {
             self.progress
                 .draw(state.num_clues_done(), state.total_num_clues(), canvas);
-            self.input.draw(&(), canvas);
             self.clue.draw(&state.current_clue(), canvas);
         }
         self.core.draw_middle_layer(canvas);
@@ -154,6 +154,16 @@ impl PuzzleView for View {
         for (device, command) in self.core.drain_queue() {
             if device == 0 {
                 self.clue.set_visible(command != 0);
+            } else if device == 1 {
+                if command == 0 {
+                    self.input.clear_text();
+                } else if command == 1 {
+                    self.input.set_text("FALSE/TRUE".to_string());
+                } else if command == 2 {
+                    self.input.set_text("NEVER/ALWAYS".to_string());
+                } else if command == 3 {
+                    self.input.set_text("TNEITAPMI".to_string());
+                }
             }
         }
     }

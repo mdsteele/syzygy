@@ -22,19 +22,188 @@ use gui::{Resources, Sound};
 
 // ========================================================================= //
 
+const MEZURE: i32 = 0;
+const UGRENT: i32 = 1;
+
+// ========================================================================= //
+
 #[cfg_attr(rustfmt, rustfmt_skip)]
 pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
             Ast::SetBg("double_cross"),
-            Ast::Place(0, "chars/ugrent", 0, (-16, 272)),
-            Ast::Slide(0, (122, 272), false, true, 1.0),
-            Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE,
-                      "Let's solve a puzzle."),
+            Ast::Queue(1, 1), // Show first word pair.
+            Ast::Place(UGRENT, "chars/ugrent", 0, (216, 256)),
+            Ast::Wait(1.0),
+            Ast::Place(MEZURE, "chars/mezure", 0, (-16, 272)),
+            Ast::Slide(MEZURE, (122, 272), false, true, 1.0),
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                      "You there!  How\n\
+                       is progress coming?"),
         ]),
         Ast::Seq(vec![
-            Ast::Queue(0, 1),  // Show clues.
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "Well, I think I've got\n\
+                       main power back online."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                      "Good.  Move along and\n\
+                       check on what the rest of\n\
+                       the crew is working on, and\n\
+                       see if they need any help."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "Oh.  Uh, okay."),
+        ]),
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::Wait(0.3),
+                Ast::Queue(1, 0), // Hide word pair.
+                Ast::Wait(0.5),
+                Ast::Queue(1, 2), // Show second word pair.
+            ]),
+            Ast::Seq(vec![
+                Ast::Slide(MEZURE, (156, 272), true, false, 0.5),
+                Ast::Sound(Sound::small_jump()),
+                Ast::Jump(MEZURE, (192, 256), 0.5),
+                Ast::Slide(MEZURE, (332, 256), true, true, 0.75),
+                Ast::Wait(0.5),
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NW,
+                          "Um, what are $iyou$r\n\
+                           working on?"),
+            ]),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                      "Inspecting the character sets\n\
+                       at this checkpoint.  I need to\n\
+                       re-double-check each one\n\
+                       a second time."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NW,
+                      "Do you...need help?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE, "No."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NW, "Oh."),
+        ]),
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::Sound(Sound::small_jump()),
+                Ast::Jump(MEZURE, (368, 240), 0.5),
+                Ast::Slide(MEZURE, (467, 240), true, true, 0.75),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.3),
+                Ast::Queue(1, 0), // Hide word pair.
+                Ast::Wait(0.5),
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                          "By the way..."),
+            ]),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                      "I have reason to suspect that\n\
+                       the damage to the ship is at least\n\
+                       partly the result of sabotage."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                      "Have you seen anyone around\n\
+                       here acting suspiciously?"),
+        ]),
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NW,
+                          "Well-"),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.1),
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                          "Or run into anyone that\n\
+                           might not belong on board?"),
+            ]),
+        ]),
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NW,
+                          "Actually-"),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.1),
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                          "Because if you see anyone\n\
+                           like that, you should\n\
+                           definitely let me know."),
+            ]),
+        ]),
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NW,
+                          "If you'll-"),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.1),
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                          "After a disaster like this,\n\
+                           we can't be too careful."),
+            ]),
+        ]),
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NW,
+                          "Yes, but-"),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.1),
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                          "Now get back to organizing\n\
+                           repairs.  I'll finish inspecting\n\
+                           this security checkpoint."),
+            ]),
+        ]),
+        Ast::Seq(vec![
+            Ast::Wait(1.0),
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NW,
+                      "...Okey-dokey."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(MEZURE, (592, 240), true, false, 1.0),
+            Ast::Remove(MEZURE),
+            Ast::Wait(1.0),
+            Ast::Slide(UGRENT, (226, 256), false, true, 0.25),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                      "Now then, where were we?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Queue(0, 1), // Show clues.
         ]),
     ];
     Ast::compile_scene(resources, ast)
@@ -46,15 +215,18 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
 pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
-            Ast::Queue(0, 0),  // Hide clues.
+            Ast::Queue(0, 0), // Hide clues.
             Ast::Sound(Sound::solve_puzzle_chime()),
             Ast::Wait(1.0),
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE, "Much better."),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE, "Much better."),
         ]),
         Ast::Seq(vec![
-            Ast::Slide(0, (-16, 272), true, false, 0.5),
-            Ast::Remove(0),
+            Ast::Slide(UGRENT, (-16, 272), true, false, 0.5),
+            Ast::Remove(UGRENT),
+            Ast::Wait(1.0),
+            Ast::Queue(1, 3), // Show metapuzzle clue.  TODO: Play sound.
+            Ast::Wait(1.0),
         ]),
     ];
     Ast::compile_scene(resources, ast)

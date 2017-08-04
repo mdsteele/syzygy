@@ -22,7 +22,9 @@ use gui::{Resources, Sound};
 
 // ========================================================================= //
 
-const MEZURE: i32 = 0;
+const MEZURE: i32 = 2;
+const RELYNG_BG: i32 = -1;
+const RELYNG_FG: i32 = 0;
 const UGRENT: i32 = 1;
 
 // ========================================================================= //
@@ -38,7 +40,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Place(MEZURE, "chars/mezure", 0, (-16, 272)),
             Ast::Slide(MEZURE, (122, 272), false, true, 1.0),
             Ast::Sound(Sound::talk_lo()),
-            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NW,
                       "You there!  How\n\
                        is progress coming?"),
         ]),
@@ -119,9 +121,10 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
-                      "I have reason to suspect that\n\
-                       the damage to the ship is at least\n\
-                       partly the result of sabotage."),
+                      "There is reason to suspect\n\
+                       that the damage to the ship\n\
+                       may be at least partly the\n\
+                       result of sabotage."),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
@@ -139,8 +142,8 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
                 Ast::Wait(0.1),
                 Ast::Sound(Sound::talk_hi()),
                 Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
-                          "Or run into anyone that\n\
-                           might not belong on board?"),
+                          "Or run into anyone that isn't\n\
+                           supposed to be on board?"),
             ]),
         ]),
         Ast::Par(vec![
@@ -194,7 +197,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
                       "...Okey-dokey."),
         ]),
         Ast::Seq(vec![
-            Ast::Slide(MEZURE, (592, 240), true, false, 1.0),
+            Ast::Slide(MEZURE, (592, 240), true, false, 0.75),
             Ast::Remove(MEZURE),
             Ast::Wait(1.0),
             Ast::Slide(UGRENT, (226, 256), false, true, 0.25),
@@ -212,6 +215,22 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
 // ========================================================================= //
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_ugrent_midscene(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_thought()),
+            Ast::Talk(UGRENT, TalkStyle::Thought, TalkPos::NE,
+                      "These pairs are all opposites,\n\
+                       so figuring out one is usually\n\
+                       enough to figure out the other.")
+        ]),
+    ];
+    (UGRENT, Ast::compile_scene(resources, ast))
+}
+
+// ========================================================================= //
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
 pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
@@ -219,11 +238,38 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
             Ast::Sound(Sound::solve_puzzle_chime()),
             Ast::Wait(1.0),
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE, "Much better."),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                      "These all seem\n\
+                       to be in order."),
         ]),
         Ast::Seq(vec![
-            Ast::Slide(UGRENT, (-16, 272), true, false, 0.5),
+            Ast::Slide(UGRENT, (332, 256), true, false, 0.75),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(UGRENT, (368, 240), 0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NW,
+                      "Time to go sweep\n\
+                       the next area."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(UGRENT, (592, 240), true, false, 1.0),
             Ast::Remove(UGRENT),
+            Ast::Wait(1.0),
+            Ast::Place(RELYNG_BG, "chars/relyng", 3, (400, 160)),
+            Ast::Slide(RELYNG_BG, (400, 176), false, false, 1.0),
+            Ast::Wait(1.0),
+            Ast::Remove(RELYNG_BG),
+            Ast::Place(RELYNG_FG, "chars/relyng", 0, (400, 176)),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(RELYNG_FG, (400, 240), 0.9),
+            Ast::Wait(0.75),
+            Ast::SetSprite(RELYNG_FG, "chars/relyng", 1),
+            Ast::Wait(0.75),
+            Ast::SetSprite(RELYNG_FG, "chars/relyng", 2),
+            Ast::Wait(0.75),
+            Ast::SetSprite(RELYNG_FG, "chars/relyng", 0),
+            Ast::Slide(RELYNG_FG, (592, 240), true, false, 1.0),
+            Ast::Remove(RELYNG_FG),
             Ast::Wait(1.0),
             Ast::Queue(1, 3), // Show metapuzzle clue.  TODO: Play sound.
             Ast::Wait(1.0),

@@ -31,6 +31,8 @@ use super::theater::TalkPos;
 #[derive(Clone, Copy)]
 pub enum TalkStyle {
     Comm,
+    Evil,
+    Good,
     Normal,
     System,
     Thought,
@@ -134,6 +136,12 @@ impl Ast {
                     match style {
                         TalkStyle::Comm => {
                             ("speech/comm", WHITE, "italic", Align::Center)
+                        }
+                        TalkStyle::Good => {
+                            ("speech/good", BLACK, "good", Align::Center)
+                        }
+                        TalkStyle::Evil => {
+                            ("speech/evil", BLACK, "evil", Align::Center)
                         }
                         TalkStyle::Normal => {
                             ("speech/normal", WHITE, "roman", Align::Center)

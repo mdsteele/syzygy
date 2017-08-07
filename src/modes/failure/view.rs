@@ -103,12 +103,12 @@ impl Element<Game, PuzzleCmd> for View {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
         let state = &game.system_failure;
         self.core.draw_back_layer(canvas);
-        self.core.draw_middle_layer(canvas);
         if state.mid_scene_is_done() {
             self.pyramid.draw(state, canvas);
         } else {
             self.dashboard.draw(game, canvas);
         }
+        self.core.draw_middle_layer(canvas);
         self.core.draw_front_layer(canvas, state);
     }
 

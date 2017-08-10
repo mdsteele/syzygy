@@ -200,8 +200,11 @@ impl Tomlable for LaneState {
 #[cfg(test)]
 mod tests {
     use std::collections::HashSet;
+    use toml;
 
-    use super::{NUM_SYMBOLS, STAGES, Stage};
+    use save::{Access, PuzzleState};
+    use save::util::{ACCESS_KEY, Tomlable};
+    use super::{LaneState, NUM_SYMBOLS, STAGES, STAGE_KEY, Stage};
 
     #[test]
     fn stages_are_well_formed() {
@@ -230,6 +233,55 @@ mod tests {
         assert!(symbols_on_board.is_empty(),
                 "At the end of the puzzle, {:?} are still on the board.",
                 symbols_on_board);
+    }
+
+    #[test]
+    fn toml_round_trip() {
+        let mut state = LaneState::from_toml(toml::Value::Boolean(false));
+        state.access = Access::Replaying;
+        assert_eq!(state.try_place_shape(-1, 0), Some(1));
+        assert_eq!(state.try_place_shape(1, -1), Some(2));
+        assert_eq!(state.stage, 2);
+        assert_eq!(state.grid.num_distinct_symbols(), 2);
+
+        let state = LaneState::from_toml(state.to_toml());
+        assert_eq!(state.access, Access::Replaying);
+        assert_eq!(state.stage, 2);
+        assert_eq!(state.grid.num_distinct_symbols(), 2);
+    }
+
+    #[test]
+    fn from_empty_toml() {
+        let state = LaneState::from_toml(toml::Value::Boolean(false));
+        assert_eq!(state.access, Access::Unvisited);
+        assert_eq!(state.stage, 0);
+        assert_eq!(state.grid.num_distinct_symbols(), 0);
+    }
+
+    #[test]
+    fn from_solved_toml() {
+        let mut table = toml::value::Table::new();
+        table.insert(ACCESS_KEY.to_string(), Access::Solved.to_toml());
+
+        let state = LaneState::from_toml(toml::Value::Table(table));
+        assert_eq!(state.access, Access::Solved);
+        assert_eq!(state.stage, STAGES.len());
+        assert_eq!(state.grid.num_distinct_symbols(), 0);
+    }
+
+    #[test]
+    fn from_invalid_stage_toml() {
+        let mut table = toml::value::Table::new();
+        table.insert(STAGE_KEY.to_string(), toml::Value::Integer(77));
+        let state = LaneState::from_toml(toml::Value::Table(table));
+        assert_eq!(state.stage, STAGES.len() - 1);
+        assert!(!state.is_solved());
+
+        let mut table = toml::value::Table::new();
+        table.insert(STAGE_KEY.to_string(), toml::Value::Integer(-77));
+        let state = LaneState::from_toml(toml::Value::Table(table));
+        assert_eq!(state.stage, 0);
+        assert!(!state.is_solved());
     }
 }
 

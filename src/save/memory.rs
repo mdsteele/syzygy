@@ -94,7 +94,7 @@ impl Grid {
     pub fn num_distinct_symbols(&self) -> usize {
         let mut symbols = HashSet::new();
         for (_, symbol) in self.tiles() {
-            symbols.insert(symbol);
+            symbols.insert(symbol.abs());
         }
         symbols.len()
     }

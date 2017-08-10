@@ -177,7 +177,7 @@ impl Tomlable for JogState {
         } else {
             let num_placed =
                 min(u32::pop_from_table(&mut table, NUM_PLACED_KEY) as usize,
-                    SHAPES.len());
+                    SHAPES.len() - 1);
             let grid = Grid::from_toml(NUM_COLS,
                                        NUM_ROWS,
                                        pop_array(&mut table, GRID_KEY));
@@ -209,8 +209,11 @@ impl Tomlable for JogState {
 mod tests {
     use std::collections::{HashMap, VecDeque};
     use std::iter::FromIterator;
+    use toml;
 
-    use super::{NUM_SYMBOLS, REMOVALS, SHAPES};
+    use save::{Access, Direction, PuzzleState};
+    use save::util::{ACCESS_KEY, Tomlable};
+    use super::{JogState, NUM_PLACED_KEY, NUM_SYMBOLS, REMOVALS, SHAPES};
 
     #[test]
     fn steps_are_well_formed() {
@@ -252,6 +255,68 @@ mod tests {
             assert_eq!(count, 0, "Symbol {} still in use at the end.", symbol);
         }
         assert_eq!(num_removed, REMOVALS.len());
+    }
+
+    #[test]
+    fn toml_round_trip() {
+        let mut state = JogState::from_toml(toml::Value::Boolean(false));
+        state.access = Access::Replaying;
+        assert_eq!(state.try_place_shape(2, 0).unwrap().0, 3);
+        assert_eq!(state.try_place_shape(1, 0).unwrap().0, 4);
+        assert_eq!(state.try_place_shape(1, 0).unwrap().0, 1);
+        assert_eq!(state.try_place_shape(0, 0).unwrap().0, 6);
+        assert_eq!(state.try_place_shape(-1, 3).unwrap().0, 5);
+        state.remove_symbol(4);
+        assert_eq!(state.try_place_shape(1, 0).unwrap().0, 2);
+        assert_eq!(state.num_placed, 6);
+        assert_eq!(state.num_removed, 1);
+        assert_eq!(state.grid.num_distinct_symbols(), 5);
+        assert_eq!(state.gravity, Direction::West);
+
+        let state = JogState::from_toml(state.to_toml());
+        assert_eq!(state.access, Access::Replaying);
+        assert_eq!(state.num_placed, 6);
+        assert_eq!(state.num_removed, 1);
+        assert_eq!(state.grid.num_distinct_symbols(), 5);
+        assert_eq!(state.gravity, Direction::West);
+    }
+
+    #[test]
+    fn from_empty_toml() {
+        let state = JogState::from_toml(toml::Value::Boolean(false));
+        assert_eq!(state.access, Access::Unvisited);
+        assert_eq!(state.num_placed, 0);
+        assert_eq!(state.num_removed, 0);
+        assert_eq!(state.grid.num_distinct_symbols(), 0);
+    }
+
+    #[test]
+    fn from_solved_toml() {
+        let mut table = toml::value::Table::new();
+        table.insert(ACCESS_KEY.to_string(), Access::Solved.to_toml());
+
+        let state = JogState::from_toml(toml::Value::Table(table));
+        assert_eq!(state.access, Access::Solved);
+        assert_eq!(state.num_placed, SHAPES.len());
+        assert_eq!(state.num_removed, REMOVALS.len());
+        assert_eq!(state.grid.num_distinct_symbols(), 0);
+    }
+
+    #[test]
+    fn from_invalid_num_placed_toml() {
+        let mut table = toml::value::Table::new();
+        table.insert(NUM_PLACED_KEY.to_string(), toml::Value::Integer(77));
+        let state = JogState::from_toml(toml::Value::Table(table));
+        assert_eq!(state.num_placed, SHAPES.len() - 1);
+        assert_eq!(state.num_removed, REMOVALS.len() - 1);
+        assert!(!state.is_solved());
+
+        let mut table = toml::value::Table::new();
+        table.insert(NUM_PLACED_KEY.to_string(), toml::Value::Integer(-77));
+        let state = JogState::from_toml(toml::Value::Table(table));
+        assert_eq!(state.num_placed, 0);
+        assert_eq!(state.num_removed, 0);
+        assert!(!state.is_solved());
     }
 }
 

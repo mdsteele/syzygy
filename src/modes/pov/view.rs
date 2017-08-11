@@ -44,11 +44,13 @@ pub struct View {
 impl View {
     pub fn new(resources: &mut Resources, visible: Rect, state: &PovState)
                -> View {
-        let core = {
+        let mut core = {
             let intro = scenes::compile_intro_scene(resources);
             let outro = scenes::compile_outro_scene(resources);
             PuzzleCore::new(resources, visible, state, intro, outro)
         };
+        core.add_extra_scene(scenes::compile_argony_midscene(resources));
+        core.add_extra_scene(scenes::compile_yttris_midscene(resources));
         View {
             core: core,
             grid: PovGridView::new(resources, 128, 64),
@@ -365,12 +367,15 @@ impl Element<PovState, PovCmd> for PovGridView {
 // ========================================================================= //
 
 const INFO_BOX_TEXT: &str = "\
-Your goal is to arrange the tiles in the grid so that
-the colors seen from the edges (as shown by the
-inner ring of indicators) match the goal pattern
+Your goal is to arrange the tiles in the grid so that the
+colors seen from the edges of the grid (as shown by
+the inner ring of indicators) match the goal pattern
 (as shown by the outer ring of indicators).
 
-Drag tiles with $M{your finger}{the mouse} to move their positions
-in the grid.  $M{Tap}{Click} tiles to rotate them.";
+Drag tiles with $M{your finger}{the mouse} to move their positions in
+the grid.  $M{Tap}{Click} tiles to rotate them.
+
+$M{Tap}{Click} on a character in the scene to hear their words
+of wisdom.";
 
 // ========================================================================= //

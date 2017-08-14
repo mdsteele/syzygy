@@ -70,7 +70,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Jump(YTTRIS, (456, 304), 0.55),
             Ast::Wait(1.0),
             Ast::Sound(Sound::small_jump()),
-            Ast::Jump(YTTRIS, (456, 304), 0.8),
+            Ast::Jump(YTTRIS, (456, 304), 0.7),
             Ast::Wait(0.5),
             Ast::Sound(Sound::talk_lo()),
             Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NW, "Hmm."),
@@ -90,7 +90,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
                        can jump that high."),
         ]),
         Ast::Seq(vec![
-            Ast::Slide(YTTRIS, (400, 304), true, true, 1.0),
+            Ast::Slide(YTTRIS, (380, 304), true, true, 1.0),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NW,
                       "I guess this is\n\
@@ -117,7 +117,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_lo()),
             Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::NE,
-                      "Oh, you cut that out.  Just\n\
+                      "Now you cut that out.  Just\n\
                        because Ugrent insists\n\
                        on calling me that doesn't\n\
                        mean you should too."),
@@ -142,15 +142,15 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
                 Ast::Sound(Sound::talk_hi()),
                 Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NW,
                           "But...but what if they're\n\
-                           broken becuase of the disaster?\n\
-                           We'll be trapped!"),
+                           broken because of the disaster?\n\
+                           We'll be trapped!!"),
             ]),
             Ast::Loop(0, 0, Box::new(Ast::Seq(vec![
-                Ast::Slide(YTTRIS, (395, 304), false, false, 0.1),
+                Ast::Slide(YTTRIS, (375, 304), false, false, 0.1),
                 Ast::Wait(0.2),
-                Ast::Slide(YTTRIS, (405, 304), false, false, 0.2),
+                Ast::Slide(YTTRIS, (385, 304), false, false, 0.2),
                 Ast::Wait(0.2),
-                Ast::Slide(YTTRIS, (400, 304), false, false, 0.1),
+                Ast::Slide(YTTRIS, (380, 304), false, false, 0.1),
             ]))),
         ]),
         Ast::Par(vec![
@@ -162,11 +162,11 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
                            a novel idea - we should $ifix them."),
             ]),
             Ast::Loop(0, 0, Box::new(Ast::Seq(vec![
-                Ast::Slide(YTTRIS, (395, 304), false, false, 0.1),
+                Ast::Slide(YTTRIS, (375, 304), false, false, 0.1),
                 Ast::Wait(0.2),
-                Ast::Slide(YTTRIS, (405, 304), false, false, 0.2),
+                Ast::Slide(YTTRIS, (385, 304), false, false, 0.2),
                 Ast::Wait(0.2),
-                Ast::Slide(YTTRIS, (400, 304), false, false, 0.1),
+                Ast::Slide(YTTRIS, (380, 304), false, false, 0.1),
             ]))),
         ]),
         Ast::Seq(vec![
@@ -214,6 +214,8 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Sound(Sound::solve_puzzle_chime()),
             Ast::Wait(1.0),
+            Ast::Queue(0, 1), // Show first letter.
+            Ast::Wait(1.0),
             Ast::Par(PLATFORMS.iter().enumerate().map(
                 |(index, &(slot, sprite, x0, x1, y))| {
                     Ast::Seq(vec![
@@ -223,8 +225,68 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
                         Ast::Slide(slot, (x1, y), false, true, 0.5),
                     ])
                 }).collect()),
-            Ast::Slide(YTTRIS, (-16, 304), true, false, 1.0),
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::NE,
+                      "There you are.  Together\n\
+                       we are better than the sum\n\
+                       of our parts, or whatever.")
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NW,
+                      "Gee, thanks Lady Argony!")
+        ]),
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::Sound(Sound::talk_lo()),
+                Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::NE,
+                          "I thought\n\
+                           I told you-")
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.25),
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NW,
+                          "Plus, the colors look so much\n\
+                           prettier arranged this way!")
+            ]),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(YTTRIS, (416, 304), true, false, 0.25),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(YTTRIS, (464, 272), 0.5),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(YTTRIS, (416, 240), 0.5),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(YTTRIS, (464, 208), 0.5),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(YTTRIS, (416, 176), 0.5),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(YTTRIS, (464, 144), 0.5),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(YTTRIS, (416, 112), 0.5),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(YTTRIS, (496, 112), 0.6),
+            Ast::Slide(YTTRIS, (592, 112), false, false, 0.4),
             Ast::Remove(YTTRIS),
+            Ast::Wait(1.0),
+            Ast::Sound(Sound::talk_thought()),
+            Ast::Talk(ARGONY, TalkStyle::Thought, TalkPos::NE,
+                      "Sigh.  Why are these young\n\
+                       ones always so stubborn?")
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(ARGONY, (-16, 304), true, false, 1.0),
+            Ast::Wait(1.0),
+            // Show remaining letters:
+            Ast::Seq((2..11).map(|index| {
+                Ast::Seq(vec![
+                    Ast::Queue(0, index),
+                    Ast::Wait(0.05),
+                ])
+            }).collect()),
+            Ast::Wait(1.0),
         ]),
     ];
     Ast::compile_scene(resources, ast)

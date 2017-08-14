@@ -18,10 +18,11 @@
 // +--------------------------------------------------------------------------+
 
 use std::cmp;
+use std::rc::Rc;
 
 use elements::{PuzzleCmd, PuzzleCore, PuzzleView};
-use gui::{Action, Canvas, Element, Event, FRAME_DELAY_MILLIS, Point, Rect,
-          Resources, Sound, Sprite};
+use gui::{Action, Canvas, Element, Event, FRAME_DELAY_MILLIS, Font, Point,
+          Rect, Resources, Sound, Sprite};
 use modes::SOLVED_INFO_TEXT;
 use save::{Game, PovState, PuzzleState};
 use super::scenes;
@@ -137,8 +138,10 @@ impl PuzzleView for View {
     }
 
     fn drain_queue(&mut self) {
-        for (_, _) in self.core.drain_queue() {
-            // TODO: drain queue
+        for (command, value) in self.core.drain_queue() {
+            if command == 0 && value >= 0 {
+                self.grid.num_letters = value as usize;
+            }
         }
     }
 }
@@ -155,6 +158,20 @@ const INDICATOR_TOTAL_THICKNESS: i32 =
     INDICATOR_MARGIN + INDICATOR_GOAL_THICKNESS + INDICATOR_SPACING +
     INDICATOR_COLOR_THICKNESS + INDICATOR_MARGIN;
 const ROTATE_MAX_MILLIS: u32 = 200;
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+const LETTERS: &[(i32, i32, char, i32)] = &[
+    (2, 2, 'M', 270),
+    (1, 2, 'I', 90),
+    (3, 2, 'R', 180),
+    (1, 1, 'N', 0),
+    (4, 2, 'E', 270),
+    (0, 1, 'E', 90),
+    (4, 3, 'T', 180),
+    (0, 0, 'D', 180),
+    (4, 4, 'E', 180),
+    (3, 4, 'D', 270),
+];
 
 fn get_color(color: u8) -> (u8, u8, u8) {
     match color {
@@ -180,6 +197,8 @@ pub struct PovGridView {
     rect: Rect,
     tile_sprites: Vec<Sprite>,
     drag: Option<GridDrag>,
+    font: Rc<Font>,
+    num_letters: usize,
 }
 
 impl PovGridView {
@@ -191,6 +210,8 @@ impl PovGridView {
                             (5 * GRID_CELL_SIZE) as u32),
             tile_sprites: resources.get_sprites("point/view"),
             drag: None,
+            font: resources.get_font("block"),
+            num_letters: 0,
         }
     }
 
@@ -205,6 +226,15 @@ impl PovGridView {
 impl Element<PovState, PovCmd> for PovGridView {
     fn draw(&self, state: &PovState, canvas: &mut Canvas) {
         canvas.fill_rect((64, 64, 64), self.rect);
+        for index in 0..self.num_letters {
+            let (col, row, chr, degrees) = LETTERS[index];
+            let center = Point::new(self.rect.left() + GRID_CELL_SIZE * col +
+                                    GRID_CELL_SIZE / 2,
+                                    self.rect.top() + GRID_CELL_SIZE * row +
+                                    GRID_CELL_SIZE / 2);
+            let sprite = self.font.glyph(chr).sprite();
+            canvas.draw_sprite_rotated(sprite, center, degrees);
+        }
         for row in 0..5 {
             // Left:
             let goal = state.row_left_goal(row);

@@ -24,12 +24,15 @@ use gui::{Resources, Sound};
 
 const ARGONY: i32 = 5;
 const BRIDGE_START: i32 = -99;
+const BOOM_START: i32 = 100;
 const ELINSA: i32 = 4;
 const MEZURE: i32 = 1;
 const RELYNG: i32 = -100;
 const SRB: i32 = 6;
 const UGRENT: i32 = 2;
 const YTTRIS: i32 = 3;
+
+const BOOM_INDICES: &[usize] = &[0, 1, 2, 3, 4];
 
 // ========================================================================= //
 
@@ -370,6 +373,12 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
                               "In fact, I-\n\
                                -Aauugh!"),
                     Ast::Seq(vec![
+                        Ast::Place(BOOM_START, "chars/boom", 0, (448, 184)),
+                        Ast::Anim(BOOM_START, "chars/boom", BOOM_INDICES, 2),
+                        Ast::Wait(0.4),
+                        Ast::Remove(BOOM_START),
+                    ]),
+                    Ast::Seq(vec![
                         Ast::Slide(SRB, (390, -32), false, true, 0.75),
                         Ast::Remove(SRB),
                         Ast::Wait(0.25),
@@ -393,11 +402,38 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
             ]),
         ]),
         Ast::Seq(vec![
-            Ast::Place(SRB, "chars/srb", 9, (192, 0)),
-            Ast::Slide(SRB, (416, 224), false, false, 0.8),
-            Ast::Slide(SRB, (192, 448), false, false, 0.8),
-            Ast::Sound(Sound::character_collision()), // TODO: explosion
-            Ast::Shake(6),
+            Ast::Par(vec![
+                Ast::Par((1..8).map(|index| {
+                    let slot = BOOM_START + index;
+                    Ast::Seq(vec![
+                        Ast::Wait(0.15 + 0.1 * index as f64),
+                        Ast::Place(slot, "chars/boom", 0,
+                                   (192 + 32 * index, 32 * index)),
+                        Ast::Anim(slot, "chars/boom", BOOM_INDICES, 1),
+                        Ast::Wait(0.2),
+                        Ast::Remove(slot),
+                    ])
+                }).collect()),
+                Ast::Par((1..6).map(|index| {
+                    let slot = BOOM_START + index;
+                    Ast::Seq(vec![
+                        Ast::Wait(0.9 + 0.1 * index as f64),
+                        Ast::Place(slot, "chars/boom", 0,
+                                   (416 - 32 * index, 224 + 32 * index)),
+                        Ast::Anim(slot, "chars/boom", BOOM_INDICES, 1),
+                        Ast::Wait(0.2),
+                        Ast::Remove(slot),
+                    ])
+                }).collect()),
+                Ast::Seq(vec![
+                    Ast::Place(SRB, "chars/srb", 9, (192, 0)),
+                    Ast::Slide(SRB, (416, 224), false, false, 0.8),
+                    Ast::Slide(SRB, (192, 448), false, false, 0.8),
+                    // TODO: explosion sound
+                    Ast::Sound(Sound::character_collision()),
+                    Ast::Shake(6),
+                ]),
+            ]),
             Ast::Wait(1.0),
             Ast::Sound(Sound::small_jump()),
             Ast::Jump(RELYNG, (448, 192), 0.5),
@@ -409,10 +445,9 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Seq((0..19).map(|index| {
                 Ast::Seq(vec![
-                    Ast::Sound(Sound::platform_shift(1)),
                     Ast::Place(BRIDGE_START + index, "tiles/miniblocks", 14,
                                (144 + 16 * index, 208)),
-                    Ast::Wait(0.1),
+                    Ast::Wait(0.05),
                 ])
             }).collect()),
         ]),

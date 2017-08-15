@@ -183,8 +183,17 @@ impl<U: Clone> PuzzleCore<U> {
         }
     }
 
-    pub fn draw_back_layer(&self, canvas: &mut Canvas) {
+    pub fn clear_screen(&self, canvas: &mut Canvas) {
+        self.theater.clear_screen(canvas);
+    }
+
+    pub fn draw_back_layer_no_clear(&self, canvas: &mut Canvas) {
         self.theater.draw_background(canvas);
+    }
+
+    pub fn draw_back_layer(&self, canvas: &mut Canvas) {
+        self.clear_screen(canvas);
+        self.draw_back_layer_no_clear(canvas);
     }
 
     pub fn draw_middle_layer(&self, canvas: &mut Canvas) {

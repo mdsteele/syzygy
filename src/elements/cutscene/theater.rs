@@ -144,13 +144,16 @@ impl Theater {
 
     pub fn set_dark(&mut self, dark: bool) { self.dark = dark; }
 
-    pub fn draw_background(&self, canvas: &mut Canvas) {
+    pub fn clear_screen(&self, canvas: &mut Canvas) {
         let bg_color = if let Some(ref background) = self.background {
             background.color()
         } else {
             (255, 255, 255)
         };
         canvas.clear(bg_color);
+    }
+
+    pub fn draw_background(&self, canvas: &mut Canvas) {
         let offset = self.shake_offset();
         for (_, actor) in self.actors.range(..0) {
             actor.draw_actor(canvas, offset);

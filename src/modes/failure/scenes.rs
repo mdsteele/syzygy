@@ -22,8 +22,14 @@ use gui::{Resources, Sound};
 
 // ========================================================================= //
 
+const ARGONY: i32 = 5;
+const BRIDGE_START: i32 = -99;
+const ELINSA: i32 = 4;
 const MEZURE: i32 = 1;
-const SRB: i32 = 2;
+const RELYNG: i32 = -100;
+const SRB: i32 = 6;
+const UGRENT: i32 = 2;
+const YTTRIS: i32 = 3;
 
 // ========================================================================= //
 
@@ -255,7 +261,160 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
 pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
+            Ast::Place(ARGONY, "chars/argony", 0, (64, 128)),
+            Ast::Place(ELINSA, "chars/elinsa", 0, (96, 128)),
+            Ast::Place(YTTRIS, "chars/yttris", 0, (64, 192)),
+            Ast::Place(UGRENT, "chars/ugrent", 0, (96, 192)),
+            Ast::Place(MEZURE, "chars/mezure", 0, (128, 192)),
+            Ast::Place(SRB, "chars/srb", 5, (448, 192)),
+            // TODO: Get rid of the above once the mid-scene is done.
             Ast::Sound(Sound::solve_puzzle_chime()),
+            Ast::Wait(1.0),
+            Ast::Par(vec![
+                Ast::Seq(vec![
+                    Ast::SetSprite(SRB, "chars/srb", 7),
+                    Ast::Sound(Sound::talk_lo()),
+                    Ast::Talk(SRB, TalkStyle::Evil, TalkPos::NW, "What!?"),
+                ]),
+                Ast::Seq(vec![
+                    Ast::Wait(0.5),
+                    Ast::Sound(Sound::talk_hi()),
+                    Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE, "Yes!"),
+                ]),
+            ]),
+        ]),
+        Ast::Seq(vec![
+            Ast::SetSprite(SRB, "chars/srb", 8),
+            Ast::Par(vec![
+                Ast::Seq(vec![
+                    Ast::Wait(0.5),
+                    Ast::Place(RELYNG, "chars/relyng", 3, (218, 208)),
+                    Ast::Slide(RELYNG, (282, 216), false, false, 0.35),
+                    Ast::Slide(RELYNG, (370, 216), false, false, 0.5),
+                    Ast::Slide(RELYNG, (434, 208), false, false, 0.35),
+                    Ast::Remove(RELYNG),
+                ]),
+                Ast::Seq((0..19).map(|index| {
+                    Ast::Seq(vec![
+                        Ast::Sound(Sound::platform_shift(1)),
+                        Ast::Place(BRIDGE_START + index,
+                                   "tiles/miniblocks", 14,
+                                   (144 + 16 * index, 208)),
+                        Ast::Wait(0.1),
+                    ])
+                }).collect()),
+            ]),
+            Ast::Wait(0.75),
+            Ast::Par(vec![
+                Ast::Seq(vec![
+                    Ast::SetSprite(SRB, "chars/srb", 7),
+                    Ast::Sound(Sound::talk_lo()),
+                    Ast::Shake(4),
+                    Ast::Talk(SRB, TalkStyle::Evil, TalkPos::NW, "NO!!"),
+                ]),
+                Ast::Seq((0..19).map(|index| {
+                    Ast::Seq(vec![
+                        Ast::Remove(BRIDGE_START + 18 - index),
+                        Ast::Wait(0.05),
+                    ])
+                }).collect()),
+                Ast::Seq(vec![
+                    Ast::Wait(0.5),
+                    Ast::Sound(Sound::talk_hi()),
+                    Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::E, "Huh!?"),
+                ]),
+            ]),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(SRB, TalkStyle::Evil, TalkPos::NW,
+                      "I shall have no more of this\n\
+                       nonsense!  I will not allow\n\
+                       you...you...PESTS to\n\
+                       interfere with my plans!"),
+        ]),
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::Place(RELYNG, "chars/relyng", 2, (490, 224)),
+                Ast::Slide(RELYNG, (490, 208), false, true, 0.75),
+                Ast::Wait(0.75),
+                Ast::Slide(RELYNG, (490, 224), true, false, 0.75),
+                Ast::Remove(RELYNG),
+            ]),
+            Ast::Seq(vec![
+                Ast::SetSprite(SRB, "chars/srb", 6),
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(SRB, TalkStyle::Evil, TalkPos::NW,
+                          "This ship is under my\n\
+                           complete control now!\n\
+                           It's too late to stop me!"),
+            ]),
+        ]),
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(SRB, TalkStyle::Evil, TalkPos::NW,
+                          "In fact, I-"),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.25),
+                Ast::Place(RELYNG, "chars/relyng", 0, (448, 224)),
+                Ast::Slide(RELYNG, (448, 202), false, false, 0.35),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.35),
+                Ast::Sound(Sound::character_collision()),
+                Ast::SetSprite(SRB, "chars/srb", 7),
+                Ast::Par(vec![
+                    Ast::Talk(SRB, TalkStyle::Evil, TalkPos::NW,
+                              "In fact, I-\n\
+                               -Aauugh!"),
+                    Ast::Seq(vec![
+                        Ast::Slide(SRB, (390, -32), false, true, 0.75),
+                        Ast::Remove(SRB),
+                        Ast::Wait(0.25),
+                        Ast::Par(vec![
+                            Ast::Seq(vec![
+                                Ast::Sound(Sound::talk_hi()),
+                                Ast::Talk(UGRENT, TalkStyle::Normal,
+                                          TalkPos::NE,
+                                          "Ha!  Excellent\n\
+                                           work, Relyng!"),
+                            ]),
+                            Ast::Seq(vec![
+                                Ast::Wait(0.5),
+                                Ast::Sound(Sound::talk_hi()),
+                                Ast::Talk(MEZURE, TalkStyle::Normal,
+                                          TalkPos::SE, "Wait, what?"),
+                            ]),
+                        ]),
+                    ]),
+                ]),
+            ]),
+        ]),
+        Ast::Seq(vec![
+            Ast::Place(SRB, "chars/srb", 9, (192, 0)),
+            Ast::Slide(SRB, (416, 224), false, false, 0.8),
+            Ast::Slide(SRB, (192, 448), false, false, 0.8),
+            Ast::Sound(Sound::character_collision()), // TODO: explosion
+            Ast::Shake(6),
+            Ast::Wait(1.0),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(RELYNG, (448, 192), 0.5),
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NW,
+                      "Good riddance."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Seq((0..19).map(|index| {
+                Ast::Seq(vec![
+                    Ast::Sound(Sound::platform_shift(1)),
+                    Ast::Place(BRIDGE_START + index, "tiles/miniblocks", 14,
+                               (144 + 16 * index, 208)),
+                    Ast::Wait(0.1),
+                ])
+            }).collect()),
         ]),
     ];
     Ast::compile_scene(resources, ast)

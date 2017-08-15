@@ -116,21 +116,36 @@ impl Tomlable for BlameState {
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
-        if !self.is_initial {
+        if !self.is_initial && !self.is_solved() {
             let positions = self.positions
                                 .iter()
                                 .map(|&idx| toml::Value::Integer(idx as i64))
                                 .collect();
             table.insert(POSITIONS_KEY.to_string(),
                          toml::Value::Array(positions));
+            table.insert(ELINSA_ROW_KEY.to_string(),
+                         toml::Value::Integer(self.elinsa_row as i64));
         }
-        table.insert(ELINSA_ROW_KEY.to_string(),
-                     toml::Value::Integer(self.elinsa_row as i64));
         toml::Value::Table(table)
     }
 
     fn from_toml(value: toml::Value) -> BlameState {
         let mut table = to_table(value);
+        let mut access = Access::pop_from_table(&mut table, ACCESS_KEY);
+        let elinsa_row = if access.is_solved() {
+            MIN_ELINSA_ROW
+        } else {
+            let mut row = table.remove(ELINSA_ROW_KEY)
+                               .map(i32::from_toml)
+                               .unwrap_or(INITIAL_ELINSA_ROW);
+            if row < MIN_ELINSA_ROW || row > MAX_ELINSA_ROW {
+                row = INITIAL_ELINSA_ROW;
+            }
+            if row == MIN_ELINSA_ROW {
+                access = Access::Solved;
+            }
+            row
+        };
         let mut positions = Vec::<i32>::pop_from_table(&mut table,
                                                        POSITIONS_KEY);
         if positions.len() != INITIAL_POSITIONS.len() {
@@ -141,20 +156,110 @@ impl Tomlable for BlameState {
                                 BlameState::max_position_for_row(row as i32));
             }
         }
-        let mut elinsa_row = table.remove(ELINSA_ROW_KEY)
-                                  .map(i32::from_toml)
-                                  .unwrap_or(INITIAL_ELINSA_ROW);
-        if elinsa_row < -1 || elinsa_row > MAX_ELINSA_ROW {
-            elinsa_row = INITIAL_ELINSA_ROW;
-        }
         let is_initial = &positions as &[i32] == INITIAL_POSITIONS &&
                          elinsa_row == INITIAL_ELINSA_ROW;
         BlameState {
-            access: Access::pop_from_table(&mut table, ACCESS_KEY),
+            access: access,
             positions: positions,
             elinsa_row: elinsa_row,
             is_initial: is_initial,
         }
+    }
+}
+
+// ========================================================================= //
+
+#[cfg(test)]
+mod tests {
+    use toml;
+
+    use save::{Access, PuzzleState};
+    use save::util::{ACCESS_KEY, Tomlable};
+    use super::{BlameState, ELINSA_ROW_KEY, INITIAL_ELINSA_ROW,
+                INITIAL_POSITIONS, MIN_ELINSA_ROW, POSITIONS_KEY};
+
+    #[test]
+    fn toml_round_trip() {
+        let mut state = BlameState::from_toml(toml::Value::Boolean(false));
+        state.access = Access::Replaying;
+        state.set_position(0, 1);
+        state.set_position(1, 1);
+        state.set_position(2, 2);
+        state.set_position(3, 2);
+        state.set_position(4, 3);
+        state.set_position(5, 3);
+        state.set_position(6, 4);
+        state.set_elinsa_row(3);
+
+        let state = BlameState::from_toml(state.to_toml());
+        assert_eq!(state.access, Access::Replaying);
+        assert_eq!(state.get_elinsa_row(), 3);
+        assert_eq!(state.positions, vec![1, 1, 2, 2, 3, 3, 4]);
+    }
+
+    #[test]
+    fn from_empty_toml() {
+        let state = BlameState::from_toml(toml::Value::Boolean(false));
+        assert_eq!(state.access, Access::Unvisited);
+        assert_eq!(state.get_elinsa_row(), INITIAL_ELINSA_ROW);
+        assert_eq!(&state.positions as &[i32], INITIAL_POSITIONS);
+    }
+
+    #[test]
+    fn from_solved_toml() {
+        let mut table = toml::value::Table::new();
+        table.insert(ACCESS_KEY.to_string(), Access::Solved.to_toml());
+
+        let state = BlameState::from_toml(toml::Value::Table(table));
+        assert_eq!(state.access, Access::Solved);
+        assert_eq!(state.elinsa_row, MIN_ELINSA_ROW);
+    }
+
+    #[test]
+    fn from_elinsa_already_at_top_toml() {
+        let mut table = toml::value::Table::new();
+        table.insert(ACCESS_KEY.to_string(), Access::Unsolved.to_toml());
+        table.insert(ELINSA_ROW_KEY.to_string(),
+                     toml::Value::Integer(MIN_ELINSA_ROW as i64));
+        let state = BlameState::from_toml(toml::Value::Table(table));
+        assert_eq!(state.access, Access::Solved);
+        assert_eq!(state.elinsa_row, MIN_ELINSA_ROW);
+    }
+
+    #[test]
+    fn from_invalid_elinsa_row_toml() {
+        let mut table = toml::value::Table::new();
+        table.insert(ELINSA_ROW_KEY.to_string(), toml::Value::Integer(77));
+        let state = BlameState::from_toml(toml::Value::Table(table));
+        assert_eq!(state.elinsa_row, INITIAL_ELINSA_ROW);
+        assert!(!state.is_solved());
+
+        let mut table = toml::value::Table::new();
+        table.insert(ELINSA_ROW_KEY.to_string(), toml::Value::Integer(-77));
+        let state = BlameState::from_toml(toml::Value::Table(table));
+        assert_eq!(state.elinsa_row, INITIAL_ELINSA_ROW);
+        assert!(!state.is_solved());
+    }
+
+    #[test]
+    fn from_invalid_positions_toml() {
+        let mut table = toml::value::Table::new();
+        table.insert(POSITIONS_KEY.to_string(),
+                     toml::Value::Array(vec![1, 2, -3, 4, 55, 66, 77]
+                         .into_iter()
+                         .map(toml::Value::Integer)
+                         .collect()));
+        let state = BlameState::from_toml(toml::Value::Table(table));
+        assert_eq!(state.positions, vec![1, 2, 0, 4, 8, 9, 9]);
+
+        let mut table = toml::value::Table::new();
+        table.insert(POSITIONS_KEY.to_string(),
+                     toml::Value::Array(vec![1, 2, 3, 4, 5, 6]
+                         .into_iter()
+                         .map(toml::Value::Integer)
+                         .collect()));
+        let state = BlameState::from_toml(toml::Value::Table(table));
+        assert_eq!(&state.positions as &[i32], INITIAL_POSITIONS);
     }
 }
 

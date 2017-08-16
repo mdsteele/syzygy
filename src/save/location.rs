@@ -131,7 +131,7 @@ impl Location {
             Location::ConnectTheDots => Location::MissedConnections,
             Location::CrossSauce => Location::ShiftGears,
             Location::CrossTheLine => Location::PlaneAndSimple,
-            Location::CubeTangle => Location::PlaneAsDay,
+            Location::CubeTangle => Location::Map,
             Location::Disconnected => Location::LogLevel,
             Location::DoubleCross => Location::WhatchaColumn,
             Location::FactOrFiction => Location::Map,
@@ -192,13 +192,13 @@ impl Location {
             Location::LogLevel => vec![Location::Disconnected],
             Location::MemoryLane => vec![Location::PlaneAndSimple],
             Location::MissedConnections => {
-                vec![Location::ConnectTheDots, Location::MemoryLane]
+                vec![Location::ConnectTheDots,
+                     Location::CubeTangle,
+                     Location::MemoryLane]
             }
             Location::PasswordFile => vec![Location::SystemFailure],
             Location::PlaneAndSimple => vec![Location::CrossTheLine],
-            Location::PlaneAsDay => {
-                vec![Location::CubeTangle, Location::MissedConnections]
-            }
+            Location::PlaneAsDay => vec![Location::IfMemoryServes],
             Location::PointOfNoReturn => {
                 vec![Location::IfMemoryServes, Location::ShiftGears]
             }
@@ -336,6 +336,8 @@ const ALL_LOCATIONS: &[Location] = &[Location::Map,
 
 #[cfg(test)]
 mod tests {
+    use std::collections::{HashMap, HashSet};
+
     use save::util::Tomlable;
     use super::Location;
 
@@ -361,6 +363,68 @@ mod tests {
                         prereqs);
             }
         }
+    }
+
+    #[test]
+    fn transitive_dependencies() {
+        let num_locations = Location::all().len();
+        let mut deps_map: HashMap<Location, HashSet<Location>> =
+            HashMap::new();
+        while deps_map.len() < num_locations {
+            let mut progress = false;
+            for &location in Location::all() {
+                if deps_map.contains_key(&location) {
+                    continue;
+                }
+                if !location.prereqs()
+                            .into_iter()
+                            .all(|req| deps_map.contains_key(&req)) {
+                    continue;
+                }
+                let mut loc_deps: HashSet<Location> = HashSet::new();
+                for req in location.prereqs().into_iter() {
+                    for &req_dep in deps_map.get(&req).unwrap().iter() {
+                        loc_deps.insert(req_dep);
+                    }
+                    loc_deps.insert(req);
+                }
+                deps_map.insert(location, loc_deps);
+                progress = true;
+                break;
+            }
+            if !progress {
+                panic!("Location dependency cycle.");
+            }
+        }
+        // "Column" puzzles:
+        assert!(deps_map.get(&Location::ColumnAsIcyEm)
+                        .unwrap()
+                        .contains(&Location::WhatchaColumn));
+        // "Connect" puzzles:
+        assert!(deps_map.get(&Location::ConnectTheDots)
+                        .unwrap()
+                        .contains(&Location::Disconnected));
+        assert!(deps_map.get(&Location::MissedConnections)
+                        .unwrap()
+                        .contains(&Location::ConnectTheDots));
+        // "Ice" puzzles:
+        assert!(deps_map.get(&Location::TheIceIsRight)
+                        .unwrap()
+                        .contains(&Location::IceToMeetYou));
+        assert!(deps_map.get(&Location::VirtueOrIce)
+                        .unwrap()
+                        .contains(&Location::TheIceIsRight));
+        // "Memory" puzzles:
+        assert!(deps_map.get(&Location::IfMemoryServes)
+                        .unwrap()
+                        .contains(&Location::MemoryLane));
+        assert!(deps_map.get(&Location::JogYourMemory)
+                        .unwrap()
+                        .contains(&Location::IfMemoryServes));
+        // "Plane" puzzles:
+        assert!(deps_map.get(&Location::PlaneAsDay)
+                        .unwrap()
+                        .contains(&Location::PlaneAndSimple));
     }
 }
 

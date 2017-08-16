@@ -108,7 +108,7 @@ impl Element<&'static str, bool> for ClueDisplay {
         if self.visible {
             canvas.draw_text(&self.font,
                              Align::Center,
-                             Point::new(288, self.top + 14),
+                             Point::new(288, self.top + 12),
                              *clue);
             self.arrows.draw(&(), canvas);
         }

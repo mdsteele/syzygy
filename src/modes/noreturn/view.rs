@@ -252,7 +252,7 @@ impl TileBridge {
     fn new(resources: &mut Resources, left: i32, top: i32) -> TileBridge {
         TileBridge {
             sprites: resources.get_sprites("point/no_return"),
-            font: resources.get_font("point"),
+            font: resources.get_font("roman"),
             left: left,
             top: top,
             drag: None,
@@ -285,7 +285,7 @@ impl TileBridge {
             canvas.draw_sprite(&self.sprites[arrow_index], pt);
             canvas.draw_text(&self.font,
                              Align::Center,
-                             pt + Point::new(12, 21),
+                             pt + Point::new(12, 20),
                              &format!("{}", value.abs()));
         }
     }

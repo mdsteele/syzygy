@@ -61,7 +61,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
                 Ast::Sound(Sound::talk_hi()),
                 Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
                           "I guess\n\
-                           that means--"),
+                           that means-"),
             ]),
             Ast::Seq(vec![
                 Ast::Slide(MEZURE, (368, 304), true, false, 0.75),

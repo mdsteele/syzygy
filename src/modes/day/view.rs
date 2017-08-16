@@ -121,13 +121,25 @@ impl PuzzleView for View {
     }
 
     fn drain_queue(&mut self) {
-        for (_, _) in self.core.drain_queue() {
-            // TODO drain queue
+        for (word, letter) in self.core.drain_queue() {
+            if word >= 0 && (word as usize) < WORDS.len() {
+                let (col, row, letters) = WORDS[word as usize];
+                if letter >= 0 && (letter as usize) < letters.len() {
+                    self.grid.add_letter(Point::new(col + letter, row),
+                                         letters[letter as usize]);
+                }
+            }
         }
     }
 }
 
 // ========================================================================= //
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+const WORDS: &[(i32, i32, &[char])] = &[
+    (10, 0, &['A', 'R', 'T']),
+    (10, 8, &['D', 'U', 'B']),
+];
 
 const INFO_BOX_TEXT: &str = "\
 Your goal is to connect each red node to each blue

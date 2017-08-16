@@ -18,7 +18,7 @@
 // +--------------------------------------------------------------------------+
 
 use elements::{Ast, Scene, TalkPos, TalkStyle};
-use gui::{Resources, Sound};
+use gui::{Rect, Resources, Sound};
 
 // ========================================================================= //
 
@@ -64,7 +64,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NW,
                       "Oh, this thing?  This is the ship's\n\
-                       starboard planar switchboard."),
+                       foreward planar switchboard."),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
@@ -117,10 +117,134 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
 // ========================================================================= //
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
+pub fn compile_ugrent_midscene(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                      "Each node has to connect\n\
+                       to each other node, so\n\
+                       there can only be so\n\
+                       many stages, right?"),
+        ]),
+    ];
+    (UGRENT, Ast::compile_scene(resources, ast))
+}
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_yttris_midscene(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NW,
+                      "C'mon, this is an undirected\n\
+                       graph we're talking about.\n\
+                       Wiring it backwards doesn't\n\
+                       even make a difference!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                      "Look, let's just put\n\
+                       it back the same\n\
+                       way it was before."),
+        ]),
+    ];
+    (YTTRIS, Ast::compile_scene(resources, ast))
+}
+
+// ========================================================================= //
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_outro_scene(resources: &mut Resources, visible: Rect) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
             Ast::Sound(Sound::solve_puzzle_chime()),
+            Ast::Wait(1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NW,
+                      "There!  All fixed."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(UGRENT, (388, 304), true, true, 1.25),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NW,
+                      "Good.  Keep working on\n\
+                       repairs.  I need to continue\n\
+                       my security sweep."),
+        ]),
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::Sound(Sound::small_jump()),
+                Ast::Jump(UGRENT, (436, 288), 0.5),
+                Ast::Sound(Sound::small_jump()),
+                Ast::Jump(UGRENT, (484, 272), 0.5),
+                Ast::Slide(UGRENT, (592, 272), false, false, 0.5),
+                Ast::SetPos(UGRENT, (visible.right() + 16, 272)),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.75),
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NW,
+                          "Will do!"),
+            ]),
+        ]),
+        Ast::Seq(vec![
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(YTTRIS, (388, 304), 0.5),
+            Ast::Slide(YTTRIS, (284, 304), true, true, 0.75),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NE,
+                      "He's gone!  Now's\n\
+                       my chance to flip\n\
+                       it all backwards!"),
+        ]),
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::W,
+                          "I heard that!"),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.5),
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NE,
+                          "Haha!  I'm just\n\
+                           $ikidding$r, Ugrent!"),
+            ]),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_thought()),
+            Ast::Talk(YTTRIS, TalkStyle::Thought, TalkPos::NE,
+                      "No sense of\n\
+                       humor at all..."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Remove(UGRENT),
+            Ast::Slide(YTTRIS, (-16, 304), true, false, 1.0),
+            Ast::Remove(YTTRIS),
+            Ast::Wait(1.0),
+            Ast::Queue(1, 7),
+            Ast::Wait(0.1),
+            Ast::Queue(0, 0),
+            Ast::Queue(1, 6),
+            Ast::Wait(0.1),
+            Ast::Queue(0, 1),
+            Ast::Queue(1, 5),
+            Ast::Wait(0.1),
+            Ast::Queue(0, 2),
+            Ast::Queue(1, 4),
+            Ast::Wait(0.1),
+            Ast::Queue(0, 3),
+            Ast::Queue(1, 3),
+            Ast::Wait(0.1),
+            Ast::Queue(0, 4),
+            Ast::Queue(1, 2),
+            Ast::Wait(0.1),
+            Ast::Queue(1, 1),
+            Ast::Wait(0.1),
+            Ast::Queue(1, 0),
             Ast::Wait(1.0),
         ]),
     ];

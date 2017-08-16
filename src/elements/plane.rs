@@ -18,9 +18,12 @@
 // +--------------------------------------------------------------------------+
 
 use num_integer::div_floor;
+use std::collections::HashMap;
 use std::mem;
+use std::rc::Rc;
 
-use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sprite};
+use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
+          Sprite};
 use save::Direction;
 use save::plane::{PlaneGrid, PlaneObj};
 
@@ -33,7 +36,8 @@ pub enum PlaneCmd {
 
 // ========================================================================= //
 
-const TILE_SIZE: u32 = 24;
+const TILE_USIZE: u32 = 24;
+const TILE_ISIZE: i32 = TILE_USIZE as i32;
 
 pub struct PlaneGridView {
     left: i32,
@@ -42,6 +46,8 @@ pub struct PlaneGridView {
     pipe_sprites: Vec<Sprite>,
     drag_from: Option<Point>,
     changes: Vec<(Point, Point)>,
+    font: Rc<Font>,
+    letters: HashMap<Point, char>,
 }
 
 impl PlaneGridView {
@@ -54,6 +60,8 @@ impl PlaneGridView {
             pipe_sprites: resources.get_sprites("plane/pipes"),
             drag_from: None,
             changes: Vec::new(),
+            font: resources.get_font("roman"),
+            letters: HashMap::new(),
         }
     }
 
@@ -62,16 +70,20 @@ impl PlaneGridView {
         self.changes.clear();
     }
 
+    pub fn add_letter(&mut self, coords: Point, letter: char) {
+        self.letters.insert(coords, letter);
+    }
+
     fn rect(&self, grid: &PlaneGrid) -> Rect {
         Rect::new(self.left,
                   self.top,
-                  grid.num_cols() * TILE_SIZE,
-                  grid.num_rows() * TILE_SIZE)
+                  grid.num_cols() * TILE_USIZE,
+                  grid.num_rows() * TILE_USIZE)
     }
 
     fn pt_to_coords(&self, grid: &PlaneGrid, pt: Point) -> Option<Point> {
-        let col = div_floor(pt.x() - self.left, TILE_SIZE as i32);
-        let row = div_floor(pt.y() - self.top, TILE_SIZE as i32);
+        let col = div_floor(pt.x() - self.left, TILE_ISIZE);
+        let row = div_floor(pt.y() - self.top, TILE_ISIZE);
         let coords = Point::new(col, row);
         if grid.contains_coords(coords) {
             Some(coords)
@@ -96,7 +108,7 @@ impl PlaneGridView {
             (Direction::North, _) => 3,
         };
         let sprite = &self.pipe_sprites[sprite_index];
-        canvas.draw_sprite(sprite, pos * TILE_SIZE as i32);
+        canvas.draw_sprite(sprite, pos * TILE_ISIZE);
     }
 }
 
@@ -118,13 +130,13 @@ impl Element<PlaneGrid, PlaneCmd> for PlaneGridView {
                         PlaneObj::GrayNode => 6,
                     };
                     let sprite = &self.obj_sprites[sprite_index];
-                    canvas.draw_sprite(sprite, coords * TILE_SIZE as i32);
+                    canvas.draw_sprite(sprite, coords * TILE_ISIZE);
                 } else {
-                    let pt = coords * TILE_SIZE as i32;
+                    let pt = coords * TILE_ISIZE;
                     let rect = Rect::new(pt.x() + 1,
                                          pt.y() + 1,
-                                         TILE_SIZE - 2,
-                                         TILE_SIZE - 2);
+                                         TILE_USIZE - 2,
+                                         TILE_USIZE - 2);
                     canvas.draw_rect((72, 72, 72), rect);
                 }
             }
@@ -158,10 +170,15 @@ impl Element<PlaneGrid, PlaneCmd> for PlaneGridView {
                     (Direction::South, _) => 9,
                 };
                 let sprite = &self.pipe_sprites[sprite_index];
-                canvas.draw_sprite(sprite, start * TILE_SIZE as i32);
+                canvas.draw_sprite(sprite, start * TILE_ISIZE);
             }
             dir = Direction::from_delta(start - next);
             self.draw_pipe_tip(grid, next, dir, &mut canvas);
+        }
+        for (&coords, &letter) in self.letters.iter() {
+            let pt = Point::new(coords.x() * TILE_ISIZE + TILE_ISIZE / 2,
+                                coords.y() * TILE_ISIZE + TILE_ISIZE / 2 + 4);
+            canvas.draw_char(&self.font, Align::Center, pt, letter);
         }
     }
 

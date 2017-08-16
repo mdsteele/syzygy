@@ -22,7 +22,7 @@ use elements::plane::{PlaneCmd, PlaneGridView};
 use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sound};
 use modes::SOLVED_INFO_TEXT;
 use save::{Game, PuzzleState, SimpleState};
-use super::scenes::{compile_intro_scene, compile_outro_scene};
+use super::scenes;
 
 // ========================================================================= //
 
@@ -34,9 +34,13 @@ pub struct View {
 impl View {
     pub fn new(resources: &mut Resources, visible: Rect, state: &SimpleState)
                -> View {
-        let intro = compile_intro_scene(resources);
-        let outro = compile_outro_scene(resources);
-        let core = PuzzleCore::new(resources, visible, state, intro, outro);
+        let mut core = {
+            let intro = scenes::compile_intro_scene(resources);
+            let outro = scenes::compile_outro_scene(resources, visible);
+            PuzzleCore::new(resources, visible, state, intro, outro)
+        };
+        core.add_extra_scene(scenes::compile_ugrent_midscene(resources));
+        core.add_extra_scene(scenes::compile_yttris_midscene(resources));
         View {
             core: core,
             grid: PlaneGridView::new(resources, 128, 48),
@@ -80,6 +84,9 @@ impl Element<Game, PuzzleCmd> for View {
             }
             action.merge(subaction.but_no_value());
         }
+        if !action.should_stop() {
+            self.core.begin_character_scene_on_click(event);
+        }
         action
     }
 }
@@ -121,13 +128,25 @@ impl PuzzleView for View {
     }
 
     fn drain_queue(&mut self) {
-        for (_, _) in self.core.drain_queue() {
-            // TODO drain queue
+        for (word, letter) in self.core.drain_queue() {
+            if word >= 0 && (word as usize) < WORDS.len() {
+                let (col, row, letters) = WORDS[word as usize];
+                if letter >= 0 && (letter as usize) < letters.len() {
+                    self.grid.add_letter(Point::new(col + letter, row),
+                                         letters[letter as usize]);
+                }
+            }
         }
     }
 }
 
 // ========================================================================= //
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+const WORDS: &[(i32, i32, &[char])] = &[
+    (3, 0, &['I', 'S', 'T', 'I', 'C']),
+    (1, 8, &['I', 'O', 'U', 'S', 'N', 'E', 'S', 'S']),
+];
 
 const INFO_BOX_TEXT: &str = "\
 Your goal is to connect each purple node to each other

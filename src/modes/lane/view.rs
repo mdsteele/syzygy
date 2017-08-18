@@ -23,7 +23,7 @@ use gui::{Action, Align, Canvas, Element, Event, Point, Rect, Resources, Sound,
           Sprite};
 use modes::SOLVED_INFO_TEXT;
 use save::{Direction, Game, LaneState, PuzzleState};
-use super::scenes::{compile_intro_scene, compile_outro_scene};
+use super::scenes;
 
 // ========================================================================= //
 
@@ -41,14 +41,19 @@ pub struct View {
     progress_adjust: u32,
     prompt: PromptView,
     remove_countdown: i32,
+    show_next: bool,
 }
 
 impl View {
     pub fn new(resources: &mut Resources, visible: Rect, state: &LaneState)
                -> View {
-        let intro = compile_intro_scene(resources);
-        let outro = compile_outro_scene(resources);
-        let core = PuzzleCore::new(resources, visible, state, intro, outro);
+        let mut core = {
+            let intro = scenes::compile_intro_scene(resources);
+            let outro = scenes::compile_outro_scene(resources);
+            PuzzleCore::new(resources, visible, state, intro, outro)
+        };
+        core.add_extra_scene(scenes::compile_argony_midscene(resources));
+        core.add_extra_scene(scenes::compile_ugrent_midscene(resources));
         View {
             core: core,
             grid: MemoryGridView::new(resources,
@@ -64,6 +69,7 @@ impl View {
             progress_adjust: 0,
             prompt: PromptView::new(resources),
             remove_countdown: 0,
+            show_next: false,
         }
     }
 }
@@ -79,11 +85,14 @@ impl Element<Game, PuzzleCmd> for View {
         }
         self.free.draw(state, canvas);
         self.grid.draw(state.grid(), canvas);
-        if self.remove_countdown == 0 && !self.next.is_dragging() {
+        if self.show_next && self.remove_countdown == 0 &&
+           !self.next.is_dragging() {
             self.prompt.draw(state, canvas);
         }
         self.core.draw_middle_layer(canvas);
-        self.next.draw(&state.next_shape(), canvas);
+        if self.show_next {
+            self.next.draw(&state.next_shape(), canvas);
+        }
         self.core.draw_front_layer(canvas, state);
     }
 
@@ -140,6 +149,9 @@ impl Element<Game, PuzzleCmd> for View {
             }
             action.merge(subaction.but_no_value());
         }
+        if !action.should_stop() {
+            self.core.begin_character_scene_on_click(event);
+        }
         action
     }
 }
@@ -168,8 +180,10 @@ impl PuzzleView for View {
     }
 
     fn drain_queue(&mut self) {
-        for (_, _) in self.core.drain_queue() {
-            // TODO: drain queue
+        for (command, value) in self.core.drain_queue() {
+            if command == 0 {
+                self.show_next = value != 0;
+            }
         }
     }
 }

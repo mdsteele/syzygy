@@ -20,10 +20,11 @@
 use num_integer::div_floor;
 use std::cmp;
 use std::collections::{HashMap, HashSet};
+use std::rc::Rc;
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sound,
-          Sprite};
+use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
+          Sound, Sprite};
 use save::memory::{Grid, Shape};
 
 // ========================================================================= //
@@ -41,6 +42,8 @@ pub struct MemoryGridView {
     tile_shifts: HashMap<(i32, i32), ((i32, i32), i32)>,
     flip_countdown: i32,
     flip_symbol: i8,
+    font: Rc<Font>,
+    letters: HashMap<(i32, i32), char>,
 }
 
 impl MemoryGridView {
@@ -57,7 +60,13 @@ impl MemoryGridView {
             tile_shifts: HashMap::new(),
             flip_countdown: 0,
             flip_symbol: 0,
+            font: resources.get_font("block"),
+            letters: HashMap::new(),
         }
+    }
+
+    pub fn add_letter(&mut self, col: i32, row: i32, letter: char) {
+        self.letters.insert((col, row), letter);
     }
 
     pub fn flip_symbol(&self) -> i8 { self.flip_symbol }
@@ -109,6 +118,10 @@ impl Element<Grid, i8> for MemoryGridView {
                 let rect = Rect::new(32 * col, 32 * row, 32, 32);
                 canvas.draw_rect((26, 26, 26), rect);
             }
+        }
+        for (&(col, row), &letter) in self.letters.iter() {
+            let pt = Point::new(32 * col + 16, 32 * row + 25);
+            canvas.draw_char(&self.font, Align::Center, pt, letter);
         }
         for ((col, row), value) in grid.tiles() {
             let mut pt = Point::new(32 * col, 32 * row);

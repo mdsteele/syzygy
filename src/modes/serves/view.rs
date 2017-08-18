@@ -154,13 +154,25 @@ impl PuzzleView for View {
     }
 
     fn drain_queue(&mut self) {
-        for (_, _) in self.core.drain_queue() {
-            // TODO: drain queue
+        for (command, value) in self.core.drain_queue() {
+            if command == 1 {
+                if value >= 0 && (value as usize) < LETTERS.len() {
+                    let (col, row, letter) = LETTERS[value as usize];
+                    self.grid.add_letter(col, row, letter);
+                }
+            }
         }
     }
 }
 
 // ========================================================================= //
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+const LETTERS: &[(i32, i32, char)] = &[
+    (1, 0, 'I'), (1, 1, 'N'), (1, 2, 'T'), (1, 3, 'E'),
+    (3, 0, 'C'), (3, 1, 'O'), (3, 2, 'N'), (3, 3, 'S'),
+    (5, 0, 'I'), (5, 1, 'N'), (5, 2, 'D'), (5, 3, 'E'),
+];
 
 const INFO_BOX_TEXT: &str = "\
 Your goal is to place (and later remove) each group of tiles

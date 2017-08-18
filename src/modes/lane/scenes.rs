@@ -164,13 +164,55 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
             Ast::Sound(Sound::solve_puzzle_chime()),
             Ast::Wait(1.0),
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE, "Much better."),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::NW,
+                      "Well, that should\n\
+                       take care of that.\n\
+                       Thanks for your\n\
+                       time, dear."),
         ]),
         Ast::Seq(vec![
-            Ast::Slide(UGRENT, (-16, 272), true, false, 0.5),
-            Ast::Remove(UGRENT),
-            Ast::Slide(ARGONY, (592, 272), true, false, 0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                      "No trouble at all,\n\
+                       Madam.  But now I\n\
+                       must be getting back\n\
+                       to my rounds."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(UGRENT, (350, 272), true, true, 1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                      "Good day to you,\n\
+                       Lady Argony."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(UGRENT, (592, 272), true, false, 1.0),
+            Ast::Wait(0.5),
+            Ast::Slide(ARGONY, (300, 272), true, true, 1.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::NE,
+                      "Maybe he just does\n\
+                       that to be annoying?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(ARGONY, (-16, 272), true, false, 1.5),
             Ast::Remove(ARGONY),
+            Ast::Wait(1.0),
+            Ast::Queue(1, 0),
+            Ast::Queue(1, 1),
+            Ast::Queue(1, 2),
+            Ast::Queue(1, 3),
+            Ast::Wait(0.5),
+            Ast::Queue(1, 4),
+            Ast::Queue(1, 5),
+            Ast::Queue(1, 6),
+            Ast::Queue(1, 7),
+            Ast::Wait(0.5),
+            Ast::Queue(1, 8),
+            Ast::Queue(1, 9),
+            Ast::Queue(1, 10),
+            Ast::Queue(1, 11),
+            Ast::Wait(1.0),
         ]),
     ];
     Ast::compile_scene(resources, ast)

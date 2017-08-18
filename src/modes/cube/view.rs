@@ -17,11 +17,15 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
+use std::collections::HashMap;
+use std::rc::Rc;
+
 use elements::{PuzzleCmd, PuzzleCore, PuzzleView};
-use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sprite};
+use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
+          Sprite};
 use modes::SOLVED_INFO_TEXT;
 use save::{CubeState, Direction, Game, PuzzleState};
-use super::scenes::{compile_intro_scene, compile_outro_scene};
+use super::scenes;
 
 // ========================================================================= //
 
@@ -34,9 +38,12 @@ pub struct View {
 impl View {
     pub fn new(resources: &mut Resources, visible: Rect, state: &CubeState)
                -> View {
-        let intro = compile_intro_scene(resources);
-        let outro = compile_outro_scene(resources);
-        let core = PuzzleCore::new(resources, visible, state, intro, outro);
+        let mut core = {
+            let intro = scenes::compile_intro_scene(resources);
+            let outro = scenes::compile_outro_scene(resources);
+            PuzzleCore::new(resources, visible, state, intro, outro)
+        };
+        core.add_extra_scene(scenes::compile_elinsa_midscene(resources));
         View {
             core: core,
             grid: CubeGrid::new(resources, 232, 72),
@@ -72,6 +79,9 @@ impl Element<Game, PuzzleCmd> for View {
         }
         if !action.should_stop() {
             action.merge(self.solution.handle_event(event, state));
+        }
+        if !action.should_stop() {
+            self.core.begin_character_scene_on_click(event);
         }
         action
     }
@@ -109,8 +119,17 @@ impl PuzzleView for View {
     }
 
     fn drain_queue(&mut self) {
-        for (_, index) in self.core.drain_queue() {
-            self.solution.set_index(index);
+        for (command, value) in self.core.drain_queue() {
+            if command == 0 {
+                self.solution.set_index(value);
+            } else if command == 1 {
+                self.grid.show_sides = value != 0;
+            } else if command == 2 {
+                if value >= 0 && (value as usize) < LETTERS.len() {
+                    let (col, row, chr) = LETTERS[value as usize];
+                    self.grid.letters.insert((col, row), chr);
+                }
+            }
         }
     }
 }
@@ -206,6 +225,9 @@ struct CubeGrid {
     cubes: Vec<Sprite>,
     faces: Vec<Sprite>,
     drag: Option<Drag>,
+    show_sides: bool,
+    font: Rc<Font>,
+    letters: HashMap<(i32, i32), char>,
 }
 
 impl CubeGrid {
@@ -216,6 +238,9 @@ impl CubeGrid {
             cubes: resources.get_sprites("tangle/cubes"),
             faces: resources.get_sprites("tangle/faces"),
             drag: None,
+            show_sides: true,
+            font: resources.get_font("danger"),
+            letters: HashMap::new(),
         }
     }
 
@@ -266,9 +291,18 @@ impl Element<CubeState, (Direction, i32, i32)> for CubeGrid {
                     }
                 } else {
                     canvas.draw_sprite(&self.cubes[0], pt);
-                    canvas.draw_sprite(&self.faces[fr], pt);
-                    canvas.draw_sprite(&self.faces[rt + 6], pt);
-                    canvas.draw_sprite_transposed(&self.faces[bt + 6], pt);
+                    if let Some(&chr) = self.letters.get(&(col, row)) {
+                        canvas.draw_char(&self.font,
+                                         Align::Center,
+                                         pt + Point::new(14, 18),
+                                         chr);
+                    } else {
+                        canvas.draw_sprite(&self.faces[fr], pt);
+                    }
+                    if self.show_sides {
+                        canvas.draw_sprite(&self.faces[rt + 6], pt);
+                        canvas.draw_sprite_transposed(&self.faces[bt + 6], pt);
+                    }
                 }
             }
         }
@@ -351,7 +385,7 @@ impl SolutionDisplay {
 impl Element<CubeState, PuzzleCmd> for SolutionDisplay {
     fn draw(&self, _state: &CubeState, canvas: &mut Canvas) {
         let index = if self.anim > 0 {
-            ((self.anim / 2) % 3) + 2
+            ((self.anim / 2) % 3) + 3
         } else {
             self.index
         };
@@ -376,6 +410,13 @@ impl Element<CubeState, PuzzleCmd> for SolutionDisplay {
 }
 
 // ========================================================================= //
+
+const LETTERS: &[(i32, i32, char)] = &[(1, 0, 'Y'),
+                                       (0, 1, 'T'),
+                                       (1, 1, 'I'),
+                                       (2, 1, 'O'),
+                                       (3, 1, 'N'),
+                                       (2, 2, 'R')];
 
 const INFO_BOX_TEXT: &str = "\
 Your goal is to arrange the front faces of the cubes in

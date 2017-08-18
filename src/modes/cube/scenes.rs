@@ -134,14 +134,14 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Wait(0.5),
             Ast::Slide(ELINSA, (288, 306), true, true, 0.75),
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NW,
                       "Uh, right.  Let's\n\
                        get this thing..."),
         ]),
         Ast::Seq(vec![
             Ast::Wait(0.5),
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NW,
                       "Um."),
         ]),
         Ast::Seq(vec![
@@ -149,17 +149,38 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Slide(ELINSA, (320, 305), true, true, 1.0),
             Ast::Wait(1.0),
             Ast::Sound(Sound::talk_lo()),
-            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NW,
                       "Right.  Let's get\n\
                        this thing fixed."),
         ]),
         Ast::Seq(vec![
-            Ast::Queue(0, 1),
+            Ast::Queue(0, 1), // Animate solution display.
             Ast::Wait(1.0),
-            Ast::Queue(0, -2),
+            Ast::Queue(0, -2), // Finish solution animation.
         ]),
     ];
     Ast::compile_scene(resources, ast)
+}
+
+// ========================================================================= //
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_elinsa_midscene(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_thought()),
+            Ast::Talk(ELINSA, TalkStyle::Thought, TalkPos::NW,
+                      "Let's see...all the\n\
+                       cubes are the same...")
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_thought()),
+            Ast::Talk(ELINSA, TalkStyle::Thought, TalkPos::NW,
+                      "I think this is actually\n\
+                       easier than it looks.")
+        ]),
+    ];
+    (ELINSA, Ast::compile_scene(resources, ast))
 }
 
 // ========================================================================= //
@@ -169,6 +190,64 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
             Ast::Sound(Sound::solve_puzzle_chime()),
+            Ast::Queue(0, 2), // Animate solution display.
+            Ast::Wait(0.5),
+            Ast::Queue(1, 0), // Hide sides of cubes.
+            Ast::Wait(0.5),
+            Ast::Queue(0, -3), // Finish solution animation.
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NW,
+                      "Ha!  Ain't no problem\n\
+                       stands a chance against\n\
+                       an engineer!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Wait(0.25),
+            Ast::Sound(Sound::beep()),
+            Ast::Queue(2, 0), // Show letter Y.
+            Ast::Wait(1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NW, "Huh?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NW, "Why, you ask?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NW,
+                      "Because I'm just that\n\
+                       good, aren't I?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Wait(0.25),
+            Ast::Sound(Sound::beep()),
+            Ast::Queue(2, 5), // Show letter R.
+            Ast::Wait(1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NW,
+                      "No, not ``are.''\n\
+                       I said ``aren't.''"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(ELINSA, (380, 304), true, true, 0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NW,
+                      "Wait, why am I arguing\n\
+                       with a machine?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(ELINSA, (592, 304), true, false, 1.0),
+            Ast::Wait(1.0),
+            Ast::Sound(Sound::beep()),
+            Ast::Queue(2, 1), // Show remaining letters.
+            Ast::Wait(0.1),
+            Ast::Queue(2, 2),
+            Ast::Wait(0.1),
+            Ast::Queue(2, 3),
+            Ast::Wait(0.1),
+            Ast::Queue(2, 4),
+            Ast::Wait(1.0),
         ]),
     ];
     Ast::compile_scene(resources, ast)

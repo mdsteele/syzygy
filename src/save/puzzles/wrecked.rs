@@ -137,39 +137,44 @@ impl Tomlable for WreckedState {
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
-        if !self.is_initial {
-            let grid = self.grid
-                           .iter()
-                           .map(|&idx| toml::Value::Integer(idx as i64))
-                           .collect();
-            table.insert(GRID_KEY.to_string(), toml::Value::Array(grid));
+        if !self.is_initial && !self.is_solved() {
+            table.insert(GRID_KEY.to_string(), self.grid.to_toml());
         }
         toml::Value::Table(table)
     }
 
     fn from_toml(value: toml::Value) -> WreckedState {
         let mut table = to_table(value);
-        let mut grid = Vec::<i8>::pop_from_table(&mut table, GRID_KEY);
-        let mut init_sorted = INITIAL_GRID.to_vec();
-        init_sorted.sort();
-        let mut grid_sorted = grid.clone();
-        grid_sorted.sort();
-        if grid_sorted != init_sorted {
-            grid = INITIAL_GRID.to_vec()
+        let mut access = Access::pop_from_table(&mut table, ACCESS_KEY);
+        let grid = if access.is_solved() {
+            SOLVED_GRID.to_vec()
         } else {
-            let init_neg: Vec<bool> = INITIAL_GRID.iter()
-                                                  .map(|&tile| tile < 0)
-                                                  .collect();
-            let grid_neg: Vec<bool> = grid.iter()
-                                          .map(|&tile| tile < 0)
-                                          .collect();
-            if grid_neg != init_neg {
-                grid = INITIAL_GRID.to_vec();
+            let mut grid = Vec::<i8>::pop_from_table(&mut table, GRID_KEY);
+            let mut init_sorted = INITIAL_GRID.to_vec();
+            init_sorted.sort();
+            let mut grid_sorted = grid.clone();
+            grid_sorted.sort();
+            if grid_sorted != init_sorted {
+                grid = INITIAL_GRID.to_vec()
+            } else {
+                let init_neg: Vec<bool> = INITIAL_GRID.iter()
+                                                      .map(|&tile| tile < 0)
+                                                      .collect();
+                let grid_neg: Vec<bool> = grid.iter()
+                                              .map(|&tile| tile < 0)
+                                              .collect();
+                if grid_neg != init_neg {
+                    grid = INITIAL_GRID.to_vec();
+                }
             }
-        }
+            if &grid as &[i8] == SOLVED_GRID {
+                access = Access::Solved;
+            }
+            grid
+        };
         let is_initial = &grid as &[i8] == INITIAL_GRID;
         WreckedState {
-            access: Access::pop_from_table(&mut table, ACCESS_KEY),
+            access: access,
             grid: grid,
             is_initial: is_initial,
         }
@@ -182,9 +187,54 @@ impl Tomlable for WreckedState {
 mod tests {
     use toml;
 
-    use save::Direction;
-    use save::util::Tomlable;
-    use super::WreckedState;
+    use save::{Access, Direction};
+    use save::util::{ACCESS_KEY, Tomlable};
+    use super::{GRID_KEY, INITIAL_GRID, SOLVED_GRID, WreckedState};
+
+    #[test]
+    fn toml_round_trip() {
+        let mut state = WreckedState::from_toml(toml::Value::Boolean(false));
+        state.access = Access::Replaying;
+        state.shift_tiles(Direction::East, 0, 1);
+        state.shift_tiles(Direction::South, 0, 1);
+        assert!(!state.is_initial);
+        let grid = state.grid.clone();
+
+        let state = WreckedState::from_toml(state.to_toml());
+        assert_eq!(state.access, Access::Replaying);
+        assert_eq!(state.grid, grid);
+        assert!(!state.is_initial);
+    }
+
+    #[test]
+    fn from_empty_toml() {
+        let state = WreckedState::from_toml(toml::Value::Boolean(false));
+        assert_eq!(state.access, Access::Unvisited);
+        assert_eq!(&state.grid as &[i8], INITIAL_GRID);
+        assert!(state.is_initial);
+    }
+
+    #[test]
+    fn from_solved_toml() {
+        let mut table = toml::value::Table::new();
+        table.insert(ACCESS_KEY.to_string(), Access::Solved.to_toml());
+
+        let state = WreckedState::from_toml(toml::Value::Table(table));
+        assert_eq!(state.access, Access::Solved);
+        assert_eq!(&state.grid as &[i8], SOLVED_GRID);
+        assert!(!state.is_initial);
+    }
+
+    #[test]
+    fn from_already_correct_toml() {
+        let mut table = toml::value::Table::new();
+        table.insert(ACCESS_KEY.to_string(), Access::Unsolved.to_toml());
+        table.insert(GRID_KEY.to_string(), SOLVED_GRID.to_vec().to_toml());
+
+        let state = WreckedState::from_toml(toml::Value::Table(table));
+        assert_eq!(state.access, Access::Solved);
+        assert_eq!(&state.grid as &[i8], SOLVED_GRID);
+    }
 
     #[test]
     fn shift_east() {

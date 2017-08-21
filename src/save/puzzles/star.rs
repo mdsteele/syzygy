@@ -18,7 +18,7 @@
 // +--------------------------------------------------------------------------+
 
 use std::ascii::AsciiExt;
-use std::collections::BTreeSet;
+use std::collections::HashSet;
 use toml;
 
 use gui::Point;
@@ -85,7 +85,7 @@ impl WordDir {
 
 pub struct StarState {
     access: Access,
-    found: BTreeSet<i32>,
+    found: HashSet<i32>,
     columns: Vec<Vec<char>>,
 }
 
@@ -188,26 +188,24 @@ impl Tomlable for StarState {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.is_solved() && !self.found.is_empty() {
-            let found = self.found
-                            .iter()
-                            .map(|&idx| toml::Value::Integer(idx as i64))
-                            .collect();
-            table.insert(FOUND_KEY.to_string(), toml::Value::Array(found));
+            table.insert(FOUND_KEY.to_string(), self.found.to_toml());
         }
         toml::Value::Table(table)
     }
 
     fn from_toml(value: toml::Value) -> StarState {
         let mut table = to_table(value);
-        let access = Access::pop_from_table(&mut table, ACCESS_KEY);
-        let found = if access == Access::Solved {
+        let mut access = Access::pop_from_table(&mut table, ACCESS_KEY);
+        let found: HashSet<i32> = if access == Access::Solved {
             (0..(WORDS.len() as i32)).into_iter().collect()
         } else {
             let num_words = WORDS.len() as i32;
             let found = Vec::<i32>::pop_from_table(&mut table, FOUND_KEY);
             found.into_iter().filter(|&i| 0 <= i && i < num_words).collect()
         };
-
+        if found.len() == WORDS.len() {
+            access = Access::Solved;
+        }
         let mut state = StarState {
             access: access,
             found: found,
@@ -222,9 +220,65 @@ impl Tomlable for StarState {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::BTreeSet;
+    use std::collections::{BTreeSet, HashSet};
+    use toml;
 
-    use super::WORDS;
+    use save::Access;
+    use save::util::{ACCESS_KEY, Tomlable};
+    use super::{FINAL_WORD, FOUND_KEY, StarState, WORDS, WordDir};
+
+    #[test]
+    fn toml_round_trip() {
+        let mut state = StarState::from_toml(toml::Value::Boolean(false));
+        state.access = Access::Replaying;
+        assert!(state.try_remove_word(2, 4, WordDir::Horizontal, 7));
+        assert_eq!(state.found.len(), 1);
+        let found = state.found.clone();
+        let columns = state.columns.clone();
+
+        let state = StarState::from_toml(state.to_toml());
+        assert_eq!(state.access, Access::Replaying);
+        assert_eq!(state.found, found);
+        assert_eq!(state.columns, columns);
+    }
+
+    #[test]
+    fn from_empty_toml() {
+        let state = StarState::from_toml(toml::Value::Boolean(false));
+        assert_eq!(state.access, Access::Unvisited);
+        assert!(state.found.is_empty());
+    }
+
+    #[test]
+    fn from_solved_toml() {
+        let mut table = toml::value::Table::new();
+        table.insert(ACCESS_KEY.to_string(), Access::Solved.to_toml());
+
+        let state = StarState::from_toml(toml::Value::Table(table));
+        assert_eq!(state.access, Access::Solved);
+        assert_eq!(state.found.len(), WORDS.len());
+        assert_eq!(state.columns,
+                   FINAL_WORD.chars()
+                             .map(|chr| vec![chr])
+                             .collect::<Vec<Vec<char>>>());
+    }
+
+    #[test]
+    fn from_already_found_everything_toml() {
+        let mut table = toml::value::Table::new();
+        table.insert(ACCESS_KEY.to_string(), Access::Unsolved.to_toml());
+        let found: HashSet<i32> =
+            (0..(WORDS.len() as i32)).into_iter().collect();
+        table.insert(FOUND_KEY.to_string(), found.to_toml());
+
+        let state = StarState::from_toml(toml::Value::Table(table));
+        assert_eq!(state.access, Access::Solved);
+        assert_eq!(state.found, found);
+        assert_eq!(state.columns,
+                   FINAL_WORD.chars()
+                             .map(|chr| vec![chr])
+                             .collect::<Vec<Vec<char>>>());
+    }
 
     #[test]
     fn word_insertion_indicies() {

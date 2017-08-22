@@ -85,13 +85,17 @@ pub struct PasswordState {
 impl PasswordState {
     pub fn solve(&mut self) {
         self.access = Access::Solved;
+        self.solve_all_crosswords();
+        self.sliders = SOLVED_SLIDERS;
+    }
+
+    fn solve_all_crosswords(&mut self) {
         self.crosswords = [(true, CrosswordState::new(VALID, ELINSA_WORDS)),
                            (true, CrosswordState::new(VALID, ARGONY_WORDS)),
                            (true, CrosswordState::new(VALID, MEZURE_WORDS)),
                            (true, CrosswordState::new(VALID, YTTRIS_WORDS)),
                            (true, CrosswordState::new(VALID, UGRENT_WORDS)),
                            (true, CrosswordState::new(VALID, RELYNG_WORDS))];
-        self.sliders = SOLVED_SLIDERS;
     }
 
     pub fn active_slot(&self) -> i32 { self.active_slot }
@@ -265,6 +269,80 @@ fn load(table: &mut toml::value::Table, access: Access, key: &str,
                                                   VALID,
                                                   solved_words);
         (crossword.words_are(solved_words), crossword)
+    }
+}
+
+// ========================================================================= //
+
+#[cfg(test)]
+mod tests {
+    use toml;
+
+    use save::Access;
+    use save::util::{ACCESS_KEY, Tomlable};
+    use super::{INIT_SLIDERS, PasswordState, SOLVED_SLIDERS};
+
+    #[test]
+    fn toml_round_trip_crosswords() {
+        let mut state = PasswordState::from_toml(toml::Value::Boolean(false));
+        state.access = Access::Replaying;
+        state.crossword_mut(0).set_char(2, 0, 'H');
+        state.crossword_mut(0).set_char(2, 1, 'E');
+        state.crossword_mut(0).set_char(2, 2, 'L');
+        state.crossword_mut(0).set_char(2, 3, 'L');
+        state.crossword_mut(0).set_char(2, 4, 'O');
+        state.crossword_mut(1).set_char(0, 0, 'W');
+        state.crossword_mut(1).set_char(0, 1, 'O');
+        state.crossword_mut(1).set_char(0, 2, 'R');
+        state.crossword_mut(1).set_char(0, 3, 'L');
+        state.crossword_mut(1).set_char(0, 4, 'D');
+        state.set_active_slot(2);
+
+        let state = PasswordState::from_toml(state.to_toml());
+        assert_eq!(state.access, Access::Replaying);
+        assert_eq!(state.active_slot, 2);
+        assert!(state.crossword(0).can_reset());
+        assert_eq!(state.crossword(0).words()[2],
+                   vec!['H', 'E', 'L', 'L', 'O', ' ', ' ', ' ', ' ']);
+        assert!(state.crossword(1).can_reset());
+        assert_eq!(state.crossword(1).words()[0],
+                   vec!['W', 'O', 'R', 'L', 'D', ' ', ' ', ' ', ' ']);
+        assert!(!state.crossword(2).can_reset());
+    }
+
+    #[test]
+    fn toml_round_trip_sliders() {
+        let mut state = PasswordState::from_toml(toml::Value::Boolean(false));
+        state.access = Access::Replaying;
+        state.solve_all_crosswords();
+        state.sliders = [0, -1, -2, -3, -4, -5];
+
+        let state = PasswordState::from_toml(state.to_toml());
+        assert_eq!(state.access, Access::Replaying);
+        assert_eq!(state.sliders, [0, -1, -2, -3, -4, -5]);
+    }
+
+    #[test]
+    fn from_empty_toml() {
+        let state = PasswordState::from_toml(toml::Value::Boolean(false));
+        assert_eq!(state.access, Access::Unvisited);
+        assert_eq!(state.active_slot, 0);
+        assert!(state.crosswords.iter().all(|&(done, _)| !done));
+        assert!(state.crosswords
+                     .iter()
+                     .all(|&(_, ref crossword)| !crossword.can_reset()));
+        assert_eq!(state.sliders, INIT_SLIDERS);
+    }
+
+    #[test]
+    fn from_solved_toml() {
+        let mut table = toml::value::Table::new();
+        table.insert(ACCESS_KEY.to_string(), Access::Solved.to_toml());
+
+        let state = PasswordState::from_toml(toml::Value::Table(table));
+        assert_eq!(state.access, Access::Solved);
+        assert!(state.crosswords.iter().all(|&(done, _)| done));
+        assert_eq!(state.sliders, SOLVED_SLIDERS);
     }
 }
 

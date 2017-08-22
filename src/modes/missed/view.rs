@@ -38,11 +38,13 @@ impl View {
     pub fn new(resources: &mut Resources, visible: Rect, state: &MissedState)
                -> View {
         let mut core = {
-            let intro = scenes::compile_intro_scene(resources);
+            let intro = scenes::compile_intro_scene(resources, visible);
             let outro = scenes::compile_outro_scene(resources);
             PuzzleCore::new(resources, visible, state, intro, outro)
         };
+        core.add_extra_scene(scenes::compile_elinsa_midscene(resources));
         core.add_extra_scene(scenes::compile_mezure_midscene(resources));
+        core.add_extra_scene(scenes::compile_ugrent_midscene(resources));
         View {
             core: core,
             laser_field: LaserField::new(resources, 104, 72, state.grid()),

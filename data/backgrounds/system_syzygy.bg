@@ -2,6 +2,7 @@
 >caution_walls
 >girders
 >miniblocks
+>space
 
         BB                                                    BB
         BB                                                    BB
@@ -11,14 +12,14 @@
 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
         BB                BB                BB                BB
         BB                BB                BB                BB
-        BB                BB                BB                BB
-        BB                BB                BB                BB
-        BB                BB                BB                BB
-        BB                BB                BB                BB
-        BB                BB                BB                BB
-        BB                BB                BB                BB
-        BB                BB                BB                BB
-        BB                BB                BB                BB
+        BB            DTDNDNDNDNDNDNDNDNDNDNDNDNDP            BB
+        BB          DTDRDTDNDNDNDNDNDNDNDNDNDNDPDVDP          BB
+        BB        DTDRDTDRDTDNDNDNDNDNDNDNDNDPDVDPDVDP        BB
+        BB                                                    BB
+        BB                                                    BB
+        BB        DVDPDVDPDVDNDNDNDNDNDNDNDNDRDTDRDTDR        BB
+        BB          DVDPDVDNDNDNDNDNDNDNDNDNDNDRDTDR          BB
+        BB            DVDNDNDNDNDNDNDNDNDNDNDNDNDR            BB
         BB                BB                BB                BB
         BB                BB          CACJCJBICJCJCJCJCJCJCJCJBICB
         BB                BB          CG                        CH

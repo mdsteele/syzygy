@@ -25,7 +25,7 @@ use elements::column::ColumnsView;
 use elements::lasers::{LaserCmd, LaserField};
 use elements::plane::{PlaneCmd, PlaneGridView};
 use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
-          Sound};
+          Sound, Sprite};
 use modes::SOLVED_INFO_TEXT;
 use save::{self, Game, PuzzleState, SyzygyStage, SyzygyState};
 use super::mezure::{MezureCmd, MezureView};
@@ -49,6 +49,7 @@ enum UndoRedo {
 pub struct View {
     core: PuzzleCore<UndoRedo>,
     progress: SyzygyProgress,
+    atlatl_sprites: Vec<Sprite>,
     yttris: ColumnsView,
     argony: elements::ice::GridView,
     elinsa: PlaneGridView,
@@ -67,7 +68,8 @@ impl View {
         View {
             core: core,
             progress: SyzygyProgress::new(resources, 320, 288),
-            yttris: ColumnsView::new(resources, 196, 156, 0),
+            atlatl_sprites: resources.get_sprites("syzygy/atlatl"),
+            yttris: ColumnsView::new(resources, 212, 168, 0),
             argony: elements::ice::GridView::new(resources,
                                                  144,
                                                  108,
@@ -78,6 +80,19 @@ impl View {
             mezure: MezureView::new(resources, state),
         }
     }
+
+    fn draw_atlatl(&self, canvas: &mut Canvas) {
+        canvas.draw_sprite(&self.atlatl_sprites[0], Point::new(128, 160));
+        canvas.draw_sprite(&self.atlatl_sprites[1], Point::new(128, 192));
+        canvas.draw_sprite(&self.atlatl_sprites[2], Point::new(160, 160));
+        canvas.draw_sprite(&self.atlatl_sprites[3], Point::new(160, 192));
+        canvas.draw_sprite(&self.atlatl_sprites[4], Point::new(192, 176));
+        for col in 0..6 {
+            let left = 224 + 32 * col;
+            canvas.draw_sprite(&self.atlatl_sprites[5], Point::new(left, 176));
+        }
+        canvas.draw_sprite(&self.atlatl_sprites[6], Point::new(416, 176));
+    }
 }
 
 impl Element<Game, PuzzleCmd> for View {
@@ -85,6 +100,8 @@ impl Element<Game, PuzzleCmd> for View {
         let state = &game.system_syzygy;
         self.core.draw_back_layer(canvas);
         self.progress.draw(&(), canvas);
+        self.core.draw_middle_layer(canvas);
+        self.draw_atlatl(canvas);
         match state.stage() {
             SyzygyStage::Yttris => {
                 self.yttris.draw(state.yttris_columns(), canvas);
@@ -101,7 +118,6 @@ impl Element<Game, PuzzleCmd> for View {
             SyzygyStage::Relyng => self.relyng.draw(state, canvas),
             SyzygyStage::Mezure => self.mezure.draw(state, canvas),
         }
-        self.core.draw_middle_layer(canvas);
         self.core.draw_front_layer(canvas, state);
     }
 

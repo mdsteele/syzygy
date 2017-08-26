@@ -69,6 +69,26 @@ impl<'a> Canvas<'a> {
         }
     }
 
+    pub fn clipped(&mut self, mut rect: Rect) -> Canvas {
+        rect.offset(self.offset_rect.x(), self.offset_rect.y());
+        let new_clip_rect = if let Some(clip) = self.clip_rect {
+            if let Some(intersection) = clip.intersection(rect) {
+                Some(intersection)
+            } else {
+                Some(Rect::new(0, 0, 0, 0))
+            }
+        } else {
+            Some(rect)
+        };
+        self.renderer.set_clip_rect(new_clip_rect);
+        Canvas {
+            renderer: self.renderer,
+            offset_rect: self.offset_rect,
+            clip_rect: new_clip_rect,
+            prev_clip_rect: self.clip_rect,
+        }
+    }
+
     pub fn clear(&mut self, color: (u8, u8, u8)) {
         let (r, g, b) = color;
         self.renderer.set_draw_color(Color::RGB(r, g, b));

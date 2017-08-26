@@ -117,6 +117,12 @@ impl<U: Clone> PuzzleCore<U> {
         }
     }
 
+    pub fn skip_extra_scene(&mut self, key: i32) {
+        if let Some(scene) = self.extra_scenes.get(&key) {
+            scene.clone().skip(&mut self.theater);
+        }
+    }
+
     pub fn begin_character_scene_on_click(&mut self, event: &Event) {
         if let &Event::MouseDown(pt) = event {
             if let Some(key) = self.theater.actor_at_point(pt) {

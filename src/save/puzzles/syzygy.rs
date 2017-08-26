@@ -52,6 +52,20 @@ const YTTRIS_COLUMNS_SPEC: &[(&str, i32, i32, &[(usize, i32)])] = &[
     ("KEYS", -1, 3, &[(5, 1), (2, -2), (4,  3)]),
 ];
 
+#[cfg_attr(rustfmt, rustfmt_skip)]
+const ELINSA_SOLVED_PIPES: &[&[(i32, i32)]] = &[
+    &[(7, 1), (6, 1), (5, 1), (4, 1), (3, 1), (2, 1), (2, 2)],
+    &[(7, 1), (7, 2), (7, 3), (7, 4), (6, 4), (5, 4), (5, 3)],
+    &[(7, 1), (7, 0), (6, 0), (5, 0), (4, 0), (3, 0), (2, 0), (1, 0), (1, 1),
+      (0, 1), (0, 2), (0, 3), (0, 4), (0, 5), (1, 5)],
+    &[(2, 2), (2, 3), (3, 3), (4, 3), (5, 3)],
+    &[(2, 2), (3, 2), (4, 2), (5, 2), (6, 2), (7, 2), (8, 2), (9, 2), (9, 3)],
+    &[(2, 2), (1, 2), (1, 3), (1, 4), (1, 5)],
+    &[(5, 3), (6, 3), (7, 3), (8, 3), (9, 3)],
+    &[(9, 3), (9, 4), (8, 4), (8, 5), (7, 5), (6, 5), (5, 5), (4, 5), (3, 5),
+      (2, 5), (1, 5)],
+];
+
 const RELYNG_NUM_COLS: i32 = 5;
 const RELYNG_NUM_ROWS: i32 = 4;
 const RELYNG_INIT_NEXT: char = '+';
@@ -75,7 +89,7 @@ const MEZURE_GRAY_NODES_EMITTERS: &[((i32, i32), (i32, i32), Direction)] = &[
 
 // ========================================================================= //
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub enum SyzygyStage {
     Yttris,
     Argony,
@@ -87,6 +101,17 @@ pub enum SyzygyStage {
 
 impl SyzygyStage {
     pub fn first() -> SyzygyStage { SyzygyStage::Yttris }
+
+    pub fn next(self) -> SyzygyStage {
+        match self {
+            SyzygyStage::Yttris => SyzygyStage::Argony,
+            SyzygyStage::Argony => SyzygyStage::Elinsa,
+            SyzygyStage::Elinsa => SyzygyStage::Ugrent,
+            SyzygyStage::Ugrent => SyzygyStage::Relyng,
+            SyzygyStage::Relyng => SyzygyStage::Mezure,
+            SyzygyStage::Mezure => SyzygyStage::Mezure,
+        }
+    }
 }
 
 impl Tomlable for SyzygyStage {
@@ -137,7 +162,7 @@ pub struct SyzygyState {
 }
 
 impl SyzygyState {
-    fn argony_initial_grid() -> ObjectGrid {
+    fn argony_base_grid() -> ObjectGrid {
         let q_goal = Symbol::CyanQ(Transform::identity());
         let u_goal = Symbol::CyanU(Transform::identity());
         let a_goal = Symbol::CyanA(Transform::identity());
@@ -157,7 +182,11 @@ impl SyzygyState {
         grid.add_object(4, 4, Object::Wall);
         grid.add_object(5, 4, Object::Goal(a_goal));
         grid.add_object(7, 4, Object::Goal(d_goal));
+        grid
+    }
 
+    fn argony_initial_grid() -> ObjectGrid {
+        let mut grid = SyzygyState::argony_base_grid();
         let q_trans = Transform::identity().rotated_cw().rotated_cw();
         let u_trans = Transform::identity().flipped_vert();
         let a_trans = Transform::identity().rotated_cw().rotated_cw();
@@ -167,6 +196,10 @@ impl SyzygyState {
         grid.add_ice_block(7, 0, Symbol::CyanU(u_trans));
         grid.add_ice_block(8, 0, Symbol::CyanQ(d_trans));
         grid
+    }
+
+    fn argony_solved_grid() -> ObjectGrid {
+        SyzygyState::argony_base_grid().solved()
     }
 
     fn elinsa_initial_grid() -> PlaneGrid {
@@ -184,7 +217,7 @@ impl SyzygyState {
         grid
     }
 
-    fn ugrent_initial_grid() -> DeviceGrid {
+    fn ugrent_base_grid() -> DeviceGrid {
         let mut grid = DeviceGrid::new(7, 5);
         grid.set(0, 0, Device::Emitter(MixedColor::Red), Direction::South);
         grid.set(3, 0, Device::Detector(MixedColor::Red), Direction::East);
@@ -192,7 +225,11 @@ impl SyzygyState {
         grid.set(3, 3, Device::Wall, Direction::East);
         grid.set(0, 4, Device::Emitter(MixedColor::Green), Direction::North);
         grid.set(3, 4, Device::Detector(MixedColor::Blue), Direction::East);
+        grid
+    }
 
+    fn ugrent_initial_grid() -> DeviceGrid {
+        let mut grid = SyzygyState::ugrent_base_grid();
         grid.set(2, 0, Device::Mirror, Direction::East);
         grid.set(2, 1, Device::Mirror, Direction::South);
         grid.set(2, 2, Device::Mirror, Direction::East);
@@ -208,6 +245,26 @@ impl SyzygyState {
         grid.set(5, 2, Device::Mirror, Direction::South);
         grid.set(5, 3, Device::Mirror, Direction::East);
         grid.set(5, 4, Device::Mirror, Direction::South);
+        grid
+    }
+
+    fn ugrent_solved_grid() -> DeviceGrid {
+        let mut grid = SyzygyState::ugrent_base_grid();
+        grid.set(1, 0, Device::Mirror, Direction::East);
+        grid.set(2, 0, Device::Mirror, Direction::South);
+        grid.set(5, 0, Device::Mirror, Direction::South);
+        grid.set(0, 1, Device::Mirror, Direction::South);
+        grid.set(1, 1, Device::Splitter, Direction::East);
+        grid.set(2, 1, Device::Mirror, Direction::South);
+        grid.set(5, 1, Device::Splitter, Direction::East);
+        grid.set(1, 2, Device::Mixer, Direction::East);
+        grid.set(4, 2, Device::Mirror, Direction::South);
+        grid.set(5, 2, Device::Mixer, Direction::East);
+        grid.set(0, 3, Device::Mirror, Direction::East);
+        grid.set(1, 3, Device::Mirror, Direction::East);
+        grid.set(4, 3, Device::Mirror, Direction::South);
+        grid.set(5, 3, Device::Splitter, Direction::East);
+        grid.set(5, 4, Device::Mirror, Direction::East);
         grid
     }
 
@@ -251,23 +308,49 @@ impl SyzygyState {
         grid
     }
 
-    // TODO: Solve stages one at a time.
-    pub fn solve(&mut self) { self.access = Access::Solved; }
+    pub fn solve_stage(&mut self) {
+        match self.stage {
+            SyzygyStage::Yttris => {
+                self.yttris.solve();
+                self.advance_stage();
+            }
+            SyzygyStage::Argony => {
+                self.argony = SyzygyState::argony_solved_grid();
+                self.advance_stage();
+            }
+            SyzygyStage::Elinsa => {
+                self.elinsa.remove_all_pipes();
+                for pipe in ELINSA_SOLVED_PIPES {
+                    let mut p1 = Point::new(pipe[0].0, pipe[0].1);
+                    for i in 1..pipe.len() {
+                        let p2 = Point::new(pipe[i].0, pipe[i].1);
+                        self.elinsa.toggle_pipe(p1, p2);
+                        p1 = p2;
+                    }
+                }
+                debug_assert!(self.elinsa.all_nodes_are_connected());
+                self.advance_stage();
+            }
+            SyzygyStage::Ugrent => {
+                self.ugrent = SyzygyState::ugrent_solved_grid();
+                self.advance_stage();
+            }
+            SyzygyStage::Relyng => {
+                let num_lights = RELYNG_NUM_COLS * RELYNG_NUM_ROWS;
+                self.relyng_lights = (0..num_lights).collect();
+                self.advance_stage();
+            }
+            SyzygyStage::Mezure => {
+                self.mezure_pipe_grid.remove_all_pipes();
+                self.mezure_columns.solve();
+                self.access = Access::Solved;
+            }
+        }
+    }
 
     pub fn stage(&self) -> SyzygyStage { self.stage }
 
-    pub fn advance_stage_if_done(&mut self) -> bool {
-        match self.stage {
-            SyzygyStage::Elinsa => {
-                if self.elinsa.all_nodes_are_connected() {
-                    self.stage = SyzygyStage::Ugrent;
-                    return true;
-                }
-            }
-            _ => {} // TODO
-        }
-        false
-    }
+    pub fn advance_stage(&mut self) { self.stage = self.stage.next(); }
 
     pub fn yttris_columns(&self) -> &Columns { &self.yttris }
 

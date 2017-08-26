@@ -58,6 +58,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Slide(RELYNG, (400, 80), false, true, 1.0),
             Ast::Place(MEZURE, "chars/mezure", 0, (592, 80)),
             Ast::Slide(MEZURE, (475, 80), false, true, 1.0),
+            Ast::Queue(1, 1),  // Set progress bar to 1/6.
             Ast::Queue(0, 1),  // Reveal puzzle.
             Ast::Wait(1.5),
             Ast::Queue(0, -1),  // Finish reveal animation.
@@ -102,6 +103,7 @@ pub fn compile_post_yttris_scene(resources: &mut Resources) -> (i32, Scene) {
                        what's next?")
         ]),
         Ast::Seq(vec![
+            Ast::Queue(1, 2),  // Set progress bar to 2/6.
             Ast::Queue(0, 1),  // Reveal puzzle.
             Ast::Wait(1.5),
             Ast::Queue(0, -1),  // Finish reveal animation.
@@ -140,6 +142,7 @@ pub fn compile_post_argony_scene(resources: &mut Resources) -> (i32, Scene) {
                        what's next?")
         ]),
         Ast::Seq(vec![
+            Ast::Queue(1, 3),  // Set progress bar to 3/6.
             Ast::Queue(0, 1),  // Reveal puzzle.
             Ast::Wait(1.5),
             Ast::Queue(0, -1),  // Finish reveal animation.
@@ -178,6 +181,7 @@ pub fn compile_post_elinsa_scene(resources: &mut Resources) -> (i32, Scene) {
                        what's next?")
         ]),
         Ast::Seq(vec![
+            Ast::Queue(1, 4),  // Set progress bar to 4/6.
             Ast::Queue(0, 1),  // Reveal puzzle.
             Ast::Wait(1.5),
             Ast::Queue(0, -1),  // Finish reveal animation.
@@ -216,6 +220,7 @@ pub fn compile_post_ugrent_scene(resources: &mut Resources) -> (i32, Scene) {
                        what's next?")
         ]),
         Ast::Seq(vec![
+            Ast::Queue(1, 5),  // Set progress bar to 5/6.
             Ast::Queue(0, 1),  // Reveal puzzle.
             Ast::Wait(1.5),
             Ast::Queue(0, -1),  // Finish reveal animation.
@@ -254,6 +259,7 @@ pub fn compile_post_relyng_scene(resources: &mut Resources) -> (i32, Scene) {
                        what's next?")
         ]),
         Ast::Seq(vec![
+            Ast::Queue(1, 6),  // Set progress bar to 6/6.
             Ast::Queue(0, 1),  // Reveal puzzle.
             Ast::Wait(1.5),
             Ast::Queue(0, -1),  // Finish reveal animation.

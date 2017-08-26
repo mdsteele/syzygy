@@ -100,14 +100,14 @@ impl View {
             core: core,
             progress: SyzygyProgress::new(resources, 320, 288),
             atlatl: Atlatl::new(resources),
-            yttris: ColumnsView::new(resources, 212, 168, 0),
+            yttris: ColumnsView::new(resources, 196, 168, 0),
             argony: elements::ice::GridView::new(resources,
                                                  144,
-                                                 108,
+                                                 128,
                                                  state.argony_grid()),
-            elinsa: PlaneGridView::new(resources, 168, 108),
-            ugrent: LaserField::new(resources, 176, 108, state.ugrent_grid()),
-            relyng: LightsGrid::new(resources, 168, 124, state),
+            elinsa: PlaneGridView::new(resources, 168, 120),
+            ugrent: LaserField::new(resources, 176, 112, state.ugrent_grid()),
+            relyng: LightsGrid::new(resources, 168, 128, state),
             mezure: MezureView::new(resources, state),
             should_reveal: false,
             reveal_amount: 0,
@@ -211,7 +211,7 @@ impl Element<Game, PuzzleCmd> for View {
                                                   .slide_ice_block(coords,
                                                                    dir) {
                             self.argony.animate_slide(&slide);
-                            if state.is_solved() {
+                            if state.argony_grid().all_blocks_on_goals() {
                                 self.core.clear_undo_redo();
                                 state.advance_stage();
                                 self.core.begin_extra_scene(

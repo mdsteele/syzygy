@@ -167,21 +167,20 @@ impl SyzygyState {
         let u_goal = Symbol::CyanU(Transform::identity());
         let a_goal = Symbol::CyanA(Transform::identity());
         let d_goal = Symbol::CyanQ(Transform::identity().flipped_vert());
-        let mut grid = ObjectGrid::new(9, 5);
+        let mut grid = ObjectGrid::new(9, 4);
+        grid.add_object(1, 0, Object::Wall);
         grid.add_object(4, 0, Object::Wall);
-        grid.add_object(1, 1, Object::Wall);
-        grid.add_object(4, 1, Object::Wall);
-        grid.add_object(1, 2, Object::Rotator);
-        grid.add_object(4, 2, Object::Reflector(false));
-        grid.add_object(8, 2, Object::Wall);
-        grid.add_object(1, 3, Object::Wall);
+        grid.add_object(1, 1, Object::Rotator);
+        grid.add_object(4, 1, Object::Reflector(false));
+        grid.add_object(8, 1, Object::Wall);
+        grid.add_object(1, 2, Object::Wall);
+        grid.add_object(3, 2, Object::PushPop(Direction::West));
+        grid.add_object(4, 2, Object::Wall);
+        grid.add_object(1, 3, Object::Goal(q_goal));
+        grid.add_object(3, 3, Object::Goal(u_goal));
         grid.add_object(4, 3, Object::Wall);
-        grid.add_object(8, 3, Object::PushPop(Direction::South));
-        grid.add_object(1, 4, Object::Goal(q_goal));
-        grid.add_object(3, 4, Object::Goal(u_goal));
-        grid.add_object(4, 4, Object::Wall);
-        grid.add_object(5, 4, Object::Goal(a_goal));
-        grid.add_object(7, 4, Object::Goal(d_goal));
+        grid.add_object(5, 3, Object::Goal(a_goal));
+        grid.add_object(7, 3, Object::Goal(d_goal));
         grid
     }
 

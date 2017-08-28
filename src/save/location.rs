@@ -172,9 +172,13 @@ impl Location {
             Location::Map => vec![],
             Location::Prolog => vec![],
             Location::ALightInTheAttic => vec![Location::Prolog],
-            Location::AutofacTour => vec![Location::WhatchaColumn],
+            Location::AutofacTour => {
+                vec![Location::HexSpangled, Location::WhatchaColumn]
+            }
             Location::BlackAndBlue => vec![Location::ColumnAsIcyEm],
-            Location::ColumnAsIcyEm => vec![Location::AutofacTour],
+            Location::ColumnAsIcyEm => {
+                vec![Location::AutofacTour, Location::IceToMeetYou]
+            }
             Location::ConnectTheDots => vec![Location::LogLevel],
             Location::CrossSauce => vec![Location::PointOfView],
             Location::CrossTheLine => vec![Location::Prolog],
@@ -183,8 +187,10 @@ impl Location {
             Location::DoubleCross => vec![Location::TreadLightly],
             Location::FactOrFiction => vec![Location::StarCrossed],
             Location::HexSpangled => vec![Location::TheYFactor],
-            Location::IceToMeetYou => vec![Location::HexSpangled],
-            Location::IfMemoryServes => vec![Location::MissedConnections],
+            Location::IceToMeetYou => vec![Location::IfMemoryServes],
+            Location::IfMemoryServes => {
+                vec![Location::MissedConnections, Location::WhatchaColumn]
+            }
             Location::JogYourMemory => vec![Location::PointOfNoReturn],
             Location::LevelHeaded => vec![Location::ColumnAsIcyEm],
             Location::LevelUp => vec![Location::TheIceIsRight],
@@ -198,7 +204,7 @@ impl Location {
             }
             Location::PasswordFile => vec![Location::SystemFailure],
             Location::PlaneAndSimple => vec![Location::CrossTheLine],
-            Location::PlaneAsDay => vec![Location::IfMemoryServes],
+            Location::PlaneAsDay => vec![Location::MissedConnections],
             Location::PointOfNoReturn => {
                 vec![Location::IfMemoryServes, Location::ShiftGears]
             }
@@ -425,6 +431,13 @@ mod tests {
         assert!(deps_map.get(&Location::PlaneAsDay)
                         .unwrap()
                         .contains(&Location::PlaneAndSimple));
+        // "Shift" puzzles:
+        assert!(deps_map.get(&Location::ShiftGears)
+                        .unwrap()
+                        .contains(&Location::ShiftingGround));
+        assert!(deps_map.get(&Location::ShiftTheBlame)
+                        .unwrap()
+                        .contains(&Location::ShiftingGround));
     }
 }
 

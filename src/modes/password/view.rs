@@ -26,13 +26,13 @@ use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
           Sound, Sprite};
 use modes::SOLVED_INFO_TEXT;
 use save::{Game, PasswordState, PuzzleState};
-use super::scenes::{compile_intro_scene, compile_outro_scene};
+use super::scenes;
 
 // ========================================================================= //
 
 #[derive(Clone, Copy)]
 enum UndoRedo {
-    Crossword(i32, i32, i32, char, char),
+    Crossword(usize, i32, i32, char, char),
     Slider(i32, i32, i32),
 }
 
@@ -44,15 +44,19 @@ pub struct View {
     paragraphs: [(Rc<Paragraph>, TalkPos); 6],
     crosswords: [CrosswordView; 6],
     slider: PasswordSlider,
+    show_words: bool,
+    should_display_speech: bool,
 }
 
 impl View {
     pub fn new(resources: &mut Resources, visible: Rect,
                state: &PasswordState)
                -> View {
-        let intro = compile_intro_scene(resources);
-        let outro = compile_outro_scene(resources);
-        let core = PuzzleCore::new(resources, visible, state, intro, outro);
+        let core = {
+            let intro = scenes::compile_intro_scene(resources);
+            let outro = scenes::compile_outro_scene(resources);
+            PuzzleCore::new(resources, visible, state, intro, outro)
+        };
         let mut view = View {
             core: core,
             speech_bubble: resources.get_sprites("speech/normal"),
@@ -87,9 +91,11 @@ impl View {
                                             RELYNG_OFFS,
                                             (276, 80))],
             slider: PasswordSlider::new(resources),
+            show_words: false,
+            should_display_speech: false,
         };
-        for (slot, crossword) in view.crosswords.iter_mut().enumerate() {
-            if state.crossword_is_done(slot as i32) {
+        for (index, crossword) in view.crosswords.iter_mut().enumerate() {
+            if state.crossword_is_done(index) {
                 crossword.set_center_word_hilighted(true);
             }
         }
@@ -102,12 +108,13 @@ impl View {
     fn display_crossword_speech(&mut self, state: &PasswordState) -> bool {
         let theater = self.core.theater_mut();
         for other in 0..6 {
-            theater.clear_actor_speech(other);
+            let slot = scenes::slot_for_crossword_index(other);
+            theater.clear_actor_speech(slot);
         }
-        let slot = state.active_slot();
-        if !state.crossword_is_done(slot) {
-            let (paragraph, talk_pos) = self.paragraphs[slot as usize].clone();
-            theater.set_actor_speech(slot,
+        let index = state.active_index();
+        if !state.crossword_is_done(index) {
+            let (paragraph, talk_pos) = self.paragraphs[index].clone();
+            theater.set_actor_speech(scenes::slot_for_crossword_index(index),
                                      self.speech_bubble.clone(),
                                      (255, 255, 255),
                                      talk_pos,
@@ -124,11 +131,14 @@ impl Element<Game, PuzzleCmd> for View {
         let state = &game.password_file;
         self.core.draw_back_layer(canvas);
         self.core.draw_middle_layer(canvas);
-        if state.all_crosswords_done() {
-            self.slider.draw(state, canvas);
-        } else {
-            let slot = state.active_slot();
-            self.crosswords[slot as usize].draw(state.crossword(slot), canvas);
+        if self.show_words {
+            if state.all_crosswords_done() {
+                self.slider.draw(state, canvas);
+            } else {
+                let index = state.active_index();
+                let crossword = state.crossword(index);
+                self.crosswords[index].draw(crossword, canvas);
+            }
         }
         self.core.draw_front_layer(canvas, state);
     }
@@ -137,7 +147,12 @@ impl Element<Game, PuzzleCmd> for View {
                     -> Action<PuzzleCmd> {
         let state = &mut game.password_file;
         let mut action = self.core.handle_event(event, state);
-        if !action.should_stop() {
+        if !action.should_stop() && self.should_display_speech {
+            self.should_display_speech = false;
+            action.also_play_sound(Sound::talk_hi());
+            self.display_crossword_speech(state);
+        }
+        if !action.should_stop() && self.show_words {
             if state.all_crosswords_done() {
                 let subaction = self.slider.handle_event(event, state);
                 if let Some(&(col, new_offset)) = subaction.value() {
@@ -155,19 +170,18 @@ impl Element<Game, PuzzleCmd> for View {
                 }
                 action.merge(subaction.but_no_value());
             } else {
-                let slot = state.active_slot();
-                let idx = slot as usize;
+                let idx = state.active_index();
                 if event == &Event::ClockTick ||
-                   !state.crossword_is_done(slot) {
+                   !state.crossword_is_done(idx) {
                     let subaction = {
-                        let crossword = state.crossword_mut(slot);
+                        let crossword = state.crossword_mut(idx);
                         self.crosswords[idx].handle_event(event, crossword)
                     };
                     if let Some(&(row, index, chr)) = subaction.value() {
-                        let old_chr = state.crossword(slot)
+                        let old_chr = state.crossword(idx)
                                            .get_char(row, index);
-                        state.crossword_mut(slot).set_char(row, index, chr);
-                        if state.check_crossword(slot) {
+                        state.crossword_mut(idx).set_char(row, index, chr);
+                        if state.check_crossword(idx) {
                             self.crosswords[idx].reset_cursor();
                             self.crosswords[idx].animate_center_word();
                             let sound = Sound::solve_puzzle_chime();
@@ -175,7 +189,7 @@ impl Element<Game, PuzzleCmd> for View {
                             self.display_crossword_speech(state);
                             self.core.clear_undo_redo();
                         } else {
-                            self.core.push_undo(UndoRedo::Crossword(slot,
+                            self.core.push_undo(UndoRedo::Crossword(idx,
                                                                     row,
                                                                     index,
                                                                     old_chr,
@@ -190,10 +204,14 @@ impl Element<Game, PuzzleCmd> for View {
             match event {
                 &Event::MouseDown(pt) => {
                     if !state.all_crosswords_done() {
-                        let opt_slot = self.core.theater().actor_at_point(pt);
-                        if let Some(slot) = opt_slot {
-                            state.set_active_slot(slot);
-                            self.crosswords[slot as usize].reset_cursor();
+                        let opt_index =
+                            self.core
+                                .theater()
+                                .actor_at_point(pt)
+                                .and_then(scenes::crossword_index_for_slot);
+                        if let Some(index) = opt_index {
+                            state.set_active_index(index);
+                            self.crosswords[index].reset_cursor();
                             if self.display_crossword_speech(state) {
                                 action.also_play_sound(Sound::talk_hi());
                             }
@@ -222,10 +240,10 @@ impl PuzzleView for View {
     fn undo(&mut self, game: &mut Game) {
         let state = &mut game.password_file;
         match self.core.pop_undo() {
-            Some(UndoRedo::Crossword(slot, row, index, old_chr, _new_chr)) => {
-                state.set_active_slot(slot);
-                state.crossword_mut(slot).set_char(row, index, old_chr);
-                self.crosswords[slot as usize].reset_cursor();
+            Some(UndoRedo::Crossword(index, row, col, old_chr, _new_chr)) => {
+                state.set_active_index(index);
+                state.crossword_mut(index).set_char(row, col, old_chr);
+                self.crosswords[index].reset_cursor();
             }
             Some(UndoRedo::Slider(col, old_offset, _new_offset)) => {
                 state.set_slider_offset(col, old_offset);
@@ -237,10 +255,10 @@ impl PuzzleView for View {
     fn redo(&mut self, game: &mut Game) {
         let state = &mut game.password_file;
         match self.core.pop_redo() {
-            Some(UndoRedo::Crossword(slot, row, index, _old_chr, new_chr)) => {
-                state.set_active_slot(slot);
-                state.crossword_mut(slot).set_char(row, index, new_chr);
-                self.crosswords[slot as usize].reset_cursor();
+            Some(UndoRedo::Crossword(index, row, col, _old_chr, new_chr)) => {
+                state.set_active_index(index);
+                state.crossword_mut(index).set_char(row, col, new_chr);
+                self.crosswords[index].reset_cursor();
             }
             Some(UndoRedo::Slider(col, _old_offset, new_offset)) => {
                 state.set_slider_offset(col, new_offset);
@@ -258,16 +276,22 @@ impl PuzzleView for View {
     }
 
     fn solve(&mut self, game: &mut Game) {
-        game.password_file.solve();
+        let state = &mut game.password_file;
+        state.solve();
         for crossword in &mut self.crosswords {
             crossword.reset_cursor();
         }
+        self.display_crossword_speech(state);
         self.core.begin_outro_scene();
     }
 
     fn drain_queue(&mut self) {
-        for (_, _) in self.core.drain_queue() {
-            // TODO drain queue
+        for (kind, value) in self.core.drain_queue() {
+            if kind == 0 {
+                self.show_words = value != 0;
+            } else if kind == 1 {
+                self.should_display_speech = value != 0;
+            }
         }
     }
 }

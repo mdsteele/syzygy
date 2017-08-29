@@ -22,23 +22,208 @@ use gui::{Resources, Sound};
 
 // ========================================================================= //
 
+const ARGONY: i32 = 1;
+const BRIDGE_START: i32 = -99;
+const ELINSA: i32 = 3;
+const MEZURE: i32 = 5;
+const RELYNG: i32 = -1;
+const SYSTEM: i32 = 0;
+const UGRENT: i32 = 4;
+const YTTRIS: i32 = 2;
+
+// ========================================================================= //
+
+pub fn crossword_index_for_slot(slot: i32) -> Option<usize> {
+    if slot == ELINSA {
+        Some(0)
+    } else if slot == ARGONY {
+        Some(1)
+    } else if slot == MEZURE {
+        Some(2)
+    } else if slot == YTTRIS {
+        Some(3)
+    } else if slot == UGRENT {
+        Some(4)
+    } else if slot == RELYNG {
+        Some(5)
+    } else {
+        None
+    }
+}
+
+pub fn slot_for_crossword_index(index: usize) -> i32 {
+    match index {
+        0 => ELINSA,
+        1 => ARGONY,
+        2 => MEZURE,
+        3 => YTTRIS,
+        4 => UGRENT,
+        5 => RELYNG,
+        _ => panic!("Invalid crossword index: {}", index),
+    }
+}
+
+// ========================================================================= //
+
 #[cfg_attr(rustfmt, rustfmt_skip)]
 pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
             Ast::SetBg("password_file"),
-            Ast::Place(2, "chars/mezure", 0, (-16, 160)),
-            Ast::Slide(2, (96, 160), false, true, 1.0),
-            Ast::Place(3, "chars/yttris", 0, (592, 160)),
-            Ast::Slide(3, (480, 160), false, true, 1.0),
-            Ast::Place(4, "chars/ugrent", 0, (-16, 320)),
-            Ast::Slide(4, (144, 320), false, true, 1.0),
-            Ast::Place(0, "chars/elinsa", 0, (-16, 96)),
-            Ast::Slide(0, (122, 96), false, true, 1.0),
-            Ast::Place(1, "chars/argony", 0, (592, 96)),
-            Ast::Slide(1, (454, 96), false, true, 1.0),
-            Ast::Place(5, "chars/relyng", 0, (592, 320)),
-            Ast::Slide(5, (432, 320), false, true, 1.0),
+            Ast::Place(SYSTEM, "chars/system", 0, (288, 208)),
+            Ast::Seq((0..10).map(|index| {
+                Ast::Place(BRIDGE_START + index, "tiles/miniblocks", 14,
+                           (216 + 16 * index, 344))
+            }).collect()),
+            Ast::Place(MEZURE, "chars/mezure", 0, (-16, 160)),
+            Ast::Slide(MEZURE, (96, 160), false, true, 1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::E,
+                      "So...what's this place that\n\
+                       the System Repair Bot didn't\n\
+                       want us to get to?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Place(ARGONY, "chars/argony", 0, (592, 96)),
+            Ast::Slide(ARGONY, (454, 96), false, true, 1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::SW,
+                      "This, dear, is the System\n\
+                       Password File."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Place(YTTRIS, "chars/yttris", 0, (592, 160)),
+            Ast::Slide(YTTRIS, (480, 160), false, true, 1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::W,
+                      "Oooh!  I don't think I've\n\
+                       ever been in here before."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::E,
+                      "System passwords?  You mean, like,\n\
+                       the bot didn't want us to get back the\n\
+                       passwords to regain control of the ship?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Place(ELINSA, "chars/elinsa", 0, (-16, 96)),
+            Ast::Slide(ELINSA, (122, 96), false, true, 1.0),
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::SE,
+                      "Pfft.  There's nothing to control right\n\
+                       now.  Navigation and helm are still\n\
+                       offline.  We're just flying on auto-pilot."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::SE,
+                      "Until we finish fixing those, neither\n\
+                       we $inor$r  that robot thing are going\n\
+                       to be controlling anything."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::E,
+                      "Then why did it care about\n\
+                       keeping us out of here?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Place(UGRENT, "chars/ugrent", 0, (-16, 320)),
+            Ast::Slide(UGRENT, (144, 320), false, true, 1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                      "You misunderstand.  I doubt it's\n\
+                       about this room at all, per se.\n\
+                       It's about what's right below us."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                      "This room is just the vault that\n\
+                       seals that section off."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Wait(1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::E,
+                      "Okay, I'll bite.  What's in\n\
+                       the section right below us?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                      "That's classified."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::SW,
+                      "Oh, knock if off Ugrent.  Look\n\
+                       at the big picture here.  We\n\
+                       need all hands on deck right\n\
+                       now.  Leaving the child in the\n\
+                       dark isn't going to help us."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                      "Hmph.  Rules\n\
+                       are rules."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::SW,
+                      "Oh fine, be that way.  We'll all\n\
+                       get to see it soon enough anyway,\n\
+                       because we need to get down there\n\
+                       and see what that bot's game was."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Place(RELYNG, "chars/relyng", 0, (432, 352)),
+            Ast::Slide(RELYNG, (432, 336), false, false, 0.75),
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(RELYNG, (432, 320), 0.5),
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NW,
+                      "Easier said than done."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NW,
+                      "Everything's on lockdown right now.\n\
+                       We're each going to have to enter in\n\
+                       our passwords to open up the vault."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NW,
+                      "It won't open unless all six of us\n\
+                       do it.  That includes you, new kid."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::E,
+                      "Who, me?  I don't\n\
+                       know any passwords!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::E,
+                      "Maybe someone can\n\
+                       do mine for me?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::SE,
+                      "That's not a good idea."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::beep()),
+            Ast::Queue(0, 1), // Reveal crosswords.
+            Ast::Wait(1.0),
+            Ast::Queue(1, 1), // Display speech.
         ]),
     ];
     Ast::compile_scene(resources, ast)
@@ -52,11 +237,74 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Sound(Sound::solve_puzzle_chime()),
             Ast::Wait(1.0),
+            Ast::Queue(0, 0), // Hide sliders.
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::beep()),
+            Ast::Talk(SYSTEM, TalkStyle::System, TalkPos::NE,
+                      "Access granted."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Seq((0..5).map(|index| {
+                Ast::Seq(vec![
+                    Ast::Wait(0.1),
+                    Ast::Sound(Sound::platform_shift(1)),
+                    Ast::Remove(BRIDGE_START + 4 - index),
+                    Ast::Remove(BRIDGE_START + index + 5),
+                ])
+            }).collect()),
+            Ast::Wait(1.0),
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(0, TalkStyle::Normal, TalkPos::SE, "Looks good!"),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::SE,
+                      "Oh.  Oh no.  I think I just\n\
+                       realized what the System\n\
+                       Repair Bot's plan was."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                      "I think we all\n\
+                       just realized it."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::E,
+                      "Um, I didn't.  What are\n\
+                       you two talking about?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(ELINSA, (98, 96), true, true, 0.5),
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::SE,
+                      "Well, if we're right, we need\n\
+                       to get down there, $inow."),
+        ]),
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::Slide(ELINSA, (-16, 96), true, false, 0.5),
+            ]),
+            Ast::Seq(vec![
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NW,
+                          "Agreed."),
+            ]),
         ]),
     ];
     Ast::compile_scene(resources, ast)
+}
+
+// ========================================================================= //
+
+#[cfg(test)]
+mod tests {
+    use super::{crossword_index_for_slot, slot_for_crossword_index};
+
+    #[test]
+    fn slot_index_round_trip() {
+        for index in 0..6 {
+            let slot = slot_for_crossword_index(index);
+            assert_eq!(crossword_index_for_slot(slot), Some(index));
+        }
+    }
 }
 
 // ========================================================================= //

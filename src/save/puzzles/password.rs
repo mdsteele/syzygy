@@ -28,7 +28,7 @@ use super::PuzzleState;
 
 const VALID: ValidChars = ValidChars::Letters;
 
-const ACTIVE_SLOT_KEY: &str = "slot";
+const ACTIVE_INDEX_KEY: &str = "index";
 const ELINSA_KEY: &str = "elisna";
 const ARGONY_KEY: &str = "argony";
 const MEZURE_KEY: &str = "mezure";
@@ -77,7 +77,7 @@ const SOLVED_SLIDERS: [i32; 6] = [-4, -5, -2, 0, -1, -3];
 
 pub struct PasswordState {
     access: Access,
-    active_slot: i32,
+    active_index: usize,
     crosswords: [(bool, CrosswordState); 6],
     sliders: [i32; 6],
 }
@@ -98,45 +98,45 @@ impl PasswordState {
                            (true, CrosswordState::new(VALID, RELYNG_WORDS))];
     }
 
-    pub fn active_slot(&self) -> i32 { self.active_slot }
+    pub fn active_index(&self) -> usize { self.active_index }
 
-    pub fn set_active_slot(&mut self, slot: i32) {
-        assert!(0 <= slot && slot < 6);
-        self.active_slot = slot;
+    pub fn set_active_index(&mut self, index: usize) {
+        debug_assert!(index < 6);
+        self.active_index = index;
     }
 
-    pub fn crossword(&self, slot: i32) -> &CrosswordState {
-        assert!(slot >= 0 && slot < 6);
-        &self.crosswords[slot as usize].1
+    pub fn crossword(&self, index: usize) -> &CrosswordState {
+        debug_assert!(index < 6);
+        &self.crosswords[index].1
     }
 
-    pub fn crossword_mut(&mut self, slot: i32) -> &mut CrosswordState {
-        assert!(slot >= 0 && slot < 6);
-        &mut self.crosswords[slot as usize].1
+    pub fn crossword_mut(&mut self, index: usize) -> &mut CrosswordState {
+        debug_assert!(index < 6);
+        &mut self.crosswords[index].1
     }
 
-    pub fn check_crossword(&mut self, slot: i32) -> bool {
-        let words = match slot {
+    pub fn check_crossword(&mut self, index: usize) -> bool {
+        let words = match index {
             0 => ELINSA_WORDS,
             1 => ARGONY_WORDS,
             2 => MEZURE_WORDS,
             3 => YTTRIS_WORDS,
             4 => UGRENT_WORDS,
             5 => RELYNG_WORDS,
-            _ => panic!("bad slot: {}", slot),
+            _ => panic!("bad index: {}", index),
         };
-        let done = self.crosswords[slot as usize].1.words_are(words);
-        self.crosswords[slot as usize].0 = done;
+        let done = self.crosswords[index].1.words_are(words);
+        self.crosswords[index].0 = done;
         done
     }
 
-    pub fn crossword_is_done(&self, slot: i32) -> bool {
-        assert!(slot >= 0 && slot < 6);
-        self.crosswords[slot as usize].0
+    pub fn crossword_is_done(&self, index: usize) -> bool {
+        debug_assert!(index < 6);
+        self.crosswords[index].0
     }
 
     pub fn all_crosswords_done(&self) -> bool {
-        (0..6).all(|slot| self.crossword_is_done(slot))
+        (0..6).all(|index| self.crossword_is_done(index))
     }
 
     pub fn get_slider_offset(&self, col: i32) -> i32 {
@@ -167,7 +167,7 @@ impl PuzzleState for PasswordState {
         if self.all_crosswords_done() {
             self.sliders != INIT_SLIDERS
         } else {
-            let (done, ref cross) = self.crosswords[self.active_slot as usize];
+            let (done, ref cross) = self.crosswords[self.active_index];
             !done && cross.can_reset()
         }
     }
@@ -176,13 +176,13 @@ impl PuzzleState for PasswordState {
         if self.all_crosswords_done() {
             self.sliders = INIT_SLIDERS;
         } else {
-            self.crosswords[self.active_slot as usize].0 = false;
-            self.crosswords[self.active_slot as usize].1.reset();
+            self.crosswords[self.active_index].0 = false;
+            self.crosswords[self.active_index].1.reset();
         }
     }
 
     fn replay(&mut self) {
-        self.active_slot = 0;
+        self.active_index = 0;
         for &mut (ref mut done, ref mut crossword) in &mut self.crosswords {
             *done = false;
             crossword.reset();
@@ -197,8 +197,8 @@ impl Tomlable for PasswordState {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.is_solved() {
-            table.insert(ACTIVE_SLOT_KEY.to_string(),
-                         toml::Value::Integer(self.active_slot as i64));
+            table.insert(ACTIVE_INDEX_KEY.to_string(),
+                         toml::Value::Integer(self.active_index as i64));
             table.insert(ELINSA_KEY.to_string(),
                          self.crosswords[0].1.to_toml());
             table.insert(ARGONY_KEY.to_string(),
@@ -224,8 +224,10 @@ impl Tomlable for PasswordState {
     fn from_toml(value: toml::Value) -> PasswordState {
         let mut table = to_table(value);
         let access = Access::pop_from_table(&mut table, ACCESS_KEY);
-        let active_slot =
-            max(0, min(5, i32::pop_from_table(&mut table, ACTIVE_SLOT_KEY)));
+        let active_index =
+            max(0,
+                min(5, i32::pop_from_table(&mut table, ACTIVE_INDEX_KEY))) as
+            usize;
         let sliders = if access == Access::Solved {
             SOLVED_SLIDERS
         } else {
@@ -245,7 +247,7 @@ impl Tomlable for PasswordState {
         };
         PasswordState {
             access: access,
-            active_slot: active_slot,
+            active_index: active_index,
             crosswords: [load(&mut table, access, ELINSA_KEY, ELINSA_WORDS),
                          load(&mut table, access, ARGONY_KEY, ARGONY_WORDS),
                          load(&mut table, access, MEZURE_KEY, MEZURE_WORDS),
@@ -296,11 +298,11 @@ mod tests {
         state.crossword_mut(1).set_char(0, 2, 'R');
         state.crossword_mut(1).set_char(0, 3, 'L');
         state.crossword_mut(1).set_char(0, 4, 'D');
-        state.set_active_slot(2);
+        state.set_active_index(2);
 
         let state = PasswordState::from_toml(state.to_toml());
         assert_eq!(state.access, Access::Replaying);
-        assert_eq!(state.active_slot, 2);
+        assert_eq!(state.active_index, 2);
         assert!(state.crossword(0).can_reset());
         assert_eq!(state.crossword(0).words()[2],
                    vec!['H', 'E', 'L', 'L', 'O', ' ', ' ', ' ', ' ']);
@@ -326,7 +328,7 @@ mod tests {
     fn from_empty_toml() {
         let state = PasswordState::from_toml(toml::Value::Boolean(false));
         assert_eq!(state.access, Access::Unvisited);
-        assert_eq!(state.active_slot, 0);
+        assert_eq!(state.active_index, 0);
         assert!(state.crosswords.iter().all(|&(done, _)| !done));
         assert!(state.crosswords
                      .iter()

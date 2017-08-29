@@ -18,10 +18,13 @@
 // +--------------------------------------------------------------------------+
 
 use num_integer::mod_floor;
+use std::collections::HashMap;
 use std::f64::consts::{FRAC_1_PI, FRAC_PI_3};
+use std::rc::Rc;
 
 use elements::{PuzzleCmd, PuzzleCore, PuzzleView};
-use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sprite};
+use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
+          Sprite};
 use modes::SOLVED_INFO_TEXT;
 use save::{Game, HexState, PuzzleState};
 use super::scenes::{compile_intro_scene, compile_outro_scene};
@@ -113,8 +116,15 @@ impl PuzzleView for View {
     }
 
     fn drain_queue(&mut self) {
-        for (_, index) in self.core.drain_queue() {
-            self.solution.set_index(index);
+        for (kind, value) in self.core.drain_queue() {
+            if kind == 0 {
+                self.solution.set_index(value);
+            } else if kind == 1 {
+                if value >= 0 && (value as usize) < LETTERS.len() {
+                    let (index, chr) = LETTERS[value as usize];
+                    self.wheels.letters.insert(index, chr);
+                }
+            }
         }
     }
 }
@@ -165,6 +175,8 @@ struct HexWheels {
     topleft: Point,
     wheels: Vec<HexWheel>,
     token_sprites: Vec<Sprite>,
+    font: Rc<Font>,
+    letters: HashMap<usize, char>,
 }
 
 impl HexWheels {
@@ -179,6 +191,8 @@ impl HexWheels {
                          HexWheel::new(resources, 5, left + 64, top + 144),
                          HexWheel::new(resources, 6, left + 128, top + 144)],
             token_sprites: resources.get_sprites("hex/tokens"),
+            font: resources.get_font("roman"),
+            letters: HashMap::new(),
         }
     }
 }
@@ -189,7 +203,6 @@ impl Element<HexState, (usize, i32)> for HexWheels {
         let tokens = state.tokens();
         debug_assert_eq!(tokens.len(), TOKENS.len());
         for (index, &((x, y), wheels)) in TOKENS.iter().enumerate() {
-            let sprite = &self.token_sprites[tokens[index] as usize];
             let mut center = self.topleft + Point::new(x, y);
             for &(wheel, at) in wheels {
                 if let Some(ref drag) = self.wheels[wheel].drag {
@@ -201,7 +214,16 @@ impl Element<HexState, (usize, i32)> for HexWheels {
                     break;
                 }
             }
-            canvas.draw_sprite_centered(sprite, center);
+            if let Some(&chr) = self.letters.get(&index) {
+                canvas.draw_sprite_centered(&self.token_sprites[3], center);
+                canvas.draw_char(&self.font,
+                                 Align::Center,
+                                 center + Point::new(0, 4),
+                                 chr);
+            } else {
+                let sprite = &self.token_sprites[tokens[index] as usize];
+                canvas.draw_sprite_centered(sprite, center);
+            }
         }
     }
 
@@ -378,6 +400,13 @@ fn point_from_polar(r: i32, theta: f64) -> Point {
 }
 
 // ========================================================================= //
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+const LETTERS: &[(usize, char)] = &[
+    (1, 'E'), (2, 'N'),
+    (9, 'E'), (10, 'M'),
+    (18, 'E'), (19, 'A'), (20, 'L'), (21, 'I'),
+];
 
 const INFO_BOX_TEXT: &str = "\
 Your goal is to arrange the colored tokens into

@@ -5,25 +5,26 @@
 >green_pipes
 >miniblocks
 >bg_miniblocks
+>gray_blocks
 
                         AB                  AB
                         AB                  AB
                         AB                  AB
                         AB                  AB
                         AB                  AB
-BABABABABD              AB                  AB                    BCBABA
-CACACACB              BCBABABABABABABABABABABABD                    CDCA
-CACLCECH  BCBABABABD                                BCBABABABABD    CICE
-CECH        CDCACB                                    CDCACACB
-            CDCACB                                    CICMCLCH
-            CDCACBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACDCB
-            CDCACB                                      CDCBFH
-          CFCJCACB                                    ENEIEIEMAAAAAAAAAA
-AAAAAAAAAACDCACACB                                    EH    EGDADADADD
-          CDCACACBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEH    EGDADD  DFDA
-          CDCACACBFB                                  ELEJEJEK  DFDADD
-          CDCACACKCG                                    CDCBFB      DJDA
-          CDCACACACB                                CFCCCJCKCCCG    DFDA
+BABABABABD              AB                  AB                BCBABABABA
+CACACACB              BCBABABABABABABABABABABABD                CDCACACA
+CACLCECH  BCBABABABD                                BCBABABABD  CICECMCA
+CECH        CDCACB                                    CDCACB        CICE
+            CDCLCH                                    CICMCB
+            CDCBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACDCB
+            CDCB                                        CDCBFH
+          EKEOEOEL                                    ENEIEIEMAAAAAAAAAA
+AAAAAAAAAAEOGEGFEO                                    EH    EGDADADADD
+DADD    DCEOGGGHEOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEH    EGDADD  DFDA
+  DJDADADEEMEOEOEN                                    ELEJEJEK  DFDADD
+DADE        CDCBFB                                      CDCBFB      DJDA
+          CFCJCKCCCG                                CFCCCJCKCCCG    DFDA
         CFCJCACACACBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACDCACACACACB
 AAAAAAAACDCACACACACB                                CDCACACACACBAAAAAAAA
         CDCACACACACBFH                              CDCACACACACBFB

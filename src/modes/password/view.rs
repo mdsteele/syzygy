@@ -149,7 +149,6 @@ impl Element<Game, PuzzleCmd> for View {
         let mut action = self.core.handle_event(event, state);
         if !action.should_stop() && self.should_display_speech {
             self.should_display_speech = false;
-            action.also_play_sound(Sound::talk_hi());
             self.display_crossword_speech(state);
         }
         if !action.should_stop() && self.show_words {

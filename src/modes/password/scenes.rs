@@ -111,7 +111,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Slide(ELINSA, (122, 96), false, true, 1.0),
             Ast::Sound(Sound::talk_lo()),
             Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::SE,
-                      "Pfft.  There's nothing to control right\n\
+                      "Pfft.  There's nothing $ito$r  control right\n\
                        now.  Navigation and helm are still\n\
                        offline.  We're just flying on auto-pilot."),
         ]),
@@ -131,7 +131,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Place(UGRENT, "chars/ugrent", 0, (-16, 320)),
             Ast::Slide(UGRENT, (144, 320), false, true, 1.0),
-            Ast::Sound(Sound::talk_hi()),
+            Ast::Sound(Sound::talk_lo()),
             Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
                       "You misunderstand.  I doubt it's\n\
                        about this room at all, per se.\n\
@@ -151,7 +151,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
                        the section right below us?"),
         ]),
         Ast::Seq(vec![
-            Ast::Sound(Sound::talk_lo()),
+            Ast::Sound(Sound::talk_annoyed_hi()),
             Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
                       "That's classified."),
         ]),
@@ -223,6 +223,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Sound(Sound::beep()),
             Ast::Queue(0, 1), // Reveal crosswords.
             Ast::Wait(1.0),
+            Ast::Sound(Sound::talk_hi()),
             Ast::Queue(1, 1), // Display speech.
         ]),
     ];
@@ -255,9 +256,14 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
             Ast::Wait(1.0),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::SE,
-                      "Oh.  Oh no.  I think I just\n\
-                       realized what the System\n\
-                       Repair Bot's plan was."),
+                      "Oh.  Oh no."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::SE,
+                      "I think I just realized\n\
+                       what the System Repair\n\
+                       Bot's plan was."),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
@@ -283,10 +289,85 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
                 Ast::Slide(ELINSA, (-16, 96), true, false, 0.5),
             ]),
             Ast::Seq(vec![
+                Ast::Wait(0.25),
                 Ast::Sound(Sound::talk_hi()),
                 Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NW,
                           "Agreed."),
             ]),
+        ]),
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::Slide(ARGONY, (592, 96), true, false, 0.75),
+                Ast::SetPos(ARGONY, (592, 320)),
+                Ast::Slide(ARGONY, (384, 320), false, false, 1.0),
+                Ast::Sound(Sound::small_jump()),
+                Ast::Jump(ARGONY, (344, 400), 0.8),
+                Ast::Remove(ARGONY),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.2),
+                Ast::Slide(UGRENT, (192, 320), true, false, 0.5),
+                Ast::Sound(Sound::small_jump()),
+                Ast::Jump(UGRENT, (232, 400), 0.8),
+                Ast::Remove(UGRENT),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.3),
+                Ast::SetPos(ELINSA, (-16, 320)),
+                Ast::Slide(ELINSA, (192, 320), false, false, 1.0),
+                Ast::Sound(Sound::small_jump()),
+                Ast::Jump(ELINSA, (232, 400), 0.8),
+                Ast::Remove(ELINSA),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.4),
+                Ast::Slide(RELYNG, (384, 320), true, false, 0.5),
+                Ast::Sound(Sound::small_jump()),
+                Ast::Jump(RELYNG, (344, 400), 0.8),
+                Ast::Remove(RELYNG),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.5),
+                Ast::Slide(YTTRIS, (592, 160), true, false, 0.75),
+                Ast::Wait(0.5),
+                Ast::SetPos(YTTRIS, (592, 320)),
+                Ast::Slide(YTTRIS, (384, 320), false, false, 1.0),
+                Ast::Par(vec![
+                    Ast::Seq(vec![
+                        Ast::Sound(Sound::talk_hi()),
+                        Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NE,
+                                  "Wheee!"),
+                    ]),
+                    Ast::Seq(vec![
+                        Ast::Sound(Sound::small_jump()),
+                        Ast::Jump(YTTRIS, (272, 400), 1.1),
+                        Ast::Remove(YTTRIS),
+                    ]),
+                ]),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(1.0),
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::E, "Huh?"),
+            ]),
+        ]),
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::E,
+                          "Wait-  Wait for me!"),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.25),
+                Ast::Slide(MEZURE, (-16, 160), true, false, 0.5),
+                Ast::SetPos(MEZURE, (-16, 320)),
+                Ast::Slide(MEZURE, (192, 320), false, false, 0.75),
+                Ast::Sound(Sound::small_jump()),
+                Ast::Jump(MEZURE, (260, 400), 0.8),
+            ]),
+        ]),
+        Ast::Seq(vec![
+            Ast::Remove(MEZURE),
         ]),
     ];
     Ast::compile_scene(resources, ast)

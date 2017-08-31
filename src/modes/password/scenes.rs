@@ -102,7 +102,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::E,
-                      "System passwords?  You mean, like,\n\
+                      "System passwords?  You mean that\n\
                        the bot didn't want us to get back the\n\
                        passwords to regain control of the ship?"),
         ]),
@@ -140,11 +140,11 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
-                      "This room is just the vault that\n\
-                       seals that section off."),
+                      "This room is just the vault\n\
+                       that seals that section off."),
         ]),
         Ast::Seq(vec![
-            Ast::Wait(1.0),
+            Ast::Wait(1.25),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::E,
                       "Okay, I'll bite.  What's in\n\

@@ -43,41 +43,234 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::SetBg("system_syzygy"),
             Ast::Wait(1.0),
+            Ast::Sound(Sound::beep()),
             Ast::Queue(1, -1),  // Display "SYZYGY" on progress bar.
             Ast::Wait(2.0),
             Ast::Queue(1, -2),  // Finish progress bar animation.
-            Ast::Place(ELINSA, "chars/elinsa", 0, (-16, 80)),
-            Ast::Slide(ELINSA, (250, 80), false, true, 1.0),
-            Ast::Place(ARGONY, "chars/argony", 0, (-16, 80)),
-            Ast::Slide(ARGONY, (175, 80), false, true, 1.0),
+            Ast::Par(vec![
+                Ast::Seq(vec![
+                    Ast::Place(ELINSA, "chars/elinsa", 0, (-16, 80)),
+                    Ast::Slide(ELINSA, (250, 80), false, true, 1.0),
+                ]),
+                Ast::Seq(vec![
+                    Ast::Place(UGRENT, "chars/ugrent", 0, (592, 80)),
+                    Ast::Slide(UGRENT, (325, 80), false, true, 1.0),
+                ]),
+            ]),
+            Ast::Par(vec![
+                Ast::Seq(vec![
+                    Ast::Place(ARGONY, "chars/argony", 0, (-16, 80)),
+                    Ast::Slide(ARGONY, (175, 80), false, true, 1.0),
+                ]),
+                Ast::Seq(vec![
+                    Ast::Place(RELYNG, "chars/relyng", 0, (592, 80)),
+                    Ast::Slide(RELYNG, (400, 80), false, true, 1.0),
+                ]),
+            ]),
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::SE,
+                      "Well...here it is."),
+        ]),
+        Ast::Seq(vec![
             Ast::Place(YTTRIS, "chars/yttris", 0, (-16, 80)),
             Ast::Slide(YTTRIS, (100, 80), false, true, 1.0),
-            Ast::Place(UGRENT, "chars/ugrent", 0, (592, 80)),
-            Ast::Slide(UGRENT, (325, 80), false, true, 1.0),
-            Ast::Place(RELYNG, "chars/relyng", 0, (592, 80)),
-            Ast::Slide(RELYNG, (400, 80), false, true, 1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::SE,
+                      "Whoa, I always wondered\n\
+                       what it looked like!"),
+        ]),
+        Ast::Seq(vec![
             Ast::Place(MEZURE, "chars/mezure", 0, (592, 80)),
             Ast::Slide(MEZURE, (475, 80), false, true, 1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SW,
+                      "What is $ithat$r  thing?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::SE,
+                      "That, child, is an Automatic Targeting\n\
+                       Linear-Amplified Terraforming Laser."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::SE,
+                      "Or, ATLATL for short!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SW,
+                      "What's it do?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::SE,
+                      "Assuming the ship is in position near\n\
+                       a star to collect solar energy, it can\n\
+                       fire a beam that can warm up an entire\n\
+                       planet, from across a solar system.\n\
+                       It can make an icy planet habitable."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::SE,
+                      "Our mission was to travel to the\n\
+                       Xanadu system and terraform\n\
+                       its uninhabited fourth planet, in\n\
+                       preparation for the arrival of\n\
+                       a human colony.  We're almost\n\
+                       there now."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::SW,
+                      "Lady Argony!  As I said, our\n\
+                       mission is highly classified!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_annoyed_hi()),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::SE,
+                      "Only for the colony's protection,\n\
+                       Ugrent.  Considering that somebody\n\
+                       slipped a rogue robot onto our ship to\n\
+                       commit a carefully-planned sabotage,\n\
+                       it seems the secret is already out."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::SW,
+                      "Anyway, as you can imagine, kid, a device\n\
+                       that can turn an uninhabitable planet\n\
+                       warm would have...unfortunate effects\n\
+                       when used on an already-inhabited world."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SW,
+                      "And we've had one of these planet\n\
+                       death rays just sitting on board\n\
+                       the ship this entire time?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::SE,
+                      "It $idoes$r  have a safety mechanism.\n\
+                       It can only fire when the ship is\n\
+                       pointed directly at a preselected\n\
+                       target, with the expected planetary\n\
+                       conditions.  In this case, Xanadu-IV."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SW,
+                      "Oh.  So we're fine!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::SE,
+                      "But..."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SW,
+                      "$iSigh.$r  Of course\n\
+                       there's a but."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::SE,
+                      "It can still fire even if there\n\
+                       happens to be another planet $iin\n\
+                       the way$r.  And from of the looks\n\
+                       of things, it's been reprogrammed\n\
+                       to fire when the ship is $iin syzygy$r\n\
+                       with Xanadu-III and Xanadu-IV."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SW,
+                      "In syzygy?  What's that?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::SE,
+                      "It's an astronomical term, dear.\n\
+                       It basically means ``lined up.''\n\
+                       Xanadu-III will be directly between\n\
+                       the ship and the intended target\n\
+                       when the terraforming laser fires."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SW,
+                      "Oh.  Is Xanadu-III inhabited?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::SW,
+                      "Yes.  By approximately seven\n\
+                       hundred million humans."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::SE,
+                      "Eeek!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::SE,
+                      "And we're locked out of the controls.\n\
+                       Very soon, the ship will drop out of warp\n\
+                       in the Xanadu system, and the ATLATL's\n\
+                       program will automatically take over."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SW,
+                      "We've got to do something!\n\
+                       Can't we shut it down?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::SE,
+                      "The E-stops have all been ripped out.\n\
+                       Our saboteur did a thorough job."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SW,
+                      "Then-  Then it's hopeless!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Wait(1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::SE,
+                      "But we could reprogram it!\n\
+                       Make it fire from a different\n\
+                       position in the star system!"),
+        ]),
+        Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::SE,
                       "It's...possible.\n\
                        But it's not going\n\
-                       to be easy.")
+                       to be easy."),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::SE,
                       "We're going to need to disengage the security\n\
-                       barrier and access the cold firmware.  Then we\n\
-                       need to reconnect the control circuits and the\n\
+                       barrier, and access the cold firmware.  Then we\n\
+                       need to reconnect the control circuits $iand$r  the\n\
                        targeting interface.  That lets us shut down the\n\
                        software locks, and finally reprogram it.\n\
-                       There's going to be a lot of steps.")
+                       There's going to be a lot of steps."),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::SW,
-                      "Oh, is that all?")
+                      "Oh, is that all?"),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
@@ -90,19 +283,24 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
                        that bypass to keep everything from\n\
                        resetting.  Whoever's left out here\n\
                        will have to do the remaining steps\n\
-                       without their help.")
+                       without their help."),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_lo()),
             Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::SW,
-                      "Wonderful.")
+                      "Wonderful."),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::SE,
                       "Aw, c'mon everyone,\n\
                        we can do this!\n\
-                       I'll start us off!")
+                       I'll start us off!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::SE,
+                      "Step 1: Disengage security!"),
         ]),
         Ast::Seq(vec![
             Ast::Queue(1, 1),  // Set progress bar to 1/6.
@@ -152,7 +350,7 @@ pub fn compile_post_yttris_scene(resources: &mut Resources) -> (i32, Scene) {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::SE,
-                      "Uh, let's see.  Next\n\
+                      "Uh, let's see.  Step 2\n\
                        is firmware access.\n\
                        The cold storage on\n\
                        this thing is pretty\n\
@@ -222,7 +420,7 @@ pub fn compile_post_argony_scene(resources: &mut Resources) -> (i32, Scene) {
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::SE,
                       "Okay, looking good so far.\n\
-                       Now we wire up the controls."),
+                       Step 3: Wire up the controls."),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
@@ -318,14 +516,14 @@ pub fn compile_post_elinsa_scene(resources: &mut Resources) -> (i32, Scene) {
             Ast::Wait(0.5),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::SW,
-                      "Well, next up is the\n\
-                       targeting controls.")
+                      "Well, step 4 is the\n\
+                       targeting interface.")
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SW,
                       "Wait, don't we need\n\
-                       Elinsa for those, too?"),
+                       Elinsa for that, too?"),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),

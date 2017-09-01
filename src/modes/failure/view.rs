@@ -17,7 +17,7 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 use std::thread;
@@ -27,9 +27,9 @@ use elements::{PuzzleCmd, PuzzleCore, PuzzleView};
 use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
           Sprite};
 use modes::SOLVED_INFO_TEXT;
-use save::{FailureState, Game, Location, PuzzleState};
+use save::{Access, FailureState, Game, Location, PuzzleState};
 use save::pyramid::{Board, Coords, MAX_REMOVALS, Move, Team};
-use super::scenes::{compile_intro_scene, compile_outro_scene};
+use super::scenes;
 
 // ========================================================================= //
 
@@ -79,14 +79,35 @@ pub struct View {
     core: PuzzleCore<()>,
     dashboard: Vec<DashChip>,
     pyramid: PyramidView,
+    show_pyramid: bool,
+    should_mark_mid_scene_done: bool,
 }
 
 impl View {
     pub fn new(resources: &mut Resources, visible: Rect, game: &Game) -> View {
-        let intro = compile_intro_scene(resources);
-        let outro = compile_outro_scene(resources);
+        let mut all_puzzles_solved = true;
+        for &(_, _, location) in DASHBOARD_CHIPS.iter() {
+            if !game.has_been_solved(location) {
+                all_puzzles_solved = false;
+                break;
+            }
+        }
         let state = &game.system_failure;
-        let core = PuzzleCore::new(resources, visible, state, intro, outro);
+        let mut core = {
+            let intro = scenes::compile_intro_scene(resources);
+            let outro = scenes::compile_outro_scene(resources);
+            PuzzleCore::new(resources, visible, state, intro, outro)
+        };
+        core.add_extra_scene(scenes::compile_middle_scene(resources));
+        core.add_extra_scene(scenes::compile_lose_game_scene(resources));
+        if !state.is_solved() {
+            if state.mid_scene_is_done() &&
+               state.access() != Access::BeginReplay {
+                core.skip_extra_scene(scenes::MIDDLE_SCENE);
+            } else if all_puzzles_solved {
+                core.begin_extra_scene(scenes::MIDDLE_SCENE);
+            }
+        }
         View {
             core: core,
             dashboard: DASHBOARD_CHIPS.iter()
@@ -95,6 +116,8 @@ impl View {
                                       })
                                       .collect(),
             pyramid: PyramidView::new(resources, state),
+            show_pyramid: false,
+            should_mark_mid_scene_done: false,
         }
     }
 }
@@ -103,7 +126,7 @@ impl Element<Game, PuzzleCmd> for View {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
         let state = &game.system_failure;
         self.core.clear_screen(canvas);
-        if state.mid_scene_is_done() {
+        if self.show_pyramid {
             self.pyramid.draw(state, canvas);
         } else {
             self.dashboard.draw(game, canvas);
@@ -117,7 +140,11 @@ impl Element<Game, PuzzleCmd> for View {
                     -> Action<PuzzleCmd> {
         let mut action = self.core
                              .handle_event(event, &mut game.system_failure);
-        if !game.system_failure.mid_scene_is_done() {
+        if self.should_mark_mid_scene_done {
+            game.system_failure.set_mid_scene_is_done(true);
+            self.should_mark_mid_scene_done = false;
+        }
+        if !self.show_pyramid {
             if !action.should_stop() {
                 action.merge(self.dashboard
                                  .handle_event(event, game)
@@ -161,6 +188,13 @@ impl Element<Game, PuzzleCmd> for View {
                             so_far: so_far.clone(),
                         };
                     }
+                    Some(&PyramidCmd::Win) => {
+                        state.solve();
+                        self.core.begin_outro_scene();
+                    }
+                    Some(&PyramidCmd::Lose) => {
+                        self.core.begin_extra_scene(scenes::LOSE_GAME_SCENE);
+                    }
                     None => {}
                 }
                 action.merge(subaction.but_no_value());
@@ -202,12 +236,38 @@ impl PuzzleView for View {
 
     fn solve(&mut self, game: &mut Game) {
         game.system_failure.solve();
+        self.pyramid.step = PyramidStep::GameOver;
         self.core.begin_outro_scene();
     }
 
     fn drain_queue(&mut self) {
-        for (_, _) in self.core.drain_queue() {
-            // TODO drain queue
+        for (kind, value) in self.core.drain_queue() {
+            if kind == 0 {
+                self.show_pyramid = value != 0;
+            } else if kind == 1 || kind == 2 {
+                let team = if kind == 1 { Team::You } else { Team::SRB };
+                if value < 0 {
+                    self.pyramid.hilight_override.clear();
+                } else if let Some(coords) = Coords::from_index(value as
+                                                                usize) {
+                    if self.pyramid.hilight_override.get(&coords) ==
+                       Some(&team) {
+                        self.pyramid.hilight_override.remove(&coords);
+                    } else {
+                        self.pyramid.hilight_override.insert(coords, team);
+                    }
+                }
+            } else if kind == 3 {
+                self.pyramid.team_override = if value == 1 {
+                    Some(Team::You)
+                } else if value == 2 {
+                    Some(Team::SRB)
+                } else {
+                    None
+                };
+            } else if kind == 4 {
+                self.should_mark_mid_scene_done = value != 0;
+            }
         }
     }
 }
@@ -318,6 +378,8 @@ enum PyramidStep {
         remaining: Vec<Coords>,
     },
     AnimateVictory { anim: i32, team: Team },
+    Victory { winner: Team },
+    GameOver,
 }
 
 impl PyramidStep {
@@ -628,12 +690,16 @@ impl PyramidStep {
                             break;
                         }
                     }
-                    // TODO: handle game over
+                    if !changed {
+                        next = Some(PyramidStep::Victory { winner: team });
+                    }
                     changed
                 } else {
                     false
                 }
             }
+            &mut PyramidStep::Victory { .. } => false,
+            &mut PyramidStep::GameOver => false,
         };
         if let Some(step) = next {
             *self = step;
@@ -649,6 +715,8 @@ enum PyramidCmd {
     JumpFrom(Coords),
     Jump(Coords, Coords),
     Remove(Vec<Coords>, Vec<Coords>),
+    Win,
+    Lose,
 }
 
 // ========================================================================= //
@@ -662,6 +730,8 @@ struct PyramidView {
     sprites: Vec<Sprite>,
     font: Rc<Font>,
     step: PyramidStep,
+    team_override: Option<Team>,
+    hilight_override: HashMap<Coords, Team>,
 }
 
 impl PyramidView {
@@ -670,6 +740,8 @@ impl PyramidView {
             sprites: resources.get_sprites("failure/chips"),
             font: resources.get_font("debug"),
             step: PyramidStep::you_ready(state),
+            team_override: None,
+            hilight_override: HashMap::new(),
         }
     }
 
@@ -698,17 +770,22 @@ impl Element<FailureState, PyramidCmd> for PyramidView {
                 continue;
             }
             if let Some(team) = board.piece_at(coords) {
+                let hilight = self.hilight_override.get(&coords).cloned();
+                let team = hilight.unwrap_or_else(|| {
+                    self.team_override.unwrap_or(team)
+                });
                 let mut sprite_index = match team {
                     Team::You => 1,
                     Team::SRB => 0,
                 };
-                if hilighted_tiles.contains(&coords) {
+                if hilight.is_some() || hilighted_tiles.contains(&coords) {
                     sprite_index += 2;
                 }
                 let top_left = coords_to_pt(coords);
                 canvas.draw_sprite(&self.sprites[sprite_index], top_left);
             }
         }
+        // Outline possible moves:
         for coords in self.step.possible_coords() {
             let pt = coords_to_pt(coords);
             let rect = Rect::new(pt.x(),
@@ -717,6 +794,7 @@ impl Element<FailureState, PyramidCmd> for PyramidView {
                                  PYRAMID_TILE_SIZE as u32);
             canvas.draw_rect((255, 255, 0), rect);
         }
+        // Draw animated piece (if any):
         if let Some((_, team, top_left)) = animation {
             let sprite_index = match team {
                 Team::You => 1,
@@ -732,7 +810,20 @@ impl Element<FailureState, PyramidCmd> for PyramidView {
                     -> Action<PyramidCmd> {
         match event {
             &Event::ClockTick => {
-                Action::redraw_if(self.step.clock_tick(state))
+                let mut action = Action::redraw_if(self.step
+                                                       .clock_tick(state));
+                match self.step {
+                    PyramidStep::Victory { winner: Team::You } => {
+                        action = action.and_return(PyramidCmd::Win);
+                        self.step = PyramidStep::GameOver;
+                    }
+                    PyramidStep::Victory { winner: Team::SRB } => {
+                        action = action.and_return(PyramidCmd::Lose);
+                        self.step = PyramidStep::GameOver;
+                    }
+                    _ => {}
+                }
+                action
             }
             &Event::MouseDown(pt) => {
                 if let Some(coords) = pt_to_coords(pt) {

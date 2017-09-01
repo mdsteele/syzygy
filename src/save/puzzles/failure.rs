@@ -57,6 +57,10 @@ impl FailureState {
 
     pub fn mid_scene_is_done(&self) -> bool { self.mid_scene_done }
 
+    pub fn set_mid_scene_is_done(&mut self, done: bool) {
+        self.mid_scene_done = done;
+    }
+
     pub fn board(&self) -> &Board { &self.board }
 
     pub fn board_mut(&mut self) -> &mut Board { &mut self.board }

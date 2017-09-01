@@ -165,7 +165,9 @@ impl<U: Clone> PuzzleCore<U> {
     }
 
     fn hud_input<S: PuzzleState>(&self, state: &S) -> HudInput {
-        let scene = if let Some(ref scene) = self.middle_scene {
+        let scene = if !self.intro_scene.is_finished() {
+            &self.intro_scene
+        } else if let Some(ref scene) = self.middle_scene {
             scene
         } else if state.is_solved() {
             &self.outro_scene
@@ -240,12 +242,12 @@ impl<U: Clone> PuzzleCore<U> {
                 }
                 Some(&HudCmd::Solve) => subaction.but_return(PuzzleCmd::Solve),
                 Some(&HudCmd::Skip) => {
-                    if let Some(ref mut scene) = self.middle_scene {
+                    if !self.intro_scene.is_finished() {
+                        self.intro_scene.skip(&mut self.theater);
+                    } else if let Some(ref mut scene) = self.middle_scene {
                         scene.skip(&mut self.theater);
                     } else if state.is_solved() {
                         self.outro_scene.skip(&mut self.theater);
-                    } else {
-                        self.intro_scene.skip(&mut self.theater);
                     };
                     subaction.but_no_value()
                 }
@@ -253,12 +255,15 @@ impl<U: Clone> PuzzleCore<U> {
             });
         }
         if !action.should_stop() {
-            let subaction = if let Some(ref mut scene) = self.middle_scene {
+            let subaction = if !self.intro_scene.is_finished() {
+                self.intro_scene.handle_event(event, &mut self.theater)
+            } else if let Some(ref mut scene) =
+                self.middle_scene {
                 scene.handle_event(event, &mut self.theater)
             } else if state.is_solved() {
                 self.outro_scene.handle_event(event, &mut self.theater)
             } else {
-                self.intro_scene.handle_event(event, &mut self.theater)
+                Action::ignore()
             };
             if self.intro_scene.is_finished() {
                 state.visit();

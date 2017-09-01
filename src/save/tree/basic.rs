@@ -388,7 +388,6 @@ impl BasicTree {
         }
     }
 
-    #[cfg(debug_assertions)]
     pub fn is_valid(&self) -> bool {
         if let Some(root_key) = self.root {
             if let Some(root_node) = self.nodes.get(&root_key) {

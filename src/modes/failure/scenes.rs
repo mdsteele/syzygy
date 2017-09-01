@@ -22,6 +22,9 @@ use gui::{Resources, Sound};
 
 // ========================================================================= //
 
+pub const MIDDLE_SCENE: i32 = 1000;
+pub const LOSE_GAME_SCENE: i32 = 1001;
+
 const ARGONY: i32 = 5;
 const BRIDGE_START: i32 = -99;
 const BOOM_START: i32 = 100;
@@ -261,18 +264,92 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
 // ========================================================================= //
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_middle_scene(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Wait(1.0),
+            Ast::Place(MEZURE, "chars/mezure", 0, (-16, 192)),
+            Ast::Slide(MEZURE, (120, 192), false, true, 0.75),
+            Ast::Place(UGRENT, "chars/ugrent", 0, (-16, 192)),
+            Ast::Slide(UGRENT, (96, 192), false, true, 0.75),
+            Ast::Place(YTTRIS, "chars/yttris", 0, (-16, 192)),
+            Ast::Slide(YTTRIS, (64, 192), false, true, 0.75),
+            Ast::Place(ELINSA, "chars/elinsa", 0, (-16, 128)),
+            Ast::Slide(ELINSA, (96, 128), false, true, 0.75),
+            Ast::Place(ARGONY, "chars/argony", 0, (-16, 128)),
+            Ast::Slide(ARGONY, (64, 128), false, true, 0.75),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "Hello, world."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Place(SRB, "chars/srb", 5, (592, 192)),
+            Ast::Slide(SRB, (448, 192), false, true, 0.75),
+            Ast::Queue(0, 1), // Hide dashboard.
+            Ast::Queue(4, 1), // Mark middle scene as done.
+        ]),
+    ];
+    (MIDDLE_SCENE, Ast::compile_scene(resources, ast))
+}
+
+// ========================================================================= //
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_lose_game_scene(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_annoyed_lo()),
+            Ast::Seq((1..9).map(|n| {
+                let start = n * (n - 1) / 2;
+                let end = n * (n + 1) / 2;
+                Ast::Seq(vec![
+                    Ast::Wait(0.1),
+                    Ast::Seq((start..end).map(|index| {
+                        Ast::Queue(2, index) // Hilight piece red.
+                    }).collect()),
+                ])
+            }).collect()),
+            Ast::Wait(0.5),
+            Ast::SetSprite(SRB, "chars/srb", 6),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(SRB, TalkStyle::Evil, TalkPos::NW,
+                      "Ha!  You lose!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(SRB, TalkStyle::Evil, TalkPos::NW,
+                      "You know, I think I'll\n\
+                       let you fools try again.\n\
+                       You'll never beat me, and\n\
+                       soon it will be too late!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::SetSprite(SRB, "chars/srb", 5),
+            Ast::Queue(2, -1), // Clear hilights.
+        ]),
+    ];
+    (LOSE_GAME_SCENE, Ast::compile_scene(resources, ast))
+}
+
+// ========================================================================= //
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
 pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
-            Ast::Place(ARGONY, "chars/argony", 0, (64, 128)),
-            Ast::Place(ELINSA, "chars/elinsa", 0, (96, 128)),
-            Ast::Place(YTTRIS, "chars/yttris", 0, (64, 192)),
-            Ast::Place(UGRENT, "chars/ugrent", 0, (96, 192)),
-            Ast::Place(MEZURE, "chars/mezure", 0, (128, 192)),
-            Ast::Place(SRB, "chars/srb", 5, (448, 192)),
-            // TODO: Get rid of the above once the mid-scene is done.
+            Ast::Queue(0, 1), // Hide dashboard.
             Ast::Sound(Sound::solve_puzzle_chime()),
-            Ast::Wait(1.0),
+            Ast::Seq((1..9).map(|n| {
+                let start = n * (n - 1) / 2;
+                let end = n * (n + 1) / 2;
+                Ast::Seq(vec![
+                    Ast::Wait(0.1),
+                    Ast::Seq((start..end).map(|index| {
+                        Ast::Queue(1, index) // Hilight piece green.
+                    }).collect()),
+                ])
+            }).collect()),
+            Ast::Wait(0.5),
             Ast::Par(vec![
                 Ast::Seq(vec![
                     Ast::SetSprite(SRB, "chars/srb", 7),
@@ -308,6 +385,8 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
                 }).collect()),
             ]),
             Ast::Wait(0.75),
+            Ast::Queue(3, 2), // Turn whole board red.
+            Ast::Queue(1, -1), // Clear hilights.
             Ast::Par(vec![
                 Ast::Seq(vec![
                     Ast::SetSprite(SRB, "chars/srb", 7),
@@ -429,8 +508,7 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
                     Ast::Place(SRB, "chars/srb", 9, (192, 0)),
                     Ast::Slide(SRB, (416, 224), false, false, 0.8),
                     Ast::Slide(SRB, (192, 448), false, false, 0.8),
-                    // TODO: explosion sound
-                    Ast::Sound(Sound::character_collision()),
+                    Ast::Sound(Sound::explosion_small()),
                     Ast::Shake(6),
                 ]),
             ]),
@@ -443,6 +521,7 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
                       "Good riddance."),
         ]),
         Ast::Seq(vec![
+            Ast::Queue(3, 1), // Turn whole board green.
             Ast::Seq((0..19).map(|index| {
                 Ast::Seq(vec![
                     Ast::Place(BRIDGE_START + index, "tiles/miniblocks", 14,

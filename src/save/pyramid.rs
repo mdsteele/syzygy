@@ -92,6 +92,16 @@ impl Coords {
         }
     }
 
+    pub fn from_index(mut index: usize) -> Option<Coords> {
+        for num_cols in 1..9 {
+            if index < num_cols {
+                return Some(Coords::new(8 - num_cols as i32, index as i32));
+            }
+            index -= num_cols;
+        }
+        None
+    }
+
     pub fn row(&self) -> i32 { self.row }
 
     pub fn col(&self) -> i32 { self.col }
@@ -558,6 +568,24 @@ mod tests {
             assert!(index < NUM_CELLS);
             assert!(!indices.contains(&index));
             indices.insert(index);
+        }
+    }
+
+    #[test]
+    fn coords_from_index() {
+        assert_eq!(Coords::from_index(0), Some(Coords::new(7, 0)));
+        assert_eq!(Coords::from_index(1), Some(Coords::new(6, 0)));
+        assert_eq!(Coords::from_index(2), Some(Coords::new(6, 1)));
+        assert_eq!(Coords::from_index(3), Some(Coords::new(5, 0)));
+        assert_eq!(Coords::from_index(35), Some(Coords::new(0, 7)));
+        assert_eq!(Coords::from_index(36), None);
+    }
+
+    #[test]
+    fn coords_index_round_trip() {
+        for coords in Coords::all() {
+            let index = coords.index();
+            assert_eq!(Coords::from_index(index), Some(coords));
         }
     }
 

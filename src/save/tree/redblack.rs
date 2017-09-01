@@ -342,7 +342,6 @@ impl RedBlackTree {
         ops
     }
 
-    #[cfg(debug_assertions)]
     pub fn is_valid(&self) -> bool {
         if !self.basic.is_valid() {
             return false;

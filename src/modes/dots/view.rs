@@ -149,12 +149,28 @@ impl PuzzleView for View {
         for (kind, value) in self.core.drain_queue() {
             if kind == 0 {
                 self.box_open = value != 0;
+            } else if kind == 1 {
+                if value >= 0 && (value as usize) < LETTERS.len() {
+                    let (coords, chr) = LETTERS[value as usize];
+                    self.laser_field.add_letter(coords, chr);
+                }
             }
         }
     }
 }
 
 // ========================================================================= //
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+const LETTERS: &[((i32, i32), char)] = &[
+    ((0, 1), 'D'),
+    ((2, 1), 'U'),
+    ((8, 1), 'T'),
+    ((0, 3), 'I'),
+    ((6, 3), 'F'),
+    ((7, 3), 'U'),
+    ((8, 3), 'L'),
+];
 
 const INFO_BOX_TEXT: &str = "\
 Your goal is to activate each detector on the right with

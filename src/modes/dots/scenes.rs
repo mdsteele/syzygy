@@ -263,6 +263,14 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Slide(0, (592, 96), true, false, 1.0),
             Ast::Remove(0),
+            Ast::Wait(1.0),
+            Ast::Seq((0..7).map(|index| {
+                Ast::Seq(vec![
+                    Ast::Queue(1, index),
+                    Ast::Wait(0.1),
+                ])
+            }).collect()),
+            Ast::Wait(1.0),
         ]),
     ];
     Ast::compile_scene(resources, ast)

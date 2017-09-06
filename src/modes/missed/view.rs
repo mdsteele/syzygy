@@ -164,6 +164,11 @@ impl PuzzleView for View {
         for (kind, value) in self.core.drain_queue() {
             if kind == 0 {
                 self.box_open = value != 0;
+            } else if kind == 1 {
+                if value >= 0 && (value as usize) < LETTERS.len() {
+                    let (coords, chr) = LETTERS[value as usize];
+                    self.laser_field.add_letter(coords, chr);
+                }
             }
         }
     }
@@ -216,6 +221,20 @@ impl Element<(), PuzzleCmd> for Blinkenlight {
 }
 
 // ========================================================================= //
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+const LETTERS: &[((i32, i32), char)] = &[
+    ((2, 0), 'E'),
+    ((6, 0), 'X'),
+    ((0, 1), 'P'),
+    ((8, 1), 'E'),
+    ((9, 1), 'R'),
+    ((3, 2), 'I'),
+    ((0, 3), 'E'),
+    ((9, 3), 'N'),
+    ((2, 4), 'C'),
+    ((7, 4), 'E'),
+];
 
 const INFO_BOX_TEXT: &str = "\
 Your goal is to activate each detector on the right with

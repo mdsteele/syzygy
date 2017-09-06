@@ -66,6 +66,8 @@ pub struct LaserField {
     lasers: HashMap<(Point, Direction), (MixedColor, i32)>,
     sparks: HashMap<(Point, Direction), i32>,
     anim_counter: i32,
+    font: Rc<Font>,
+    letters: HashMap<(i32, i32), char>,
 }
 
 impl LaserField {
@@ -86,9 +88,15 @@ impl LaserField {
             lasers: HashMap::new(),
             sparks: HashMap::new(),
             anim_counter: 0,
+            font: resources.get_font("block"),
+            letters: HashMap::new(),
         };
         laser_field.recalculate_lasers(grid);
         laser_field
+    }
+
+    pub fn add_letter(&mut self, coords: (i32, i32), letter: char) {
+        self.letters.insert(coords, letter);
     }
 
     pub fn satisfied_detector_positions(&self, grid: &DeviceGrid)
@@ -449,6 +457,14 @@ impl LaserField {
 impl Element<DeviceGrid, LaserCmd> for LaserField {
     fn draw(&self, grid: &DeviceGrid, canvas: &mut Canvas) {
         self.draw_immovables(grid, canvas);
+        for (&(col, row), &letter) in self.letters.iter() {
+            let pt = Point::new(self.rect.left() + col * GRID_CELL_SIZE +
+                                GRID_CELL_SIZE / 2,
+                                self.rect.top() + row * GRID_CELL_SIZE +
+                                GRID_CELL_SIZE / 2 +
+                                9);
+            canvas.draw_char(&self.font, Align::Center, pt, letter);
+        }
         self.draw_movables_bg(grid, canvas);
         self.draw_lasers(canvas);
         self.draw_movables_fg(grid, canvas);

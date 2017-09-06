@@ -22,10 +22,10 @@ use gui::{Rect, Resources, Sound};
 
 // ========================================================================= //
 
-const ELINSA: i32 = 1;
+const ELINSA: i32 = 2;
 const MEZURE: i32 = 3;
 const SRB: i32 = 4;
-const UGRENT: i32 = 2;
+const UGRENT: i32 = 1;
 
 const WEST_DOOR_UPPER: i32 = -1;
 const WEST_DOOR_LOWER: i32 = -2;
@@ -148,7 +148,7 @@ pub fn compile_intro_scene(resources: &mut Resources, visible: Rect) -> Scene {
                         Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
                                   "Hey, you!  Have you\n\
                                    seen Elinsa recently?\n\
-                                   We need to talk to her."),
+                                   I need to talk to her."),
                     ]),
                     Ast::Seq(vec![
                         Ast::Par(vec![
@@ -180,8 +180,13 @@ pub fn compile_intro_scene(resources: &mut Resources, visible: Rect) -> Scene {
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
                       "Let's see, last time I saw her, she\n\
                        had just...um, well, she'd just fallen\n\
-                       through a broken bridge.  Into...a\n\
-                       deep pit with no apparent way out?"),
+                       through a broken bridge."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "Into...uh, a deep pit with\n\
+                       no apparent way out?"),
         ]),
         Ast::Par(vec![
             Ast::Seq(vec![
@@ -219,7 +224,7 @@ pub fn compile_intro_scene(resources: &mut Resources, visible: Rect) -> Scene {
             ]),
         ]),
         Ast::Seq(vec![
-            Ast::Slide(ELINSA, (500, 304), true, false, 0.35),
+            Ast::Slide(ELINSA, (500, 304), true, false, 0.25),
             Ast::Sound(Sound::character_collision()),
             Ast::Slide(ELINSA, (518, 304), false, true, 0.25),
             Ast::Par(vec![
@@ -237,7 +242,7 @@ pub fn compile_intro_scene(resources: &mut Resources, visible: Rect) -> Scene {
             ]),
         ]),
         Ast::Seq(vec![
-            Ast::Slide(ELINSA, (500, 304), true, false, 0.25),
+            Ast::Slide(ELINSA, (500, 304), true, false, 0.2),
             Ast::Sound(Sound::character_collision()),
             Ast::Slide(ELINSA, (518, 304), false, true, 0.25),
             Ast::Par(vec![
@@ -274,8 +279,8 @@ pub fn compile_intro_scene(resources: &mut Resources, visible: Rect) -> Scene {
                 Ast::Wait(0.5),
                 Ast::Sound(Sound::talk_hi()),
                 Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NW,
-                          "All right, let's get\n\
-                           this panel open..."),
+                          "All right, let's take a\n\
+                           look inside this panel..."),
             ]),
         ]),
         Ast::Seq(vec![
@@ -376,9 +381,103 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
             ]),
             Ast::Remove(EAST_DOOR_UPPER),
             Ast::Remove(EAST_DOOR_LOWER),
-            Ast::Wait(1.0),
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE, "Got it!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(ELINSA, (315, 304), true, true, 1.0),
+            Ast::Sound(Sound::talk_annoyed_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NW,
+                      "Took you long enough."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "``Thanks for the help, Mezure!''\n\
+                       ``You're very welcome, Elinsa.''"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                      "Elinsa.  We need to talk."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NW,
+                      "What about?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "Well, I sure appreciate all\n\
+                       the thanks, but I'd better get\n\
+                       back to organizing repairs."),
+        ]),
+        Ast::Seq(vec![
             Ast::Slide(MEZURE, (592, 304), true, false, 1.0),
             Ast::Remove(MEZURE),
+            Ast::Wait(1.0),
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                      "I think there might be more\n\
+                       than meets the eye going on.\n\
+                       We need to take a look down\n\
+                       in Main Engineering."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NW,
+                      "I'm very busy with\n\
+                       repairs, Ugrent."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                      "They can wait.  This\n\
+                       is very important."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NW,
+                      "$iSigh.$r  Okay, let's go."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Par(vec![
+                Ast::Seq(vec![
+                    Ast::Slide(ELINSA, (-16, 304), true, false, 1.0),
+                    Ast::Remove(ELINSA),
+                ]),
+                Ast::Seq(vec![
+                    Ast::Wait(0.5),
+                    Ast::Slide(UGRENT, (-16, 304), true, false, 1.0),
+                    Ast::Remove(UGRENT),
+                ]),
+                Ast::Seq(vec![
+                    Ast::Wait(0.5),
+                    Ast::Par(vec![
+                        Ast::Slide(WEST_DOOR_UPPER, (64, 272),
+                                   false, false, 0.25),
+                        Ast::Slide(WEST_DOOR_LOWER, (64, 320),
+                                   false, false, 0.25),
+                    ]),
+                    Ast::Wait(1.0),
+                    Ast::Par(vec![
+                        Ast::Slide(WEST_DOOR_UPPER, (64, 288),
+                                   false, false, 0.25),
+                        Ast::Slide(WEST_DOOR_LOWER, (64, 304),
+                                   false, false, 0.25),
+                    ]),
+                ]),
+            ]),
+            Ast::Wait(1.0),
+            Ast::Seq((0..10).map(|index| {
+                Ast::Seq(vec![
+                    Ast::Queue(1, index),
+                    Ast::Wait(0.1),
+                ])
+            }).collect()),
+            Ast::Wait(1.0),
         ]),
     ];
     Ast::compile_scene(resources, ast)

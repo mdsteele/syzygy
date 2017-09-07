@@ -22,31 +22,39 @@ use gui::{Resources, Sound};
 
 // ========================================================================= //
 
+const MEZURE: i32 = 1;
+const SYSTEM: i32 = 0;
+const YTTRIS: i32 = 2;
+
+// ========================================================================= //
+
 #[cfg_attr(rustfmt, rustfmt_skip)]
 pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
             Ast::SetBg("the_y_factor"),
+            Ast::Place(SYSTEM, "chars/system", 0, (80, 80)),
             Ast::Wait(0.25),
-            Ast::Place(0, "chars/mezure", 0, (-16, 256)),
-            Ast::Slide(0, (64, 256), false, true, 0.75),
+            Ast::Place(MEZURE, "chars/mezure", 0, (-16, 256)),
+            Ast::Slide(MEZURE, (64, 256), false, true, 0.75),
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE, "Whoa.")
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE, "Whoa.")
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::small_jump()),
-            Ast::Jump(0, (112, 272), 0.5),
-            Ast::Slide(0, (150, 272), true, true, 0.5),
+            Ast::Jump(MEZURE, (112, 272), 0.5),
+            Ast::Slide(MEZURE, (150, 272), true, true, 0.5),
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE, "What's this place?")
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "What's this place?")
         ]),
         Ast::Wait(0.75),
         Ast::Par(vec![
             Ast::Seq(vec![
-                Ast::Place(1, "chars/yttris", 0, (592, 128)),
-                Ast::Slide(1, (480, 128), false, true, 0.25),
+                Ast::Place(YTTRIS, "chars/yttris", 0, (592, 128)),
+                Ast::Slide(YTTRIS, (480, 128), false, true, 0.25),
                 Ast::Sound(Sound::talk_hi()),
-                Ast::Talk(1, TalkStyle::Normal, TalkPos::SW,
+                Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::SW,
                           "Welcome to the factory,\n\
                            brave traveller!!")
             ]),
@@ -54,92 +62,92 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
                 Ast::Wait(0.35),
                 Ast::Par(vec![
                     Ast::Sound(Sound::small_jump()),
-                    Ast::Jump(0, (130, 272), 0.25),
+                    Ast::Jump(MEZURE, (130, 272), 0.25),
                     Ast::Sound(Sound::talk_hi()),
-                    Ast::Talk(0, TalkStyle::Normal, TalkPos::NE, "Augh!")
+                    Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE, "Augh!")
                 ]),
             ]),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(1, TalkStyle::Normal, TalkPos::SW,
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::SW,
                       "Fear not, brave traveller!\n\
                        My name is Yttris, and I\n\
                        mean you no harm.")
         ]),
         Ast::Seq(vec![
-            Ast::Slide(0, (136, 272), true, true, 0.25),
+            Ast::Slide(MEZURE, (136, 272), true, true, 0.25),
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE,
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
                       "Sorry, you just startled me.")
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE,
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
                       "I'm not actually a\n\
                        traveller.  I'm Mezure, the\n\
                        new administrator process.")
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(1, TalkStyle::Normal, TalkPos::SW,
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::SW,
                       "Oh, that's okay!  I'm sure\n\
                        you're a very brave\n\
                        administrator process.")
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE,
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
                       "Um, thanks, I guess.")
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE,
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
                       "Might I ask what\n\
                        you work on here?")
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(1, TalkStyle::Normal, TalkPos::SW, "Of course!")
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::SW, "Of course!")
         ]),
         Ast::Seq(vec![
             Ast::Wait(1.75),
             Ast::Sound(Sound::talk_lo()),
-            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE,
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
                       "...What do you\n\
                        work on here, Yttris?")
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(1, TalkStyle::Normal, TalkPos::SW,
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::SW,
                       "Oh, I do a bit of this and that.")
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(1, TalkStyle::Normal, TalkPos::SW,
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::SW,
                       "Right now I'm supposed to be\n\
                        fixing this lexical component.")
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE,
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
                       "It looks fine to me.\n\
                        What's wrong with it?")
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(1, TalkStyle::Normal, TalkPos::SW,
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::SW,
                       "It's the wrong word, silly!")
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE,
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
                       "Well, maybe I could help.\n\
                        What's the correct word?")
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(1, TalkStyle::Normal, TalkPos::SW,
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::SW,
                       "Haha, no idea!  Let's work\n\
                        on it together.  It'll be fun!")
         ]),
@@ -156,39 +164,40 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
             Ast::Sound(Sound::transform_final()),
             Ast::Wait(2.0),
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(1, TalkStyle::Normal, TalkPos::SW,
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::SW,
                       "That was easy!  We just had\n\
                        to use our imaginations."),
         ]),
         Ast::Seq(vec![
-            Ast::Slide(1, (592, 128), true, false, 0.5),
-            Ast::Remove(1),
+            Ast::Slide(YTTRIS, (592, 128), true, false, 0.5),
+            Ast::Remove(YTTRIS),
             Ast::Wait(1.0),
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE,
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
                       "Wait, so is it fixed now?")
         ]),
         Ast::Seq(vec![
             Ast::Wait(0.5),
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE,
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
                       "I guess it's fixed now.")
         ]),
         Ast::Seq(vec![
-            Ast::Slide(0, (163, 272), true, false, 0.4),
+            Ast::Slide(MEZURE, (163, 272), true, false, 0.4),
             Ast::Sound(Sound::small_jump()),
-            Ast::Jump(0, (221, 272), 0.5),
-            Ast::Slide(0, (372, 272), false, true, 0.8),
+            Ast::Jump(MEZURE, (221, 272), 0.5),
+            Ast::Slide(MEZURE, (372, 272), false, true, 0.8),
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(0, TalkStyle::Normal, TalkPos::NW,
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NW,
                       "I dunno, I thought ``maximize''\n\
                        was a perfectly good word.")
         ]),
         Ast::Seq(vec![
-            Ast::Slide(0, (464, 272), true, false, 0.65),
+            Ast::Slide(MEZURE, (464, 272), true, false, 0.65),
             Ast::Sound(Sound::small_jump()),
-            Ast::Jump(0, (512, 272), 0.5),
-            Ast::Slide(0, (592, 272), true, false, 0.35),
+            Ast::Jump(MEZURE, (512, 272), 0.5),
+            Ast::Slide(MEZURE, (592, 272), true, false, 0.35),
+            Ast::Remove(MEZURE),
         ]),
     ];
     Ast::compile_scene(resources, ast)

@@ -27,7 +27,6 @@ use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sound};
 use modes::SOLVED_INFO_TEXT;
 use save::{Game, GroundState, PuzzleState};
 use super::scenes;
-use super::scenes::ELINSA_SLOT;
 
 // ========================================================================= //
 
@@ -106,7 +105,7 @@ impl View {
 
     fn update_elinsa_position(&mut self, state: &GroundState) {
         let position = self.platform_pt(state, state.get_elinsa_row());
-        self.core.theater_mut().set_actor_position(ELINSA_SLOT, position);
+        self.core.theater_mut().set_actor_position(scenes::ELINSA, position);
     }
 
     fn update_platform_positions(&mut self, state: &GroundState) {
@@ -180,7 +179,7 @@ impl View {
                     elinsa_seq.push(Box::new(WaitNode::new(time_to_hit)));
                     let sound = Sound::character_collision();
                     elinsa_seq.push(Box::new(SoundNode::new(sound)));
-                    elinsa_seq.push(Box::new(JumpNode::new(ELINSA_SLOT,
+                    elinsa_seq.push(Box::new(JumpNode::new(scenes::ELINSA,
                                                            dest,
                                                            time_to_fall)));
                 }
@@ -213,20 +212,20 @@ impl View {
                     let fall_dist = jump_dest.y() - self.platform_top(row);
                     let time_to_fall = JumpNode::time_to_fall(fall_dist + 5) +
                                        JumpNode::time_to_fall(5);
-                    elinsa_seq.push(Box::new(SlideNode::new(ELINSA_SLOT,
+                    elinsa_seq.push(Box::new(SlideNode::new(scenes::ELINSA,
                                                             slide_dest,
                                                             false,
                                                             false,
                                                             time_to_hit)));
                     let sound = Sound::character_collision();
                     elinsa_seq.push(Box::new(SoundNode::new(sound)));
-                    elinsa_seq.push(Box::new(JumpNode::new(ELINSA_SLOT,
+                    elinsa_seq.push(Box::new(JumpNode::new(scenes::ELINSA,
                                                            jump_dest,
                                                            time_to_fall)));
                 } else {
                     elinsa_pos = pos;
                     let dest = self.platform_pt_for_pos(row, elinsa_pos);
-                    elinsa_seq.push(Box::new(SlideNode::new(ELINSA_SLOT,
+                    elinsa_seq.push(Box::new(SlideNode::new(scenes::ELINSA,
                                                             dest,
                                                             false,
                                                             false,
@@ -243,14 +242,14 @@ impl View {
         // If Elinsa fell to the floor, get back on the starting platform:
         if elinsa_row == num_rows && original_elinsa_row != num_rows {
             let slide_time = 0.5 * Platform::travel_time(elinsa_pos, 0);
-            top_seq.push(Box::new(SlideNode::new(ELINSA_SLOT,
+            top_seq.push(Box::new(SlideNode::new(scenes::ELINSA,
                                                  self.floor_pt_for_pos(0),
                                                  false,
                                                  false,
                                                  slide_time)));
             let dest = self.platform_pt(state, elinsa_row);
             top_seq.push(Box::new(SoundNode::new(Sound::small_jump())));
-            top_seq.push(Box::new(JumpNode::new(ELINSA_SLOT, dest, 0.5)));
+            top_seq.push(Box::new(JumpNode::new(scenes::ELINSA, dest, 0.5)));
         }
 
         // Make Elinsa climb upwards:
@@ -259,7 +258,7 @@ impl View {
             elinsa_row -= 1;
             let dest = self.platform_pt(state, elinsa_row);
             top_seq.push(Box::new(SoundNode::new(Sound::small_jump())));
-            top_seq.push(Box::new(JumpNode::new(ELINSA_SLOT, dest, 0.6)));
+            top_seq.push(Box::new(JumpNode::new(scenes::ELINSA, dest, 0.6)));
         }
         if elinsa_row < num_rows {
             while elinsa_row > 0 {
@@ -277,14 +276,16 @@ impl View {
                 elinsa_row -= 1;
                 let dest = self.platform_pt(state, elinsa_row);
                 top_seq.push(Box::new(SoundNode::new(Sound::small_jump())));
-                top_seq.push(Box::new(JumpNode::new(ELINSA_SLOT, dest, 0.6)));
+                top_seq.push(Box::new(JumpNode::new(scenes::ELINSA,
+                                                    dest,
+                                                    0.6)));
             }
         }
         if elinsa_row == 0 && state.get_position(0) == max_pos {
             elinsa_row -= 1;
             let dest = self.platform_pt(state, elinsa_row);
             top_seq.push(Box::new(SoundNode::new(Sound::small_jump())));
-            top_seq.push(Box::new(JumpNode::new(ELINSA_SLOT, dest, 0.6)));
+            top_seq.push(Box::new(JumpNode::new(scenes::ELINSA, dest, 0.6)));
         }
         state.set_elinsa_row(elinsa_row);
         self.core.push_undo((row,

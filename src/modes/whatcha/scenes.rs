@@ -22,16 +22,210 @@ use gui::{Resources, Sound};
 
 // ========================================================================= //
 
+const MEZURE: i32 = 1;
+const MEZURE_BG: i32 = -1;
+const RELYNG: i32 = 2;
+
+const DOOR_UPPER: i32 = -2;
+const DOOR_LOWER: i32 = -3;
+
+// ========================================================================= //
+
 #[cfg_attr(rustfmt, rustfmt_skip)]
 pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
-            Ast::SetBg("whatcha_column"),
-            Ast::Place(0, "chars/mezure", 0, (-16, 304)),
-            Ast::Slide(0, (304, 304), true, true, 1.0),
+            Ast::SetBg("whatcha_column_1"),
+            Ast::Place(DOOR_UPPER, "tiles/caution_walls", 5, (408, 288)),
+            Ast::Place(DOOR_LOWER, "tiles/caution_walls", 4, (408, 304)),
+            Ast::Wait(0.5),
+            Ast::Place(MEZURE, "chars/mezure", 0, (-16, 240)),
+            Ast::Slide(MEZURE, (176, 240), false, true, 1.0),
             Ast::Wait(0.5),
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE, "Let's have a look."),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "Now what's $ithis$r\n\
+                       all about?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(MEZURE, (208, 256), 0.5),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(MEZURE, (240, 272), 0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "Some kind of sealed\n\
+                       chamber, looks like."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(MEZURE, (272, 288), 0.5),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(MEZURE, (304, 304), 0.5),
+            Ast::Slide(MEZURE, (348, 304), false, true, 0.5),
+            Ast::Par(vec![
+                Ast::Slide(DOOR_UPPER, (408, 272), true, false, 0.5),
+                Ast::Slide(DOOR_LOWER, (408, 320), true, false, 0.5),
+            ]),
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "Is that...a $itree!?$r"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Remove(MEZURE),
+            Ast::Place(MEZURE_BG, "chars/mezure", 0, (348, 304)),
+            Ast::Slide(MEZURE_BG, (450, 304), true, true, 1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE_BG, TalkStyle::Normal, TalkPos::NW,
+                      "This must be some kind of bio-dome.\n\
+                       Why would we need that on this ship?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE_BG, TalkStyle::Normal, TalkPos::NW,
+                      "I'd better take a look inside."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(MEZURE_BG, (592, 304), true, false, 0.75),
+            Ast::Remove(MEZURE_BG),
+            Ast::Wait(0.5),
+            Ast::Remove(DOOR_UPPER),
+            Ast::Remove(DOOR_LOWER),
+            Ast::SetBg("whatcha_column_2"),
+            Ast::Queue(0, 1), // Show columns.
+            Ast::Wait(0.5),
+            Ast::Place(MEZURE, "chars/mezure", 0, (-16, 304)),
+            Ast::Slide(MEZURE, (138, 304), false, true, 1.0),
+            Ast::Wait(1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "This thing seems fine, I guess."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(MEZURE, (180, 304), true, true, 0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "Hmm.  I'm not sure\n\
+                       if I should be here."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Place(RELYNG, "chars/relyng", 0, (592, 160)),
+            Ast::Slide(RELYNG, (528, 160), false, false, 0.5),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(RELYNG, (496, 192), 0.5),
+            Ast::Par(vec![
+                Ast::Seq(vec![
+                    Ast::Sound(Sound::talk_hi()),
+                    Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NW,
+                              "Aha!"),
+                ]),
+                Ast::Seq(vec![
+                    Ast::Wait(0.1),
+                    Ast::Sound(Sound::talk_hi()),
+                    Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                              "Augh!"),
+                ]),
+                Ast::Seq(vec![
+                    Ast::Wait(0.1),
+                    Ast::Sound(Sound::small_jump()),
+                    Ast::Jump(MEZURE, (160, 304), 0.25),
+                ]),
+            ]),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "You again!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NW,
+                      "Me again."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(RELYNG, (464, 208), 0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NW,
+                      "What's this I hear about how\n\
+                       you're not supposed to be here?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NW,
+                      "A stowaway, are you?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "What?  No!  I just meant that if\n\
+                       there's nothing broken in this area,\n\
+                       then I ought to be coordinating\n\
+                       repairs elsewhere."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_annoyed_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "Why are $iyou$r  always sneaking\n\
+                       around, anyway?  Have you\n\
+                       got something to hide?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NW,
+                      "We've all got $isomething$r\n\
+                       to hide, kid.  In my case,\n\
+                       it's the only way to find\n\
+                       what I'm looking for."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "Yeah?  And what's that?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NW,
+                      "The truth, of course."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "What's that supposed to mean?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(RELYNG, (496, 192), 0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NW,
+                      "By the way, ``this thing'' isn't\n\
+                       ``fine.''  It's broken, and it\n\
+                       needs to be fixed."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(RELYNG, (528, 160), 0.5),
+            Ast::Slide(RELYNG, (592, 160), true, false, 0.5),
+            Ast::Wait(1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "Well, how was I supposed\n\
+                       to know that?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "And I still don't even\n\
+                       know that guy's name!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(MEZURE, (176, 304), true, true, 0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "$iSigh.$r  Guess I'd better\n\
+                       try to fix these columns\n\
+                       before I move on."),
         ]),
     ];
     Ast::compile_scene(resources, ast)
@@ -45,8 +239,16 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Sound(Sound::solve_puzzle_chime()),
             Ast::Wait(1.0),
-            Ast::Slide(0, (592, 304), true, false, 1.0),
-            Ast::Remove(0),
+            Ast::Slide(MEZURE, (400, 304), true, true, 1.0),
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(MEZURE, (432, 320), 0.5),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(MEZURE, (464, 352), 0.5),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(MEZURE, (496, 400), 0.5),
+            Ast::Remove(MEZURE),
+            Ast::Wait(1.0),
         ]),
     ];
     Ast::compile_scene(resources, ast)

@@ -29,6 +29,7 @@ use super::scenes::{compile_intro_scene, compile_outro_scene};
 pub struct View {
     core: PuzzleCore<(usize, i32)>,
     columns: ColumnsView,
+    show_columns: bool,
 }
 
 impl View {
@@ -41,6 +42,7 @@ impl View {
         View {
             core: core,
             columns: ColumnsView::new(resources, 278, 108, 0),
+            show_columns: false,
         }
     }
 }
@@ -49,7 +51,9 @@ impl Element<Game, PuzzleCmd> for View {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
         let state = &game.whatcha_column;
         self.core.draw_back_layer(canvas);
-        self.columns.draw(state.columns(), canvas);
+        if self.show_columns {
+            self.columns.draw(state.columns(), canvas);
+        }
         self.core.draw_middle_layer(canvas);
         self.core.draw_front_layer(canvas, state);
     }
@@ -58,7 +62,7 @@ impl Element<Game, PuzzleCmd> for View {
                     -> Action<PuzzleCmd> {
         let state = &mut game.whatcha_column;
         let mut action = self.core.handle_event(event, state);
-        if !action.should_stop() {
+        if !action.should_stop() && self.show_columns {
             let subaction = self.columns
                                 .handle_event(event, state.columns_mut());
             if let Some(&(col, by)) = subaction.value() {
@@ -107,8 +111,10 @@ impl PuzzleView for View {
     }
 
     fn drain_queue(&mut self) {
-        for _ in self.core.drain_queue() {
-            // TODO drain queue
+        for (kind, value) in self.core.drain_queue() {
+            if kind == 0 {
+                self.show_columns = value != 0;
+            }
         }
     }
 }

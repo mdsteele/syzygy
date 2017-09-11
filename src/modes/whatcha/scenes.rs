@@ -239,8 +239,24 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Sound(Sound::solve_puzzle_chime()),
             Ast::Wait(1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "Well, that's that, I guess."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "I wish I knew what that\n\
+                       sneaky guy's deal was."),
+        ]),
+        Ast::Seq(vec![
             Ast::Slide(MEZURE, (400, 304), true, true, 1.0),
-            Ast::Wait(0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NW,
+                      "Gotta get back to\n\
+                       work, though."),
+        ]),
+        Ast::Seq(vec![
             Ast::Sound(Sound::small_jump()),
             Ast::Jump(MEZURE, (432, 320), 0.5),
             Ast::Sound(Sound::small_jump()),
@@ -249,6 +265,42 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
             Ast::Jump(MEZURE, (496, 400), 0.5),
             Ast::Remove(MEZURE),
             Ast::Wait(1.0),
+            Ast::Place(RELYNG, "chars/relyng", 0, (592, 160)),
+            Ast::Slide(RELYNG, (528, 160), false, false, 0.5),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(RELYNG, (496, 192), 0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NW,
+                      "Heh.  Nice work, kid."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(RELYNG, (464, 208), 0.5),
+            Ast::Slide(RELYNG, (352, 208), true, false, 0.5),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(RELYNG, (304, 176), 0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NE,
+                      "The question is, though:\n\
+                       What are you $ireally$r\n\
+                       doing on this ship?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(RELYNG, (256, 176), true, false, 0.4),
+            Ast::Slide(RELYNG, (224, 208), false, false, 0.2),
+            Ast::Slide(RELYNG, (208, 208), false, false, 0.1),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(RELYNG, (168, 304), 1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NE,
+                      "I intend to find out."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(RELYNG, (400, 304), true, false, 1.0),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(RELYNG, (496, 400), 0.85),
+            Ast::Remove(RELYNG),
+            Ast::Wait(0.5),
         ]),
     ];
     Ast::compile_scene(resources, ast)

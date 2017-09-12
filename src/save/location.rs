@@ -144,7 +144,7 @@ impl Location {
             Location::LightSyrup => Location::TreadLightly,
             Location::LogLevel => Location::SystemFailure,
             Location::MemoryLane => Location::MissedConnections,
-            Location::MissedConnections => Location::Map,
+            Location::MissedConnections => Location::IfMemoryServes,
             Location::PasswordFile => Location::SystemSyzygy,
             Location::PlaneAndSimple => Location::MemoryLane,
             Location::PlaneAsDay => Location::Map,
@@ -154,7 +154,7 @@ impl Location {
             Location::ShiftGears => Location::PointOfNoReturn,
             Location::ShiftTheBlame => Location::PointOfOrder,
             Location::ShiftingGround => Location::CubeTangle,
-            Location::StarCrossed => Location::FactOrFiction,
+            Location::StarCrossed => Location::PlaneAsDay,
             Location::SystemFailure => Location::PasswordFile,
             Location::SystemSyzygy => Location::Finale,
             Location::TheIceIsRight => Location::LevelUp,
@@ -185,7 +185,11 @@ impl Location {
             Location::CubeTangle => vec![Location::ShiftingGround],
             Location::Disconnected => vec![Location::Prolog],
             Location::DoubleCross => vec![Location::TreadLightly],
-            Location::FactOrFiction => vec![Location::StarCrossed],
+            Location::FactOrFiction => {
+                vec![Location::CubeTangle,
+                     Location::HexSpangled,
+                     Location::WhatchaColumn]
+            }
             Location::HexSpangled => vec![Location::TheYFactor],
             Location::IceToMeetYou => vec![Location::IfMemoryServes],
             Location::IfMemoryServes => {
@@ -204,7 +208,7 @@ impl Location {
             }
             Location::PasswordFile => vec![Location::SystemFailure],
             Location::PlaneAndSimple => vec![Location::CrossTheLine],
-            Location::PlaneAsDay => vec![Location::MissedConnections],
+            Location::PlaneAsDay => vec![Location::StarCrossed],
             Location::PointOfNoReturn => {
                 vec![Location::IfMemoryServes, Location::ShiftGears]
             }
@@ -372,6 +376,30 @@ mod tests {
     }
 
     #[test]
+    fn leads_to_only_dependent() {
+        let mut dependents: HashMap<Location, Vec<Location>> = HashMap::new();
+        for &location in Location::all() {
+            for prereq in location.prereqs().into_iter() {
+                dependents.entry(prereq)
+                          .or_insert_with(Vec::new)
+                          .push(location);
+            }
+        }
+        for (&location, direct_dependents) in dependents.iter() {
+            if direct_dependents.len() == 1 {
+                let dependent = direct_dependents.first().cloned().unwrap();
+                let next = location.next();
+                assert_eq!(dependent,
+                           next,
+                           "{:?} leads to {:?}, but it should lead to {:?}",
+                           location,
+                           next,
+                           dependent);
+            }
+        }
+    }
+
+    #[test]
     fn transitive_dependencies() {
         let num_locations = Location::all().len();
         let mut deps_map: HashMap<Location, HashSet<Location>> =
@@ -402,42 +430,29 @@ mod tests {
                 panic!("Location dependency cycle.");
             }
         }
+        let precedes = |loc1: Location, loc2: Location| {
+            deps_map.get(&loc2).unwrap().contains(&loc1)
+        };
         // "Column" puzzles:
-        assert!(deps_map.get(&Location::ColumnAsIcyEm)
-                        .unwrap()
-                        .contains(&Location::WhatchaColumn));
+        assert!(precedes(Location::WhatchaColumn, Location::ColumnAsIcyEm));
         // "Connect" puzzles:
-        assert!(deps_map.get(&Location::ConnectTheDots)
-                        .unwrap()
-                        .contains(&Location::Disconnected));
-        assert!(deps_map.get(&Location::MissedConnections)
-                        .unwrap()
-                        .contains(&Location::ConnectTheDots));
+        assert!(precedes(Location::Disconnected, Location::ConnectTheDots));
+        assert!(precedes(Location::ConnectTheDots,
+                         Location::MissedConnections));
+        // "Factor" puzzles:
+        assert!(precedes(Location::TheYFactor, Location::AutofacTour));
+        assert!(precedes(Location::TheYFactor, Location::FactOrFiction));
         // "Ice" puzzles:
-        assert!(deps_map.get(&Location::TheIceIsRight)
-                        .unwrap()
-                        .contains(&Location::IceToMeetYou));
-        assert!(deps_map.get(&Location::VirtueOrIce)
-                        .unwrap()
-                        .contains(&Location::TheIceIsRight));
+        assert!(precedes(Location::IceToMeetYou, Location::TheIceIsRight));
+        assert!(precedes(Location::TheIceIsRight, Location::VirtueOrIce));
         // "Memory" puzzles:
-        assert!(deps_map.get(&Location::IfMemoryServes)
-                        .unwrap()
-                        .contains(&Location::MemoryLane));
-        assert!(deps_map.get(&Location::JogYourMemory)
-                        .unwrap()
-                        .contains(&Location::IfMemoryServes));
+        assert!(precedes(Location::MemoryLane, Location::IfMemoryServes));
+        assert!(precedes(Location::IfMemoryServes, Location::JogYourMemory));
         // "Plane" puzzles:
-        assert!(deps_map.get(&Location::PlaneAsDay)
-                        .unwrap()
-                        .contains(&Location::PlaneAndSimple));
+        assert!(precedes(Location::PlaneAndSimple, Location::PlaneAsDay));
         // "Shift" puzzles:
-        assert!(deps_map.get(&Location::ShiftGears)
-                        .unwrap()
-                        .contains(&Location::ShiftingGround));
-        assert!(deps_map.get(&Location::ShiftTheBlame)
-                        .unwrap()
-                        .contains(&Location::ShiftingGround));
+        assert!(precedes(Location::ShiftingGround, Location::ShiftGears));
+        assert!(precedes(Location::ShiftingGround, Location::ShiftTheBlame));
     }
 }
 

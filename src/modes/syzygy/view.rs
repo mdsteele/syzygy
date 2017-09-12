@@ -312,8 +312,43 @@ impl PuzzleView for View {
             Some(UndoRedo::Yttris(col, by)) => {
                 state.yttris_columns_mut().rotate_column(col, -by);
             }
+            Some(UndoRedo::Argony(slide)) => {
+                state.argony_grid_mut().undo_slide(&slide);
+                self.argony.reset_animation();
+            }
+            Some(UndoRedo::Elinsa(changes)) => {
+                for (coords1, coords2) in changes.into_iter().rev() {
+                    state.elinsa_grid_mut().toggle_pipe(coords1, coords2);
+                }
+            }
+            Some(UndoRedo::Ugrent(cmd)) => {
+                let grid = state.ugrent_grid_mut();
+                match cmd {
+                    LaserCmd::Moved(col1, row1, col2, row2) => {
+                        grid.move_to(col2, row2, col1, row1);
+                    }
+                    LaserCmd::Rotated(col, row) => {
+                        grid.unrotate(col, row);
+                    }
+                }
+                self.ugrent.recalculate_lasers(grid);
+            }
             Some(UndoRedo::Relyng(pos)) => state.relyng_untoggle(pos),
-            Some(_) => {} // TODO other undos
+            Some(UndoRedo::Mezure(MezureCmd::Pipes(changes))) => {
+                for (coords1, coords2) in changes.into_iter().rev() {
+                    state.mezure_pipe_grid_mut().toggle_pipe(coords1, coords2);
+                }
+                state.mezure_regenerate_laser_grid();
+                self.mezure.refresh(state);
+            }
+            Some(UndoRedo::Mezure(MezureCmd::IceBlocks(slide))) => {
+                state.mezure_ice_grid_mut().undo_slide(&slide);
+                state.mezure_regenerate_laser_grid();
+                self.mezure.refresh(state);
+            }
+            Some(UndoRedo::Mezure(MezureCmd::Columns(col, by))) => {
+                state.mezure_columns_mut().rotate_column(col, -by);
+            }
             None => {}
         }
     }
@@ -324,8 +359,43 @@ impl PuzzleView for View {
             Some(UndoRedo::Yttris(col, by)) => {
                 state.yttris_columns_mut().rotate_column(col, by);
             }
+            Some(UndoRedo::Argony(slide)) => {
+                state.argony_grid_mut().redo_slide(&slide);
+                self.argony.reset_animation();
+            }
+            Some(UndoRedo::Elinsa(changes)) => {
+                for (coords1, coords2) in changes.into_iter() {
+                    state.elinsa_grid_mut().toggle_pipe(coords1, coords2);
+                }
+            }
+            Some(UndoRedo::Ugrent(cmd)) => {
+                let grid = state.ugrent_grid_mut();
+                match cmd {
+                    LaserCmd::Moved(col1, row1, col2, row2) => {
+                        grid.move_to(col1, row1, col2, row2);
+                    }
+                    LaserCmd::Rotated(col, row) => {
+                        grid.unrotate(col, row);
+                    }
+                }
+                self.ugrent.recalculate_lasers(grid);
+            }
             Some(UndoRedo::Relyng(pos)) => state.relyng_toggle(pos),
-            Some(_) => {} // TODO other redos
+            Some(UndoRedo::Mezure(MezureCmd::Pipes(changes))) => {
+                for (coords1, coords2) in changes.into_iter() {
+                    state.mezure_pipe_grid_mut().toggle_pipe(coords1, coords2);
+                }
+                state.mezure_regenerate_laser_grid();
+                self.mezure.refresh(state);
+            }
+            Some(UndoRedo::Mezure(MezureCmd::IceBlocks(slide))) => {
+                state.mezure_ice_grid_mut().redo_slide(&slide);
+                state.mezure_regenerate_laser_grid();
+                self.mezure.refresh(state);
+            }
+            Some(UndoRedo::Mezure(MezureCmd::Columns(col, by))) => {
+                state.mezure_columns_mut().rotate_column(col, by);
+            }
             None => {}
         }
     }
@@ -339,6 +409,7 @@ impl PuzzleView for View {
     }
 
     fn solve(&mut self, game: &mut Game) {
+        self.core.clear_undo_redo();
         let state = &mut game.system_syzygy;
         let stage = state.stage();
         state.solve_stage();

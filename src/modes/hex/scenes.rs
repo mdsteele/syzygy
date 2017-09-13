@@ -183,17 +183,100 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
                        and operational."),
         ]),
         Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::SW,
+                      "Hooray, we did it!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SE,
+                      "There, see?  Just look at\n\
+                       what we can accomplish\n\
+                       when we work together!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(YTTRIS, (430, 112), true, true, 0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::SW,
+                      "That's very inspiring!\n\
+                       You should put that\n\
+                       on a poster!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(YTTRIS, (472, 112), true, false, 0.4),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(YTTRIS, (512, 80), 0.5),
+            Ast::Slide(YTTRIS, (592, 80), false, false, 0.5),
+            Ast::Remove(YTTRIS),
+            Ast::Wait(1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::E,
+                      "Is she...mocking me?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::beep()),
+            Ast::Queue(1, 2),
+            Ast::Wait(0.1),
+            Ast::Queue(1, 3),
+            Ast::Wait(1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::E,
+                      "No, I said ``ME.''\n\
+                       ``Mocking ME.''"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::E,
+                      "I think you spelled it\n\
+                       backwards down in there."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::beep()),
             Ast::Queue(1, 0),
+            Ast::Wait(0.1),
             Ast::Queue(1, 1),
             Ast::Wait(0.5),
-            Ast::Queue(1, 2),
-            Ast::Queue(1, 3),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::E,
+                      "No, ``IN.''  ``Down IN there.''  I think\n\
+                       you have the wrong vowel?"),
+        ]),
+        Ast::Seq(vec![
             Ast::Wait(0.5),
+            Ast::Sound(Sound::beep()),
             Ast::Queue(1, 4),
+            Ast::Wait(0.1),
             Ast::Queue(1, 5),
+            Ast::Wait(0.1),
             Ast::Queue(1, 6),
+            Ast::Wait(0.1),
             Ast::Queue(1, 7),
             Ast::Wait(1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::E,
+                      "I have no idea what\n\
+                       that even means."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(MEZURE, (144, 112), true, false, 0.5),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(MEZURE, (192, 96), 0.5),
+            Ast::Slide(MEZURE, (320, 96), false, true, 1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::W,
+                      "Anyway, uh, hopefully this\n\
+                       thing is working now?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(MEZURE, (368, 96), true, false, 0.5),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(MEZURE, (440, 112), 0.5),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(MEZURE, (512, 80), 0.5),
+            Ast::Slide(MEZURE, (592, 80), false, false, 0.5),
+            Ast::Remove(MEZURE),
+            Ast::Wait(0.5),
         ]),
     ];
     Ast::compile_scene(resources, ast)

@@ -53,16 +53,17 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
                     Ast::Slide(ELINSA, (250, 80), false, true, 1.0),
                 ]),
                 Ast::Seq(vec![
+                    Ast::Wait(0.5),
                     Ast::Place(UGRENT, "chars/ugrent", 0, (592, 80)),
                     Ast::Slide(UGRENT, (325, 80), false, true, 1.0),
                 ]),
-            ]),
-            Ast::Par(vec![
                 Ast::Seq(vec![
+                    Ast::Wait(1.0),
                     Ast::Place(ARGONY, "chars/argony", 0, (-16, 80)),
                     Ast::Slide(ARGONY, (175, 80), false, true, 1.0),
                 ]),
                 Ast::Seq(vec![
+                    Ast::Wait(1.5),
                     Ast::Place(RELYNG, "chars/relyng", 0, (592, 80)),
                     Ast::Slide(RELYNG, (400, 80), false, true, 1.0),
                 ]),
@@ -106,10 +107,10 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::SE,
-                      "Assuming the ship is in position near\n\
-                       a star to collect solar energy, it can\n\
-                       fire a beam that can warm up an entire\n\
-                       planet, from across a solar system.\n\
+                      "Assuming the ship is near a star to\n\
+                       collect enough solar energy, it can\n\
+                       fire a beam that'll warm up an entire\n\
+                       planet from across the solar system.\n\
                        It can make an icy planet habitable."),
         ]),
         Ast::Seq(vec![
@@ -117,10 +118,10 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::SE,
                       "Our mission was to travel to the\n\
                        Xanadu system and terraform\n\
-                       its uninhabited fourth planet, in\n\
-                       preparation for the arrival of\n\
-                       a human colony.  We're almost\n\
-                       there now."),
+                       its uninhabited fourth planet,\n\
+                       Xanadu-IV, in preparation for\n\
+                       the arrival of a human colony.\n\
+                       We're almost there now."),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
@@ -148,7 +149,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SW,
-                      "And we've had one of these planet\n\
+                      "And...we've had one of these planet\n\
                        death rays just sitting on board\n\
                        the ship this entire time?"),
         ]),
@@ -180,8 +181,8 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::SE,
-                      "It can still fire even if there\n\
-                       happens to be another planet $iin\n\
+                      "It could still fire even if there\n\
+                       happened to be another planet $iin\n\
                        the way$r.  And from of the looks\n\
                        of things, it's been reprogrammed\n\
                        to fire when the ship is $iin syzygy$r\n\
@@ -196,8 +197,8 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::SE,
                       "It's an astronomical term, dear.\n\
-                       It basically means ``lined up.''\n\
-                       Xanadu-III will be directly between\n\
+                       It basically means ``lined up with.''\n\
+                       Xanadu-III would be directly between\n\
                        the ship and the intended target\n\
                        when the terraforming laser fires."),
         ]),
@@ -239,16 +240,17 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SW,
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::SE,
                       "Then-  Then it's hopeless!"),
         ]),
         Ast::Seq(vec![
             Ast::Wait(1.0),
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::SE,
-                      "But we could reprogram it!\n\
-                       Make it fire from a different\n\
-                       position in the star system!"),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SW,
+                      "Well...could we reprogram it?\n\
+                       Make us fire from a different\n\
+                       position in the star system, so\n\
+                       the planets won't be lined up?"),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
@@ -260,12 +262,13 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::SE,
-                      "We're going to need to disengage the security\n\
-                       barrier, and access the cold firmware.  Then we\n\
-                       need to reconnect the control circuits $iand$r  the\n\
-                       targeting interface.  That lets us shut down the\n\
-                       software locks, and finally reprogram it.\n\
-                       There's going to be a lot of steps."),
+                      "We're going to need to disengage the\n\
+                       security barrier, and access the cold\n\
+                       firmware.  Then we need to reconnect\n\
+                       the control circuits $iand$r  the targeting\n\
+                       interface.  That lets us shut down the\n\
+                       software locks, and finally reprogram\n\
+                       it.  There's going to be a lot of steps."),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
@@ -279,11 +282,11 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
                        This thing is designed to be very\n\
                        tamper-resistant.  After each one\n\
                        of those steps, one of us will have\n\
-                       to get into the machine and hold open\n\
-                       that bypass to keep everything from\n\
-                       resetting.  Whoever's left out here\n\
-                       will have to do the remaining steps\n\
-                       without their help."),
+                       to get into the machine and hold\n\
+                       open that bypass to keep everything\n\
+                       from resetting.  Whoever's left out\n\
+                       here will have to do the remaining\n\
+                       steps without their help."),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_lo()),
@@ -292,10 +295,15 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::SE,
-                      "Aw, c'mon everyone,\n\
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SW,
+                      "C'mon everyone,\n\
                        we can do this!\n\
-                       I'll start us off!"),
+                       We've got to!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::SE,
+                      "Yeah!  I'll start us off!"),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
@@ -330,8 +338,7 @@ pub fn compile_post_yttris_scene(resources: &mut Resources) -> (i32, Scene) {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::SE,
-                      "See you all\n\
-                       later!"),
+                      "See you all later!"),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::small_jump()),
@@ -377,7 +384,7 @@ pub fn compile_post_yttris_scene(resources: &mut Resources) -> (i32, Scene) {
                        Archaic Argony.''"),
         ]),
         Ast::Seq(vec![
-            Ast::Sound(Sound::talk_hi()),
+            Ast::Sound(Sound::talk_lo()),
             Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::SE,
                       "Hush, you."),
         ]),
@@ -426,8 +433,9 @@ pub fn compile_post_argony_scene(resources: &mut Resources) -> (i32, Scene) {
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::SW,
                       "I'm pretty sure you're\n\
-                       the only one left who\n\
-                       knows how to do that."),
+                       the only one left here\n\
+                       who knows how to\n\
+                       do that, Elinsa."),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
@@ -540,7 +548,7 @@ pub fn compile_post_elinsa_scene(resources: &mut Resources) -> (i32, Scene) {
                        lasers go pew, pew!''"),
         ]),
         Ast::Seq(vec![
-            Ast::Sound(Sound::talk_annoyed_hi()),
+            Ast::Sound(Sound::talk_lo()),
             Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::SW,
                       "$iSlightly$r  more\n\
                        complicated\n\
@@ -551,7 +559,6 @@ pub fn compile_post_elinsa_scene(resources: &mut Resources) -> (i32, Scene) {
             Ast::Queue(0, 1),  // Reveal puzzle.
             Ast::Wait(1.5),
             Ast::Queue(0, -1),  // Finish reveal animation.
-            Ast::Wait(0.5),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SW,
                       "This looks kind of\n\
@@ -639,7 +646,7 @@ pub fn compile_post_ugrent_scene(resources: &mut Resources) -> (i32, Scene) {
             Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::SW,
                       "Now, how's about you and me get\n\
                        those software locks shut down\n\
-                       so we can fix this thing, eh?"),
+                       so we can finish this thing, eh?"),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),

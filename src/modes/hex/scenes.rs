@@ -17,6 +17,8 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
+use std::f64::consts::FRAC_PI_3;
+
 use elements::{Ast, Scene, TalkPos, TalkStyle};
 use gui::{Resources, Sound};
 
@@ -172,6 +174,98 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
 // ========================================================================= //
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_mezure_midscene(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SE,
+                      "I think this will be\n\
+                       easiest if we work row by\n\
+                       row, from top to bottom."),
+        ]),
+    ];
+    (MEZURE, Ast::compile_scene(resources, ast))
+}
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_system_midscene(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::beep()),
+            Ast::Talk(SYSTEM, TalkStyle::System, TalkPos::NE,
+                      "Warning: Factory FAB\n\
+                       unit is still offline."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SE,
+                      "Yes, $ithank you$r  for that\n\
+                       update.  We're working on it."),
+        ]),
+    ];
+    (SYSTEM, Ast::compile_scene(resources, ast))
+}
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_yttris_midscene(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::SW,
+                          "Here I go!"),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.5),
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::E, "Huh?"),
+            ]),
+            Ast::Seq(vec![
+                Ast::Sound(Sound::small_jump()),
+                Ast::Jump(YTTRIS, (356, 182), 0.75),
+                Ast::Seq((0..18).map(|index| {
+                    let theta = 0.25 * FRAC_PI_3 * index as f64;
+                    let (sin, cos) = theta.sin_cos();
+                    let x = 320 + (32.0 * cos).round() as i32;
+                    let y = 176 + (32.0 * sin).round() as i32 + 8;
+                    Ast::Seq(vec![
+                        Ast::Wait(0.05),
+                        Ast::SetPos(YTTRIS, (x, y)),
+                        Ast::Queue(2, index - 23),
+                    ])
+                }).collect()),
+                Ast::Par(vec![
+                    Ast::Seq(vec![
+                        Ast::Sound(Sound::small_jump()),
+                        Ast::Jump(YTTRIS, (456, 112), 0.75),
+                    ]),
+                    Ast::Seq(vec![
+                        Ast::Wait(0.25),
+                        Ast::Sound(Sound::talk_hi()),
+                        Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::W,
+                                  "Wheee!"),
+                    ]),
+                    Ast::Seq((18..24).map(|index| {
+                        Ast::Seq(vec![
+                            Ast::Wait(0.041 * (index / 2 - 8) as f64),
+                            Ast::Queue(2, index - 23),
+                        ])
+                    }).collect()),
+                ]),
+            ]),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::W,
+                      "That was fun!"),
+        ]),
+    ];
+    (YTTRIS, Ast::compile_scene(resources, ast))
+}
+
+// ========================================================================= //
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
 pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
@@ -264,7 +358,7 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
             Ast::Jump(MEZURE, (192, 96), 0.5),
             Ast::Slide(MEZURE, (320, 96), false, true, 1.0),
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::W,
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SW,
                       "Anyway, uh, hopefully this\n\
                        thing is working now?"),
         ]),

@@ -27,7 +27,7 @@ use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
           Sprite};
 use modes::SOLVED_INFO_TEXT;
 use save::{Game, HexState, PuzzleState};
-use super::scenes::{compile_intro_scene, compile_outro_scene};
+use super::scenes;
 
 // ========================================================================= //
 
@@ -40,9 +40,14 @@ pub struct View {
 impl View {
     pub fn new(resources: &mut Resources, visible: Rect, state: &HexState)
                -> View {
-        let intro = compile_intro_scene(resources);
-        let outro = compile_outro_scene(resources);
-        let core = PuzzleCore::new(resources, visible, state, intro, outro);
+        let mut core = {
+            let intro = scenes::compile_intro_scene(resources);
+            let outro = scenes::compile_outro_scene(resources);
+            PuzzleCore::new(resources, visible, state, intro, outro)
+        };
+        core.add_extra_scene(scenes::compile_mezure_midscene(resources));
+        core.add_extra_scene(scenes::compile_system_midscene(resources));
+        core.add_extra_scene(scenes::compile_yttris_midscene(resources));
         View {
             core: core,
             wheels: HexWheels::new(resources, 192, 144),
@@ -79,6 +84,9 @@ impl Element<Game, PuzzleCmd> for View {
         }
         if !action.should_stop() {
             action.merge(self.solution.handle_event(event, state));
+        }
+        if !action.should_stop() {
+            self.core.begin_character_scene_on_click(event);
         }
         action
     }
@@ -124,6 +132,8 @@ impl PuzzleView for View {
                     let (index, chr) = LETTERS[value as usize];
                     self.wheels.letters.insert(index, chr);
                 }
+            } else if kind == 2 {
+                self.wheels.wheels[1].base_rotation = mod_floor(value, 24);
             }
         }
     }
@@ -205,9 +215,11 @@ impl Element<HexState, (usize, i32)> for HexWheels {
         for (index, &((x, y), wheels)) in TOKENS.iter().enumerate() {
             let mut center = self.topleft + Point::new(x, y);
             for &(wheel, at) in wheels {
-                if let Some(ref drag) = self.wheels[wheel].drag {
+                let rotation = self.wheels[wheel].sprite_rotation();
+                if rotation != 0 {
                     let base_theta = FRAC_PI_3 * (at as f64);
-                    let new_theta = base_theta + drag.rotation_angle();
+                    let new_theta = base_theta +
+                                    0.25 * FRAC_PI_3 * rotation as f64;
                     let base_pt = point_from_polar(32, base_theta);
                     let new_pt = point_from_polar(32, new_theta);
                     center = center + new_pt - base_pt;
@@ -241,6 +253,7 @@ struct HexWheel {
     wheel_sprites: Vec<Sprite>,
     hub_sprites: Vec<Sprite>,
     drag: Option<WheelDrag>,
+    base_rotation: i32,
 }
 
 impl HexWheel {
@@ -252,14 +265,21 @@ impl HexWheel {
             wheel_sprites: resources.get_sprites("hex/wheels"),
             hub_sprites: resources.get_sprites("hex/hub"),
             drag: None,
+            base_rotation: 0,
         }
+    }
+
+    fn sprite_rotation(&self) -> i32 {
+        self.drag
+            .as_ref()
+            .map(WheelDrag::sprite_rotation)
+            .unwrap_or(self.base_rotation)
     }
 }
 
 impl Element<HexState, (usize, i32)> for HexWheel {
     fn draw(&self, _state: &HexState, canvas: &mut Canvas) {
-        let rotation =
-            self.drag.as_ref().map(WheelDrag::sprite_rotation).unwrap_or(0);
+        let rotation = self.sprite_rotation();
         let sprite = &self.wheel_sprites[mod_floor(rotation, 2) as usize];
         let angle = if mod_floor(rotation, 4) < 2 { 0 } else { 90 };
         canvas.draw_sprite_rotated(sprite, self.center, angle);
@@ -328,10 +348,6 @@ impl WheelDrag {
     fn sprite_rotation(&self) -> i32 {
         let delta = self.current_angle - self.start_angle;
         mod_floor((12.0 * FRAC_1_PI * delta).round() as i32, 24)
-    }
-
-    fn rotation_angle(&self) -> f64 {
-        0.25 * FRAC_PI_3 * (self.sprite_rotation() as f64)
     }
 }
 

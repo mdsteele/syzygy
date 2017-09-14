@@ -22,7 +22,7 @@ use elements::column::ColumnsView;
 use gui::{Action, Canvas, Element, Event, Rect, Resources};
 use modes::SOLVED_INFO_TEXT;
 use save::{Game, PuzzleState, WhatchaState};
-use super::scenes::{compile_intro_scene, compile_outro_scene};
+use super::scenes;
 
 // ========================================================================= //
 
@@ -36,9 +36,12 @@ impl View {
     pub fn new(resources: &mut Resources, visible: Rect,
                state: &WhatchaState)
                -> View {
-        let intro = compile_intro_scene(resources);
-        let outro = compile_outro_scene(resources);
-        let core = PuzzleCore::new(resources, visible, state, intro, outro);
+        let mut core = {
+            let intro = scenes::compile_intro_scene(resources);
+            let outro = scenes::compile_outro_scene(resources);
+            PuzzleCore::new(resources, visible, state, intro, outro)
+        };
+        core.add_extra_scene(scenes::compile_mezure_midscene(resources));
         View {
             core: core,
             columns: ColumnsView::new(resources, 278, 108, 0),
@@ -74,6 +77,9 @@ impl Element<Game, PuzzleCmd> for View {
                 }
             }
             action.merge(subaction.but_no_value());
+        }
+        if !action.should_stop() {
+            self.core.begin_character_scene_on_click(event);
         }
         action
     }

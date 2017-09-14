@@ -158,6 +158,42 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
 // ========================================================================= //
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_mezure_midscene(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "I think we'll need to\n\
+                       use all six buttons."),
+        ]),
+    ];
+    (MEZURE, Ast::compile_scene(resources, ast))
+}
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_yttris_midscene(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::SW,
+                      "Don't worry!  There's over seven\n\
+                       hundred possible combinations to\n\
+                       try, but I'm pretty sure that at\n\
+                       least one of them will work."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "Thanks.  That's very\n\
+                       reassuring."),
+        ]),
+    ];
+    (YTTRIS, Ast::compile_scene(resources, ast))
+}
+
+// ========================================================================= //
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
 pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![

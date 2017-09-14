@@ -38,9 +38,13 @@ pub struct View {
 impl View {
     pub fn new(resources: &mut Resources, visible: Rect, state: &TheYState)
                -> View {
-        let intro = scenes::compile_intro_scene(resources);
-        let outro = scenes::compile_outro_scene(resources);
-        let core = PuzzleCore::new(resources, visible, state, intro, outro);
+        let mut core = {
+            let intro = scenes::compile_intro_scene(resources);
+            let outro = scenes::compile_outro_scene(resources);
+            PuzzleCore::new(resources, visible, state, intro, outro)
+        };
+        core.add_extra_scene(scenes::compile_mezure_midscene(resources));
+        core.add_extra_scene(scenes::compile_yttris_midscene(resources));
         let buttons = resources.get_sprites("factor/they");
         let seq = state.sequence();
         View {
@@ -108,6 +112,9 @@ impl Element<Game, PuzzleCmd> for View {
                 }
             }
             action.merge(subaction.but_no_value());
+        }
+        if !action.should_stop() {
+            self.core.begin_character_scene_on_click(event);
         }
         action
     }

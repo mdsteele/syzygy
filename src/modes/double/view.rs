@@ -157,17 +157,17 @@ impl PuzzleView for View {
     }
 
     fn drain_queue(&mut self) {
-        for (device, command) in self.core.drain_queue() {
-            if device == 0 {
-                self.clue.set_visible(command != 0);
-            } else if device == 1 {
-                if command == 0 {
+        for (kind, value) in self.core.drain_queue() {
+            if kind == 0 {
+                self.clue.set_visible(value != 0);
+            } else if kind == 1 {
+                if value == 0 {
                     self.input.clear_text();
-                } else if command == 1 {
+                } else if value == 1 {
                     self.input.set_text("FALSE/TRUE".to_string());
-                } else if command == 2 {
+                } else if value == 2 {
                     self.input.set_text("NEVER/ALWAYS".to_string());
-                } else if command == 3 {
+                } else if value == 3 {
                     self.input.set_text("TNEITAPMI".to_string());
                 }
             }

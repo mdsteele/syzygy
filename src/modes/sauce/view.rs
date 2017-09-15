@@ -151,9 +151,27 @@ impl PuzzleView for View {
     }
 
     fn drain_queue(&mut self) {
-        for (device, command) in self.core.drain_queue() {
-            if device == 0 {
-                self.clue.set_visible(command != 0);
+        for (kind, value) in self.core.drain_queue() {
+            if kind == 0 {
+                self.clue.set_visible(value != 0);
+            } else if kind == 1 {
+                if value == 0 {
+                    self.input.clear_text();
+                } else if value == 1 {
+                    self.input.set_text("RHYME TIME".to_string());
+                } else if value == 2 {
+                    self.input.set_text("THYME CLIMB".to_string());
+                } else if value == 3 {
+                    self.input.set_text("SUBLIME ENZYME".to_string());
+                } else if value == 4 {
+                    self.input.set_text("TOUGH BLUFF".to_string());
+                } else if value == 5 {
+                    self.input.set_text("ENOUGH STUFF?".to_string());
+                } else if value == 6 {
+                    self.input.set_text("ROUGH FLUFF".to_string());
+                } else if value == 7 {
+                    self.input.set_text("F   G U    F  R".to_string());
+                }
             }
         }
     }

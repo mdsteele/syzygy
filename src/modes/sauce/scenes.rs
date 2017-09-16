@@ -115,7 +115,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::NE,
                       "All facts I am well aware\n\
-                       of, Ugrent.  And you don't\n\
+                       of, dear.  And you don't\n\
                        need to call me ``Lady.''"),
         ]),
         Ast::Seq(vec![
@@ -161,11 +161,93 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
             Ast::Sound(Sound::solve_puzzle_chime()),
             Ast::Wait(1.0),
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NW, "Much better."),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::NE,
+                      "That looks to be\n\
+                       the lot of them."),
+        ]),
+        Ast::Par(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NE,
+                      "Hooray, I got to help!"),
+            Ast::Loop(0, 2, Box::new(Ast::Seq(vec![
+                Ast::Sound(Sound::small_jump()),
+                Ast::Jump(YTTRIS, (244, 240), 0.5),
+            ]))),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NW,
+                      "Yes.  Well.  Everything\n\
+                       seems to be fine here."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(UGRENT, (454, 240), true, true, 0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NW,
+                      "I must be moving on\n\
+                       to the next section.\n\
+                       Good day, ladies."),
         ]),
         Ast::Seq(vec![
             Ast::Slide(UGRENT, (592, 240), true, false, 0.75),
             Ast::Remove(UGRENT),
+            Ast::Wait(1.0),
+            Ast::Sound(Sound::beep()),
+            Ast::Queue(1, 4),  // Display "TOUGH BLUFF".
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NE,
+                      "Huh?  We did this\n\
+                       one already."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::NE,
+                      "If that's everything here, I\n\
+                       should be moving on as well."),
+        ]),
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::Slide(ARGONY, (-16, 240), true, false, 1.0),
+                Ast::Remove(ARGONY),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.25),
+                Ast::Queue(1, 0),  // Clear display.
+                Ast::Wait(0.75),
+                Ast::Sound(Sound::beep()),
+                Ast::Queue(1, 5),  // Display "ENOUGH STUFF".
+                Ast::Wait(0.75),
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NE,
+                          "Yeah, I think we've done more\n\
+                           than enough stuff here.  I think\n\
+                           I might need a break from poetry!"),
+            ]),
+        ]),
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::Queue(1, 0),  // Clear display.
+                Ast::Wait(0.75),
+                Ast::Sound(Sound::beep()),
+                Ast::Queue(1, 6),  // Display "BOUGH FLUFF?".
+            ]),
+            Ast::Seq(vec![
+                Ast::Slide(YTTRIS, (344, 240), true, true, 1.0),
+                Ast::Wait(0.5),
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NW,
+                          "You can't fool me!\n\
+                           Those don't even rhyme."),
+            ]),
+        ]),
+        Ast::Seq(vec![
+            Ast::Queue(1, 0),  // Clear display.
+            Ast::Slide(YTTRIS, (592, 240), true, false, 1.0),
+            Ast::Wait(1.0),
+            Ast::Sound(Sound::beep()),
+            Ast::Queue(1, 7),  // Display "F   G U    F  R".
+            Ast::Wait(1.0),
         ]),
     ];
     Ast::compile_scene(resources, ast)

@@ -59,10 +59,10 @@ impl Element<Game, PuzzleCmd> for View {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
         let state = &game.cross_sauce;
         self.core.draw_back_layer(canvas);
+        self.input.draw(&(), canvas);
         if !state.is_solved() || self.text_timer > 0 {
             self.progress
                 .draw(state.num_clues_done(), state.total_num_clues(), canvas);
-            self.input.draw(&(), canvas);
             self.clue.draw(&state.current_clue(), canvas);
         }
         self.core.draw_middle_layer(canvas);
@@ -166,9 +166,9 @@ impl PuzzleView for View {
                 } else if value == 4 {
                     self.input.set_text("TOUGH BLUFF".to_string());
                 } else if value == 5 {
-                    self.input.set_text("ENOUGH STUFF?".to_string());
+                    self.input.set_text("ENOUGH STUFF".to_string());
                 } else if value == 6 {
-                    self.input.set_text("ROUGH FLUFF".to_string());
+                    self.input.set_text("BOUGH FLUFF?".to_string());
                 } else if value == 7 {
                     self.input.set_text("F   G U    F  R".to_string());
                 }

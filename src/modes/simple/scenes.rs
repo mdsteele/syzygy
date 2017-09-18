@@ -64,7 +64,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NW,
                       "Oh, this thing?  This is the ship's\n\
-                       foreward planar switchboard."),
+                       forward planar switchboard."),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),

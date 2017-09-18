@@ -180,10 +180,10 @@ impl PuzzleView for View {
     }
 
     fn drain_queue(&mut self) {
-        for (command, value) in self.core.drain_queue() {
-            if command == 0 {
+        for (kind, value) in self.core.drain_queue() {
+            if kind == 0 {
                 self.show_next = value != 0;
-            } else if command == 1 {
+            } else if kind == 1 {
                 if value >= 0 && (value as usize) < LETTERS.len() {
                     let (col, row, letter) = LETTERS[value as usize];
                     self.grid.add_letter(col, row, letter);

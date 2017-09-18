@@ -22,7 +22,7 @@ use elements::memory::{FLIP_SLOWDOWN, MemoryGridView, NextShapeView};
 use gui::{Action, Canvas, Element, Event, Rect, Resources, Sound};
 use modes::SOLVED_INFO_TEXT;
 use save::{Direction, Game, PuzzleState, ServesState};
-use super::scenes::{compile_intro_scene, compile_outro_scene};
+use super::scenes;
 
 // ========================================================================= //
 
@@ -38,15 +38,21 @@ pub struct View {
     progress: ProgressBar,
     progress_adjust: u32,
     remove_countdown: i32,
+    show_next: bool,
 }
 
 impl View {
     pub fn new(resources: &mut Resources, visible: Rect, state: &ServesState)
                -> View {
-        let intro = compile_intro_scene(resources);
-        let outro = compile_outro_scene(resources);
+        let mut core = {
+            let intro = scenes::compile_intro_scene(resources);
+            let outro = scenes::compile_outro_scene(resources);
+            PuzzleCore::new(resources, visible, state, intro, outro)
+        };
+        core.add_extra_scene(scenes::compile_argony_midscene(resources));
+        core.add_extra_scene(scenes::compile_mezure_midscene(resources));
         View {
-            core: PuzzleCore::new(resources, visible, state, intro, outro),
+            core: core,
             grid: MemoryGridView::new(resources,
                                       "memory/serves",
                                       (256, 176),
@@ -58,6 +64,7 @@ impl View {
                                        (191, 191, 0)),
             progress_adjust: 0,
             remove_countdown: 0,
+            show_next: false,
         }
     }
 }
@@ -73,7 +80,9 @@ impl Element<Game, PuzzleCmd> for View {
         }
         self.grid.draw(state.grid(), canvas);
         self.core.draw_middle_layer(canvas);
-        self.next.draw(&state.next_shape(), canvas);
+        if self.show_next {
+            self.next.draw(&state.next_shape(), canvas);
+        }
         self.core.draw_front_layer(canvas, state);
     }
 
@@ -126,6 +135,9 @@ impl Element<Game, PuzzleCmd> for View {
             }
             action.merge(subaction.but_no_value());
         }
+        if !action.should_stop() {
+            self.core.begin_character_scene_on_click(event);
+        }
         action
     }
 }
@@ -154,8 +166,10 @@ impl PuzzleView for View {
     }
 
     fn drain_queue(&mut self) {
-        for (command, value) in self.core.drain_queue() {
-            if command == 1 {
+        for (kind, value) in self.core.drain_queue() {
+            if kind == 0 {
+                self.show_next = value != 0;
+            } else if kind == 1 {
                 if value >= 0 && (value as usize) < LETTERS.len() {
                     let (col, row, letter) = LETTERS[value as usize];
                     self.grid.add_letter(col, row, letter);

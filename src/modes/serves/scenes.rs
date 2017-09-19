@@ -57,7 +57,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::SW,
                       "Ugrent and I already fixed the\n\
-                       forward banks.  Would you believe\n\
+                       forward set.  Would you believe\n\
                        that these ones are broken too?"),
         ]),
         Ast::Seq(vec![
@@ -185,22 +185,136 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
             Ast::Sound(Sound::solve_puzzle_chime()),
             Ast::Wait(1.0),
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE, "Much better."),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::SW,
+                      "Nicely done, child.\n\
+                       I appreciate the help."),
         ]),
         Ast::Seq(vec![
-            Ast::Slide(MEZURE, (-16, 128), true, false, 0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SE,
+                      "You're very welcome!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::SW,
+                      "So tell me, Mezure.  How\n\
+                       is being ship's administrator\n\
+                       going for you so far?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SE,
+                      "Oh, uh, it's fine, I guess."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SE,
+                      "Mostly, it consists of people\n\
+                       telling me to fix things.\n\
+                       But I do want to help out."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::SW,
+                      "Them telling $iyou$r  to fix things?\n\
+                       Mezure, dear child, I think\n\
+                       perhaps you have it backwards."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::SW,
+                      "You are the $iadministrator$r,  not a\n\
+                       lackey.  Your job is to manage this\n\
+                       motley crew and get our efforts\n\
+                       organized, so we're not all\n\
+                       working past each other."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::SW,
+                      "You're supposed to help us forge\n\
+                       order out of this chaos, and if\n\
+                       that means $iyou$r  need to give some\n\
+                       orders, that's your prerogative."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SE,
+                      "But Ugrent said-"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::SW,
+                      "Ugrent is a stuffed shirt, and he\n\
+                       doesn't actually outrank you, so\n\
+                       don't let him push you around.\n\
+                       If you need to tell $ihim$r  what to\n\
+                       do too, you should feel free."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SE,
+                      "But...but $iyou$r  ordered\n\
+                       me to help you with these\n\
+                       memory banks just now!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::SW,
+                      "Age before beauty, dear."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(ARGONY, (458, 128), true, true, 0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::SW,
+                      "Now, I need to be going.\n\
+                       Remember what I told you;\n\
+                       get out there and whip\n\
+                       this crew into shape!"),
+        ]),
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::Slide(ARGONY, (592, 128), true, false, 1.0),
+                Ast::Remove(ARGONY),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.5),
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SE,
+                          "$iSigh.$r  Yes, ma'am."),
+            ]),
+        ]),
+        Ast::Seq(vec![
+            Ast::Wait(1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SE,
+                      "$iMe$r  tell $ithem$r  what to do?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(MEZURE, (360, 128), true, true, 1.0),
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SW,
+                      "Somehow, I doubt that\n\
+                       Elinsa would take that\n\
+                       well, coming from me."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(MEZURE, (592, 128), true, false, 1.0),
             Ast::Remove(MEZURE),
             Ast::Wait(1.0),
+            Ast::Sound(Sound::transform_step(1)),
             Ast::Queue(1, 0),
             Ast::Queue(1, 1),
             Ast::Queue(1, 2),
             Ast::Queue(1, 3),
             Ast::Wait(0.5),
+            Ast::Sound(Sound::transform_step(2)),
             Ast::Queue(1, 4),
             Ast::Queue(1, 5),
             Ast::Queue(1, 6),
             Ast::Queue(1, 7),
             Ast::Wait(0.5),
+            Ast::Sound(Sound::transform_step(3)),
             Ast::Queue(1, 8),
             Ast::Queue(1, 9),
             Ast::Queue(1, 10),

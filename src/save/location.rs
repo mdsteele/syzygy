@@ -137,7 +137,7 @@ impl Location {
             Location::FactOrFiction => Location::Map,
             Location::HexSpangled => Location::Map,
             Location::IceToMeetYou => Location::TheIceIsRight,
-            Location::IfMemoryServes => Location::Map,
+            Location::IfMemoryServes => Location::IceToMeetYou,
             Location::JogYourMemory => Location::Map,
             Location::LevelHeaded => Location::Map,
             Location::LevelUp => Location::VirtueOrIce,

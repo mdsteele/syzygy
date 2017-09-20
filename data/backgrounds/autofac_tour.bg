@@ -3,6 +3,7 @@
 >girders
 >gray_blocks
 >green_pipes
+>bg_miniblocks
 
                     DBDB            DB          DB            DB
                     DBDB            DB          DFDD          DB
@@ -16,10 +17,10 @@ AAAAAAAAAAABBABABD                                    BFBABAADAAAAAAAAAA
 AEAEAEAEAEAH                                                AIAEAEAEAEAE
 
 
-
-
-
-
+                EG                    EB            EA
+                EG                    EH            EG
+                EK    EH        EB    EO        EG  EG
+            EB  EO    EHEB      EL    EO        EO  EK    EH
 DADGDADDCKCCCICICICICCCICICICICCCICICICICCCICICICICCCICICICICFDCDADADADA
 DADE  DFDACJBCBCBCBCCJBCBCBCBCCJBCBCBCBCCJBCBCBCBCCJBCBCBCBCCJDE  DCDADA
 DADADADADACJBCBCBCBCCJBCBCBCBCCJBCBCBCBCCJBCBCBCBCCJBCBCBCBCCJDADADIDADA

@@ -32,7 +32,7 @@ const POSITIONS_KEY: &str = "positions";
 const NUM_ROWS: i32 = 8;
 const MIN_ELINSA_ROW: i32 = -1;
 const MAX_ELINSA_ROW: i32 = NUM_ROWS;
-const INITIAL_POSITIONS: &[i32] = &[9, 10, 10, 10, 0, 0, 0, 1];
+const INITIAL_POSITIONS: &[i32] = &[1, 0, 0, 0, 10, 10, 10, 9];
 const INITIAL_ELINSA_ROW: i32 = MAX_ELINSA_ROW;
 
 // ========================================================================= //
@@ -47,7 +47,7 @@ pub struct GearsState {
 impl GearsState {
     pub fn solve(&mut self) {
         self.access = Access::Solved;
-        self.positions[0] = GearsState::min_position_for_row(0);
+        self.positions[0] = GearsState::max_position_for_row(0);
         self.elinsa_row = MIN_ELINSA_ROW;
         self.is_initial = false;
     }
@@ -56,12 +56,12 @@ impl GearsState {
 
     pub fn min_position_for_row(row: i32) -> i32 {
         assert!(row >= 0 && row < NUM_ROWS);
-        if row == 3 { 6 } else { 0 }
+        if row == 4 { 6 } else { 0 }
     }
 
     pub fn max_position_for_row(row: i32) -> i32 {
         assert!(row >= 0 && row < NUM_ROWS);
-        if row == 4 { 4 } else { 10 }
+        if row == 3 { 4 } else { 10 }
     }
 
     pub fn get_position(&self, row: i32) -> i32 {
@@ -190,20 +190,20 @@ mod tests {
     fn toml_round_trip() {
         let mut state = GearsState::from_toml(toml::Value::Boolean(false));
         state.access = Access::Replaying;
-        state.set_position(0, 7);
-        state.set_position(1, 7);
-        state.set_position(2, 6);
-        state.set_position(3, 6);
-        state.set_position(4, 4);
-        state.set_position(5, 4);
-        state.set_position(6, 3);
-        state.set_position(7, 3);
+        state.set_position(0, 3);
+        state.set_position(1, 3);
+        state.set_position(2, 4);
+        state.set_position(3, 4);
+        state.set_position(4, 6);
+        state.set_position(5, 6);
+        state.set_position(6, 7);
+        state.set_position(7, 7);
         state.set_elinsa_row(3);
 
         let state = GearsState::from_toml(state.to_toml());
         assert_eq!(state.access, Access::Replaying);
         assert_eq!(state.get_elinsa_row(), 3);
-        assert_eq!(state.positions, vec![7, 7, 6, 6, 4, 4, 3, 3]);
+        assert_eq!(state.positions, vec![3, 3, 4, 4, 6, 6, 7, 7]);
     }
 
     #[test]
@@ -254,12 +254,12 @@ mod tests {
     fn from_invalid_positions_toml() {
         let mut table = toml::value::Table::new();
         table.insert(POSITIONS_KEY.to_string(),
-                     toml::Value::Array(vec![1, 2, -3, 4, 55, 66, 77, 88]
+                     toml::Value::Array(vec![1, 2, -3, 44, -5, 66, 77, 88]
                          .into_iter()
                          .map(toml::Value::Integer)
                          .collect()));
         let state = GearsState::from_toml(toml::Value::Table(table));
-        assert_eq!(state.positions, vec![1, 2, 0, 6, 4, 10, 10, 10]);
+        assert_eq!(state.positions, vec![1, 2, 0, 4, 6, 10, 10, 10]);
 
         let mut table = toml::value::Table::new();
         table.insert(POSITIONS_KEY.to_string(),

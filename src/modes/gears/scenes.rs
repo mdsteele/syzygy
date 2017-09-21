@@ -22,7 +22,7 @@ use gui::{Resources, Sound};
 
 // ========================================================================= //
 
-pub const ELINSA_SLOT: i32 = 0;
+pub const ELINSA: i32 = 0;
 
 // ========================================================================= //
 
@@ -31,11 +31,12 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
             Ast::SetBg("shift_gears"),
-            Ast::Place(0, "chars/elinsa", 0, (592, 304)),
-            Ast::Slide(0, (464, 304), false, true, 0.75),
+            Ast::Place(ELINSA, "chars/elinsa", 0, (-16, 304)),
+            Ast::Slide(ELINSA, (112, 304), false, true, 0.75),
             Ast::Wait(0.5),
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(0, TalkStyle::Normal, TalkPos::NW, "Let's do this."),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
+                      "Let's do this."),
         ]),
     ];
     Ast::compile_scene(resources, ast)
@@ -50,11 +51,12 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
             Ast::Sound(Sound::solve_puzzle_chime()),
             Ast::Wait(1.0),
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(0, TalkStyle::Normal, TalkPos::SE, "Done and done."),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::SW,
+                      "Done and done."),
         ]),
         Ast::Seq(vec![
-            Ast::Slide(0, (-16, 64), true, false, 0.75),
-            Ast::Remove(0),
+            Ast::Slide(ELINSA, (592, 64), true, false, 0.75),
+            Ast::Remove(ELINSA),
         ]),
     ];
     Ast::compile_scene(resources, ast)

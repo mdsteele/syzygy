@@ -26,21 +26,21 @@ use super::PuzzleState;
 
 // ========================================================================= //
 
-const ELINSA_ROW_KEY: &str = "elinsa";
+const UGRENT_ROW_KEY: &str = "ugrent";
 const POSITIONS_KEY: &str = "positions";
 
 const NUM_ROWS: i32 = 8;
-const MIN_ELINSA_ROW: i32 = -1;
-const MAX_ELINSA_ROW: i32 = NUM_ROWS;
+const MIN_UGRENT_ROW: i32 = -1;
+const MAX_UGRENT_ROW: i32 = NUM_ROWS;
 const INITIAL_POSITIONS: &[i32] = &[1, 0, 0, 0, 10, 10, 10, 9];
-const INITIAL_ELINSA_ROW: i32 = MAX_ELINSA_ROW;
+const INITIAL_UGRENT_ROW: i32 = MAX_UGRENT_ROW;
 
 // ========================================================================= //
 
 pub struct GearsState {
     access: Access,
     positions: Vec<i32>,
-    elinsa_row: i32,
+    ugrent_row: i32,
     is_initial: bool,
 }
 
@@ -48,7 +48,7 @@ impl GearsState {
     pub fn solve(&mut self) {
         self.access = Access::Solved;
         self.positions[0] = GearsState::max_position_for_row(0);
-        self.elinsa_row = MIN_ELINSA_ROW;
+        self.ugrent_row = MIN_UGRENT_ROW;
         self.is_initial = false;
     }
 
@@ -74,18 +74,18 @@ impl GearsState {
         assert!(pos >= GearsState::min_position_for_row(row) &&
                 pos <= GearsState::max_position_for_row(row));
         self.positions[row as usize] = pos;
-        self.is_initial = self.elinsa_row == INITIAL_ELINSA_ROW &&
+        self.is_initial = self.ugrent_row == INITIAL_UGRENT_ROW &&
                           &self.positions as &[i32] == INITIAL_POSITIONS;
     }
 
-    pub fn get_elinsa_row(&self) -> i32 { self.elinsa_row }
+    pub fn get_ugrent_row(&self) -> i32 { self.ugrent_row }
 
-    pub fn set_elinsa_row(&mut self, row: i32) {
-        assert!(row >= MIN_ELINSA_ROW && row <= MAX_ELINSA_ROW);
-        self.elinsa_row = row;
-        self.is_initial = self.elinsa_row == INITIAL_ELINSA_ROW &&
+    pub fn set_ugrent_row(&mut self, row: i32) {
+        assert!(row >= MIN_UGRENT_ROW && row <= MAX_UGRENT_ROW);
+        self.ugrent_row = row;
+        self.is_initial = self.ugrent_row == INITIAL_UGRENT_ROW &&
                           &self.positions as &[i32] == INITIAL_POSITIONS;
-        if self.elinsa_row == MIN_ELINSA_ROW {
+        if self.ugrent_row == MIN_UGRENT_ROW {
             self.access = Access::Solved;
         }
     }
@@ -113,7 +113,7 @@ impl PuzzleState for GearsState {
 
     fn reset(&mut self) {
         self.positions = INITIAL_POSITIONS.to_vec();
-        self.elinsa_row = INITIAL_ELINSA_ROW;
+        self.ugrent_row = INITIAL_UGRENT_ROW;
         self.is_initial = true;
     }
 }
@@ -129,8 +129,8 @@ impl Tomlable for GearsState {
                                 .collect();
             table.insert(POSITIONS_KEY.to_string(),
                          toml::Value::Array(positions));
-            table.insert(ELINSA_ROW_KEY.to_string(),
-                         toml::Value::Integer(self.elinsa_row as i64));
+            table.insert(UGRENT_ROW_KEY.to_string(),
+                         toml::Value::Integer(self.ugrent_row as i64));
         }
         toml::Value::Table(table)
     }
@@ -138,16 +138,16 @@ impl Tomlable for GearsState {
     fn from_toml(value: toml::Value) -> GearsState {
         let mut table = to_table(value);
         let mut access = Access::pop_from_table(&mut table, ACCESS_KEY);
-        let elinsa_row = if access.is_solved() {
-            MIN_ELINSA_ROW
+        let ugrent_row = if access.is_solved() {
+            MIN_UGRENT_ROW
         } else {
-            let mut row = table.remove(ELINSA_ROW_KEY)
+            let mut row = table.remove(UGRENT_ROW_KEY)
                                .map(i32::from_toml)
-                               .unwrap_or(INITIAL_ELINSA_ROW);
-            if row < MIN_ELINSA_ROW || row > MAX_ELINSA_ROW {
-                row = INITIAL_ELINSA_ROW;
+                               .unwrap_or(INITIAL_UGRENT_ROW);
+            if row < MIN_UGRENT_ROW || row > MAX_UGRENT_ROW {
+                row = INITIAL_UGRENT_ROW;
             }
-            if row == MIN_ELINSA_ROW {
+            if row == MIN_UGRENT_ROW {
                 access = Access::Solved;
             }
             row
@@ -165,11 +165,11 @@ impl Tomlable for GearsState {
             }
         }
         let is_initial = &positions as &[i32] == INITIAL_POSITIONS &&
-                         elinsa_row == INITIAL_ELINSA_ROW;
+                         ugrent_row == INITIAL_UGRENT_ROW;
         GearsState {
             access: access,
             positions: positions,
-            elinsa_row: elinsa_row,
+            ugrent_row: ugrent_row,
             is_initial: is_initial,
         }
     }
@@ -183,8 +183,8 @@ mod tests {
 
     use save::{Access, PuzzleState};
     use save::util::{ACCESS_KEY, Tomlable};
-    use super::{ELINSA_ROW_KEY, GearsState, INITIAL_ELINSA_ROW,
-                INITIAL_POSITIONS, MIN_ELINSA_ROW, POSITIONS_KEY};
+    use super::{GearsState, INITIAL_POSITIONS, INITIAL_UGRENT_ROW,
+                MIN_UGRENT_ROW, POSITIONS_KEY, UGRENT_ROW_KEY};
 
     #[test]
     fn toml_round_trip() {
@@ -198,11 +198,11 @@ mod tests {
         state.set_position(5, 6);
         state.set_position(6, 7);
         state.set_position(7, 7);
-        state.set_elinsa_row(3);
+        state.set_ugrent_row(3);
 
         let state = GearsState::from_toml(state.to_toml());
         assert_eq!(state.access, Access::Replaying);
-        assert_eq!(state.get_elinsa_row(), 3);
+        assert_eq!(state.get_ugrent_row(), 3);
         assert_eq!(state.positions, vec![3, 3, 4, 4, 6, 6, 7, 7]);
     }
 
@@ -210,7 +210,7 @@ mod tests {
     fn from_empty_toml() {
         let state = GearsState::from_toml(toml::Value::Boolean(false));
         assert_eq!(state.access, Access::Unvisited);
-        assert_eq!(state.get_elinsa_row(), INITIAL_ELINSA_ROW);
+        assert_eq!(state.get_ugrent_row(), INITIAL_UGRENT_ROW);
         assert_eq!(&state.positions as &[i32], INITIAL_POSITIONS);
     }
 
@@ -221,32 +221,32 @@ mod tests {
 
         let state = GearsState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Solved);
-        assert_eq!(state.elinsa_row, MIN_ELINSA_ROW);
+        assert_eq!(state.ugrent_row, MIN_UGRENT_ROW);
     }
 
     #[test]
-    fn from_elinsa_already_at_top_toml() {
+    fn from_ugrent_already_at_top_toml() {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), Access::Unsolved.to_toml());
-        table.insert(ELINSA_ROW_KEY.to_string(),
-                     toml::Value::Integer(MIN_ELINSA_ROW as i64));
+        table.insert(UGRENT_ROW_KEY.to_string(),
+                     toml::Value::Integer(MIN_UGRENT_ROW as i64));
         let state = GearsState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Solved);
-        assert_eq!(state.elinsa_row, MIN_ELINSA_ROW);
+        assert_eq!(state.ugrent_row, MIN_UGRENT_ROW);
     }
 
     #[test]
-    fn from_invalid_elinsa_row_toml() {
+    fn from_invalid_ugrent_row_toml() {
         let mut table = toml::value::Table::new();
-        table.insert(ELINSA_ROW_KEY.to_string(), toml::Value::Integer(77));
+        table.insert(UGRENT_ROW_KEY.to_string(), toml::Value::Integer(77));
         let state = GearsState::from_toml(toml::Value::Table(table));
-        assert_eq!(state.elinsa_row, INITIAL_ELINSA_ROW);
+        assert_eq!(state.ugrent_row, INITIAL_UGRENT_ROW);
         assert!(!state.is_solved());
 
         let mut table = toml::value::Table::new();
-        table.insert(ELINSA_ROW_KEY.to_string(), toml::Value::Integer(-77));
+        table.insert(UGRENT_ROW_KEY.to_string(), toml::Value::Integer(-77));
         let state = GearsState::from_toml(toml::Value::Table(table));
-        assert_eq!(state.elinsa_row, INITIAL_ELINSA_ROW);
+        assert_eq!(state.ugrent_row, INITIAL_UGRENT_ROW);
         assert!(!state.is_solved());
     }
 

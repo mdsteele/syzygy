@@ -210,7 +210,7 @@ pub fn compile_elinsa_midscene(resources: &mut Resources) -> (i32, Scene) {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_thought()),
             Ast::Talk(ELINSA, TalkStyle::Thought, TalkPos::Auto,
-                      "I'm $ipretty$r sure it's possible\n\
+                      "I'm $ipretty$r  sure it's possible\n\
                        to do this without smacking myself\n\
                        in the face with these platforms.")
         ]),
@@ -230,7 +230,7 @@ pub fn compile_yttris_midscene(resources: &mut Resources) -> (i32, Scene) {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_lo()),
             Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::Auto,
-                      "Yes, thank you $iso$r much for\n\
+                      "Yes, thank you $iso$r  much for\n\
                        the vote of confidence, Yttris.")
         ]),
     ];

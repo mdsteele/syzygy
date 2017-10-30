@@ -387,7 +387,7 @@ impl SyzygyState {
 
     pub fn relyng_is_done(&self) -> bool {
         self.relyng_lights.len() ==
-        (RELYNG_NUM_COLS * RELYNG_NUM_ROWS) as usize
+            (RELYNG_NUM_COLS * RELYNG_NUM_ROWS) as usize
     }
 
     pub fn relyng_next_shape(&self) -> char { self.relyng_next }
@@ -450,7 +450,8 @@ impl SyzygyState {
 
     fn relyng_toggle_light(&mut self, col: i32, row: i32) {
         if (col >= 0 && col < RELYNG_NUM_COLS) &&
-           (row >= 0 && row < RELYNG_NUM_ROWS) {
+            (row >= 0 && row < RELYNG_NUM_ROWS)
+        {
             let index = row * RELYNG_NUM_COLS + col;
             if !self.relyng_lights.remove(&index) {
                 self.relyng_lights.insert(index);
@@ -536,8 +537,8 @@ impl SyzygyState {
         }
         for index in 0..6 {
             self.mezure_lights[index] = !(satisfied[index] ^
-                                          satisfied[(index + 1) % 6] ^
-                                          satisfied[(index + 5) % 6]);
+                                              satisfied[(index + 1) % 6] ^
+                                              satisfied[(index + 5) % 6]);
         }
         for index in 0..6 {
             let linkages = if self.mezure_lights[index] {
@@ -568,8 +569,8 @@ impl PuzzleState for SyzygyState {
             SyzygyStage::Relyng => !self.relyng_lights.is_empty(),
             SyzygyStage::Mezure => {
                 self.mezure_columns.can_reset() ||
-                self.mezure_ice_grid.is_modified() ||
-                !self.mezure_pipe_grid.pipes().is_empty()
+                    self.mezure_ice_grid.is_modified() ||
+                    !self.mezure_pipe_grid.pipes().is_empty()
             }
         }
     }
@@ -627,11 +628,10 @@ impl Tomlable for SyzygyState {
                     }
                 }
                 SyzygyStage::Relyng => {
-                    let lights =
-                        self.relyng_lights
-                            .iter()
-                            .map(|&idx| toml::Value::Integer(idx as i64))
-                            .collect();
+                    let lights = self.relyng_lights
+                        .iter()
+                        .map(|&idx| toml::Value::Integer(idx as i64))
+                        .collect();
                     table.insert(RELYNG_LIGHTS_KEY.to_string(),
                                  toml::Value::Array(lights));
                     let mut next = String::new();
@@ -672,23 +672,21 @@ impl Tomlable for SyzygyState {
         let ugrent =
             DeviceGrid::from_toml(pop_array(&mut table, UGRENT_KEY),
                                   &SyzygyState::ugrent_initial_grid());
-        let relyng_next = match table.get(RELYNG_NEXT_KEY)
-                                     .and_then(toml::Value::as_str)
-                                     .unwrap_or("") {
+        let relyng_next = match table
+            .get(RELYNG_NEXT_KEY)
+            .and_then(toml::Value::as_str)
+            .unwrap_or("") {
             "+" => '+',
             "N" => 'N',
             "X" => 'X',
             "Z" => 'Z',
             _ => RELYNG_INIT_NEXT,
         };
-        let relyng_lights =
-            pop_array(&mut table, RELYNG_LIGHTS_KEY)
-                .into_iter()
-                .map(i32::from_toml)
-                .filter(|&idx| {
-                    0 <= idx && idx < RELYNG_NUM_COLS * RELYNG_NUM_ROWS
-                })
-                .collect();
+        let relyng_lights = pop_array(&mut table, RELYNG_LIGHTS_KEY)
+            .into_iter()
+            .map(i32::from_toml)
+            .filter(|&idx| 0 <= idx && idx < RELYNG_NUM_COLS * RELYNG_NUM_ROWS)
+            .collect();
         let mezure_columns = Columns::from_toml(MEZURE_COLUMNS_SPEC,
                                                 pop_array(&mut table,
                                                           MEZURE_COLUMNS_KEY));
@@ -696,8 +694,8 @@ impl Tomlable for SyzygyState {
             ObjectGrid::from_toml(pop_table(&mut table, MEZURE_ICE_GRID_KEY),
                                   &SyzygyState::mezure_initial_ice_grid());
         let mut mezure_pipe_grid = SyzygyState::mezure_initial_pipe_grid();
-        mezure_pipe_grid.set_pipes_from_toml(pop_array(&mut table,
-                                                       MEZURE_PIPES_KEY));
+        mezure_pipe_grid
+            .set_pipes_from_toml(pop_array(&mut table, MEZURE_PIPES_KEY));
         let mut state = SyzygyState {
             access: access,
             stage: stage,
@@ -725,12 +723,14 @@ mod tests {
     use save::util::Tomlable;
     use super::SyzygyStage;
 
-    const ALL_STAGES: &[SyzygyStage] = &[SyzygyStage::Yttris,
-                                         SyzygyStage::Argony,
-                                         SyzygyStage::Elinsa,
-                                         SyzygyStage::Ugrent,
-                                         SyzygyStage::Relyng,
-                                         SyzygyStage::Mezure];
+    const ALL_STAGES: &[SyzygyStage] = &[
+        SyzygyStage::Yttris,
+        SyzygyStage::Argony,
+        SyzygyStage::Elinsa,
+        SyzygyStage::Ugrent,
+        SyzygyStage::Relyng,
+        SyzygyStage::Mezure,
+    ];
 
     #[test]
     fn stage_toml_round_trip() {

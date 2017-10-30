@@ -91,8 +91,8 @@ impl Element<Game, PuzzleCmd> for View {
             }
         }
         if !action.should_stop() && self.text_timer == 0 {
-            let subaction = self.clue.handle_event(event,
-                                                   &mut state.current_clue());
+            let subaction =
+                self.clue.handle_event(event, &mut state.current_clue());
             if let Some(&next) = subaction.value() {
                 if next {
                     state.go_next();
@@ -105,7 +105,8 @@ impl Element<Game, PuzzleCmd> for View {
             action.merge(subaction.but_no_value());
         }
         if !action.should_stop() && self.text_timer == 0 &&
-           !state.is_solved() {
+            !state.is_solved()
+        {
             let subaction = self.input.handle_event(event, &mut ());
             if let Some(text) = subaction.value() {
                 let (prefix, error, done) = state.try_text(text);

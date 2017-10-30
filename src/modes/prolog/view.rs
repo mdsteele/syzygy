@@ -169,7 +169,7 @@ impl MovingStars {
             let mut xoff = 0;
             while xoff < modulus {
                 let x = ((xoff + scroll) % modulus) - spacing as i32 +
-                        MovingStars::rand(spacing, &mut seed);
+                    MovingStars::rand(spacing, &mut seed);
                 let y = yoff + MovingStars::rand(spacing, &mut seed);
                 self.draw_star(x, y, star_width, gray, canvas);
                 xoff += spacing as i32;

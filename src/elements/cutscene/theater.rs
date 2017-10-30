@@ -224,7 +224,7 @@ fn remove_rect(rects: &mut Vec<Rect>, remove: Rect) {
                                          inter.bottom(),
                                          rect.width(),
                                          (rect.bottom() - inter.bottom()) as
-                                         u32));
+                                             u32));
             }
             if inter.left() > rect.left() {
                 new_rects.push(Rect::new(rect.left(),
@@ -236,7 +236,7 @@ fn remove_rect(rects: &mut Vec<Rect>, remove: Rect) {
                 new_rects.push(Rect::new(inter.right(),
                                          inter.top(),
                                          (rect.right() - inter.right()) as
-                                         u32,
+                                             u32,
                                          inter.height()));
             }
         } else {
@@ -366,10 +366,10 @@ impl SpeechBubble {
         }
         let width = round_up_to_16(cmp::max(48,
                                             paragraph.min_width() +
-                                            2 * SPEECH_MARGIN));
+                                                2 * SPEECH_MARGIN));
         let height = round_up_to_16(cmp::max(32,
                                              paragraph.height() as i32 +
-                                             2 * SPEECH_MARGIN));
+                                                 2 * SPEECH_MARGIN));
         let tail_x = match positioning {
             TalkPos::NW | TalkPos::NE | TalkPos::SW | TalkPos::SE => {
                 actor_rect.left() + actor_rect.width() as i32 / 2
@@ -453,8 +453,8 @@ impl SpeechBubble {
             }
             for row in 1..(bottom / 16) {
                 let y = 16 * row + 8;
-                canvas.draw_sprite_centered(&self.sprites[2],
-                                            Point::new(8, y));
+                canvas
+                    .draw_sprite_centered(&self.sprites[2], Point::new(8, y));
                 canvas.draw_sprite_rotated(&self.sprites[2],
                                            Point::new(right + 8, y),
                                            180);
@@ -473,7 +473,7 @@ impl SpeechBubble {
                                        self.tail_flip_vert);
         canvas.draw_sprite_transformed(&self.sprites[3],
                                        self.tail_pos +
-                                       self.tail_dir.delta() * 16,
+                                           self.tail_dir.delta() * 16,
                                        self.tail_dir.degrees(),
                                        false,
                                        self.tail_flip_vert);
@@ -481,12 +481,13 @@ impl SpeechBubble {
         {
             let width = self.paragraph.min_width();
             let height = self.paragraph.height();
-            let subrect = Rect::new(self.rect.x() +
-                                    (self.rect.width() as i32 - width) / 2,
-                                    self.rect.y() +
-                                    (self.rect.height() - height) as i32 / 2,
-                                    width as u32,
-                                    height);
+            let subrect =
+                Rect::new(self.rect.x() +
+                              (self.rect.width() as i32 - width) / 2,
+                          self.rect.y() +
+                              (self.rect.height() - height) as i32 / 2,
+                          width as u32,
+                          height);
             self.paragraph.draw(&mut canvas.subcanvas(subrect));
         }
     }

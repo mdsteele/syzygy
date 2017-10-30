@@ -24,8 +24,8 @@ use std::thread;
 use std::time;
 
 use elements::{PuzzleCmd, PuzzleCore, PuzzleView};
-use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
-          Sprite};
+use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
+          Resources, Sprite};
 use modes::SOLVED_INFO_TEXT;
 use save::{Access, FailureState, Game, Location, PuzzleState};
 use save::pyramid::{Board, Coords, MAX_REMOVALS, Move, Team};
@@ -102,7 +102,8 @@ impl View {
         core.add_extra_scene(scenes::compile_lose_game_scene(resources));
         if !state.is_solved() {
             if state.mid_scene_is_done() &&
-               state.access() != Access::BeginReplay {
+                state.access() != Access::BeginReplay
+            {
                 core.skip_extra_scene(scenes::MIDDLE_SCENE);
             } else if all_puzzles_solved {
                 core.begin_extra_scene(scenes::MIDDLE_SCENE);
@@ -110,11 +111,10 @@ impl View {
         }
         View {
             core: core,
-            dashboard: DASHBOARD_CHIPS.iter()
-                                      .map(|&(x, y, loc)| {
-                                          DashChip::new(resources, x, y, loc)
-                                      })
-                                      .collect(),
+            dashboard: DASHBOARD_CHIPS
+                .iter()
+                .map(|&(x, y, loc)| DashChip::new(resources, x, y, loc))
+                .collect(),
             pyramid: PyramidView::new(resources, state),
             show_pyramid: false,
             should_mark_mid_scene_done: false,
@@ -139,7 +139,7 @@ impl Element<Game, PuzzleCmd> for View {
     fn handle_event(&mut self, event: &Event, game: &mut Game)
                     -> Action<PuzzleCmd> {
         let mut action = self.core
-                             .handle_event(event, &mut game.system_failure);
+            .handle_event(event, &mut game.system_failure);
         if self.should_mark_mid_scene_done {
             game.system_failure.set_mid_scene_is_done(true);
             self.should_mark_mid_scene_done = false;
@@ -249,9 +249,11 @@ impl PuzzleView for View {
                 if value < 0 {
                     self.pyramid.hilight_override.clear();
                 } else if let Some(coords) = Coords::from_index(value as
-                                                                usize) {
+                                                                    usize)
+                {
                     if self.pyramid.hilight_override.get(&coords) ==
-                       Some(&team) {
+                        Some(&team)
+                    {
                         self.pyramid.hilight_override.remove(&coords);
                     } else {
                         self.pyramid.hilight_override.insert(coords, team);
@@ -275,8 +277,8 @@ impl PuzzleView for View {
 // ========================================================================= //
 
 const DASH_ANIM_SLOWDOWN: i32 = 4;
-const DASH_ANIM_INDICES: &[usize] = &[4, 5, 6, 7, 8, 9, 10, 11, 12, 7, 6, 13,
-                                      14, 15];
+const DASH_ANIM_INDICES: &[usize] =
+    &[4, 5, 6, 7, 8, 9, 10, 11, 12, 7, 6, 13, 14, 15];
 
 struct DashChip {
     sprites: Vec<Sprite>,
@@ -294,7 +296,7 @@ impl DashChip {
             topleft: Point::new(left, top),
             location: location,
             anim: (left + top) %
-                  (DASH_ANIM_SLOWDOWN * DASH_ANIM_INDICES.len() as i32),
+                (DASH_ANIM_SLOWDOWN * DASH_ANIM_INDICES.len() as i32),
         }
     }
 }
@@ -314,7 +316,8 @@ impl Element<Game, ()> for DashChip {
             &Event::ClockTick => {
                 self.anim += 1;
                 if self.anim ==
-                   DASH_ANIM_INDICES.len() as i32 * DASH_ANIM_SLOWDOWN {
+                    DASH_ANIM_INDICES.len() as i32 * DASH_ANIM_SLOWDOWN
+                {
                     self.anim = 0;
                 }
                 Action::redraw_if(self.anim % DASH_ANIM_SLOWDOWN == 0)
@@ -416,7 +419,7 @@ impl PyramidStep {
                     let end = time::Instant::now();
                     let duration = end.duration_since(start);
                     let millis = duration.as_secs() * 1000 +
-                                 (duration.subsec_nanos() / 1_000_000) as u64;
+                        (duration.subsec_nanos() / 1_000_000) as u64;
                     println!("Found best move in {}ms", millis);
                 }
                 *result.lock().unwrap() = Some(best);
@@ -430,8 +433,16 @@ impl PyramidStep {
             &PyramidStep::YouJumping { from, .. } => {
                 [from].iter().cloned().collect()
             }
-            &PyramidStep::YouAnimateFormation { anim, ref formation, .. } |
-            &PyramidStep::SrbAnimateFormation { anim, ref formation, .. } => {
+            &PyramidStep::YouAnimateFormation {
+                anim,
+                ref formation,
+                ..
+            } |
+            &PyramidStep::SrbAnimateFormation {
+                anim,
+                ref formation,
+                ..
+            } => {
                 let num = (anim / ANIM_FORMATION_SLOWDOWN) as usize + 1;
                 formation.iter().take(num).cloned().collect()
             }
@@ -513,9 +524,9 @@ impl PyramidStep {
                     if let Some(formation) = state.board().formation_at(at) {
                         // TODO: sound effects
                         next = Some(PyramidStep::YouAnimateFormation {
-                            anim: 0,
-                            formation: formation,
-                        });
+                                        anim: 0,
+                                        formation: formation,
+                                    });
                     } else {
                         next = Some(PyramidStep::srb_thinking(state));
                     }
@@ -527,42 +538,49 @@ impl PyramidStep {
                 if *anim >= ANIM_JUMP_FRAMES {
                     if let Some(formation) = state.board().formation_at(to) {
                         next = Some(PyramidStep::YouAnimateFormation {
-                            anim: 0,
-                            formation: formation,
-                        });
+                                        anim: 0,
+                                        formation: formation,
+                                    });
                     } else {
                         next = Some(PyramidStep::srb_thinking(state));
                     }
                 }
                 true
             }
-            &mut PyramidStep::YouAnimateFormation { ref mut anim,
-                                                    ref formation } => {
+            &mut PyramidStep::YouAnimateFormation {
+                ref mut anim,
+                ref formation,
+            } => {
                 *anim += 1;
                 if *anim >= ANIM_FORMATION_SLOWDOWN * formation.len() as i32 {
                     next = Some(PyramidStep::YouRemoving {
-                        formation: formation.clone(),
-                        so_far: Vec::new(),
-                        possible: state.board().possible_removals(Team::You),
-                    });
+                                    formation: formation.clone(),
+                                    so_far: Vec::new(),
+                                    possible:
+                                        state
+                                            .board()
+                                            .possible_removals(Team::You),
+                                });
                 }
                 *anim % ANIM_FORMATION_SLOWDOWN == 0
             }
-            &mut PyramidStep::YouAnimateRemove { ref mut anim,
-                                                 ref formation,
-                                                 ref so_far,
-                                                 .. } => {
+            &mut PyramidStep::YouAnimateRemove {
+                ref mut anim,
+                ref formation,
+                ref so_far,
+                ..
+            } => {
                 *anim += 1;
                 if *anim >= ANIM_REMOVE_FRAMES {
                     if (so_far.len() as i32) < MAX_REMOVALS {
-                        let possible = state.board()
-                                            .possible_removals(Team::You);
+                        let possible =
+                            state.board().possible_removals(Team::You);
                         if !possible.is_empty() {
                             next = Some(PyramidStep::YouRemoving {
-                                formation: formation.clone(),
-                                so_far: so_far.clone(),
-                                possible: possible,
-                            });
+                                            formation: formation.clone(),
+                                            so_far: so_far.clone(),
+                                            possible: possible,
+                                        });
                         } else {
                             next = Some(PyramidStep::srb_thinking(state));
                         }
@@ -574,35 +592,46 @@ impl PyramidStep {
             }
             &mut PyramidStep::SrbThinking { ref result } => {
                 match result.lock().unwrap().take() {
-                    Some(Move::Place { at, formation, remove }) => {
+                    Some(Move::Place {
+                             at,
+                             formation,
+                             remove,
+                         }) => {
                         state.board_mut().set_piece_at(at, Team::SRB);
                         next = Some(PyramidStep::SrbAnimatePlace {
-                            anim: 0,
-                            at: at,
-                            formation: formation,
-                            to_remove: remove,
-                        });
+                                        anim: 0,
+                                        at: at,
+                                        formation: formation,
+                                        to_remove: remove,
+                                    });
                         true
                     }
-                    Some(Move::Jump { from, to, formation, remove }) => {
+                    Some(Move::Jump {
+                             from,
+                             to,
+                             formation,
+                             remove,
+                         }) => {
                         state.board_mut().remove_piece(from);
                         state.board_mut().set_piece_at(to, Team::SRB);
                         next = Some(PyramidStep::SrbAnimateJump {
-                            anim: 0,
-                            from: from,
-                            to: to,
-                            formation: formation,
-                            to_remove: remove,
-                        });
+                                        anim: 0,
+                                        from: from,
+                                        to: to,
+                                        formation: formation,
+                                        to_remove: remove,
+                                    });
                         true
                     }
                     None => false,
                 }
             }
-            &mut PyramidStep::SrbAnimatePlace { ref mut anim,
-                                                ref formation,
-                                                ref to_remove,
-                                                .. } => {
+            &mut PyramidStep::SrbAnimatePlace {
+                ref mut anim,
+                ref formation,
+                ref to_remove,
+                ..
+            } => {
                 *anim += 1;
                 if *anim >= ANIM_PLACE_FRAMES {
                     if to_remove.is_empty() {
@@ -610,18 +639,20 @@ impl PyramidStep {
                     } else {
                         debug_assert!(!formation.is_empty());
                         next = Some(PyramidStep::SrbAnimateFormation {
-                            anim: 0,
-                            formation: formation.clone(),
-                            to_remove: to_remove.clone(),
-                        });
+                                        anim: 0,
+                                        formation: formation.clone(),
+                                        to_remove: to_remove.clone(),
+                                    });
                     }
                 }
                 true
             }
-            &mut PyramidStep::SrbAnimateJump { ref mut anim,
-                                               ref formation,
-                                               ref to_remove,
-                                               .. } => {
+            &mut PyramidStep::SrbAnimateJump {
+                ref mut anim,
+                ref formation,
+                ref to_remove,
+                ..
+            } => {
                 *anim += 1;
                 if *anim >= ANIM_JUMP_FRAMES {
                     if to_remove.is_empty() {
@@ -629,17 +660,19 @@ impl PyramidStep {
                     } else {
                         debug_assert!(!formation.is_empty());
                         next = Some(PyramidStep::SrbAnimateFormation {
-                            anim: 0,
-                            formation: formation.clone(),
-                            to_remove: to_remove.clone(),
-                        });
+                                        anim: 0,
+                                        formation: formation.clone(),
+                                        to_remove: to_remove.clone(),
+                                    });
                     }
                 }
                 true
             }
-            &mut PyramidStep::SrbAnimateFormation { ref mut anim,
-                                                    ref formation,
-                                                    ref to_remove } => {
+            &mut PyramidStep::SrbAnimateFormation {
+                ref mut anim,
+                ref formation,
+                ref to_remove,
+            } => {
                 *anim += 1;
                 if *anim >= ANIM_FORMATION_SLOWDOWN * formation.len() as i32 {
                     debug_assert!(!to_remove.is_empty());
@@ -647,18 +680,20 @@ impl PyramidStep {
                     let from = remaining.pop().unwrap();
                     state.board_mut().remove_piece(from);
                     next = Some(PyramidStep::SrbAnimateRemove {
-                        anim: 0,
-                        formation: formation.clone(),
-                        from: from,
-                        remaining: remaining,
-                    });
+                                    anim: 0,
+                                    formation: formation.clone(),
+                                    from: from,
+                                    remaining: remaining,
+                                });
                 }
                 *anim % ANIM_FORMATION_SLOWDOWN == 0
             }
-            &mut PyramidStep::SrbAnimateRemove { ref mut anim,
-                                                 ref formation,
-                                                 ref remaining,
-                                                 .. } => {
+            &mut PyramidStep::SrbAnimateRemove {
+                ref mut anim,
+                ref formation,
+                ref remaining,
+                ..
+            } => {
                 *anim += 1;
                 if *anim >= ANIM_REMOVE_FRAMES {
                     if remaining.is_empty() {
@@ -668,11 +703,11 @@ impl PyramidStep {
                         let from = remaining.pop().unwrap();
                         state.board_mut().remove_piece(from);
                         next = Some(PyramidStep::SrbAnimateRemove {
-                            anim: 0,
-                            formation: formation.clone(),
-                            from: from,
-                            remaining: remaining,
-                        });
+                                        anim: 0,
+                                        formation: formation.clone(),
+                                        from: from,
+                                        remaining: remaining,
+                                    });
                     }
                 }
                 true
@@ -771,9 +806,9 @@ impl Element<FailureState, PyramidCmd> for PyramidView {
             }
             if let Some(team) = board.piece_at(coords) {
                 let hilight = self.hilight_override.get(&coords).cloned();
-                let team = hilight.unwrap_or_else(|| {
-                    self.team_override.unwrap_or(team)
-                });
+                let team =
+                    hilight
+                        .unwrap_or_else(|| self.team_override.unwrap_or(team));
                 let mut sprite_index = match team {
                     Team::You => 1,
                     Team::SRB => 0,
@@ -845,15 +880,17 @@ impl Element<FailureState, PyramidCmd> for PyramidView {
                                 return Action::redraw().and_return(cmd);
                             }
                         }
-                        PyramidStep::YouRemoving { ref formation,
-                                                   ref so_far,
-                                                   ref possible } => {
+                        PyramidStep::YouRemoving {
+                            ref formation,
+                            ref so_far,
+                            ref possible,
+                        } => {
                             if possible.contains(&coords) {
                                 let mut so_far = so_far.clone();
                                 so_far.push(coords);
-                                let cmd =
-                                    PyramidCmd::Remove(formation.clone(),
-                                                       so_far);
+                                let cmd = PyramidCmd::Remove(formation
+                                                                 .clone(),
+                                                             so_far);
                                 return Action::redraw().and_return(cmd);
                             }
                         }
@@ -876,13 +913,13 @@ fn srb_supply_pt() -> Point { Point::new(469, 48) }
 fn interpolate(from: Point, to: Point, anim: i32, max_anim: i32) -> Point {
     let x = from.x() + (to.x() - from.x()) * anim / max_anim;
     let y = from.y() + (to.y() - from.y()) * anim / max_anim +
-            50 * 4 * anim * (anim - max_anim) / (max_anim * max_anim);
+        50 * 4 * anim * (anim - max_anim) / (max_anim * max_anim);
     Point::new(x, y)
 }
 
 fn coords_to_pt(coords: Coords) -> Point {
     let left = PYRAMID_BOTTOM_ROW_LEFT + PYRAMID_TILE_SIZE * coords.col() +
-               (PYRAMID_TILE_SIZE / 2) * coords.row();
+        (PYRAMID_TILE_SIZE / 2) * coords.row();
     let top = PYRAMID_BOTTOM_ROW_TOP - PYRAMID_TILE_SIZE * coords.row();
     Point::new(left, top)
 }

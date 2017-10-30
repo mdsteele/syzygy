@@ -23,8 +23,8 @@ use std::f64::consts::{FRAC_1_PI, FRAC_PI_3};
 use std::rc::Rc;
 
 use elements::{PuzzleCmd, PuzzleCore, PuzzleView};
-use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
-          Sprite};
+use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
+          Resources, Sprite};
 use modes::SOLVED_INFO_TEXT;
 use save::{Game, HexState, PuzzleState};
 use super::scenes;
@@ -193,13 +193,15 @@ impl HexWheels {
     fn new(resources: &mut Resources, left: i32, top: i32) -> HexWheels {
         HexWheels {
             topleft: Point::new(left, top),
-            wheels: vec![HexWheel::new(resources, 0, left + 64, top + 32),
-                         HexWheel::new(resources, 1, left + 128, top + 32),
-                         HexWheel::new(resources, 2, left + 32, top + 88),
-                         HexWheel::new(resources, 3, left + 96, top + 88),
-                         HexWheel::new(resources, 4, left + 160, top + 88),
-                         HexWheel::new(resources, 5, left + 64, top + 144),
-                         HexWheel::new(resources, 6, left + 128, top + 144)],
+            wheels: vec![
+                HexWheel::new(resources, 0, left + 64, top + 32),
+                HexWheel::new(resources, 1, left + 128, top + 32),
+                HexWheel::new(resources, 2, left + 32, top + 88),
+                HexWheel::new(resources, 3, left + 96, top + 88),
+                HexWheel::new(resources, 4, left + 160, top + 88),
+                HexWheel::new(resources, 5, left + 64, top + 144),
+                HexWheel::new(resources, 6, left + 128, top + 144),
+            ],
             token_sprites: resources.get_sprites("hex/tokens"),
             font: resources.get_font("roman"),
             letters: HashMap::new(),
@@ -219,7 +221,7 @@ impl Element<HexState, (usize, i32)> for HexWheels {
                 if rotation != 0 {
                     let base_theta = FRAC_PI_3 * (at as f64);
                     let new_theta = base_theta +
-                                    0.25 * FRAC_PI_3 * rotation as f64;
+                        0.25 * FRAC_PI_3 * rotation as f64;
                     let base_pt = point_from_polar(32, base_theta);
                     let new_pt = point_from_polar(32, new_theta);
                     center = center + new_pt - base_pt;

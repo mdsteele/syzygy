@@ -117,10 +117,12 @@ impl Direction {
 
     #[cfg(test)]
     pub fn all() -> Vec<Direction> {
-        vec![Direction::East,
-             Direction::South,
-             Direction::West,
-             Direction::North]
+        vec![
+            Direction::East,
+            Direction::South,
+            Direction::West,
+            Direction::North,
+        ]
     }
 }
 

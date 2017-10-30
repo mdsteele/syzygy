@@ -89,10 +89,10 @@ impl CrosswordState {
 
     pub fn to_toml(&self) -> toml::Value {
         let words = self.words
-                        .iter()
-                        .map(|chars| chars.iter().cloned().collect())
-                        .map(toml::Value::String)
-                        .collect();
+            .iter()
+            .map(|chars| chars.iter().cloned().collect())
+            .map(toml::Value::String)
+            .collect();
         toml::Value::Array(words)
     }
 
@@ -112,9 +112,8 @@ impl CrosswordState {
     pub fn words(&self) -> &Vec<Vec<char>> { &self.words }
 
     pub fn words_are(&self, words: &[&str]) -> bool {
-        let words: Vec<Vec<char>> = words.iter()
-                                         .map(|word| word.chars().collect())
-                                         .collect();
+        let words: Vec<Vec<char>> =
+            words.iter().map(|word| word.chars().collect()).collect();
         self.words == words
     }
 

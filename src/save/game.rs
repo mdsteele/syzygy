@@ -19,15 +19,15 @@
 
 use toml;
 
-use save::{AtticState, AutoState, BlackState, BlameState, CubeState, DayState,
-           DisconState, DotsState, DoubleState, FailureState, FictionState,
-           FinaleState, GearsState, GroundState, HeadedState, HexState,
-           IcyEmState, JogState, LaneState, LevelUpState, LineState, Location,
-           LogLevelState, MeetState, MissedState, NoReturnState, OrderState,
-           PasswordState, PovState, PrologState, PuzzleState, RightState,
-           SauceState, ServesState, SimpleState, StarState, SyrupState,
-           SyzygyState, TheYState, TreadState, VirtueState, WhatchaState,
-           WreckedState};
+use save::{AtticState, AutoState, BlackState, BlameState, CubeState,
+           DayState, DisconState, DotsState, DoubleState, FailureState,
+           FictionState, FinaleState, GearsState, GroundState, HeadedState,
+           HexState, IcyEmState, JogState, LaneState, LevelUpState,
+           LineState, Location, LogLevelState, MeetState, MissedState,
+           NoReturnState, OrderState, PasswordState, PovState, PrologState,
+           PuzzleState, RightState, SauceState, ServesState, SimpleState,
+           StarState, SyrupState, SyzygyState, TheYState, TreadState,
+           VirtueState, WhatchaState, WreckedState};
 use save::util::{Tomlable, to_table};
 
 // ========================================================================= //

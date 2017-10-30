@@ -28,8 +28,8 @@ use super::PuzzleState;
 
 const TREE_KEY: &str = "tree";
 
-const SOLVED_SIGNATURE: [i8; 15] = [2, 4, 2, 0, -6, 7, 12, 9, -7, -11, 9, -4,
-                                    14, 12, 14];
+const SOLVED_SIGNATURE: [i8; 15] =
+    [2, 4, 2, 0, -6, 7, 12, 9, -7, -11, 9, -4, 14, 12, 14];
 
 const MIN_KEY: i32 = 1;
 const MAX_KEY: i32 = 15;
@@ -180,8 +180,9 @@ impl Tomlable for BlackState {
         if num_keys < MIN_KEYS_ON_TREE || num_keys > TOTAL_NUM_KEYS {
             tree = BlackState::initial_tree();
         } else if tree.keys()
-                      .into_iter()
-                      .any(|key| key < MIN_KEY || key > MAX_KEY) {
+                   .into_iter()
+                   .any(|key| key < MIN_KEY || key > MAX_KEY)
+        {
             tree = BlackState::initial_tree();
         }
         let is_initial = tree == BlackState::initial_tree();

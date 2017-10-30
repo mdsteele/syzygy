@@ -125,7 +125,8 @@ impl StarState {
             let col = pt.x();
             let row = pt.y();
             if col < 0 || row < 0 || col >= self.num_columns() ||
-               row >= self.column_letters(col).len() as i32 {
+                row >= self.column_letters(col).len() as i32
+            {
                 return false;
             }
             word.push(self.columns[col as usize][row as usize]);
@@ -145,12 +146,12 @@ impl StarState {
     }
 
     fn regenerate_columns(&mut self) {
-        let mut insertions: Vec<(i32, usize)> =
-            WORDS.iter()
-                 .enumerate()
-                 .map(|(index, &tuple)| (tuple.0, index))
-                 .filter(|&(_, index)| !self.found.contains(&(index as i32)))
-                 .collect();
+        let mut insertions: Vec<(i32, usize)> = WORDS
+            .iter()
+            .enumerate()
+            .map(|(index, &tuple)| (tuple.0, index))
+            .filter(|&(_, index)| !self.found.contains(&(index as i32)))
+            .collect();
         insertions.sort();
         self.columns = FINAL_WORD.chars().map(|ch| vec![ch]).collect();
         for (_, index) in insertions.into_iter() {
@@ -258,9 +259,10 @@ mod tests {
         assert_eq!(state.access, Access::Solved);
         assert_eq!(state.found.len(), WORDS.len());
         assert_eq!(state.columns,
-                   FINAL_WORD.chars()
-                             .map(|chr| vec![chr])
-                             .collect::<Vec<Vec<char>>>());
+                   FINAL_WORD
+                       .chars()
+                       .map(|chr| vec![chr])
+                       .collect::<Vec<Vec<char>>>());
     }
 
     #[test]
@@ -275,9 +277,10 @@ mod tests {
         assert_eq!(state.access, Access::Solved);
         assert_eq!(state.found, found);
         assert_eq!(state.columns,
-                   FINAL_WORD.chars()
-                             .map(|chr| vec![chr])
-                             .collect::<Vec<Vec<char>>>());
+                   FINAL_WORD
+                       .chars()
+                       .map(|chr| vec![chr])
+                       .collect::<Vec<Vec<char>>>());
     }
 
     #[test]

@@ -49,13 +49,15 @@ const SOLVED_TOKENS: &[u8] = &[
         2, 2, 2, 2,
 ];
 
-const WHEELS: &[[usize; 6]] = &[[0, 1, 5, 9, 8, 4],
-                                [2, 3, 6, 11, 10, 5],
-                                [7, 8, 14, 18, 17, 13],
-                                [9, 10, 15, 20, 19, 14],
-                                [11, 12, 16, 22, 21, 15],
-                                [18, 19, 24, 27, 26, 23],
-                                [20, 21, 25, 29, 28, 24]];
+const WHEELS: &[[usize; 6]] = &[
+    [0, 1, 5, 9, 8, 4],
+    [2, 3, 6, 11, 10, 5],
+    [7, 8, 14, 18, 17, 13],
+    [9, 10, 15, 20, 19, 14],
+    [11, 12, 16, 22, 21, 15],
+    [18, 19, 24, 27, 26, 23],
+    [20, 21, 25, 29, 28, 24],
+];
 
 // ========================================================================= //
 
@@ -111,9 +113,9 @@ impl Tomlable for HexState {
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.is_solved() && !self.is_initial {
             let tokens = self.tokens
-                             .iter()
-                             .map(|&token| toml::Value::Integer(token as i64))
-                             .collect();
+                .iter()
+                .map(|&token| toml::Value::Integer(token as i64))
+                .collect();
             table.insert(TOKENS_KEY.to_string(), toml::Value::Array(tokens));
         }
         toml::Value::Table(table)
@@ -156,19 +158,27 @@ mod tests {
     use save::util::{ACCESS_KEY, Tomlable};
     use super::{HexState, INITIAL_TOKENS, SOLVED_TOKENS, TOKENS_KEY};
 
+    #[cfg_attr(rustfmt, rustfmt_skip)]
+    const ROUND_TRIP_TOKENS: &[u8] = &[
+            0, 0, 0, 0,
+           0,    1,    1,
+         1, 1, 1, 2, 2, 2,
+        2,    2,    0,    0,
+         0, 0, 0, 1, 1, 1,
+           1,    1,    2,
+            2, 2, 2, 2,
+    ];
+
     #[test]
     fn toml_round_trip() {
         let mut state = HexState::from_toml(toml::Value::Boolean(false));
         state.access = Access::Replaying;
-        state.tokens = vec![0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 0,
-                            0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2];
+        state.tokens.copy_from_slice(ROUND_TRIP_TOKENS);
         state.is_initial = false;
 
         let state = HexState::from_toml(state.to_toml());
         assert_eq!(state.access, Access::Replaying);
-        assert_eq!(state.tokens,
-                   vec![0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 0, 0,
-                        0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2]);
+        assert_eq!(state.tokens.as_slice(), ROUND_TRIP_TOKENS);
         assert!(!state.is_initial);
     }
 

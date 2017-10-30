@@ -135,13 +135,14 @@ impl GridView {
     pub fn animate_slide(&mut self, slide: &BlockSlide) {
         self.drag = None;
         self.animation = Some(SlideAnimation {
-            slide_dir: slide.direction(),
-            to_coords: slide.to_coords(),
-            remaining_dist: GRID_CELL_SIZE * slide.distance(),
-            speed: SLIDE_START_SPEED,
-            pushed: slide.pushed(),
-            transform: slide.transform().inverse(),
-        });
+                                  slide_dir: slide.direction(),
+                                  to_coords: slide.to_coords(),
+                                  remaining_dist: GRID_CELL_SIZE *
+                                      slide.distance(),
+                                  speed: SLIDE_START_SPEED,
+                                  pushed: slide.pushed(),
+                                  transform: slide.transform().inverse(),
+                              });
     }
 
     pub fn reset_animation(&mut self) {
@@ -165,17 +166,16 @@ impl GridView {
                         let rect = self.cell_rect(coords);
                         let mut canvas = canvas.subcanvas(rect);
                         let center = canvas.rect().center() -
-                                     anim.slide_dir.delta() *
-                                     anim.remaining_dist;
+                            anim.slide_dir.delta() * anim.remaining_dist;
                         self.draw_push_pop_at(center, direction, &mut canvas);
                     }
                     {
                         let rect = self.cell_rect(anim.to_coords);
                         let mut canvas = canvas.subcanvas(rect);
-                        let center =
-                            canvas.rect().center() +
+                        let center = canvas.rect().center() +
                             anim.slide_dir.delta() *
-                            cmp::max(0, GRID_CELL_SIZE - anim.remaining_dist);
+                                cmp::max(0,
+                                         GRID_CELL_SIZE - anim.remaining_dist);
                         self.draw_push_pop_at(center,
                                               direction.opposite(),
                                               &mut canvas);
@@ -185,7 +185,7 @@ impl GridView {
             }
         }
         let center = coords * GRID_CELL_SIZE +
-                     Point::new(GRID_CELL_SIZE / 2, GRID_CELL_SIZE / 2);
+            Point::new(GRID_CELL_SIZE / 2, GRID_CELL_SIZE / 2);
         self.draw_push_pop_at(center, direction, canvas);
     }
 
@@ -196,14 +196,14 @@ impl GridView {
                                        direction.degrees(),
                                        false,
                                        (direction == Direction::South ||
-                                        direction == Direction::West));
+                                            direction == Direction::West));
     }
 
     pub fn draw_objects(&self, grid: &ObjectGrid, canvas: &mut Canvas) {
         let mut canvas = canvas.subcanvas(self.rect);
         for (&coords, &object) in grid.objects() {
             let center = coords * GRID_CELL_SIZE +
-                         Point::new(GRID_CELL_SIZE / 2, GRID_CELL_SIZE / 2);
+                Point::new(GRID_CELL_SIZE / 2, GRID_CELL_SIZE / 2);
             match object {
                 Object::Gap => {}
                 Object::Wall => {
@@ -236,13 +236,12 @@ impl GridView {
         let mut canvas = canvas.subcanvas(self.rect);
         for (&coords, &symbol) in grid.ice_blocks() {
             let mut center = coords * GRID_CELL_SIZE +
-                             Point::new(GRID_CELL_SIZE / 2,
-                                        GRID_CELL_SIZE / 2);
+                Point::new(GRID_CELL_SIZE / 2, GRID_CELL_SIZE / 2);
             let mut symbol = symbol;
             if let Some(ref anim) = self.animation {
                 if anim.to_coords == coords {
                     center = center -
-                             anim.slide_dir.delta() * anim.remaining_dist;
+                        anim.slide_dir.delta() * anim.remaining_dist;
                     symbol = symbol.transformed(anim.transform);
                 }
             }
@@ -295,22 +294,22 @@ impl Element<ObjectGrid, (Point, Direction)> for GridView {
                         let new_dist = anim.cell_dist();
                         if new_dist != old_dist {
                             let coords = anim.to_coords -
-                                         anim.slide_dir.delta() * new_dist;
+                                anim.slide_dir.delta() * new_dist;
                             match grid.objects().get(&coords) {
                                 Some(&Object::Rotator) => {
                                     // TODO: play sound
                                     anim.transform = anim.transform
-                                                         .rotated_cw()
+                                        .rotated_cw()
                                 }
                                 Some(&Object::Reflector(false)) => {
                                     // TODO: play sound
                                     anim.transform = anim.transform
-                                                         .flipped_horz()
+                                        .flipped_horz()
                                 }
                                 Some(&Object::Reflector(true)) => {
                                     // TODO: play sound
                                     anim.transform = anim.transform
-                                                         .flipped_vert()
+                                        .flipped_vert()
                                 }
                                 _ => {}
                             }

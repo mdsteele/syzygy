@@ -86,10 +86,7 @@ impl Coords {
     pub fn new(row: i32, col: i32) -> Coords {
         debug_assert!(row >= 0 && row < 8);
         debug_assert!(col >= 0 && col < 8 - row);
-        Coords {
-            row: row,
-            col: col,
-        }
+        Coords { row: row, col: col }
     }
 
     pub fn from_index(mut index: usize) -> Option<Coords> {
@@ -250,17 +247,17 @@ impl Board {
         let row = coords.row;
         let col = coords.col;
         self.get(Coords::new(row, col)) == 0 &&
-        (row == 0 ||
-         self.get(Coords::new(row - 1, col)) != 0 &&
-         self.get(Coords::new(row - 1, col + 1)) != 0)
+            (row == 0 ||
+                 self.get(Coords::new(row - 1, col)) != 0 &&
+                     self.get(Coords::new(row - 1, col + 1)) != 0)
     }
 
     pub fn can_remove_from(&self, coords: Coords) -> bool {
         let row = coords.row;
         let col = coords.col;
         row == 7 ||
-        (col == 0 || self.get(Coords::new(row + 1, col - 1)) == 0) &&
-        (col == 7 - row || self.get(Coords::new(row + 1, col)) == 0)
+            (col == 0 || self.get(Coords::new(row + 1, col - 1)) == 0) &&
+                (col == 7 - row || self.get(Coords::new(row + 1, col)) == 0)
     }
 
     pub fn possible_move_starts(&self, team: Team) -> HashSet<Coords> {
@@ -270,7 +267,8 @@ impl Board {
             if self.can_place_at(coords) {
                 results.insert(coords);
             } else if self.get(coords) == value &&
-                      self.can_remove_from(coords) {
+                       self.can_remove_from(coords)
+            {
                 let board = self.with_removed(coords);
                 for dest in Coords::all_above_row(coords.row()) {
                     if board.can_place_at(dest) {
@@ -360,7 +358,7 @@ impl Board {
                 cmp::max(0, coords.row() + 1 - FORMATION_LINE_LENGTH as i32);
             let upper_row = cmp::min(coords.row() + coords.col() + 1,
                                      coords.row() +
-                                     FORMATION_LINE_LENGTH as i32);
+                                         FORMATION_LINE_LENGTH as i32);
             if upper_row - lower_row >= FORMATION_LINE_LENGTH as i32 {
                 let mut formation = Vec::with_capacity(FORMATION_LINE_LENGTH);
                 for row in lower_row..upper_row {
@@ -393,7 +391,7 @@ impl Board {
         let mut best_moves = Vec::new();
         for (mov, board) in self.all_moves(Team::SRB) {
             let score = 1.0 /
-                        board.minimax(depth, 0.0, 1.0 / best_score, Team::You);
+                board.minimax(depth, 0.0, 1.0 / best_score, Team::You);
             if score > best_score {
                 best_score = score;
                 best_moves = vec![mov];
@@ -426,10 +424,10 @@ impl Board {
         let mut best = 0.0;
         for (_, board) in self.all_moves(team) {
             let score = 1.0 /
-                        board.minimax(depth - 1,
-                                      1.0 / beta,
-                                      1.0 / alpha,
-                                      team.opponent());
+                board.minimax(depth - 1,
+                              1.0 / beta,
+                              1.0 / alpha,
+                              team.opponent());
             if score > best {
                 best = score;
             }
@@ -466,7 +464,8 @@ impl Board {
                                 board2));
                 }
             } else if self.get(coords) == team.value() &&
-                      self.can_remove_from(coords) {
+                       self.can_remove_from(coords)
+            {
                 let board2 = self.with_removed(coords);
                 for coords2 in Coords::all_above_row(coords.row) {
                     if board2.can_place_at(coords2) {
@@ -522,8 +521,8 @@ impl Tomlable for Board {
         toml::Value::Array(self.cells
                                .iter()
                                .map(|&value| {
-                                   toml::Value::Integer(value as i64)
-                               })
+                                        toml::Value::Integer(value as i64)
+                                    })
                                .collect())
     }
 
@@ -626,19 +625,20 @@ mod tests {
         board.set_piece_at(Coords::new(0, 2), Team::SRB);
         board.set_piece_at(Coords::new(1, 1), Team::SRB);
         board.set_piece_at(Coords::new(0, 4), Team::SRB);
-        let mut actual_removals: Vec<Vec<Coords>> =
-            board.all_removals(Team::SRB)
-                 .into_iter()
-                 .map(|(remove, _)| remove)
-                 .collect();
+        let mut actual_removals: Vec<Vec<Coords>> = board
+            .all_removals(Team::SRB)
+            .into_iter()
+            .map(|(remove, _)| remove)
+            .collect();
         actual_removals.sort();
         for removal in actual_removals.iter_mut() {
             removal.sort();
         }
-        let expected_removals =
-            vec![vec![Coords::new(0, 1), Coords::new(1, 1)],
-                 vec![Coords::new(0, 2), Coords::new(1, 1)],
-                 vec![Coords::new(0, 4), Coords::new(1, 1)]];
+        let expected_removals = vec![
+            vec![Coords::new(0, 1), Coords::new(1, 1)],
+            vec![Coords::new(0, 2), Coords::new(1, 1)],
+            vec![Coords::new(0, 4), Coords::new(1, 1)],
+        ];
         assert_eq!(actual_removals, expected_removals);
     }
 

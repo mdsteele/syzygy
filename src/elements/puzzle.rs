@@ -177,7 +177,7 @@ impl<U: Clone> PuzzleCore<U> {
         let mut can_reset = state.can_reset();
         if !can_reset && state.allow_reset_for_undo_redo() {
             can_reset = !self.undo_stack.is_empty() ||
-                        !self.redo_stack.is_empty();
+                !self.redo_stack.is_empty();
         }
         HudInput {
             name: S::location().name(),
@@ -257,8 +257,7 @@ impl<U: Clone> PuzzleCore<U> {
         if !action.should_stop() {
             let subaction = if !self.intro_scene.is_finished() {
                 self.intro_scene.handle_event(event, &mut self.theater)
-            } else if let Some(ref mut scene) =
-                self.middle_scene {
+            } else if let Some(ref mut scene) = self.middle_scene {
                 scene.handle_event(event, &mut self.theater)
             } else if state.is_solved() {
                 self.outro_scene.handle_event(event, &mut self.theater)
@@ -269,13 +268,15 @@ impl<U: Clone> PuzzleCore<U> {
                 state.visit();
             }
             if self.middle_scene
-                   .as_ref()
-                   .map(Scene::is_finished)
-                   .unwrap_or(false) {
+                .as_ref()
+                .map(Scene::is_finished)
+                .unwrap_or(false)
+            {
                 self.middle_scene = None;
             }
             if !self.previously_solved && self.outro_scene.is_finished() &&
-               self.screen_fade.is_transparent() {
+                self.screen_fade.is_transparent()
+            {
                 self.screen_fade.fade_out_and_return(PuzzleCmd::Next);
             }
             action.merge(subaction.but_no_value());

@@ -29,8 +29,8 @@ use super::PuzzleState;
 
 const SEQUENCE_KEY: &str = "sequence";
 
-const INITIAL_LETTERS: &[char] = &['E', 'D', 'U', 'C', 'A', 'T', 'I', 'O',
-                                   'N'];
+const INITIAL_LETTERS: &[char] =
+    &['E', 'D', 'U', 'C', 'A', 'T', 'I', 'O', 'N'];
 const SOLVED_LETTERS: &[char] = &['S', 'E', 'C', 'U', 'R', 'I', 'T', 'Y'];
 const SOLVED_SEQUENCE: &[i8] = &[3, 0, 1, 4, 2];
 
@@ -102,9 +102,9 @@ impl Tomlable for AutoState {
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.is_solved() && !self.sequence.is_empty() {
             let seq = self.sequence
-                          .iter()
-                          .map(|&idx| toml::Value::Integer(idx as i64))
-                          .collect();
+                .iter()
+                .map(|&idx| toml::Value::Integer(idx as i64))
+                .collect();
             table.insert(SEQUENCE_KEY.to_string(), toml::Value::Array(seq));
         }
         toml::Value::Table(table)
@@ -261,10 +261,14 @@ mod tests {
     #[test]
     fn from_valid_sequence_toml() {
         let mut table = toml::value::Table::new();
-        table.insert(SEQUENCE_KEY.to_string(),
-                     toml::Value::Array(vec![toml::Value::Integer(1),
-                                             toml::Value::Integer(2),
-                                             toml::Value::Integer(3)]));
+        table.insert(
+            SEQUENCE_KEY.to_string(),
+            toml::Value::Array(vec![
+                toml::Value::Integer(1),
+                toml::Value::Integer(2),
+                toml::Value::Integer(3),
+            ]),
+        );
         let state = AutoState::from_toml(toml::Value::Table(table));
         assert_eq!(state.sequence, vec![1, 2, 3]);
     }

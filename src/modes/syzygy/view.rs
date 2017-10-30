@@ -24,8 +24,8 @@ use elements::{self, PuzzleCmd, PuzzleCore, PuzzleView};
 use elements::column::ColumnsView;
 use elements::lasers::{LaserCmd, LaserField};
 use elements::plane::{PlaneCmd, PlaneGridView};
-use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
-          Sprite};
+use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
+          Resources, Sprite};
 use modes::SOLVED_INFO_TEXT;
 use save::{self, Game, PuzzleState, SyzygyStage, SyzygyState};
 use super::mezure::{MezureCmd, MezureView};
@@ -183,7 +183,8 @@ impl Element<Game, PuzzleCmd> for View {
             action.merge(subaction.but_no_value());
         }
         if self.should_reveal && self.reveal_amount >= MAX_REVEAL &&
-           !action.should_stop() && !state.is_solved() {
+            !action.should_stop() && !state.is_solved()
+        {
             match self.stage {
                 SyzygyStage::Yttris => {
                     let subaction =
@@ -203,13 +204,15 @@ impl Element<Game, PuzzleCmd> for View {
                     action.merge(subaction.but_no_value());
                 }
                 SyzygyStage::Argony => {
-                    let subaction = self.argony
-                                        .handle_event(event,
-                                                      state.argony_grid_mut());
+                    let subaction =
+                        self.argony
+                            .handle_event(event, state.argony_grid_mut());
                     if let Some(&(coords, dir)) = subaction.value() {
-                        if let Some(slide) = state.argony_grid_mut()
-                                                  .slide_ice_block(coords,
-                                                                   dir) {
+                        if let Some(slide) =
+                            state
+                                .argony_grid_mut()
+                                .slide_ice_block(coords, dir)
+                        {
                             self.argony.animate_slide(&slide);
                             if state.argony_grid().all_blocks_on_goals() {
                                 self.core.clear_undo_redo();
@@ -245,12 +248,13 @@ impl Element<Game, PuzzleCmd> for View {
                     action.merge(subaction.but_no_value());
                 }
                 SyzygyStage::Ugrent => {
-                    let subaction = self.ugrent
-                                        .handle_event(event,
-                                                      state.ugrent_grid_mut());
+                    let subaction =
+                        self.ugrent
+                            .handle_event(event, state.ugrent_grid_mut());
                     if let Some(&cmd) = subaction.value() {
                         if self.ugrent
-                               .all_detectors_satisfied(state.ugrent_grid()) {
+                            .all_detectors_satisfied(state.ugrent_grid())
+                        {
                             self.core.clear_undo_redo();
                             state.advance_stage();
                             self.core

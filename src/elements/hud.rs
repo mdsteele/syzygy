@@ -21,8 +21,8 @@ use std::cmp;
 use std::rc::Rc;
 
 use elements::Paragraph;
-use gui::{Action, Align, Canvas, Element, Event, Font, KeyMod, Keycode, Point,
-          Rect, Resources, Sound, Sprite};
+use gui::{Action, Align, Canvas, Element, Event, Font, KeyMod, Keycode,
+          Point, Rect, Resources, Sound, Sprite};
 use save::{Access, Location};
 
 // ========================================================================= //
@@ -223,7 +223,8 @@ impl Element<HudInput, HudCmd> for HudButton {
                 if self.blink_frames > 0 {
                     self.blink_frames -= 1;
                     if self.blink_frames == 0 ||
-                       self.blink_frames == BLINK_FRAMES {
+                        self.blink_frames == BLINK_FRAMES
+                    {
                         redraw = true;
                     }
                 } else if self.flashing {
@@ -240,17 +241,18 @@ impl Element<HudInput, HudCmd> for HudButton {
                 }
                 Action::redraw_if(redraw && (was_visible || self.is_visible()))
             }
-            &Event::MouseDown(pt) if self.scroll == 0 &&
-                                     self.is_enabled(input) &&
-                                     self.rect.contains(pt) => {
+            &Event::MouseDown(pt)
+                if self.scroll == 0 && self.is_enabled(input) &&
+                       self.rect.contains(pt) => {
                 self.blink_frames = BLINK_FRAMES;
                 self.flashing = false;
                 self.click_action()
             }
             &Event::KeyDown(Keycode::Z, keymod) if self.is_enabled(input) => {
                 if keymod == KeyMod::command() && self.value == HudCmd::Undo ||
-                   keymod == (KeyMod::command() | KeyMod::shift()) &&
-                   self.value == HudCmd::Redo {
+                    keymod == (KeyMod::command() | KeyMod::shift()) &&
+                        self.value == HudCmd::Redo
+                {
                     self.click_action()
                 } else {
                     Action::ignore()
@@ -305,7 +307,8 @@ impl PauseIndicator {
         let inner_height = paragraph.height();
         let outer_height = inner_height + 2 * PAUSE_TEXT_MARGIN_VERT as u32;
         let outer_rect = Rect::new(visible.x() +
-                                   (visible.width() as i32 - outer_width) / 2,
+                                       (visible.width() as i32 - outer_width) /
+                                           2,
                                    visible.top(),
                                    outer_width as u32,
                                    outer_height);
@@ -315,7 +318,7 @@ impl PauseIndicator {
                                  outer_rect.height());
         let inner_rect = Rect::new(outer_rect.x() + PAUSE_TEXT_MARGIN_HORZ,
                                    outer_rect.y() + PAUSE_TEXT_MARGIN_VERT -
-                                   1,
+                                       1,
                                    inner_width as u32,
                                    inner_height);
         PauseIndicator {
@@ -353,13 +356,13 @@ impl SkipIndicator {
         let outer_width = inner_width + 2 * SKIP_TEXT_MARGIN_HORZ;
         let inner_height = paragraph.height();
         let outer_height = inner_height + 2 * SKIP_TEXT_MARGIN_VERT as u32;
-        let outer_rect = Rect::new(visible.x() +
-                                   (visible.width() as i32 - outer_width) / 2,
-                                   visible.top() +
-                                   ((visible.height() - outer_height) as i32) /
-                                   3,
-                                   outer_width as u32,
-                                   outer_height);
+        let outer_rect =
+            Rect::new(visible.x() +
+                          (visible.width() as i32 - outer_width) / 2,
+                      visible.top() +
+                          ((visible.height() - outer_height) as i32) / 3,
+                      outer_width as u32,
+                      outer_height);
         let mid_rect = Rect::new(outer_rect.x() + 1,
                                  outer_rect.y() + 1,
                                  outer_rect.width() - 2,
@@ -390,8 +393,8 @@ impl Element<HudInput, HudCmd> for SkipIndicator {
     fn handle_event(&mut self, event: &Event, input: &mut HudInput)
                     -> Action<HudCmd> {
         match event {
-            &Event::MouseDown(pt) if input.show_skip &&
-                                     self.outer_rect.contains(pt) => {
+            &Event::MouseDown(pt)
+                if input.show_skip && self.outer_rect.contains(pt) => {
                 Action::redraw().and_return(HudCmd::Skip)
             }
             &Event::KeyDown(Keycode::Escape, _) if input.show_skip => {

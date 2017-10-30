@@ -95,7 +95,8 @@ impl ObjectGrid {
             let row = i32::pop_from_table(&mut block_toml, ROW_KEY);
             let symbol = Symbol::pop_from_table(&mut block_toml, SYMBOL_KEY);
             if (col < 0 || col >= default.num_cols) ||
-               (row < 0 || row >= default.num_rows) {
+                (row < 0 || row >= default.num_rows)
+            {
                 return default.clone();
             }
             blocks.push((col, row, symbol));
@@ -115,9 +116,9 @@ impl ObjectGrid {
 
         let mut grid = default.clone();
         grid.objects.retain(|_, obj| match obj {
-            &mut Object::PushPop(_) => false,
-            _ => true,
-        });
+                                &mut Object::PushPop(_) => false,
+                                _ => true,
+                            });
 
         for (col, row, dir) in push_pops.into_iter() {
             if grid.objects.contains_key(&Point::new(col, row)) {
@@ -134,7 +135,7 @@ impl ObjectGrid {
             grid.add_ice_block(col, row, symbol);
         }
         grid.is_modified = grid.ice_blocks != default.ice_blocks ||
-                           grid.objects != default.objects;
+            grid.objects != default.objects;
         grid
     }
 
@@ -159,8 +160,8 @@ impl ObjectGrid {
                                 toml::Value::Integer(coords.x() as i64));
                 push_pop.insert(ROW_KEY.to_string(),
                                 toml::Value::Integer(coords.y() as i64));
-                push_pop.insert(DIRECTION_KEY.to_string(),
-                                direction.to_toml());
+                push_pop
+                    .insert(DIRECTION_KEY.to_string(), direction.to_toml());
                 push_pops.push(toml::Value::Table(push_pop));
             }
         }
@@ -202,8 +203,9 @@ impl ObjectGrid {
             loop {
                 let next = new_coords + delta;
                 if (next.x() < 0 || next.x() >= self.num_cols) ||
-                   (next.y() < 0 || next.y() >= self.num_rows) ||
-                   self.ice_blocks.contains_key(&next) {
+                    (next.y() < 0 || next.y() >= self.num_rows) ||
+                    self.ice_blocks.contains_key(&next)
+                {
                     break;
                 }
                 match self.objects.get(&next).cloned() {
@@ -243,13 +245,14 @@ impl ObjectGrid {
             self.ice_blocks.insert(new_coords, symbol.transformed(transform));
             if new_coords != coords {
                 self.is_modified = true;
-                return Some(BlockSlide {
+                let slide = BlockSlide {
                     from: coords,
                     direction: slide_dir,
                     to: new_coords,
                     pushed: pushed,
                     transform: transform,
-                });
+                };
+                return Some(slide);
             }
         }
         None
@@ -261,7 +264,8 @@ impl ObjectGrid {
             self.ice_blocks.insert(slide.from, symbol);
             if let Some(pp_coords) = slide.pushed {
                 if let Some(&Object::PushPop(pp_dir)) =
-                    self.objects.get(&pp_coords) {
+                    self.objects.get(&pp_coords)
+                {
                     let delta = pp_dir.opposite().delta();
                     let mut new_pp_coords = pp_coords + delta;
                     while self.objects.contains_key(&new_pp_coords) {

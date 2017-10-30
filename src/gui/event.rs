@@ -59,24 +59,26 @@ impl Event {
                 }
             }
             &sdl2::event::Event::MouseButtonDown {
-                mouse_btn: MouseButton::Left, x, y, .. } => {
-              Some(Event::MouseDown(Point::new(x, y)))
-            }
-            &sdl2::event::Event::MouseButtonUp { mouse_btn: MouseButton::Left,
-                                                 .. } => {
-              Some(Event::MouseUp)
-            }
-            &sdl2::event::Event::KeyDown { keycode: Some(keycode),
-                                           keymod,
-                                           .. } => {
-                Some(Event::KeyDown(keycode, KeyMod::from_sdl2(keymod)))
-            }
+                mouse_btn: MouseButton::Left,
+                x,
+                y,
+                ..
+            } => Some(Event::MouseDown(Point::new(x, y))),
+            &sdl2::event::Event::MouseButtonUp {
+                mouse_btn: MouseButton::Left, ..
+            } => Some(Event::MouseUp),
+            &sdl2::event::Event::KeyDown {
+                keycode: Some(keycode),
+                keymod,
+                ..
+            } => Some(Event::KeyDown(keycode, KeyMod::from_sdl2(keymod))),
             &sdl2::event::Event::TextInput { ref text, .. } => {
                 Some(Event::TextInput(text.clone()))
             }
             &sdl2::event::Event::User { .. }
-                if event.as_user_event_type::<ClockTick>()
-                        .is_some() => Some(Event::ClockTick),
+                if event.as_user_event_type::<ClockTick>().is_some() => {
+                Some(Event::ClockTick)
+            }
             _ => None,
         }
     }
@@ -119,12 +121,12 @@ impl KeyMod {
             result |= KeyMod::alt();
         }
 
-        let sdl2_command = if cfg!(any(target_os = "ios",
-                                       target_os = "macos")) {
-            sdl2::keyboard::LGUIMOD | sdl2::keyboard::RGUIMOD
-        } else {
-            sdl2::keyboard::LCTRLMOD | sdl2::keyboard::RCTRLMOD
-        };
+        let sdl2_command =
+            if cfg!(any(target_os = "ios", target_os = "macos")) {
+                sdl2::keyboard::LGUIMOD | sdl2::keyboard::RGUIMOD
+            } else {
+                sdl2::keyboard::LCTRLMOD | sdl2::keyboard::RCTRLMOD
+            };
         if kmod.intersects(sdl2_command) {
             result |= KeyMod::command();
         }
@@ -158,7 +160,7 @@ mod tests {
         assert_eq!(KeyMod::from_sdl2(sdl2::keyboard::RSHIFTMOD),
                    KeyMod::shift());
         assert_eq!(KeyMod::from_sdl2(sdl2::keyboard::LSHIFTMOD |
-                                     sdl2::keyboard::RALTMOD),
+                                         sdl2::keyboard::RALTMOD),
                    KeyMod::alt() | KeyMod::shift());
     }
 

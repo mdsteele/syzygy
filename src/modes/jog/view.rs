@@ -105,14 +105,16 @@ impl Element<Game, PuzzleCmd> for View {
             }
         }
         if (!action.should_stop() && self.remove_countdown == 0 &&
-            !self.grid.is_shifting()) ||
-           event == &Event::ClockTick {
+                !self.grid.is_shifting()) ||
+            event == &Event::ClockTick
+        {
             let subaction = self.next
-                                .handle_event(event, &mut state.next_shape());
+                .handle_event(event, &mut state.next_shape());
             if let Some(&pt) = subaction.value() {
                 let (col, row) = self.grid.coords_for_point(pt);
                 if let Some((symbol, shifts)) =
-                    state.try_place_shape(col, row) {
+                    state.try_place_shape(col, row)
+                {
                     action.also_play_sound(Sound::device_drop());
                     self.grid.place_symbol(symbol);
                     self.grid.shift_tiles(shifts);
@@ -121,8 +123,9 @@ impl Element<Game, PuzzleCmd> for View {
             action.merge(subaction.but_no_value());
         }
         if (!action.should_stop() && self.remove_countdown == 0 &&
-            !self.grid.is_shifting()) ||
-           event == &Event::ClockTick {
+                !self.grid.is_shifting()) ||
+            event == &Event::ClockTick
+        {
             let subaction = self.grid.handle_event(event, state.grid_mut());
             if let Some(&symbol) = subaction.value() {
                 action.also_play_sound(Sound::device_rotate());

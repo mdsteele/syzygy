@@ -101,7 +101,8 @@ impl Grid {
 
     pub fn symbol_at(&self, col: i32, row: i32) -> Option<i8> {
         if (col >= 0 && col < self.num_cols()) &&
-           (row >= 0 && row < self.num_rows()) {
+            (row >= 0 && row < self.num_rows())
+        {
             let value = self.values[row as usize * self.width + col as usize];
             if value == 0 { None } else { Some(value.abs()) }
         } else {
@@ -122,7 +123,8 @@ impl Grid {
             let col = col + shape_col;
             let row = row + shape_row;
             if (col < 0 || col >= self.num_cols()) ||
-               (row < 0 || row >= self.num_rows()) {
+                (row < 0 || row >= self.num_rows())
+            {
                 return false;
             }
             let index = row as usize * self.width + col as usize;

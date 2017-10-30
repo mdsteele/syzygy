@@ -240,8 +240,9 @@ mod tests {
         let mut state = SimpleState::from_toml(toml::Value::Boolean(false));
         state.access = Access::Replaying;
         state.stage = FIRST_STAGE + 1;
-        assert!(state.grid_mut()
-                     .toggle_pipe(Point::new(3, 1), Point::new(4, 1)));
+        assert!(state
+                    .grid_mut()
+                    .toggle_pipe(Point::new(3, 1), Point::new(4, 1)));
 
         let state = SimpleState::from_toml(state.to_toml());
         assert_eq!(state.access, Access::Replaying);

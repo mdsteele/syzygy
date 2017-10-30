@@ -182,7 +182,8 @@ impl Element<Grid, i8> for MemoryGridView {
                     self.tile_shifts.remove(coords);
                 }
                 if self.flip_symbol != 0 &&
-                   self.flip_countdown > -FLIP_COUNTDOWN_MAX {
+                    self.flip_countdown > -FLIP_COUNTDOWN_MAX
+                {
                     let old_offset = self.flip_tile_offset();
                     self.flip_countdown -= 1;
                     let new_offset = self.flip_tile_offset();
@@ -193,8 +194,8 @@ impl Element<Grid, i8> for MemoryGridView {
                 }
                 Action::redraw_if(redraw)
             }
-            &Event::MouseDown(pt) if self.rect.contains(pt) &&
-                                     self.flip_symbol == 0 => {
+            &Event::MouseDown(pt)
+                if self.rect.contains(pt) && self.flip_symbol == 0 => {
                 let pt = pt - self.rect.top_left();
                 let col = pt.x() / 32;
                 let row = pt.y() / 32;

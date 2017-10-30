@@ -97,11 +97,13 @@ mod tests {
 
     #[test]
     fn toml_round_trip() {
-        let all = &[Access::Unvisited,
-                    Access::Unsolved,
-                    Access::Solved,
-                    Access::BeginReplay,
-                    Access::Replaying];
+        let all = &[
+            Access::Unvisited,
+            Access::Unsolved,
+            Access::Solved,
+            Access::BeginReplay,
+            Access::Replaying,
+        ];
         for &original in all.iter() {
             let result = Access::from_toml(original.to_toml());
             assert_eq!(result, original);

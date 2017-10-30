@@ -69,10 +69,13 @@ pub fn to_table(value: toml::Value) -> toml::value::Table {
 pub trait Tomlable {
     fn to_toml(&self) -> toml::Value;
 
-    fn from_toml(value: toml::Value) -> Self where Self: Sized;
+    fn from_toml(value: toml::Value) -> Self
+    where
+        Self: Sized;
 
     fn pop_from_table(table: &mut toml::value::Table, key: &str) -> Self
-        where Self: Sized
+    where
+        Self: Sized,
     {
         let value = table.remove(key).unwrap_or(toml::Value::Boolean(false));
         Self::from_toml(value)
@@ -243,10 +246,8 @@ mod tests {
 
     #[test]
     fn deque_rotation() {
-        let mut deque: VecDeque<i32> = [1, 2, 3, 4, 5]
-            .iter()
-            .cloned()
-            .collect();
+        let mut deque: VecDeque<i32> =
+            [1, 2, 3, 4, 5].iter().cloned().collect();
         rotate_deque(&mut deque, 0);
         assert_eq!(deque.iter().cloned().collect::<Vec<i32>>(),
                    vec![1, 2, 3, 4, 5]);

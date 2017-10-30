@@ -56,16 +56,18 @@ impl Window {
         let (ideal_width, ideal_height) = ideal_size;
         let video_subsystem = sdl_context.video().unwrap();
         let sdl_window = if fullscreen {
-            video_subsystem.window(title, ideal_width, ideal_height)
-                           .position_centered()
-                           .fullscreen_desktop()
-                           .build()
-                           .unwrap()
+            video_subsystem
+                .window(title, ideal_width, ideal_height)
+                .position_centered()
+                .fullscreen_desktop()
+                .build()
+                .unwrap()
         } else {
-            video_subsystem.window(title, ideal_width, ideal_height)
-                           .position_centered()
-                           .build()
-                           .unwrap()
+            video_subsystem
+                .window(title, ideal_width, ideal_height)
+                .position_centered()
+                .build()
+                .unwrap()
         };
         let (actual_width, actual_height) = if force_ideal {
             ideal_size
@@ -83,10 +85,8 @@ impl Window {
                 (ideal_width, actual_height)
             }
         };
-        let mut renderer = sdl_window.renderer()
-                                     .present_vsync()
-                                     .build()
-                                     .unwrap();
+        let mut renderer =
+            sdl_window.renderer().present_vsync().build().unwrap();
         renderer.set_logical_size(actual_width, actual_height).unwrap();
         let offset_x = (actual_width as i32 - full_width as i32) / 2;
         let offset_y = (actual_height as i32 - full_height as i32) / 2;
@@ -126,7 +126,7 @@ impl Window {
 
     pub fn is_fullscreen(&self) -> bool {
         self.renderer.window().unwrap().fullscreen_state() !=
-        FullscreenType::Off
+            FullscreenType::Off
     }
 
     pub fn set_fullscreen(&mut self, fullscreen: bool) {

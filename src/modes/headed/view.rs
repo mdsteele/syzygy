@@ -60,9 +60,10 @@ impl Element<Game, PuzzleCmd> for View {
         let state = &mut game.level_headed;
         let mut action = self.core.handle_event(event, state);
         if !action.should_stop() &&
-           (event == &Event::ClockTick || !state.is_solved()) {
+            (event == &Event::ClockTick || !state.is_solved())
+        {
             let subaction = self.crossword
-                                .handle_event(event, state.crossword_mut());
+                .handle_event(event, state.crossword_mut());
             if let Some(&(row, index, chr)) = subaction.value() {
                 let old_chr = state.crossword().get_char(row, index);
                 state.crossword_mut().set_char(row, index, chr);

@@ -63,23 +63,24 @@ pub enum Ast {
 
 impl Ast {
     pub fn compile_scene(resources: &mut Resources, nodes: Vec<Ast>) -> Scene {
-        Scene::new(nodes.into_iter()
-                        .map(|ast| ast.to_scene_node(resources))
-                        .collect())
+        Scene::new(nodes
+                       .into_iter()
+                       .map(|ast| ast.to_scene_node(resources))
+                       .collect())
     }
 
     fn to_scene_node(self, resources: &mut Resources) -> Box<SceneNode> {
         match self {
             Ast::Seq(asts) => {
                 let nodes = asts.into_iter()
-                                .map(|ast| ast.to_scene_node(resources))
-                                .collect();
+                    .map(|ast| ast.to_scene_node(resources))
+                    .collect();
                 Box::new(SequenceNode::new(nodes))
             }
             Ast::Par(asts) => {
                 let nodes = asts.into_iter()
-                                .map(|ast| ast.to_scene_node(resources))
-                                .collect();
+                    .map(|ast| ast.to_scene_node(resources))
+                    .collect();
                 Box::new(ParallelNode::new(nodes))
             }
             Ast::Loop(min, max, ast) => {

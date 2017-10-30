@@ -58,62 +58,74 @@ pub struct View {
 impl View {
     pub fn new(resources: &mut Resources, visible: Rect) -> View {
         let spacing = (visible.width() as i32 - 2 * BOTTOM_BUTTONS_MARGIN -
-                       FULLSCREEN_BUTTON_WIDTH as i32 -
-                       ABOUT_BUTTON_WIDTH as i32 -
-                       ERASE_BUTTON_WIDTH as i32 -
-                       QUIT_BUTTON_WIDTH as i32) / 3;
+                           FULLSCREEN_BUTTON_WIDTH as i32 -
+                           ABOUT_BUTTON_WIDTH as i32 -
+                           ERASE_BUTTON_WIDTH as i32 -
+                           QUIT_BUTTON_WIDTH as i32) / 3;
         let mut elements: Vec<Box<Element<SaveData, Cmd>>> = vec![];
         elements.push(Box::new({
-            let mut rect =
-                Rect::new(0, 0, START_BUTTON_WIDTH, START_BUTTON_HEIGHT);
-            rect.center_on(visible.center());
-            rect.offset(0, 35);
-            StartGameButton::new(resources, rect)
-        }));
+                                   let mut rect =
+                                       Rect::new(0,
+                                                 0,
+                                                 START_BUTTON_WIDTH,
+                                                 START_BUTTON_HEIGHT);
+                                   rect.center_on(visible.center());
+                                   rect.offset(0, 35);
+                                   StartGameButton::new(resources, rect)
+                               }));
         if !cfg!(any(target_os = "android", target_os = "ios")) {
             elements.push(Box::new({
                 let rect = Rect::new(visible.left() + BOTTOM_BUTTONS_MARGIN,
                                      visible.bottom() -
-                                     BOTTOM_BUTTONS_HEIGHT as i32 -
-                                     BOTTOM_BUTTONS_MARGIN,
+                                         BOTTOM_BUTTONS_HEIGHT as i32 -
+                                         BOTTOM_BUTTONS_MARGIN,
                                      FULLSCREEN_BUTTON_WIDTH,
                                      BOTTOM_BUTTONS_HEIGHT);
                 FullscreenButton::new(resources, rect)
             }));
             elements.push(Box::new({
                 let rect = Rect::new(visible.right() - BOTTOM_BUTTONS_MARGIN -
-                                     QUIT_BUTTON_WIDTH as i32,
+                                         QUIT_BUTTON_WIDTH as i32,
                                      visible.bottom() -
-                                     BOTTOM_BUTTONS_HEIGHT as i32 -
-                                     BOTTOM_BUTTONS_MARGIN,
+                                         BOTTOM_BUTTONS_HEIGHT as i32 -
+                                         BOTTOM_BUTTONS_MARGIN,
                                      QUIT_BUTTON_WIDTH,
                                      BOTTOM_BUTTONS_HEIGHT);
                 QuitButton::new(resources, rect)
             }));
         }
         elements.push(Box::new({
-            let rect = Rect::new(visible.left() + BOTTOM_BUTTONS_MARGIN +
-                                 FULLSCREEN_BUTTON_WIDTH as i32 +
-                                 spacing,
-                                 visible.bottom() -
-                                 BOTTOM_BUTTONS_HEIGHT as i32 -
-                                 BOTTOM_BUTTONS_MARGIN,
-                                 ABOUT_BUTTON_WIDTH,
-                                 BOTTOM_BUTTONS_HEIGHT);
-            AboutButton::new(resources, rect)
-        }));
+                                   let rect =
+                                       Rect::new(visible.left() +
+                                                     BOTTOM_BUTTONS_MARGIN +
+                                                     FULLSCREEN_BUTTON_WIDTH as
+                                                         i32 +
+                                                     spacing,
+                                                 visible.bottom() -
+                                                     BOTTOM_BUTTONS_HEIGHT as
+                                                         i32 -
+                                                     BOTTOM_BUTTONS_MARGIN,
+                                                 ABOUT_BUTTON_WIDTH,
+                                                 BOTTOM_BUTTONS_HEIGHT);
+                                   AboutButton::new(resources, rect)
+                               }));
         elements.push(Box::new({
-            let rect = Rect::new(visible.left() + BOTTOM_BUTTONS_MARGIN +
-                                 FULLSCREEN_BUTTON_WIDTH as i32 +
-                                 ABOUT_BUTTON_WIDTH as i32 +
-                                 2 * spacing,
-                                 visible.bottom() -
-                                 BOTTOM_BUTTONS_HEIGHT as i32 -
-                                 BOTTOM_BUTTONS_MARGIN,
-                                 ERASE_BUTTON_WIDTH,
-                                 BOTTOM_BUTTONS_HEIGHT);
-            EraseGameButton::new(resources, rect)
-        }));
+                                   let rect =
+                                       Rect::new(visible.left() +
+                                                     BOTTOM_BUTTONS_MARGIN +
+                                                     FULLSCREEN_BUTTON_WIDTH as
+                                                         i32 +
+                                                     ABOUT_BUTTON_WIDTH as
+                                                         i32 +
+                                                     2 * spacing,
+                                                 visible.bottom() -
+                                                     BOTTOM_BUTTONS_HEIGHT as
+                                                         i32 -
+                                                     BOTTOM_BUTTONS_MARGIN,
+                                                 ERASE_BUTTON_WIDTH,
+                                                 BOTTOM_BUTTONS_HEIGHT);
+                                   EraseGameButton::new(resources, rect)
+                               }));
         View {
             screen_fade: ScreenFade::new(resources, FadeStyle::Uniform),
             elements: GroupElement::new(elements),
@@ -262,8 +274,8 @@ impl Element<SaveData, Cmd> for EraseGameButton {
     fn handle_event(&mut self, event: &Event, data: &mut SaveData)
                     -> Action<Cmd> {
         match event {
-            &Event::MouseDown(pt) if self.rect.contains(pt) &&
-                                     data.game().is_some() => {
+            &Event::MouseDown(pt)
+                if self.rect.contains(pt) && data.game().is_some() => {
                 Action::redraw()
                     .and_play_sound(Sound::beep())
                     .and_return(Cmd::EraseGame)
@@ -292,10 +304,8 @@ impl AboutButton {
 impl Element<SaveData, Cmd> for AboutButton {
     fn draw(&self, _: &SaveData, canvas: &mut Canvas) {
         canvas.fill_rect((200, 200, 200), self.rect);
-        canvas.draw_text(&self.font,
-                         Align::Center,
-                         self.rect.center(),
-                         "About");
+        canvas
+            .draw_text(&self.font, Align::Center, self.rect.center(), "About");
     }
 
     fn handle_event(&mut self, event: &Event, _data: &mut SaveData)
@@ -328,10 +338,8 @@ impl QuitButton {
 impl Element<SaveData, Cmd> for QuitButton {
     fn draw(&self, _: &SaveData, canvas: &mut Canvas) {
         canvas.fill_rect((200, 200, 200), self.rect);
-        canvas.draw_text(&self.font,
-                         Align::Center,
-                         self.rect.center(),
-                         "Quit");
+        canvas
+            .draw_text(&self.font, Align::Center, self.rect.center(), "Quit");
     }
 
     fn handle_event(&mut self, event: &Event, _data: &mut SaveData)
@@ -375,8 +383,8 @@ impl<'a> ConfirmEraseView<'a> {
                title_view: &'a View)
                -> ConfirmEraseView<'a> {
         let text = "Really erase game data?\nAll progress will be lost!";
-        let buttons = vec![("Cancel".to_string(), false),
-                           ("Erase".to_string(), true)];
+        let buttons =
+            vec![("Cancel".to_string(), false), ("Erase".to_string(), true)];
         let dialog = DialogBox::new(resources, visible, text, buttons);
         ConfirmEraseView {
             title_view: title_view,

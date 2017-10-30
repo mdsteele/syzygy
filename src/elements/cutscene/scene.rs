@@ -107,7 +107,7 @@ impl Scene {
 
     pub fn is_paused(&self) -> bool {
         self.index < self.nodes.len() &&
-        self.nodes[self.index].status() == Status::Paused
+            self.nodes[self.index].status() == Status::Paused
     }
 
     pub fn unpause(&mut self) {
@@ -280,7 +280,7 @@ impl SceneNode for SequenceNode {
                 self.index += 1;
                 if self.index < self.nodes.len() {
                     let pause = self.terminated_by_pause &&
-                                self.on_last_node();
+                        self.on_last_node();
                     self.nodes[self.index].begin(theater, pause);
                     changed = true;
                 } else {
@@ -432,11 +432,13 @@ impl SceneNode for LoopNode {
             changed |= self.node.tick(theater, false);
             if self.node.status() == Status::Done {
                 if self.iteration < self.min_iterations ||
-                   self.max_iterations.is_some() {
+                    self.max_iterations.is_some()
+                {
                     self.iteration += 1;
                 }
                 if self.iteration < self.min_iterations ||
-                   (keep_twiddling && self.can_continue()) {
+                    (keep_twiddling && self.can_continue())
+                {
                     self.node.reset();
                     self.node.begin(theater, false);
                     changed = true;
@@ -564,8 +566,8 @@ impl SceneNode for JumpNode {
             let delta = self.end - self.start;
             let dx = delta.x() as f64 * frac;
             let dy = delta.y() as f64 * frac -
-                     0.5 * GRAVITY * frames_to_seconds(self.progress) *
-                     frames_to_seconds(self.duration - self.progress);
+                0.5 * GRAVITY * frames_to_seconds(self.progress) *
+                    frames_to_seconds(self.duration - self.progress);
             let delta = Point::new(dx.round() as i32, dy.round() as i32);
             theater.set_actor_position(self.slot, self.start + delta);
             true

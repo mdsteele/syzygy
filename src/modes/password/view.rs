@@ -22,8 +22,8 @@ use std::rc::Rc;
 
 use elements::{CrosswordView, Paragraph, PuzzleCmd, PuzzleCore, PuzzleView,
                TalkPos};
-use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
-          Sound, Sprite};
+use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
+          Resources, Sound, Sprite};
 use modes::SOLVED_INFO_TEXT;
 use save::{Game, PasswordState, PuzzleState};
 use super::scenes;
@@ -60,36 +60,40 @@ impl View {
         let mut view = View {
             core: core,
             speech_bubble: resources.get_sprites("speech/normal"),
-            paragraphs: [make_speech(resources, TalkPos::E, ELINSA_SPEECH),
-                         make_speech(resources, TalkPos::W, ARGONY_SPEECH),
-                         make_speech(resources, TalkPos::NE, MEZURE_SPEECH),
-                         make_speech(resources, TalkPos::NW, YTTRIS_SPEECH),
-                         make_speech(resources, TalkPos::E, UGRENT_SPEECH),
-                         make_speech(resources, TalkPos::W, RELYNG_SPEECH)],
-            crosswords: [CrosswordView::new(resources,
-                                            (264, 116),
-                                            ELINSA_OFFS,
-                                            (264, 80)),
-                         CrosswordView::new(resources,
-                                            (264, 116),
-                                            ARGONY_OFFS,
-                                            (264, 80)),
-                         CrosswordView::new(resources,
-                                            (276, 116),
-                                            MEZURE_OFFS,
-                                            (276, 80)),
-                         CrosswordView::new(resources,
-                                            (276, 116),
-                                            YTTRIS_OFFS,
-                                            (276, 80)),
-                         CrosswordView::new(resources,
-                                            (212, 116),
-                                            UGRENT_OFFS,
-                                            (212, 80)),
-                         CrosswordView::new(resources,
-                                            (276, 116),
-                                            RELYNG_OFFS,
-                                            (276, 80))],
+            paragraphs: [
+                make_speech(resources, TalkPos::E, ELINSA_SPEECH),
+                make_speech(resources, TalkPos::W, ARGONY_SPEECH),
+                make_speech(resources, TalkPos::NE, MEZURE_SPEECH),
+                make_speech(resources, TalkPos::NW, YTTRIS_SPEECH),
+                make_speech(resources, TalkPos::E, UGRENT_SPEECH),
+                make_speech(resources, TalkPos::W, RELYNG_SPEECH),
+            ],
+            crosswords: [
+                CrosswordView::new(resources,
+                                   (264, 116),
+                                   ELINSA_OFFS,
+                                   (264, 80)),
+                CrosswordView::new(resources,
+                                   (264, 116),
+                                   ARGONY_OFFS,
+                                   (264, 80)),
+                CrosswordView::new(resources,
+                                   (276, 116),
+                                   MEZURE_OFFS,
+                                   (276, 80)),
+                CrosswordView::new(resources,
+                                   (276, 116),
+                                   YTTRIS_OFFS,
+                                   (276, 80)),
+                CrosswordView::new(resources,
+                                   (212, 116),
+                                   UGRENT_OFFS,
+                                   (212, 80)),
+                CrosswordView::new(resources,
+                                   (276, 116),
+                                   RELYNG_OFFS,
+                                   (276, 80)),
+            ],
             slider: PasswordSlider::new(resources),
             show_words: false,
             should_display_speech: false,
@@ -171,14 +175,15 @@ impl Element<Game, PuzzleCmd> for View {
             } else {
                 let idx = state.active_index();
                 if event == &Event::ClockTick ||
-                   !state.crossword_is_done(idx) {
+                    !state.crossword_is_done(idx)
+                {
                     let subaction = {
                         let crossword = state.crossword_mut(idx);
                         self.crosswords[idx].handle_event(event, crossword)
                     };
                     if let Some(&(row, index, chr)) = subaction.value() {
-                        let old_chr = state.crossword(idx)
-                                           .get_char(row, index);
+                        let old_chr =
+                            state.crossword(idx).get_char(row, index);
                         state.crossword_mut(idx).set_char(row, index, chr);
                         if state.check_crossword(idx) {
                             self.crosswords[idx].reset_cursor();
@@ -301,8 +306,8 @@ const BOX_USIZE: u32 = 24;
 const BOX_SIZE: i32 = BOX_USIZE as i32;
 const SLIDER_LEFT: i32 = 216;
 const SLIDER_TOP: i32 = 178;
-const SLIDER_WORDS: [&str; 6] = ["ELINSA", "ARGONY", "MEZURE", "YTTRIS",
-                                 "UGRENT", "RELYNG"];
+const SLIDER_WORDS: [&str; 6] =
+    ["ELINSA", "ARGONY", "MEZURE", "YTTRIS", "UGRENT", "RELYNG"];
 
 struct SliderDrag {
     col: i32,
@@ -384,10 +389,10 @@ impl Element<PasswordState, (i32, i32)> for PasswordSlider {
                 for col in 0..6 {
                     if self.get_slider_rect(state, col).contains(pt) {
                         self.drag = Some(SliderDrag {
-                            col: col,
-                            from_y: pt.y(),
-                            to_y: pt.y(),
-                        });
+                                             col: col,
+                                             from_y: pt.y(),
+                                             to_y: pt.y(),
+                                         });
                         return Action::redraw();
                     }
                 }
@@ -402,9 +407,8 @@ impl Element<PasswordState, (i32, i32)> for PasswordSlider {
                 if let Some(drag) = self.drag.take() {
                     let old_offset = state.get_slider_offset(drag.col);
                     let delta = ((drag.to_y - drag.from_y) as f64 /
-                                 BOX_SIZE as f64)
-                                    .round() as
-                                i32;
+                                     BOX_SIZE as f64)
+                        .round() as i32;
                     let new_offset = max(-5, min(0, old_offset + delta));
                     return Action::redraw().and_return((drag.col, new_offset));
                 }
@@ -441,18 +445,18 @@ fn make_speech(resources: &mut Resources, pos: TalkPos, text: &str)
     (Rc::new(Paragraph::new(resources, "roman", Align::Center, text)), pos)
 }
 
-const ELINSA_OFFS: &[(i32, &str)] = &[(5, ""), (5, ""), (5, ""), (6, ""),
-                                      (2, ""), (4, "")];
-const ARGONY_OFFS: &[(i32, &str)] = &[(5, ""), (2, ""), (7, ""), (4, ""),
-                                      (7, ""), (6, "")];
-const MEZURE_OFFS: &[(i32, &str)] = &[(5, ""), (1, ""), (6, ""), (1, ""),
-                                      (5, ""), (4, "")];
-const YTTRIS_OFFS: &[(i32, &str)] = &[(5, ""), (3, ""), (4, ""), (3, ""),
-                                      (5, ""), (4, "")];
-const UGRENT_OFFS: &[(i32, &str)] = &[(2, ""), (0, ""), (1, ""), (1, ""),
-                                      (2, ""), (2, "")];
-const RELYNG_OFFS: &[(i32, &str)] = &[(0, ""), (2, ""), (4, ""), (6, ""),
-                                      (7, ""), (7, "")];
+const ELINSA_OFFS: &[(i32, &str)] =
+    &[(5, ""), (5, ""), (5, ""), (6, ""), (2, ""), (4, "")];
+const ARGONY_OFFS: &[(i32, &str)] =
+    &[(5, ""), (2, ""), (7, ""), (4, ""), (7, ""), (6, "")];
+const MEZURE_OFFS: &[(i32, &str)] =
+    &[(5, ""), (1, ""), (6, ""), (1, ""), (5, ""), (4, "")];
+const YTTRIS_OFFS: &[(i32, &str)] =
+    &[(5, ""), (3, ""), (4, ""), (3, ""), (5, ""), (4, "")];
+const UGRENT_OFFS: &[(i32, &str)] =
+    &[(2, ""), (0, ""), (1, ""), (1, ""), (2, ""), (2, "")];
+const RELYNG_OFFS: &[(i32, &str)] =
+    &[(0, ""), (2, ""), (4, ""), (6, ""), (7, ""), (7, "")];
 
 const CROSSWORDS_INFO_BOX_TEXT: &str = "\
 Your goal is to fill in all six crosswords.

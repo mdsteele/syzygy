@@ -265,16 +265,18 @@ impl Element<LineState, ()> for LetterGrid {
 
 // ========================================================================= //
 
-const FILTER: &[(bool, bool)] = &[(true, false),
-                                  (false, false),
-                                  (true, false),
-                                  (false, true),
-                                  (true, true),
-                                  (false, false),
-                                  (false, true),
-                                  (false, false),
-                                  (true, false),
-                                  (false, true)];
+const FILTER: &[(bool, bool)] = &[
+    (true, false),
+    (false, false),
+    (true, false),
+    (false, true),
+    (true, true),
+    (false, false),
+    (false, true),
+    (false, false),
+    (true, false),
+    (false, true),
+];
 
 struct AnswersDisplay {
     left: i32,

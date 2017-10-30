@@ -101,9 +101,9 @@ impl Tomlable for TheYState {
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.is_solved() && !self.sequence.is_empty() {
             let seq = self.sequence
-                          .iter()
-                          .map(|&idx| toml::Value::Integer(idx as i64))
-                          .collect();
+                .iter()
+                .map(|&idx| toml::Value::Integer(idx as i64))
+                .collect();
             table.insert(SEQUENCE_KEY.to_string(), toml::Value::Array(seq));
         }
         toml::Value::Table(table)
@@ -195,8 +195,8 @@ mod tests {
 
     use save::Access;
     use save::util::{ACCESS_KEY, Tomlable};
-    use super::{INITIAL_LETTERS, SEQUENCE_KEY, SOLVED_LETTERS, SOLVED_SEQUENCE,
-                TheYState, apply_transformation};
+    use super::{INITIAL_LETTERS, SEQUENCE_KEY, SOLVED_LETTERS,
+                SOLVED_SEQUENCE, TheYState, apply_transformation};
 
     #[test]
     fn transform_letters() {
@@ -254,10 +254,14 @@ mod tests {
     #[test]
     fn from_valid_sequence_toml() {
         let mut table = toml::value::Table::new();
-        table.insert(SEQUENCE_KEY.to_string(),
-                     toml::Value::Array(vec![toml::Value::Integer(1),
-                                             toml::Value::Integer(2),
-                                             toml::Value::Integer(3)]));
+        table.insert(
+            SEQUENCE_KEY.to_string(),
+            toml::Value::Array(vec![
+                toml::Value::Integer(1),
+                toml::Value::Integer(2),
+                toml::Value::Integer(3),
+            ]),
+        );
         let state = TheYState::from_toml(toml::Value::Table(table));
         assert_eq!(state.sequence, vec![1, 2, 3]);
     }

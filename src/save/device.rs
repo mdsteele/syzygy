@@ -75,7 +75,8 @@ impl DeviceGrid {
             let col = coords[0];
             let row = coords[1];
             if (col < 0 || col >= grid.num_cols) ||
-               (row < 0 || row >= grid.num_rows) {
+                (row < 0 || row >= grid.num_rows)
+            {
                 return default.clone();
             }
             let index = (row * grid.num_cols + col) as usize;
@@ -180,10 +181,11 @@ impl DeviceGrid {
                    to_row: i32)
                    -> bool {
         if (from_col >= 0 && from_col < self.num_cols) &&
-           (from_row >= 0 && from_row < self.num_rows) &&
-           (to_col >= 0 && to_col < self.num_cols) &&
-           (to_row >= 0 && to_row < self.num_rows) &&
-           (from_col != to_col || from_row != to_row) {
+            (from_row >= 0 && from_row < self.num_rows) &&
+            (to_col >= 0 && to_col < self.num_cols) &&
+            (to_row >= 0 && to_row < self.num_rows) &&
+            (from_col != to_col || from_row != to_row)
+        {
             let from = (from_row * self.num_cols + from_col) as usize;
             let to = (to_row * self.num_cols + to_col) as usize;
             if let Some((dev1, dir1)) = self.grid[from] {
@@ -235,12 +237,14 @@ impl Device {
 
     #[cfg(test)]
     pub fn all() -> Vec<Device> {
-        let mut devices = vec![Device::Wall,
-                               Device::Channel,
-                               Device::CrossChannel,
-                               Device::Mirror,
-                               Device::Splitter,
-                               Device::Mixer];
+        let mut devices = vec![
+            Device::Wall,
+            Device::Channel,
+            Device::CrossChannel,
+            Device::Mirror,
+            Device::Splitter,
+            Device::Mixer,
+        ];
         for color in MixedColor::all() {
             devices.push(Device::Emitter(color));
             devices.push(Device::Detector(color));

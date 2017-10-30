@@ -52,14 +52,16 @@ impl View {
                                          (224, 144),
                                          "ACHTUNG!",
                                          "DAS BLINKENLICHTEN"),
-            blinkenlights: vec![Blinkenlight::new(resources, 176, 112, 0),
-                                Blinkenlight::new(resources, 176, 144, 3),
-                                Blinkenlight::new(resources, 176, 160, 2),
-                                Blinkenlight::new(resources, 176, 192, 1),
-                                Blinkenlight::new(resources, 336, 112, 1),
-                                Blinkenlight::new(resources, 336, 144, 2),
-                                Blinkenlight::new(resources, 336, 160, 3),
-                                Blinkenlight::new(resources, 336, 192, 0)],
+            blinkenlights: vec![
+                Blinkenlight::new(resources, 176, 112, 0),
+                Blinkenlight::new(resources, 176, 144, 3),
+                Blinkenlight::new(resources, 176, 160, 2),
+                Blinkenlight::new(resources, 176, 192, 1),
+                Blinkenlight::new(resources, 336, 112, 1),
+                Blinkenlight::new(resources, 336, 144, 2),
+                Blinkenlight::new(resources, 336, 160, 3),
+                Blinkenlight::new(resources, 336, 192, 0),
+            ],
             box_open: false,
         }
     }
@@ -84,9 +86,10 @@ impl Element<Game, PuzzleCmd> for View {
         let state = &mut game.missed_connections;
         let mut action = self.core.handle_event(event, state);
         if !action.should_stop() && self.box_open &&
-           (event == &Event::ClockTick || !state.is_solved()) {
+            (event == &Event::ClockTick || !state.is_solved())
+        {
             let subaction = self.laser_field
-                                .handle_event(event, state.grid_mut());
+                .handle_event(event, state.grid_mut());
             if let Some(&cmd) = subaction.value() {
                 if self.laser_field.all_detectors_satisfied(state.grid()) {
                     state.mark_solved();

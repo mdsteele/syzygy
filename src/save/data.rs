@@ -50,8 +50,10 @@ impl SaveData {
 
     fn from_toml(path: PathBuf, mut table: toml::value::Table) -> SaveData {
         let mut data = SaveData::new(path);
-        if let Some(prefs) = table.get(PREFS_KEY)
-                                  .and_then(toml::Value::as_table) {
+        if let Some(prefs) = table
+            .get(PREFS_KEY)
+            .and_then(toml::Value::as_table)
+        {
             data.prefs = Prefs::from_toml(prefs);
         }
         if let Some(game) = table.remove(GAME_KEY) {
@@ -71,9 +73,9 @@ impl SaveData {
 
     pub fn save_to_disk(&mut self) -> io::Result<()> {
         let string = self.to_toml().to_string();
-        try!(fs::create_dir_all(self.path.parent().unwrap()));
-        let mut file = try!(fs::File::create(&self.path));
-        try!(file.write_all(string.as_bytes()));
+        fs::create_dir_all(self.path.parent().unwrap())?;
+        let mut file = fs::File::create(&self.path)?;
+        file.write_all(string.as_bytes())?;
         if cfg!(debug_assertions) {
             println!("Saved game to disk.");
         }
@@ -81,9 +83,9 @@ impl SaveData {
     }
 
     fn load_from_disk(path: PathBuf) -> io::Result<SaveData> {
-        let mut file = try!(fs::File::open(&path));
+        let mut file = fs::File::open(&path)?;
         let mut string = String::new();
-        try!(file.read_to_string(&mut string));
+        file.read_to_string(&mut string)?;
         match string.parse::<toml::Value>() {
             Ok(value) => Ok(SaveData::from_toml(path, to_table(value))),
             Err(_) => {
@@ -98,7 +100,7 @@ impl SaveData {
             SaveData::load_from_disk(path)
         } else {
             let mut data = SaveData::new(path);
-            try!(data.save_to_disk());
+            data.save_to_disk()?;
             Ok(data)
         }
     }

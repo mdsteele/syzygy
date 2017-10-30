@@ -30,8 +30,10 @@ impl Prefs {
 
     pub fn from_toml(table: &toml::value::Table) -> Prefs {
         let mut prefs = Prefs::with_defaults();
-        if let Some(fullscreen) = table.get(FULLSCREEN_KEY)
-                                       .and_then(toml::Value::as_bool) {
+        if let Some(fullscreen) = table
+            .get(FULLSCREEN_KEY)
+            .and_then(toml::Value::as_bool)
+        {
             prefs.fullscreen = fullscreen;
         }
         prefs

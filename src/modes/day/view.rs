@@ -59,7 +59,7 @@ impl Element<Game, PuzzleCmd> for View {
         let mut action = self.core.handle_event(event, state);
         if !action.should_stop() && !state.is_solved() {
             let mut subaction = self.grid
-                                    .handle_event(event, state.grid_mut());
+                .handle_event(event, state.grid_mut());
             match subaction.take_value() {
                 Some(PlaneCmd::Changed) => {
                     if state.advance_stage_if_done() {

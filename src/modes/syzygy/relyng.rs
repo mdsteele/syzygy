@@ -20,8 +20,8 @@
 use std::cmp;
 use std::rc::Rc;
 
-use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
-          Sprite};
+use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
+          Resources, Sprite};
 use save::SyzygyState;
 
 // ========================================================================= //

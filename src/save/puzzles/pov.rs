@@ -148,9 +148,10 @@ impl PovState {
 
     pub fn move_tile(&mut self, from: (i32, i32), to: (i32, i32)) -> bool {
         if (from.0 < 0 || from.0 >= NUM_COLS) ||
-           (from.1 < 0 || from.1 >= NUM_ROWS) ||
-           (to.0 < 0 || to.0 >= NUM_COLS) ||
-           (to.1 < 0 || to.1 >= NUM_ROWS) {
+            (from.1 < 0 || from.1 >= NUM_ROWS) ||
+            (to.0 < 0 || to.0 >= NUM_COLS) ||
+            (to.1 < 0 || to.1 >= NUM_ROWS)
+        {
             return false;
         }
         if let Some(tile1) = self.grid.remove(&from) {
@@ -167,7 +168,8 @@ impl PovState {
 
     pub fn rotate_tile(&mut self, coords: (i32, i32), by: i32) -> bool {
         if (coords.0 < 0 || coords.0 >= NUM_COLS) ||
-           (coords.1 < 0 || coords.1 >= NUM_ROWS) {
+            (coords.1 < 0 || coords.1 >= NUM_ROWS)
+        {
             return false;
         }
         if let Some(tile) = self.grid.get_mut(&coords) {
@@ -277,7 +279,8 @@ impl Tomlable for PovState {
             let mut grid = HashMap::new();
             for entry in Vec::<Vec<i32>>::pop_from_table(&mut table,
                                                          GRID_KEY)
-                             .into_iter() {
+                .into_iter()
+            {
                 if entry.len() != 6 {
                     continue;
                 }

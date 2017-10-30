@@ -25,8 +25,8 @@ use elements::{PuzzleCmd, PuzzleCore, PuzzleView, Scene};
 use elements::cutscene::{JumpNode, QueueNode, SceneNode, SequenceNode,
                          SetPosNode, ShakeNode, SlideNode, SoundNode};
 use elements::cutscene::WaitNode;
-use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
-          Sound, Sprite};
+use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
+          Resources, Sound, Sprite};
 use modes::SOLVED_INFO_TEXT;
 use save::{Game, NoReturnState, PuzzleState};
 use super::scenes::{self, YTTRIS};
@@ -162,7 +162,7 @@ impl Element<Game, PuzzleCmd> for View {
         }
         if !action.should_stop() {
             let subaction = self.animation
-                                .handle_event(event, self.core.theater_mut());
+                .handle_event(event, self.core.theater_mut());
             action.merge(subaction.but_no_value());
             self.drain_queue();
             if self.animation.is_finished() {
@@ -173,7 +173,8 @@ impl Element<Game, PuzzleCmd> for View {
             }
         }
         if !action.should_stop() &&
-           (!self.running || event == &Event::ClockTick) {
+            (!self.running || event == &Event::ClockTick)
+        {
             let subaction = self.bridge.handle_event(event, state);
             if let Some(&(old_index, new_index)) = subaction.value() {
                 state.move_tile(old_index, new_index);
@@ -410,7 +411,8 @@ impl TileDrag {
         let tile_width = self.tile_spans[self.index].1 as i32;
         let new_col = cmp::min(cmp::max(0,
                                         self.new_col +
-                                        (self.to - self.from) / TILE_SIZE),
+                                            (self.to - self.from) /
+                                                TILE_SIZE),
                                self.num_cols);
         let mut new_index: usize = 0;
         for &(start_col, _) in self.tile_spans.iter() {
@@ -429,7 +431,8 @@ impl TileDrag {
             self.new_col = new_col;
             let old_index = self.index;
             for (index, &mut (_, ref mut goal)) in
-                self.offsets.iter_mut().enumerate() {
+                self.offsets.iter_mut().enumerate()
+            {
                 *goal = if index < old_index && index >= new_index {
                     TILE_SIZE * tile_width
                 } else if index > old_index && index <= new_index {
@@ -441,7 +444,7 @@ impl TileDrag {
         }
         let old_col = self.tile_spans[self.index].0;
         let offset = (self.new_col - old_col) * TILE_SIZE + self.to -
-                     self.from;
+            self.from;
         self.offsets[self.index] = (offset, offset);
     }
 
@@ -487,8 +490,8 @@ impl StartStopButton {
 impl Element<(bool, Point), bool> for StartStopButton {
     fn draw(&self, input: &(bool, Point), canvas: &mut Canvas) {
         let index = if input.0 { 0 } else { 1 };
-        canvas.draw_sprite(&self.sprites[index],
-                           self.rect.top_left() + input.1);
+        canvas
+            .draw_sprite(&self.sprites[index], self.rect.top_left() + input.1);
     }
 
     fn handle_event(&mut self, event: &Event, input: &mut (bool, Point))

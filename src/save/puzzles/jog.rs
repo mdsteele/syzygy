@@ -97,9 +97,9 @@ impl JogState {
         }
     }
 
-    pub fn try_place_shape
-        (&mut self, col: i32, row: i32)
-         -> Option<(i8, HashMap<(i32, i32), (i32, i32)>)> {
+    pub fn try_place_shape(
+        &mut self, col: i32, row: i32)
+        -> Option<(i8, HashMap<(i32, i32), (i32, i32)>)> {
         if let Some(shape) = self.next_shape() {
             if self.grid.try_place_shape(&shape, col, row) {
                 for &(symbol, num) in SHAPES[self.num_placed].1 {
@@ -223,9 +223,10 @@ mod tests {
         for &(ref shape, decay, _) in SHAPES.iter() {
             let add_symbol = shape.symbol().unwrap();
             assert!((add_symbol as i32) <= NUM_SYMBOLS);
-            assert_eq!(num_symbols_in_use.get(&add_symbol)
-                                         .cloned()
-                                         .unwrap_or(0),
+            assert_eq!(num_symbols_in_use
+                           .get(&add_symbol)
+                           .cloned()
+                           .unwrap_or(0),
                        0);
             for &(symbol, _) in decay {
                 assert!(symbol != add_symbol,

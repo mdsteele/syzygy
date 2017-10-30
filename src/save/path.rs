@@ -30,7 +30,7 @@ const APP_INFO: AppInfo = AppInfo {
 
 pub fn get_default_save_file_path() -> io::Result<PathBuf> {
     let mut path = match app_dirs::app_root(AppDataType::UserData,
-                                            &APP_INFO) {
+                                              &APP_INFO) {
         Ok(path) => path,
         Err(AppDirsError::Io(error)) => return Err(error),
         Err(AppDirsError::NotSupported) => {

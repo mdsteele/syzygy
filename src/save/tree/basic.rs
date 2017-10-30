@@ -842,9 +842,9 @@ mod tests {
 
     #[test]
     fn from_invalid_signature_with_loop() {
-        let tree = BasicTree::from_signature(vec![(1, 1, false),
-                                                  (2, 3, true),
-                                                  (3, 2, true)]);
+        let tree = BasicTree::from_signature(
+            vec![(1, 1, false), (2, 3, true), (3, 2, true)],
+        );
         assert_eq!(tree.len(), 0);
     }
 }

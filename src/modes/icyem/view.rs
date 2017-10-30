@@ -59,7 +59,7 @@ impl Element<Game, PuzzleCmd> for View {
         let mut action = self.core.handle_event(event, state);
         if !action.should_stop() {
             let subaction = self.columns
-                                .handle_event(event, state.columns_mut());
+                .handle_event(event, state.columns_mut());
             if let Some(&(col, by)) = subaction.value() {
                 state.rotate_column(col, by);
                 if state.is_solved() {

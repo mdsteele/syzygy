@@ -49,12 +49,13 @@ impl Sprite {
                                          height,
                                          width * bytes_per_pixel,
                                          format)
-                          .unwrap();
+            .unwrap();
         Sprite {
             width: width,
             height: height,
-            texture: Rc::new(renderer.create_texture_from_surface(&surface)
-                                     .unwrap()),
+            texture: Rc::new(renderer
+                                 .create_texture_from_surface(&surface)
+                                 .unwrap()),
         }
     }
 

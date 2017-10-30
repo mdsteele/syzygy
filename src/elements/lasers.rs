@@ -314,7 +314,8 @@ impl LaserField {
                     } else {
                         self.lasers.insert((next, anti_dir), (color, 3));
                         if let Some(&(other, _)) =
-                            self.lasers.get(&(next, laser_dir)) {
+                            self.lasers.get(&(next, laser_dir))
+                        {
                             let output = mixer_output(color, other);
                             self.lasers.insert((next, mixer_dir), (output, 3));
                             self.sparks.remove(&(next, mixer_dir));
@@ -335,9 +336,9 @@ impl LaserField {
                 if let Some((device, dir)) = grid.get(col, row) {
                     if !device.is_moveable() {
                         let pt = Point::new(col * GRID_CELL_SIZE +
-                                            GRID_CELL_SIZE / 2,
+                                                GRID_CELL_SIZE / 2,
                                             row * GRID_CELL_SIZE +
-                                            GRID_CELL_SIZE / 2);
+                                                GRID_CELL_SIZE / 2);
                         self.draw_device_bg(&mut canvas, pt, device, dir);
                     }
                 }
@@ -352,16 +353,17 @@ impl LaserField {
             for col in 0..num_cols {
                 if let Some(ref drag) = self.drag {
                     if drag.from_pt != drag.to_pt && row == drag.from_row &&
-                       col == drag.from_col {
+                        col == drag.from_col
+                    {
                         continue;
                     }
                 }
                 if let Some((device, dir)) = grid.get(col, row) {
                     if device.is_moveable() {
                         let pt = Point::new(col * GRID_CELL_SIZE +
-                                            GRID_CELL_SIZE / 2,
+                                                GRID_CELL_SIZE / 2,
                                             row * GRID_CELL_SIZE +
-                                            GRID_CELL_SIZE / 2);
+                                                GRID_CELL_SIZE / 2);
                         self.draw_device_bg(&mut canvas, pt, device, dir);
                     }
                 }
@@ -376,16 +378,17 @@ impl LaserField {
             for col in 0..num_cols {
                 if let Some(ref drag) = self.drag {
                     if drag.from_pt != drag.to_pt && row == drag.from_row &&
-                       col == drag.from_col {
+                        col == drag.from_col
+                    {
                         continue;
                     }
                 }
                 if let Some((device, dir)) = grid.get(col, row) {
                     if device.is_moveable() {
                         let pt = Point::new(col * GRID_CELL_SIZE +
-                                            GRID_CELL_SIZE / 2,
+                                                GRID_CELL_SIZE / 2,
                                             row * GRID_CELL_SIZE +
-                                            GRID_CELL_SIZE / 2);
+                                                GRID_CELL_SIZE / 2);
                         self.draw_device_fg(&mut canvas, pt, device, dir);
                     }
                 }
@@ -440,8 +443,7 @@ impl LaserField {
 
     pub fn draw_sparks(&self, canvas: &mut Canvas) {
         for (&(coords, dir), &dist) in self.sparks.iter() {
-            let center =
-                self.rect.top_left() +
+            let center = self.rect.top_left() +
                 dir.delta() * (GRID_CELL_SIZE / 2 - dist) +
                 Point::new(coords.x() * GRID_CELL_SIZE + GRID_CELL_SIZE / 2,
                            coords.y() * GRID_CELL_SIZE + GRID_CELL_SIZE / 2);
@@ -459,10 +461,10 @@ impl Element<DeviceGrid, LaserCmd> for LaserField {
         self.draw_immovables(grid, canvas);
         for (&(col, row), &letter) in self.letters.iter() {
             let pt = Point::new(self.rect.left() + col * GRID_CELL_SIZE +
-                                GRID_CELL_SIZE / 2,
+                                    GRID_CELL_SIZE / 2,
                                 self.rect.top() + row * GRID_CELL_SIZE +
-                                GRID_CELL_SIZE / 2 +
-                                9);
+                                    GRID_CELL_SIZE / 2 +
+                                    9);
             canvas.draw_char(&self.font, Align::Center, pt, letter);
         }
         self.draw_movables_bg(grid, canvas);
@@ -489,7 +491,8 @@ impl Element<DeviceGrid, LaserCmd> for LaserField {
                 self.anim_counter += 1;
                 self.anim_counter %= 2 * ANIM_SLOWDOWN;
                 if self.anim_counter % ANIM_SLOWDOWN == 0 &&
-                   !self.sparks.is_empty() {
+                    !self.sparks.is_empty()
+                {
                     return Action::redraw();
                 }
             }
@@ -501,15 +504,15 @@ impl Element<DeviceGrid, LaserCmd> for LaserField {
                     if let Some((device, dir)) = grid.get(col, row) {
                         if device.is_moveable() {
                             self.drag = Some(GridDrag {
-                                device: device,
-                                dir: dir,
-                                from_col: col,
-                                from_row: row,
-                                from_pt: pt,
-                                to_pt: pt,
-                                millis: 0,
-                                moved: false,
-                            });
+                                                 device: device,
+                                                 dir: dir,
+                                                 from_col: col,
+                                                 from_row: row,
+                                                 from_pt: pt,
+                                                 to_pt: pt,
+                                                 millis: 0,
+                                                 moved: false,
+                                             });
                         }
                     }
                 }
@@ -532,7 +535,8 @@ impl Element<DeviceGrid, LaserCmd> for LaserField {
                     let to_col = drag.to_pt.x() / GRID_CELL_SIZE;
                     let to_row = drag.to_pt.y() / GRID_CELL_SIZE;
                     return if to_col == drag.from_col &&
-                              to_row == drag.from_row {
+                        to_row == drag.from_row
+                    {
                         if drag.millis <= ROTATE_MAX_MILLIS {
                             grid.rotate(drag.from_col, drag.from_row);
                             self.recalculate_lasers(grid);
@@ -622,14 +626,14 @@ fn color_index(color: MixedColor) -> usize {
 
 fn mixer_output(color1: MixedColor, color2: MixedColor) -> MixedColor {
     let red = (color1.has_red() && color2.has_red()) ||
-              (color1.has_green() && color2.has_blue()) ||
-              (color1.has_blue() && color2.has_green());
+        (color1.has_green() && color2.has_blue()) ||
+        (color1.has_blue() && color2.has_green());
     let green = (color1.has_green() && color2.has_green()) ||
-                (color1.has_red() && color2.has_blue()) ||
-                (color1.has_blue() && color2.has_red());
+        (color1.has_red() && color2.has_blue()) ||
+        (color1.has_blue() && color2.has_red());
     let blue = (color1.has_blue() && color2.has_blue()) ||
-               (color1.has_red() && color2.has_green()) ||
-               (color1.has_green() && color2.has_red());
+        (color1.has_red() && color2.has_green()) ||
+        (color1.has_green() && color2.has_red());
     MixedColor::from_rgb(red, green, blue)
 }
 

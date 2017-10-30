@@ -101,9 +101,7 @@ pub struct View {
 impl View {
     pub fn new(resources: &mut Resources, visible: Rect, game: &Game) -> View {
         let locations: HashMap<Location, (i32, i32)> =
-            NODES.iter()
-                 .map(|&(loc, pt, _)| (loc, pt))
-                 .collect();
+            NODES.iter().map(|&(loc, pt, _)| (loc, pt)).collect();
         let mut nodes = Vec::new();
         let mut paths_outer = Vec::new();
         let mut paths_inner = Vec::new();
@@ -123,20 +121,16 @@ impl View {
                                                            y - 2,
                                                            w + 2,
                                                            4));
-                                paths_inner.push(Rect::new(min(x, px),
-                                                           y - 1,
-                                                           w,
-                                                           2));
+                                paths_inner
+                                    .push(Rect::new(min(x, px), y - 1, w, 2));
                             }
                             if h > 0 {
                                 paths_outer.push(Rect::new(px - 2,
                                                            min(y, py) - 1,
                                                            4,
                                                            h + 2));
-                                paths_inner.push(Rect::new(px - 1,
-                                                           min(y, py),
-                                                           2,
-                                                           h));
+                                paths_inner
+                                    .push(Rect::new(px - 1, min(y, py), 2, h));
                             }
                         } else {
                             if h > 0 {
@@ -144,20 +138,16 @@ impl View {
                                                            min(y, py) - 1,
                                                            4,
                                                            h + 2));
-                                paths_inner.push(Rect::new(x - 1,
-                                                           min(y, py),
-                                                           2,
-                                                           h));
+                                paths_inner
+                                    .push(Rect::new(x - 1, min(y, py), 2, h));
                             }
                             if w > 0 {
                                 paths_outer.push(Rect::new(min(x, px) - 1,
                                                            py - 2,
                                                            w + 2,
                                                            4));
-                                paths_inner.push(Rect::new(min(x, px),
-                                                           py - 1,
-                                                           w,
-                                                           2));
+                                paths_inner
+                                    .push(Rect::new(min(x, px), py - 1, w, 2));
                             }
                         }
                     }
@@ -180,9 +170,9 @@ impl View {
         {
             let mut sprites = resources.get_sprites("map/icebox");
             let is_open = game.is_unlocked(Location::IceToMeetYou) ||
-                          game.is_unlocked(Location::TheIceIsRight) ||
-                          game.is_unlocked(Location::VirtueOrIce) ||
-                          game.is_unlocked(Location::ColumnAsIcyEm);
+                game.is_unlocked(Location::TheIceIsRight) ||
+                game.is_unlocked(Location::VirtueOrIce) ||
+                game.is_unlocked(Location::ColumnAsIcyEm);
             let idx = if is_open { 1 } else { 0 };
             map_sprites.push((sprites.swap_remove(idx), Point::new(400, 144)));
         }
@@ -247,13 +237,16 @@ impl Element<Game, Cmd> for View {
             let mut input = self.hud_input();
             let subaction = self.hud.handle_event(event, &mut input);
             action.merge(match subaction.value() {
-                Some(&HudCmd::Back) => {
-                    self.screen_fade.fade_out_and_return(Cmd::ReturnToTitle);
-                    subaction.but_no_value()
-                }
-                Some(&HudCmd::Info) => subaction.but_return(Cmd::ShowInfoBox),
-                _ => subaction.but_no_value(),
-            });
+                             Some(&HudCmd::Back) => {
+                                 self.screen_fade
+                                     .fade_out_and_return(Cmd::ReturnToTitle);
+                                 subaction.but_no_value()
+                             }
+                             Some(&HudCmd::Info) => {
+                                 subaction.but_return(Cmd::ShowInfoBox)
+                             }
+                             _ => subaction.but_no_value(),
+                         });
         }
         if !action.should_stop() {
             let subaction = self.nodes.handle_event(event, &mut self.selected);
@@ -288,8 +281,8 @@ impl PuzzleNode {
         let sprite_index = if game.has_been_solved(location) {
             1
         } else if location == Location::SystemFailure &&
-                                     !game.system_failure
-                                          .mid_scene_is_done() {
+                   !game.system_failure.mid_scene_is_done()
+        {
             2
         } else {
             0
@@ -372,16 +365,16 @@ mod tests {
 
     #[test]
     fn nodes_do_not_overlap_on_map() {
-        let rects: HashMap<Location, Rect> =
-            NODES.iter()
-                 .map(|&(loc, (x, y), _)| {
-                (loc,
-                 Rect::new(x - (NODE_WIDTH / 2) as i32,
-                           y - (NODE_HEIGHT / 2) as i32,
-                           NODE_WIDTH,
-                           NODE_HEIGHT))
-            })
-                 .collect();
+        let rects: HashMap<Location, Rect> = NODES
+            .iter()
+            .map(|&(loc, (x, y), _)| {
+                     (loc,
+                      Rect::new(x - (NODE_WIDTH / 2) as i32,
+                                y - (NODE_HEIGHT / 2) as i32,
+                                NODE_WIDTH,
+                                NODE_HEIGHT))
+                 })
+            .collect();
         for (&loc1, &rect1) in rects.iter() {
             for (&loc2, &rect2) in rects.iter() {
                 if loc1 != loc2 {

@@ -156,7 +156,7 @@ const INDICATOR_SPACING: i32 = 2;
 const INDICATOR_LENGTH: u32 = (GRID_CELL_SIZE - 2 * INDICATOR_MARGIN) as u32;
 const INDICATOR_TOTAL_THICKNESS: i32 =
     INDICATOR_MARGIN + INDICATOR_GOAL_THICKNESS + INDICATOR_SPACING +
-    INDICATOR_COLOR_THICKNESS + INDICATOR_MARGIN;
+        INDICATOR_COLOR_THICKNESS + INDICATOR_MARGIN;
 const ROTATE_MAX_MILLIS: u32 = 200;
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
@@ -229,9 +229,9 @@ impl Element<PovState, PovCmd> for PovGridView {
         for index in 0..self.num_letters {
             let (col, row, chr, degrees) = LETTERS[index];
             let center = Point::new(self.rect.left() + GRID_CELL_SIZE * col +
-                                    GRID_CELL_SIZE / 2,
+                                        GRID_CELL_SIZE / 2,
                                     self.rect.top() + GRID_CELL_SIZE * row +
-                                    GRID_CELL_SIZE / 2);
+                                        GRID_CELL_SIZE / 2);
             let sprite = self.font.glyph(chr).sprite();
             canvas.draw_sprite_rotated(sprite, center, degrees);
         }
@@ -248,8 +248,8 @@ impl Element<PovState, PovCmd> for PovGridView {
                                        INDICATOR_LENGTH));
             canvas.fill_rect(get_color(color),
                              Rect::new(left + INDICATOR_MARGIN +
-                                       INDICATOR_GOAL_THICKNESS +
-                                       INDICATOR_SPACING,
+                                           INDICATOR_GOAL_THICKNESS +
+                                           INDICATOR_SPACING,
                                        top + INDICATOR_MARGIN,
                                        INDICATOR_COLOR_THICKNESS as u32,
                                        INDICATOR_LENGTH));
@@ -264,8 +264,8 @@ impl Element<PovState, PovCmd> for PovGridView {
                                        INDICATOR_LENGTH));
             canvas.fill_rect(get_color(goal),
                              Rect::new(left + INDICATOR_MARGIN +
-                                       INDICATOR_COLOR_THICKNESS +
-                                       INDICATOR_SPACING,
+                                           INDICATOR_COLOR_THICKNESS +
+                                           INDICATOR_SPACING,
                                        top + INDICATOR_MARGIN,
                                        INDICATOR_GOAL_THICKNESS as u32,
                                        INDICATOR_LENGTH));
@@ -284,8 +284,8 @@ impl Element<PovState, PovCmd> for PovGridView {
             canvas.fill_rect(get_color(color),
                              Rect::new(left + INDICATOR_MARGIN,
                                        top + INDICATOR_MARGIN +
-                                       INDICATOR_GOAL_THICKNESS +
-                                       INDICATOR_SPACING,
+                                           INDICATOR_GOAL_THICKNESS +
+                                           INDICATOR_SPACING,
                                        INDICATOR_LENGTH,
                                        INDICATOR_COLOR_THICKNESS as u32));
             // Bottom:
@@ -300,8 +300,8 @@ impl Element<PovState, PovCmd> for PovGridView {
             canvas.fill_rect(get_color(goal),
                              Rect::new(left + INDICATOR_MARGIN,
                                        top + INDICATOR_MARGIN +
-                                       INDICATOR_COLOR_THICKNESS +
-                                       INDICATOR_SPACING,
+                                           INDICATOR_COLOR_THICKNESS +
+                                           INDICATOR_SPACING,
                                        INDICATOR_LENGTH,
                                        INDICATOR_GOAL_THICKNESS as u32));
         }
@@ -318,7 +318,7 @@ impl Element<PovState, PovCmd> for PovGridView {
         if let Some(ref drag) = self.drag {
             if drag.from_pt != drag.to_pt {
                 let pt = self.rect.top_left() + drag.to_pt -
-                         Point::new(GRID_CELL_SIZE / 2, GRID_CELL_SIZE / 2);
+                    Point::new(GRID_CELL_SIZE / 2, GRID_CELL_SIZE / 2);
                 self.draw_tile(pt, drag.tile, canvas);
             }
         }
@@ -340,13 +340,13 @@ impl Element<PovState, PovCmd> for PovGridView {
                     let row = pt.y() / GRID_CELL_SIZE;
                     if let Some(tile) = state.tile_at((col, row)) {
                         self.drag = Some(GridDrag {
-                            tile: tile,
-                            from_coords: (col, row),
-                            from_pt: pt,
-                            to_pt: pt,
-                            millis: 0,
-                            moved: false,
-                        });
+                                             tile: tile,
+                                             from_coords: (col, row),
+                                             from_pt: pt,
+                                             to_pt: pt,
+                                             millis: 0,
+                                             moved: false,
+                                         });
                     }
                 }
             }
@@ -375,8 +375,8 @@ impl Element<PovState, PovCmd> for PovGridView {
                             Action::redraw()
                         }
                     } else {
-                        let success = state.move_tile(drag.from_coords,
-                                                      to_coords);
+                        let success =
+                            state.move_tile(drag.from_coords, to_coords);
                         if success {
                             Action::redraw()
                                 .and_play_sound(Sound::device_drop())

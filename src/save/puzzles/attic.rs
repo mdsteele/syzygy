@@ -48,7 +48,7 @@ impl AtticState {
             (1, 0) => self.is_toggled((1, 1)) ^ self.is_toggled((2, 1)),
             (2, 0) => {
                 (self.is_toggled((1, 1)) ^ self.is_toggled((2, 1)) ^
-                 self.is_toggled((3, 1)))
+                     self.is_toggled((3, 1)))
             }
             (3, 0) => true,
             (4, 0) => self.is_toggled((3, 1)) ^ self.is_toggled((4, 1)),
@@ -56,38 +56,38 @@ impl AtticState {
             (1, 1) => self.is_toggled((1, 1)) ^ self.is_toggled((2, 2)),
             (2, 1) => {
                 self.is_toggled((2, 1)) ^ self.is_toggled((3, 1)) ^
-                self.is_toggled((1, 2)) ^
-                self.is_toggled((3, 2))
+                    self.is_toggled((1, 2)) ^
+                    self.is_toggled((3, 2))
             }
             (3, 1) => {
                 self.is_toggled((3, 1)) ^ self.is_toggled((4, 1)) ^
-                self.is_toggled((2, 2))
+                    self.is_toggled((2, 2))
             }
             (4, 1) => {
                 self.is_toggled((3, 1)) ^ self.is_toggled((4, 1)) ^
-                self.is_toggled((3, 2)) ^
-                self.is_toggled((4, 2))
+                    self.is_toggled((3, 2)) ^
+                    self.is_toggled((4, 2))
             }
             (5, 1) => self.is_toggled((4, 1)) ^ self.is_toggled((4, 2)),
             (0, 2) => self.is_toggled((1, 2)),
             (1, 2) => {
                 self.is_toggled((1, 1)) ^ self.is_toggled((1, 2)) ^
-                self.is_toggled((1, 3)) ^
-                self.is_toggled((2, 3))
+                    self.is_toggled((1, 3)) ^
+                    self.is_toggled((2, 3))
             }
             (2, 2) => {
                 self.is_toggled((1, 1)) ^ self.is_toggled((2, 1)) ^
-                self.is_toggled((3, 1)) ^
-                self.is_toggled((1, 2)) ^
-                self.is_toggled((2, 2)) ^
-                self.is_toggled((2, 3))
+                    self.is_toggled((3, 1)) ^
+                    self.is_toggled((1, 2)) ^
+                    self.is_toggled((2, 2)) ^
+                    self.is_toggled((2, 3))
             }
             (3, 2) => {
                 self.is_toggled((2, 1)) ^ self.is_toggled((4, 1)) ^
-                self.is_toggled((3, 2)) ^
-                self.is_toggled((2, 3)) ^
-                self.is_toggled((3, 3)) ^
-                self.is_toggled((4, 3))
+                    self.is_toggled((3, 2)) ^
+                    self.is_toggled((2, 3)) ^
+                    self.is_toggled((3, 3)) ^
+                    self.is_toggled((4, 3))
             }
             (4, 2) => !(self.is_toggled((3, 1)) ^ self.is_toggled((4, 2))),
             (5, 2) => self.is_toggled((4, 1)) ^ self.is_toggled((4, 3)),
@@ -95,31 +95,31 @@ impl AtticState {
             (1, 3) => self.is_toggled((1, 3)) ^ self.is_toggled((2, 4)),
             (2, 3) => {
                 !(self.is_toggled((3, 2)) ^ self.is_toggled((2, 3)) ^
-                  self.is_toggled((1, 4)) ^
-                  self.is_toggled((2, 4)))
+                      self.is_toggled((1, 4)) ^
+                      self.is_toggled((2, 4)))
             }
             (3, 3) => {
                 !(self.is_toggled((4, 2)) ^ self.is_toggled((3, 3)) ^
-                  self.is_toggled((4, 3)) ^
-                  self.is_toggled((2, 4)) ^
-                  self.is_toggled((3, 4)))
+                      self.is_toggled((4, 3)) ^
+                      self.is_toggled((2, 4)) ^
+                      self.is_toggled((3, 4)))
             }
             (4, 3) => {
                 !(self.is_toggled((3, 2)) ^ self.is_toggled((4, 2)) ^
-                  self.is_toggled((4, 3)))
+                      self.is_toggled((4, 3)))
             }
             (5, 3) => self.is_toggled((4, 4)),
             (0, 4) => !self.is_toggled((1, 3)),
             (1, 4) => {
                 self.is_toggled((1, 3)) ^ self.is_toggled((1, 4)) ^
-                self.is_toggled((2, 4))
+                    self.is_toggled((2, 4))
             }
             (2, 4) => self.is_toggled((2, 3)),
             (3, 4) => {
                 self.is_toggled((3, 3)) ^ self.is_toggled((4, 3)) ^
-                self.is_toggled((2, 4)) ^
-                self.is_toggled((3, 4)) ^
-                self.is_toggled((4, 4))
+                    self.is_toggled((2, 4)) ^
+                    self.is_toggled((3, 4)) ^
+                    self.is_toggled((4, 4))
             }
             (4, 4) => self.is_toggled((4, 4)),
             (5, 4) => self.is_toggled((4, 3)) ^ self.is_toggled((4, 4)),
@@ -127,7 +127,7 @@ impl AtticState {
             (2, 5) => self.is_toggled((2, 4)),
             (3, 5) => {
                 !(self.is_toggled((2, 4)) ^ self.is_toggled((3, 4)) ^
-                  self.is_toggled((4, 4)))
+                      self.is_toggled((4, 4)))
             }
             (4, 5) => !(self.is_toggled((3, 4))),
             _ => false,
@@ -137,7 +137,7 @@ impl AtticState {
     pub fn is_toggled(&self, pos: (i32, i32)) -> bool {
         let (col, row) = pos;
         col >= 1 && col <= 4 && row >= 1 && row <= 4 &&
-        self.toggled.contains(&((row - 1) * 4 + (col - 1)))
+            self.toggled.contains(&((row - 1) * 4 + (col - 1)))
     }
 
     pub fn toggle(&mut self, pos: (i32, i32)) {
@@ -245,9 +245,10 @@ mod tests {
         table.insert(ACCESS_KEY.to_string(), Access::Unsolved.to_toml());
         let toggled = vec![-1, 0, 15, 16];
         table.insert(TOGGLED_KEY.to_string(),
-                     toml::Value::Array(toggled.into_iter()
-                                               .map(toml::Value::Integer)
-                                               .collect()));
+                     toml::Value::Array(toggled
+                                            .into_iter()
+                                            .map(toml::Value::Integer)
+                                            .collect()));
 
         let state = AtticState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Unsolved);
@@ -258,9 +259,10 @@ mod tests {
     fn from_toggled_already_correct_toml() {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), Access::Unsolved.to_toml());
-        let toggled = SOLVED_TOGGLED.iter()
-                                    .map(|&t| toml::Value::Integer(t as i64))
-                                    .collect();
+        let toggled = SOLVED_TOGGLED
+            .iter()
+            .map(|&t| toml::Value::Integer(t as i64))
+            .collect();
         table.insert(TOGGLED_KEY.to_string(), toml::Value::Array(toggled));
 
         let state = AtticState::from_toml(toml::Value::Table(table));

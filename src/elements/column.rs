@@ -95,15 +95,17 @@ impl Element<Columns, (usize, i32)> for ColumnsView {
                 self.hilights.get(&col).cloned().unwrap_or((63, 31, 63));
             let hilight_rect = Rect::new(0,
                                          -BOX_SIZE *
-                                         columns.column_offset(col),
+                                             columns.column_offset(col),
                                          BOX_USIZE,
                                          BOX_USIZE);
             canvas.fill_rect(hilight_color, hilight_rect);
             let height = canvas.height() as i32;
             let offset = mod_floor(self.column_scroll(columns, col), height);
-            for (index, &chr) in columns.column_letters(col)
-                                        .iter()
-                                        .enumerate() {
+            for (index, &chr) in columns
+                .column_letters(col)
+                .iter()
+                .enumerate()
+            {
                 let top = BOX_SIZE * index as i32 + offset;
                 let pt = Point::new(BOX_SIZE / 2, top + BOX_SIZE - 3);
                 canvas.draw_char(&self.font, Align::Center, pt, chr);
@@ -139,7 +141,8 @@ impl Element<Columns, (usize, i32)> for ColumnsView {
             &Event::MouseDown(pt) => {
                 for col in 0..columns.num_columns() {
                     if self.column_rect(columns, col).contains(pt) &&
-                       !columns.column_linkages(col).is_empty() {
+                        !columns.column_linkages(col).is_empty()
+                    {
                         self.drag = Some((col, pt.y(), pt.y()));
                         return Action::redraw();
                     }

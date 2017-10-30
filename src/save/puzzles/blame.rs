@@ -69,7 +69,7 @@ impl BlameState {
         assert!(pos >= 0 && pos <= BlameState::max_position_for_row(row));
         self.positions[row as usize] = pos;
         self.is_initial = self.elinsa_row == INITIAL_ELINSA_ROW &&
-                          &self.positions as &[i32] == INITIAL_POSITIONS;
+            &self.positions as &[i32] == INITIAL_POSITIONS;
     }
 
     pub fn get_elinsa_row(&self) -> i32 { self.elinsa_row }
@@ -78,7 +78,7 @@ impl BlameState {
         assert!(row >= MIN_ELINSA_ROW && row <= MAX_ELINSA_ROW);
         self.elinsa_row = row;
         self.is_initial = self.elinsa_row == INITIAL_ELINSA_ROW &&
-                          &self.positions as &[i32] == INITIAL_POSITIONS;
+            &self.positions as &[i32] == INITIAL_POSITIONS;
         if self.elinsa_row == MIN_ELINSA_ROW {
             self.access = Access::Solved;
         }
@@ -118,9 +118,9 @@ impl Tomlable for BlameState {
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.is_initial && !self.is_solved() {
             let positions = self.positions
-                                .iter()
-                                .map(|&idx| toml::Value::Integer(idx as i64))
-                                .collect();
+                .iter()
+                .map(|&idx| toml::Value::Integer(idx as i64))
+                .collect();
             table.insert(POSITIONS_KEY.to_string(),
                          toml::Value::Array(positions));
             table.insert(ELINSA_ROW_KEY.to_string(),
@@ -135,9 +135,10 @@ impl Tomlable for BlameState {
         let elinsa_row = if access.is_solved() {
             MIN_ELINSA_ROW
         } else {
-            let mut row = table.remove(ELINSA_ROW_KEY)
-                               .map(i32::from_toml)
-                               .unwrap_or(INITIAL_ELINSA_ROW);
+            let mut row = table
+                .remove(ELINSA_ROW_KEY)
+                .map(i32::from_toml)
+                .unwrap_or(INITIAL_ELINSA_ROW);
             if row < MIN_ELINSA_ROW || row > MAX_ELINSA_ROW {
                 row = INITIAL_ELINSA_ROW;
             }
@@ -157,7 +158,7 @@ impl Tomlable for BlameState {
             }
         }
         let is_initial = &positions as &[i32] == INITIAL_POSITIONS &&
-                         elinsa_row == INITIAL_ELINSA_ROW;
+            elinsa_row == INITIAL_ELINSA_ROW;
         BlameState {
             access: access,
             positions: positions,
@@ -246,18 +247,18 @@ mod tests {
         let mut table = toml::value::Table::new();
         table.insert(POSITIONS_KEY.to_string(),
                      toml::Value::Array(vec![1, 2, -3, 4, 55, 66, 77]
-                         .into_iter()
-                         .map(toml::Value::Integer)
-                         .collect()));
+                                            .into_iter()
+                                            .map(toml::Value::Integer)
+                                            .collect()));
         let state = BlameState::from_toml(toml::Value::Table(table));
         assert_eq!(state.positions, vec![1, 2, 0, 4, 8, 9, 9]);
 
         let mut table = toml::value::Table::new();
         table.insert(POSITIONS_KEY.to_string(),
                      toml::Value::Array(vec![1, 2, 3, 4, 5, 6]
-                         .into_iter()
-                         .map(toml::Value::Integer)
-                         .collect()));
+                                            .into_iter()
+                                            .map(toml::Value::Integer)
+                                            .collect()));
         let state = BlameState::from_toml(toml::Value::Table(table));
         assert_eq!(&state.positions as &[i32], INITIAL_POSITIONS);
     }

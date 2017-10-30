@@ -31,15 +31,30 @@ const GREEN_TOGGLED_KEY: &str = "green";
 const BLUE_TOGGLED_KEY: &str = "blue";
 const NEXT_COLOR_KEY: &str = "next";
 
-const INITIAL_RED_GRID: &[bool] =
-    &[true, true, true, true, false, true, true, true, false, true, true,
-      true, true, false, true, false, true, true, false, true, true];
-const INITIAL_GREEN_GRID: &[bool] =
-    &[true, false, true, false, false, true, true, true, false, false, true,
-      false, true, true, false, false, true, true, true, true, true];
-const INITIAL_BLUE_GRID: &[bool] =
-    &[true, false, true, true, false, false, false, false, true, true, true,
-      true, true, true, true, false, true, false, true, true, false];
+#[cfg_attr(rustfmt, rustfmt_skip)]
+const INITIAL_RED_GRID: &[bool] = &[
+           true,  true,  true,
+    true,  false, true,  true,  true,
+    false, true,  true,  true,  true,
+    false, true,  false, true,  true,
+           false, true,  true,
+];
+#[cfg_attr(rustfmt, rustfmt_skip)]
+const INITIAL_GREEN_GRID: &[bool] = &[
+           true,  false, true,
+    false, false, true,  true,  true,
+    false, false, true,  false, true,
+    true,  false, false, true,  true,
+           true,  true,  true,
+];
+#[cfg_attr(rustfmt, rustfmt_skip)]
+const INITIAL_BLUE_GRID: &[bool] = &[
+           true,  false, true,
+    true,  false, false, false, false,
+    true,  true,  true,  true,  true,
+    true,  true,  false, true,  false,
+           true,  true,  false,
+];
 
 const SOLVED_RED_TOGGLED: &[i32] = &[3, 8, 13, 14];
 const SOLVED_GREEN_TOGGLED: &[i32] = &[0, 4, 9, 10];
@@ -139,8 +154,9 @@ impl SyrupState {
 
     fn check_if_solved(&mut self) {
         if self.red_grid.iter().all(|&r| r) &&
-           self.green_grid.iter().all(|&g| g) &&
-           self.blue_grid.iter().all(|&b| b) {
+            self.green_grid.iter().all(|&g| g) &&
+            self.blue_grid.iter().all(|&b| b)
+        {
             self.access = Access::Solved;
         }
     }
@@ -155,8 +171,9 @@ impl PuzzleState for SyrupState {
 
     fn can_reset(&self) -> bool {
         self.next_color != Default::default() ||
-        !self.red_toggled.is_empty() ||
-        !self.green_toggled.is_empty() || !self.blue_toggled.is_empty()
+            !self.red_toggled.is_empty() ||
+            !self.green_toggled.is_empty() ||
+            !self.blue_toggled.is_empty()
     }
 
     fn reset(&mut self) {
@@ -173,8 +190,8 @@ impl Tomlable for SyrupState {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.is_solved() {
-            table.insert(NEXT_COLOR_KEY.to_string(),
-                         self.next_color.to_toml());
+            table
+                .insert(NEXT_COLOR_KEY.to_string(), self.next_color.to_toml());
             insert_toggled(&mut table, RED_TOGGLED_KEY, &self.red_toggled);
             insert_toggled(&mut table, GREEN_TOGGLED_KEY, &self.green_toggled);
             insert_toggled(&mut table, BLUE_TOGGLED_KEY, &self.blue_toggled);
@@ -282,8 +299,8 @@ mod tests {
     use save::util::{ACCESS_KEY, Tomlable};
     use super::{BLUE_TOGGLED_KEY, GREEN_TOGGLED_KEY, INITIAL_BLUE_GRID,
                 INITIAL_GREEN_GRID, INITIAL_RED_GRID, RED_TOGGLED_KEY,
-                SOLVED_BLUE_TOGGLED, SOLVED_GREEN_TOGGLED, SOLVED_RED_TOGGLED,
-                SyrupState, index_to_pos, pos_to_index};
+                SOLVED_BLUE_TOGGLED, SOLVED_GREEN_TOGGLED,
+                SOLVED_RED_TOGGLED, SyrupState, index_to_pos, pos_to_index};
 
     #[test]
     fn index_to_pos_to_index() {
@@ -306,11 +323,12 @@ mod tests {
 
         let state = SyrupState::from_toml(state.to_toml());
         assert_eq!(state.next_color, PrimaryColor::Green);
-        assert_eq!(state.red_toggled,
-                   vec![pos_to_index((1, 1)).unwrap(),
-                        pos_to_index((3, 2)).unwrap()]
-                       .into_iter()
-                       .collect());
+        assert_eq!(
+            state.red_toggled,
+            vec![pos_to_index((1, 1)).unwrap(), pos_to_index((3, 2)).unwrap()]
+                .into_iter()
+                .collect()
+        );
         assert_eq!(state.green_toggled,
                    vec![pos_to_index((2, 2)).unwrap()].into_iter().collect());
         assert_eq!(state.blue_toggled,
@@ -357,9 +375,9 @@ mod tests {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), Access::Unsolved.to_toml());
         let toggled = toml::Value::Array(vec![-1, 0, 20, 21]
-            .into_iter()
-            .map(toml::Value::Integer)
-            .collect());
+                                             .into_iter()
+                                             .map(toml::Value::Integer)
+                                             .collect());
         table.insert(RED_TOGGLED_KEY.to_string(), toggled.clone());
         table.insert(GREEN_TOGGLED_KEY.to_string(), toggled.clone());
         table.insert(BLUE_TOGGLED_KEY.to_string(), toggled.clone());
@@ -375,19 +393,20 @@ mod tests {
     fn from_toggled_already_correct_toml() {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), Access::Unsolved.to_toml());
-        let red = SOLVED_RED_TOGGLED.iter()
-                                    .map(|&t| toml::Value::Integer(t as i64))
-                                    .collect();
+        let red = SOLVED_RED_TOGGLED
+            .iter()
+            .map(|&t| toml::Value::Integer(t as i64))
+            .collect();
         table.insert(RED_TOGGLED_KEY.to_string(), toml::Value::Array(red));
-        let green =
-            SOLVED_GREEN_TOGGLED.iter()
-                                .map(|&t| toml::Value::Integer(t as i64))
-                                .collect();
+        let green = SOLVED_GREEN_TOGGLED
+            .iter()
+            .map(|&t| toml::Value::Integer(t as i64))
+            .collect();
         table.insert(GREEN_TOGGLED_KEY.to_string(), toml::Value::Array(green));
-        let blue =
-            SOLVED_BLUE_TOGGLED.iter()
-                               .map(|&t| toml::Value::Integer(t as i64))
-                               .collect();
+        let blue = SOLVED_BLUE_TOGGLED
+            .iter()
+            .map(|&t| toml::Value::Integer(t as i64))
+            .collect();
         table.insert(BLUE_TOGGLED_KEY.to_string(), toml::Value::Array(blue));
 
         let state = SyrupState::from_toml(toml::Value::Table(table));

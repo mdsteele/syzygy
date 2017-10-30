@@ -40,18 +40,19 @@ pub struct Background {
 
 impl Background {
     pub fn load<F>(path: &Path, mut get_sprites: F) -> io::Result<Background>
-        where F: FnMut(&str) -> Vec<Sprite>
+    where
+        F: FnMut(&str) -> Vec<Sprite>,
     {
-        let mut file = io::BufReader::new(try!(File::open(path)));
-        try!(read_exactly(file.by_ref(), b"@BG "));
-        let red = try!(read_int(file.by_ref(), b' ')) as u8;
-        let green = try!(read_int(file.by_ref(), b' ')) as u8;
-        let blue = try!(read_int(file.by_ref(), b'\n')) as u8;
+        let mut file = io::BufReader::new(File::open(path)?);
+        read_exactly(file.by_ref(), b"@BG ")?;
+        let red = read_int(file.by_ref(), b' ')? as u8;
+        let green = read_int(file.by_ref(), b' ')? as u8;
+        let blue = read_int(file.by_ref(), b'\n')? as u8;
         let mut tileset: Vec<(String, Vec<Sprite>)> = Vec::new();
         loop {
-            match try!(read_byte(file.by_ref())) {
+            match read_byte(file.by_ref())? {
                 b'>' => {
-                    let filename = try!(read_string(file.by_ref(), b'\n'));
+                    let filename = read_string(file.by_ref(), b'\n')?;
                     let sprites = get_sprites(&filename);
                     tileset.push((filename, sprites));
                 }
@@ -68,7 +69,7 @@ impl Background {
         for _ in 0..NUM_ROWS {
             let mut col = 0;
             loop {
-                let byte1 = try!(read_byte(file.by_ref()));
+                let byte1 = read_byte(file.by_ref())?;
                 if byte1 == b'\n' {
                     for _ in col..NUM_COLS {
                         tiles.push(None);
@@ -79,13 +80,13 @@ impl Background {
                     return Err(io::Error::new(io::ErrorKind::InvalidData,
                                               "too many columns"));
                 }
-                let byte2 = try!(read_byte(file.by_ref()));
+                let byte2 = read_byte(file.by_ref())?;
                 if byte1 == b' ' && byte2 == b' ' {
                     tiles.push(None);
                 } else {
-                    let file_index = try!(base62_index(byte1, tileset.len()));
+                    let file_index = base62_index(byte1, tileset.len())?;
                     let sprites = &tileset[file_index].1;
-                    let tile_index = try!(base62_index(byte2, sprites.len()));
+                    let tile_index = base62_index(byte2, sprites.len())?;
                     let sprite = &sprites[tile_index];
                     tiles.push(Some(sprite.clone()));
                     used_file[file_index] = true;
@@ -101,9 +102,9 @@ impl Background {
             }
         }
         Ok(Background {
-            color: (red, green, blue),
-            tiles: tiles,
-        })
+               color: (red, green, blue),
+               tiles: tiles,
+           })
     }
 
     pub fn color(&self) -> (u8, u8, u8) { self.color }
@@ -181,7 +182,7 @@ fn read_byte<R: io::Read>(reader: R) -> io::Result<u8> {
 
 fn read_exactly<R: io::Read>(mut reader: R, string: &[u8]) -> io::Result<()> {
     let mut actual = vec![0u8; string.len()];
-    try!(reader.read_exact(&mut actual));
+    reader.read_exact(&mut actual)?;
     if &actual as &[u8] != string {
         let msg = format!("expected '{}', found '{}'",
                           String::from_utf8_lossy(string),
@@ -195,7 +196,7 @@ fn read_exactly<R: io::Read>(mut reader: R, string: &[u8]) -> io::Result<()> {
 fn read_int<R: io::Read>(reader: R, terminator: u8) -> io::Result<u32> {
     let mut value: u32 = 0;
     for next in reader.bytes() {
-        let byte = try!(next);
+        let byte = next?;
         if byte == terminator {
             break;
         }
@@ -219,7 +220,7 @@ fn read_int<R: io::Read>(reader: R, terminator: u8) -> io::Result<u32> {
 fn read_string<R: io::Read>(reader: R, terminator: u8) -> io::Result<String> {
     let mut result = Vec::new();
     for next in reader.bytes() {
-        let byte = try!(next);
+        let byte = next?;
         if byte == terminator {
             break;
         }

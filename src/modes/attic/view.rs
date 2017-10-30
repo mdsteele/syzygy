@@ -45,38 +45,42 @@ impl View {
         core.add_extra_scene(scenes::compile_mezure_midscene(resources));
         View {
             core: core,
-            toggles: vec![ToggleLight::new(resources, state, (1, 1), 'C'),
-                          ToggleLight::new(resources, state, (2, 1), 'Z'),
-                          ToggleLight::new(resources, state, (3, 1), 'H'),
-                          ToggleLight::new(resources, state, (4, 1), 'A'),
-                          ToggleLight::new(resources, state, (1, 2), 'U'),
-                          ToggleLight::new(resources, state, (2, 2), 'V'),
-                          ToggleLight::new(resources, state, (3, 2), 'X'),
-                          ToggleLight::new(resources, state, (4, 2), 'S'),
-                          ToggleLight::new(resources, state, (1, 3), 'J'),
-                          ToggleLight::new(resources, state, (2, 3), 'T'),
-                          ToggleLight::new(resources, state, (3, 3), 'I'),
-                          ToggleLight::new(resources, state, (4, 3), 'K'),
-                          ToggleLight::new(resources, state, (1, 4), 'Y'),
-                          ToggleLight::new(resources, state, (2, 4), 'O'),
-                          ToggleLight::new(resources, state, (3, 4), 'L'),
-                          ToggleLight::new(resources, state, (4, 4), 'N')],
-            passives: vec![PassiveLight::new(resources, state, (1, 0)),
-                           PassiveLight::new(resources, state, (2, 0)),
-                           PassiveLight::new(resources, state, (3, 0)),
-                           PassiveLight::new(resources, state, (4, 0)),
-                           PassiveLight::new(resources, state, (1, 5)),
-                           PassiveLight::new(resources, state, (2, 5)),
-                           PassiveLight::new(resources, state, (3, 5)),
-                           PassiveLight::new(resources, state, (4, 5)),
-                           PassiveLight::new(resources, state, (0, 1)),
-                           PassiveLight::new(resources, state, (0, 2)),
-                           PassiveLight::new(resources, state, (0, 3)),
-                           PassiveLight::new(resources, state, (0, 4)),
-                           PassiveLight::new(resources, state, (5, 1)),
-                           PassiveLight::new(resources, state, (5, 2)),
-                           PassiveLight::new(resources, state, (5, 3)),
-                           PassiveLight::new(resources, state, (5, 4))],
+            toggles: vec![
+                ToggleLight::new(resources, state, (1, 1), 'C'),
+                ToggleLight::new(resources, state, (2, 1), 'Z'),
+                ToggleLight::new(resources, state, (3, 1), 'H'),
+                ToggleLight::new(resources, state, (4, 1), 'A'),
+                ToggleLight::new(resources, state, (1, 2), 'U'),
+                ToggleLight::new(resources, state, (2, 2), 'V'),
+                ToggleLight::new(resources, state, (3, 2), 'X'),
+                ToggleLight::new(resources, state, (4, 2), 'S'),
+                ToggleLight::new(resources, state, (1, 3), 'J'),
+                ToggleLight::new(resources, state, (2, 3), 'T'),
+                ToggleLight::new(resources, state, (3, 3), 'I'),
+                ToggleLight::new(resources, state, (4, 3), 'K'),
+                ToggleLight::new(resources, state, (1, 4), 'Y'),
+                ToggleLight::new(resources, state, (2, 4), 'O'),
+                ToggleLight::new(resources, state, (3, 4), 'L'),
+                ToggleLight::new(resources, state, (4, 4), 'N'),
+            ],
+            passives: vec![
+                PassiveLight::new(resources, state, (1, 0)),
+                PassiveLight::new(resources, state, (2, 0)),
+                PassiveLight::new(resources, state, (3, 0)),
+                PassiveLight::new(resources, state, (4, 0)),
+                PassiveLight::new(resources, state, (1, 5)),
+                PassiveLight::new(resources, state, (2, 5)),
+                PassiveLight::new(resources, state, (3, 5)),
+                PassiveLight::new(resources, state, (4, 5)),
+                PassiveLight::new(resources, state, (0, 1)),
+                PassiveLight::new(resources, state, (0, 2)),
+                PassiveLight::new(resources, state, (0, 3)),
+                PassiveLight::new(resources, state, (0, 4)),
+                PassiveLight::new(resources, state, (5, 1)),
+                PassiveLight::new(resources, state, (5, 2)),
+                PassiveLight::new(resources, state, (5, 3)),
+                PassiveLight::new(resources, state, (5, 4)),
+            ],
         }
     }
 }
@@ -222,8 +226,8 @@ impl Element<AtticState, (i32, i32)> for ToggleLight {
                             &mut self.light_radius,
                             TOGGLE_MAX_LIGHT_RADIUS)
             }
-            &Event::MouseDown(pt) if self.rect().contains(pt) &&
-                                     !state.is_solved() => {
+            &Event::MouseDown(pt)
+                if self.rect().contains(pt) && !state.is_solved() => {
                 Action::redraw().and_return(self.position)
             }
             _ => Action::ignore(),

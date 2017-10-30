@@ -20,8 +20,8 @@
 use std::cmp;
 use std::rc::Rc;
 
-use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
-          Sprite};
+use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
+          Resources, Sprite};
 use super::paragraph::Paragraph;
 
 // ========================================================================= //
@@ -47,8 +47,8 @@ impl<A: 'static + Clone> DialogBox<A> {
         let paragraph = Paragraph::new(resources, "roman", Align::Left, text);
         let rect = {
             let buttons_width = buttons.len() as i32 *
-                                (BUTTON_WIDTH as i32 + BUTTON_SPACING) -
-                                BUTTON_SPACING;
+                (BUTTON_WIDTH as i32 + BUTTON_SPACING) -
+                BUTTON_SPACING;
             let width = {
                 let inner_width = cmp::max(buttons_width,
                                            paragraph.min_width());
@@ -56,8 +56,8 @@ impl<A: 'static + Clone> DialogBox<A> {
             };
             let height = {
                 round_up_to_16(2 * MARGIN + paragraph.height() as i32 +
-                               BUTTON_SPACING +
-                               BUTTON_HEIGHT as i32)
+                                   BUTTON_SPACING +
+                                   BUTTON_HEIGHT as i32)
             };
             let mut rect = Rect::new(0, 0, width, height);
             rect.center_on(visible.center());

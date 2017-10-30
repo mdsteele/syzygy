@@ -28,14 +28,16 @@ use super::PuzzleState;
 
 const ORDER_KEY: &str = "order";
 
-const TILES: [&[i32]; 8] = [&[7, 5],
-                            &[-3, 3],
-                            &[-6, 4, 2],
-                            &[-1, 4],
-                            &[6, 3],
-                            &[-4, -4],
-                            &[-1],
-                            &[-1, 2]];
+const TILES: [&[i32]; 8] = [
+    &[7, 5],
+    &[-3, 3],
+    &[-6, 4, 2],
+    &[-1, 4],
+    &[6, 3],
+    &[-4, -4],
+    &[-1],
+    &[-1, 2],
+];
 
 const INITIAL_ORDER: [usize; 8] = [0, 1, 2, 3, 4, 5, 6, 7];
 // Solved arragement is f6-f3 b1-f4 b1 b3-f3 f7-f5 b1-f2 b6-f4-f2 b4-b4
@@ -126,9 +128,9 @@ impl Tomlable for NoReturnState {
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.is_solved() {
             let order = self.order
-                            .iter()
-                            .map(|&idx| toml::Value::Integer(idx as i64))
-                            .collect();
+                .iter()
+                .map(|&idx| toml::Value::Integer(idx as i64))
+                .collect();
             table.insert(ORDER_KEY.to_string(), toml::Value::Array(order));
         }
         toml::Value::Table(table)

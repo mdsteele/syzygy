@@ -20,8 +20,8 @@
 use std::rc::Rc;
 
 use elements::{PuzzleCmd, PuzzleCore, PuzzleView};
-use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
-          Sprite};
+use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
+          Resources, Sprite};
 use modes::SOLVED_INFO_TEXT;
 use save::{Direction, Game, PuzzleState, WreckedState};
 use super::scenes::{compile_intro_scene, compile_outro_scene};
@@ -280,8 +280,8 @@ impl Element<WreckedState, (Direction, i32, i32)> for WreckedGrid {
                     if let Some((dir, rank, by)) = drag_result {
                         state.shift_tiles(dir, rank, by);
                         if state.is_solved() {
-                            return Action::redraw().and_return(drag.accum()
-                                                                   .unwrap());
+                            return Action::redraw()
+                                .and_return(drag.accum().unwrap());
                         }
                     }
                     self.drag = Some(drag);

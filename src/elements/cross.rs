@@ -94,8 +94,10 @@ impl ClueDisplay {
         ClueDisplay {
             top: top,
             font: resources.get_font("system"),
-            arrows: vec![ArrowButton::new(resources, false, 96, top),
-                         ArrowButton::new(resources, true, 464, top)],
+            arrows: vec![
+                ArrowButton::new(resources, false, 96, top),
+                ArrowButton::new(resources, true, 464, top),
+            ],
             visible: false,
         }
     }
@@ -160,8 +162,8 @@ impl Element<(), bool> for ArrowButton {
         if self.blink > 0 {
             idx += 1;
         }
-        canvas.draw_sprite(&self.sprites[idx],
-                           Point::new(self.left, self.top));
+        canvas
+            .draw_sprite(&self.sprites[idx], Point::new(self.left, self.top));
     }
 
     fn handle_event(&mut self, event: &Event, _: &mut ()) -> Action<bool> {

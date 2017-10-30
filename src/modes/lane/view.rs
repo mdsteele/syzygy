@@ -19,8 +19,8 @@
 
 use elements::{Paragraph, ProgressBar, PuzzleCmd, PuzzleCore, PuzzleView};
 use elements::memory::{FLIP_SLOWDOWN, MemoryGridView, NextShapeView};
-use gui::{Action, Align, Canvas, Element, Event, Point, Rect, Resources, Sound,
-          Sprite};
+use gui::{Action, Align, Canvas, Element, Event, Point, Rect, Resources,
+          Sound, Sprite};
 use modes::SOLVED_INFO_TEXT;
 use save::{Direction, Game, LaneState, PuzzleState};
 use super::scenes;
@@ -86,7 +86,8 @@ impl Element<Game, PuzzleCmd> for View {
         self.free.draw(state, canvas);
         self.grid.draw(state.grid(), canvas);
         if self.show_next && self.remove_countdown == 0 &&
-           !self.next.is_dragging() {
+            !self.next.is_dragging()
+        {
             self.prompt.draw(state, canvas);
         }
         self.core.draw_middle_layer(canvas);
@@ -124,7 +125,7 @@ impl Element<Game, PuzzleCmd> for View {
         }
         if !action.should_stop() {
             let subaction = self.next
-                                .handle_event(event, &mut state.next_shape());
+                .handle_event(event, &mut state.next_shape());
             if let Some(&pt) = subaction.value() {
                 let (col, row) = self.grid.coords_for_point(pt);
                 if let Some(symbol) = state.try_place_shape(col, row) {
@@ -135,7 +136,8 @@ impl Element<Game, PuzzleCmd> for View {
             action.merge(subaction.but_no_value());
         }
         if (!action.should_stop() && self.remove_countdown == 0) ||
-           event == &Event::ClockTick {
+            event == &Event::ClockTick
+        {
             let subaction = self.grid.handle_event(event, state.grid_mut());
             if let Some(&symbol) = subaction.value() {
                 if state.next_remove().is_some() {

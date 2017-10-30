@@ -85,7 +85,7 @@ impl SauceState {
 
     pub fn current_clue(&self) -> &'static str {
         debug_assert!(self.current >= 0 &&
-                      self.current < WORD_CLUES.len() as i32);
+                          self.current < WORD_CLUES.len() as i32);
         WORD_CLUES[self.current as usize].1
     }
 
@@ -164,9 +164,9 @@ impl Tomlable for SauceState {
             table.insert(CURRENT_KEY.to_string(),
                          toml::Value::Integer(self.current as i64));
             let done = self.done
-                           .iter()
-                           .map(|&idx| toml::Value::Integer(idx as i64))
-                           .collect();
+                .iter()
+                .map(|&idx| toml::Value::Integer(idx as i64))
+                .collect();
             table.insert(DONE_KEY.to_string(), toml::Value::Array(done));
         }
         toml::Value::Table(table)
@@ -281,10 +281,14 @@ mod tests {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), Access::Unsolved.to_toml());
         table.insert(CURRENT_KEY.to_string(), toml::Value::Integer(2));
-        table.insert(DONE_KEY.to_string(),
-                     toml::Value::Array(vec![toml::Value::Integer(1),
-                                             toml::Value::Integer(2),
-                                             toml::Value::Integer(3)]));
+        table.insert(
+            DONE_KEY.to_string(),
+            toml::Value::Array(vec![
+                toml::Value::Integer(1),
+                toml::Value::Integer(2),
+                toml::Value::Integer(3),
+            ]),
+        );
 
         let state = SauceState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Unsolved);
@@ -299,8 +303,8 @@ mod tests {
         table.insert(CURRENT_KEY.to_string(), toml::Value::Integer(5));
         table.insert(DONE_KEY.to_string(),
                      toml::Value::Array((0..(WORD_CLUES.len() as i64))
-                         .map(toml::Value::Integer)
-                         .collect()));
+                                            .map(toml::Value::Integer)
+                                            .collect()));
 
         let state = SauceState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Solved);

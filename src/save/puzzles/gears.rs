@@ -72,10 +72,10 @@ impl GearsState {
     pub fn set_position(&mut self, row: i32, pos: i32) {
         assert!(row >= 0 && row < NUM_ROWS);
         assert!(pos >= GearsState::min_position_for_row(row) &&
-                pos <= GearsState::max_position_for_row(row));
+                    pos <= GearsState::max_position_for_row(row));
         self.positions[row as usize] = pos;
         self.is_initial = self.ugrent_row == INITIAL_UGRENT_ROW &&
-                          &self.positions as &[i32] == INITIAL_POSITIONS;
+            &self.positions as &[i32] == INITIAL_POSITIONS;
     }
 
     pub fn get_ugrent_row(&self) -> i32 { self.ugrent_row }
@@ -84,7 +84,7 @@ impl GearsState {
         assert!(row >= MIN_UGRENT_ROW && row <= MAX_UGRENT_ROW);
         self.ugrent_row = row;
         self.is_initial = self.ugrent_row == INITIAL_UGRENT_ROW &&
-                          &self.positions as &[i32] == INITIAL_POSITIONS;
+            &self.positions as &[i32] == INITIAL_POSITIONS;
         if self.ugrent_row == MIN_UGRENT_ROW {
             self.access = Access::Solved;
         }
@@ -124,9 +124,9 @@ impl Tomlable for GearsState {
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.is_initial && !self.is_solved() {
             let positions = self.positions
-                                .iter()
-                                .map(|&idx| toml::Value::Integer(idx as i64))
-                                .collect();
+                .iter()
+                .map(|&idx| toml::Value::Integer(idx as i64))
+                .collect();
             table.insert(POSITIONS_KEY.to_string(),
                          toml::Value::Array(positions));
             table.insert(UGRENT_ROW_KEY.to_string(),
@@ -141,9 +141,10 @@ impl Tomlable for GearsState {
         let ugrent_row = if access.is_solved() {
             MIN_UGRENT_ROW
         } else {
-            let mut row = table.remove(UGRENT_ROW_KEY)
-                               .map(i32::from_toml)
-                               .unwrap_or(INITIAL_UGRENT_ROW);
+            let mut row = table
+                .remove(UGRENT_ROW_KEY)
+                .map(i32::from_toml)
+                .unwrap_or(INITIAL_UGRENT_ROW);
             if row < MIN_UGRENT_ROW || row > MAX_UGRENT_ROW {
                 row = INITIAL_UGRENT_ROW;
             }
@@ -158,14 +159,14 @@ impl Tomlable for GearsState {
             positions = INITIAL_POSITIONS.to_vec();
         } else {
             for (row, position) in positions.iter_mut().enumerate() {
-                *position = min(max(GearsState::min_position_for_row(row as
-                                                                     i32),
-                                    *position),
-                                GearsState::max_position_for_row(row as i32));
+                *position =
+                    min(max(GearsState::min_position_for_row(row as i32),
+                            *position),
+                        GearsState::max_position_for_row(row as i32));
             }
         }
         let is_initial = &positions as &[i32] == INITIAL_POSITIONS &&
-                         ugrent_row == INITIAL_UGRENT_ROW;
+            ugrent_row == INITIAL_UGRENT_ROW;
         GearsState {
             access: access,
             positions: positions,
@@ -255,18 +256,18 @@ mod tests {
         let mut table = toml::value::Table::new();
         table.insert(POSITIONS_KEY.to_string(),
                      toml::Value::Array(vec![1, 2, -3, 44, -5, 66, 77, 88]
-                         .into_iter()
-                         .map(toml::Value::Integer)
-                         .collect()));
+                                            .into_iter()
+                                            .map(toml::Value::Integer)
+                                            .collect()));
         let state = GearsState::from_toml(toml::Value::Table(table));
         assert_eq!(state.positions, vec![1, 2, 0, 4, 6, 10, 10, 10]);
 
         let mut table = toml::value::Table::new();
         table.insert(POSITIONS_KEY.to_string(),
                      toml::Value::Array(vec![1, 2, 3, 4, 5, 6, 7]
-                         .into_iter()
-                         .map(toml::Value::Integer)
-                         .collect()));
+                                            .into_iter()
+                                            .map(toml::Value::Integer)
+                                            .collect()));
         let state = GearsState::from_toml(toml::Value::Table(table));
         assert_eq!(&state.positions as &[i32], INITIAL_POSITIONS);
     }

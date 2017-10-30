@@ -118,8 +118,10 @@ impl Element<SyzygyState, MezureCmd> for MezureView {
                 self.ice_grid.handle_event(event, grid)
             };
             if let Some(&(coords, dir)) = subaction.value() {
-                if let Some(slide) = state.mezure_ice_grid_mut()
-                                          .slide_ice_block(coords, dir) {
+                if let Some(slide) = state
+                    .mezure_ice_grid_mut()
+                    .slide_ice_block(coords, dir)
+                {
                     state.mezure_regenerate_laser_grid();
                     self.ice_grid.animate_slide(&slide);
                     self.laser_grid.clear_lasers();

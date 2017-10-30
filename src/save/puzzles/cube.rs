@@ -30,8 +30,8 @@ const GRID_KEY: &str = "grid";
 const NUM_COLS: i32 = 4;
 const NUM_ROWS: i32 = 4;
 
-const INITIAL_GRID: &[i32] = &[23, 16, 18, 12, 15, 9, 17, 22, 21, 3, 8, 6,
-                               19, 1, 4, 11];
+const INITIAL_GRID: &[i32] =
+    &[23, 16, 18, 12, 15, 9, 17, 22, 21, 3, 8, 6, 19, 1, 4, 11];
 const SOLVED_GRID: &[i32] = &[4, 4, 3, 3, 4, 2, 2, 3, 1, 2, 2, 0, 1, 1, 0, 0];
 
 // ========================================================================= //
@@ -101,9 +101,9 @@ impl Tomlable for CubeState {
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.is_initial && !self.is_solved() {
             let grid = self.grid
-                           .iter()
-                           .map(|&idx| toml::Value::Integer(idx as i64))
-                           .collect();
+                .iter()
+                .map(|&idx| toml::Value::Integer(idx as i64))
+                .collect();
             table.insert(GRID_KEY.to_string(), toml::Value::Array(grid));
         }
         toml::Value::Table(table)
@@ -256,8 +256,8 @@ mod tests {
     fn toml_round_trip() {
         let mut state = CubeState::from_toml(toml::Value::Boolean(false));
         state.access = Access::Replaying;
-        state.grid = vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
-                          15];
+        state.grid =
+            vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
         state.is_initial = false;
 
         let state = CubeState::from_toml(state.to_toml());

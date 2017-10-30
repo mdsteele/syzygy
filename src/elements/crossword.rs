@@ -181,7 +181,7 @@ impl Element<CrosswordState, (i32, i32, char)> for CrosswordView {
             let top = self.crossword_top + BOX_SIZE * row as i32;
             let offset = self.offsets_and_clues[row].0;
             let word_left = self.crossword_center_x - BOX_SIZE / 2 -
-                            BOX_SIZE * offset;
+                BOX_SIZE * offset;
             for (index, &chr) in word.iter().enumerate() {
                 let index = index as i32;
                 let left = word_left + BOX_SIZE * index;
@@ -230,10 +230,11 @@ impl Element<CrosswordState, (i32, i32, char)> for CrosswordView {
                 }
                 let offset = self.offsets_and_clues[row as usize].0;
                 let word_left = self.crossword_center_x - BOX_SIZE / 2 -
-                                BOX_SIZE * offset;
+                    BOX_SIZE * offset;
                 let index = (pt.x() - word_left) / BOX_SIZE;
                 if index < 0 ||
-                   index >= state.words()[row as usize].len() as i32 {
+                    index >= state.words()[row as usize].len() as i32
+                {
                     return Action::ignore();
                 }
                 self.cursor = Some((row, index));

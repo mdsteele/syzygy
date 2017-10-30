@@ -96,14 +96,16 @@ impl Transform {
 
     #[cfg(test)]
     pub fn all() -> Vec<Transform> {
-        vec![Transform::new(0, false),
-             Transform::new(0, true),
-             Transform::new(1, false),
-             Transform::new(1, true),
-             Transform::new(2, false),
-             Transform::new(2, true),
-             Transform::new(3, false),
-             Transform::new(3, true)]
+        vec![
+            Transform::new(0, false),
+            Transform::new(0, true),
+            Transform::new(1, false),
+            Transform::new(1, true),
+            Transform::new(2, false),
+            Transform::new(2, true),
+            Transform::new(3, false),
+            Transform::new(3, true),
+        ]
     }
 }
 
@@ -189,10 +191,11 @@ mod tests {
         for transform in Transform::all() {
             assert_eq!(transform.flipped_vert().flipped_vert(), transform);
             assert_eq!(transform.flipped_horz().flipped_horz(), transform);
-            assert_eq!(transform.flipped_vert()
-                                .rotated_cw()
-                                .rotated_cw()
-                                .flipped_horz(),
+            assert_eq!(transform
+                           .flipped_vert()
+                           .rotated_cw()
+                           .rotated_cw()
+                           .flipped_horz(),
                        transform);
         }
     }

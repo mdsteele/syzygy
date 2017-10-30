@@ -170,7 +170,8 @@ impl Tomlable for LineState {
         if access != Access::Solved {
             let mut index = 0;
             for value in Vec::<u32>::pop_from_table(&mut table, SEED_KEY)
-                .into_iter() {
+                .into_iter()
+            {
                 seed[index] = value;
                 index += 1;
                 if index >= 8 {

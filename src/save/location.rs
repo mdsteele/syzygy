@@ -186,9 +186,11 @@ impl Location {
             Location::Disconnected => vec![Location::Prolog],
             Location::DoubleCross => vec![Location::TreadLightly],
             Location::FactOrFiction => {
-                vec![Location::CubeTangle,
-                     Location::HexSpangled,
-                     Location::WhatchaColumn]
+                vec![
+                    Location::CubeTangle,
+                    Location::HexSpangled,
+                    Location::WhatchaColumn,
+                ]
             }
             Location::HexSpangled => vec![Location::TheYFactor],
             Location::IceToMeetYou => vec![Location::IfMemoryServes],
@@ -202,9 +204,11 @@ impl Location {
             Location::LogLevel => vec![Location::Disconnected],
             Location::MemoryLane => vec![Location::PlaneAndSimple],
             Location::MissedConnections => {
-                vec![Location::ConnectTheDots,
-                     Location::CubeTangle,
-                     Location::MemoryLane]
+                vec![
+                    Location::ConnectTheDots,
+                    Location::CubeTangle,
+                    Location::MemoryLane,
+                ]
             }
             Location::PasswordFile => vec![Location::SystemFailure],
             Location::PlaneAndSimple => vec![Location::CrossTheLine],
@@ -299,48 +303,50 @@ impl Default for Location {
     fn default() -> Location { Location::Map }
 }
 
-const ALL_LOCATIONS: &[Location] = &[Location::Map,
-                                     Location::Prolog,
-                                     Location::ALightInTheAttic,
-                                     Location::AutofacTour,
-                                     Location::BlackAndBlue,
-                                     Location::ColumnAsIcyEm,
-                                     Location::ConnectTheDots,
-                                     Location::CrossSauce,
-                                     Location::CrossTheLine,
-                                     Location::CubeTangle,
-                                     Location::Disconnected,
-                                     Location::DoubleCross,
-                                     Location::FactOrFiction,
-                                     Location::HexSpangled,
-                                     Location::IceToMeetYou,
-                                     Location::IfMemoryServes,
-                                     Location::JogYourMemory,
-                                     Location::LevelHeaded,
-                                     Location::LevelUp,
-                                     Location::LightSyrup,
-                                     Location::LogLevel,
-                                     Location::MemoryLane,
-                                     Location::MissedConnections,
-                                     Location::PasswordFile,
-                                     Location::PlaneAndSimple,
-                                     Location::PlaneAsDay,
-                                     Location::PointOfNoReturn,
-                                     Location::PointOfOrder,
-                                     Location::PointOfView,
-                                     Location::ShiftGears,
-                                     Location::ShiftTheBlame,
-                                     Location::ShiftingGround,
-                                     Location::StarCrossed,
-                                     Location::SystemFailure,
-                                     Location::SystemSyzygy,
-                                     Location::TheIceIsRight,
-                                     Location::TheYFactor,
-                                     Location::TreadLightly,
-                                     Location::VirtueOrIce,
-                                     Location::WhatchaColumn,
-                                     Location::WreckedAngle,
-                                     Location::Finale];
+const ALL_LOCATIONS: &[Location] = &[
+    Location::Map,
+    Location::Prolog,
+    Location::ALightInTheAttic,
+    Location::AutofacTour,
+    Location::BlackAndBlue,
+    Location::ColumnAsIcyEm,
+    Location::ConnectTheDots,
+    Location::CrossSauce,
+    Location::CrossTheLine,
+    Location::CubeTangle,
+    Location::Disconnected,
+    Location::DoubleCross,
+    Location::FactOrFiction,
+    Location::HexSpangled,
+    Location::IceToMeetYou,
+    Location::IfMemoryServes,
+    Location::JogYourMemory,
+    Location::LevelHeaded,
+    Location::LevelUp,
+    Location::LightSyrup,
+    Location::LogLevel,
+    Location::MemoryLane,
+    Location::MissedConnections,
+    Location::PasswordFile,
+    Location::PlaneAndSimple,
+    Location::PlaneAsDay,
+    Location::PointOfNoReturn,
+    Location::PointOfOrder,
+    Location::PointOfView,
+    Location::ShiftGears,
+    Location::ShiftTheBlame,
+    Location::ShiftingGround,
+    Location::StarCrossed,
+    Location::SystemFailure,
+    Location::SystemSyzygy,
+    Location::TheIceIsRight,
+    Location::TheYFactor,
+    Location::TreadLightly,
+    Location::VirtueOrIce,
+    Location::WhatchaColumn,
+    Location::WreckedAngle,
+    Location::Finale,
+];
 
 // ========================================================================= //
 
@@ -380,9 +386,10 @@ mod tests {
         let mut dependents: HashMap<Location, Vec<Location>> = HashMap::new();
         for &location in Location::all() {
             for prereq in location.prereqs().into_iter() {
-                dependents.entry(prereq)
-                          .or_insert_with(Vec::new)
-                          .push(location);
+                dependents
+                    .entry(prereq)
+                    .or_insert_with(Vec::new)
+                    .push(location);
             }
         }
         for (&location, direct_dependents) in dependents.iter() {
@@ -410,9 +417,11 @@ mod tests {
                 if deps_map.contains_key(&location) {
                     continue;
                 }
-                if !location.prereqs()
-                            .into_iter()
-                            .all(|req| deps_map.contains_key(&req)) {
+                if !location
+                    .prereqs()
+                    .into_iter()
+                    .all(|req| deps_map.contains_key(&req))
+                {
                     continue;
                 }
                 let mut loc_deps: HashSet<Location> = HashSet::new();

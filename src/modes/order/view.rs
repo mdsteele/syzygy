@@ -43,12 +43,14 @@ impl View {
         };
         View {
             core: core,
-            rows: vec![TileRow::new(resources, 0, 321, 95),
-                       TileRow::new(resources, 1, 321, 127),
-                       TileRow::new(resources, 2, 321, 159),
-                       TileRow::new(resources, 3, 322, 191),
-                       TileRow::new(resources, 4, 322, 223),
-                       TileRow::new(resources, 5, 322, 255)],
+            rows: vec![
+                TileRow::new(resources, 0, 321, 95),
+                TileRow::new(resources, 1, 321, 127),
+                TileRow::new(resources, 2, 321, 159),
+                TileRow::new(resources, 3, 322, 191),
+                TileRow::new(resources, 4, 322, 223),
+                TileRow::new(resources, 5, 322, 255),
+            ],
         }
     }
 }
@@ -152,9 +154,11 @@ impl TileRow {
 impl Element<OrderState, (usize, usize)> for TileRow {
     fn draw(&self, state: &OrderState, canvas: &mut Canvas) {
         if state.current_row() >= self.row {
-            for (index, value) in state.row_order(self.row)
-                                       .iter()
-                                       .enumerate() {
+            for (index, value) in state
+                .row_order(self.row)
+                .iter()
+                .enumerate()
+            {
                 let mut x = self.left + TILE_SPACING * (index as i32) + 1;
                 if let Some(ref drag) = self.drag {
                     if drag.index == index {
@@ -170,7 +174,7 @@ impl Element<OrderState, (usize, usize)> for TileRow {
                 let value = state.row_order(self.row)[drag.index];
                 let sprite = &self.sprites[6 * self.row + value];
                 let x = self.left + TILE_SPACING * (drag.index as i32) + 1 +
-                        drag.offset(drag.index);
+                    drag.offset(drag.index);
                 let y = self.top + 1;
                 canvas.draw_sprite(sprite, Point::new(x, y));
             }
@@ -252,15 +256,16 @@ impl TileDrag {
         let new_index =
             cmp::min(cmp::max(0,
                               self.new_index as i32 +
-                              (self.to - self.from) / TILE_SPACING),
+                                  (self.to - self.from) / TILE_SPACING),
                      self.offsets.len() as i32 - 1) as usize;
         if self.new_index != new_index {
             self.from += (new_index as i32 - self.new_index as i32) *
-                         TILE_SPACING;
+                TILE_SPACING;
             self.new_index = new_index;
             let old_index = self.index;
             for (index, &mut (_, ref mut goal)) in
-                self.offsets.iter_mut().enumerate() {
+                self.offsets.iter_mut().enumerate()
+            {
                 *goal = if index < old_index && index >= new_index {
                     TILE_SPACING
                 } else if index > old_index && index <= new_index {
@@ -271,7 +276,7 @@ impl TileDrag {
             }
         }
         let offset = (self.new_index as i32 - self.index as i32) *
-                     TILE_SPACING + self.to - self.from;
+            TILE_SPACING + self.to - self.from;
         self.offsets[self.index] = (offset, offset);
     }
 

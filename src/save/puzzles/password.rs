@@ -37,38 +37,54 @@ const UGRENT_KEY: &str = "ugrent";
 const RELYNG_KEY: &str = "relyng";
 const SLIDERS_KEY: &str = "sliders";
 
-const ELINSA_WORDS: &[&str] = &["ENGINEERING",
-                                "INTELLIGENCE",
-                                "IMPATIENT",
-                                "INDEPENDENCE",
-                                "RESOURCEFUL",
-                                "SARCASM"];
-const ARGONY_WORDS: &[&str] = &["VENERATED",
-                                "PERSPECTIVE",
-                                "KNOWLEDGE",
-                                "HISTORY",
-                                "EXPERIENCE",
-                                "ELDERLY"];
-const MEZURE_WORDS: &[&str] = &["DETERMINED",
-                                "TEAMWORK",
-                                "ORGANIZED",
-                                "DUTIFUL",
-                                "JUNIOR",
-                                "LEADERSHIP"];
-const YTTRIS_WORDS: &[&str] =
-    &["ENERGY", "EMOTION", "SPONTANEOUS", "FEARFUL", "CREATIVE", "ARTISTIC"];
-const UGRENT_WORDS: &[&str] = &["CAUTION",
-                                "GRUFF",
-                                "PROTECTIVE",
-                                "SECURITY",
-                                "CONSERVATIVE",
-                                "METICULOUS"];
-const RELYNG_WORDS: &[&str] = &["REALISM",
-                                "SKEPTICISM",
-                                "STEALTH",
-                                "SECRECY",
-                                "DUBIOUSNESS",
-                                "INVESTIGATION"];
+const ELINSA_WORDS: &[&str] = &[
+    "ENGINEERING",
+    "INTELLIGENCE",
+    "IMPATIENT",
+    "INDEPENDENCE",
+    "RESOURCEFUL",
+    "SARCASM",
+];
+const ARGONY_WORDS: &[&str] = &[
+    "VENERATED",
+    "PERSPECTIVE",
+    "KNOWLEDGE",
+    "HISTORY",
+    "EXPERIENCE",
+    "ELDERLY",
+];
+const MEZURE_WORDS: &[&str] = &[
+    "DETERMINED",
+    "TEAMWORK",
+    "ORGANIZED",
+    "DUTIFUL",
+    "JUNIOR",
+    "LEADERSHIP",
+];
+const YTTRIS_WORDS: &[&str] = &[
+    "ENERGY",
+    "EMOTION",
+    "SPONTANEOUS",
+    "FEARFUL",
+    "CREATIVE",
+    "ARTISTIC",
+];
+const UGRENT_WORDS: &[&str] = &[
+    "CAUTION",
+    "GRUFF",
+    "PROTECTIVE",
+    "SECURITY",
+    "CONSERVATIVE",
+    "METICULOUS",
+];
+const RELYNG_WORDS: &[&str] = &[
+    "REALISM",
+    "SKEPTICISM",
+    "STEALTH",
+    "SECRECY",
+    "DUBIOUSNESS",
+    "INVESTIGATION",
+];
 
 const INIT_SLIDERS: [i32; 6] = [-3, -1, -4, -1, -4, -2];
 const SOLVED_SLIDERS: [i32; 6] = [-4, -5, -2, 0, -1, -3];
@@ -90,12 +106,14 @@ impl PasswordState {
     }
 
     fn solve_all_crosswords(&mut self) {
-        self.crosswords = [(true, CrosswordState::new(VALID, ELINSA_WORDS)),
-                           (true, CrosswordState::new(VALID, ARGONY_WORDS)),
-                           (true, CrosswordState::new(VALID, MEZURE_WORDS)),
-                           (true, CrosswordState::new(VALID, YTTRIS_WORDS)),
-                           (true, CrosswordState::new(VALID, UGRENT_WORDS)),
-                           (true, CrosswordState::new(VALID, RELYNG_WORDS))];
+        self.crosswords = [
+            (true, CrosswordState::new(VALID, ELINSA_WORDS)),
+            (true, CrosswordState::new(VALID, ARGONY_WORDS)),
+            (true, CrosswordState::new(VALID, MEZURE_WORDS)),
+            (true, CrosswordState::new(VALID, YTTRIS_WORDS)),
+            (true, CrosswordState::new(VALID, UGRENT_WORDS)),
+            (true, CrosswordState::new(VALID, RELYNG_WORDS)),
+        ];
     }
 
     pub fn active_index(&self) -> usize { self.active_index }
@@ -227,7 +245,7 @@ impl Tomlable for PasswordState {
         let active_index =
             max(0,
                 min(5, i32::pop_from_table(&mut table, ACTIVE_INDEX_KEY))) as
-            usize;
+                usize;
         let sliders = if access == Access::Solved {
             SOLVED_SLIDERS
         } else {
@@ -237,7 +255,8 @@ impl Tomlable for PasswordState {
                 .filter_map(toml::Value::as_integer)
                 .filter(|&off| -5 <= off && off <= 0)
                 .map(|off| off as i32)
-                .enumerate() {
+                .enumerate()
+            {
                 if index >= sliders.len() {
                     break;
                 }
@@ -248,12 +267,14 @@ impl Tomlable for PasswordState {
         PasswordState {
             access: access,
             active_index: active_index,
-            crosswords: [load(&mut table, access, ELINSA_KEY, ELINSA_WORDS),
-                         load(&mut table, access, ARGONY_KEY, ARGONY_WORDS),
-                         load(&mut table, access, MEZURE_KEY, MEZURE_WORDS),
-                         load(&mut table, access, YTTRIS_KEY, YTTRIS_WORDS),
-                         load(&mut table, access, UGRENT_KEY, UGRENT_WORDS),
-                         load(&mut table, access, RELYNG_KEY, RELYNG_WORDS)],
+            crosswords: [
+                load(&mut table, access, ELINSA_KEY, ELINSA_WORDS),
+                load(&mut table, access, ARGONY_KEY, ARGONY_WORDS),
+                load(&mut table, access, MEZURE_KEY, MEZURE_WORDS),
+                load(&mut table, access, YTTRIS_KEY, YTTRIS_WORDS),
+                load(&mut table, access, UGRENT_KEY, UGRENT_WORDS),
+                load(&mut table, access, RELYNG_KEY, RELYNG_WORDS),
+            ],
             sliders: sliders,
         }
     }
@@ -330,9 +351,10 @@ mod tests {
         assert_eq!(state.access, Access::Unvisited);
         assert_eq!(state.active_index, 0);
         assert!(state.crosswords.iter().all(|&(done, _)| !done));
-        assert!(state.crosswords
-                     .iter()
-                     .all(|&(_, ref crossword)| !crossword.can_reset()));
+        assert!(state
+                    .crosswords
+                    .iter()
+                    .all(|&(_, ref crossword)| !crossword.can_reset()));
         assert_eq!(state.sliders, INIT_SLIDERS);
     }
 

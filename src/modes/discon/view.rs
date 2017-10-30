@@ -74,9 +74,10 @@ impl Element<Game, PuzzleCmd> for View {
         let state = &mut game.disconnected;
         let mut action = self.core.handle_event(event, state);
         if !action.should_stop() && self.box_open &&
-           (event == &Event::ClockTick || !state.is_solved()) {
+            (event == &Event::ClockTick || !state.is_solved())
+        {
             let subaction = self.laser_field
-                                .handle_event(event, state.grid_mut());
+                .handle_event(event, state.grid_mut());
             if let Some(&cmd) = subaction.value() {
                 if self.laser_field.all_detectors_satisfied(state.grid()) {
                     state.mark_solved();

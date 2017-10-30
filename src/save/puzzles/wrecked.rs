@@ -31,15 +31,27 @@ const NUM_ROWS: i32 = 7;
 
 const GRID_KEY: &str = "grid";
 
-const INITIAL_GRID: &[i8] =
-    &[2, 1, 2, 1, 2, -1, 2, 0, 1, -1, -1, 1, 2, 0, -1, -1, 2, 0, 0, 1, 2, 1,
-      -1, 0, 1, 1, 2, 2, 0, -1, -1, 2, -1, -1, -1, 1, 2, 1, 0, 2, -1, 1, 2,
-      2, 0, 0, -1, -1, -1, 1, 0, -1, 0, 1, 1, 0, 2, 2, 0, 1, -1, 2, 2];
+#[cfg_attr(rustfmt, rustfmt_skip)]
+const INITIAL_GRID: &[i8] = &[
+    2,   1,  2,  1,  2, -1,  2,  0, 1,
+    -1, -1,  1,  2,  0, -1, -1,  2, 0,
+    0,   1,  2,  1, -1,  0,  1,  1, 2,
+    2,   0, -1, -1,  2, -1, -1, -1, 1,
+    2,   1,  0,  2, -1,  1,  2,  2, 0,
+    0,  -1, -1, -1,  1,  0, -1,  0, 1,
+    1,   0,  2,  2,  0,  1, -1,  2, 2,
+];
 
-const SOLVED_GRID: &[i8] =
-    &[0, 0, 0, 1, 1, -1, 2, 2, 2, -1, -1, 0, 1, 1, -1, -1, 2, 2, 2, 2, 2, 0,
-      -1, 0, 1, 1, 1, 2, 2, -1, -1, 0, -1, -1, -1, 1, 2, 2, 2, 0, -1, 0, 1,
-      1, 1, 1, -1, -1, -1, 2, 2, -1, 0, 0, 1, 1, 1, 2, 2, 2, -1, 0, 0];
+#[cfg_attr(rustfmt, rustfmt_skip)]
+const SOLVED_GRID: &[i8] = &[
+    0,   0,  0,  1,  1, -1,  2,  2, 2,
+    -1, -1,  0,  1,  1, -1, -1,  2, 2,
+    2,   2,  2,  0, -1,  0,  1,  1, 1,
+    2,   2, -1, -1,  0, -1, -1, -1, 1,
+    2,   2,  2,  0, -1,  0,  1,  1, 1,
+    1,  -1, -1, -1,  2,  2, -1,  0, 0,
+    1,   1,  1,  2,  2,  2, -1,  0, 0,
+];
 
 // ========================================================================= //
 
@@ -157,12 +169,10 @@ impl Tomlable for WreckedState {
             if grid_sorted != init_sorted {
                 grid = INITIAL_GRID.to_vec()
             } else {
-                let init_neg: Vec<bool> = INITIAL_GRID.iter()
-                                                      .map(|&tile| tile < 0)
-                                                      .collect();
-                let grid_neg: Vec<bool> = grid.iter()
-                                              .map(|&tile| tile < 0)
-                                              .collect();
+                let init_neg: Vec<bool> =
+                    INITIAL_GRID.iter().map(|&tile| tile < 0).collect();
+                let grid_neg: Vec<bool> =
+                    grid.iter().map(|&tile| tile < 0).collect();
                 if grid_neg != init_neg {
                     grid = INITIAL_GRID.to_vec();
                 }

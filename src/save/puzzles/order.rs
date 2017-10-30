@@ -30,12 +30,14 @@ const ORDER_KEY: &str = "order";
 const ROW_KEY: &str = "row";
 
 const INITIAL_ORDER: &[usize; 6] = &[0, 1, 2, 3, 4, 5];
-const SOLVED_ORDERS: &[[usize; 6]] = &[[3, 4, 0, 2, 5, 1], // Letters
-                                       [4, 3, 0, 5, 2, 1], // Numbers
-                                       [4, 2, 1, 0, 3, 5], // Elements
-                                       [1, 4, 2, 5, 3, 0], // Shapes
-                                       [4, 3, 2, 5, 0, 1], // Colors
-                                       [1, 2, 5, 4, 3, 0]]; // Characters
+const SOLVED_ORDERS: &[[usize; 6]] = &[
+    [3, 4, 0, 2, 5, 1], // Letters
+    [4, 3, 0, 5, 2, 1], // Numbers
+    [4, 2, 1, 0, 3, 5], // Elements
+    [1, 4, 2, 5, 3, 0], // Shapes
+    [4, 3, 2, 5, 0, 1], // Colors
+    [1, 2, 5, 4, 3, 0],
+]; // Characters
 
 // ========================================================================= //
 
@@ -113,9 +115,9 @@ impl Tomlable for OrderState {
             table.insert(ROW_KEY.to_string(),
                          toml::Value::Integer(self.row as i64));
             let order = self.order
-                            .iter()
-                            .map(|&idx| toml::Value::Integer(idx as i64))
-                            .collect();
+                .iter()
+                .map(|&idx| toml::Value::Integer(idx as i64))
+                .collect();
             table.insert(ORDER_KEY.to_string(), toml::Value::Array(order));
         }
         toml::Value::Table(table)
@@ -133,7 +135,8 @@ impl Tomlable for OrderState {
         let mut order = [0; 6];
         for (index, value) in pop_array(&mut table, ORDER_KEY)
             .into_iter()
-            .enumerate() {
+            .enumerate()
+        {
             if index >= order.len() {
                 break;
             }

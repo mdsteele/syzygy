@@ -68,7 +68,8 @@ impl Paragraph {
                         let mobile = parse_arg(&mut chars);
                         let desktop = parse_arg(&mut chars);
                         if cfg!(any(target_os = "android",
-                                    target_os = "ios")) {
+                                    target_os = "ios"))
+                        {
                             parser.push_str(&mobile);
                         } else {
                             parser.push_str(&desktop);
@@ -138,7 +139,8 @@ impl Line {
         let mut baseline = 0;
         for piece in (self.left.iter())
             .chain(self.center.iter())
-            .chain(self.right.iter()) {
+            .chain(self.right.iter())
+        {
             baseline = cmp::max(baseline, piece.baseline());
         }
         baseline
@@ -148,7 +150,8 @@ impl Line {
         let mut width = 0;
         for piece in (self.left.iter())
             .chain(self.center.iter())
-            .chain(self.right.iter()) {
+            .chain(self.right.iter())
+        {
             width += piece.width();
         }
         width
@@ -159,10 +162,11 @@ impl Line {
         let mut height = MIN_LINE_HEIGHT;
         for piece in (self.left.iter())
             .chain(self.center.iter())
-            .chain(self.right.iter()) {
+            .chain(self.right.iter())
+        {
             height = cmp::max(height,
                               (baseline - piece.baseline()) as u32 +
-                              piece.height());
+                                  piece.height());
         }
         height
     }

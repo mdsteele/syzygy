@@ -42,9 +42,8 @@ impl Columns {
     pub fn from_toml(spec: &[(&str, i32, i32, &[(usize, i32)])],
                      array: toml::value::Array)
                      -> Columns {
-        let mut columns: Vec<Column> =
-            spec.iter()
-                .map(|&(word, offset, solved, linkages)| {
+        let mut columns: Vec<Column> = spec.iter()
+            .map(|&(word, offset, solved, linkages)| {
                 Column {
                     letters: word.chars().collect(),
                     linkages: linkages.iter().cloned().collect(),
@@ -53,7 +52,7 @@ impl Columns {
                     solved_position: solved,
                 }
             })
-                .collect();
+            .collect();
         for (index, value) in array.into_iter().enumerate() {
             if index >= columns.len() {
                 break;
@@ -117,7 +116,7 @@ impl Columns {
         for (other, factor) in linkages.into_iter() {
             let column = &mut self.columns[other];
             column.current_position = mod_floor(column.current_position -
-                                                by * factor,
+                                                    by * factor,
                                                 column.letters.len() as i32);
         }
     }

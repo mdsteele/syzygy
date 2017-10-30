@@ -100,7 +100,7 @@ impl PlaneGrid {
 
     pub fn contains_coords(&self, pt: Point) -> bool {
         (pt.x() >= 0 && (pt.x() as u32) < self.num_cols) &&
-        (pt.y() >= 0 && (pt.y() as u32) < self.num_rows)
+            (pt.y() >= 0 && (pt.y() as u32) < self.num_rows)
     }
 
     pub fn objects(&self) -> &HashMap<Point, PlaneObj> { &self.objects }
@@ -171,15 +171,16 @@ impl PlaneGrid {
         }
         let is_vertical = dx == 0;
         match (self.pipe_piece_at(coords1, is_vertical),
-               self.pipe_piece_at(coords2, is_vertical)) {
+                 self.pipe_piece_at(coords2, is_vertical)) {
             (PipePiece::EmptyOrNode(node1), PipePiece::EmptyOrNode(node2)) => {
                 if node1 && node2 {
                     for p in 0..self.pipes.len() {
                         if self.pipes[p].len() == 2 &&
-                           ((self.pipes[p][0] == coords1 &&
-                             self.pipes[p][1] == coords2) ||
-                            (self.pipes[p][0] == coords2 &&
-                             self.pipes[p][1] == coords1)) {
+                            ((self.pipes[p][0] == coords1 &&
+                                  self.pipes[p][1] == coords2) ||
+                                 (self.pipes[p][0] == coords2 &&
+                                      self.pipes[p][1] == coords1))
+                        {
                             self.pipes.swap_remove(p);
                             return true;
                         }
@@ -197,7 +198,8 @@ impl PlaneGrid {
             }
             (PipePiece::EmptyOrNode(is_node), PipePiece::End(p2)) => {
                 if is_node && self.pipes[p2].len() == 2 &&
-                   self.pipes[p2][0] == coords1 {
+                    self.pipes[p2][0] == coords1
+                {
                     self.pipes.swap_remove(p2);
                 } else {
                     self.pipes[p2].push(coords1);
@@ -213,7 +215,8 @@ impl PlaneGrid {
             }
             (PipePiece::End(p1), PipePiece::EmptyOrNode(is_node)) => {
                 if is_node && self.pipes[p1].len() == 2 &&
-                   self.pipes[p1][0] == coords2 {
+                    self.pipes[p1][0] == coords2
+                {
                     self.pipes.swap_remove(p1);
                 } else {
                     self.pipes[p1].push(coords2);
@@ -283,7 +286,8 @@ impl PlaneGrid {
                 if is_node && i1 == 1 && self.pipes[p1][0] == coords2 {
                     self.pipes[p1].remove(0);
                 } else if is_node && i1 + 2 == self.pipes[p1].len() &&
-                          self.pipes[p1][i1 + 1] == coords2 {
+                           self.pipes[p1][i1 + 1] == coords2
+                {
                     self.pipes[p1].pop();
                 } else {
                     return false;
@@ -293,7 +297,8 @@ impl PlaneGrid {
                 if is_node && i2 == 1 && self.pipes[p2][0] == coords1 {
                     self.pipes[p2].remove(0);
                 } else if is_node && i2 + 2 == self.pipes[p2].len() &&
-                          self.pipes[p2][i2 + 1] == coords1 {
+                           self.pipes[p2][i2 + 1] == coords1
+                {
                     self.pipes[p2].pop();
                 } else {
                     return false;

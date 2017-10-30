@@ -153,13 +153,16 @@ impl View {
             platform_seq.push(Box::new(QueueNode::new((row, pos))));
             platform_seq.push(Box::new(WaitNode::new(travel_time)));
             if elinsa_row >= 0 && elinsa_row < num_rows &&
-               row == elinsa_row - 1 {
+                row == elinsa_row - 1
+            {
                 let impact = if pos > old_pos && elinsa_pos > old_pos &&
-                                elinsa_pos <= pos {
+                    elinsa_pos <= pos
+                {
                     Some((Platform::travel_time(old_pos, elinsa_pos - 1),
                           cmp::min(max_pos, elinsa_pos + 1)))
                 } else if pos < old_pos && elinsa_pos >= pos &&
-                                       elinsa_pos < old_pos {
+                           elinsa_pos < old_pos
+                {
                     Some((Platform::travel_time(old_pos, elinsa_pos + 1),
                           cmp::max(0, elinsa_pos - 1)))
                 } else {
@@ -175,7 +178,7 @@ impl View {
                     };
                     let fall_dist = dest.y() - self.platform_top(row + 1);
                     let time_to_fall = JumpNode::time_to_fall(fall_dist + 5) +
-                                       JumpNode::time_to_fall(5);
+                        JumpNode::time_to_fall(5);
                     elinsa_seq.push(Box::new(WaitNode::new(time_to_hit)));
                     let sound = Sound::character_collision();
                     elinsa_seq.push(Box::new(SoundNode::new(sound)));
@@ -187,10 +190,12 @@ impl View {
                 let impact = if row > 0 {
                     let barrier_pos = state.get_position(row - 1);
                     if pos > old_pos && barrier_pos > old_pos &&
-                       barrier_pos <= pos {
+                        barrier_pos <= pos
+                    {
                         Some(barrier_pos - 1)
                     } else if pos < old_pos && barrier_pos < old_pos &&
-                              barrier_pos >= pos {
+                               barrier_pos >= pos
+                    {
                         Some(barrier_pos + 1)
                     } else {
                         None
@@ -211,7 +216,7 @@ impl View {
                     };
                     let fall_dist = jump_dest.y() - self.platform_top(row);
                     let time_to_fall = JumpNode::time_to_fall(fall_dist + 5) +
-                                       JumpNode::time_to_fall(5);
+                        JumpNode::time_to_fall(5);
                     elinsa_seq.push(Box::new(SlideNode::new(scenes::ELINSA,
                                                             slide_dest,
                                                             false,
@@ -254,7 +259,8 @@ impl View {
 
         // Make Elinsa climb upwards:
         if elinsa_row == num_rows && state.get_position(num_rows - 1) == 0 &&
-           state.get_position(num_rows - 2) != 0 {
+            state.get_position(num_rows - 2) != 0
+        {
             elinsa_row -= 1;
             let dest = self.platform_pt(state, elinsa_row);
             top_seq.push(Box::new(SoundNode::new(Sound::small_jump())));
@@ -276,9 +282,8 @@ impl View {
                 elinsa_row -= 1;
                 let dest = self.platform_pt(state, elinsa_row);
                 top_seq.push(Box::new(SoundNode::new(Sound::small_jump())));
-                top_seq.push(Box::new(JumpNode::new(scenes::ELINSA,
-                                                    dest,
-                                                    0.6)));
+                top_seq
+                    .push(Box::new(JumpNode::new(scenes::ELINSA, dest, 0.6)));
             }
         }
         if elinsa_row == 0 && state.get_position(0) == max_pos {
@@ -323,7 +328,7 @@ impl Element<Game, PuzzleCmd> for View {
         }
         if !action.should_stop() {
             let subaction = self.animation
-                                .handle_event(event, self.core.theater_mut());
+                .handle_event(event, self.core.theater_mut());
             action.merge(subaction.but_no_value());
             self.drain_queue();
             if state.is_solved() && self.animation.is_finished() {
@@ -331,7 +336,8 @@ impl Element<Game, PuzzleCmd> for View {
             }
         }
         if !action.should_stop() && self.platforms_and_arrows_visible &&
-           (event == &Event::ClockTick || !state.is_solved()) {
+            (event == &Event::ClockTick || !state.is_solved())
+        {
             let subaction = self.arrows.handle_event(event, &mut ());
             if let Some(&(row, delta)) = subaction.value() {
                 self.shift_platform(state, row, delta);

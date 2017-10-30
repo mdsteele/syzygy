@@ -139,14 +139,16 @@ impl MixedColor {
 
     #[cfg(test)]
     pub fn all() -> Vec<MixedColor> {
-        vec![MixedColor::Black,
-             MixedColor::Red,
-             MixedColor::Green,
-             MixedColor::Yellow,
-             MixedColor::Blue,
-             MixedColor::Magenta,
-             MixedColor::Cyan,
-             MixedColor::White]
+        vec![
+            MixedColor::Black,
+            MixedColor::Red,
+            MixedColor::Green,
+            MixedColor::Yellow,
+            MixedColor::Blue,
+            MixedColor::Magenta,
+            MixedColor::Cyan,
+            MixedColor::White,
+        ]
     }
 }
 

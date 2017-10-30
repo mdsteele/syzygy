@@ -22,8 +22,8 @@ use std::collections::HashSet;
 use std::rc::Rc;
 
 use elements::{PuzzleCmd, PuzzleCore, PuzzleView};
-use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
-          Sound, Sprite};
+use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
+          Resources, Sound, Sprite};
 use modes::SOLVED_INFO_TEXT;
 use save::{Game, PuzzleState, StarState, WordDir};
 use super::scenes::{compile_intro_scene, compile_outro_scene};
@@ -213,12 +213,15 @@ impl Element<StarState, (i32, i32, WordDir, i32)> for LetterColumns {
         let rect = self.rect();
         let mut canvas = canvas.subcanvas(rect);
         for col in 0..state.num_columns() {
-            for (row, &letter) in state.column_letters(col)
-                                       .iter()
-                                       .enumerate() {
+            for (row, &letter) in state
+                .column_letters(col)
+                .iter()
+                .enumerate()
+            {
                 let row = row as i32;
                 let sprite_idx = if self.hilight_anim > col &&
-                                    self.hilight_anim <= 10 + col {
+                    self.hilight_anim <= 10 + col
+                {
                     2
                 } else if hilighted.contains(&(col, row)) {
                     1
@@ -229,7 +232,7 @@ impl Element<StarState, (i32, i32, WordDir, i32)> for LetterColumns {
                 let gap = if row >= gap_row { gap } else { 0 };
                 let pt = Point::new(col * BLOCK_WIDTH,
                                     rect.height() as i32 - gap -
-                                    (1 + row) * BLOCK_HEIGHT);
+                                        (1 + row) * BLOCK_HEIGHT);
                 canvas.draw_sprite(&self.sprites[sprite_idx], pt);
                 let pt = pt + Point::new(BLOCK_WIDTH / 2, BLOCK_HEIGHT - 3);
                 canvas.draw_char(&self.font, Align::Center, pt, letter);
@@ -243,7 +246,8 @@ impl Element<StarState, (i32, i32, WordDir, i32)> for LetterColumns {
             &Event::ClockTick => {
                 let mut redraw = false;
                 for &mut (_, ref mut gap, ref mut speed) in
-                    self.fall_anim.iter_mut() {
+                    self.fall_anim.iter_mut()
+                {
                     if *gap > 0 {
                         *gap = cmp::max(0, *gap - *speed);
                         *speed += 1;
@@ -275,10 +279,10 @@ impl Element<StarState, (i32, i32, WordDir, i32)> for LetterColumns {
                 let rect = self.rect();
                 if let Some(ref mut drag) = self.drag {
                     let from = rect.bottom_left() +
-                               Point::new(drag.start_col * BLOCK_WIDTH +
-                                          BLOCK_WIDTH / 2,
-                                          -drag.start_row * BLOCK_HEIGHT -
-                                          BLOCK_HEIGHT / 2);
+                        Point::new(drag.start_col * BLOCK_WIDTH +
+                                       BLOCK_WIDTH / 2,
+                                   -drag.start_row * BLOCK_HEIGHT -
+                                       BLOCK_HEIGHT / 2);
                     Action::redraw_if(drag.set_delta(pt - from, state))
                 } else {
                     Action::ignore()
@@ -330,7 +334,8 @@ impl Drag {
         let xabs = delta.x().abs();
         let yabs = delta.y().abs();
         if xabs < BLOCK_WIDTH + BLOCK_WIDTH / 2 &&
-           yabs < BLOCK_HEIGHT + BLOCK_HEIGHT / 2 {
+            yabs < BLOCK_HEIGHT + BLOCK_HEIGHT / 2
+        {
             let direction = if xabs > 2 * yabs {
                 Point::new(delta.x().signum(), 0)
             } else if yabs > 2 * xabs {
@@ -361,9 +366,10 @@ impl Drag {
         let mut length = dist.abs() + 1;
         for offset in 1..length {
             let pt = Point::new(self.start_col, self.start_row) +
-                     self.direction * offset;
+                self.direction * offset;
             if pt.x() < 0 || pt.x() >= state.num_columns() || pt.y() < 0 ||
-               pt.y() >= state.column_letters(pt.x()).len() as i32 {
+                pt.y() >= state.column_letters(pt.x()).len() as i32
+            {
                 length = offset;
                 break;
             }

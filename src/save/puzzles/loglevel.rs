@@ -27,9 +27,18 @@ use super::PuzzleState;
 
 const WORDS_KEY: &str = "words";
 
-const SOLVED_WORDS: &[&str] = &["IN4MAL", "FEMI9", "CAR2N", "1DERFUL",
-                                "4EN6", "PER48", "42ITOUS", "PHY6", "QUI9",
-                                "PUNC28"];
+const SOLVED_WORDS: &[&str] = &[
+    "IN4MAL",
+    "FEMI9",
+    "CAR2N",
+    "1DERFUL",
+    "4EN6",
+    "PER48",
+    "42ITOUS",
+    "PHY6",
+    "QUI9",
+    "PUNC28",
+];
 
 const VALID_CHARS: ValidChars = ValidChars::LettersAndNumbers;
 

@@ -21,8 +21,8 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 use elements::{PuzzleCmd, PuzzleCore, PuzzleView};
-use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
-          Sprite};
+use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
+          Resources, Sprite};
 use modes::SOLVED_INFO_TEXT;
 use save::{CubeState, Direction, Game, PuzzleState};
 use super::scenes;
@@ -272,12 +272,12 @@ impl Element<CubeState, (Direction, i32, i32)> for CubeGrid {
                         } else {
                             (fr, bt)
                         };
-                        canvas.draw_sprite_transposed(&self.faces[12 + bt],
-                                                      pt);
-                        canvas.draw_sprite_transposed(&self.faces[18 + tp],
-                                                      pt);
-                        canvas.draw_sprite_transposed(&self.faces[24 + rt],
-                                                      pt);
+                        canvas
+                            .draw_sprite_transposed(&self.faces[12 + bt], pt);
+                        canvas
+                            .draw_sprite_transposed(&self.faces[18 + tp], pt);
+                        canvas
+                            .draw_sprite_transposed(&self.faces[24 + rt], pt);
                     } else {
                         canvas.draw_sprite(&self.cubes[1], pt);
                         let (lt, rt) = if dir == Direction::East {
@@ -325,8 +325,8 @@ impl Element<CubeState, (Direction, i32, i32)> for CubeGrid {
                     if let Some((dir, rank, by)) = drag_result {
                         state.rotate_cubes(dir, rank, by);
                         if state.is_solved() {
-                            return Action::redraw().and_return(drag.accum()
-                                                                   .unwrap());
+                            return Action::redraw()
+                                .and_return(drag.accum().unwrap());
                         }
                     }
                     self.drag = Some(drag);
@@ -411,12 +411,14 @@ impl Element<CubeState, PuzzleCmd> for SolutionDisplay {
 
 // ========================================================================= //
 
-const LETTERS: &[(i32, i32, char)] = &[(1, 0, 'Y'),
-                                       (0, 1, 'T'),
-                                       (1, 1, 'I'),
-                                       (2, 1, 'O'),
-                                       (3, 1, 'N'),
-                                       (2, 2, 'R')];
+const LETTERS: &[(i32, i32, char)] = &[
+    (1, 0, 'Y'),
+    (0, 1, 'T'),
+    (1, 1, 'I'),
+    (2, 1, 'O'),
+    (3, 1, 'N'),
+    (2, 2, 'R'),
+];
 
 const INFO_BOX_TEXT: &str = "\
 Your goal is to arrange the front faces of the cubes in

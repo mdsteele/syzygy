@@ -44,27 +44,29 @@ impl View {
         core.add_extra_scene(scenes::compile_mezure_midscene(resources));
         View {
             core: core,
-            toggles: vec![ToggleLight::new(resources, state, (1, 0)),
-                          ToggleLight::new(resources, state, (2, 0)),
-                          ToggleLight::new(resources, state, (3, 0)),
-                          ToggleLight::new(resources, state, (0, 1)),
-                          ToggleLight::new(resources, state, (1, 1)),
-                          ToggleLight::new(resources, state, (2, 1)),
-                          ToggleLight::new(resources, state, (3, 1)),
-                          ToggleLight::new(resources, state, (4, 1)),
-                          ToggleLight::new(resources, state, (0, 2)),
-                          ToggleLight::new(resources, state, (1, 2)),
-                          ToggleLight::new(resources, state, (2, 2)),
-                          ToggleLight::new(resources, state, (3, 2)),
-                          ToggleLight::new(resources, state, (4, 2)),
-                          ToggleLight::new(resources, state, (0, 3)),
-                          ToggleLight::new(resources, state, (1, 3)),
-                          ToggleLight::new(resources, state, (2, 3)),
-                          ToggleLight::new(resources, state, (3, 3)),
-                          ToggleLight::new(resources, state, (4, 3)),
-                          ToggleLight::new(resources, state, (1, 4)),
-                          ToggleLight::new(resources, state, (2, 4)),
-                          ToggleLight::new(resources, state, (3, 4))],
+            toggles: vec![
+                ToggleLight::new(resources, state, (1, 0)),
+                ToggleLight::new(resources, state, (2, 0)),
+                ToggleLight::new(resources, state, (3, 0)),
+                ToggleLight::new(resources, state, (0, 1)),
+                ToggleLight::new(resources, state, (1, 1)),
+                ToggleLight::new(resources, state, (2, 1)),
+                ToggleLight::new(resources, state, (3, 1)),
+                ToggleLight::new(resources, state, (4, 1)),
+                ToggleLight::new(resources, state, (0, 2)),
+                ToggleLight::new(resources, state, (1, 2)),
+                ToggleLight::new(resources, state, (2, 2)),
+                ToggleLight::new(resources, state, (3, 2)),
+                ToggleLight::new(resources, state, (4, 2)),
+                ToggleLight::new(resources, state, (0, 3)),
+                ToggleLight::new(resources, state, (1, 3)),
+                ToggleLight::new(resources, state, (2, 3)),
+                ToggleLight::new(resources, state, (3, 3)),
+                ToggleLight::new(resources, state, (4, 3)),
+                ToggleLight::new(resources, state, (1, 4)),
+                ToggleLight::new(resources, state, (2, 4)),
+                ToggleLight::new(resources, state, (3, 4)),
+            ],
             next: NextColor::new(resources),
         }
     }
@@ -211,7 +213,8 @@ impl Element<SyrupState, (i32, i32)> for ToggleLight {
                        MAX_LIGHT_RADIUS,
                        (0, 0, 255));
         } else if self.red_radius <= self.green_radius &&
-                  self.red_radius <= self.blue_radius {
+                   self.red_radius <= self.blue_radius
+        {
             // Red is smallest.
             if self.green_radius <= self.blue_radius {
                 draw_light(&mut canvas,
@@ -274,11 +277,12 @@ impl Element<SyrupState, (i32, i32)> for ToggleLight {
                 let (red, green, blue) = state.light_colors(self.position);
                 // N.B. The below ORs must be non-short-circuiting.
                 Action::redraw_if(tick_radius(red, &mut self.red_radius) |
-                                  tick_radius(green, &mut self.green_radius) |
-                                  tick_radius(blue, &mut self.blue_radius))
+                                      tick_radius(green,
+                                                  &mut self.green_radius) |
+                                      tick_radius(blue, &mut self.blue_radius))
             }
-            &Event::MouseDown(pt) if self.rect().contains(pt) &&
-                                     !state.is_solved() => {
+            &Event::MouseDown(pt)
+                if self.rect().contains(pt) && !state.is_solved() => {
                 Action::redraw().and_return(self.position)
             }
             _ => Action::ignore(),
@@ -311,8 +315,8 @@ impl Element<SyrupState, PuzzleCmd> for NextColor {
                 PrimaryColor::Green => 1,
                 PrimaryColor::Blue => 2,
             };
-            canvas.draw_sprite(&self.sprites[sprite_index],
-                               Point::new(461, 77));
+            canvas
+                .draw_sprite(&self.sprites[sprite_index], Point::new(461, 77));
         }
     }
 
@@ -336,7 +340,7 @@ fn light_rect(center: Point, radius: i32) -> Rect {
 fn draw_light(canvas: &mut Canvas, radius1: i32, radius2: i32,
               color2: (u8, u8, u8), radius3: i32, color3: (u8, u8, u8)) {
     debug_assert!(0 <= radius1 && radius1 <= radius2 && radius2 <= radius3 &&
-                  radius3 <= MAX_LIGHT_RADIUS);
+                      radius3 <= MAX_LIGHT_RADIUS);
     let center = canvas.rect().center();
     if radius3 < MAX_LIGHT_RADIUS {
         canvas.fill_rect((0, 0, 32), light_rect(center, MAX_LIGHT_RADIUS));

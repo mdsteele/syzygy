@@ -22,8 +22,8 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 use elements::{PuzzleCmd, PuzzleCore, PuzzleView};
-use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
-          Sprite};
+use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
+          Resources, Sprite};
 use modes::SOLVED_INFO_TEXT;
 use save::{BlackState, Game, PuzzleState};
 use save::tree::{BasicTree, TreeOp};
@@ -239,7 +239,8 @@ impl TreeView {
 
     fn move_fruit_to_goals(&mut self) {
         for (_, &mut (ref mut base, ref mut curr, goal)) in
-            self.fruit.iter_mut() {
+            self.fruit.iter_mut()
+        {
             *base = goal;
             *curr = goal;
         }
@@ -261,20 +262,20 @@ impl Element<BlackState, TreeCmd> for TreeView {
                                  min(self.base.y(), mid_y) + 1 - BRANCH_SEMI,
                                  BRANCH_THICKNESS,
                                  (self.base.y() - mid_y).abs() as u32 +
-                                 (BRANCH_THICKNESS / 2 - 1));
+                                     (BRANCH_THICKNESS / 2 - 1));
             canvas.fill_rect(BRANCH_COLOR, rect);
             let rect =
                 Rect::new(min(root_pos.x(), self.base.x()) + 1 - BRANCH_SEMI,
                           mid_y - BRANCH_SEMI,
                           (root_pos.x() - self.base.x()).abs() as u32 +
-                          BRANCH_THICKNESS - 2,
+                              BRANCH_THICKNESS - 2,
                           BRANCH_THICKNESS);
             canvas.fill_rect(BRANCH_COLOR, rect);
             let rect = Rect::new(root_pos.x() - BRANCH_SEMI,
                                  min(root_pos.y(), mid_y) + 1 - BRANCH_SEMI,
                                  BRANCH_THICKNESS,
                                  (root_pos.y() - mid_y).abs() as u32 +
-                                 (BRANCH_THICKNESS - 2));
+                                     (BRANCH_THICKNESS - 2));
             canvas.fill_rect(BRANCH_COLOR, rect);
         }
         // Branches:
@@ -283,16 +284,16 @@ impl Element<BlackState, TreeCmd> for TreeView {
                 let &(_, ppos, _) = self.fruit.get(&parent_key).unwrap();
                 let rect = Rect::new(cpos.x() - BRANCH_SEMI,
                                      min(cpos.y(), ppos.y()) + 1 -
-                                     BRANCH_SEMI,
+                                         BRANCH_SEMI,
                                      BRANCH_THICKNESS,
                                      (cpos.y() - ppos.y()).abs() as u32 +
-                                     (BRANCH_THICKNESS - 2));
+                                         (BRANCH_THICKNESS - 2));
                 canvas.fill_rect(BRANCH_COLOR, rect);
                 let rect = Rect::new(min(cpos.x(), ppos.x()) + 1 -
-                                     BRANCH_SEMI,
+                                         BRANCH_SEMI,
                                      ppos.y() - BRANCH_SEMI,
                                      (cpos.x() - ppos.x()).abs() as u32 +
-                                     (BRANCH_THICKNESS - 2),
+                                         (BRANCH_THICKNESS - 2),
                                      BRANCH_THICKNESS);
                 canvas.fill_rect(BRANCH_COLOR, rect);
             }
@@ -326,7 +327,8 @@ impl Element<BlackState, TreeCmd> for TreeView {
             &Event::ClockTick => {
                 let mut redraw = false;
                 if let Some((mut basic, mut ops, mut frames)) =
-                    self.animation.take() {
+                    self.animation.take()
+                {
                     debug_assert!(!ops.is_empty());
                     frames -= 1;
                     if frames <= 0 {
@@ -334,7 +336,8 @@ impl Element<BlackState, TreeCmd> for TreeView {
                         ops.remove(0);
                         // TODO: play sound
                         if ops.is_empty() ||
-                           (ops.len() == 1 && ops[0].is_set_red()) {
+                            (ops.len() == 1 && ops[0].is_set_red())
+                        {
                             self.update_fruit_positions(state);
                         } else {
                             basic.perform_op(&ops[0]);
@@ -353,8 +356,8 @@ impl Element<BlackState, TreeCmd> for TreeView {
                 }
                 Action::redraw_if(redraw)
             }
-            &Event::MouseDown(pt) if self.animation.is_none() &&
-                                     !state.is_solved() => {
+            &Event::MouseDown(pt)
+                if self.animation.is_none() && !state.is_solved() => {
                 for (&key, &(_, position, _)) in self.fruit.iter() {
                     let delta = pt - position;
                     let sqdist = delta.x() * delta.x() + delta.y() * delta.y();

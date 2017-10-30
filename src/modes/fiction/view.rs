@@ -46,12 +46,14 @@ impl View {
         let seq = state.sequence();
         View {
             core: core,
-            buttons: vec![TransformButton::new(&buttons, 0, seq, 96, 192),
-                          TransformButton::new(&buttons, 1, seq, 432, 192),
-                          TransformButton::new(&buttons, 2, seq, 96, 240),
-                          TransformButton::new(&buttons, 3, seq, 432, 240),
-                          TransformButton::new(&buttons, 4, seq, 96, 288),
-                          TransformButton::new(&buttons, 5, seq, 432, 288)],
+            buttons: vec![
+                TransformButton::new(&buttons, 0, seq, 96, 192),
+                TransformButton::new(&buttons, 1, seq, 432, 192),
+                TransformButton::new(&buttons, 2, seq, 96, 240),
+                TransformButton::new(&buttons, 3, seq, 432, 240),
+                TransformButton::new(&buttons, 4, seq, 96, 288),
+                TransformButton::new(&buttons, 5, seq, 432, 288),
+            ],
             letters: LettersView::new(resources, state.letters(), 296, 256),
             retry_countdown: 0,
         }

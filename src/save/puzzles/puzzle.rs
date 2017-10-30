@@ -25,7 +25,9 @@ use save::util::Tomlable;
 // ========================================================================= //
 
 pub trait PuzzleState: Tomlable {
-    fn location() -> Location where Self: Sized;
+    fn location() -> Location
+    where
+        Self: Sized;
 
     fn access(&self) -> Access;
 
@@ -55,7 +57,8 @@ pub trait PuzzleState: Tomlable {
     }
 
     fn pop_from_game_table(table: &mut toml::value::Table) -> Self
-        where Self: Sized
+    where
+        Self: Sized,
     {
         Self::pop_from_table(table, Self::location().key())
     }

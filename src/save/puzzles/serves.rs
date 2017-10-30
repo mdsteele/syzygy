@@ -210,9 +210,10 @@ mod tests {
         for &(ref shape, decay) in SHAPES.iter() {
             let add_symbol = shape.symbol().unwrap();
             assert!((add_symbol as i32) <= NUM_SYMBOLS);
-            assert_eq!(num_symbols_in_use.get(&add_symbol)
-                                         .cloned()
-                                         .unwrap_or(0),
+            assert_eq!(num_symbols_in_use
+                           .get(&add_symbol)
+                           .cloned()
+                           .unwrap_or(0),
                        0);
             for &(symbol, _) in decay {
                 assert!(symbol != add_symbol,

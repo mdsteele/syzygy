@@ -30,10 +30,14 @@ const TOGGLED_KEY: &str = "toggled";
 const NUM_COLS: i32 = 4;
 const NUM_ROWS: i32 = 3;
 
-const INITIAL_GRID: &[bool] =
-    &[false, true, false, true, true, false, true, false, true, true, true,
-      false, false, false, false, true, false, true, true, false, true,
-      false, true, true, false, true, true, false, true, false];
+#[cfg_attr(rustfmt, rustfmt_skip)]
+const INITIAL_GRID: &[bool] = &[
+    false, true,  false, true,  true,  false,
+    true,  false, true,  true,  true,  false,
+    false, false, false, true,  false, true,
+    true,  false, true,  false, true,  true,
+    false, true,  true,  false, true,  false,
+];
 
 const LETTERS: &[char] = &['T', 'A', 'S', 'H', 'L', 'E', 'T'];
 
@@ -87,8 +91,9 @@ impl TreadState {
     pub fn push_toggle(&mut self, pos: (i32, i32)) -> bool {
         let (col, row) = pos;
         if self.toggled.len() < LETTERS.len() &&
-           (col >= 1 && col <= NUM_COLS) &&
-           (row >= 1 && row <= NUM_ROWS) {
+            (col >= 1 && col <= NUM_COLS) &&
+            (row >= 1 && row <= NUM_ROWS)
+        {
             let index = (row - 1) * NUM_COLS + (col - 1);
             if !self.toggled.contains(&index) {
                 self.toggled.push(index);
@@ -119,12 +124,27 @@ impl TreadState {
             let shape = match LETTERS[char_index] {
                 'A' => vec![(0, -1), (-1, 0), (0, 0), (1, 0), (-1, 1), (1, 1)],
                 'E' => {
-                    vec![(-1, -1), (0, -1), (1, -1), (-1, 0), (0, 0), (-1, 1),
-                         (0, 1), (1, 1)]
+                    vec![
+                        (-1, -1),
+                        (0, -1),
+                        (1, -1),
+                        (-1, 0),
+                        (0, 0),
+                        (-1, 1),
+                        (0, 1),
+                        (1, 1),
+                    ]
                 }
                 'H' => {
-                    vec![(-1, -1), (1, -1), (-1, 0), (0, 0), (1, 0), (-1, 1),
-                         (1, 1)]
+                    vec![
+                        (-1, -1),
+                        (1, -1),
+                        (-1, 0),
+                        (0, 0),
+                        (1, 0),
+                        (-1, 1),
+                        (1, 1),
+                    ]
                 }
                 'L' => vec![(0, -1), (0, 0), (0, 1), (1, 1)],
                 'S' => vec![(0, -1), (1, -1), (0, 0), (-1, 1), (0, 1)],
@@ -160,9 +180,9 @@ impl Tomlable for TreadState {
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.is_solved() && !self.toggled.is_empty() {
             let toggled = self.toggled
-                              .iter()
-                              .map(|&idx| toml::Value::Integer(idx as i64))
-                              .collect();
+                .iter()
+                .map(|&idx| toml::Value::Integer(idx as i64))
+                .collect();
             table.insert(TOGGLED_KEY.to_string(), toml::Value::Array(toggled));
         }
         toml::Value::Table(table)
@@ -183,7 +203,8 @@ impl Tomlable for TreadState {
             vec.into_iter().take(LETTERS.len()).collect()
         };
         if (&toggled as &[i32]) == SOLVED_TOGGLED_1 ||
-           (&toggled as &[i32]) == SOLVED_TOGGLED_2 {
+            (&toggled as &[i32]) == SOLVED_TOGGLED_2
+        {
             access = Access::Solved;
         }
         let mut state = TreadState {
@@ -205,8 +226,8 @@ mod tests {
 
     use save::Access;
     use save::util::{ACCESS_KEY, Tomlable};
-    use super::{INITIAL_GRID, SOLVED_TOGGLED_1, SOLVED_TOGGLED_2, TOGGLED_KEY,
-                TreadState};
+    use super::{INITIAL_GRID, SOLVED_TOGGLED_1, SOLVED_TOGGLED_2,
+                TOGGLED_KEY, TreadState};
 
     #[test]
     fn toml_round_trip() {
@@ -251,9 +272,10 @@ mod tests {
         table.insert(ACCESS_KEY.to_string(), Access::Unsolved.to_toml());
         let toggled = vec![-1, 0, 11, 12];
         table.insert(TOGGLED_KEY.to_string(),
-                     toml::Value::Array(toggled.into_iter()
-                                               .map(toml::Value::Integer)
-                                               .collect()));
+                     toml::Value::Array(toggled
+                                            .into_iter()
+                                            .map(toml::Value::Integer)
+                                            .collect()));
 
         let state = TreadState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Unsolved);
@@ -264,10 +286,10 @@ mod tests {
     fn from_toggled_already_correct_toml() {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), Access::Unsolved.to_toml());
-        let toggled =
-            SOLVED_TOGGLED_2.iter()
-                            .map(|&t| toml::Value::Integer(t as i64))
-                            .collect();
+        let toggled = SOLVED_TOGGLED_2
+            .iter()
+            .map(|&t| toml::Value::Integer(t as i64))
+            .collect();
         table.insert(TOGGLED_KEY.to_string(), toml::Value::Array(toggled));
 
         let state = TreadState::from_toml(toml::Value::Table(table));

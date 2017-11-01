@@ -30,19 +30,23 @@ use super::scenes;
 pub struct View {
     core: PuzzleCore<BlockSlide>,
     grid: GridView,
+    grid_visible: bool,
 }
 
 impl View {
     pub fn new(resources: &mut Resources, visible: Rect, state: &MeetState)
                -> View {
-        let core = {
-            let intro = scenes::compile_intro_scene(resources);
+        let mut core = {
+            let intro = scenes::compile_intro_scene(resources, visible);
             let outro = scenes::compile_outro_scene(resources);
             PuzzleCore::new(resources, visible, state, intro, outro)
         };
+        core.add_extra_scene(scenes::compile_elinsa_midscene(resources));
+        core.add_extra_scene(scenes::compile_mezure_midscene(resources));
         View {
             core: core,
             grid: GridView::new(resources, 96, 48, state.grid()),
+            grid_visible: true,
         }
     }
 }
@@ -51,7 +55,9 @@ impl Element<Game, PuzzleCmd> for View {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
         let state = &game.ice_to_meet_you;
         self.core.draw_back_layer(canvas);
-        self.grid.draw(state.grid(), canvas);
+        if self.grid_visible {
+            self.grid.draw(state.grid(), canvas);
+        }
         self.core.draw_middle_layer(canvas);
         self.core.draw_front_layer(canvas, state);
     }
@@ -60,7 +66,7 @@ impl Element<Game, PuzzleCmd> for View {
                     -> Action<PuzzleCmd> {
         let state = &mut game.ice_to_meet_you;
         let mut action = self.core.handle_event(event, state);
-        if !action.should_stop() {
+        if self.grid_visible && !action.should_stop() {
             let subaction = self.grid.handle_event(event, state.grid_mut());
             if let Some(&(coords, dir)) = subaction.value() {
                 if let Some(slide) = state.slide_ice_block(coords, dir) {
@@ -117,8 +123,10 @@ impl PuzzleView for View {
     }
 
     fn drain_queue(&mut self) {
-        for (_, _) in self.core.drain_queue() {
-            // TODO: drain queue
+        for (kind, value) in self.core.drain_queue() {
+            if kind == 0 {
+                self.grid_visible = value != 0;
+            }
         }
     }
 }

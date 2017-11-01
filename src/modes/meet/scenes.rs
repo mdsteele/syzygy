@@ -18,23 +18,272 @@
 // +--------------------------------------------------------------------------+
 
 use elements::{Ast, Scene, TalkPos, TalkStyle};
-use gui::{Resources, Sound};
+use gui::{Rect, Resources, Sound};
+
+// ========================================================================= //
+
+const SYSTEM: i32 = 0;
+const ELINSA: i32 = 2;
+const ELINSA_BG: i32 = -1;
+const MEZURE: i32 = 1;
+
+const DOOR_UPPER_L: i32 = -2;
+const DOOR_UPPER_R: i32 = -3;
+const DOOR_LOWER_L: i32 = -4;
+const DOOR_LOWER_R: i32 = -5;
+
+const ICE_BLOCK_L: i32 = -6;
+const ICE_BLOCK_R: i32 = -7;
 
 // ========================================================================= //
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
+pub fn compile_intro_scene(resources: &mut Resources, visible: Rect) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
-            Ast::SetBg("ice_to_meet_you"),
-            Ast::Place(0, "chars/mezure", 0, (-16, 320)),
-            Ast::Slide(0, (272, 320), true, true, 1.0),
+            Ast::SetBg("ice_to_meet_you_1"),
+            Ast::Queue(0, 0), // Hide ice grid
+            Ast::Place(SYSTEM, "chars/system", 0, (112, 144)),
+            Ast::Place(DOOR_UPPER_L, "tiles/caution_walls", 12, (472, 304)),
+            Ast::Place(DOOR_UPPER_R, "tiles/caution_walls", 13, (488, 304)),
+            Ast::Place(DOOR_LOWER_L, "tiles/caution_walls", 10, (472, 320)),
+            Ast::Place(DOOR_LOWER_R, "tiles/caution_walls", 11, (488, 320)),
             Ast::Wait(0.5),
+            Ast::Place(ELINSA, "chars/elinsa", 0, (-16, 320)),
+            Ast::Slide(ELINSA, (170, 320), false, true, 1.0),
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::talk_annoyed_lo()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
+                      "Well, $ithat$r  was\n\
+                       a waste of time."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
+                      "I should be out fixing the ship's\n\
+                       critical systems, not getting\n\
+                       dragged off on stupid errands."),
+        ]),
+        Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE, "Let's have a look."),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
+                      "Well, whatever.  That's done.\n\
+                       Maybe now I can finally focus\n\
+                       on my actual job."),
+        ]),
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::Place(MEZURE, "chars/mezure", 0,
+                           (visible.right() + 16, 320)),
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::W,
+                          "Heeellp!"),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.75),
+                Ast::Sound(Sound::talk_lo()),
+                Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
+                          "Oh, good grief."),
+            ]),
+        ]),
+        Ast::Seq(vec![
+            Ast::Remove(MEZURE),
+            Ast::Slide(ELINSA, (448, 320), true, true, 1.0),
+            Ast::Wait(0.75),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NW,
+                      "System, get this\n\
+                       stupid door open!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::beep()),
+            Ast::Talk(SYSTEM, TalkStyle::System, TalkPos::SE,
+                      "Affirmative."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Par(vec![
+                Ast::Slide(DOOR_UPPER_L, (472, 288), true, false, 0.5),
+                Ast::Slide(DOOR_UPPER_R, (488, 288), true, false, 0.5),
+                Ast::Slide(DOOR_LOWER_L, (472, 336), true, false, 0.5),
+                Ast::Slide(DOOR_LOWER_R, (488, 336), true, false, 0.5),
+            ]),
+            Ast::Remove(ELINSA),
+            Ast::Place(ELINSA_BG, "chars/elinsa", 0, (448, 320)),
+            Ast::Slide(ELINSA_BG, (592, 320), true, false, 0.5),
+            Ast::Remove(ELINSA_BG),
+            Ast::Par(vec![
+                Ast::Slide(DOOR_UPPER_L, (472, 304), true, false, 0.5),
+                Ast::Slide(DOOR_UPPER_R, (488, 304), true, false, 0.5),
+                Ast::Slide(DOOR_LOWER_L, (472, 320), true, false, 0.5),
+                Ast::Slide(DOOR_LOWER_R, (488, 320), true, false, 0.5),
+            ]),
+            Ast::Wait(1.5),
+            Ast::Remove(SYSTEM),
+            Ast::Remove(DOOR_UPPER_L),
+            Ast::Remove(DOOR_UPPER_R),
+            Ast::Remove(DOOR_LOWER_L),
+            Ast::Remove(DOOR_LOWER_R),
+            Ast::SetBg("ice_to_meet_you_2"),
+            Ast::Queue(0, 1), // Show ice grid
+            Ast::Place(MEZURE, "chars/mezure", 0, (336, 320)),
+            Ast::Place(ICE_BLOCK_L, "tiles/ice", 0, (360, 320)),
+            Ast::Place(ICE_BLOCK_R, "tiles/ice", 1, (376, 320)),
+            Ast::Wait(0.5),
+            Ast::Place(ELINSA, "chars/elinsa", 0, (-16, 320)),
+            Ast::Slide(ELINSA, (165, 320), false, true, 1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NW,
+                      "It's $ic-c-c-cold$r  in here!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
+                      "No kidding.  This is where we\n\
+                       keep historical records data in cold\n\
+                       storage.  What are you doing in here?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NW,
+                      "I came in to see if anything\n\
+                       needed fixing, but this passage\n\
+                       is too narrow to get through, and\n\
+                       I couldn't get the door back open."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
+                      "$iSigh$r.  Didn't anyone ever\n\
+                       teach you not to close yourself\n\
+                       inside a refrigerator?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NW,
+                      "No.  Who would have taught me that?\n\
+                       Didn't we go over the $iliterally born\n\
+                       today$r  thing when we first met?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
+                      "Fine, whatever.  Let's\n\
+                       get you out of here."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Par(vec![
+                Ast::Slide(ELINSA, (-48, 320), true, false, 1.0),
+                Ast::Seq(vec![
+                    Ast::Wait(0.25),
+                    Ast::Slide(MEZURE, (-16, 320), true, false, 1.0),
+                ]),
+            ]),
+            Ast::Wait(1.25),
+            Ast::Par(vec![
+                Ast::Slide(MEZURE, (250, 320), false, true, 1.0),
+                Ast::Seq(vec![
+                    Ast::Wait(0.25),
+                    Ast::Slide(ELINSA, (170, 320), false, true, 1.0),
+                ]),
+            ]),
+            Ast::Sound(Sound::talk_annoyed_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
+                      "...Oooorr, maybe the system\n\
+                       closed the door behind me\n\
+                       when I came in here."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "What do we do now!?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
+                      "Relax, we'll figure\n\
+                       a way out of this."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
+                      "Let's see if we can push that\n\
+                       block of ice out of the way."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Par(vec![
+                Ast::Slide(ELINSA, (325, 320), true, true, 0.75),
+                Ast::Slide(MEZURE, (345, 320), true, true, 0.75),
+            ]),
+            Ast::Wait(1.0),
+            Ast::Par(vec![
+                Ast::Slide(ELINSA, (180, 320), true, true, 0.75),
+                Ast::Seq(vec![
+                    Ast::Wait(0.25),
+                    Ast::Slide(MEZURE, (250, 320), true, true, 0.75),
+                ]),
+            ]),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
+                      "Won't budge.  Hmm.\n\
+                       Must be frozen solid."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
+                      "You know, I think it's colder in here\n\
+                       than it's supposed to be.  Which\n\
+                       will also complicate data retreival\n\
+                       whenever we need to do that."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
+                      "Let's get that fixed\n\
+                       and maybe it'll help."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "Okay, yeah!  We\n\
+                       can do this!"),
         ]),
     ];
     Ast::compile_scene(resources, ast)
+}
+
+// ========================================================================= //
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_elinsa_midscene(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
+                      "We'll need to take care of\n\
+                       the green square first."),
+        ]),
+    ];
+    (ELINSA, Ast::compile_scene(resources, ast))
+}
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_mezure_midscene(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "Why can't we open\n\
+                       the door from the\n\
+                       inside, anyway?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
+                      "Don't look at me, I didn't\n\
+                       design this thing!"),
+        ]),
+    ];
+    (MEZURE, Ast::compile_scene(resources, ast))
 }
 
 // ========================================================================= //
@@ -45,8 +294,8 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Sound(Sound::solve_puzzle_chime()),
             Ast::Wait(1.0),
-            Ast::Slide(0, (592, 320), true, false, 1.0),
-            Ast::Remove(0),
+            Ast::Slide(MEZURE, (592, 320), true, false, 1.0),
+            Ast::Remove(MEZURE),
         ]),
     ];
     Ast::compile_scene(resources, ast)

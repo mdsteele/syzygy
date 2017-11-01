@@ -34,7 +34,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::SetBg("cross_sauce"),
             Ast::Place(UGRENT, "chars/ugrent", 0, (436, 240)),
-            Ast::Queue(1, 1),  // Display "RHYME TIME!".
+            Ast::Queue(1, 1),  // Display "RHYME TIME".
             Ast::Wait(1.0),
             Ast::Place(YTTRIS, "chars/yttris", 0, (-16, 240)),
             Ast::Slide(YTTRIS, (188, 240), false, true, 1.0),
@@ -212,9 +212,7 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
                 Ast::Remove(ARGONY),
             ]),
             Ast::Seq(vec![
-                Ast::Wait(0.25),
-                Ast::Queue(1, 0),  // Clear display.
-                Ast::Wait(0.75),
+                Ast::Wait(1.0),
                 Ast::Sound(Sound::beep()),
                 Ast::Queue(1, 5),  // Display "ENOUGH STUFF".
                 Ast::Wait(0.75),
@@ -227,7 +225,6 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
         ]),
         Ast::Par(vec![
             Ast::Seq(vec![
-                Ast::Queue(1, 0),  // Clear display.
                 Ast::Wait(0.75),
                 Ast::Sound(Sound::beep()),
                 Ast::Queue(1, 6),  // Display "BOUGH FLUFF?".
@@ -242,9 +239,10 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
             ]),
         ]),
         Ast::Seq(vec![
-            Ast::Queue(1, 0),  // Clear display.
             Ast::Slide(YTTRIS, (592, 240), true, false, 1.0),
-            Ast::Wait(1.0),
+            Ast::Wait(0.75),
+            Ast::Queue(1, 0),  // Clear display.
+            Ast::Wait(0.25),
             Ast::Sound(Sound::beep()),
             Ast::Queue(1, 7),  // Display "F   G U    F  R".
             Ast::Wait(1.0),

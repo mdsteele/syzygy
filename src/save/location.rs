@@ -147,7 +147,7 @@ impl Location {
             Location::MissedConnections => Location::IfMemoryServes,
             Location::PasswordFile => Location::SystemSyzygy,
             Location::PlaneAndSimple => Location::MemoryLane,
-            Location::PlaneAsDay => Location::Map,
+            Location::PlaneAsDay => Location::LevelUp,
             Location::PointOfNoReturn => Location::JogYourMemory,
             Location::PointOfOrder => Location::Map,
             Location::PointOfView => Location::CrossSauce,
@@ -199,7 +199,9 @@ impl Location {
             }
             Location::JogYourMemory => vec![Location::PointOfNoReturn],
             Location::LevelHeaded => vec![Location::ColumnAsIcyEm],
-            Location::LevelUp => vec![Location::TheIceIsRight],
+            Location::LevelUp => {
+                vec![Location::PlaneAsDay, Location::TheIceIsRight]
+            }
             Location::LightSyrup => vec![Location::ALightInTheAttic],
             Location::LogLevel => vec![Location::Disconnected],
             Location::MemoryLane => vec![Location::PlaneAndSimple],

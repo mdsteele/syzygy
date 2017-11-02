@@ -23,9 +23,9 @@ use gui::{Rect, Resources, Sound};
 // ========================================================================= //
 
 const SYSTEM: i32 = 0;
-const ELINSA: i32 = 2;
+const ELINSA: i32 = 1;
 const ELINSA_BG: i32 = -1;
-const MEZURE: i32 = 1;
+const MEZURE: i32 = 2;
 
 const DOOR_UPPER_L: i32 = -2;
 const DOOR_UPPER_R: i32 = -3;
@@ -111,6 +111,7 @@ pub fn compile_intro_scene(resources: &mut Resources, visible: Rect) -> Scene {
             Ast::Place(ELINSA_BG, "chars/elinsa", 0, (448, 320)),
             Ast::Slide(ELINSA_BG, (592, 320), true, false, 0.5),
             Ast::Remove(ELINSA_BG),
+            Ast::Wait(0.5),
             Ast::Par(vec![
                 Ast::Slide(DOOR_UPPER_L, (472, 304), true, false, 0.5),
                 Ast::Slide(DOOR_UPPER_R, (488, 304), true, false, 0.5),
@@ -294,8 +295,150 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Sound(Sound::solve_puzzle_chime()),
             Ast::Wait(1.0),
-            Ast::Slide(MEZURE, (592, 320), true, false, 1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
+                      "There we go.  The tempurature\n\
+                       should get back to normal now."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "It does feel a bit\n\
+                       warmer in here.  Well,\n\
+                       less cold, anyway."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
+                      "Okay.  Let's try moving\n\
+                       that block again."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Par(vec![
+                Ast::Slide(ELINSA, (325, 320), true, true, 0.75),
+                Ast::Slide(MEZURE, (345, 320), true, true, 0.75),
+            ]),
+            Ast::Wait(0.5),
+            Ast::Par(vec![
+                Ast::Slide(ELINSA, (357, 320), false, false, 0.4),
+                Ast::Slide(MEZURE, (377, 320), false, false, 0.4),
+                Ast::Slide(ICE_BLOCK_L, (392, 320), false, false, 0.4),
+                Ast::Slide(ICE_BLOCK_R, (408, 320), false, false, 0.4),
+            ]),
+            Ast::Sound(Sound::character_collision()),
+            Ast::Wait(0.25),
+            Ast::Par(vec![
+                Ast::Slide(ELINSA, (220, 320), true, true, 0.75),
+                Ast::Seq(vec![
+                    Ast::Wait(0.25),
+                    Ast::Slide(MEZURE, (290, 320), true, true, 0.75),
+                ]),
+            ]),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "We did it!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
+                      "Now that these controls aren't\n\
+                       stuck, I think we should be able\n\
+                       to get that door back open, too."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "Excellent!  Thanks for the\n\
+                       save, Elinsa.  I'm really glad\n\
+                       we have you on this crew."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
+                      "Um...thanks, I guess."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
+                      "I should really be getting\n\
+                       back to work, though."),
+        ]),
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::Slide(ELINSA, (120, 320), true, true, 1.0),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.5),
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                          "Um, Elinsa?  I...I hate to ask you\n\
+                           this, but do think you could check\n\
+                           on the rest of cold storage first?"),
+            ]),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "It's just...well, it seems like a\n\
+                       safety hazard right now, and\n\
+                       you seem like the person\n\
+                       most qualified to fix it."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
+                      "Look, Mezure, I\n\
+                       really need to..."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Wait(0.75),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
+                      "$i...Sigh.$r  You're right.  If you\n\
+                       got trapped in here, someone\n\
+                       else could too, so we should\n\
+                       probably fix it right away.\n\
+                       And you'd be more effective\n\
+                       organizing repairs elsewhere."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
+                      "Yeah, okay.  I'll\n\
+                       take care of it."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "Thanks so much, Elinsa!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(MEZURE, (-16, 320), true, false, 0.75),
             Ast::Remove(MEZURE),
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
+                      "How do I always get\n\
+                       stuck with these jobs?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(ELINSA, (368, 320), true, true, 1.25),
+            Ast::Sound(Sound::talk_thought()),
+            Ast::Talk(ELINSA, TalkStyle::Thought, TalkPos::NW,
+                      "At least maybe I can\n\
+                       get some peace and\n\
+                       quiet in here."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(ELINSA, (400, 304), 0.5),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(ELINSA, (448, 288), 0.5),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(ELINSA, (496, 272), 0.5),
+            Ast::Slide(ELINSA, (592, 272), false, false, 0.5),
+            Ast::Remove(ELINSA),
+            Ast::Wait(0.5),
         ]),
     ];
     Ast::compile_scene(resources, ast)

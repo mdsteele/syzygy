@@ -117,13 +117,30 @@ impl PuzzleView for View {
     }
 
     fn drain_queue(&mut self) {
-        for (_, _) in self.core.drain_queue() {
-            // TODO: drain queue
+        for (kind, value) in self.core.drain_queue() {
+            if kind == 1 {
+                if value >= 0 && (value as usize) < LETTERS.len() {
+                    let (coords, chr) = LETTERS[value as usize];
+                    self.grid.add_letter(coords, chr);
+                }
+            }
         }
     }
 }
 
 // ========================================================================= //
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+const LETTERS: &[((i32, i32), char)] = &[
+    ((3, 1), 'C'),
+    ((3, 2), 'E'),
+    ((3, 0), 'T'),
+    ((2, 2), 'V'),
+    ((4, 0), 'O'),
+    ((1, 2), 'I'),
+    ((5, 0), 'R'),
+    ((6, 0), 'P'),
+];
 
 const INFO_BOX_TEXT: &str = "\
 Your goal is to slide the blocks of ice until each one

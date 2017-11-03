@@ -19,9 +19,11 @@
 
 use num_integer::div_floor;
 use std::cmp;
+use std::collections::HashMap;
+use std::rc::Rc;
 
-use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sprite};
-use gui::Sound;
+use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
+          Resources, Sound, Sprite};
 use save::Direction;
 use save::ice::{BlockSlide, Object, ObjectGrid, Transform};
 
@@ -111,6 +113,8 @@ pub struct GridView {
     symbol_sprites: Vec<Sprite>,
     drag: Option<GridDrag>,
     animation: Option<SlideAnimation>,
+    font: Rc<Font>,
+    letters: HashMap<(i32, i32), char>,
 }
 
 impl GridView {
@@ -127,6 +131,8 @@ impl GridView {
             symbol_sprites: resources.get_sprites("ice/symbols"),
             drag: None,
             animation: None,
+            font: resources.get_font("block"),
+            letters: HashMap::new(),
         }
     }
 
@@ -148,6 +154,10 @@ impl GridView {
     pub fn reset_animation(&mut self) {
         self.drag = None;
         self.animation = None;
+    }
+
+    pub fn add_letter(&mut self, coords: (i32, i32), letter: char) {
+        self.letters.insert(coords, letter);
     }
 
     fn cell_rect(&self, coords: Point) -> Rect {
@@ -277,6 +287,14 @@ impl Element<ObjectGrid, (Point, Direction)> for GridView {
             }
         }
         self.draw_objects(grid, canvas);
+        for (&(col, row), &letter) in self.letters.iter() {
+            let pt = Point::new(self.rect.left() + col * GRID_CELL_SIZE +
+                                    GRID_CELL_SIZE / 2,
+                                self.rect.top() + row * GRID_CELL_SIZE +
+                                    GRID_CELL_SIZE / 2 +
+                                    9);
+            canvas.draw_char(&self.font, Align::Center, pt, letter);
+        }
         self.draw_ice_blocks(grid, canvas);
     }
 

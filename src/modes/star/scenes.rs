@@ -22,8 +22,9 @@ use gui::{Resources, Sound};
 
 // ========================================================================= //
 
-const MEZURE: i32 = 2;
-const UGRENT: i32 = 1;
+const MEZURE: i32 = 1;
+const SRB: i32 = -1;
+const UGRENT: i32 = 2;
 
 // ========================================================================= //
 
@@ -215,13 +216,165 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
 // ========================================================================= //
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_mezure_midscene(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_thought()),
+            Ast::Talk(MEZURE, TalkStyle::Thought, TalkPos::NE,
+                      "Wow, I stood up to Ugrent!\n\
+                       I guess Argony was right."),
+        ]),
+    ];
+    (MEZURE, Ast::compile_scene(resources, ast))
+}
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_ugrent_midscene(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                      "These words can only be\n\
+                       found in a certain order."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "What's the order?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                      "No idea.  I probably\n\
+                       should have written\n\
+                       it down somewhere."),
+        ]),
+    ];
+    (UGRENT, Ast::compile_scene(resources, ast))
+}
+
+// ========================================================================= //
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
 pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
             Ast::Wait(0.5),
             Ast::Sound(Sound::solve_puzzle_chime()),
             Ast::Queue(0, 1), // Animate final word.
-            Ast::Wait(2.0),
+            Ast::Wait(1.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                      "There you go.  Just\n\
+                       be careful in there."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "Thanks, will do!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(UGRENT, (-16, 272), true, false, 1.0),
+            Ast::Remove(UGRENT),
+            Ast::Slide(MEZURE, (300, 272), true, true, 1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "Whew!  Let's go see how\n\
+                       bad the damage is."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Place(SRB, "chars/srb", 0, (440, 56)),
+            Ast::Slide(SRB, (440, 140), false, true, 0.75),
+            Ast::Par(vec![
+                Ast::SetSprite(SRB, "chars/srb", 3),
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(SRB, TalkStyle::Good, TalkPos::W,
+                          "Iiiiiitt's everyone's favorite\n\
+                           System Repair Bot!"),
+                Ast::Loop(0, 0, Box::new(Ast::Seq(vec![
+                    Ast::Slide(SRB, (440, 138), false, false, 0.1),
+                    Ast::Slide(SRB, (440, 142), false, false, 0.2),
+                    Ast::Slide(SRB, (440, 140), false, false, 0.1),
+                ]))),
+            ]),
+        ]),
+        Ast::Seq(vec![
+            Ast::SetSprite(SRB, "chars/srb", 0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "Hello again!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::SetSprite(SRB, "chars/srb", 1),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(SRB, TalkStyle::Good, TalkPos::W,
+                      "The engine room is just\n\
+                       ahead!  Get that fixed,\n\
+                       and we're in business!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::SetSprite(SRB, "chars/srb", 2),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "Actually, I was only going\n\
+                       to inspect it for now, and\n\
+                       ask Elinsa to fix it later."),
+        ]),
+        Ast::Par(vec![
+            Ast::SetSprite(SRB, "chars/srb", 7),
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(SRB, TalkStyle::Evil, TalkPos::W,
+                      "NO NO NO YOU NEED TO\n\
+                       FIX IT RIGHT AWAY!"),
+            Ast::Loop(0, 0, Box::new(Ast::Seq(vec![
+                Ast::Slide(SRB, (440, 138), false, false, 0.1),
+                Ast::Slide(SRB, (440, 142), false, false, 0.2),
+                Ast::Slide(SRB, (440, 140), false, false, 0.1),
+            ]))),
+       ]),
+        Ast::Seq(vec![
+            Ast::SetSprite(SRB, "chars/srb", 4),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "Okay, okay, chill.\n\
+                       I'll see what I can do."),
+        ]),
+        Ast::Seq(vec![
+            Ast::SetSprite(SRB, "chars/srb", 1),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(SRB, TalkStyle::Good, TalkPos::W,
+                      "Great!  Then we'll\n\
+                       be all set soon."),
+        ]),
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::SetSprite(SRB, "chars/srb", 2),
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                          "You know, I've been\n\
+                           meaning to ask you-"),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.5),
+                Ast::Par(vec![
+                    Ast::Sound(Sound::talk_hi()),
+                    Ast::Talk(SRB, TalkStyle::Good, TalkPos::W,
+                              "OOPS SORRY I MUST\n\
+                               BE GOING NOW!"),
+                    Ast::Slide(SRB, (440, 56), true, false, 0.75),
+                ]),
+            ]),
+        ]),
+        Ast::Seq(vec![
+            Ast::Wait(0.75),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "What a strange robot."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(MEZURE, (592, 272), true, false, 1.0),
+            Ast::Remove(MEZURE),
+            Ast::Wait(1.0),
             Ast::Queue(0, 0), // Cancel animating final word.
         ]),
     ];

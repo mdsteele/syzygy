@@ -26,7 +26,7 @@ use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
           Resources, Sound, Sprite};
 use modes::SOLVED_INFO_TEXT;
 use save::{Game, PuzzleState, StarState, WordDir};
-use super::scenes::{compile_intro_scene, compile_outro_scene};
+use super::scenes;
 
 // ========================================================================= //
 
@@ -40,9 +40,13 @@ pub struct View {
 impl View {
     pub fn new(resources: &mut Resources, visible: Rect, state: &StarState)
                -> View {
-        let intro = compile_intro_scene(resources);
-        let outro = compile_outro_scene(resources);
-        let core = PuzzleCore::new(resources, visible, state, intro, outro);
+        let mut core = {
+            let intro = scenes::compile_intro_scene(resources);
+            let outro = scenes::compile_outro_scene(resources);
+            PuzzleCore::new(resources, visible, state, intro, outro)
+        };
+        core.add_extra_scene(scenes::compile_mezure_midscene(resources));
+        core.add_extra_scene(scenes::compile_ugrent_midscene(resources));
         View {
             core: core,
             wordlist: WordList::new(resources),
@@ -84,6 +88,9 @@ impl Element<Game, PuzzleCmd> for View {
                 }
             }
             action.merge(subaction.but_no_value());
+        }
+        if !action.should_stop() {
+            self.core.begin_character_scene_on_click(event);
         }
         action
     }
@@ -415,6 +422,9 @@ Search across, down, and diagonally within the grid of letters
 on the right for one of the words listed on the left, then $M{tap}{click}
 and drag with $M{your finger}{the mouse} across the letters of that word to
 remove them from the grid.  The remaining grid letters will
-fall into place.  Continue this process until the list is empty.";
+fall into place.  Continue this process until the list is empty.
+
+$M{Tap}{Click} on a character in the scene to hear their words of
+wisdom.";
 
 // ========================================================================= //

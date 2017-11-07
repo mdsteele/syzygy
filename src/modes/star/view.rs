@@ -33,6 +33,7 @@ use super::scenes::{compile_intro_scene, compile_outro_scene};
 pub struct View {
     core: PuzzleCore<()>,
     wordlist: WordList,
+    wordlist_visible: bool,
     columns: LetterColumns,
 }
 
@@ -45,6 +46,7 @@ impl View {
         View {
             core: core,
             wordlist: WordList::new(resources),
+            wordlist_visible: true,
             columns: LetterColumns::new(resources),
         }
     }
@@ -55,7 +57,9 @@ impl Element<Game, PuzzleCmd> for View {
         let state = &game.star_crossed;
         self.core.draw_back_layer(canvas);
         self.columns.draw(state, canvas);
-        self.wordlist.draw(state, canvas);
+        if self.wordlist_visible {
+            self.wordlist.draw(state, canvas);
+        }
         self.core.draw_middle_layer(canvas);
         self.core.draw_front_layer(canvas, state);
     }
@@ -109,9 +113,11 @@ impl PuzzleView for View {
     }
 
     fn drain_queue(&mut self) {
-        for (command, enable) in self.core.drain_queue() {
-            if command == 0 {
-                self.columns.animate_hilight(enable != 0);
+        for (kind, value) in self.core.drain_queue() {
+            if kind == 0 {
+                self.columns.animate_hilight(value != 0);
+            } else if kind == 1 {
+                self.wordlist_visible = value != 0;
             }
         }
     }

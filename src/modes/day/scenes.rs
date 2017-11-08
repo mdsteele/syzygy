@@ -22,19 +22,59 @@ use gui::{Resources, Sound};
 
 // ========================================================================= //
 
+const MEZURE: i32 = 1;
+
+// ========================================================================= //
+
 #[cfg_attr(rustfmt, rustfmt_skip)]
 pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
             Ast::SetBg("plane_as_day"),
-            Ast::Place(0, "chars/mezure", 0, (-16, 304)),
-            Ast::Slide(0, (304, 304), true, true, 1.0),
-            Ast::Wait(0.5),
+            Ast::Wait(1.0),
+            Ast::Place(MEZURE, "chars/mezure", 0, (-16, 288)),
+            Ast::Slide(MEZURE, (115, 288), false, true, 1.0),
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(0, TalkStyle::Normal, TalkPos::NE, "Let's have a look."),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "Well, here it is.\n\
+                       The engine room."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "Let's see if we can\n\
+                       get this thing fixed."),
         ]),
     ];
     Ast::compile_scene(resources, ast)
+}
+
+// ========================================================================= //
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_mezure_midscene(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "Once the ship's moving\n\
+                       again, we can continue\n\
+                       with our mission."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "Which is...wait, what\n\
+                       $iis$r  our mission?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_thought()),
+            Ast::Talk(MEZURE, TalkStyle::Thought, TalkPos::NE,
+                      "Hopefully someone will\n\
+                       tell me eventually."),
+        ]),
+    ];
+    (MEZURE, Ast::compile_scene(resources, ast))
 }
 
 // ========================================================================= //
@@ -45,8 +85,8 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Sound(Sound::solve_puzzle_chime()),
             Ast::Wait(1.0),
-            Ast::Slide(0, (592, 304), true, false, 1.0),
-            Ast::Remove(0),
+            Ast::Slide(MEZURE, (-16, 288), true, false, 1.0),
+            Ast::Remove(MEZURE),
             Ast::Wait(1.0),
             Ast::Queue(0, 1),
             Ast::Wait(0.1),

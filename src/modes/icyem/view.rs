@@ -22,24 +22,29 @@ use elements::column::ColumnsView;
 use gui::{Action, Canvas, Element, Event, Rect, Resources};
 use modes::SOLVED_INFO_TEXT;
 use save::{Game, IcyEmState, PuzzleState};
-use super::scenes::{compile_intro_scene, compile_outro_scene};
+use super::scenes;
 
 // ========================================================================= //
 
 pub struct View {
     core: PuzzleCore<(usize, i32)>,
     columns: ColumnsView,
+    show_columns: bool,
 }
 
 impl View {
     pub fn new(resources: &mut Resources, visible: Rect, state: &IcyEmState)
                -> View {
-        let intro = compile_intro_scene(resources);
-        let outro = compile_outro_scene(resources);
-        let core = PuzzleCore::new(resources, visible, state, intro, outro);
+        let mut core = {
+            let intro = scenes::compile_intro_scene(resources);
+            let outro = scenes::compile_outro_scene(resources);
+            PuzzleCore::new(resources, visible, state, intro, outro)
+        };
+        core.add_extra_scene(scenes::compile_relyng_midscene(resources));
         View {
             core: core,
             columns: ColumnsView::new(resources, 180, 100, 80),
+            show_columns: false,
         }
     }
 }
@@ -48,7 +53,9 @@ impl Element<Game, PuzzleCmd> for View {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
         let state = &game.column_as_icy_em;
         self.core.draw_back_layer(canvas);
-        self.columns.draw(state.columns(), canvas);
+        if self.show_columns {
+            self.columns.draw(state.columns(), canvas);
+        }
         self.core.draw_middle_layer(canvas);
         self.core.draw_front_layer(canvas, state);
     }
@@ -57,7 +64,7 @@ impl Element<Game, PuzzleCmd> for View {
                     -> Action<PuzzleCmd> {
         let state = &mut game.column_as_icy_em;
         let mut action = self.core.handle_event(event, state);
-        if !action.should_stop() {
+        if !action.should_stop() && self.show_columns {
             let subaction = self.columns
                 .handle_event(event, state.columns_mut());
             if let Some(&(col, by)) = subaction.value() {
@@ -69,6 +76,9 @@ impl Element<Game, PuzzleCmd> for View {
                 }
             }
             action.merge(subaction.but_no_value());
+        }
+        if !action.should_stop() {
+            self.core.begin_character_scene_on_click(event);
         }
         action
     }
@@ -106,8 +116,10 @@ impl PuzzleView for View {
     }
 
     fn drain_queue(&mut self) {
-        for _ in self.core.drain_queue() {
-            // TODO drain queue
+        for (kind, value) in self.core.drain_queue() {
+            if kind == 0 {
+                self.show_columns = value != 0;
+            }
         }
     }
 }

@@ -60,6 +60,10 @@ impl ColumnsView {
         self.hilights.insert(col, color);
     }
 
+    pub fn clear_hilight_color(&mut self, col: usize) {
+        self.hilights.remove(&col);
+    }
+
     fn column_rect(&self, columns: &Columns, col: usize) -> Rect {
         let mut left = self.left + 32 * col as i32;
         let mut top = self.top + BOX_SIZE * columns.column_offset(col);

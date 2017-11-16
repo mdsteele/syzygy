@@ -119,6 +119,11 @@ impl PuzzleView for View {
         for (kind, value) in self.core.drain_queue() {
             if kind == 0 {
                 self.show_columns = value != 0;
+            } else if kind == 1 && value >= 0 {
+                self.columns
+                    .set_hilight_color(value as usize, (255, 128, 255));
+            } else if kind == 2 && value >= 0 {
+                self.columns.clear_hilight_color(value as usize);
             }
         }
     }

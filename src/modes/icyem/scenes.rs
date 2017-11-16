@@ -277,9 +277,40 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
             Ast::Sound(Sound::solve_puzzle_chime()),
-            Ast::Wait(1.0),
+            Ast::Seq((0..7).map(|index| Ast::Seq(vec![
+                Ast::Wait(0.075),
+                Ast::Queue(1, index),
+                Ast::Queue(1, 13 - index),
+            ])).collect()),
+            Ast::Wait(0.25),
+            Ast::Seq((0..7).map(|index| Ast::Seq(vec![
+                Ast::Wait(0.075),
+                Ast::Queue(2, index),
+                Ast::Queue(2, 13 - index),
+            ])).collect()),
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NE,
+                      "Yeah, that sounds\n\
+                       about right."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NE,
+                      "I'd say there are a\n\
+                       few $itoo many$r  secrets\n\
+                       around here right now."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NE,
+                      "...and not enough of\n\
+                       them are mine."),
+        ]),
+        Ast::Seq(vec![
             Ast::Slide(RELYNG, (592, 304), true, false, 1.0),
             Ast::Remove(RELYNG),
+            Ast::Wait(0.5),
         ]),
     ];
     Ast::compile_scene(resources, ast)

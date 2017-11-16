@@ -23,7 +23,9 @@ use gui::{Resources, Sound};
 // ========================================================================= //
 
 const ELINSA: i32 = 2;
+const ELINSA_BG: i32 = -2;
 const YTTRIS: i32 = 1;
+const YTTRIS_BG: i32 = -1;
 
 const DOOR_UPPER_L: i32 = -3;
 const DOOR_UPPER_R: i32 = -4;
@@ -210,10 +212,64 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
                 Ast::Slide(DOOR_LOWER_L, (504, 336), true, false, 0.5),
                 Ast::Slide(DOOR_LOWER_R, (520, 336), true, false, 0.5),
             ]),
-            Ast::Slide(ELINSA, (592, 320), true, false, 1.0),
-            Ast::Remove(ELINSA),
-            Ast::Slide(YTTRIS, (592, 320), true, false, 0.75),
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NW,
+                      "We're free!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_annoyed_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
+                      "That is the $ilast$r  time\n\
+                       I let that Mezure kid\n\
+                       give me work to do."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_annoyed_lo()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
+                      "It is $iway$r  too\n\
+                       cold in here."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(YTTRIS, (440, 320), true, true, 0.35),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NW,
+                      "Well?  Let's\n\
+                       go, sister!"),
+        ]),
+        Ast::Seq(vec![
             Ast::Remove(YTTRIS),
+            Ast::Place(YTTRIS_BG, "chars/yttris", 0, (440, 320)),
+            Ast::Slide(YTTRIS_BG, (592, 320), true, false, 0.75),
+            Ast::Remove(YTTRIS_BG),
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
+                      "And don't call me\n\
+                       ``sister,'' Yttris."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(ELINSA, (368, 304), true, false, 1.0),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(ELINSA, (405, 320), 0.5),
+            Ast::Slide(ELINSA, (445, 320), false, true, 0.4),
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NW,
+                      "At least this\n\
+                       section's fixed."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_annoyed_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NW,
+                      "Maybe now I can\n\
+                       get something\n\
+                       $iimportant$r  done."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Remove(ELINSA),
+            Ast::Place(ELINSA_BG, "chars/elinsa", 0, (445, 320)),
+            Ast::Slide(ELINSA_BG, (592, 320), true, false, 0.75),
+            Ast::Remove(ELINSA_BG),
             Ast::Par(vec![
                 Ast::Slide(DOOR_UPPER_L, (504, 304), true, false, 0.5),
                 Ast::Slide(DOOR_UPPER_R, (520, 304), true, false, 0.5),

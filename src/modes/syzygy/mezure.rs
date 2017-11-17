@@ -66,6 +66,14 @@ impl MezureView {
         view
     }
 
+    pub fn hilight_column_red(&mut self, index: usize) {
+        self.columns.set_hilight_color(index, (200, 0, 0));
+    }
+
+    pub fn hilight_column_dark(&mut self, index: usize) {
+        self.columns.set_hilight_color(index, (0, 0, 32));
+    }
+
     fn recalculate_lasers_and_lights(&mut self, state: &mut SyzygyState) {
         let positions = {
             let grid = state.mezure_laser_grid();

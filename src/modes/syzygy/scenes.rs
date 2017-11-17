@@ -784,6 +784,22 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
             Ast::Sound(Sound::solve_puzzle_chime()),
+            Ast::Seq((0..6).map(|index| Ast::Seq(vec![
+                Ast::Wait(0.075),
+                Ast::Queue(4, index),
+            ])).collect()),
+            Ast::Seq((0..2).map(|_| Ast::Seq(vec![
+                Ast::Wait(0.5),
+                Ast::Sound(Sound::beep()),
+                Ast::Seq((0..6).map(|index| Ast::Queue(5, index)).collect()),
+                Ast::Queue(1, 0),
+                Ast::Queue(1, -2),
+                Ast::Wait(0.5),
+                Ast::Sound(Sound::beep()),
+                Ast::Seq((0..6).map(|index| Ast::Queue(4, index)).collect()),
+                Ast::Queue(1, 6),
+                Ast::Queue(1, -2),
+            ])).collect()),
             Ast::Wait(1.0),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SW,

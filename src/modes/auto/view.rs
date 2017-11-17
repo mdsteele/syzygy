@@ -170,11 +170,7 @@ impl PuzzleView for View {
         self.core.begin_outro_scene();
     }
 
-    fn drain_queue(&mut self) {
-        for (_, _) in self.core.drain_queue() {
-            // TODO: drain queue
-        }
-    }
+    fn drain_queue(&mut self) { self.core.drain_queue().clear(); }
 }
 
 // ========================================================================= //

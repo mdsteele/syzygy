@@ -461,6 +461,10 @@ impl PuzzleView for View {
                 self.atlatl.animate(value);
             } else if kind == 3 {
                 self.should_advance = value != 0;
+            } else if kind == 4 && value >= 0 {
+                self.mezure.hilight_column_red(value as usize);
+            } else if kind == 5 && value >= 0 {
+                self.mezure.hilight_column_dark(value as usize);
             }
         }
     }

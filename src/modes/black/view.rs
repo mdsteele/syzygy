@@ -27,7 +27,7 @@ use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
 use modes::SOLVED_INFO_TEXT;
 use save::{BlackState, Game, PuzzleState};
 use save::tree::{BasicTree, TreeOp};
-use super::scenes::{compile_intro_scene, compile_outro_scene};
+use super::scenes;
 
 // ========================================================================= //
 
@@ -48,9 +48,13 @@ pub struct View {
 impl View {
     pub fn new(resources: &mut Resources, visible: Rect, state: &BlackState)
                -> View {
-        let intro = compile_intro_scene(resources);
-        let outro = compile_outro_scene(resources);
-        let core = PuzzleCore::new(resources, visible, state, intro, outro);
+        let mut core = {
+            let intro = scenes::compile_intro_scene(resources);
+            let outro = scenes::compile_outro_scene(resources);
+            PuzzleCore::new(resources, visible, state, intro, outro)
+        };
+        core.add_extra_scene(scenes::compile_mezure_midscene(resources));
+        core.add_extra_scene(scenes::compile_yttris_midscene(resources));
         View {
             core: core,
             tree: TreeView::new(resources, 312, 320, state),
@@ -97,6 +101,9 @@ impl Element<Game, PuzzleCmd> for View {
                 }
             }
             action.merge(subaction.but_no_value());
+        }
+        if !action.should_stop() {
+            self.core.begin_character_scene_on_click(event);
         }
         action
     }
@@ -152,6 +159,8 @@ impl PuzzleView for View {
         for (kind, value) in self.core.drain_queue() {
             if kind == 0 {
                 self.tree_visible = value != 0;
+            } else if kind == 1 {
+                self.tree.override_fruits = value != 0;
             }
         }
     }
@@ -172,6 +181,7 @@ struct TreeView {
     leaf_sprites: Vec<Sprite>,
     fruit: HashMap<i32, (Point, Point, Point)>,
     animation: Option<(BasicTree, Vec<TreeOp>, i32)>,
+    override_fruits: bool,
 }
 
 impl TreeView {
@@ -187,6 +197,7 @@ impl TreeView {
             leaf_sprites: resources.get_sprites("tree/leaves"),
             fruit: fruit,
             animation: None,
+            override_fruits: false,
         };
         view.update_fruit_positions(state);
         view
@@ -261,7 +272,6 @@ impl TreeView {
             if tree.contains(key) != on_tree {
                 continue;
             }
-            let is_red = !on_tree || tree.is_red(key);
             if on_tree {
                 if tree.left_child(key).is_none() {
                     canvas.draw_sprite(&self.leaf_sprites[0],
@@ -272,12 +282,23 @@ impl TreeView {
                                        position + Point::new(7, -14));
                 }
             }
-            let idx = if is_red { 1 } else { 0 };
+            let idx = if self.override_fruits {
+                if LETTERS[(key - 1) as usize].1 { 2 } else { 0 }
+            } else {
+                if !on_tree || tree.is_red(key) { 1 } else { 0 }
+            };
             canvas.draw_sprite_centered(&self.fruit_sprites[idx], position);
-            canvas.draw_text(&self.font,
-                             Align::Center,
-                             position + Point::new(0, 4),
-                             &format!("{}", key));
+            if self.override_fruits {
+                canvas.draw_char(&self.font,
+                                 Align::Center,
+                                 position + Point::new(0, 4),
+                                 LETTERS[(key - 1) as usize].0);
+            } else {
+                canvas.draw_text(&self.font,
+                                 Align::Center,
+                                 position + Point::new(0, 4),
+                                 &format!("{}", key));
+            }
         }
     }
 
@@ -405,7 +426,25 @@ impl Element<BlackState, TreeCmd> for TreeView {
 
 // ========================================================================= //
 
-const INFO_BOX_TEXT: &'static str = "\
+const LETTERS: [(char, bool); 15] = [
+    ('O', true),
+    ('K', false),
+    ('R', true),
+    ('G', true),
+    ('B', false),
+    ('A', true),
+    ('W', false),
+    ('N', true),
+    ('I', true),
+    ('Q', false),
+    ('Z', true),
+    ('L', false),
+    ('E', true),
+    ('D', true),
+    ('U', false),
+];
+
+const INFO_BOX_TEXT: &str = "\
 Your goal is to get fruit #10 on the tree high enough
 to reach the girder.
 

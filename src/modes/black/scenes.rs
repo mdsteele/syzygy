@@ -143,7 +143,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NE,
-                      "We can climb the\n\
+                      "We can climb this\n\
                        tree to get there!"),
         ]),
         Ast::Seq(vec![
@@ -217,13 +217,147 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
 // ========================================================================= //
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_mezure_midscene(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NW,
+                      "I didn't know you\n\
+                       were into gardening."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NE,
+                      "Oh sure!  I handle most\n\
+                       of the, ah, aethetic\n\
+                       concerns on this ship."),
+        ]),
+    ];
+    (MEZURE, Ast::compile_scene(resources, ast))
+}
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_yttris_midscene(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NE,
+                      "This tree will try to keep\n\
+                       itself mostly balanced.  We need\n\
+                       to deliberately $iunbalance$r  it."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NE,
+                      "We'll need the trunk to be as\n\
+                       far to one side as possible."),
+        ]),
+    ];
+    (YTTRIS, Ast::compile_scene(resources, ast))
+}
+
+// ========================================================================= //
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
 pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
             Ast::Sound(Sound::solve_puzzle_chime()),
             Ast::Wait(1.0),
-            Ast::Slide(MEZURE, (592, 320), true, false, 1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NE,
+                      "Haha!  Piece of cake!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NW, "Wow!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(MEZURE, (416, 304), true, false, 0.3),
+            Ast::Slide(MEZURE, (400, 320), false, false, 0.15),
+            Ast::Slide(MEZURE, (320, 320), false, true, 1.0),
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "I don't really have\n\
+                       much experience climbing\n\
+                       trees, but here goes..."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(MEZURE, (200, 260), 0.75),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(MEZURE, (464, 170), 1.0),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(MEZURE, (344, 96), 0.75),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SW, "Oof!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NE,
+                      "Hooray!  You did it!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SW,
+                      "Oy, I'm not sure how\n\
+                       safe this is...are you\n\
+                       coming up too?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NE,
+                      "Huh?  Are\n\
+                       you kidding?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NE,
+                      " I'm $iterrified$r \n\
+                       of heights!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(YTTRIS, (400, 320), true, false, 0.75),
+            Ast::Slide(YTTRIS, (416, 304), false, false, 0.1),
+            Ast::Slide(YTTRIS, (448, 304), false, false, 0.15),
+            Ast::Slide(YTTRIS, (464, 288), false, false, 0.1),
+            Ast::Slide(YTTRIS, (544, 288), false, false, 0.3),
+            Ast::Slide(YTTRIS, (560, 304), false, false, 0.1),
+            Ast::Slide(YTTRIS, (592, 304), false, false, 0.1),
+            Ast::Remove(YTTRIS),
+            Ast::Wait(1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SW,
+                      "Er, better\n\
+                       get moving."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(MEZURE, (344, 50), 0.75),
+            Ast::Par(vec![
+                Ast::Sound(Sound::talk_thought()),
+                Ast::Talk(MEZURE, TalkStyle::Thought, TalkPos::SW,
+                          "Don't fall off,\n\
+                           don't fall off..."),
+                Ast::Loop(5, 0, Box::new(Ast::Seq(vec![
+                    Ast::Slide(MEZURE, (343, 50), false, false, 0.1),
+                    Ast::Slide(MEZURE, (344, 50), false, false, 0.1),
+                ]))),
+            ]),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(MEZURE, (128, 50), true, false, 1.0),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(MEZURE, (96, 80), 0.5),
+            Ast::Slide(MEZURE, (80, 80), false, false, 0.1),
+            Ast::Slide(MEZURE, (64, 96), false, false, 0.1),
+            Ast::Slide(MEZURE, (-16, 96), false, false, 0.4),
             Ast::Remove(MEZURE),
+            Ast::Wait(1.5),
+            Ast::Sound(Sound::beep()),
+            Ast::Queue(1, 1), // Make fruits black and blue.
+            Ast::Wait(1.0),
         ]),
     ];
     Ast::compile_scene(resources, ast)

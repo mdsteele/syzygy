@@ -42,6 +42,7 @@ enum TreeCmd {
 pub struct View {
     core: PuzzleCore<(TreeCmd, [i8; 15])>,
     tree: TreeView,
+    tree_visible: bool,
 }
 
 impl View {
@@ -53,6 +54,7 @@ impl View {
         View {
             core: core,
             tree: TreeView::new(resources, 312, 320, state),
+            tree_visible: false,
         }
     }
 }
@@ -61,8 +63,13 @@ impl Element<Game, PuzzleCmd> for View {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
         let state = &game.black_and_blue;
         self.core.draw_back_layer(canvas);
-        self.tree.draw(state, canvas);
+        if self.tree_visible {
+            self.tree.draw(state, canvas);
+        }
         self.core.draw_middle_layer(canvas);
+        if self.tree_visible {
+            self.tree.draw_loose_fruits(state, canvas);
+        }
         self.core.draw_front_layer(canvas, state);
     }
 
@@ -70,7 +77,7 @@ impl Element<Game, PuzzleCmd> for View {
                     -> Action<PuzzleCmd> {
         let state = &mut game.black_and_blue;
         let mut action = self.core.handle_event(event, state);
-        if !action.should_stop() {
+        if !action.should_stop() && self.tree_visible {
             let subaction = self.tree.handle_event(event, state);
             if let Some(&cmd) = subaction.value() {
                 let basic = state.tree().as_basic().clone();
@@ -142,8 +149,10 @@ impl PuzzleView for View {
     }
 
     fn drain_queue(&mut self) {
-        for (_, _) in self.core.drain_queue() {
-            // TODO drain queue
+        for (kind, value) in self.core.drain_queue() {
+            if kind == 0 {
+                self.tree_visible = value != 0;
+            }
         }
     }
 }
@@ -245,6 +254,41 @@ impl TreeView {
             *curr = goal;
         }
     }
+
+    fn draw_fruits(&self, on_tree: bool, tree: &BasicTree,
+                   canvas: &mut Canvas) {
+        for (&key, &(_, position, _)) in self.fruit.iter() {
+            if tree.contains(key) != on_tree {
+                continue;
+            }
+            let is_red = !on_tree || tree.is_red(key);
+            if on_tree {
+                if tree.left_child(key).is_none() {
+                    canvas.draw_sprite(&self.leaf_sprites[0],
+                                       position + Point::new(-16, -14));
+                }
+                if tree.right_child(key).is_none() {
+                    canvas.draw_sprite(&self.leaf_sprites[1],
+                                       position + Point::new(7, -14));
+                }
+            }
+            let idx = if is_red { 1 } else { 0 };
+            canvas.draw_sprite_centered(&self.fruit_sprites[idx], position);
+            canvas.draw_text(&self.font,
+                             Align::Center,
+                             position + Point::new(0, 4),
+                             &format!("{}", key));
+        }
+    }
+
+    fn draw_loose_fruits(&self, state: &BlackState, canvas: &mut Canvas) {
+        let tree = if let Some((ref basic, _, _)) = self.animation {
+            basic
+        } else {
+            state.tree().as_basic()
+        };
+        self.draw_fruits(false, tree, canvas);
+    }
 }
 
 impl Element<BlackState, TreeCmd> for TreeView {
@@ -299,26 +343,7 @@ impl Element<BlackState, TreeCmd> for TreeView {
             }
         }
         // Fruit:
-        for (&key, &(_, position, _)) in self.fruit.iter() {
-            let on_tree = tree.contains(key);
-            let is_red = !on_tree || tree.is_red(key);
-            if on_tree {
-                if tree.left_child(key).is_none() {
-                    canvas.draw_sprite(&self.leaf_sprites[0],
-                                       position + Point::new(-16, -14));
-                }
-                if tree.right_child(key).is_none() {
-                    canvas.draw_sprite(&self.leaf_sprites[1],
-                                       position + Point::new(7, -14));
-                }
-            }
-            let idx = if is_red { 1 } else { 0 };
-            canvas.draw_sprite_centered(&self.fruit_sprites[idx], position);
-            canvas.draw_text(&self.font,
-                             Align::Center,
-                             position + Point::new(0, 4),
-                             &format!("{}", key));
-        }
+        self.draw_fruits(true, tree, canvas);
     }
 
     fn handle_event(&mut self, event: &Event, state: &mut BlackState)

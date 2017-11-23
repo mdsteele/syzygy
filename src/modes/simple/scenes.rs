@@ -242,6 +242,7 @@ pub fn compile_outro_scene(resources: &mut Resources, visible: Rect) -> Scene {
             Ast::Queue(0, 4),
             Ast::Queue(1, 2),
             Ast::Wait(0.1),
+            Ast::Queue(0, 5),
             Ast::Queue(1, 1),
             Ast::Wait(0.1),
             Ast::Queue(1, 0),

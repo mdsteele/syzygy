@@ -143,7 +143,7 @@ impl PuzzleView for View {
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
 const WORDS: &[(i32, i32, &[char])] = &[
-    (10, 0, &['A', 'R', 'T']),
+    (10, 0, &['O', 'R', 'G']),
     (10, 8, &['D', 'U', 'B']),
 ];
 

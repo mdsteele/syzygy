@@ -27,10 +27,10 @@ use self::view::View;
 
 // ========================================================================= //
 
-pub fn run_virtue_or_ice(window: &mut Window, game: &mut Game) -> Mode {
+pub fn run_three_blind_ice(window: &mut Window, game: &mut Game) -> Mode {
     let view = {
         let visible_rect = window.visible_rect();
-        View::new(&mut window.resources(), visible_rect, &game.virtue_or_ice)
+        View::new(&mut window.resources(), visible_rect, &game.three_blind_ice)
     };
     run_puzzle(window, game, view)
 }

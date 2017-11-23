@@ -19,15 +19,15 @@
 
 use toml;
 
-use save::{AtticState, AutoState, BlackState, BlameState, CubeState,
-           DayState, DisconState, DotsState, DoubleState, FailureState,
-           FictionState, FinaleState, GearsState, GroundState, HeadedState,
-           HexState, IcyEmState, JogState, LaneState, LevelUpState,
-           LineState, Location, LogLevelState, MeetState, MissedState,
-           NoReturnState, OrderState, PasswordState, PovState, PrologState,
-           PuzzleState, RightState, SauceState, ServesState, SimpleState,
-           StarState, SyrupState, SyzygyState, TheYState, TreadState,
-           VirtueState, WhatchaState, WreckedState};
+use save::{AtticState, AutoState, BlackState, BlameState, BlindState,
+           CubeState, DayState, DisconState, DotsState, DoubleState,
+           FailureState, FictionState, FinaleState, GearsState, GroundState,
+           HeadedState, HexState, IcyEmState, JogState, LaneState,
+           LevelUpState, LineState, Location, LogLevelState, MeetState,
+           MissedState, NoReturnState, OrderState, PasswordState, PovState,
+           PrologState, PuzzleState, RightState, SauceState, ServesState,
+           SimpleState, StarState, SyrupState, SyzygyState, TheYState,
+           TreadState, WhatchaState, WreckedState};
 use save::util::{Tomlable, to_table};
 
 // ========================================================================= //
@@ -75,8 +75,8 @@ pub struct Game {
     pub system_syzygy: SyzygyState,
     pub the_ice_is_right: RightState,
     pub the_y_factor: TheYState,
+    pub three_blind_ice: BlindState,
     pub tread_lightly: TreadState,
-    pub virtue_or_ice: VirtueState,
     pub whatcha_column: WhatchaState,
     pub wrecked_angle: WreckedState,
     pub finale: FinaleState,
@@ -131,8 +131,8 @@ impl Game {
             system_syzygy: SyzygyState::pop_from_game_table(table_ref),
             the_ice_is_right: RightState::pop_from_game_table(table_ref),
             the_y_factor: TheYState::pop_from_game_table(table_ref),
+            three_blind_ice: BlindState::pop_from_game_table(table_ref),
             tread_lightly: TreadState::pop_from_game_table(table_ref),
-            virtue_or_ice: VirtueState::pop_from_game_table(table_ref),
             whatcha_column: WhatchaState::pop_from_game_table(table_ref),
             wrecked_angle: WreckedState::pop_from_game_table(table_ref),
             finale: FinaleState::pop_from_game_table(table_ref),
@@ -205,8 +205,8 @@ impl Game {
             Location::SystemSyzygy => &self.system_syzygy,
             Location::TheIceIsRight => &self.the_ice_is_right,
             Location::TheYFactor => &self.the_y_factor,
+            Location::ThreeBlindIce => &self.three_blind_ice,
             Location::TreadLightly => &self.tread_lightly,
-            Location::VirtueOrIce => &self.virtue_or_ice,
             Location::WhatchaColumn => &self.whatcha_column,
             Location::WreckedAngle => &self.wrecked_angle,
             Location::Finale => &self.finale,
@@ -252,8 +252,8 @@ impl Game {
             Location::SystemSyzygy => &mut self.system_syzygy,
             Location::TheIceIsRight => &mut self.the_ice_is_right,
             Location::TheYFactor => &mut self.the_y_factor,
+            Location::ThreeBlindIce => &mut self.three_blind_ice,
             Location::TreadLightly => &mut self.tread_lightly,
-            Location::VirtueOrIce => &mut self.virtue_or_ice,
             Location::WhatchaColumn => &mut self.whatcha_column,
             Location::WreckedAngle => &mut self.wrecked_angle,
             Location::Finale => &mut self.finale,

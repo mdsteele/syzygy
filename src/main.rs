@@ -257,11 +257,11 @@ fn main() {
                         Location::TheYFactor => {
                             modes::run_the_y_factor(&mut window, game)
                         }
+                        Location::ThreeBlindIce => {
+                            modes::run_three_blind_ice(&mut window, game)
+                        }
                         Location::TreadLightly => {
                             modes::run_tread_lightly(&mut window, game)
-                        }
-                        Location::VirtueOrIce => {
-                            modes::run_virtue_or_ice(&mut window, game)
                         }
                         Location::WhatchaColumn => {
                             modes::run_whatcha_column(&mut window, game)

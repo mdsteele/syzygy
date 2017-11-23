@@ -69,8 +69,8 @@ const NODES: &[(Location, (i32, i32), bool)] = &[
     (Location::SystemSyzygy, (224, 272), false),
     (Location::TheIceIsRight, (448, 192), false),
     (Location::TheYFactor, (296, 144), true),
+    (Location::ThreeBlindIce, (448, 160), true),
     (Location::TreadLightly, (288, 112), false),
-    (Location::VirtueOrIce, (448, 160), true),
     (Location::WhatchaColumn, (352, 128), false),
     (Location::WreckedAngle, (272, 256), false),
     (Location::Finale, (192, 272), false),
@@ -171,7 +171,7 @@ impl View {
             let mut sprites = resources.get_sprites("map/icebox");
             let is_open = game.is_unlocked(Location::IceToMeetYou) ||
                 game.is_unlocked(Location::TheIceIsRight) ||
-                game.is_unlocked(Location::VirtueOrIce) ||
+                game.is_unlocked(Location::ThreeBlindIce) ||
                 game.is_unlocked(Location::ColumnAsIcyEm);
             let idx = if is_open { 1 } else { 0 };
             map_sprites.push((sprites.swap_remove(idx), Point::new(400, 144)));

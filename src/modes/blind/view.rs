@@ -21,7 +21,7 @@ use elements::{PuzzleCmd, PuzzleCore, PuzzleView};
 use elements::ice::GridView;
 use gui::{Action, Canvas, Element, Event, Rect, Resources};
 use modes::SOLVED_INFO_TEXT;
-use save::{Game, PuzzleState, VirtueState};
+use save::{BlindState, Game, PuzzleState};
 use save::ice::BlockSlide;
 use super::scenes;
 
@@ -33,7 +33,7 @@ pub struct View {
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect, state: &VirtueState)
+    pub fn new(resources: &mut Resources, visible: Rect, state: &BlindState)
                -> View {
         let core = {
             let intro = scenes::compile_intro_scene(resources);
@@ -49,7 +49,7 @@ impl View {
 
 impl Element<Game, PuzzleCmd> for View {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
-        let state = &game.virtue_or_ice;
+        let state = &game.three_blind_ice;
         self.core.draw_back_layer(canvas);
         self.grid.draw(state.grid(), canvas);
         self.core.draw_middle_layer(canvas);
@@ -58,7 +58,7 @@ impl Element<Game, PuzzleCmd> for View {
 
     fn handle_event(&mut self, event: &Event, game: &mut Game)
                     -> Action<PuzzleCmd> {
-        let state = &mut game.virtue_or_ice;
+        let state = &mut game.three_blind_ice;
         let mut action = self.core.handle_event(event, state);
         if !action.should_stop() {
             let subaction = self.grid.handle_event(event, state.grid_mut());
@@ -83,7 +83,7 @@ impl Element<Game, PuzzleCmd> for View {
 
 impl PuzzleView for View {
     fn info_text(&self, game: &Game) -> &'static str {
-        if game.virtue_or_ice.is_solved() {
+        if game.three_blind_ice.is_solved() {
             SOLVED_INFO_TEXT
         } else {
             INFO_BOX_TEXT
@@ -92,26 +92,26 @@ impl PuzzleView for View {
 
     fn undo(&mut self, game: &mut Game) {
         if let Some(slide) = self.core.pop_undo() {
-            game.virtue_or_ice.grid_mut().undo_slide(&slide);
+            game.three_blind_ice.grid_mut().undo_slide(&slide);
             self.grid.reset_animation();
         }
     }
 
     fn redo(&mut self, game: &mut Game) {
         if let Some(slide) = self.core.pop_redo() {
-            game.virtue_or_ice.grid_mut().redo_slide(&slide);
+            game.three_blind_ice.grid_mut().redo_slide(&slide);
             self.grid.reset_animation();
         }
     }
 
     fn reset(&mut self, game: &mut Game) {
         self.core.clear_undo_redo();
-        game.virtue_or_ice.reset();
+        game.three_blind_ice.reset();
         self.grid.reset_animation();
     }
 
     fn solve(&mut self, game: &mut Game) {
-        game.virtue_or_ice.solve();
+        game.three_blind_ice.solve();
         self.grid.reset_animation();
         self.core.begin_outro_scene();
     }

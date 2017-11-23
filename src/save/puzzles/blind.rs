@@ -31,15 +31,15 @@ const GRID_KEY: &str = "grid";
 
 // ========================================================================= //
 
-pub struct VirtueState {
+pub struct BlindState {
     access: Access,
     grid: ObjectGrid,
 }
 
-impl VirtueState {
+impl BlindState {
     pub fn solve(&mut self) {
         self.access = Access::Solved;
-        self.grid = VirtueState::solved_grid();
+        self.grid = BlindState::solved_grid();
     }
 
     pub fn grid(&self) -> &ObjectGrid { &self.grid }
@@ -81,7 +81,7 @@ impl VirtueState {
     }
 
     fn initial_grid() -> ObjectGrid {
-        let mut grid = VirtueState::base_grid();
+        let mut grid = BlindState::base_grid();
         grid.add_ice_block(2, 0, Symbol::RedTriangle(Direction::South));
         let transform = Transform::identity().flipped_horz().rotated_cw();
         grid.add_ice_block(7, 2, Symbol::PurpleCheckmark(transform));
@@ -89,11 +89,11 @@ impl VirtueState {
         grid
     }
 
-    fn solved_grid() -> ObjectGrid { VirtueState::base_grid().solved() }
+    fn solved_grid() -> ObjectGrid { BlindState::base_grid().solved() }
 }
 
-impl PuzzleState for VirtueState {
-    fn location() -> Location { Location::VirtueOrIce }
+impl PuzzleState for BlindState {
+    fn location() -> Location { Location::ThreeBlindIce }
 
     fn access(&self) -> Access { self.access }
 
@@ -101,10 +101,10 @@ impl PuzzleState for VirtueState {
 
     fn can_reset(&self) -> bool { self.grid.is_modified() }
 
-    fn reset(&mut self) { self.grid = VirtueState::initial_grid(); }
+    fn reset(&mut self) { self.grid = BlindState::initial_grid(); }
 }
 
-impl Tomlable for VirtueState {
+impl Tomlable for BlindState {
     fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
@@ -114,16 +114,16 @@ impl Tomlable for VirtueState {
         toml::Value::Table(table)
     }
 
-    fn from_toml(value: toml::Value) -> VirtueState {
+    fn from_toml(value: toml::Value) -> BlindState {
         let mut table = to_table(value);
         let access = Access::pop_from_table(&mut table, ACCESS_KEY);
         let grid = if access == Access::Solved {
-            VirtueState::solved_grid()
+            BlindState::solved_grid()
         } else {
             let grid = pop_table(&mut table, GRID_KEY);
-            ObjectGrid::from_toml(grid, &VirtueState::initial_grid())
+            ObjectGrid::from_toml(grid, &BlindState::initial_grid())
         };
-        VirtueState {
+        BlindState {
             access: access,
             grid: grid,
         }
@@ -139,11 +139,11 @@ mod tests {
     use gui::Point;
     use save::{Access, Direction};
     use save::util::{ACCESS_KEY, Tomlable};
-    use super::VirtueState;
+    use super::BlindState;
 
     #[test]
     fn toml_round_trip() {
-        let mut state = VirtueState::from_toml(toml::Value::Boolean(false));
+        let mut state = BlindState::from_toml(toml::Value::Boolean(false));
         state.access = Access::Replaying;
         let slide1 = state.slide_ice_block(Point::new(2, 0), Direction::South);
         assert!(slide1.is_some());
@@ -157,7 +157,7 @@ mod tests {
         assert!(state.grid().ice_blocks().get(&coords2).is_some());
         let symbol2 = state.grid().ice_blocks().get(&coords2).cloned();
 
-        let state = VirtueState::from_toml(state.to_toml());
+        let state = BlindState::from_toml(state.to_toml());
         assert_eq!(state.access, Access::Replaying);
         assert!(state.grid().is_modified());
         assert_eq!(state.grid().ice_blocks().get(&coords1).cloned(), symbol1);
@@ -166,7 +166,7 @@ mod tests {
 
     #[test]
     fn from_empty_toml() {
-        let state = VirtueState::from_toml(toml::Value::Boolean(false));
+        let state = BlindState::from_toml(toml::Value::Boolean(false));
         assert_eq!(state.access, Access::Unvisited);
         assert!(!state.grid().is_modified());
     }
@@ -176,7 +176,7 @@ mod tests {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), Access::Solved.to_toml());
 
-        let state = VirtueState::from_toml(toml::Value::Table(table));
+        let state = BlindState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Solved);
         assert!(state.grid().is_modified());
     }

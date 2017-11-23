@@ -63,8 +63,8 @@ pub enum Location {
     SystemSyzygy,
     TheIceIsRight,
     TheYFactor,
+    ThreeBlindIce,
     TreadLightly,
-    VirtueOrIce,
     WhatchaColumn,
     WreckedAngle,
     Finale,
@@ -112,8 +112,8 @@ impl Location {
             Location::SystemSyzygy => "System Syzygy",
             Location::TheIceIsRight => "The Ice is Right",
             Location::TheYFactor => "The Y Factor",
+            Location::ThreeBlindIce => "Three Blind Ice",
             Location::TreadLightly => "Tread Lightly",
-            Location::VirtueOrIce => "Virtue or Ice",
             Location::WhatchaColumn => "Whatcha Column",
             Location::WreckedAngle => "Wrecked Angle",
             Location::Finale => "Finale",
@@ -140,7 +140,7 @@ impl Location {
             Location::IfMemoryServes => Location::IceToMeetYou,
             Location::JogYourMemory => Location::Map,
             Location::LevelHeaded => Location::Map,
-            Location::LevelUp => Location::VirtueOrIce,
+            Location::LevelUp => Location::ThreeBlindIce,
             Location::LightSyrup => Location::TreadLightly,
             Location::LogLevel => Location::SystemFailure,
             Location::MemoryLane => Location::MissedConnections,
@@ -159,8 +159,8 @@ impl Location {
             Location::SystemSyzygy => Location::Finale,
             Location::TheIceIsRight => Location::LevelUp,
             Location::TheYFactor => Location::HexSpangled,
+            Location::ThreeBlindIce => Location::Map,
             Location::TreadLightly => Location::DoubleCross,
-            Location::VirtueOrIce => Location::Map,
             Location::WhatchaColumn => Location::AutofacTour,
             Location::WreckedAngle => Location::ShiftingGround,
             Location::Finale => Location::Map,
@@ -228,8 +228,8 @@ impl Location {
             Location::SystemSyzygy => vec![Location::PasswordFile],
             Location::TheIceIsRight => vec![Location::IceToMeetYou],
             Location::TheYFactor => vec![Location::Prolog],
+            Location::ThreeBlindIce => vec![Location::LevelUp],
             Location::TreadLightly => vec![Location::LightSyrup],
-            Location::VirtueOrIce => vec![Location::LevelUp],
             Location::WhatchaColumn => vec![Location::DoubleCross],
             Location::WreckedAngle => vec![Location::Prolog],
             Location::Finale => vec![Location::SystemSyzygy],
@@ -275,8 +275,8 @@ impl Location {
             Location::SystemSyzygy => "system_syzygy",
             Location::TheIceIsRight => "the_ice_is_right",
             Location::TheYFactor => "the_y_factor",
+            Location::ThreeBlindIce => "three_blind_ice",
             Location::TreadLightly => "tread_lightly",
-            Location::VirtueOrIce => "virtue_or_ice",
             Location::WhatchaColumn => "whatcha_column",
             Location::WreckedAngle => "wrecked_angle",
             Location::Finale => "finale",
@@ -343,8 +343,8 @@ const ALL_LOCATIONS: &[Location] = &[
     Location::SystemSyzygy,
     Location::TheIceIsRight,
     Location::TheYFactor,
+    Location::ThreeBlindIce,
     Location::TreadLightly,
-    Location::VirtueOrIce,
     Location::WhatchaColumn,
     Location::WreckedAngle,
     Location::Finale,
@@ -455,7 +455,7 @@ mod tests {
         assert!(precedes(Location::TheYFactor, Location::FactOrFiction));
         // "Ice" puzzles:
         assert!(precedes(Location::IceToMeetYou, Location::TheIceIsRight));
-        assert!(precedes(Location::TheIceIsRight, Location::VirtueOrIce));
+        assert!(precedes(Location::TheIceIsRight, Location::ThreeBlindIce));
         // "Memory" puzzles:
         assert!(precedes(Location::MemoryLane, Location::IfMemoryServes));
         assert!(precedes(Location::IfMemoryServes, Location::JogYourMemory));

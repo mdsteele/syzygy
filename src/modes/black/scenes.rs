@@ -329,8 +329,8 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
             Ast::Wait(1.0),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SW,
-                      "Er, better\n\
-                       get moving."),
+                      "Er...I'd better\n\
+                       get moving..."),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::small_jump()),

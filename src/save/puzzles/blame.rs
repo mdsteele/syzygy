@@ -26,21 +26,21 @@ use super::PuzzleState;
 
 // ========================================================================= //
 
-const ELINSA_ROW_KEY: &str = "elinsa";
+const MEZURE_ROW_KEY: &str = "mezure";
 const POSITIONS_KEY: &str = "positions";
 
 const NUM_ROWS: i32 = 7;
-const MIN_ELINSA_ROW: i32 = -1;
-const MAX_ELINSA_ROW: i32 = NUM_ROWS;
+const MIN_MEZURE_ROW: i32 = -1;
+const MAX_MEZURE_ROW: i32 = NUM_ROWS;
 const INITIAL_POSITIONS: &[i32] = &[0, 0, 0, 0, 0, 0, 0];
-const INITIAL_ELINSA_ROW: i32 = MAX_ELINSA_ROW;
+const INITIAL_MEZURE_ROW: i32 = MAX_MEZURE_ROW;
 
 // ========================================================================= //
 
 pub struct BlameState {
     access: Access,
     positions: Vec<i32>,
-    elinsa_row: i32,
+    mezure_row: i32,
     is_initial: bool,
 }
 
@@ -48,7 +48,7 @@ impl BlameState {
     pub fn solve(&mut self) {
         self.access = Access::Solved;
         self.positions[0] = BlameState::max_position_for_row(0);
-        self.elinsa_row = MIN_ELINSA_ROW;
+        self.mezure_row = MIN_MEZURE_ROW;
         self.is_initial = false;
     }
 
@@ -68,18 +68,18 @@ impl BlameState {
         assert!(row >= 0 && row < NUM_ROWS);
         assert!(pos >= 0 && pos <= BlameState::max_position_for_row(row));
         self.positions[row as usize] = pos;
-        self.is_initial = self.elinsa_row == INITIAL_ELINSA_ROW &&
+        self.is_initial = self.mezure_row == INITIAL_MEZURE_ROW &&
             &self.positions as &[i32] == INITIAL_POSITIONS;
     }
 
-    pub fn get_elinsa_row(&self) -> i32 { self.elinsa_row }
+    pub fn get_mezure_row(&self) -> i32 { self.mezure_row }
 
-    pub fn set_elinsa_row(&mut self, row: i32) {
-        assert!(row >= MIN_ELINSA_ROW && row <= MAX_ELINSA_ROW);
-        self.elinsa_row = row;
-        self.is_initial = self.elinsa_row == INITIAL_ELINSA_ROW &&
+    pub fn set_mezure_row(&mut self, row: i32) {
+        assert!(row >= MIN_MEZURE_ROW && row <= MAX_MEZURE_ROW);
+        self.mezure_row = row;
+        self.is_initial = self.mezure_row == INITIAL_MEZURE_ROW &&
             &self.positions as &[i32] == INITIAL_POSITIONS;
-        if self.elinsa_row == MIN_ELINSA_ROW {
+        if self.mezure_row == MIN_MEZURE_ROW {
             self.access = Access::Solved;
         }
     }
@@ -107,7 +107,7 @@ impl PuzzleState for BlameState {
 
     fn reset(&mut self) {
         self.positions = INITIAL_POSITIONS.to_vec();
-        self.elinsa_row = INITIAL_ELINSA_ROW;
+        self.mezure_row = INITIAL_MEZURE_ROW;
         self.is_initial = true;
     }
 }
@@ -123,8 +123,8 @@ impl Tomlable for BlameState {
                 .collect();
             table.insert(POSITIONS_KEY.to_string(),
                          toml::Value::Array(positions));
-            table.insert(ELINSA_ROW_KEY.to_string(),
-                         toml::Value::Integer(self.elinsa_row as i64));
+            table.insert(MEZURE_ROW_KEY.to_string(),
+                         toml::Value::Integer(self.mezure_row as i64));
         }
         toml::Value::Table(table)
     }
@@ -132,17 +132,17 @@ impl Tomlable for BlameState {
     fn from_toml(value: toml::Value) -> BlameState {
         let mut table = to_table(value);
         let mut access = Access::pop_from_table(&mut table, ACCESS_KEY);
-        let elinsa_row = if access.is_solved() {
-            MIN_ELINSA_ROW
+        let mezure_row = if access.is_solved() {
+            MIN_MEZURE_ROW
         } else {
             let mut row = table
-                .remove(ELINSA_ROW_KEY)
+                .remove(MEZURE_ROW_KEY)
                 .map(i32::from_toml)
-                .unwrap_or(INITIAL_ELINSA_ROW);
-            if row < MIN_ELINSA_ROW || row > MAX_ELINSA_ROW {
-                row = INITIAL_ELINSA_ROW;
+                .unwrap_or(INITIAL_MEZURE_ROW);
+            if row < MIN_MEZURE_ROW || row > MAX_MEZURE_ROW {
+                row = INITIAL_MEZURE_ROW;
             }
-            if row == MIN_ELINSA_ROW {
+            if row == MIN_MEZURE_ROW {
                 access = Access::Solved;
             }
             row
@@ -158,11 +158,11 @@ impl Tomlable for BlameState {
             }
         }
         let is_initial = &positions as &[i32] == INITIAL_POSITIONS &&
-            elinsa_row == INITIAL_ELINSA_ROW;
+            mezure_row == INITIAL_MEZURE_ROW;
         BlameState {
             access: access,
             positions: positions,
-            elinsa_row: elinsa_row,
+            mezure_row: mezure_row,
             is_initial: is_initial,
         }
     }
@@ -176,8 +176,8 @@ mod tests {
 
     use save::{Access, PuzzleState};
     use save::util::{ACCESS_KEY, Tomlable};
-    use super::{BlameState, ELINSA_ROW_KEY, INITIAL_ELINSA_ROW,
-                INITIAL_POSITIONS, MIN_ELINSA_ROW, POSITIONS_KEY};
+    use super::{BlameState, INITIAL_MEZURE_ROW, INITIAL_POSITIONS,
+                MEZURE_ROW_KEY, MIN_MEZURE_ROW, POSITIONS_KEY};
 
     #[test]
     fn toml_round_trip() {
@@ -190,11 +190,11 @@ mod tests {
         state.set_position(4, 3);
         state.set_position(5, 3);
         state.set_position(6, 4);
-        state.set_elinsa_row(3);
+        state.set_mezure_row(3);
 
         let state = BlameState::from_toml(state.to_toml());
         assert_eq!(state.access, Access::Replaying);
-        assert_eq!(state.get_elinsa_row(), 3);
+        assert_eq!(state.get_mezure_row(), 3);
         assert_eq!(state.positions, vec![1, 1, 2, 2, 3, 3, 4]);
     }
 
@@ -202,7 +202,7 @@ mod tests {
     fn from_empty_toml() {
         let state = BlameState::from_toml(toml::Value::Boolean(false));
         assert_eq!(state.access, Access::Unvisited);
-        assert_eq!(state.get_elinsa_row(), INITIAL_ELINSA_ROW);
+        assert_eq!(state.get_mezure_row(), INITIAL_MEZURE_ROW);
         assert_eq!(&state.positions as &[i32], INITIAL_POSITIONS);
     }
 
@@ -213,32 +213,32 @@ mod tests {
 
         let state = BlameState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Solved);
-        assert_eq!(state.elinsa_row, MIN_ELINSA_ROW);
+        assert_eq!(state.mezure_row, MIN_MEZURE_ROW);
     }
 
     #[test]
-    fn from_elinsa_already_at_top_toml() {
+    fn from_mezure_already_at_top_toml() {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), Access::Unsolved.to_toml());
-        table.insert(ELINSA_ROW_KEY.to_string(),
-                     toml::Value::Integer(MIN_ELINSA_ROW as i64));
+        table.insert(MEZURE_ROW_KEY.to_string(),
+                     toml::Value::Integer(MIN_MEZURE_ROW as i64));
         let state = BlameState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Solved);
-        assert_eq!(state.elinsa_row, MIN_ELINSA_ROW);
+        assert_eq!(state.mezure_row, MIN_MEZURE_ROW);
     }
 
     #[test]
-    fn from_invalid_elinsa_row_toml() {
+    fn from_invalid_mezure_row_toml() {
         let mut table = toml::value::Table::new();
-        table.insert(ELINSA_ROW_KEY.to_string(), toml::Value::Integer(77));
+        table.insert(MEZURE_ROW_KEY.to_string(), toml::Value::Integer(77));
         let state = BlameState::from_toml(toml::Value::Table(table));
-        assert_eq!(state.elinsa_row, INITIAL_ELINSA_ROW);
+        assert_eq!(state.mezure_row, INITIAL_MEZURE_ROW);
         assert!(!state.is_solved());
 
         let mut table = toml::value::Table::new();
-        table.insert(ELINSA_ROW_KEY.to_string(), toml::Value::Integer(-77));
+        table.insert(MEZURE_ROW_KEY.to_string(), toml::Value::Integer(-77));
         let state = BlameState::from_toml(toml::Value::Table(table));
-        assert_eq!(state.elinsa_row, INITIAL_ELINSA_ROW);
+        assert_eq!(state.mezure_row, INITIAL_MEZURE_ROW);
         assert!(!state.is_solved());
     }
 

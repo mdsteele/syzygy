@@ -26,7 +26,7 @@ use elements::shift::{ArrowPair, Platform};
 use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sound};
 use modes::SOLVED_INFO_TEXT;
 use save::{BlameState, Game, PuzzleState};
-use super::scenes::{ELINSA_SLOT, compile_intro_scene, compile_outro_scene};
+use super::scenes;
 
 // ========================================================================= //
 
@@ -41,9 +41,13 @@ impl View {
     #[cfg_attr(rustfmt, rustfmt_skip)]
     pub fn new(resources: &mut Resources, visible: Rect, state: &BlameState)
                -> View {
-        let intro = compile_intro_scene(resources);
-        let outro = compile_outro_scene(resources);
-        let core = PuzzleCore::new(resources, visible, state, intro, outro);
+        let mut core = {
+            let intro = scenes::compile_intro_scene(resources);
+            let outro = scenes::compile_outro_scene(resources);
+            PuzzleCore::new(resources, visible, state, intro, outro)
+        };
+        core.add_extra_scene(scenes::compile_mezure_midscene(resources));
+        core.add_extra_scene(scenes::compile_yttris_midscene(resources));
         let mut view = View {
             core: core,
             animation: Scene::empty(),
@@ -67,7 +71,7 @@ impl View {
         };
         view.animation.begin(view.core.theater_mut());
         if state.is_visited() && !state.is_solved() {
-            view.update_elinsa_position(state);
+            view.update_mezure_position(state);
         }
         view
     }
@@ -96,9 +100,9 @@ impl View {
         Point::new(self.platforms[0].pos_to_left(pos) + 16, 320)
     }
 
-    fn update_elinsa_position(&mut self, state: &BlameState) {
-        let position = self.platform_pt(state, state.get_elinsa_row());
-        self.core.theater_mut().set_actor_position(ELINSA_SLOT, position);
+    fn update_mezure_position(&mut self, state: &BlameState) {
+        let position = self.platform_pt(state, state.get_mezure_row());
+        self.core.theater_mut().set_actor_position(scenes::MEZURE, position);
     }
 
     fn update_platform_positions(&mut self, state: &BlameState) {
@@ -118,14 +122,14 @@ impl View {
         let max_pos_2 = BlameState::max_position_for_row(row_2);
         let original_pos_1 = state.get_position(row_1);
         let original_pos_2 = state.get_position(row_2);
-        let original_elinsa_row = state.get_elinsa_row();
+        let original_mezure_row = state.get_mezure_row();
         let mut top_seq: Vec<Box<SceneNode>> = Vec::new();
 
         // Move platforms:
-        let mut elinsa_row = state.get_elinsa_row();
-        let mut elinsa_pos = 0;
-        if elinsa_row >= 0 && elinsa_row < num_rows {
-            elinsa_pos = state.get_position(elinsa_row);
+        let mut mezure_row = state.get_mezure_row();
+        let mut mezure_pos = 0;
+        if mezure_row >= 0 && mezure_row < num_rows {
+            mezure_pos = state.get_position(mezure_row);
         }
         let mut delta_1 = delta;
         let mut delta_2 = delta;
@@ -134,7 +138,7 @@ impl View {
         while delta_1 != 0 || delta_2 != 0 {
             let mut platform_1_seq: Vec<Box<SceneNode>> = Vec::new();
             let mut platform_2_seq: Vec<Box<SceneNode>> = Vec::new();
-            let mut elinsa_seq: Vec<Box<SceneNode>> = Vec::new();
+            let mut mezure_seq: Vec<Box<SceneNode>> = Vec::new();
             if delta_1 < 0 && pos_1 == 0 || delta_1 > 0 && pos_1 == max_pos_1 {
                 delta_1 = -delta_1;
             }
@@ -183,9 +187,9 @@ impl View {
             state.set_position(row_1, pos_1);
             state.set_position(row_2, pos_2);
 
-            // Move Elinsa and/or knock her downwards.
-            if elinsa_row == row_1 || elinsa_row == row_2 {
-                let impact = if elinsa_row == row_1 {
+            // Move Mezure and/or knock them downwards.
+            if mezure_row == row_1 || mezure_row == row_2 {
+                let impact = if mezure_row == row_1 {
                     if row_1 == 5 && pos_1 == max_pos_for_row_5 {
                         Some(max_pos_for_row_5 - 1)
                     } else if row_1 > 0 {
@@ -207,7 +211,7 @@ impl View {
                         None
                     }
                 } else {
-                    debug_assert_eq!(elinsa_row, row_2);
+                    debug_assert_eq!(mezure_row, row_2);
                     if old_pos_1 < old_pos_2 && pos_1 >= pos_2 {
                         Some(old_pos_1 + (old_pos_2 - old_pos_1) / 2 + 1)
                     } else if old_pos_1 > old_pos_2 && pos_1 <= pos_2 {
@@ -218,18 +222,18 @@ impl View {
                         None
                     }
                 };
-                let (row, pos) = if elinsa_row == row_1 {
+                let (row, pos) = if mezure_row == row_1 {
                     (row_1, pos_1)
                 } else {
                     (row_2, pos_2)
                 };
-                if let Some(new_elinsa_pos) = impact {
+                if let Some(new_mezure_pos) = impact {
                     let mut time_to_hit =
-                        Platform::travel_time(elinsa_pos, new_elinsa_pos);
-                    elinsa_pos = new_elinsa_pos;
-                    elinsa_row = state.fall_from(elinsa_row, elinsa_pos);
+                        Platform::travel_time(mezure_pos, new_mezure_pos);
+                    mezure_pos = new_mezure_pos;
+                    mezure_row = state.fall_from(mezure_row, mezure_pos);
                     let mut slide_dest =
-                        self.platform_pt_for_pos(row, elinsa_pos);
+                        self.platform_pt_for_pos(row, mezure_pos);
                     if row == row_2 && (old_pos_1 - old_pos_2).abs() % 2 == 0 {
                         slide_dest = slide_dest +
                             if old_pos_1 < old_pos_2 {
@@ -239,63 +243,63 @@ impl View {
                             };
                         time_to_hit += 0.5 * Platform::travel_time(0, 1);
                     }
-                    let jump_dest = if elinsa_row < num_rows {
-                        self.platform_pt_for_pos(elinsa_row, elinsa_pos)
+                    let jump_dest = if mezure_row < num_rows {
+                        self.platform_pt_for_pos(mezure_row, mezure_pos)
                     } else {
-                        self.floor_pt_for_pos(elinsa_pos)
+                        self.floor_pt_for_pos(mezure_pos)
                     };
                     let fall_dist = jump_dest.y() - self.platform_top(row);
                     let time_to_fall = JumpNode::time_to_fall(fall_dist + 5) +
                         JumpNode::time_to_fall(5);
-                    elinsa_seq.push(Box::new(SlideNode::new(ELINSA_SLOT,
+                    mezure_seq.push(Box::new(SlideNode::new(scenes::MEZURE,
                                                             slide_dest,
                                                             false,
                                                             false,
                                                             time_to_hit)));
                     let sound = Sound::character_collision();
-                    elinsa_seq.push(Box::new(SoundNode::new(sound)));
-                    elinsa_seq.push(Box::new(JumpNode::new(ELINSA_SLOT,
+                    mezure_seq.push(Box::new(SoundNode::new(sound)));
+                    mezure_seq.push(Box::new(JumpNode::new(scenes::MEZURE,
                                                            jump_dest,
                                                            time_to_fall)));
                 } else {
-                    elinsa_pos = pos;
-                    let dest = self.platform_pt_for_pos(row, elinsa_pos);
-                    elinsa_seq.push(Box::new(SlideNode::new(ELINSA_SLOT,
+                    mezure_pos = pos;
+                    let dest = self.platform_pt_for_pos(row, mezure_pos);
+                    mezure_seq.push(Box::new(SlideNode::new(scenes::MEZURE,
                                                             dest,
                                                             false,
                                                             false,
                                                             travel_time)));
                 }
-            } else if elinsa_row < num_rows && elinsa_row == row_2 + 1 {
-                let impact = if pos_2 > old_pos_2 && elinsa_pos > old_pos_2 &&
-                    elinsa_pos <= pos_2
+            } else if mezure_row < num_rows && mezure_row == row_2 + 1 {
+                let impact = if pos_2 > old_pos_2 && mezure_pos > old_pos_2 &&
+                    mezure_pos <= pos_2
                 {
-                    Some((Platform::travel_time(old_pos_2, elinsa_pos - 1),
-                          min(BlameState::max_position_for_row(elinsa_row),
-                              elinsa_pos + 1)))
-                } else if pos_2 < old_pos_2 && elinsa_pos >= pos_2 &&
-                           elinsa_pos < old_pos_2
+                    Some((Platform::travel_time(old_pos_2, mezure_pos - 1),
+                          min(BlameState::max_position_for_row(mezure_row),
+                              mezure_pos + 1)))
+                } else if pos_2 < old_pos_2 && mezure_pos >= pos_2 &&
+                           mezure_pos < old_pos_2
                 {
-                    Some((Platform::travel_time(old_pos_2, elinsa_pos + 1),
-                          max(0, elinsa_pos - 1)))
+                    Some((Platform::travel_time(old_pos_2, mezure_pos + 1),
+                          max(0, mezure_pos - 1)))
                 } else {
                     None
                 };
-                if let Some((time_to_hit, new_elinsa_pos)) = impact {
-                    elinsa_pos = new_elinsa_pos;
-                    elinsa_row = state.fall_from(elinsa_row, elinsa_pos);
-                    let dest = if elinsa_row < num_rows {
-                        self.platform_pt_for_pos(elinsa_row, elinsa_pos)
+                if let Some((time_to_hit, new_mezure_pos)) = impact {
+                    mezure_pos = new_mezure_pos;
+                    mezure_row = state.fall_from(mezure_row, mezure_pos);
+                    let dest = if mezure_row < num_rows {
+                        self.platform_pt_for_pos(mezure_row, mezure_pos)
                     } else {
-                        self.floor_pt_for_pos(elinsa_pos)
+                        self.floor_pt_for_pos(mezure_pos)
                     };
                     let fall_dist = dest.y() - self.platform_top(row_2 + 1);
                     let time_to_fall = JumpNode::time_to_fall(fall_dist + 5) +
                         JumpNode::time_to_fall(5);
-                    elinsa_seq.push(Box::new(WaitNode::new(time_to_hit)));
+                    mezure_seq.push(Box::new(WaitNode::new(time_to_hit)));
                     let sound = Sound::character_collision();
-                    elinsa_seq.push(Box::new(SoundNode::new(sound)));
-                    elinsa_seq.push(Box::new(JumpNode::new(ELINSA_SLOT,
+                    mezure_seq.push(Box::new(SoundNode::new(sound)));
+                    mezure_seq.push(Box::new(JumpNode::new(scenes::MEZURE,
                                                            dest,
                                                            time_to_fall)));
                 }
@@ -303,74 +307,78 @@ impl View {
             top_seq.push(Box::new(ParallelNode::new(vec![
                 Box::new(SequenceNode::new(platform_1_seq)),
                 Box::new(SequenceNode::new(platform_2_seq)),
-                Box::new(SequenceNode::new(elinsa_seq)),
+                Box::new(SequenceNode::new(mezure_seq)),
             ])));
         }
 
-        // If Elinsa fell to the floor, get back on the starting platform:
-        if elinsa_row == num_rows && original_elinsa_row != num_rows {
+        // If Mezure fell to the floor, get back on the starting platform:
+        if mezure_row == num_rows && original_mezure_row != num_rows {
             let time = 0.5 *
-                Platform::travel_time(elinsa_pos, max_pos_for_last_row);
+                Platform::travel_time(mezure_pos, max_pos_for_last_row);
             let dest = Point::new(408, 320);
-            let slide = SlideNode::new(ELINSA_SLOT, dest, false, false, time);
+            let slide =
+                SlideNode::new(scenes::MEZURE, dest, false, false, time);
             top_seq.push(Box::new(slide));
             let dest = Point::new(424, 304);
-            let slide = SlideNode::new(ELINSA_SLOT, dest, false, false, 0.1);
+            let slide =
+                SlideNode::new(scenes::MEZURE, dest, false, false, 0.1);
             top_seq.push(Box::new(slide));
-            let dest = self.platform_pt(state, elinsa_row);
-            let slide = SlideNode::new(ELINSA_SLOT, dest, false, false, 0.1);
+            let dest = self.platform_pt(state, mezure_row);
+            let slide =
+                SlideNode::new(scenes::MEZURE, dest, false, false, 0.1);
             top_seq.push(Box::new(slide));
         }
 
-        // Make Elinsa climb upwards:
-        if elinsa_row == num_rows &&
+        // Make Mezure climb upwards:
+        if mezure_row == num_rows &&
             state.get_position(last_row) == max_pos_for_last_row &&
             state.get_position(last_row - 1) != max_pos_for_last_row
         {
-            elinsa_row -= 1;
-            let dest = self.platform_pt(state, elinsa_row);
+            mezure_row -= 1;
+            let dest = self.platform_pt(state, mezure_row);
             top_seq.push(Box::new(SoundNode::new(Sound::small_jump())));
-            top_seq.push(Box::new(JumpNode::new(ELINSA_SLOT, dest, 0.6)));
+            top_seq.push(Box::new(JumpNode::new(scenes::MEZURE, dest, 0.6)));
         }
-        if elinsa_row < num_rows {
-            while elinsa_row > 0 {
-                let pos_0 = state.get_position(elinsa_row);
-                let pos_1 = state.get_position(elinsa_row - 1);
+        if mezure_row < num_rows {
+            while mezure_row > 0 {
+                let pos_0 = state.get_position(mezure_row);
+                let pos_1 = state.get_position(mezure_row - 1);
                 if (pos_0 - pos_1).abs() != 1 {
                     break;
                 }
-                if elinsa_row >= 2 {
-                    let pos_2 = state.get_position(elinsa_row - 2);
+                if mezure_row >= 2 {
+                    let pos_2 = state.get_position(mezure_row - 2);
                     if pos_2 == pos_1 || pos_2 == pos_0 {
                         break;
                     }
                 }
-                if elinsa_row == last_row &&
+                if mezure_row == last_row &&
                     (pos_0 == max_pos_for_last_row ||
                          pos_1 == max_pos_for_last_row) ||
-                    elinsa_row == 1 && (pos_0 == 0 || pos_1 == 0)
+                    mezure_row == 1 && (pos_0 == 0 || pos_1 == 0)
                 {
                     break;
                 }
-                elinsa_row -= 1;
-                let dest = self.platform_pt(state, elinsa_row);
+                mezure_row -= 1;
+                let dest = self.platform_pt(state, mezure_row);
                 top_seq.push(Box::new(SoundNode::new(Sound::small_jump())));
-                top_seq.push(Box::new(JumpNode::new(ELINSA_SLOT, dest, 0.6)));
+                top_seq
+                    .push(Box::new(JumpNode::new(scenes::MEZURE, dest, 0.6)));
             }
         }
-        if elinsa_row == 0 &&
+        if mezure_row == 0 &&
             state.get_position(0) == BlameState::max_position_for_row(0)
         {
-            elinsa_row -= 1;
-            let dest = self.platform_pt(state, elinsa_row);
+            mezure_row -= 1;
+            let dest = self.platform_pt(state, mezure_row);
             top_seq.push(Box::new(SoundNode::new(Sound::small_jump())));
-            top_seq.push(Box::new(JumpNode::new(ELINSA_SLOT, dest, 0.6)));
+            top_seq.push(Box::new(JumpNode::new(scenes::MEZURE, dest, 0.6)));
         }
-        state.set_elinsa_row(elinsa_row);
+        state.set_mezure_row(mezure_row);
         self.core.push_undo((row_1,
                              pos_1 - original_pos_1,
                              pos_2 - original_pos_2,
-                             elinsa_row - original_elinsa_row));
+                             mezure_row - original_mezure_row));
 
         // Start animation:
         self.animation =
@@ -417,6 +425,9 @@ impl Element<Game, PuzzleCmd> for View {
             }
             action.merge(subaction.but_no_value());
         }
+        if !action.should_stop() {
+            self.core.begin_character_scene_on_click(event);
+        }
         action
     }
 }
@@ -437,13 +448,13 @@ impl PuzzleView for View {
             let row_2 = row_1 + 1;
             let new_pos_1 = state.get_position(row_1) - dx_1;
             let new_pos_2 = state.get_position(row_2) - dx_2;
-            let new_elinsa = state.get_elinsa_row() - dy;
+            let new_mezure = state.get_mezure_row() - dy;
             state.set_position(row_1, new_pos_1);
             state.set_position(row_2, new_pos_2);
             self.platforms[row_1 as usize].set_position(new_pos_1);
             self.platforms[row_2 as usize].set_position(new_pos_2);
-            state.set_elinsa_row(new_elinsa);
-            self.update_elinsa_position(state);
+            state.set_mezure_row(new_mezure);
+            self.update_mezure_position(state);
         }
     }
 
@@ -453,13 +464,13 @@ impl PuzzleView for View {
             let row_2 = row_1 + 1;
             let new_pos_1 = state.get_position(row_1) + dx_1;
             let new_pos_2 = state.get_position(row_2) + dx_2;
-            let new_elinsa = state.get_elinsa_row() + dy;
+            let new_mezure = state.get_mezure_row() + dy;
             state.set_position(row_1, new_pos_1);
             state.set_position(row_2, new_pos_2);
             self.platforms[row_1 as usize].set_position(new_pos_1);
             self.platforms[row_2 as usize].set_position(new_pos_2);
-            state.set_elinsa_row(new_elinsa);
-            self.update_elinsa_position(state);
+            state.set_mezure_row(new_mezure);
+            self.update_mezure_position(state);
         }
     }
 
@@ -468,14 +479,14 @@ impl PuzzleView for View {
         self.core.clear_undo_redo();
         state.reset();
         self.update_platform_positions(state);
-        self.update_elinsa_position(state);
+        self.update_mezure_position(state);
     }
 
     fn solve(&mut self, game: &mut Game) {
         let state = &mut game.shift_the_blame;
         state.solve();
         self.update_platform_positions(state);
-        self.update_elinsa_position(state);
+        self.update_mezure_position(state);
         self.core.begin_outro_scene();
     }
 
@@ -495,13 +506,13 @@ impl PuzzleView for View {
 // ========================================================================= //
 
 const INFO_BOX_TEXT: &str = "\
-Your goal is to help Elinsa reach the ledge in the
+Your goal is to help Mezure reach the ledge in the
 upper-right corner.
 
 $M{Tap}{Click} the arrow buttons to move the platforms
 to the left or to the right.
 
-Elinsa will jump up onto the next platform when
-it is adjacent to her.";
+Mezure will jump up onto the next platform when
+it is adjacent.";
 
 // ========================================================================= //

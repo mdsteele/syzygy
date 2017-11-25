@@ -498,6 +498,6 @@ that platform, it will move by 4 instead of by
 its normal distance.
 
 Ugrent will jump up onto the next platform when
-it is adjacent to him.";
+it is adjacent.";
 
 // ========================================================================= //

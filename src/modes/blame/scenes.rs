@@ -193,9 +193,9 @@ pub fn compile_yttris_midscene(resources: &mut Resources) -> (i32, Scene) {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_thought()),
             Ast::Talk(YTTRIS, TalkStyle::Thought, TalkPos::NW,
-                      "I think there's an\n\
-                       easier way to do this.\n\
-                       I just forget how..."),
+                      "I wonder if I should\n\
+                       have mentioned the\n\
+                       freight elevator?"),
         ]),
     ];
     (YTTRIS, Ast::compile_scene(resources, ast))
@@ -211,12 +211,105 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
             Ast::Wait(1.0),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SW,
-                      "Done and done."),
+                      "Got there!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SW,
+                      "Time to go see where\n\
+                       Argony ran off to."),
         ]),
         Ast::Seq(vec![
             Ast::Slide(MEZURE, (592, 64), true, false, 1.0),
             Ast::Remove(MEZURE),
             Ast::Wait(1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NW,
+                      "Wow, that Mezure\n\
+                       sure did a good job!"),
+        ]),
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::Wait(0.2),
+                Ast::Queue(0, 8),
+                Ast::Queue(1, 7),
+                Ast::Queue(2, 6),
+                Ast::Queue(3, 5),
+                Ast::Queue(4, 6),
+                Ast::Queue(5, 7),
+                Ast::Queue(6, 8),
+                Ast::Wait(1.5),
+            ]),
+            Ast::Seq(vec![
+                Ast::Slide(YTTRIS, (445, 304), true, true, 0.3),
+                Ast::Wait(0.9),
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NW,
+                          "Probably would've\n\
+                           been easier to just\n\
+                           do this, though."),
+            ]),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(YTTRIS, (384, 280), 0.65),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(YTTRIS, (352, 248), 0.5),
+            Ast::Par(vec![
+                Ast::Seq(vec![
+                    Ast::Sound(Sound::small_jump()),
+                    Ast::Jump(YTTRIS, (320, 216), 0.5),
+                ]),
+                Ast::Seq(vec![
+                    Ast::Wait(0.25),
+                    Ast::Sound(Sound::platform_shift(1)),
+                    Ast::Queue(2, 7),
+                ]),
+            ]),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(YTTRIS, (288, 184), 0.5),
+            Ast::Sound(Sound::platform_shift(1)),
+            Ast::Queue(2, 6),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(YTTRIS, (320, 152), 0.5),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(YTTRIS, (352, 120), 0.5),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(YTTRIS, (384, 88), 0.5),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(YTTRIS, (416, 64), 0.5),
+            Ast::Sound(Sound::solve_puzzle_chime()),
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::SW,
+                      "w00t!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Wait(1.0),
+            Ast::Slide(YTTRIS, (406, 64), true, true, 0.2),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::SW,
+                      "You know, it's a\n\
+                       pretty nice view\n\
+                       from up here!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::SW,
+                      "...Maybe heights\n\
+                       aren't all that bad."),
+        ]),
+        Ast::Par(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::SW,
+                      "Sorry for doubting\n\
+                       you, heights!"),
+            Ast::Slide(YTTRIS, (592, 64), true, false, 0.75),
+        ]),
+        Ast::Seq(vec![
+            Ast::Remove(YTTRIS),
+            Ast::Wait(0.35),
+            Ast::Queue(-2, 0), // Move all platforms to final position.
         ]),
     ];
     Ast::compile_scene(resources, ast)

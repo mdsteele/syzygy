@@ -31,16 +31,21 @@ use super::scenes;
 pub struct View {
     core: PuzzleCore<(usize, usize)>,
     rows: Vec<TileRow>,
+    show_tiles: bool,
 }
 
 impl View {
     pub fn new(resources: &mut Resources, visible: Rect, state: &OrderState)
                -> View {
-        let core = {
+        let mut core = {
             let intro = scenes::compile_intro_scene(resources);
             let outro = scenes::compile_outro_scene(resources);
             PuzzleCore::new(resources, visible, state, intro, outro)
         };
+        core.add_extra_scene(scenes::compile_argony_midscene(resources));
+        core.add_extra_scene(scenes::compile_mezure_midscene(resources));
+        core.add_extra_scene(scenes::compile_relyng_midscene(resources));
+        core.add_extra_scene(scenes::compile_yttris_midscene(resources));
         View {
             core: core,
             rows: vec![
@@ -51,6 +56,7 @@ impl View {
                 TileRow::new(resources, 4, 322, 223),
                 TileRow::new(resources, 5, 322, 255),
             ],
+            show_tiles: false,
         }
     }
 }
@@ -59,7 +65,9 @@ impl Element<Game, PuzzleCmd> for View {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
         let state = &game.point_of_order;
         self.core.draw_back_layer(canvas);
-        self.rows.draw(state, canvas);
+        if self.show_tiles {
+            self.rows.draw(state, canvas);
+        }
         self.core.draw_middle_layer(canvas);
         self.core.draw_front_layer(canvas, state);
     }
@@ -68,7 +76,7 @@ impl Element<Game, PuzzleCmd> for View {
                     -> Action<PuzzleCmd> {
         let state = &mut game.point_of_order;
         let mut action = self.core.handle_event(event, state);
-        if !action.should_stop() {
+        if !action.should_stop() && self.show_tiles {
             let subaction = self.rows.handle_event(event, state);
             if let Some(&(old_index, new_index)) = subaction.value() {
                 let old_row = state.current_row();
@@ -122,8 +130,10 @@ impl PuzzleView for View {
     }
 
     fn drain_queue(&mut self) {
-        for (_, _) in self.core.drain_queue() {
-            // TODO: drain queue
+        for (kind, value) in self.core.drain_queue() {
+            if kind == 0 {
+                self.show_tiles = value != 0;
+            }
         }
     }
 }

@@ -22,10 +22,10 @@ use gui::{Resources, Sound};
 
 // ========================================================================= //
 
-pub const ARGONY: i32 = 1;
-pub const MEZURE: i32 = 2;
+pub const ARGONY: i32 = 3;
+pub const MEZURE: i32 = 1;
 pub const RELYNG: i32 = -1;
-pub const YTTRIS: i32 = 3;
+pub const YTTRIS: i32 = 2;
 
 // ========================================================================= //
 
@@ -278,8 +278,189 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Sound(Sound::solve_puzzle_chime()),
             Ast::Wait(1.0),
-            Ast::Slide(MEZURE, (592, 304), true, false, 1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "Huh.  There he is,\n\
+                       listed right between\n\
+                       me and Ugrent."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NW,
+                      "And there $iyou$r  are,\n\
+                       listed right between\n\
+                       Elinsa and myself."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::NE,
+                      "Well then, now that that's\n\
+                       settled, we can get down to\n\
+                       business.  What have you\n\
+                       found out so far, Relyng?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NW,
+                      "I'd prefer not to share\n\
+                       confidential information\n\
+                       in such an open forum."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_annoyed_hi()),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::NE,
+                      "Oh, the blazes with that,\n\
+                       Relyng.  We've $ijust verified$r\n\
+                       that everyone here is a member\n\
+                       of the crew.  Whatever you can\n\
+                       tell me, you can tell them."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::NE,
+                      "Now, spit it out."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NW,
+                      "$iSigh$r...very\n\
+                       well, madam."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NW,
+                      "As you may have already\n\
+                       suspected, there is clear\n\
+                       evidence of sabotage."),
+        ]),
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                          "Someone's trying to\n\
+                           stop our mission?"),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.5),
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NE,
+                          "Oh no!"),
+            ]),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NW,
+                      "It doesn't appear\n\
+                       to be that simple."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NW,
+                      "Lots of systems were\n\
+                       damaged, but most of it\n\
+                       is easily repairable."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NW,
+                      "In fact, a lot of the repairs\n\
+                       are already done, and the\n\
+                       rest won't take long.  We\n\
+                       should be shipshape soon."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NW,
+                      "So it seems that either\n\
+                       out saboteur is lousy at\n\
+                       their job, or...something\n\
+                       deeper is going on."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::NE,
+                      "I see."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::NE,
+                      "You'll keep\n\
+                       investigating,\n\
+                       won't you?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NW,
+                      "Oh, you'd better\n\
+                       believe I will."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::NE,
+                      "Good."),
+        ]),
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::Slide(ARGONY, (80, 320), true, false, 1.0),
+                Ast::Slide(ARGONY, (64, 336), false, false, 0.15),
+                Ast::Slide(ARGONY, (-16, 336), false, false, 0.5),
+                Ast::Remove(ARGONY),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(1.3),
+                Ast::Slide(YTTRIS, (80, 320), true, false, 0.5),
+                Ast::Slide(YTTRIS, (64, 336), false, false, 0.15),
+                Ast::Slide(YTTRIS, (-16, 336), false, false, 0.4),
+                Ast::Remove(YTTRIS),
+                Ast::Wait(0.75),
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                          "So why did you doubt I\n\
+                           was on the crew?  I've\n\
+                           been working to fix the\n\
+                           ship this whole time!"),
+            ]),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NW,
+                      "Don't take it\n\
+                       personally, kid."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(RELYNG, (306, 304), 0.3),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NW,
+                      "It's my job to\n\
+                       doubt $ieverything."),
+        ]),
+        Ast::Seq(vec![
+            Ast::SetSprite(RELYNG, "chars/relyng", 5),
+            Ast::Slide(RELYNG, (320, 304), true, true, 0.35),
+            Ast::Remove(RELYNG),
+            Ast::Wait(1.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "Why is everyone on\n\
+                       this ship so $iweird?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(MEZURE, (80, 320), true, false, 0.75),
+            Ast::Slide(MEZURE, (64, 336), false, false, 0.15),
+            Ast::Slide(MEZURE, (-16, 336), false, false, 0.4),
             Ast::Remove(MEZURE),
+            Ast::Wait(1.0),
+            Ast::Sound(Sound::beep()),
+            Ast::Queue(1, 15),
+            Ast::Queue(1, 4),
+            Ast::Queue(1, 5),
+            Ast::Queue(1, 17),
+            Ast::Queue(1, 3),
+            Ast::Queue(1, 1),
+            Ast::Queue(1, 0),
+            Ast::Queue(1, 13),
+            Ast::Wait(1.0),
         ]),
     ];
     Ast::compile_scene(resources, ast)

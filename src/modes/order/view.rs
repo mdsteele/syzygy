@@ -17,7 +17,9 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
+use num_integer::div_mod_floor;
 use std::cmp;
+use std::collections::HashSet;
 
 use elements::{PuzzleCmd, PuzzleCore, PuzzleView};
 use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sound};
@@ -133,6 +135,11 @@ impl PuzzleView for View {
         for (kind, value) in self.core.drain_queue() {
             if kind == 0 {
                 self.show_tiles = value != 0;
+            } else if kind == 1 {
+                let (row, index) = div_mod_floor(value, 6);
+                if row >= 0 && (row as usize) < self.rows.len() {
+                    self.rows[row as usize].hilight_tile(index as usize);
+                }
             }
         }
     }
@@ -141,24 +148,30 @@ impl PuzzleView for View {
 // ========================================================================= //
 
 struct TileRow {
-    sprites: Vec<Sprite>,
+    symbol_sprites: Vec<Sprite>,
+    tile_sprites: Vec<Sprite>,
     row: usize,
     left: i32,
     top: i32,
     drag: Option<TileDrag>,
+    hilights: HashSet<usize>,
 }
 
 impl TileRow {
     fn new(resources: &mut Resources, row: usize, left: i32, top: i32)
            -> TileRow {
         TileRow {
-            sprites: resources.get_sprites("point/order"),
+            symbol_sprites: resources.get_sprites("point/order"),
+            tile_sprites: resources.get_sprites("point/tiles"),
             row: row,
             left: left,
             top: top,
             drag: None,
+            hilights: HashSet::new(),
         }
     }
+
+    fn hilight_tile(&mut self, index: usize) { self.hilights.insert(index); }
 }
 
 impl Element<OrderState, (usize, usize)> for TileRow {
@@ -176,17 +189,26 @@ impl Element<OrderState, (usize, usize)> for TileRow {
                     }
                     x += drag.offset(index);
                 }
-                let y = self.top + 1;
-                let sprite = &self.sprites[6 * self.row + value];
-                canvas.draw_sprite(sprite, Point::new(x, y));
+                let pt = Point::new(x, self.top + 1);
+                let symbol_index = 6 * self.row + value;
+                let tile_index = if self.hilights.contains(&index) {
+                    2
+                } else if state.current_row() == self.row {
+                    0
+                } else {
+                    1
+                };
+                canvas.draw_sprite(&self.tile_sprites[tile_index], pt);
+                canvas.draw_sprite(&self.symbol_sprites[symbol_index], pt);
             }
             if let Some(ref drag) = self.drag {
                 let value = state.row_order(self.row)[drag.index];
-                let sprite = &self.sprites[6 * self.row + value];
                 let x = self.left + TILE_SPACING * (drag.index as i32) + 1 +
                     drag.offset(drag.index);
-                let y = self.top + 1;
-                canvas.draw_sprite(sprite, Point::new(x, y));
+                let pt = Point::new(x, self.top + 1);
+                let symbol_index = 6 * self.row + value;
+                canvas.draw_sprite(&self.tile_sprites[0], pt);
+                canvas.draw_sprite(&self.symbol_sprites[symbol_index], pt);
             }
         }
     }

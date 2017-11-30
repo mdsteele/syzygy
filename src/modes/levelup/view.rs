@@ -28,6 +28,7 @@ use super::scenes::{compile_intro_scene, compile_outro_scene};
 pub struct View {
     core: PuzzleCore<(i32, i32, char, char)>,
     crossword: CrosswordView,
+    crossword_visible: bool,
 }
 
 impl View {
@@ -43,6 +44,7 @@ impl View {
                                           (392, 55),
                                           OFFSETS_CLUES,
                                           (392, 310)),
+            crossword_visible: false,
         }
     }
 }
@@ -51,7 +53,9 @@ impl Element<Game, PuzzleCmd> for View {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
         let state = &game.level_up;
         self.core.draw_back_layer(canvas);
-        self.crossword.draw(state.crossword(), canvas);
+        if self.crossword_visible {
+            self.crossword.draw(state.crossword(), canvas);
+        }
         self.core.draw_middle_layer(canvas);
         self.core.draw_front_layer(canvas, state);
     }
@@ -60,7 +64,7 @@ impl Element<Game, PuzzleCmd> for View {
                     -> Action<PuzzleCmd> {
         let state = &mut game.level_up;
         let mut action = self.core.handle_event(event, state);
-        if !action.should_stop() &&
+        if !action.should_stop() && self.crossword_visible &&
             (event == &Event::ClockTick || !state.is_solved())
         {
             let subaction = self.crossword
@@ -122,6 +126,7 @@ impl PuzzleView for View {
             match entry {
                 (0, 0) => self.crossword.animate_center_word(),
                 (0, 1) => self.crossword.set_center_word_hilighted(true),
+                (1, visible) => self.crossword_visible = visible != 0,
                 _ => {}
             }
         }

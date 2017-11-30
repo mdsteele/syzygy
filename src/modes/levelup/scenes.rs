@@ -18,14 +18,16 @@
 // +--------------------------------------------------------------------------+
 
 use elements::{Ast, Scene, TalkPos, TalkStyle};
-use gui::{Resources, Sound};
+use gui::{Rect, Resources, Sound};
 
 // ========================================================================= //
 
+const BOOM: i32 = 100;
 const ELINSA: i32 = 1;
 const UGRENT: i32 = 2;
 const PLATFORM: i32 = 0;
 
+const BOOM_INDICES: &[usize] = &[0, 1, 2, 3, 4];
 const PLATFORM_INDICES: &[usize] = &[2, 3];
 
 // ========================================================================= //
@@ -58,7 +60,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_annoyed_hi()),
             Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
-                      "I still can't believe that\n\
+                      "I $istill$r  can't believe that\n\
                        Mezure started the engines\n\
                        without even telling me."),
         ]),
@@ -198,17 +200,141 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
 // ========================================================================= //
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
+pub fn compile_elinsa_midscene(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_thought()),
+            Ast::Talk(ELINSA, TalkStyle::Thought, TalkPos::NE,
+                      "These words are all\n\
+                       too long...gotta make\n\
+                       `em fit somehow."),
+        ]),
+    ];
+    (ELINSA, Ast::compile_scene(resources, ast))
+}
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_ugrent_midscene(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::SE,
+                      "This is $idefinitely$r\n\
+                       not up to code."),
+        ]),
+    ];
+    (UGRENT, Ast::compile_scene(resources, ast))
+}
+
+// ========================================================================= //
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_outro_scene(resources: &mut Resources, visible: Rect) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
             Ast::Sound(Sound::solve_puzzle_chime()),
             Ast::Queue(0, 0), // Animate crossword center word.
             Ast::Wait(1.0),
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE, "Looks good!"),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
+                      "Looks good!"),
         ]),
         Ast::Seq(vec![
             Ast::Queue(0, 1), // Hilight crossword center word.
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::SE,
+                      "Are you sure\n\
+                       this is safe?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
+                      "Eh, it's a one-off.\n\
+                       It'll be fine."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
+                      "Okay, now let's\n\
+                       try this again:\n\
+                       $iup,$r  elevator!"),
+        ]),
+        Ast::Par(vec![
+            Ast::Slide(ELINSA, (152, -32), false, false, 1.0),
+            Ast::Seq(vec![
+                Ast::Sound(Sound::platform_shift(5)),
+                Ast::Anim(PLATFORM, "shift/platforms",
+                          PLATFORM_INDICES, 2),
+                Ast::Slide(PLATFORM, (152, 0), false, false, 1.0),
+                Ast::SetSprite(PLATFORM, "shift/platforms", 2),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.1),
+                Ast::Sound(Sound::platform_shift(5)),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.2),
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::E,
+                          "Waaahh!"),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.5),
+                Ast::Slide(UGRENT, (72, 80), true, true, 0.3),
+            ]),
+        ]),
+        Ast::Seq(vec![
+            Ast::Wait(1.0),
+            Ast::Par(vec![
+                Ast::Seq(vec![
+                    Ast::Slide(ELINSA, (152, 80), false, false, 0.3),
+                    Ast::Sound(Sound::small_jump()),
+                    Ast::Jump(ELINSA, (112, 80), 0.5),
+                ]),
+                Ast::Seq(vec![
+                    Ast::Sound(Sound::platform_shift(6)),
+                    Ast::Anim(PLATFORM, "shift/platforms",
+                              PLATFORM_INDICES, 2),
+                    Ast::Slide(PLATFORM, (152, 448), false, false, 1.2),
+                    Ast::Remove(PLATFORM),
+                    Ast::Sound(Sound::explosion_small()),
+                    Ast::Shake(4),
+                    Ast::Place(BOOM, "chars/boom", 0,
+                               (152, visible.bottom() + 16)),
+                    Ast::Anim(BOOM, "chars/boom", BOOM_INDICES, 2),
+                    Ast::Slide(BOOM, (152, visible.bottom() - 34),
+                               false, false, 0.4),
+                    Ast::Remove(BOOM),
+                ]),
+                Ast::Seq(vec![
+                    Ast::Wait(0.1),
+                    Ast::Sound(Sound::platform_shift(6)),
+                ]),
+            ]),
+            Ast::Wait(2.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::SE,
+                      "So...you'll still\n\
+                       ``fix it properly''\n\
+                       later, right?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Wait(0.75),
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::SE,
+                      "...yeah."),
+        ]),
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::Slide(UGRENT, (-16, 80), true, false, 0.75),
+                Ast::Remove(UGRENT),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.5),
+                Ast::Slide(ELINSA, (-16, 80), true, false, 1.0),
+                Ast::Remove(ELINSA),
+                Ast::Wait(0.75),
+            ]),
         ]),
     ];
     Ast::compile_scene(resources, ast)

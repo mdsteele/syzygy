@@ -327,7 +327,15 @@ pub fn compile_post_yttris_scene(resources: &mut Resources) -> (i32, Scene) {
     let ast = vec![
         Ast::Seq(vec![
             Ast::Sound(Sound::solve_puzzle_chime()),
-            Ast::Wait(0.5),
+            Ast::Seq((0..6).map(|index| Ast::Seq(vec![
+                Ast::Wait(0.075),
+                Ast::Queue(6, index),
+            ])).collect()),
+            Ast::Wait(0.25),
+            Ast::Seq((0..6).map(|index| Ast::Seq(vec![
+                Ast::Wait(0.075),
+                Ast::Queue(7, index),
+            ])).collect()),
             Ast::Queue(0, 0),  // Hide puzzle.
             Ast::Wait(1.5),
             Ast::Queue(0, -1),  // Finish hide animation.

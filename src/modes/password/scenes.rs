@@ -22,6 +22,8 @@ use gui::{Resources, Sound};
 
 // ========================================================================= //
 
+pub const PRE_SLIDERS_SCENE: i32 = 1000;
+
 const ARGONY: i32 = 1;
 const BRIDGE_START: i32 = -99;
 const ELINSA: i32 = 3;
@@ -233,12 +235,33 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
 // ========================================================================= //
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_pre_sliders_scene(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Wait(1.0),
+            Ast::Queue(0, 0), // Hide crosswords.
+            Ast::Wait(1.0),
+            Ast::Seq((1..7).map(|col| Ast::Seq(vec![
+                Ast::Sound(Sound::beep()),
+                Ast::Queue(2, col),
+                Ast::Wait(0.5),
+            ])).collect()),
+        ]),
+    ];
+    (PRE_SLIDERS_SCENE, Ast::compile_scene(resources, ast))
+}
+
+// ========================================================================= //
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
 pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
+            Ast::Queue(0, 0), // Hide crosswords.
+            Ast::Queue(2, 6), // Show sliders.
             Ast::Sound(Sound::solve_puzzle_chime()),
             Ast::Wait(1.0),
-            Ast::Queue(0, 0), // Hide sliders.
+            Ast::Queue(2, 0), // Hide sliders.
             Ast::Wait(0.5),
             Ast::Sound(Sound::beep()),
             Ast::Talk(SYSTEM, TalkStyle::System, TalkPos::NE,

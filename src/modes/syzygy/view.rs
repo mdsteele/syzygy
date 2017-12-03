@@ -465,6 +465,10 @@ impl PuzzleView for View {
                 self.mezure.hilight_column_red(value as usize);
             } else if kind == 5 && value >= 0 {
                 self.mezure.hilight_column_dark(value as usize);
+            } else if kind == 6 && value >= 0 {
+                self.yttris.set_hilight_color(value as usize, (255, 128, 255));
+            } else if kind == 7 && value >= 0 {
+                self.yttris.clear_hilight_color(value as usize);
             }
         }
     }

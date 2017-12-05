@@ -48,11 +48,10 @@ impl View {
             core: core,
             buttons: vec![
                 TransformButton::new(&buttons, 0, seq, 96, 192),
-                TransformButton::new(&buttons, 1, seq, 432, 192),
+                TransformButton::new(&buttons, 1, seq, 432, 208),
                 TransformButton::new(&buttons, 2, seq, 96, 240),
-                TransformButton::new(&buttons, 3, seq, 432, 240),
+                TransformButton::new(&buttons, 3, seq, 432, 256),
                 TransformButton::new(&buttons, 4, seq, 96, 288),
-                TransformButton::new(&buttons, 5, seq, 432, 288),
             ],
             letters: LettersView::new(resources, state.letters(), 296, 256),
             retry_countdown: 0,
@@ -95,10 +94,9 @@ impl Element<Game, PuzzleCmd> for View {
             if let Some(&index) = subaction.value() {
                 state.append(index);
                 match index {
-                    0 => self.letters.hilight_full(),
-                    1 => self.letters.hilight_halves(),
-                    3 => self.letters.hilight_positions(&[2]),
-                    5 => self.letters.hilight_all(),
+                    0 => self.letters.hilight_bars(&[(0, 1), (5, 6)]),
+                    2 => self.letters.hilight_bars(&[(0, 2), (3, 5)]),
+                    4 => self.letters.hilight_positions(&[0, 1, 2, 3]),
                     _ => self.letters.hilight_changed_letters(state.letters()),
                 }
                 if state.is_solved() {
@@ -107,7 +105,7 @@ impl Element<Game, PuzzleCmd> for View {
                     self.core.push_undo(state.sequence().clone());
                     let sound = Sound::transform_step(state.sequence().len());
                     action.also_play_sound(sound);
-                    if state.sequence().len() == 6 {
+                    if state.sequence().len() == 5 {
                         self.retry_countdown = RETRY_DELAY;
                     }
                 }
@@ -142,7 +140,7 @@ impl PuzzleView for View {
             let state = &mut game.fact_or_fiction;
             state.set_sequence(seq);
             self.letters.reset(state.letters());
-            self.retry_countdown = if state.sequence().len() == 6 {
+            self.retry_countdown = if state.sequence().len() == 5 {
                 RETRY_DELAY
             } else {
                 0

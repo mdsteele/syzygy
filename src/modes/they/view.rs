@@ -97,10 +97,11 @@ impl Element<Game, PuzzleCmd> for View {
             let subaction = self.buttons.handle_event(event, &mut sequence);
             if let Some(&index) = subaction.value() {
                 state.append(index);
-                if index == 5 {
-                    self.letters.hilight_halves();
-                } else {
-                    self.letters.hilight_changed_letters(state.letters());
+                match index {
+                    2 => self.letters.hilight_positions(&[1, 2, 5, 6]),
+                    3 => self.letters.hilight_positions(&[2]),
+                    5 => self.letters.hilight_bars(&[(0, 3), (4, 7)]),
+                    _ => self.letters.hilight_changed_letters(state.letters()),
                 }
                 if state.is_solved() {
                     self.core.begin_outro_scene();

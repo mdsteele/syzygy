@@ -50,20 +50,25 @@ impl LettersView {
         }
     }
 
-    pub fn hilight_all(&mut self) {
+    pub fn hilight_positions(&mut self, positions: &[usize]) {
         self.hilights.clear();
-        for position in 0..self.letters.len() {
+        for &position in positions {
             let rect = self.letter_rect(position);
             self.hilights.push(rect);
         }
         self.countdown = HILIGHT_FRAMES;
     }
 
-    pub fn hilight_positions(&mut self, positions: &[usize]) {
+    pub fn hilight_bars(&mut self, bars: &[(usize, usize)]) {
         self.hilights.clear();
-        for &position in positions {
-            let rect = self.letter_rect(position);
-            self.hilights.push(rect);
+        for &(from, to) in bars {
+            let rect1 = self.letter_rect(from);
+            let rect2 = self.letter_rect(to);
+            self.hilights.push(Rect::new(rect1.left(),
+                                         rect1.top(),
+                                         (rect2.right() - rect1.left()) as
+                                             u32,
+                                         rect1.height()));
         }
         self.countdown = HILIGHT_FRAMES;
     }
@@ -76,33 +81,6 @@ impl LettersView {
                 self.hilights.push(rect);
             }
         }
-        self.countdown = HILIGHT_FRAMES;
-    }
-
-    fn add_bar(&mut self, from: usize, to: usize) {
-        let rect1 = self.letter_rect(from);
-        let rect2 = self.letter_rect(to);
-        self.hilights.push(Rect::new(rect1.left(),
-                                     rect1.top(),
-                                     (rect2.right() - rect1.left()) as u32,
-                                     rect1.height()));
-    }
-
-    pub fn hilight_full(&mut self) {
-        debug_assert!(!self.letters.is_empty());
-        self.hilights.clear();
-        let total = self.letters.len();
-        self.add_bar(0, total - 1);
-        self.countdown = HILIGHT_FRAMES;
-    }
-
-    pub fn hilight_halves(&mut self) {
-        debug_assert!(self.letters.len() >= 2);
-        self.hilights.clear();
-        let total = self.letters.len();
-        let half = total / 2;
-        self.add_bar(0, half - 1);
-        self.add_bar(total - half, total - 1);
         self.countdown = HILIGHT_FRAMES;
     }
 

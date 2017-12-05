@@ -29,9 +29,9 @@ use super::PuzzleState;
 
 const SEQUENCE_KEY: &str = "sequence";
 
-const INITIAL_LETTERS: &[char] = &['F', 'A', 'N', 'T', 'A', 'S', 'Y'];
+const INITIAL_LETTERS: &[char] = &['L', 'E', 'G', 'E', 'N', 'D', 'S'];
 const SOLVED_LETTERS: &[char] = &['H', 'I', 'S', 'T', 'O', 'R', 'Y'];
-const SOLVED_SEQUENCE: &[i8] = &[3, 0, 2, 5, 4, 1];
+const SOLVED_SEQUENCE: &[i8] = &[2, 3, 0, 1, 4];
 
 // ========================================================================= //
 
@@ -63,7 +63,7 @@ impl FictionState {
     }
 
     pub fn append(&mut self, index: i8) {
-        assert!(index >= 0 && index < 6);
+        assert!(index >= 0 && index < 5);
         assert!(!self.has_used(index));
         self.sequence.push(index);
         apply_transformation(&mut self.letters, index);
@@ -116,7 +116,7 @@ impl Tomlable for FictionState {
             SOLVED_SEQUENCE.iter().cloned().collect()
         } else {
             let mut seq = Vec::<i8>::pop_from_table(&mut table, SEQUENCE_KEY);
-            seq.retain(|&idx| 0 <= idx && idx < 6);
+            seq.retain(|&idx| 0 <= idx && idx < 5);
             let unique: HashSet<i8> = seq.iter().cloned().collect();
             if unique.len() != seq.len() {
                 Vec::new()
@@ -145,32 +145,35 @@ fn increment_letter(letter: char, by: u32) -> char {
 fn apply_transformation(letters: &mut Vec<char>, index: i8) {
     match index {
         0 => {
-            letters[0..7].sort();
+            letters.swap(0, 6);
+            letters.swap(1, 5);
         }
         1 => {
-            letters[0..3].sort();
-            letters[4..7].sort();
+            for letter in letters.iter_mut() {
+                *letter = match *letter {
+                    'A' => 'U',
+                    'E' => 'A',
+                    'I' => 'E',
+                    'O' => 'I',
+                    'U' => 'O',
+                    ltr => ltr,
+                }
+            }
         }
         2 => {
-            letters[0] = increment_letter(letters[0], 7);
-            letters[1] = increment_letter(letters[1], 11);
+            letters[0] = increment_letter(letters[0], 13);
+            letters[1] = increment_letter(letters[1], 13);
+            letters[2] = increment_letter(letters[2], 13);
+            letters[3] = increment_letter(letters[3], 7);
+            letters[4] = increment_letter(letters[4], 7);
+            letters[5] = increment_letter(letters[5], 7);
         }
         3 => {
-            letters[2] = 'R';
+            letters[3] = increment_letter(letters[3], 22);
+            letters[5] = increment_letter(letters[5], 4);
         }
         4 => {
-            letters[0] = increment_letter(letters[0], 3);
-            letters[6] = increment_letter(letters[6], 3);
-        }
-        5 => {
-            let old = letters.clone();
-            letters[0] = old[2];
-            letters[1] = old[0];
-            letters[2] = old[4];
-            letters[3] = old[5];
-            letters[4] = old[6];
-            letters[5] = old[3];
-            letters[6] = old[1];
+            letters[0..4].sort();
         }
         _ => panic!("bad transformation index: {}", index),
     }
@@ -191,27 +194,23 @@ mod tests {
     fn transform_letters() {
         let mut letters = "AWESOME".chars().collect::<Vec<char>>();
         apply_transformation(&mut letters, 0);
-        assert_eq!(letters, "AEEMOSW".chars().collect::<Vec<char>>());
+        assert_eq!(letters, "EMESOWA".chars().collect::<Vec<char>>());
 
         let mut letters = "AWESOME".chars().collect::<Vec<char>>();
         apply_transformation(&mut letters, 1);
-        assert_eq!(letters, "AEWSEMO".chars().collect::<Vec<char>>());
+        assert_eq!(letters, "UWASIMA".chars().collect::<Vec<char>>());
 
         let mut letters = "AWESOME".chars().collect::<Vec<char>>();
         apply_transformation(&mut letters, 2);
-        assert_eq!(letters, "HHESOME".chars().collect::<Vec<char>>());
+        assert_eq!(letters, "NJRZVTE".chars().collect::<Vec<char>>());
 
         let mut letters = "AWESOME".chars().collect::<Vec<char>>();
         apply_transformation(&mut letters, 3);
-        assert_eq!(letters, "AWRSOME".chars().collect::<Vec<char>>());
+        assert_eq!(letters, "AWEOOQE".chars().collect::<Vec<char>>());
 
         let mut letters = "AWESOME".chars().collect::<Vec<char>>();
         apply_transformation(&mut letters, 4);
-        assert_eq!(letters, "DWESOMH".chars().collect::<Vec<char>>());
-
-        let mut letters = "AWESOME".chars().collect::<Vec<char>>();
-        apply_transformation(&mut letters, 5);
-        assert_eq!(letters, "EAOMESW".chars().collect::<Vec<char>>());
+        assert_eq!(letters, "AESWOME".chars().collect::<Vec<char>>());
     }
 
     #[test]
@@ -277,7 +276,7 @@ mod tests {
     fn from_invalid_index_sequence_toml() {
         let mut table = toml::value::Table::new();
         table.insert(SEQUENCE_KEY.to_string(),
-                     toml::Value::Array(vec![toml::Value::Integer(6)]));
+                     toml::Value::Array(vec![toml::Value::Integer(5)]));
         let state = FictionState::from_toml(toml::Value::Table(table));
         assert_eq!(state.sequence, vec![]);
         assert_eq!(state.letters, INITIAL_LETTERS.to_vec());

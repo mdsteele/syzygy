@@ -61,8 +61,9 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SE,
-                      "I'm Mezure, the new administrator\n\
-                       process.  Who are you?"),
+                      "I'm Mezure, the new\n\
+                       administrator process.\n\
+                       Who are you?"),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_lo()),
@@ -96,14 +97,14 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SE,
-                      "Um, any way I can help?  I'm\n\
-                       supposed to be helping."),
+                      "Um, any way I can help?\n\
+                       I'm supposed to be helping."),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_annoyed_lo()),
             Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NW,
-                      "Oh, $isure$r.  Why don't you\n\
-                       run down to the supply depot and\n\
+                      "Oh, $isure$r.  Why don't you run\n\
+                       down to the supply depot and\n\
                        fetch me a jar of elbow grease?\n\
                        That would be a $ihuge$r help."),
         ]),
@@ -116,13 +117,15 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SE,
-                      "...actually, technically I was born today."),
+                      "...actually, technically\n\
+                       I was born today."),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SE,
-                      "Anyway, if you don't want my help,\n\
-                       just say so.  There's no need to be rude."),
+                      "Anyway, if you don't\n\
+                       want my help, just say so.\n\
+                       There's no need to be rude."),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
@@ -141,14 +144,15 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Wait(0.25),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SE,
-                      "Okay.  Yeah!  I can totally\n\
-                       figure this out."),
+                      "Okay.  Yeah!  I can\n\
+                       totally figure this out."),
         ]),
         Ast::Seq(vec![
             Ast::Wait(0.75),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SE,
-                      "Er, how will I know when it's fixed?"),
+                      "Er, how will I know\n\
+                       when it's fixed?"),
         ]),
         Ast::Seq(vec![
             Ast::Slide(ELINSA, (480, 304), false, true, 0.5),
@@ -179,7 +183,8 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Par(vec![
                 Ast::Sound(Sound::talk_lo()),
                 Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::W,
-                          "Ugh, fine, make it look like this, then."),
+                          "Ugh, fine, make it\n\
+                           look like this, then."),
                 Ast::Seq(vec![
                     Ast::Sound(Sound::small_jump()),
                     Ast::Jump(ELINSA, (480, 304), 0.5),
@@ -196,7 +201,8 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Queue(0, -3),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SE,
-                      "Sure, how hard could this be?"),
+                      "Sure, how hard\n\
+                       could this be?"),
         ]),
     ];
     Ast::compile_scene(resources, ast)
@@ -227,21 +233,21 @@ pub fn compile_outro_scene(resources: &mut Resources, visible: Rect) -> Scene {
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NW,
                       "I'm...impressed, actually.\n\
-                       This really is a big help.\n\
-                       Sorry for being a jerk earlier."),
+                       This really is a big help.  Uh,\n\
+                       sorry for being a jerk earlier."),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SE,
-                      "It's okay.  I know you're probably\n\
-                       under a lot of stress."),
+                      "It's okay.  I know you're\n\
+                       probably under a lot of stress."),
         ]),
         Ast::Seq(vec![
             Ast::Wait(0.75),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SE,
-                      "Well, is there anything else\n\
-                       I can try to help fix?"),
+                      "Well, is there anything\n\
+                       else I can try to help fix?"),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::bridge_crack()),
@@ -302,8 +308,8 @@ pub fn compile_outro_scene(resources: &mut Resources, visible: Rect) -> Scene {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NW,
-                      "Do you actually have any way to\n\
-                       pull me back up from there?"),
+                      "Do you actually have any way\n\
+                       to pull me back up from there?"),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
@@ -321,7 +327,8 @@ pub fn compile_outro_scene(resources: &mut Resources, visible: Rect) -> Scene {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NW,
-                      "O...okay.  Good luck down there."),
+                      "O...okay.  Good\n\
+                       luck down there."),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::small_jump()),
@@ -332,9 +339,31 @@ pub fn compile_outro_scene(resources: &mut Resources, visible: Rect) -> Scene {
             Ast::Slide(MEZURE, (592, 304), false, false, 0.5),
             Ast::Remove(MEZURE),
             Ast::Wait(1.0),
-            Ast::Sound(Sound::talk_thought()),
-            Ast::Talk(ELINSA, TalkStyle::Thought, TalkPos::NW,
-                      "This day is NOT going well."),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NW,
+                      " I can get $imyself$r \n\
+                       out of this."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Wait(0.75),
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NW,
+                      "...I think."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::transform_step(3)),
+            Ast::Queue(1, 0),
+            Ast::Queue(1, 1),
+            Ast::Queue(1, 2),
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::transform_step(2)),
+            Ast::Queue(1, 3),
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::transform_step(1)),
+            Ast::Queue(1, 4),
+            Ast::Queue(1, 5),
+            Ast::Wait(1.5),
         ]),
     ];
     Ast::compile_scene(resources, ast)

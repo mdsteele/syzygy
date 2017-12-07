@@ -17,6 +17,7 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
+use std::collections::HashMap;
 use std::rc::Rc;
 
 use elements::{PuzzleCmd, PuzzleCore, PuzzleView};
@@ -116,8 +117,15 @@ impl PuzzleView for View {
     }
 
     fn drain_queue(&mut self) {
-        for (_, index) in self.core.drain_queue() {
-            self.solution.set_index(index);
+        for (kind, value) in self.core.drain_queue() {
+            if kind == 0 {
+                self.solution.set_index(value);
+            } else if kind == 1 {
+                if value >= 0 && (value as usize) < LETTERS.len() {
+                    let (col, row, chr) = LETTERS[value as usize];
+                    self.grid.letters.insert((col, row), chr);
+                }
+            }
         }
     }
 }
@@ -213,6 +221,8 @@ struct WreckedGrid {
     tile_sprites: Vec<Sprite>,
     hole_sprites: Vec<Sprite>,
     drag: Option<Drag>,
+    font: Rc<Font>,
+    letters: HashMap<(i32, i32), char>,
 }
 
 impl WreckedGrid {
@@ -223,6 +233,8 @@ impl WreckedGrid {
             tile_sprites: resources.get_sprites("wrecked/tiles"),
             hole_sprites: resources.get_sprites("wrecked/holes"),
             drag: None,
+            font: resources.get_font("danger"),
+            letters: HashMap::new(),
         }
     }
 
@@ -253,7 +265,15 @@ impl Element<WreckedState, (Direction, i32, i32)> for WreckedGrid {
                     pt = pt + drag.offset_for(col, row);
                 }
                 if let Some(index) = state.tile_at(col, row) {
-                    canvas.draw_sprite(&self.tile_sprites[index], pt);
+                    if let Some(&chr) = self.letters.get(&(col, row)) {
+                        canvas.draw_sprite(&self.tile_sprites[3], pt);
+                        canvas.draw_char(&self.font,
+                                         Align::Center,
+                                         pt + Point::new(12, 17),
+                                         chr);
+                    } else {
+                        canvas.draw_sprite(&self.tile_sprites[index], pt);
+                    }
                 }
             }
         }
@@ -384,6 +404,15 @@ impl Element<WreckedState, PuzzleCmd> for SolutionDisplay {
 }
 
 // ========================================================================= //
+
+const LETTERS: &[(i32, i32, char)] = &[
+    (2, 1, 'E'),
+    (3, 1, 'R'),
+    (4, 1, 'G'),
+    (4, 3, 'O'),
+    (4, 5, 'S'),
+    (5, 5, 'M'),
+];
 
 const INFO_BOX_TEXT: &str = "\
 Your goal is to arrange the large grid on the left into

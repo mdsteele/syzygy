@@ -28,12 +28,39 @@ pub const POST_ELINSA_SCENE: i32 = 1002;
 pub const POST_UGRENT_SCENE: i32 = 1003;
 pub const POST_RELYNG_SCENE: i32 = 1004;
 
+const YTTRIS: i32 = 5;
 const ARGONY: i32 = 4;
 const ELINSA: i32 = 3;
-const MEZURE: i32 = 2;
-const RELYNG: i32 = 0;
 const UGRENT: i32 = 1;
-const YTTRIS: i32 = 5;
+const RELYNG: i32 = 0;
+const MEZURE: i32 = 2;
+
+const YTTRIS_1: i32 = 10 + YTTRIS;
+const ARGONY_1: i32 = 10 + ARGONY;
+const ELINSA_1: i32 = 10 + ELINSA;
+const UGRENT_1: i32 = 10 + UGRENT;
+const RELYNG_1: i32 = 10 + RELYNG;
+const MEZURE_1: i32 = 10 + MEZURE;
+
+const ARGONY_2: i32 = 20 + ARGONY;
+const ELINSA_2: i32 = 20 + ELINSA;
+const UGRENT_2: i32 = 20 + UGRENT;
+const RELYNG_2: i32 = 20 + RELYNG;
+const MEZURE_2: i32 = 20 + MEZURE;
+
+const ELINSA_3: i32 = 30 + ELINSA;
+const UGRENT_3: i32 = 30 + UGRENT;
+const RELYNG_3: i32 = 30 + RELYNG;
+const MEZURE_3: i32 = 30 + MEZURE;
+
+const UGRENT_4: i32 = 40 + UGRENT;
+const RELYNG_4: i32 = 40 + RELYNG;
+const MEZURE_4: i32 = 40 + MEZURE;
+
+const RELYNG_5: i32 = 50 + RELYNG;
+const MEZURE_5: i32 = 50 + MEZURE;
+
+const MEZURE_6: i32 = 60 + MEZURE;
 
 // ========================================================================= //
 
@@ -315,6 +342,12 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Queue(0, 1),  // Reveal puzzle.
             Ast::Wait(1.5),
             Ast::Queue(0, -1),  // Finish reveal animation.
+            Ast::Swap(YTTRIS, YTTRIS_1),
+            Ast::Swap(ARGONY, ARGONY_1),
+            Ast::Swap(ELINSA, ELINSA_1),
+            Ast::Swap(UGRENT, UGRENT_1),
+            Ast::Swap(RELYNG, RELYNG_1),
+            Ast::Swap(MEZURE, MEZURE_1),
         ]),
     ];
     Ast::compile_scene(resources, ast)
@@ -323,9 +356,95 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
 // ========================================================================= //
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_yttris_midscene_1(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS_1, TalkStyle::Normal, TalkPos::SE,
+                      "Is it ``decrypt?''\n\
+                       Hmm, no, that's too\n\
+                       many letters..."),
+        ]),
+    ];
+    (YTTRIS_1, Ast::compile_scene(resources, ast))
+}
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_argony_midscene_1(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ARGONY_1, TalkStyle::Normal, TalkPos::SE,
+                      "TODO a1"),
+        ]),
+    ];
+    (ARGONY_1, Ast::compile_scene(resources, ast))
+}
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_elinsa_midscene_1(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA_1, TalkStyle::Normal, TalkPos::SE,
+                      "Could we hurry this\n\
+                       up a bit?  We're kind\n\
+                       of on a deadline."),
+        ]),
+    ];
+    (ELINSA_1, Ast::compile_scene(resources, ast))
+}
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_ugrent_midscene_1(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(UGRENT_1, TalkStyle::Normal, TalkPos::SW,
+                      "TODO u1"),
+        ]),
+    ];
+    (UGRENT_1, Ast::compile_scene(resources, ast))
+}
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_relyng_midscene_1(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG_1, TalkStyle::Normal, TalkPos::SW,
+                      "TODO r1"),
+        ]),
+    ];
+    (RELYNG_1, Ast::compile_scene(resources, ast))
+}
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_mezure_midscene_1(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_thought()),
+            Ast::Talk(MEZURE_1, TalkStyle::Thought, TalkPos::SW,
+                      "And I thought that\n\
+                       those $iother$r  mixed-up\n\
+                       columns were tricky!"),
+        ]),
+    ];
+    (MEZURE_1, Ast::compile_scene(resources, ast))
+}
+
+// ========================================================================= //
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
 pub fn compile_post_yttris_scene(resources: &mut Resources) -> (i32, Scene) {
     let ast = vec![
         Ast::Seq(vec![
+            Ast::Swap(YTTRIS_1, YTTRIS),
+            Ast::Swap(ARGONY_1, ARGONY),
+            Ast::Swap(ELINSA_1, ELINSA),
+            Ast::Swap(UGRENT_1, UGRENT),
+            Ast::Swap(RELYNG_1, RELYNG),
+            Ast::Swap(MEZURE_1, MEZURE),
             Ast::Sound(Sound::solve_puzzle_chime()),
             Ast::Seq((0..6).map(|index| Ast::Seq(vec![
                 Ast::Wait(0.075),
@@ -401,6 +520,11 @@ pub fn compile_post_yttris_scene(resources: &mut Resources) -> (i32, Scene) {
             Ast::Queue(0, 1),  // Reveal puzzle.
             Ast::Wait(1.5),
             Ast::Queue(0, -1),  // Finish reveal animation.
+            Ast::Swap(ARGONY, ARGONY_2),
+            Ast::Swap(ELINSA, ELINSA_2),
+            Ast::Swap(UGRENT, UGRENT_2),
+            Ast::Swap(RELYNG, RELYNG_2),
+            Ast::Swap(MEZURE, MEZURE_2),
         ]),
     ];
     (POST_YTTRIS_SCENE, Ast::compile_scene(resources, ast))
@@ -409,9 +533,82 @@ pub fn compile_post_yttris_scene(resources: &mut Resources) -> (i32, Scene) {
 // ========================================================================= //
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_argony_midscene_2(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ARGONY_2, TalkStyle::Normal, TalkPos::SE,
+                      "We'll need to make\n\
+                       careful use of\n\
+                       that reflector."),
+        ]),
+    ];
+    (ARGONY_2, Ast::compile_scene(resources, ast))
+}
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_elinsa_midscene_2(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_thought()),
+            Ast::Talk(ELINSA_2, TalkStyle::Thought, TalkPos::SE,
+                      "Only $iquad$r-core?\n\
+                       Wow, this thing\n\
+                       really $iis$r  archaic."),
+        ]),
+    ];
+    (ELINSA_2, Ast::compile_scene(resources, ast))
+}
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_ugrent_midscene_2(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(UGRENT_2, TalkStyle::Normal, TalkPos::SW,
+                      "TODO u2"),
+        ]),
+    ];
+    (UGRENT_2, Ast::compile_scene(resources, ast))
+}
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_relyng_midscene_2(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG_2, TalkStyle::Normal, TalkPos::SW,
+                      "TODO r2"),
+        ]),
+    ];
+    (RELYNG_2, Ast::compile_scene(resources, ast))
+}
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_mezure_midscene_2(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_thought()),
+            Ast::Talk(MEZURE_2, TalkStyle::Thought, TalkPos::SW,
+                      "I'm sure glad that\n\
+                       I don't have to do\n\
+                       these hard ones!"),
+        ]),
+    ];
+    (MEZURE_2, Ast::compile_scene(resources, ast))
+}
+
+// ========================================================================= //
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
 pub fn compile_post_argony_scene(resources: &mut Resources) -> (i32, Scene) {
     let ast = vec![
         Ast::Seq(vec![
+            Ast::Swap(ARGONY_2, ARGONY),
+            Ast::Swap(ELINSA_2, ELINSA),
+            Ast::Swap(UGRENT_2, UGRENT),
+            Ast::Swap(RELYNG_2, RELYNG),
+            Ast::Swap(MEZURE_2, MEZURE),
             Ast::Sound(Sound::solve_puzzle_chime()),
             Ast::Wait(0.5),
             Ast::Queue(0, 0),  // Hide puzzle.
@@ -495,6 +692,10 @@ pub fn compile_post_argony_scene(resources: &mut Resources) -> (i32, Scene) {
             Ast::Queue(0, 1),  // Reveal puzzle.
             Ast::Wait(1.5),
             Ast::Queue(0, -1),  // Finish reveal animation.
+            Ast::Swap(ELINSA, ELINSA_3),
+            Ast::Swap(UGRENT, UGRENT_3),
+            Ast::Swap(RELYNG, RELYNG_3),
+            Ast::Swap(MEZURE, MEZURE_3),
         ]),
     ];
     (POST_ARGONY_SCENE, Ast::compile_scene(resources, ast))
@@ -503,9 +704,66 @@ pub fn compile_post_argony_scene(resources: &mut Resources) -> (i32, Scene) {
 // ========================================================================= //
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_elinsa_midscene_3(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA_3, TalkStyle::Normal, TalkPos::SE,
+                      "There'll be four connections\n\
+                       to the purple node, and three\n\
+                       to each of the other nodes."),
+        ]),
+    ];
+    (ELINSA_3, Ast::compile_scene(resources, ast))
+}
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_ugrent_midscene_3(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(UGRENT_3, TalkStyle::Normal, TalkPos::SW,
+                      "TODO u3"),
+        ]),
+    ];
+    (UGRENT_3, Ast::compile_scene(resources, ast))
+}
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_relyng_midscene_3(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG_3, TalkStyle::Normal, TalkPos::SW,
+                      "TODO r3"),
+        ]),
+    ];
+    (RELYNG_3, Ast::compile_scene(resources, ast))
+}
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_mezure_midscene_3(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE_3, TalkStyle::Normal, TalkPos::SW,
+                      "This is all very\n\
+                       confusing."),
+        ]),
+    ];
+    (MEZURE_3, Ast::compile_scene(resources, ast))
+}
+
+// ========================================================================= //
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
 pub fn compile_post_elinsa_scene(resources: &mut Resources) -> (i32, Scene) {
     let ast = vec![
         Ast::Seq(vec![
+            Ast::Swap(ELINSA_3, ELINSA),
+            Ast::Swap(UGRENT_3, UGRENT),
+            Ast::Swap(RELYNG_3, RELYNG),
+            Ast::Swap(MEZURE_3, MEZURE),
             Ast::Sound(Sound::solve_puzzle_chime()),
             Ast::Wait(0.5),
             Ast::Queue(0, 0),  // Hide puzzle.
@@ -567,10 +825,11 @@ pub fn compile_post_elinsa_scene(resources: &mut Resources) -> (i32, Scene) {
             Ast::Queue(0, 1),  // Reveal puzzle.
             Ast::Wait(1.5),
             Ast::Queue(0, -1),  // Finish reveal animation.
-            Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SW,
-                      "This looks kind of\n\
-                       familiar, actually."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Swap(UGRENT, UGRENT_4),
+            Ast::Swap(RELYNG, RELYNG_4),
+            Ast::Swap(MEZURE, MEZURE_4),
         ]),
     ];
     (POST_ELINSA_SCENE, Ast::compile_scene(resources, ast))
@@ -579,9 +838,54 @@ pub fn compile_post_elinsa_scene(resources: &mut Resources) -> (i32, Scene) {
 // ========================================================================= //
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_ugrent_midscene_4(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(UGRENT_4, TalkStyle::Normal, TalkPos::SW,
+                      "There's only room for two beams\n\
+                       beams through the center, so we'll\n\
+                       need to reconstitute the third\n\
+                       color on the right-hand side."),
+        ]),
+    ];
+    (UGRENT_4, Ast::compile_scene(resources, ast))
+}
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_relyng_midscene_4(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG_4, TalkStyle::Normal, TalkPos::SW,
+                      "TODO r4"),
+        ]),
+    ];
+    (RELYNG_4, Ast::compile_scene(resources, ast))
+}
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_mezure_midscene_4(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE_4, TalkStyle::Normal, TalkPos::SW,
+                      "At least this one doesn't\n\
+                       involve any stuck doors."),
+        ]),
+    ];
+    (MEZURE_4, Ast::compile_scene(resources, ast))
+}
+
+// ========================================================================= //
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
 pub fn compile_post_ugrent_scene(resources: &mut Resources) -> (i32, Scene) {
     let ast = vec![
         Ast::Seq(vec![
+            Ast::Swap(UGRENT_4, UGRENT),
+            Ast::Swap(RELYNG_4, RELYNG),
+            Ast::Swap(MEZURE_4, MEZURE),
             Ast::Sound(Sound::solve_puzzle_chime()),
             Ast::Wait(0.5),
             Ast::Queue(0, 0),  // Hide puzzle.
@@ -671,6 +975,8 @@ pub fn compile_post_ugrent_scene(resources: &mut Resources) -> (i32, Scene) {
             Ast::Queue(0, 1),  // Reveal puzzle.
             Ast::Wait(1.5),
             Ast::Queue(0, -1),  // Finish reveal animation.
+            Ast::Swap(RELYNG, RELYNG_5),
+            Ast::Swap(MEZURE, MEZURE_5),
         ]),
     ];
     (POST_UGRENT_SCENE, Ast::compile_scene(resources, ast))
@@ -679,9 +985,42 @@ pub fn compile_post_ugrent_scene(resources: &mut Resources) -> (i32, Scene) {
 // ========================================================================= //
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_relyng_midscene_5(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG_5, TalkStyle::Normal, TalkPos::SW,
+                      "The trick here is to\n\
+                       take advantage of the\n\
+                       edges and corners."),
+        ]),
+    ];
+    (RELYNG_5, Ast::compile_scene(resources, ast))
+}
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_mezure_midscene_5(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE_5, TalkStyle::Normal, TalkPos::SW,
+                      "Just please tell me we're\n\
+                       not going to have to do\n\
+                       the rest of this in the\n\
+                       dark after this step."),
+        ]),
+    ];
+    (MEZURE_5, Ast::compile_scene(resources, ast))
+}
+
+// ========================================================================= //
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
 pub fn compile_post_relyng_scene(resources: &mut Resources) -> (i32, Scene) {
     let ast = vec![
         Ast::Seq(vec![
+            Ast::Swap(RELYNG_5, RELYNG),
+            Ast::Swap(MEZURE_5, MEZURE),
             Ast::Sound(Sound::solve_puzzle_chime()),
             Ast::Wait(0.5),
             Ast::Queue(0, 0),  // Hide puzzle.
@@ -759,7 +1098,7 @@ pub fn compile_post_relyng_scene(resources: &mut Resources) -> (i32, Scene) {
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SW,
                       "Okay, stay calm.  The first\n\
-                       five steps weren't so bad.\n\
+                       five steps weren't $iso$r  bad.\n\
                        This one will probably be\n\
                        straightforward, too."),
         ]),
@@ -767,8 +1106,8 @@ pub fn compile_post_relyng_scene(resources: &mut Resources) -> (i32, Scene) {
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SW,
                       "Okay.  Yeah.  Let's get\n\
-                       this done, and we're\n\
-                       all home free."),
+                       this done, and then\n\
+                       we're all home free."),
         ]),
         Ast::Seq(vec![
             Ast::Queue(1, 6),  // Set progress bar to 6/6.
@@ -781,8 +1120,26 @@ pub fn compile_post_relyng_scene(resources: &mut Resources) -> (i32, Scene) {
                       "This, uh...this does\n\
                        not look good."),
         ]),
+        Ast::Seq(vec![
+            Ast::Swap(MEZURE, MEZURE_6),
+        ]),
     ];
     (POST_RELYNG_SCENE, Ast::compile_scene(resources, ast))
+}
+
+// ========================================================================= //
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_mezure_midscene_6(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_thought()),
+            Ast::Talk(MEZURE_6, TalkStyle::Thought, TalkPos::SW,
+                      "But...what word goes\n\
+                       with ``Syzygy''?"),
+        ]),
+    ];
+    (MEZURE_6, Ast::compile_scene(resources, ast))
 }
 
 // ========================================================================= //
@@ -791,6 +1148,7 @@ pub fn compile_post_relyng_scene(resources: &mut Resources) -> (i32, Scene) {
 pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
+            Ast::Swap(MEZURE_6, MEZURE),
             Ast::Sound(Sound::solve_puzzle_chime()),
             Ast::Seq((0..6).map(|index| Ast::Seq(vec![
                 Ast::Wait(0.075),
@@ -831,11 +1189,12 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
             Ast::Queue(2, -1), // Finish indicator light animation.
             Ast::Wait(0.5),
             // Clean up:
-            Ast::Remove(YTTRIS),
-            Ast::Remove(ARGONY),
-            Ast::Remove(ELINSA),
-            Ast::Remove(UGRENT),
-            Ast::Remove(RELYNG),
+            Ast::Remove(YTTRIS_1),
+            Ast::Remove(ARGONY_1),
+            Ast::Remove(ELINSA_1),
+            Ast::Remove(UGRENT_1),
+            Ast::Remove(RELYNG_1),
+            Ast::Remove(MEZURE_1),
             Ast::Queue(1, 6),  // Set progress bar to 6/6.
             Ast::Queue(2, 0), // Turn on indicator lights.
             Ast::Queue(2, 1),

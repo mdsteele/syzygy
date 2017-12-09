@@ -74,11 +74,32 @@ impl View {
             let outro = scenes::compile_outro_scene(resources);
             PuzzleCore::new(resources, visible, state, intro, outro)
         };
+        core.add_extra_scene(scenes::compile_yttris_midscene_1(resources));
+        core.add_extra_scene(scenes::compile_argony_midscene_1(resources));
+        core.add_extra_scene(scenes::compile_elinsa_midscene_1(resources));
+        core.add_extra_scene(scenes::compile_ugrent_midscene_1(resources));
+        core.add_extra_scene(scenes::compile_relyng_midscene_1(resources));
+        core.add_extra_scene(scenes::compile_mezure_midscene_1(resources));
         core.add_extra_scene(scenes::compile_post_yttris_scene(resources));
+        core.add_extra_scene(scenes::compile_argony_midscene_2(resources));
+        core.add_extra_scene(scenes::compile_elinsa_midscene_2(resources));
+        core.add_extra_scene(scenes::compile_ugrent_midscene_2(resources));
+        core.add_extra_scene(scenes::compile_relyng_midscene_2(resources));
+        core.add_extra_scene(scenes::compile_mezure_midscene_2(resources));
         core.add_extra_scene(scenes::compile_post_argony_scene(resources));
+        core.add_extra_scene(scenes::compile_elinsa_midscene_3(resources));
+        core.add_extra_scene(scenes::compile_ugrent_midscene_3(resources));
+        core.add_extra_scene(scenes::compile_relyng_midscene_3(resources));
+        core.add_extra_scene(scenes::compile_mezure_midscene_3(resources));
         core.add_extra_scene(scenes::compile_post_elinsa_scene(resources));
+        core.add_extra_scene(scenes::compile_ugrent_midscene_4(resources));
+        core.add_extra_scene(scenes::compile_relyng_midscene_4(resources));
+        core.add_extra_scene(scenes::compile_mezure_midscene_4(resources));
         core.add_extra_scene(scenes::compile_post_ugrent_scene(resources));
+        core.add_extra_scene(scenes::compile_relyng_midscene_5(resources));
+        core.add_extra_scene(scenes::compile_mezure_midscene_5(resources));
         core.add_extra_scene(scenes::compile_post_relyng_scene(resources));
+        core.add_extra_scene(scenes::compile_mezure_midscene_6(resources));
         if !state.is_solved() {
             if state.stage() > SyzygyStage::Yttris {
                 core.skip_extra_scene(scenes::POST_YTTRIS_SCENE);
@@ -289,6 +310,9 @@ impl Element<Game, PuzzleCmd> for View {
                     action.merge(subaction.but_no_value());
                 }
             }
+        }
+        if !action.should_stop() {
+            self.core.begin_character_scene_on_click(event);
         }
         action
     }

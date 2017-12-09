@@ -881,6 +881,33 @@ impl SceneNode for SoundNode {
 // ========================================================================= //
 
 #[derive(Clone)]
+pub struct SwapNode {
+    slot1: i32,
+    slot2: i32,
+}
+
+impl SwapNode {
+    pub fn new(slot1: i32, slot2: i32) -> SwapNode {
+        SwapNode {
+            slot1: slot1,
+            slot2: slot2,
+        }
+    }
+}
+
+impl SceneNode for SwapNode {
+    fn box_clone(&self) -> Box<SceneNode> { Box::new(self.clone()) }
+
+    fn begin(&mut self, theater: &mut Theater, _: bool) { self.skip(theater); }
+
+    fn skip(&mut self, theater: &mut Theater) {
+        theater.swap_actors(self.slot1, self.slot2);
+    }
+}
+
+// ========================================================================= //
+
+#[derive(Clone)]
 pub struct TalkNode {
     slot: i32,
     bubble_sprites: Vec<Sprite>,

@@ -238,8 +238,7 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
                        go, sister!"),
         ]),
         Ast::Seq(vec![
-            Ast::Remove(YTTRIS),
-            Ast::Place(YTTRIS_BG, "chars/yttris", 0, (440, 320)),
+            Ast::Swap(YTTRIS, YTTRIS_BG),
             Ast::Slide(YTTRIS_BG, (592, 320), true, false, 0.75),
             Ast::Remove(YTTRIS_BG),
             Ast::Sound(Sound::talk_lo()),
@@ -266,8 +265,7 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
                        $iimportant$r  done."),
         ]),
         Ast::Seq(vec![
-            Ast::Remove(ELINSA),
-            Ast::Place(ELINSA_BG, "chars/elinsa", 0, (445, 320)),
+            Ast::Swap(ELINSA, ELINSA_BG),
             Ast::Slide(ELINSA_BG, (592, 320), true, false, 0.75),
             Ast::Remove(ELINSA_BG),
             Ast::Par(vec![

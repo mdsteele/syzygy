@@ -59,6 +59,17 @@ impl Theater {
 
     pub fn remove_actor(&mut self, slot: i32) { self.actors.remove(&slot); }
 
+    pub fn swap_actors(&mut self, slot1: i32, slot2: i32) {
+        let actor1 = self.actors.remove(&slot1);
+        let actor2 = self.actors.remove(&slot2);
+        if let Some(actor) = actor1 {
+            self.actors.insert(slot2, actor);
+        }
+        if let Some(actor) = actor2 {
+            self.actors.insert(slot1, actor);
+        }
+    }
+
     pub fn set_actor_anim(&mut self, slot: i32, sprites: Vec<Sprite>,
                           slowdown: i32) {
         if let Some(actor) = self.actors.get_mut(&slot) {

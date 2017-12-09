@@ -73,8 +73,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
                       "Is that...a $itree!?$r"),
         ]),
         Ast::Seq(vec![
-            Ast::Remove(MEZURE),
-            Ast::Place(MEZURE_BG, "chars/mezure", 0, (348, 304)),
+            Ast::Swap(MEZURE, MEZURE_BG),
             Ast::Slide(MEZURE_BG, (450, 304), true, true, 1.0),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE_BG, TalkStyle::Normal, TalkPos::NW,

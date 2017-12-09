@@ -22,8 +22,8 @@ use gui::{Align, Point, Resources, Sound};
 use super::scene::{AnimNode, DarkNode, JumpNode, LightNode, LoopNode,
                    ParallelNode, PlaceNode, QueueNode, RemoveNode, Scene,
                    SceneNode, SequenceNode, SetBgNode, SetPosNode,
-                   SetSpriteNode, ShakeNode, SlideNode, SoundNode, TalkNode,
-                   WaitNode};
+                   SetSpriteNode, ShakeNode, SlideNode, SoundNode, SwapNode,
+                   TalkNode, WaitNode};
 use super::theater::TalkPos;
 
 // ========================================================================= //
@@ -57,6 +57,7 @@ pub enum Ast {
     Shake(i32),
     Slide(i32, (i32, i32), bool, bool, f64),
     Sound(Sound),
+    Swap(i32, i32),
     Talk(i32, TalkStyle, TalkPos, &'static str),
     Wait(f64),
 }
@@ -132,6 +133,7 @@ impl Ast {
                                         duration))
             }
             Ast::Sound(sound) => Box::new(SoundNode::new(sound)),
+            Ast::Swap(slot1, slot2) => Box::new(SwapNode::new(slot1, slot2)),
             Ast::Talk(slot, style, pos, text) => {
                 let (bubble_name, color, init_font, init_align) =
                     match style {

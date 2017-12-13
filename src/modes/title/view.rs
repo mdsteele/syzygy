@@ -19,27 +19,15 @@
 
 use std::rc::Rc;
 
-use gui::{Action, Align, Canvas, Element, Event, Font, GroupElement, Point,
+use gui::{Action, Align, Background, Canvas, Element, Event, Font, Point,
           Rect, Resources, Sound, Sprite};
 use elements::{DialogBox, FadeStyle, ScreenFade};
 use save::SaveData;
 
 // ========================================================================= //
 
-const START_BUTTON_WIDTH: u32 = 64;
-const START_BUTTON_HEIGHT: u32 = 32;
-
-const BOTTOM_BUTTONS_MARGIN: i32 = 20;
-const BOTTOM_BUTTONS_HEIGHT: u32 = 32;
-const FULLSCREEN_BUTTON_WIDTH: u32 = 32;
-const ABOUT_BUTTON_WIDTH: u32 = 64;
-const ERASE_BUTTON_WIDTH: u32 = 96;
-const QUIT_BUTTON_WIDTH: u32 = 64;
-
-// ========================================================================= //
-
+#[derive(Clone, Copy, Eq, PartialEq)]
 pub enum Cmd {
-    SetFullscreen(bool),
     StartGame,
     EraseGame,
     ShowAboutBox,
@@ -50,94 +38,69 @@ pub enum Cmd {
 
 pub struct View {
     screen_fade: ScreenFade<Cmd>,
-    elements: GroupElement<SaveData, Cmd>,
+    background: Rc<Background>,
+    sun_sprites: Vec<Sprite>,
+    xanadu3_sprites: Vec<Sprite>,
+    xanadu4_sprites: Vec<Sprite>,
+    ship_sprites: Vec<Sprite>,
+    buttons: Vec<Button>,
     title_font_1: Rc<Font>,
     title_font_2: Rc<Font>,
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect) -> View {
-        let spacing = (visible.width() as i32 - 2 * BOTTOM_BUTTONS_MARGIN -
-                           FULLSCREEN_BUTTON_WIDTH as i32 -
-                           ABOUT_BUTTON_WIDTH as i32 -
-                           ERASE_BUTTON_WIDTH as i32 -
-                           QUIT_BUTTON_WIDTH as i32) / 3;
-        let mut elements: Vec<Box<Element<SaveData, Cmd>>> = vec![];
-        elements.push(Box::new({
-                                   let mut rect =
-                                       Rect::new(0,
-                                                 0,
-                                                 START_BUTTON_WIDTH,
-                                                 START_BUTTON_HEIGHT);
-                                   rect.center_on(visible.center());
-                                   rect.offset(0, 35);
-                                   StartGameButton::new(resources, rect)
-                               }));
-        if !cfg!(any(target_os = "android", target_os = "ios")) {
-            elements.push(Box::new({
-                let rect = Rect::new(visible.left() + BOTTOM_BUTTONS_MARGIN,
-                                     visible.bottom() -
-                                         BOTTOM_BUTTONS_HEIGHT as i32 -
-                                         BOTTOM_BUTTONS_MARGIN,
-                                     FULLSCREEN_BUTTON_WIDTH,
-                                     BOTTOM_BUTTONS_HEIGHT);
-                FullscreenButton::new(resources, rect)
-            }));
-            elements.push(Box::new({
-                let rect = Rect::new(visible.right() - BOTTOM_BUTTONS_MARGIN -
-                                         QUIT_BUTTON_WIDTH as i32,
-                                     visible.bottom() -
-                                         BOTTOM_BUTTONS_HEIGHT as i32 -
-                                         BOTTOM_BUTTONS_MARGIN,
-                                     QUIT_BUTTON_WIDTH,
-                                     BOTTOM_BUTTONS_HEIGHT);
-                QuitButton::new(resources, rect)
-            }));
-        }
-        elements.push(Box::new({
-                                   let rect =
-                                       Rect::new(visible.left() +
-                                                     BOTTOM_BUTTONS_MARGIN +
-                                                     FULLSCREEN_BUTTON_WIDTH as
-                                                         i32 +
-                                                     spacing,
-                                                 visible.bottom() -
-                                                     BOTTOM_BUTTONS_HEIGHT as
-                                                         i32 -
-                                                     BOTTOM_BUTTONS_MARGIN,
-                                                 ABOUT_BUTTON_WIDTH,
-                                                 BOTTOM_BUTTONS_HEIGHT);
-                                   AboutButton::new(resources, rect)
-                               }));
-        elements.push(Box::new({
-                                   let rect =
-                                       Rect::new(visible.left() +
-                                                     BOTTOM_BUTTONS_MARGIN +
-                                                     FULLSCREEN_BUTTON_WIDTH as
-                                                         i32 +
-                                                     ABOUT_BUTTON_WIDTH as
-                                                         i32 +
-                                                     2 * spacing,
-                                                 visible.bottom() -
-                                                     BOTTOM_BUTTONS_HEIGHT as
-                                                         i32 -
-                                                     BOTTOM_BUTTONS_MARGIN,
-                                                 ERASE_BUTTON_WIDTH,
-                                                 BOTTOM_BUTTONS_HEIGHT);
-                                   EraseGameButton::new(resources, rect)
-                               }));
+    pub fn new(resources: &mut Resources) -> View {
+        let center_x = 288;
+        let upper_y = 226;
+        let lower_y = 302;
+        let spacing = 128;
         View {
             screen_fade: ScreenFade::new(resources, FadeStyle::Uniform),
-            elements: GroupElement::new(elements),
+            background: resources.get_background("space"),
+            sun_sprites: resources.get_sprites("title/sun"),
+            xanadu3_sprites: resources.get_sprites("title/xanadu3"),
+            xanadu4_sprites: resources.get_sprites("title/xanadu4"),
+            ship_sprites: resources.get_sprites("title/ship"),
+            buttons: vec![
+                Button::new(resources,
+                            Point::new(center_x, upper_y),
+                            Cmd::StartGame),
+                Button::new(resources,
+                            Point::new(center_x - spacing, lower_y),
+                            Cmd::ShowAboutBox),
+                Button::new(resources,
+                            Point::new(center_x, lower_y),
+                            Cmd::EraseGame),
+                Button::new(resources,
+                            Point::new(center_x + spacing, lower_y),
+                            Cmd::Quit),
+            ],
             title_font_1: resources.get_font("title1"),
             title_font_2: resources.get_font("title2"),
+        }
+    }
+
+    pub fn reset_buttons(&mut self) {
+        for button in self.buttons.iter_mut() {
+            button.active = false;
         }
     }
 }
 
 impl Element<SaveData, Cmd> for View {
     fn draw(&self, data: &SaveData, canvas: &mut Canvas) {
-        canvas.clear((16, 24, 16));
+        canvas.draw_background(&self.background);
+        canvas.fill_rect((255, 255, 255), Rect::new(0, 0, 64, 64));
+        canvas.draw_sprite(&self.sun_sprites[0], Point::new(64, 0));
+        canvas.draw_sprite(&self.sun_sprites[1], Point::new(64, 64));
+        canvas.draw_sprite(&self.sun_sprites[2], Point::new(0, 64));
+        canvas.draw_sprite_centered(&self.xanadu3_sprites[0],
+                                    Point::new(288, 225));
+        canvas.draw_sprite_centered(&self.xanadu4_sprites[0],
+                                    Point::new(421, 166));
+        canvas.draw_sprite(&self.ship_sprites[0], Point::new(0, 256));
+        canvas.draw_sprite(&self.ship_sprites[1], Point::new(53, 256));
+        canvas.draw_sprite(&self.ship_sprites[2], Point::new(106, 256));
         canvas.draw_text(&self.title_font_1,
                          Align::Center,
                          Point::new(288, 90),
@@ -146,7 +109,7 @@ impl Element<SaveData, Cmd> for View {
                          Align::Center,
                          Point::new(288, 165),
                          "SYZYGY");
-        self.elements.draw(data, canvas);
+        self.buttons.draw(data, canvas);
         self.screen_fade.draw(&(), canvas);
     }
 
@@ -154,10 +117,12 @@ impl Element<SaveData, Cmd> for View {
                     -> Action<Cmd> {
         let mut action = self.screen_fade.handle_event(event, &mut ());
         if !action.should_stop() {
-            let mut subaction = self.elements.handle_event(event, data);
-            if let Some(&Cmd::StartGame) = subaction.value() {
-                self.screen_fade.fade_out_and_return(Cmd::StartGame);
-                subaction = subaction.but_no_value();
+            let mut subaction = self.buttons.handle_event(event, data);
+            if let Some(&cmd) = subaction.value() {
+                if cmd == Cmd::StartGame || cmd == Cmd::Quit {
+                    self.screen_fade.fade_out_and_return(cmd);
+                    subaction = subaction.but_no_value();
+                }
             }
             action.merge(subaction);
         }
@@ -167,186 +132,71 @@ impl Element<SaveData, Cmd> for View {
 
 // ========================================================================= //
 
-struct FullscreenButton {
-    to_fullscreen_icon: Sprite,
-    to_windowed_icon: Sprite,
-    rect: Rect,
+struct Button {
+    sprites: Vec<Sprite>,
+    font: Rc<Font>,
+    center: Point,
+    command: Cmd,
+    active: bool,
 }
 
-impl FullscreenButton {
-    fn new(resources: &mut Resources, rect: Rect) -> FullscreenButton {
-        let sprites = resources.get_sprites("fullscreen");
-        FullscreenButton {
-            to_fullscreen_icon: sprites[0].clone(),
-            to_windowed_icon: sprites[1].clone(),
-            rect: rect,
+impl Button {
+    fn new(resources: &mut Resources, center: Point, command: Cmd) -> Button {
+        Button {
+            sprites: resources.get_sprites("title/buttons"),
+            font: resources.get_font("roman"),
+            center: center,
+            command: command,
+            active: false,
         }
+    }
+
+    fn rect(&self) -> Rect {
+        Rect::new(self.center.x() - 48, self.center.y() - 12, 96, 24)
     }
 }
 
-impl Element<SaveData, Cmd> for FullscreenButton {
+impl Element<SaveData, Cmd> for Button {
     fn draw(&self, data: &SaveData, canvas: &mut Canvas) {
-        let icon = if data.prefs().fullscreen() {
-            &self.to_windowed_icon
-        } else {
-            &self.to_fullscreen_icon
+        let (mut sprite_index, label, x_offset) = match self.command {
+            Cmd::StartGame => {
+                let label = if data.game().is_none() {
+                    "New Game"
+                } else {
+                    "Continue"
+                };
+                (0, label, 0)
+            }
+            Cmd::ShowAboutBox => (2, "About", 4),
+            Cmd::EraseGame => {
+                if data.game().is_none() {
+                    return;
+                }
+                (4, "Erase Game", 0)
+            }
+            Cmd::Quit => (6, "Quit", -4),
         };
-        canvas.draw_sprite(icon, self.rect.top_left());
+        if self.active {
+            sprite_index += 1;
+        }
+        canvas.draw_sprite_centered(&self.sprites[sprite_index], self.center);
+        canvas.draw_text(&self.font,
+                         Align::Center,
+                         self.center + Point::new(x_offset, 4),
+                         label);
     }
 
     fn handle_event(&mut self, event: &Event, data: &mut SaveData)
                     -> Action<Cmd> {
+        if self.command == Cmd::EraseGame && data.game().is_none() {
+            return Action::ignore();
+        }
         match event {
-            &Event::MouseDown(pt) if self.rect.contains(pt) => {
-                let full = !data.prefs().fullscreen();
-                Action::redraw().and_return(Cmd::SetFullscreen(full))
-            }
-            _ => Action::ignore(),
-        }
-    }
-}
-
-// ========================================================================= //
-
-struct StartGameButton {
-    font: Rc<Font>,
-    rect: Rect,
-}
-
-impl StartGameButton {
-    fn new(resources: &mut Resources, rect: Rect) -> StartGameButton {
-        StartGameButton {
-            font: resources.get_font("roman"),
-            rect: rect,
-        }
-    }
-}
-
-impl Element<SaveData, Cmd> for StartGameButton {
-    fn draw(&self, data: &SaveData, canvas: &mut Canvas) {
-        canvas.fill_rect((200, 200, 200), self.rect);
-        let label = if data.game().is_some() {
-            "Continue"
-        } else {
-            "New Game"
-        };
-        canvas.draw_text(&self.font, Align::Center, self.rect.center(), label);
-    }
-
-    fn handle_event(&mut self, event: &Event, _data: &mut SaveData)
-                    -> Action<Cmd> {
-        match event {
-            &Event::MouseDown(pt) if self.rect.contains(pt) => {
-                Action::redraw().and_return(Cmd::StartGame)
-            }
-            _ => Action::ignore(),
-        }
-    }
-}
-
-// ========================================================================= //
-
-struct EraseGameButton {
-    font: Rc<Font>,
-    rect: Rect,
-}
-
-impl EraseGameButton {
-    fn new(resources: &mut Resources, rect: Rect) -> EraseGameButton {
-        EraseGameButton {
-            font: resources.get_font("roman"),
-            rect: rect,
-        }
-    }
-}
-
-impl Element<SaveData, Cmd> for EraseGameButton {
-    fn draw(&self, data: &SaveData, canvas: &mut Canvas) {
-        if data.game().is_some() {
-            canvas.fill_rect((200, 200, 200), self.rect);
-            canvas.draw_text(&self.font,
-                             Align::Center,
-                             self.rect.center(),
-                             "Erase Game");
-        }
-    }
-
-    fn handle_event(&mut self, event: &Event, data: &mut SaveData)
-                    -> Action<Cmd> {
-        match event {
-            &Event::MouseDown(pt)
-                if self.rect.contains(pt) && data.game().is_some() => {
+            &Event::MouseDown(pt) if self.rect().contains(pt) => {
+                self.active = true;
                 Action::redraw()
                     .and_play_sound(Sound::beep())
-                    .and_return(Cmd::EraseGame)
-            }
-            _ => Action::ignore(),
-        }
-    }
-}
-
-// ========================================================================= //
-
-struct AboutButton {
-    font: Rc<Font>,
-    rect: Rect,
-}
-
-impl AboutButton {
-    fn new(resources: &mut Resources, rect: Rect) -> AboutButton {
-        AboutButton {
-            font: resources.get_font("roman"),
-            rect: rect,
-        }
-    }
-}
-
-impl Element<SaveData, Cmd> for AboutButton {
-    fn draw(&self, _: &SaveData, canvas: &mut Canvas) {
-        canvas.fill_rect((200, 200, 200), self.rect);
-        canvas
-            .draw_text(&self.font, Align::Center, self.rect.center(), "About");
-    }
-
-    fn handle_event(&mut self, event: &Event, _data: &mut SaveData)
-                    -> Action<Cmd> {
-        match event {
-            &Event::MouseDown(pt) if self.rect.contains(pt) => {
-                Action::redraw().and_return(Cmd::ShowAboutBox)
-            }
-            _ => Action::ignore(),
-        }
-    }
-}
-
-// ========================================================================= //
-
-struct QuitButton {
-    font: Rc<Font>,
-    rect: Rect,
-}
-
-impl QuitButton {
-    fn new(resources: &mut Resources, rect: Rect) -> QuitButton {
-        QuitButton {
-            font: resources.get_font("roman"),
-            rect: rect,
-        }
-    }
-}
-
-impl Element<SaveData, Cmd> for QuitButton {
-    fn draw(&self, _: &SaveData, canvas: &mut Canvas) {
-        canvas.fill_rect((200, 200, 200), self.rect);
-        canvas
-            .draw_text(&self.font, Align::Center, self.rect.center(), "Quit");
-    }
-
-    fn handle_event(&mut self, event: &Event, _data: &mut SaveData)
-                    -> Action<Cmd> {
-        match event {
-            &Event::MouseDown(pt) if self.rect.contains(pt) => {
-                Action::redraw().and_return(Cmd::Quit)
+                    .and_return(self.command)
             }
             _ => Action::ignore(),
         }
@@ -359,7 +209,7 @@ impl Element<SaveData, Cmd> for QuitButton {
 pub const ABOUT_BOX_TEXT: &str = "\
 $C$f{block}SYSTEM SYZYGY$r$L\n\
 \n\
-Copyright 2012 Matthew D. Steele <mdsteele@alum.mit.edu>\n\
+Copyright 2016 Matthew D. Steele <mdsteele@alum.mit.edu>\n\
 \n\
 Source code:$Rhttps://github.com/mdsteele/syzygy/$L\n\
 \n\

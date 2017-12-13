@@ -26,7 +26,7 @@ use gui::Resources;
 pub fn compile_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
-            Ast::SetBg("prolog_space"),
+            Ast::SetBg("space"),
             Ast::Wait(2.0),
         ]),
     ];

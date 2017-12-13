@@ -48,34 +48,3 @@ impl<S, A, E: Element<S, A>> Element<S, A> for Vec<E> {
 }
 
 // ========================================================================= //
-
-pub struct GroupElement<S, A> {
-    elements: Vec<Box<Element<S, A>>>,
-}
-
-impl<S, A> GroupElement<S, A> {
-    pub fn new(elements: Vec<Box<Element<S, A>>>) -> GroupElement<S, A> {
-        GroupElement { elements: elements }
-    }
-}
-
-impl<S, A> Element<S, A> for GroupElement<S, A> {
-    fn draw(&self, state: &S, canvas: &mut Canvas) {
-        for element in self.elements.iter().rev() {
-            element.draw(state, canvas);
-        }
-    }
-
-    fn handle_event(&mut self, event: &Event, state: &mut S) -> Action<A> {
-        let mut action = Action::ignore();
-        for element in self.elements.iter_mut() {
-            action.merge(element.handle_event(event, state));
-            if action.should_stop() {
-                break;
-            }
-        }
-        action
-    }
-}
-
-// ========================================================================= //

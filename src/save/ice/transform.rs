@@ -65,7 +65,6 @@ impl Transform {
         }
     }
 
-    #[allow(dead_code)]
     pub fn compose(mut self, other: Transform) -> Transform {
         if other.mirrored {
             self.rotated_cw = -self.rotated_cw;

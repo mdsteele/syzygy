@@ -26,10 +26,7 @@ use super::view::{ABOUT_BOX_TEXT, Cmd, ConfirmEraseView, View};
 // ========================================================================= //
 
 pub fn run_title_screen(window: &mut Window, data: &mut SaveData) -> Mode {
-    let mut view = {
-        let visible = window.visible_rect();
-        View::new(&mut window.resources(), visible)
-    };
+    let mut view = View::new(&mut window.resources());
     window.render(data, &view);
     loop {
         let mut action = match window.next_event() {
@@ -38,13 +35,6 @@ pub fn run_title_screen(window: &mut Window, data: &mut SaveData) -> Mode {
         };
         window.play_sounds(action.drain_sounds());
         match action.value() {
-            Some(&Cmd::SetFullscreen(full)) => {
-                data.prefs_mut().set_fullscreen(full);
-                window.set_fullscreen(full);
-                if let Err(error) = data.save_to_disk() {
-                    println!("Failed to save game: {}", error);
-                }
-            }
             Some(&Cmd::StartGame) => {
                 if let Some(game) = data.game() {
                     return Mode::Location(game.location);
@@ -60,6 +50,7 @@ pub fn run_title_screen(window: &mut Window, data: &mut SaveData) -> Mode {
                     Confirmation::Confirm(value) => value,
                     Confirmation::Quit => return Mode::Quit,
                 };
+                view.reset_buttons();
                 if confirmed {
                     data.erase_game();
                     if let Err(error) = data.save_to_disk() {
@@ -71,6 +62,7 @@ pub fn run_title_screen(window: &mut Window, data: &mut SaveData) -> Mode {
                 if !run_info_box(window, &view, data, ABOUT_BOX_TEXT) {
                     return Mode::Quit;
                 }
+                view.reset_buttons();
             }
             Some(&Cmd::Quit) => return Mode::Quit,
             None => {}

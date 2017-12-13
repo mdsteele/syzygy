@@ -48,6 +48,7 @@ impl Prefs {
 
     pub fn fullscreen(&self) -> bool { self.fullscreen }
 
+    #[allow(dead_code)]
     pub fn set_fullscreen(&mut self, fullscreen: bool) {
         self.fullscreen = fullscreen;
     }

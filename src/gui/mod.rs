@@ -32,7 +32,7 @@ pub use sdl2::rect::{Point, Rect};
 pub use self::action::Action;
 pub use self::background::Background;
 pub use self::canvas::{Align, Canvas};
-pub use self::element::{Element, GroupElement};
+pub use self::element::Element;
 pub use self::event::{Event, KeyMod, Keycode};
 pub use self::font::Font;
 pub use self::resources::Resources;

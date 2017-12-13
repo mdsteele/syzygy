@@ -36,7 +36,7 @@ const YTTRIS: i32 = 4;
 pub fn compile_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
-            Ast::SetBg("prolog_space"),
+            Ast::SetBg("space"),
             Ast::Queue(2, 1), // Show large moving starfield
             Ast::Place(SYSTEM, "chars/invis", 0, (224, 240)),
             Ast::Wait(1.0), // TODO: Show the ship
@@ -59,7 +59,7 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
             Ast::Remove(SYSTEM),
             Ast::Remove(UGRENT),
             Ast::Queue(1, 0), // Hide status indicator
-            Ast::SetBg("prolog_space"),
+            Ast::SetBg("space"),
             Ast::Queue(2, 1), // Show large moving starfield
             Ast::Wait(0.5),
             Ast::Sound(Sound::explosion_small()), // TODO: Show ship 'splosion

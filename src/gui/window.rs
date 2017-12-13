@@ -124,11 +124,13 @@ impl Window {
         Rect::new(-self.full_rect.x(), -self.full_rect.y(), width, height)
     }
 
+    #[allow(dead_code)]
     pub fn is_fullscreen(&self) -> bool {
         self.renderer.window().unwrap().fullscreen_state() !=
             FullscreenType::Off
     }
 
+    #[allow(dead_code)]
     pub fn set_fullscreen(&mut self, fullscreen: bool) {
         if fullscreen != self.is_fullscreen() {
             let state = if fullscreen {

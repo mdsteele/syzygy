@@ -107,6 +107,7 @@ impl SaveData {
 
     pub fn prefs(&self) -> &Prefs { &self.prefs }
 
+    #[allow(dead_code)]
     pub fn prefs_mut(&mut self) -> &mut Prefs { &mut self.prefs }
 
     pub fn game(&self) -> Option<&Game> {

@@ -77,7 +77,7 @@ impl<A: 'static + Clone> DialogBox<A> {
         };
         DialogBox {
             rect: rect,
-            bg_sprites: resources.get_sprites("dialog_box"),
+            bg_sprites: resources.get_sprites("dialog/box"),
             paragraph: paragraph,
             buttons: elements,
         }
@@ -140,7 +140,7 @@ impl<A> DialogButton<A> {
     fn new(resources: &mut Resources, rect: Rect, label: String, value: A)
            -> DialogButton<A> {
         DialogButton {
-            sprite: resources.get_sprites("dialog_button")[0].clone(),
+            sprite: resources.get_sprites("dialog/button")[0].clone(),
             font: resources.get_font("roman"),
             rect: rect,
             label: label,

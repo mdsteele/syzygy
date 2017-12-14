@@ -18,9 +18,11 @@
 // +--------------------------------------------------------------------------+
 
 use std::cmp;
+use std::rc::Rc;
 
 use elements::{PuzzleCmd, PuzzleCore, PuzzleView};
-use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sprite};
+use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
+          Resources, Sprite};
 use modes::SOLVED_INFO_TEXT;
 use save::{Game, PrimaryColor, PuzzleState, SyrupState};
 use super::scenes;
@@ -141,7 +143,12 @@ impl PuzzleView for View {
 
     fn drain_queue(&mut self) {
         for (index, color) in self.core.drain_queue() {
-            if index < 0 {
+            if index == -2 {
+                self.toggles[15].letter = Some('E');
+                self.toggles[18].letter = Some('D');
+                self.toggles[19].letter = Some('E');
+                self.toggles[20].letter = Some('R');
+            } else if index == -1 {
                 self.next.visible = color != 0;
             } else if (index as usize) < self.toggles.len() {
                 self.toggles[index as usize].set_hilight(color);
@@ -163,6 +170,8 @@ struct ToggleLight {
     green_radius: i32,
     blue_radius: i32,
     hilight: i32,
+    font: Rc<Font>,
+    letter: Option<char>,
 }
 
 impl ToggleLight {
@@ -177,6 +186,8 @@ impl ToggleLight {
             green_radius: if green { MAX_LIGHT_RADIUS } else { 0 },
             blue_radius: if blue { MAX_LIGHT_RADIUS } else { 0 },
             hilight: 0,
+            font: resources.get_font("block"),
+            letter: None,
         }
     }
 
@@ -267,6 +278,12 @@ impl Element<SyrupState, (i32, i32)> for ToggleLight {
             }
         }
         let center = canvas.rect().center();
+        if let Some(chr) = self.letter {
+            canvas.draw_char(&self.font,
+                             Align::Center,
+                             center + Point::new(0, 9),
+                             chr);
+        }
         canvas.draw_sprite_centered(&self.frame, center);
     }
 

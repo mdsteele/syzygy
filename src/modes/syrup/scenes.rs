@@ -231,7 +231,10 @@ pub fn compile_outro_scene(resources: &mut Resources, visible: Rect) -> Scene {
             Ast::Queue(11, 3),
             Ast::Wait(0.1),
             Ast::Queue(16, 3),
-            Ast::Wait(1.0),
+            Ast::Wait(0.5),
+            // Show EDER letters:
+            Ast::Queue(-2, 0),
+            Ast::Wait(1.5),
         ]),
     ];
     Ast::compile_scene(resources, ast)

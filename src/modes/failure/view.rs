@@ -955,14 +955,14 @@ Your goal is to beat the System Repair Bot at its own game.
 Each player starts out with a supply of 18 pieces to place, and
 whoever's supply runs out of pieces first loses.
 
-On your turn, you may either place a new piece into an empty
-position on the pile, or jump one of your pieces on the pile up
-to a higher row.  Either way, if the newly-positioned piece
-creates a $iformation$r, then you may remove two of your pieces
-from the board and put them back into your supply.
+On your turn, you may either place a new piece into an open
+position on the pile, or jump one of your uncovered pieces on
+the pile up to a higher row.  Either way, if the newly-positioned
+piece creates a line of four pieces of the same color, then you
+may remove two of your pieces from the board and put them
+back into your supply.
 
-A $iformation$r is four pieces of the same color in a row, either
-horizontally or diagonally.";
+$M{Tap}{Click} on a character in the scene to hear their words of wisdom.";
 
 // ========================================================================= //
 

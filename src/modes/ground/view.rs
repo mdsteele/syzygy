@@ -426,6 +426,9 @@ $M{Tap}{Click} the arrow buttons to move a platform to
 the left or to the right.
 
 Elinsa will jump up onto the next platform when
-it is adjacent.";
+it is adjacent.
+
+$M{Tap}{Click} on a character in the scene to hear their
+words of wisdom.";
 
 // ========================================================================= //

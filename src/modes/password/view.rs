@@ -480,11 +480,11 @@ in the words that properly describe that character, using the
 $M{on-screen }{}keyboard.
 
 The words for each character are scattered around other
-scenes in the game.  Be sure to check the $iSystem Failure$r area
-for hints on how to find all the words.
+scenes in the game.  Be sure to check the $iSystem Failure$r
+area for hints on how to find all the words.
 
-(Note that for this puzzle, the reset button will affect only the
-currently-selected crossword, not any of the others.)";
+(Note that for this puzzle, the reset button will affect only
+the currently-selected crossword, not any of the others.)";
 
 const SLIDERS_INFO_BOX_TEXT: &str = "\
 Now that all six characters' crosswords have been filled in,

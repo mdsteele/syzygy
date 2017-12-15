@@ -276,8 +276,8 @@ const LETTERS: &[(i32, i32, char)] = &[
 ];
 
 const INFO_BOX_TEXT: &str = "\
-Your goal is to place (and later remove) each group of tiles
-on the grid.
+Your goal is to place (and later remove) each group of tiles on
+the grid.
 
 When a group of tiles appears on the left, use $M{your finger}{the mouse} to
 drag it onto the grid on the right.  The tiles will then flip over.
@@ -286,6 +286,8 @@ At certain points, you will be prompted to remove a group of
 tiles from the grid that had a given symbol.  $M{Tap}{Click} any of the
 tiles on the grid that had that symbol to remove all of them.
 However, if you accidentally remove a tile with the wrong
-symbol,  you will have to start over.";
+symbol,  you will have to start over.
+
+$M{Tap}{Click} on a character in the scene to hear their words of wisdom.";
 
 // ========================================================================= //

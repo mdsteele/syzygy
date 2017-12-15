@@ -331,6 +331,9 @@ Each of the two upper grids contains a character
 that does not appear in the other.  $M{Tap}{Click} each of
 those two characters to proceed.  If you choose
 incorrectly, the grids will rescramble and you
-will have to try again.";
+will have to try again.
+
+$M{Tap}{Click} on a character in the scene to hear their
+words of wisdom.";
 
 // ========================================================================= //

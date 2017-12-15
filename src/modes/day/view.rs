@@ -152,6 +152,9 @@ Your goal is to connect each red node to each blue
 node.
 
 Drag across the grid with $M{your finger}{the mouse} to create or
-remove pipes between the nodes.";
+remove pipes between the nodes.
+
+$M{Tap}{Click} on a character in the scene to hear their words
+of wisdom.";
 
 // ========================================================================= //

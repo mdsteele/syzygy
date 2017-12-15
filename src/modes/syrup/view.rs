@@ -395,7 +395,11 @@ Your goal is to turn all twenty-one lights WHITE.
 
 $M{Tap}{Click} one of the lights to change the color of that
 light and of the adjacent lights.  Your first move will
-toggle the redness of the lights; the second move will toggle
-greenness, the third blueness, and then back to red.";
+toggle the redness of the lights; the second move
+will toggle greenness, the third blueness, and then
+back to red.
+
+$M{Tap}{Click} on a character in the scene to hear their words
+of wisdom.";
 
 // ========================================================================= //

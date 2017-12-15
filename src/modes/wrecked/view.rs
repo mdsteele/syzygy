@@ -419,6 +419,9 @@ Your goal is to arrange the large grid on the left into
 the pattern shown on the small grid on the right.
 
 Drag a tile on the large grid up, down, left, or right
-to shift that whole row or column.";
+to shift that whole row or column.
+
+$M{Tap}{Click} on a character in the scene to hear their words
+of wisdom.";
 
 // ========================================================================= //

@@ -164,6 +164,9 @@ word that matches the given clue, using the
 $M{on-screen }{}keyboard.
 
 If the word won't fit, you should at least take
-a moment to consider its symbolism.";
+a moment to consider its symbolism.
+
+$M{Tap}{Click} on a character in the scene to hear their
+words of wisdom.";
 
 // ========================================================================= //

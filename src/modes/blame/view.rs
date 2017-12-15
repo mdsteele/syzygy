@@ -513,6 +513,9 @@ $M{Tap}{Click} the arrow buttons to move the platforms
 to the left or to the right.
 
 Mezure will jump up onto the next platform when
-it is adjacent.";
+it is adjacent.
+
+$M{Tap}{Click} on a character in the scene to hear their
+words of wisdom.";
 
 // ========================================================================= //

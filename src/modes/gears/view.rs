@@ -497,7 +497,10 @@ the left or to the right.  If Ugrent is standing on
 that platform, it will move by 4 instead of by
 its normal distance.
 
-Ugrent will jump up onto the next platform when
-it is adjacent.";
+Ugrent will jump up onto the next platform
+when it is adjacent.
+
+$M{Tap}{Click} on a character in the scene to hear their
+words of wisdom.";
 
 // ========================================================================= //

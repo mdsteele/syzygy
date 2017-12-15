@@ -151,6 +151,9 @@ covers its matching symbol on the grid, in the same
 orientation.
 
 Drag one of the ice blocks up, down, left, or right with
-$M{your finger}{the mouse} to slide it in that direction.";
+$M{your finger}{the mouse} to slide it in that direction.
+
+$M{Tap}{Click} on a character in the scene to hear their words
+of wisdom.";
 
 // ========================================================================= //

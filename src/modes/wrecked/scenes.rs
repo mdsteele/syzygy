@@ -210,6 +210,10 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
 
 // ========================================================================= //
 
+// TODO: add character midscenes
+
+// ========================================================================= //
+
 #[cfg_attr(rustfmt, rustfmt_skip)]
 pub fn compile_outro_scene(resources: &mut Resources, visible: Rect) -> Scene {
     let ast = vec![

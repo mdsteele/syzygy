@@ -698,7 +698,10 @@ There is only one possible word that can be formed.
 
 Drag a column up or down with $M{your finger}{the mouse} to rotate
 its letters.  Moving one column may also cause other
-columns to move at the same time.";
+columns to move at the same time.
+
+$M{Tap}{Click} on a character in the scene to hear their words
+of wisdom.";
 
 const ARGONY_INFO_BOX_TEXT: &str = "\
 Your goal is to slide the blocks of ice until each one
@@ -706,14 +709,20 @@ covers its matching symbol on the grid, in the same
 orientation and chirality.
 
 Drag one of the ice blocks up, down, left, or right with
-$M{your finger}{the mouse} to slide it in that direction.";
+$M{your finger}{the mouse} to slide it in that direction.
+
+$M{Tap}{Click} on a character in the scene to hear their words
+of wisdom.";
 
 const ELINSA_INFO_BOX_TEXT: &str = "\
 Your goal is to connect each red node to each blue
 node.  The purple node counts as both red and blue.
 
 Drag across the grid with $M{your finger}{the mouse} to create or
-remove pipes between the nodes.";
+remove pipes between the nodes.
+
+$M{Tap}{Click} on a character in the scene to hear their words
+of wisdom.";
 
 const UGRENT_INFO_BOX_TEXT: &str = "\
 Your goal is to activate each detector on the right with
@@ -721,14 +730,20 @@ the appropriate color of laser.
 
 Drag mirrors and other objects with $M{your finger}{the mouse} to
 move their positions in the grid.  $M{Tap}{Click} objects to rotate
-them.";
+them.
+
+$M{Tap}{Click} on a character in the scene to hear their words of
+wisdom.";
 
 const RELYNG_INFO_BOX_TEXT: &str = "\
 Your goal is to turn all twenty lights OFF.
 
 $M{Tap}{Click} one of the lights to toggle that light and some
-of the adjacent lights.  The pattern of adjancent lights
-toggled will change after each move.";
+of the adjacent lights.  The pattern of adjancent
+lights toggled will change after each move.
+
+$M{Tap}{Click} on a character in the scene to hear their
+words of wisdom.";
 
 const MEZURE_INFO_BOX_TEXT: &str = "\
 Your goal is to form the final, missing word.";

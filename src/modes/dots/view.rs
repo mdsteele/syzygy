@@ -179,6 +179,9 @@ the appropriate color of laser.
 
 Drag mirrors and other objects with $M{your finger}{the mouse} to
 move their positions in the grid.  $M{Tap}{Click} objects to rotate
-them.";
+them.
+
+$M{Tap}{Click} on a character in the scene to hear their words of
+wisdom.";
 
 // ========================================================================= //

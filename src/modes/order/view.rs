@@ -332,13 +332,12 @@ impl TileDrag {
 // ========================================================================= //
 
 const INFO_BOX_TEXT: &str = "\
-Your goal is to put each row of tiles in alphabetical
-order.
+Your goal is to put each row of tiles in alphabetical order.
 
-Drag tiles left and right with $M{your finger}{the mouse} to reorder
-them.
+Drag tiles left and right with $M{your finger}{the mouse} to reorder them.
+Once a row is ordered correctly, the next row will appear.
 
-(For this puzzle, the reset button will reset only the
-current row, not any of the previously-solved rows.)";
+$M{Tap}{Click} on a character in the scene to hear their words of
+wisdom.";
 
 // ========================================================================= //

@@ -184,6 +184,9 @@ Your goal is to activate each detector on the right with
 the appropriate color of laser.
 
 Drag mirrors with $M{your finger}{the mouse} to move their positions in
-the grid.  $M{Tap}{Click} mirrors to rotate them.";
+the grid.  $M{Tap}{Click} mirrors to rotate them.
+
+$M{Tap}{Click} on a character in the scene to hear their words of
+wisdom.";
 
 // ========================================================================= //

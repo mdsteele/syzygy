@@ -431,6 +431,9 @@ Your goal is to arrange the colored tokens into
 the pattern shown on the right.
 
 Drag any one of the wheels with $M{your finger}{the mouse} to
-rotate it.";
+rotate it.
+
+$M{Tap}{Click} on a character in the scene to hear their
+words of wisdom.";
 
 // ========================================================================= //

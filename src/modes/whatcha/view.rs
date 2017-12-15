@@ -139,6 +139,9 @@ There is only one possible word that can be formed.
 
 Drag a column up or down with $M{your finger}{the mouse} to rotate
 its letters.  Moving one column may also cause other
-columns to move at the same time.";
+columns to move at the same time.
+
+$M{Tap}{Click} on a character in the scene to hear their words
+of wisdom.";
 
 // ========================================================================= //

@@ -392,6 +392,9 @@ some of the surrounding lights, depending on the letter.
 
 If any lights are still on after you place the seventh
 letter, you will need to use the reset button or the
-undo button to back up and try again.";
+undo button to back up and try again.
+
+$M{Tap}{Click} on a character in the scene to hear their words of
+wisdom.";
 
 // ========================================================================= //

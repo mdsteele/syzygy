@@ -150,6 +150,9 @@ word that matches the given clue, using the
 $M{on-screen }{}keyboard.
 
 If the word won't fit, you may need to turn
-the problem on its head.";
+the problem on its head.
+
+$M{Tap}{Click} on a character in the scene to hear their
+words of wisdom.";
 
 // ========================================================================= //

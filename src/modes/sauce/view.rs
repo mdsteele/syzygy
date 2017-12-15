@@ -190,6 +190,9 @@ For each clue, type in the two words in order
 $M{on-screen }{}keyboard.
 
 $M{Tap}{Click} the arrows to skip past a particular clue
-and come back to it later.";
+and come back to it later.
+
+$M{Tap}{Click} on a character in the scene to hear their
+words of wisdom.";
 
 // ========================================================================= //

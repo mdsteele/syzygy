@@ -514,6 +514,9 @@ Yttris can cross while landing on each square exactly once.
 
 Drag pieces left and right with $M{your finger}{the mouse} to reorder them.
 When you're ready, $M{tap}{click} the green triangle button on the
-left to see if your solution works.";
+left to see if your solution works.
+
+$M{Tap}{Click} on a character in the scene to hear their words of
+wisdom.";
 
 // ========================================================================= //

@@ -426,6 +426,9 @@ the large grid in the middle into the pattern shown on
 the small grid on the left.
 
 Drag a cube on the large grid up, down, left, or right
-to rotate that whole row or column.";
+to rotate that whole row or column.
+
+$M{Tap}{Click} on a character in the scene to hear their words
+of wisdom.";
 
 // ========================================================================= //

@@ -157,6 +157,9 @@ word that matches the given clue, using the
 $M{on-screen }{}keyboard.
 
 If the word won't fit, you may need to fudge
-the numbers.";
+the numbers.
+
+$M{Tap}{Click} on a character in the scene to hear their
+words of wisdom.";
 
 // ========================================================================= //

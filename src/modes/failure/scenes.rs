@@ -333,6 +333,10 @@ pub fn compile_lose_game_scene(resources: &mut Resources) -> (i32, Scene) {
 
 // ========================================================================= //
 
+// TODO: add character midscenes
+
+// ========================================================================= //
+
 #[cfg_attr(rustfmt, rustfmt_skip)]
 pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![

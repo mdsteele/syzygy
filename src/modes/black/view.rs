@@ -457,6 +457,9 @@ rebalance/recolor itself, following two rules:
 1) Each path from a leaf down to the trunk must have
      the same number of black fruits, and
 2) No path from a leaf down to the trunk can have
-     two red fruits in a row.";
+     two red fruits in a row.
+
+$M{Tap}{Click} on a character in the scene to hear their words
+of wisdom.";
 
 // ========================================================================= //

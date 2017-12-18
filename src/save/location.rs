@@ -75,7 +75,7 @@ impl Location {
 
     pub fn name(self) -> &'static str {
         match self {
-            Location::Map => "The Map",
+            Location::Map => "The System",
             Location::Prolog => "Prolog",
             Location::ALightInTheAttic => "A Light in the Attic",
             Location::AutofacTour => "Autofac Tour",

@@ -168,6 +168,13 @@ impl View {
             map_sprites.push((sprites[3].clone(), Point::new(416, 208)));
         }
         {
+            let sprites = resources.get_sprites("map/factory");
+            map_sprites.push((sprites[0].clone(), Point::new(272, 128)));
+            map_sprites.push((sprites[1].clone(), Point::new(304, 128)));
+            map_sprites.push((sprites[2].clone(), Point::new(336, 128)));
+            map_sprites.push((sprites[3].clone(), Point::new(368, 128)));
+        }
+        {
             let mut sprites = resources.get_sprites("map/icebox");
             let is_open = game.is_unlocked(Location::IceToMeetYou) ||
                 game.is_unlocked(Location::TheIceIsRight) ||
@@ -185,7 +192,23 @@ impl View {
         }
         if !game.is_unlocked(Location::SystemSyzygy) {
             let sprites = resources.get_sprites("map/secret");
-            map_sprites.push((sprites[0].clone(), Point::new(160, 240)));
+            map_sprites.push((sprites[0].clone(), Point::new(176, 256)));
+        }
+        {
+            let sprites = resources.get_sprites("map/sewer");
+            map_sprites.push((sprites[0].clone(), Point::new(240, 272)));
+            map_sprites.push((sprites[1].clone(), Point::new(272, 272)));
+            map_sprites.push((sprites[2].clone(), Point::new(304, 272)));
+            map_sprites.push((sprites[3].clone(), Point::new(336, 272)));
+        }
+        {
+            let sprites = resources.get_sprites("map/yellow");
+            map_sprites.push((sprites[0].clone(), Point::new(400, 240)));
+            map_sprites.push((sprites[1].clone(), Point::new(432, 240)));
+            map_sprites.push((sprites[2].clone(), Point::new(464, 240)));
+            map_sprites.push((sprites[3].clone(), Point::new(400, 272)));
+            map_sprites.push((sprites[4].clone(), Point::new(432, 272)));
+            map_sprites.push((sprites[5].clone(), Point::new(464, 272)));
         }
         View {
             screen_fade: ScreenFade::new(resources, FadeStyle::Radial),

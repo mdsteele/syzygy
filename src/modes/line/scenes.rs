@@ -95,7 +95,18 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
 
 // ========================================================================= //
 
-// TODO: add character midscenes
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_ugrent_midscene(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                      "All it takes is patience\n\
+                       and a keen eye.")
+        ]),
+    ];
+    (UGRENT, Ast::compile_scene(resources, ast))
+}
 
 // ========================================================================= //
 
@@ -130,6 +141,7 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
             Ast::Slide(UGRENT, (592, 272), false, false, 0.5),
             Ast::Remove(UGRENT),
             Ast::Wait(1.0),
+            Ast::Sound(Sound::beep()),
             Ast::Queue(3, 1), // Hide extra solution characters.
             Ast::Wait(0.15),
             Ast::Queue(3, 0), // Show extra solution characters.

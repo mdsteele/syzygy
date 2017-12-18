@@ -20,10 +20,11 @@
 use std::rc::Rc;
 
 use elements::{PuzzleCmd, PuzzleCore, PuzzleView};
-use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources};
+use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
+          Resources, Sound};
 use modes::SOLVED_INFO_TEXT;
 use save::{Game, LineState, PuzzleState};
-use super::scenes::{compile_intro_scene, compile_outro_scene};
+use super::scenes;
 
 // ========================================================================= //
 
@@ -32,19 +33,24 @@ pub struct View {
     grid1: LetterGrid,
     grid2: LetterGrid,
     answers: AnswersDisplay,
+    delay: i32,
 }
 
 impl View {
     pub fn new(resources: &mut Resources, visible: Rect, state: &LineState)
                -> View {
-        let intro = compile_intro_scene(resources);
-        let outro = compile_outro_scene(resources);
-        let core = PuzzleCore::new(resources, visible, state, intro, outro);
+        let mut core = {
+            let intro = scenes::compile_intro_scene(resources);
+            let outro = scenes::compile_outro_scene(resources);
+            PuzzleCore::new(resources, visible, state, intro, outro)
+        };
+        core.add_extra_scene(scenes::compile_ugrent_midscene(resources));
         View {
             core: core,
             grid1: LetterGrid::new(resources, 80, 48, false),
             grid2: LetterGrid::new(resources, 320, 48, true),
             answers: AnswersDisplay::new(resources, 168, 272),
+            delay: 0,
         }
     }
 }
@@ -64,7 +70,20 @@ impl Element<Game, PuzzleCmd> for View {
                     -> Action<PuzzleCmd> {
         let state = &mut game.cross_the_line;
         let mut action = self.core.handle_event(event, state);
-        if !action.should_stop() {
+        if !action.should_stop() && event == &Event::ClockTick {
+            if self.delay > 0 {
+                self.delay -= 1;
+                if self.delay == 0 {
+                    self.grid1.reset();
+                    self.grid2.reset();
+                    if state.is_solved() {
+                        self.core.begin_outro_scene();
+                    }
+                    action.also_redraw();
+                }
+            }
+        }
+        if !action.should_stop() && self.delay == 0 {
             let mut subaction = self.grid1.handle_event(event, state);
             if !subaction.should_stop() {
                 subaction.merge(self.grid2.handle_event(event, state));
@@ -72,22 +91,29 @@ impl Element<Game, PuzzleCmd> for View {
             if let Some(&()) = subaction.value() {
                 if let Some(index1) = self.grid1.selected {
                     if let Some(index2) = self.grid2.selected {
-                        // TODO: short delay first
-                        self.grid1.selected = None;
-                        self.grid2.selected = None;
-                        // TODO: play sound based on pick_chars result
-                        state.pick_chars(index1, index2);
-                        if state.is_solved() {
-                            self.core.begin_outro_scene();
+                        self.grid1.override_grid =
+                            Some((state.num_cols(), state.grid1().to_vec()));
+                        self.grid2.override_grid =
+                            Some((state.num_cols(), state.grid2().to_vec()));
+                        self.delay = 20;
+                        if state.pick_chars(index1, index2) {
+                            action.also_play_sound(Sound::mid_puzzle_chime());
+                        } else {
+                            self.grid1.error = true;
+                            self.grid2.error = true;
+                            action.also_play_sound(Sound::talk_annoyed_hi());
                         }
                     }
                 }
             }
             action.merge(subaction.but_no_value());
         }
-        if !action.should_stop() {
+        if !action.should_stop() && self.delay == 0 {
             let subaction = self.answers.handle_event(event, state);
             action.merge(subaction.but_no_value());
+        }
+        if !action.should_stop() && self.delay == 0 {
+            self.core.begin_character_scene_on_click(event);
         }
         action
     }
@@ -120,16 +146,18 @@ impl PuzzleView for View {
         for entry in self.core.drain_queue() {
             match entry {
                 (0, -1) => {
-                    self.grid1.override_grid = Some(Vec::new());
-                    self.grid2.override_grid = Some(Vec::new());
+                    self.grid1.override_grid = Some((1, Vec::new()));
+                    self.grid2.override_grid = Some((1, Vec::new()));
                 }
                 (0, 0) => {
                     self.grid1.override_grid = None;
                     self.grid2.override_grid = None;
                 }
                 (0, 1) => {
-                    self.grid1.override_grid = Some("SAFE".chars().collect());
-                    self.grid2.override_grid = Some("FACE".chars().collect());
+                    self.grid1.override_grid =
+                        Some((4, "SAFE".chars().collect()));
+                    self.grid2.override_grid =
+                        Some((4, "FACE".chars().collect()));
                 }
                 (1, index) => {
                     if index >= 0 {
@@ -167,7 +195,8 @@ struct LetterGrid {
     is_grid_2: bool,
     font: Rc<Font>,
     selected: Option<usize>,
-    override_grid: Option<Vec<char>>,
+    override_grid: Option<(i32, Vec<char>)>,
+    error: bool,
 }
 
 impl LetterGrid {
@@ -180,7 +209,14 @@ impl LetterGrid {
             font: resources.get_font("block"),
             selected: None,
             override_grid: None,
+            error: false,
         }
+    }
+
+    fn reset(&mut self) {
+        self.selected = None;
+        self.override_grid = None;
+        self.error = false;
     }
 
     fn max_rect(&self) -> Rect {
@@ -199,14 +235,14 @@ impl LetterGrid {
 
 impl Element<LineState, ()> for LetterGrid {
     fn draw(&self, state: &LineState, canvas: &mut Canvas) {
-        let num_cols = state.num_cols();
-        let grid = if let Some(ref grid) = self.override_grid {
-            grid
-        } else if self.is_grid_2 {
-            state.grid2()
-        } else {
-            state.grid1()
-        };
+        let (num_cols, grid) =
+            if let Some((num_cols, ref grid)) = self.override_grid {
+                (num_cols, grid.as_slice())
+            } else if self.is_grid_2 {
+                (state.num_cols(), state.grid2())
+            } else {
+                (state.num_cols(), state.grid1())
+            };
         let grid_rect = self.grid_rect(num_cols, grid.len());
         let mut col = 0;
         let mut row = 0;
@@ -215,7 +251,12 @@ impl Element<LineState, ()> for LetterGrid {
             let box_top = grid_rect.top() + row * BOX_SIZE;
             if self.selected == Some(index) {
                 let rect = Rect::new(box_left, box_top, BOX_USIZE, BOX_USIZE);
-                canvas.fill_rect((255, 255, 128), rect);
+                let color = if self.error {
+                    (128, 64, 64)
+                } else {
+                    (255, 255, 128)
+                };
+                canvas.fill_rect(color, rect);
             }
             let pt = Point::new(box_left + BOX_SIZE / 2,
                                 box_top + BOX_SIZE - 3);

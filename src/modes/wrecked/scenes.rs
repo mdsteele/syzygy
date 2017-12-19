@@ -210,7 +210,19 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
 
 // ========================================================================= //
 
-// TODO: add character midscenes
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_mezure_midscene(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SE,
+                      "If I just ignore one color, and\n\
+                       focus on the other two, I think\n\
+                       everything should fall into place.")
+        ]),
+    ];
+    (MEZURE, Ast::compile_scene(resources, ast))
+}
 
 // ========================================================================= //
 

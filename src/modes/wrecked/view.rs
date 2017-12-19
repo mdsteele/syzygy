@@ -25,7 +25,7 @@ use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
           Resources, Sprite};
 use modes::SOLVED_INFO_TEXT;
 use save::{Direction, Game, PuzzleState, WreckedState};
-use super::scenes::{compile_intro_scene, compile_outro_scene};
+use super::scenes;
 
 // ========================================================================= //
 
@@ -39,9 +39,12 @@ impl View {
     pub fn new(resources: &mut Resources, visible: Rect,
                state: &WreckedState)
                -> View {
-        let intro = compile_intro_scene(resources);
-        let outro = compile_outro_scene(resources, visible);
-        let core = PuzzleCore::new(resources, visible, state, intro, outro);
+        let mut core = {
+            let intro = scenes::compile_intro_scene(resources);
+            let outro = scenes::compile_outro_scene(resources, visible);
+            PuzzleCore::new(resources, visible, state, intro, outro)
+        };
+        core.add_extra_scene(scenes::compile_mezure_midscene(resources));
         View {
             core: core,
             grid: WreckedGrid::new(resources, 84, 132),
@@ -80,6 +83,9 @@ impl Element<Game, PuzzleCmd> for View {
         }
         if !action.should_stop() {
             action.merge(self.solution.handle_event(event, state));
+        }
+        if !action.should_stop() {
+            self.core.begin_character_scene_on_click(event);
         }
         action
     }

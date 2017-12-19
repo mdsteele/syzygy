@@ -153,7 +153,65 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
 
 // ========================================================================= //
 
-// TODO: add character midscenes
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_argony_midscene(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::NE,
+                      "If we get stuck on one of these,\n\
+                       we can always just try every letter\n\
+                       until we get the first one.  That\n\
+                       might be enough to get us unstuck."),
+        ]),
+    ];
+    (ARGONY, Ast::compile_scene(resources, ast))
+}
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_ugrent_midscene(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_thought()),
+            Ast::Talk(UGRENT, TalkStyle::Thought, TalkPos::NW,
+                      "$iGrumble$r...I don't\n\
+                       even $ilike$r  rhymes."),
+        ]),
+    ];
+    (UGRENT, Ast::compile_scene(resources, ast))
+}
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_yttris_midscene(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NE,
+                      "$L* Although his manner *\n      * tends to chafe, *\n\
+                       * Ugrent works to *\n      * keep us safe! *"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NW,
+                      "Ugh, Yttris, no more\n\
+                       rhymes than we have to!"),
+        ]),
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NE,
+                          "Anybody want a...cashew?"),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.5),
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::W,
+                          "Gah!"),
+            ]),
+        ]),
+    ];
+    (YTTRIS, Ast::compile_scene(resources, ast))
+}
 
 // ========================================================================= //
 

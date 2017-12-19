@@ -33,6 +33,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::SetBg("log_level"),
             Ast::Place(SYSTEM, "chars/system", 0, (352, 208)),
+            Ast::Wait(1.0),
             Ast::Place(MEZURE, "chars/mezure", 0, (-16, 160)),
             Ast::Slide(MEZURE, (162, 160), false, false, 0.5),
             Ast::Par(vec![
@@ -135,7 +136,23 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
 
 // ========================================================================= //
 
-// TODO: add character midscenes
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_mezure_midscene(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "But...none of\n\
+                       these words fit!")
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "This is really asinine.")
+        ]),
+    ];
+    (MEZURE, Ast::compile_scene(resources, ast))
+}
 
 // ========================================================================= //
 

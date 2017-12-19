@@ -17,15 +17,21 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
+use std::rc::Rc;
+
 use elements;
 use elements::column::ColumnsView;
 use elements::lasers::LaserField;
 use elements::plane::{PlaneCmd, PlaneGridView};
-use gui::{Action, Canvas, Element, Event, Point, Resources, Sprite};
+use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
+          Resources, Sprite};
 use save::SyzygyState;
 use save::ice::BlockSlide;
 
 // ========================================================================= //
+
+const RED_HILIGHT: (u8, u8, u8) = (200, 0, 0);
+const DARK: (u8, u8, u8) = (0, 0, 32);
 
 #[derive(Clone, Debug)]
 pub enum MezureCmd {
@@ -42,6 +48,7 @@ pub struct MezureView {
     ice_grid: elements::ice::GridView,
     laser_grid: LaserField,
     pipe_grid: PlaneGridView,
+    font: Rc<Font>,
     animating_slide: bool,
 }
 
@@ -60,6 +67,7 @@ impl MezureView {
                                         104,
                                         state.mezure_laser_grid()),
             pipe_grid: PlaneGridView::new(resources, 60, 104),
+            font: resources.get_font("block"),
             animating_slide: false,
         };
         view.recalculate_lasers_and_lights(state);
@@ -67,11 +75,11 @@ impl MezureView {
     }
 
     pub fn hilight_column_red(&mut self, index: usize) {
-        self.columns.set_hilight_color(index, (200, 0, 0));
+        self.columns.set_hilight_color(index, RED_HILIGHT);
     }
 
     pub fn hilight_column_dark(&mut self, index: usize) {
-        self.columns.set_hilight_color(index, (0, 0, 32));
+        self.columns.set_hilight_color(index, DARK);
     }
 
     fn recalculate_lasers_and_lights(&mut self, state: &mut SyzygyState) {
@@ -82,7 +90,7 @@ impl MezureView {
         };
         state.set_mezure_satisfied_detectors(positions);
         for (index, &lit) in state.mezure_lights().iter().enumerate() {
-            let color = if lit { (255, 255, 192) } else { (0, 0, 32) };
+            let color = if lit { (255, 255, 192) } else { DARK };
             self.columns.set_hilight_color(index, color);
         }
     }
@@ -90,6 +98,23 @@ impl MezureView {
     pub fn refresh(&mut self, state: &mut SyzygyState) {
         self.recalculate_lasers_and_lights(state);
         self.ice_grid.reset_animation();
+    }
+
+    pub fn draw_final_answer(&self, canvas: &mut Canvas) {
+        for column in 0..6 {
+            let left = 320 + 32 * (column as i32);
+            let top = 232;
+            let pt = Point::new(left, 232);
+            canvas
+                .fill_rect(RED_HILIGHT, Rect::new(left + 4, top + 4, 24, 24));
+            canvas.draw_rect((255, 255, 255),
+                             Rect::new(left + 4, top + 3, 24, 25));
+            canvas.draw_char(&self.font,
+                             Align::Center,
+                             Point::new(left + 16, top + 25),
+                             ['S', 'Y', 'S', 'T', 'E', 'M'][column]);
+            canvas.draw_sprite(&self.toggle_sprites[0], pt);
+        }
     }
 }
 
@@ -103,8 +128,13 @@ impl Element<SyzygyState, MezureCmd> for MezureView {
         self.laser_grid.draw_sparks(canvas);
         self.pipe_grid.draw(state.mezure_pipe_grid(), canvas);
         for column in 0..6 {
-            let pt = Point::new(320 + 32 * column, 232);
-            canvas.draw_sprite(&self.toggle_sprites[0], pt);
+            let sprite_index = if state.mezure_satisfied()[column] {
+                1
+            } else {
+                0
+            };
+            let pt = Point::new(320 + 32 * (column as i32), 232);
+            canvas.draw_sprite(&self.toggle_sprites[sprite_index], pt);
         }
     }
 

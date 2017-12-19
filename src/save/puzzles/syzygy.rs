@@ -156,6 +156,7 @@ pub struct SyzygyState {
     relyng_next: char,
     mezure_columns: Columns,
     mezure_lights: [bool; 6],
+    mezure_satisfied: [bool; 6],
     mezure_ice_grid: ObjectGrid,
     mezure_laser_grid: DeviceGrid,
     mezure_pipe_grid: PlaneGrid,
@@ -340,8 +341,9 @@ impl SyzygyState {
                 self.advance_stage();
             }
             SyzygyStage::Mezure => {
-                self.mezure_pipe_grid.remove_all_pipes();
                 self.mezure_columns.solve();
+                self.mezure_pipe_grid.remove_all_pipes();
+                self.mezure_regenerate_laser_grid();
                 self.access = Access::Solved;
             }
         }
@@ -466,6 +468,8 @@ impl SyzygyState {
 
     pub fn mezure_lights(&self) -> &[bool; 6] { &self.mezure_lights }
 
+    pub fn mezure_satisfied(&self) -> &[bool; 6] { &self.mezure_satisfied }
+
     pub fn mezure_columns(&self) -> &Columns { &self.mezure_columns }
 
     pub fn mezure_columns_mut(&mut self) -> &mut Columns {
@@ -475,7 +479,7 @@ impl SyzygyState {
     pub fn mezure_rotate_column(&mut self, col: usize, by: i32) {
         self.mezure_columns.rotate_column(col, by);
         if self.mezure_columns.is_solved() {
-            // TODO: mezure is solved
+            self.access = Access::Solved;
         }
     }
 
@@ -531,14 +535,16 @@ impl SyzygyState {
 
     pub fn set_mezure_satisfied_detectors(&mut self,
                                           positions: HashSet<(i32, i32)>) {
-        let mut satisfied = [false; 6];
+        self.mezure_satisfied = [false; 6];
         for row in 0..6 {
-            satisfied[row as usize] = positions.contains(&(3, row));
+            self.mezure_satisfied[row as usize] = positions
+                .contains(&(3, row));
         }
         for index in 0..6 {
-            self.mezure_lights[index] = !(satisfied[index] ^
-                                              satisfied[(index + 1) % 6] ^
-                                              satisfied[(index + 5) % 6]);
+            self.mezure_lights[index] =
+                !(self.mezure_satisfied[index] ^
+                      self.mezure_satisfied[(index + 1) % 6] ^
+                      self.mezure_satisfied[(index + 5) % 6]);
         }
         for index in 0..6 {
             let linkages = if self.mezure_lights[index] {
@@ -549,6 +555,9 @@ impl SyzygyState {
                 Vec::new()
             };
             self.mezure_columns.set_linkages(index, linkages);
+        }
+        if self.is_solved() {
+            self.mezure_satisfied = [false; 6];
         }
     }
 }
@@ -707,6 +716,7 @@ impl Tomlable for SyzygyState {
             relyng_lights: relyng_lights,
             mezure_columns: mezure_columns,
             mezure_lights: [true; 6],
+            mezure_satisfied: [false; 6],
             mezure_ice_grid: mezure_ice_grid,
             mezure_laser_grid: SyzygyState::mezure_initial_laser_grid(),
             mezure_pipe_grid: mezure_pipe_grid,

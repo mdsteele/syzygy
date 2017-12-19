@@ -172,6 +172,9 @@ impl Element<Game, PuzzleCmd> for View {
                 SyzygyStage::Mezure => self.mezure.draw(state, &mut canvas),
             }
         }
+        if state.is_solved() && !self.should_reveal {
+            self.mezure.draw_final_answer(canvas);
+        }
         self.core.draw_front_layer(canvas, state);
     }
 
@@ -204,7 +207,7 @@ impl Element<Game, PuzzleCmd> for View {
             action.merge(subaction.but_no_value());
         }
         if self.should_reveal && self.reveal_amount >= MAX_REVEAL &&
-            !action.should_stop() && !state.is_solved()
+            !action.should_stop()
         {
             match self.stage {
                 SyzygyStage::Yttris => {
@@ -304,8 +307,12 @@ impl Element<Game, PuzzleCmd> for View {
                 SyzygyStage::Mezure => {
                     let mut subaction = self.mezure.handle_event(event, state);
                     if let Some(cmd) = subaction.take_value() {
-                        // TODO: detect when solved
-                        self.core.push_undo(UndoRedo::Mezure(cmd));
+                        if state.is_solved() {
+                            self.mezure.refresh(state);
+                            self.core.begin_outro_scene();
+                        } else {
+                            self.core.push_undo(UndoRedo::Mezure(cmd));
+                        }
                     }
                     action.merge(subaction.but_no_value());
                 }
@@ -459,6 +466,7 @@ impl PuzzleView for View {
                 self.core.begin_extra_scene(scenes::POST_RELYNG_SCENE);
             }
             SyzygyStage::Mezure => {
+                self.mezure.refresh(state);
                 self.core.begin_outro_scene();
             }
         }

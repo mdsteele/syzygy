@@ -22,7 +22,6 @@ use sdl2::render::Renderer;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io;
-use std::mem;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 
@@ -57,10 +56,6 @@ impl<'a> Resources<'a> {
     pub fn get_sprites(&mut self, name: &str) -> Vec<Sprite> {
         self.cache.get_sprites(self.renderer, name)
     }
-}
-
-impl<'a> Drop for Resources<'a> {
-    fn drop(&mut self) { self.cache.scrub_unused() }
 }
 
 // ========================================================================= //
@@ -128,20 +123,6 @@ impl ResourceCache {
             ahi.iter().map(|image| Sprite::new(renderer, image)).collect();
         self.sprites.insert(name.to_string(), vec.clone());
         vec
-    }
-
-    /// Removes entries from the cache that are not currently used outside of
-    /// the cache itself.
-    fn scrub_unused(&mut self) {
-        let fonts = mem::replace(&mut self.fonts, HashMap::new());
-        for (name, font) in fonts.into_iter() {
-            if let Err(font) = Rc::try_unwrap(font) {
-                self.fonts.insert(name, font);
-            } else if cfg!(debug_assertions) {
-                println!("Scrubbing unused font: {}", name);
-            }
-        }
-        // TODO: Scrub unused sprites.
     }
 }
 

@@ -73,7 +73,6 @@ impl Element<Game, PuzzleCmd> for View {
                             self.core.begin_outro_scene();
                         } else {
                             action.also_play_sound(Sound::mid_puzzle_chime());
-                            // TODO animate grid changes
                         }
                     }
                 }

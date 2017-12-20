@@ -25,6 +25,8 @@ use gui::{Resources, Sound};
 const MEZURE: i32 = 0;
 const UGRENT: i32 = 1;
 
+const WEST_DOOR_UPPER: i32 = -4;
+const WEST_DOOR_LOWER: i32 = -3;
 const EAST_DOOR_UPPER: i32 = -2;
 const EAST_DOOR_LOWER: i32 = -1;
 
@@ -35,21 +37,39 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
             Ast::SetBg("disconnected"),
-            // TODO: west door
+            Ast::Place(WEST_DOOR_UPPER, "tiles/caution_walls", 5, (64, 288)),
+            Ast::Place(WEST_DOOR_LOWER, "tiles/caution_walls", 4, (64, 304)),
             Ast::Place(EAST_DOOR_UPPER, "tiles/caution_walls", 5, (472, 288)),
             Ast::Place(EAST_DOOR_LOWER, "tiles/caution_walls", 4, (472, 304)),
+            Ast::Wait(0.75),
             Ast::Par(vec![
                 Ast::Seq(vec![
+                    Ast::Wait(0.1),
                     Ast::Place(UGRENT, "chars/ugrent", 0, (-16, 304)),
-                    Ast::Slide(UGRENT, (346, 304), false, true, 1.0),
+                    Ast::Slide(UGRENT, (346, 304), false, true, 1.5),
                     Ast::Sound(Sound::talk_hi()),
                     Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NW,
                               "All right, first task for you:"),
                 ]),
                 Ast::Seq(vec![
-                    Ast::Wait(0.75),
+                    Ast::Wait(0.85),
                     Ast::Place(MEZURE, "chars/mezure", 0, (-16, 304)),
-                    Ast::Slide(MEZURE, (302, 304), false, true, 1.0),
+                    Ast::Slide(MEZURE, (302, 304), false, true, 1.5),
+                ]),
+                Ast::Seq(vec![
+                    Ast::Par(vec![
+                        Ast::Slide(WEST_DOOR_UPPER, (64, 272),
+                                   false, false, 0.25),
+                        Ast::Slide(WEST_DOOR_LOWER, (64, 320),
+                                   false, false, 0.25),
+                    ]),
+                    Ast::Wait(1.0),
+                    Ast::Par(vec![
+                        Ast::Slide(WEST_DOOR_UPPER, (64, 288),
+                                   false, false, 0.25),
+                        Ast::Slide(WEST_DOOR_LOWER, (64, 304),
+                                   false, false, 0.25),
+                    ]),
                 ]),
             ]),
         ]),
@@ -77,7 +97,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             ]),
         ]),
         Ast::Seq(vec![
-            Ast::Slide(UGRENT, (354, 304), true, true, 0.75),
+            Ast::Slide(UGRENT, (354, 304), true, true, 0.85),
             Ast::Sound(Sound::talk_lo()),
             Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NW,
                       "I'd better show you.  Follow me."),
@@ -123,7 +143,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
                        task is to fix this stupid door."),
         ]),
         Ast::Seq(vec![
-            Ast::Slide(UGRENT, (196, 304), true, true, 0.75),
+            Ast::Slide(UGRENT, (196, 304), true, true, 0.85),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
                       "I'll check in on you later.\n\
@@ -131,13 +151,27 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
                        perimeter and make sure there\n\
                        hasn't been a security breach."),
         ]),
-        Ast::Seq(vec![
-            Ast::Slide(UGRENT, (-16, 304), true, false, 0.5),
-            Ast::Remove(UGRENT),
-            Ast::Wait(1.0),
-            Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
-                      "Well."),
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::Slide(UGRENT, (-16, 304), true, false, 0.75),
+                Ast::Remove(UGRENT),
+                Ast::Wait(1.0),
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                          "Well."),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.2),
+                Ast::Par(vec![
+                    Ast::Slide(WEST_DOOR_UPPER, (64, 272), false, false, 0.25),
+                    Ast::Slide(WEST_DOOR_LOWER, (64, 320), false, false, 0.25),
+                ]),
+                Ast::Wait(0.4),
+                Ast::Par(vec![
+                    Ast::Slide(WEST_DOOR_UPPER, (64, 288), false, false, 0.25),
+                    Ast::Slide(WEST_DOOR_LOWER, (64, 304), false, false, 0.25),
+                ]),
+            ]),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),

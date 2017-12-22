@@ -17,23 +17,41 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod coords;
-mod scenes;
-mod view;
-
-use gui::Window;
-use modes::{Mode, run_puzzle};
-use save::Game;
-use self::view::View;
+use gui::Point;
+use save::pyramid::Coords;
 
 // ========================================================================= //
 
-pub fn run_system_failure(window: &mut Window, game: &mut Game) -> Mode {
-    let view = {
-        let visible_rect = window.visible_rect();
-        View::new(&mut window.resources(), visible_rect, game)
-    };
-    run_puzzle(window, game, view)
+pub const PYRAMID_TILE_SIZE: i32 = 32;
+
+const PYRAMID_BOTTOM_ROW_LEFT: i32 = 160;
+const PYRAMID_BOTTOM_ROW_TOP: i32 = 288;
+const PYRAMID_BOTTOM: i32 = PYRAMID_BOTTOM_ROW_TOP + PYRAMID_TILE_SIZE;
+
+pub fn coords_to_pt(coords: Coords) -> Point {
+    let left = PYRAMID_BOTTOM_ROW_LEFT + PYRAMID_TILE_SIZE * coords.col() +
+        (PYRAMID_TILE_SIZE / 2) * coords.row();
+    let top = PYRAMID_BOTTOM_ROW_TOP - PYRAMID_TILE_SIZE * coords.row();
+    Point::new(left, top)
+}
+
+pub fn pt_to_coords(pt: Point) -> Option<Coords> {
+    if pt.y() > PYRAMID_BOTTOM {
+        return None;
+    }
+    let row = (PYRAMID_BOTTOM - pt.y()) / PYRAMID_TILE_SIZE;
+    if row >= 8 {
+        return None;
+    }
+    let left = PYRAMID_BOTTOM_ROW_LEFT + (PYRAMID_TILE_SIZE / 2) * row;
+    if pt.x() < left {
+        return None;
+    }
+    let col = (pt.x() - left) / PYRAMID_TILE_SIZE;
+    if col >= 8 - row {
+        return None;
+    }
+    Some(Coords::new(row, col))
 }
 
 // ========================================================================= //

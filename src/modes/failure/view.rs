@@ -26,9 +26,9 @@ use std::time;
 use elements::{PuzzleCmd, PuzzleCore, PuzzleView};
 use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
           Resources, Sprite};
-use modes::SOLVED_INFO_TEXT;
 use save::{Access, FailureState, Game, Location, PuzzleState};
 use save::pyramid::{Board, Coords, MAX_REMOVALS, Move, Team};
+use super::coords::{PYRAMID_TILE_SIZE, coords_to_pt, pt_to_coords};
 use super::scenes;
 
 // ========================================================================= //
@@ -100,6 +100,9 @@ impl View {
         };
         core.add_extra_scene(scenes::compile_middle_scene(resources));
         core.add_extra_scene(scenes::compile_lose_game_scene(resources));
+        for index in 0..scenes::num_hints() {
+            core.add_extra_scene(scenes::compile_hint_scene(resources, index));
+        }
         if !state.is_solved() {
             if state.mid_scene_is_done() &&
                 state.access() != Access::BeginReplay
@@ -195,6 +198,10 @@ impl Element<Game, PuzzleCmd> for View {
                     Some(&PyramidCmd::Lose) => {
                         self.core.begin_extra_scene(scenes::LOSE_GAME_SCENE);
                     }
+                    Some(&PyramidCmd::PasswordHint(coords)) => {
+                        self.core.begin_extra_scene(
+                            scenes::hint_scene_for_coords(coords));
+                    }
                     None => {}
                 }
                 action.merge(subaction.but_no_value());
@@ -207,7 +214,7 @@ impl Element<Game, PuzzleCmd> for View {
 impl PuzzleView for View {
     fn info_text(&self, game: &Game) -> &'static str {
         if game.system_failure.is_solved() {
-            SOLVED_INFO_TEXT
+            INFO_BOX_TEXT_3
         } else if game.system_failure.mid_scene_is_done() {
             INFO_BOX_TEXT_2
         } else {
@@ -752,14 +759,10 @@ enum PyramidCmd {
     Remove(Vec<Coords>, Vec<Coords>),
     Win,
     Lose,
+    PasswordHint(Coords),
 }
 
 // ========================================================================= //
-
-const PYRAMID_TILE_SIZE: i32 = 32;
-const PYRAMID_BOTTOM_ROW_LEFT: i32 = 160;
-const PYRAMID_BOTTOM_ROW_TOP: i32 = 288;
-const PYRAMID_BOTTOM: i32 = PYRAMID_BOTTOM_ROW_TOP + PYRAMID_TILE_SIZE;
 
 struct PyramidView {
     sprites: Vec<Sprite>,
@@ -862,6 +865,10 @@ impl Element<FailureState, PyramidCmd> for PyramidView {
             }
             &Event::MouseDown(pt) => {
                 if let Some(coords) = pt_to_coords(pt) {
+                    if state.is_solved() {
+                        let cmd = PyramidCmd::PasswordHint(coords);
+                        return Action::redraw().and_return(cmd);
+                    }
                     match self.step {
                         PyramidStep::YouReady { ref possible } => {
                             if possible.contains(&coords) {
@@ -917,32 +924,6 @@ fn interpolate(from: Point, to: Point, anim: i32, max_anim: i32) -> Point {
     Point::new(x, y)
 }
 
-fn coords_to_pt(coords: Coords) -> Point {
-    let left = PYRAMID_BOTTOM_ROW_LEFT + PYRAMID_TILE_SIZE * coords.col() +
-        (PYRAMID_TILE_SIZE / 2) * coords.row();
-    let top = PYRAMID_BOTTOM_ROW_TOP - PYRAMID_TILE_SIZE * coords.row();
-    Point::new(left, top)
-}
-
-fn pt_to_coords(pt: Point) -> Option<Coords> {
-    if pt.y() > PYRAMID_BOTTOM {
-        return None;
-    }
-    let row = (PYRAMID_BOTTOM - pt.y()) / PYRAMID_TILE_SIZE;
-    if row >= 8 {
-        return None;
-    }
-    let left = PYRAMID_BOTTOM_ROW_LEFT + (PYRAMID_TILE_SIZE / 2) * row;
-    if pt.x() < left {
-        return None;
-    }
-    let col = (pt.x() - left) / PYRAMID_TILE_SIZE;
-    if col >= 8 - row {
-        return None;
-    }
-    Some(Coords::new(row, col))
-}
-
 // ========================================================================= //
 
 const INFO_BOX_TEXT_1: &str = "\
@@ -963,6 +944,9 @@ may remove two of your pieces from the board and put them
 back into your supply.
 
 $M{Tap}{Click} on a character in the scene to hear their words of wisdom.";
+
+const INFO_BOX_TEXT_3: &str = "\
+$M{Tap}{Click} on a tile to get a password hint.";
 
 // ========================================================================= //
 

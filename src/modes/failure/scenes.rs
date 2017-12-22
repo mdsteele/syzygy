@@ -19,11 +19,15 @@
 
 use elements::{Ast, Scene, TalkPos, TalkStyle};
 use gui::{Resources, Sound};
+use save::pyramid::Coords;
+use super::coords::{PYRAMID_TILE_SIZE, coords_to_pt};
 
 // ========================================================================= //
 
 pub const MIDDLE_SCENE: i32 = 1000;
 pub const LOSE_GAME_SCENE: i32 = 1001;
+const HINTS_START: i32 = 2000;
+const HILIGHTS_START: i32 = -1000;
 
 const ARGONY: i32 = 5;
 const BRIDGE_START: i32 = -99;
@@ -536,6 +540,89 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
         ]),
     ];
     Ast::compile_scene(resources, ast)
+}
+
+// ========================================================================= //
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+const PASSWORD_HINTS: &[(&[usize], &str)] = &[
+    (&[4, 0, 1], "Three are divided\ninto unequal angles."),
+    (&[9, 2, 5], "Three are split\ninto equal memories."),
+    (&[7, 8], "Two are broken\nup in plane sight."),
+    (&[6, 3, 10], "Three have\nmixed the point."),
+    (&[11, 12, 13, 14],
+     "Four cross forwards and back,\nscrambled and jumbled."),
+    (&[16, 15, 17], "Three are\non the level."),
+    (&[19, 18, 20], "Three are\nsimple factors."),
+    (&[22, 21, 23, 24], "Four are skating\non thin ice."),
+    (&[26, 25, 27], "Three are rows\nwithin columns."),
+    (&[29, 28, 30], "Three have basic\nconnections."),
+    (&[32, 31, 33], "Three are full of\nlight and magic."),
+    (&[34, 35], "Two have\nthe blues."),
+];
+
+pub fn num_hints() -> usize { PASSWORD_HINTS.len() }
+
+fn coords_to_actor_pos(coords: Coords) -> (i32, i32) {
+    let pt = coords_to_pt(coords);
+    (pt.x() + PYRAMID_TILE_SIZE / 2, pt.y() + PYRAMID_TILE_SIZE)
+}
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_hint_scene(resources: &mut Resources, index: usize)
+                          -> (i32, Scene) {
+    let hint = PASSWORD_HINTS[index].1;
+    let ast = vec![
+        Ast::Seq(PASSWORD_HINTS[index].0.iter().enumerate().map(|(i, &j)| {
+            let slot = HILIGHTS_START + i as i32;
+            let coords = Coords::from_index(j).unwrap();
+            Ast::Place(slot, "failure/chips", 3, coords_to_actor_pos(coords))
+        }).collect()),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(HILIGHTS_START, TalkStyle::Good, TalkPos::Auto, hint),
+        ]),
+        Ast::Seq((0..PASSWORD_HINTS[index].0.len()).map(|i| {
+            Ast::Remove(HILIGHTS_START + i as i32)
+        }).collect()),
+    ];
+    (HINTS_START + index as i32, Ast::compile_scene(resources, ast))
+}
+
+pub fn hint_scene_for_coords(coords: Coords) -> i32 {
+    for (number, &(indices, _)) in PASSWORD_HINTS.iter().enumerate() {
+        for &index in indices.iter() {
+            if Coords::from_index(index) == Some(coords) {
+                return HINTS_START + number as i32;
+            }
+        }
+    }
+    return HINTS_START;
+}
+
+// ========================================================================= //
+
+#[cfg(test)]
+mod tests {
+    use std::collections::HashSet;
+
+    use super::PASSWORD_HINTS;
+
+    #[test]
+    fn password_hint_indices() {
+        let mut all_indices: HashSet<usize> = HashSet::new();
+        for &(indices, _) in PASSWORD_HINTS.iter() {
+            for &index in indices.iter() {
+                assert!(!all_indices.contains(&index),
+                        "Repeated index: {}",
+                        index);
+                all_indices.insert(index);
+            }
+        }
+        for index in 0..36 {
+            assert!(all_indices.contains(&index), "Missing index: {}", index);
+        }
+    }
 }
 
 // ========================================================================= //

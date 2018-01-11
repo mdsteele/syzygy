@@ -143,12 +143,12 @@ pub fn compile_mezure_midscene(resources: &mut Resources) -> (i32, Scene) {
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
                       "But...none of\n\
-                       these words fit!")
+                       these words fit!"),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_lo()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
-                      "This is really asinine.")
+                      "This is asinine."),
         ]),
     ];
     (MEZURE, Ast::compile_scene(resources, ast))

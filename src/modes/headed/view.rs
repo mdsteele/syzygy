@@ -21,27 +21,34 @@ use elements::{CrosswordView, PuzzleCmd, PuzzleCore, PuzzleView};
 use gui::{Action, Canvas, Element, Event, Rect, Resources};
 use modes::SOLVED_INFO_TEXT;
 use save::{Game, HeadedState, PuzzleState};
-use super::scenes::{compile_intro_scene, compile_outro_scene};
+use super::scenes;
 
 // ========================================================================= //
 
 pub struct View {
     core: PuzzleCore<(i32, i32, char, char)>,
     crossword: CrosswordView,
+    crossword_visible: bool,
 }
 
 impl View {
     pub fn new(resources: &mut Resources, visible: Rect, state: &HeadedState)
                -> View {
-        let intro = compile_intro_scene(resources);
-        let outro = compile_outro_scene(resources);
-        let core = PuzzleCore::new(resources, visible, state, intro, outro);
+        let mut core = {
+            let intro = scenes::compile_intro_scene(resources);
+            let outro = scenes::compile_outro_scene(resources);
+            PuzzleCore::new(resources, visible, state, intro, outro)
+        };
+        core.add_extra_scene(scenes::compile_elinsa_midscene(resources));
+        core.add_extra_scene(scenes::compile_ugrent_midscene(resources));
+        core.add_extra_scene(scenes::compile_yttris_midscene(resources));
         View {
             core: core,
             crossword: CrosswordView::new(resources,
                                           (427, 76),
                                           OFFSETS_CLUES,
                                           (416, 310)),
+            crossword_visible: false,
         }
     }
 }
@@ -50,7 +57,9 @@ impl Element<Game, PuzzleCmd> for View {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
         let state = &game.level_headed;
         self.core.draw_back_layer(canvas);
-        self.crossword.draw(state.crossword(), canvas);
+        if self.crossword_visible {
+            self.crossword.draw(state.crossword(), canvas);
+        }
         self.core.draw_middle_layer(canvas);
         self.core.draw_front_layer(canvas, state);
     }
@@ -59,7 +68,7 @@ impl Element<Game, PuzzleCmd> for View {
                     -> Action<PuzzleCmd> {
         let state = &mut game.level_headed;
         let mut action = self.core.handle_event(event, state);
-        if !action.should_stop() &&
+        if !action.should_stop() && self.crossword_visible &&
             (event == &Event::ClockTick || !state.is_solved())
         {
             let subaction = self.crossword
@@ -76,6 +85,9 @@ impl Element<Game, PuzzleCmd> for View {
                 }
             }
             action.merge(subaction.but_no_value());
+        }
+        if !action.should_stop() {
+            self.core.begin_character_scene_on_click(event);
         }
         action
     }
@@ -121,6 +133,7 @@ impl PuzzleView for View {
             match entry {
                 (0, 0) => self.crossword.animate_center_word(),
                 (0, 1) => self.crossword.set_center_word_hilighted(true),
+                (1, visible) => self.crossword_visible = visible != 0,
                 _ => {}
             }
         }

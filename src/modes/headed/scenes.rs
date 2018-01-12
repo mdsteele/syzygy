@@ -23,6 +23,7 @@ use gui::{Resources, Sound};
 // ========================================================================= //
 
 const ELINSA: i32 = 1;
+const MEZURE: i32 = 4;
 const UGRENT: i32 = 2;
 const YTTRIS: i32 = 3;
 
@@ -70,7 +71,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
                       "Unless you're here\n\
                        to repair the thermal\n\
-                       regulators, too."),
+                       regulator, too."),
         ]),
         Ast::Seq(vec![
             Ast::Slide(YTTRIS, (248, 304), true, true, 0.3),
@@ -83,9 +84,9 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Sound(Sound::talk_lo()),
             Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
                       "...I'm here to repair\n\
-                       the thermal regulators,\n\
+                       the thermal regulator,\n\
                        Yttris.  Our $ilittle disaster$r\n\
-                       knocked them out."),
+                       knocked it out."),
         ]),
         Ast::Par(vec![
             Ast::Seq(vec![
@@ -131,7 +132,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
                       "Unless you're here\n\
                        to inspect the thermal\n\
-                       regulators, too."),
+                       regulator, too."),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
@@ -149,16 +150,16 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
                       "...I'm here to inspect\n\
-                       the thermal regulators,\n\
-                       Elinsa.  To see if they\n\
-                       were sabotaged."),
+                       the thermal regulator,\n\
+                       Elinsa.  To see if it\n\
+                       was sabotaged."),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_annoyed_hi()),
             Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
-                      "Whatever, they're $ibroken$r.\n\
-                       I'm fixing them.  You don't\n\
-                       need to ``inspect'' them."),
+                      "Whatever, it's $ibroken$r.\n\
+                       I'm fixing it.  You don't\n\
+                       need to ``inspect'' it."),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_lo()),
@@ -234,13 +235,13 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         ]),
         Ast::Seq(vec![
             Ast::Wait(1.0),
-            Ast::Sound(Sound::talk_lo()),
+            Ast::Sound(Sound::talk_hi()),
             Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
                       "...Is $iYttris$r  telling us\n\
                        not to get worked up?"),
         ]),
         Ast::Seq(vec![
-            Ast::Sound(Sound::talk_hi()),
+            Ast::Sound(Sound::talk_lo()),
             Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
                       "...I guess that means we\n\
                        went a little too far."),
@@ -250,7 +251,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NE,
                       "If you two are just going\n\
                        to argue, then $iI'll$r  fix the\n\
-                       thermal whatchamacallits."),
+                       thermal whatchamacallit."),
         ]),
         Ast::Seq(vec![
             Ast::Wait(0.25),
@@ -326,10 +327,129 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
             Ast::Queue(0, 0), // animate crossword center word
             Ast::Wait(1.0),
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NE, "Looks good!"),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NE,
+                      "There!  Now I'd call that a\n\
+                       $ithorougly-repaired$r\n\
+                       thermal thingamawhatsit."),
         ]),
         Ast::Seq(vec![
-            Ast::Queue(0, 1), // hilight crossword center word
+            Ast::Slide(YTTRIS, (240, 304), true, false, 0.3),
+            Ast::Slide(YTTRIS, (208, 272), false, false, 0.3),
+            Ast::Slide(YTTRIS, (200, 272), false, true, 0.3),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NE,
+                      "Toodles!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(YTTRIS, (162, 240), 0.65),
+            Ast::Slide(YTTRIS, (144, 240), false, false, 0.15),
+            Ast::Slide(YTTRIS, (112, 208), false, false, 0.3),
+            Ast::Slide(YTTRIS, (96, 208), false, false, 0.1),
+            Ast::Slide(YTTRIS, (80, 192), false, false, 0.1),
+            Ast::Slide(YTTRIS, (-16, 192), false, false, 0.5),
+            Ast::Remove(YTTRIS),
+            Ast::Wait(1.0),
+            Ast::Slide(UGRENT, (80, 192), true, false, 0.3),
+            Ast::Slide(UGRENT, (96, 208), false, false, 0.15),
+            Ast::Slide(UGRENT, (106, 208), false, true, 0.3),
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                      "$iSigh$r...I suppose\n\
+                       Yttris was right."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                      "I offer my apologies\n\
+                       for losing my temper."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
+                      "Aw, don't worry about it.\n\
+                       And me too, I guess."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
+                      "I guess getting into a\n\
+                       fight wasn't the right\n\
+                       way to go, was it?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Place(MEZURE, "chars/mezure", 0, (-16, 192)),
+            Ast::Slide(MEZURE, (72, 192), false, true, 0.75),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "Well, this looks like\n\
+                       a dead end, so it\n\
+                       probably wasn't."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "Unless you're here\n\
+                       to check out...whatever\n\
+                       that thing is?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                      "Thermal regulator.\n\
+                       And yes, we were."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "Oh.  I guess you\n\
+                       fixed it together?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
+                      "Sorta?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "That's great!  Thanks\n\
+                       for being a team.  Keep\n\
+                       up the great work!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(MEZURE, (-16, 192), true, false, 0.75),
+            Ast::Remove(MEZURE),
+            Ast::Wait(1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
+                      "That kid sure gets on\n\
+                       my nerves sometimes."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                      "Another thing we have\n\
+                       in common, I suppose."),
+        ]),
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::Slide(UGRENT, (96, 208), true, false, 0.3),
+                Ast::Slide(UGRENT, (80, 192), false, false, 0.15),
+                Ast::Slide(UGRENT, (-16, 192), false, false, 0.5),
+                Ast::Remove(UGRENT),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.25),
+                Ast::Slide(ELINSA, (144, 240), true, false, 0.3),
+                Ast::Slide(ELINSA, (112, 208), false, false, 0.3),
+                Ast::Slide(ELINSA, (96, 208), false, false, 0.1),
+                Ast::Slide(ELINSA, (80, 192), false, false, 0.15),
+                Ast::Slide(ELINSA, (-16, 192), false, false, 0.5),
+                Ast::Remove(ELINSA),
+                Ast::Wait(1.0),
+                Ast::Queue(0, 1), // hilight crossword center word
+            ]),
         ]),
     ];
     Ast::compile_scene(resources, ast)

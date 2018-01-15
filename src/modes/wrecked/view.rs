@@ -32,7 +32,7 @@ use super::scenes;
 pub struct View {
     core: PuzzleCore<(Direction, i32, i32)>,
     grid: WreckedGrid,
-    solution: SolutionDisplay,
+    display: WreckedDisplay,
 }
 
 impl View {
@@ -47,8 +47,8 @@ impl View {
         core.add_extra_scene(scenes::compile_mezure_midscene(resources));
         View {
             core: core,
-            grid: WreckedGrid::new(resources, 84, 132),
-            solution: SolutionDisplay::new(resources),
+            grid: WreckedGrid::new(resources),
+            display: WreckedDisplay::new(resources),
         }
     }
 }
@@ -57,7 +57,7 @@ impl Element<Game, PuzzleCmd> for View {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
         let state = &game.wrecked_angle;
         self.core.draw_back_layer(canvas);
-        self.solution.draw(state, canvas);
+        self.display.draw(state, canvas);
         self.grid.draw(state, canvas);
         self.core.draw_middle_layer(canvas);
         self.core.draw_front_layer(canvas, state);
@@ -82,7 +82,7 @@ impl Element<Game, PuzzleCmd> for View {
             action.merge(subaction.but_no_value());
         }
         if !action.should_stop() {
-            action.merge(self.solution.handle_event(event, state));
+            action.merge(self.display.handle_event(event, state));
         }
         if !action.should_stop() {
             self.core.begin_character_scene_on_click(event);
@@ -125,7 +125,7 @@ impl PuzzleView for View {
     fn drain_queue(&mut self) {
         for (kind, value) in self.core.drain_queue() {
             if kind == 0 {
-                self.solution.set_index(value);
+                self.display.set_index(value);
             } else if kind == 1 {
                 if value >= 0 && (value as usize) < LETTERS.len() {
                     let (col, row, chr) = LETTERS[value as usize];
@@ -221,9 +221,10 @@ impl Drag {
 
 // ========================================================================= //
 
-struct WreckedGrid {
-    left: i32,
-    top: i32,
+const GRID_LEFT: i32 = 84;
+const GRID_TOP: i32 = 132;
+
+pub struct WreckedGrid {
     tile_sprites: Vec<Sprite>,
     hole_sprites: Vec<Sprite>,
     drag: Option<Drag>,
@@ -232,10 +233,8 @@ struct WreckedGrid {
 }
 
 impl WreckedGrid {
-    fn new(resources: &mut Resources, left: i32, top: i32) -> WreckedGrid {
+    pub fn new(resources: &mut Resources) -> WreckedGrid {
         WreckedGrid {
-            left: left,
-            top: top,
             tile_sprites: resources.get_sprites("wrecked/tiles"),
             hole_sprites: resources.get_sprites("wrecked/holes"),
             drag: None,
@@ -243,19 +242,15 @@ impl WreckedGrid {
             letters: HashMap::new(),
         }
     }
-
-    fn rect(&self) -> Rect {
-        Rect::new(self.left, self.top, 9 * TILE_USIZE, 7 * TILE_USIZE)
-    }
 }
 
 impl Element<WreckedState, (Direction, i32, i32)> for WreckedGrid {
     fn draw(&self, state: &WreckedState, canvas: &mut Canvas) {
         for row in 0..7 {
-            let top = self.top + row * TILE_SIZE;
+            let top = GRID_TOP + row * TILE_SIZE;
             for col in 0..9 {
                 if state.tile_at(col, row).is_none() {
-                    let left = self.left + col * TILE_SIZE;
+                    let left = GRID_LEFT + col * TILE_SIZE;
                     let rect = Rect::new(left, top, TILE_USIZE, TILE_USIZE);
                     canvas.fill_rect((15, 20, 15), rect);
                     canvas.draw_sprite(&self.hole_sprites[0], rect.top_left());
@@ -263,9 +258,9 @@ impl Element<WreckedState, (Direction, i32, i32)> for WreckedGrid {
             }
         }
         for row in 0..7 {
-            let top = self.top + row * TILE_SIZE;
+            let top = GRID_TOP + row * TILE_SIZE;
             for col in 0..9 {
-                let left = self.left + col * TILE_SIZE;
+                let left = GRID_LEFT + col * TILE_SIZE;
                 let mut pt = Point::new(left, top);
                 if let Some(ref drag) = self.drag {
                     pt = pt + drag.offset_for(col, row);
@@ -287,7 +282,8 @@ impl Element<WreckedState, (Direction, i32, i32)> for WreckedGrid {
 
     fn handle_event(&mut self, event: &Event, state: &mut WreckedState)
                     -> Action<(Direction, i32, i32)> {
-        let rect = self.rect();
+        let rect =
+            Rect::new(GRID_LEFT, GRID_TOP, 9 * TILE_USIZE, 7 * TILE_USIZE);
         match event {
             &Event::MouseDown(pt) if !state.is_solved() => {
                 if rect.contains(pt) {
@@ -334,25 +330,29 @@ impl Element<WreckedState, (Direction, i32, i32)> for WreckedGrid {
 
 // ========================================================================= //
 
-const SOLUTION_LEFT: i32 = 452;
-const SOLUTION_TOP: i32 = 211;
+const DISPLAY_LEFT: i32 = 452;
+const DISPLAY_TOP: i32 = 211;
 
-struct SolutionDisplay {
+pub struct WreckedDisplay {
     font: Rc<Font>,
     sprites: Vec<Sprite>,
     index: usize,
     anim: usize,
+    panic: bool,
 }
 
-impl SolutionDisplay {
-    fn new(resources: &mut Resources) -> SolutionDisplay {
-        SolutionDisplay {
+impl WreckedDisplay {
+    pub fn new(resources: &mut Resources) -> WreckedDisplay {
+        WreckedDisplay {
             font: resources.get_font("roman"),
             sprites: resources.get_sprites("wrecked/solution"),
             index: 0,
             anim: 0,
+            panic: false,
         }
     }
+
+    pub fn set_panic(&mut self, panic: bool) { self.panic = panic; }
 
     fn set_index(&mut self, index: i32) {
         if index >= 0 {
@@ -365,7 +365,7 @@ impl SolutionDisplay {
     }
 }
 
-impl Element<WreckedState, PuzzleCmd> for SolutionDisplay {
+impl Element<WreckedState, PuzzleCmd> for WreckedDisplay {
     fn draw(&self, state: &WreckedState, canvas: &mut Canvas) {
         let index = if self.anim > 0 {
             ((self.anim / 2) % 3) + 3
@@ -373,22 +373,22 @@ impl Element<WreckedState, PuzzleCmd> for SolutionDisplay {
             self.index
         };
         canvas.draw_sprite(&self.sprites[index],
-                           Point::new(SOLUTION_LEFT, SOLUTION_TOP));
+                           Point::new(DISPLAY_LEFT, DISPLAY_TOP));
         if index == 0 {
-            let (text1, text2) = if state.is_solved() {
+            let (text1, text2) = if self.panic {
+                ("PLEASE", "PANIC")
+            } else if state.is_solved() {
                 ("Fixed,", "sorta.")
             } else {
                 ("Status:", "BORKEN")
             };
             canvas.draw_text(&self.font,
                              Align::Center,
-                             Point::new(SOLUTION_LEFT + 28,
-                                        SOLUTION_TOP + 18),
+                             Point::new(DISPLAY_LEFT + 28, DISPLAY_TOP + 18),
                              text1);
             canvas.draw_text(&self.font,
                              Align::Center,
-                             Point::new(SOLUTION_LEFT + 28,
-                                        SOLUTION_TOP + 32),
+                             Point::new(DISPLAY_LEFT + 28, DISPLAY_TOP + 32),
                              text2);
         }
     }

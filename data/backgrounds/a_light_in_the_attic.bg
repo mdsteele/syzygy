@@ -2,25 +2,27 @@
 >girders
 >blue_ells
 >green_pipes
+>gray_blocks
+>miniblocks
 
-          CB        CB  CB              CB      AB          CB
-          CB        CB  CB              CB      AB  AB      CB
-          CB        CB  CB              CB      AB  AB      CB
-CACACACACACE        CB  CB        CCCACACE  AB  AB  AB  AB  CB      CCCA
-                    CFCACICACACACACE        ACAAACAAACAAAC  CFCACACACE
-                                            AB  AB  AB  AB
-                                    AAAAACAAACAAACAAACAAACAAACAA
-CACACACACGCACACDBFBCBCBCBG              AB  AB  AB  AB  AB  AB
-CACACACACE    CBBDBABABABBAAAAAAAAAAAAAAACAAACAAACAAACAAACAAACAAAAAAAAAA
-        CCCACACEBIBMBABLBH              AB  AB  AB  AB  AB  AB
-CACACACACE        BIBEBH              AAACAAACAAACAAACAAACAAACAAAAAAAAAA
-                    AB                  AB  AB  AB  AB  AB  AB
-                    AB            AAAAAAACAAACAAACAAACAAACAAAC
-                    AB                      AB  AB  AB  AB
-                    AB                      ACAAACAAACAAAC
-                    AB                      AB  AB  AB  AB
-                    AB                      AB      AB  AB
-                    AB                      AB      AB  AB
+          CB        CB  CB            CB      AB            CB
+          CB        CB  CB            CB      AB  AB        CB
+          CB        CB  CB            CB      AB  AB        CBEJ
+CACACACACACE        CB  CB      CCCACACE  AB  AB  AB  AB  EGDEDFEH  CCCA
+                    CFCACICACACACE        ACAAACAAACAAAC  EGDGDHCACACE
+                                          AB  AB  AB  AB    EIEI
+                                  AAAAACAAACAAACAAACAAACAAACAA
+CACACACACGCACACDBFBCBCBCBG            AB  AB  AB  AB  AB  AB
+CACACACACE    CBBDBABABABBAAAAAAAAAAAAACAAACAAACAAACAAACAAACAAAAAAAA
+        CCCACACEBIBMBABLBH            AB  AB  AB  AB  AB  AB
+CACACACACE        BIBEBH            AAACAAACAAACAAACAAACAAACAAAAAAAAAAAA
+                    AB                AB  AB  AB  AB  AB  AB
+                    AB          AAAAAAACAAACAAACAAACAAACAAAC
+                    AB                    AB  AB  AB  AB
+                    AB                    ACAAACAAACAAAC
+                    AB                    AB  AB  AB  AB
+                    AB                    AB      AB  AB
+                    AB                    AB      AB  AB
                     AB              BFBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBC
                     AB  BFBCBCBCBCBCBJBABABABABABABABABABABABABABABABABA
 BCBCBCBCBCBCBCBCBCBCBCBCBJBABABABABABABABABABABABABABABABABABABABABABABA

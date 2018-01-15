@@ -18,17 +18,46 @@
 // +--------------------------------------------------------------------------+
 
 use elements::{Ast, Scene, TalkPos, TalkStyle};
+use elements::cutscene::JumpNode;
 use gui::{Resources, Sound};
 
 // ========================================================================= //
 
-const ARGONY: i32 = 2;
+const ARGONY: i32 = 4;
 const BRIDGE: i32 = -1;
-const ELINSA: i32 = 3;
+const ELEVATOR_LEFT: i32 = 1;
+const ELEVATOR_RIGHT: i32 = 2;
+const ELINSA: i32 = 5;
+const MEZURE: i32 = 3;
 const RELYNG: i32 = -2;
+const SHIP: i32 = 8;
 const SYSTEM: i32 = 0;
-const UGRENT: i32 = 1;
-const YTTRIS: i32 = 4;
+const UGRENT: i32 = 7;
+const YTTRIS: i32 = 6;
+
+const ELEVATOR_INDICES: &[usize] = &[2, 3];
+const RELYNG_INDICES: &[usize] = &[4, 7];
+
+const BOOM_START: i32 = 1000;
+const BOOM_INDICES: &[usize] = &[0, 1, 2, 3, 4];
+const BOOM_POSITIONS: &[(i32, i32)] = &[(290, 228), (250, 208), (318, 188)];
+
+const FIRE_START: i32 = 2000;
+const FIRE_INDICES: [&[usize]; 4] =
+    [&[0, 1, 2, 3], &[1, 2, 3, 0], &[2, 3, 0, 1], &[3, 0, 1, 2]];
+const FIRE_POSITIONS: &[(i32, i32)] = &[
+    (112, 176),
+    (144, 176),
+    (440, 176),
+    (120, 272),
+    (176, 272),
+    (208, 272),
+    (240, 272),
+    (276, 288),
+    (348, 288),
+    (380, 288),
+    (424, 304),
+];
 
 // ========================================================================= //
 
@@ -38,21 +67,87 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::SetBg("space"),
             Ast::Queue(2, 1), // Show large moving starfield
-            Ast::Place(SYSTEM, "chars/invis", 0, (224, 240)),
-            Ast::Wait(1.0), // TODO: Show the ship
+            Ast::Place(SYSTEM, "chars/invis", 0, (224, 320)),
+            Ast::Place(SHIP, "prolog/ship", 0, (288, 216)),
+            // TODO: Show ship thrusters
+            Ast::Wait(1.0),
             Ast::Talk(SYSTEM, TalkStyle::System, TalkPos::NE,
                       "Somewhere in deep space..."),
         ]),
         Ast::Seq(vec![
             Ast::Wait(1.0),
+            Ast::Remove(SHIP),
             Ast::SetBg("prolog_security"),
             Ast::Queue(2, 2), // Show moving stars through windows
             Ast::Queue(1, 1), // Show status indicator
+            // TODO: Show other security station screens
             Ast::Place(SYSTEM, "chars/system", 0, (464, 208)),
             Ast::Place(UGRENT, "chars/ugrent", 0, (224, 240)),
             Ast::Wait(1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                      "Security to Bridge,\n\
+                       any sign of nearby\n\
+                       enemy vessels?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(SYSTEM, TalkStyle::Comm, TalkPos::W,
+                      " For the last time Ugrent, \n \
+                       no, of course there isn't! "),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(SYSTEM, TalkStyle::Comm, TalkPos::W,
+                      "We're noncombatants in the\n\
+                       middle of friendly territory,\n\
+                       not a warship on the front!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                      "Hmph.  Can't be\n\
+                       too careful."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(UGRENT, (252, 240), true, true, 0.3),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                      "System, any sign\n\
+                       of enemy vessels?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::beep()),
+            Ast::Talk(SYSTEM, TalkStyle::System, TalkPos::NW, "No."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                      "Are there any enemy ships\n\
+                       within 20 light years?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::beep()),
+            Ast::Talk(SYSTEM, TalkStyle::System, TalkPos::NW, "No."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(UGRENT, (224, 240), true, true, 0.4),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                      "Well, where $iis$r  the\n\
+                       nearest enemy ship?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::beep()),
+            Ast::Talk(SYSTEM, TalkStyle::System, TalkPos::NW, "No."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Wait(0.5),
             Ast::Sound(Sound::talk_thought()),
-            Ast::Talk(UGRENT, TalkStyle::Thought, TalkPos::NE, "Zzzz..."),
+            Ast::Talk(UGRENT, TalkStyle::Thought, TalkPos::NE,
+                      "Whose idea was it to\n\
+                       program this thing\n\
+                       in Prolog, anyway?"),
         ]),
         Ast::Seq(vec![
             Ast::Wait(1.0),
@@ -61,16 +156,31 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
             Ast::Queue(1, 0), // Hide status indicator
             Ast::SetBg("space"),
             Ast::Queue(2, 1), // Show large moving starfield
+            Ast::Place(SHIP, "prolog/ship", 0, (288, 216)),
             Ast::Wait(0.5),
-            Ast::Sound(Sound::explosion_small()), // TODO: Show ship 'splosion
+            Ast::Sound(Sound::explosion_small()),
             Ast::Queue(2, 0), // Hide moving stars
             Ast::Shake(16),
-            Ast::Wait(0.5),
+            Ast::SetBg("white"),
+            Ast::Wait(0.05),
+            Ast::SetBg("space"),
+            Ast::Par(BOOM_POSITIONS.iter().enumerate().map(|(index, &pos)| {
+                let slot = BOOM_START + index as i32;
+                Ast::Seq(vec![
+                    Ast::Wait(0.1 * index as f64),
+                    Ast::Place(slot, "chars/boom", 0, pos),
+                    Ast::Anim(slot, "chars/boom", BOOM_INDICES, 1),
+                    Ast::Wait(0.2),
+                    Ast::Remove(slot),
+                ])
+            }).collect()),
+            Ast::Wait(1.0),
+            Ast::Remove(SHIP),
             Ast::SetBg("prolog_security"),
             Ast::Queue(1, 2), // Show status indicator
             Ast::Place(SYSTEM, "chars/system", 0, (464, 208)),
             Ast::Place(UGRENT, "chars/ugrent", 0, (224, 240)),
-            Ast::Wait(1.0),
+            Ast::Wait(0.25),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
                       "What in blazes was that!?"),
@@ -112,7 +222,7 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
             Ast::SetBg("prolog_bridge"),
             Ast::Place(SYSTEM, "chars/system", 0, (432, 112)),
             Ast::Seq(FIRE_POSITIONS.iter().enumerate().map(|(index, &pos)| {
-                let slot = FIRE_SLOTS_START + index as i32;
+                let slot = FIRE_START + index as i32;
                 Ast::Seq(vec![
                     Ast::Place(slot, "chars/fire", 0, pos),
                     Ast::Anim(slot, "chars/fire", &FIRE_INDICES[index % 4], 2),
@@ -127,7 +237,7 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Slide(UGRENT, (592, 304), true, false, 0.3),
             Ast::Seq((0..FIRE_POSITIONS.len()).map(|index| {
-                Ast::Remove(FIRE_SLOTS_START + index as i32)
+                Ast::Remove(FIRE_START + index as i32)
             }).collect()),
             Ast::SetBg("prolog_security"),
             Ast::Queue(1, 3), // Show status indicator
@@ -137,7 +247,8 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
             Ast::Wait(0.5),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
-                      "System, get me ship-wide broadcast!"),
+                      "System, get me\n\
+                       ship-wide broadcast!"),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::beep()),
@@ -153,6 +264,7 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
             Ast::Queue(1, 0), // Hide status indicator
             Ast::Remove(UGRENT),
             Ast::SetBg("wrecked_angle"),
+            Ast::Queue(3, 1), // Show wrecked grid
             Ast::Place(BRIDGE, "wrecked/bridge", 0, (432, 320)),
             Ast::Place(SYSTEM, "chars/system", 0, (480, 96)),
             Ast::Place(ELINSA, "chars/elinsa", 0, (348, 304)),
@@ -178,6 +290,7 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Remove(BRIDGE),
             Ast::Remove(ELINSA),
+            Ast::Queue(3, 0), // Hide wrecked grid
             Ast::SetBg("the_y_factor"),
             Ast::Place(SYSTEM, "chars/system", 0, (80, 80)),
             Ast::Place(YTTRIS, "chars/yttris", 0, (488, 128)),
@@ -186,7 +299,7 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
                 Ast::Seq(vec![
                     Ast::Sound(Sound::talk_hi()),
                     Ast::Talk(SYSTEM, TalkStyle::Comm, TalkPos::SE,
-                              "Bridge is down.  Our mission\n\
+                              " Bridge is down.  Our mission \n\
                                may be in jeopardy."),
                 ]),
                 Ast::Seq(vec![
@@ -199,18 +312,25 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
         ]),
         Ast::Seq(vec![
             Ast::Remove(YTTRIS),
-            Ast::SetBg("a_light_in_the_attic"), // TODO
-            Ast::Place(SYSTEM, "chars/system", 0, (496, 272)),
+            Ast::SetBg("a_light_in_the_attic"),
+            Ast::Queue(4, 1), // Show attic grid
+            Ast::Place(SYSTEM, "chars/system", 0, (496, 80)),
             Ast::Place(ARGONY, "chars/argony", 0, (168, 112)),
             Ast::Wait(0.5),
             Ast::Par(vec![
                 Ast::Seq(vec![
                     Ast::Sound(Sound::talk_hi()),
-                    Ast::Talk(SYSTEM, TalkStyle::Comm, TalkPos::NW,
-                              "We need all hands on deck\n\
-                               working on repairs."),
+                    Ast::Talk(SYSTEM, TalkStyle::Comm, TalkPos::SW,
+                              "We need all hands on\n \
+                               deck working on repairs. "),
                 ]),
                 Ast::Seq(vec![
+                    Ast::Wait(0.5),
+                    Ast::Sound(Sound::explosion_small()),
+                    Ast::Shake(10),
+                    Ast::Dark(true),
+                    Ast::Light(ARGONY, true),
+                    Ast::Queue(4, -1), // Unsolve attic grid
                     Ast::Wait(0.75),
                     Ast::Sound(Sound::talk_lo()),
                     Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::SE,
@@ -221,27 +341,29 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
         ]),
         Ast::Seq(vec![
             Ast::Remove(ARGONY),
-            Ast::SetBg("tread_lightly"), // TODO
-            Ast::Place(SYSTEM, "chars/system", 0, (488, 164)),
+            Ast::Dark(false),
+            Ast::Queue(4, 0), // Hide attic grid
+            Ast::SetBg("cross_the_line"),
+            Ast::Place(SYSTEM, "chars/system", 0, (288, 128)),
             Ast::Wait(0.5),
             Ast::Par(vec![
                 Ast::Seq(vec![
                     Ast::Sound(Sound::talk_hi()),
-                    Ast::Talk(SYSTEM, TalkStyle::Comm, TalkPos::NW,
-                              "And we need to figure out\n\
-                               what the heck just happened!"),
+                    Ast::Talk(SYSTEM, TalkStyle::Comm, TalkPos::SW,
+                              "And we need to figure out\n \
+                               what the heck just happened! "),
                 ]),
                 Ast::Seq(vec![
-                    Ast::Place(RELYNG, "chars/relyng", 0, (200, 336)),
-                    Ast::Slide(RELYNG, (200, 316), false, false, 0.75),
+                    Ast::Place(RELYNG, "chars/relyng", 6, (333, 288)),
+                    Ast::Slide(RELYNG, (333, 272), false, false, 0.75),
                     Ast::Wait(0.5),
-                    Ast::Anim(RELYNG, "chars/relyng", RELYNG_INDICES_1, 15),
+                    Ast::Anim(RELYNG, "chars/relyng", RELYNG_INDICES, 15),
                 ]),
             ]),
         ]),
         Ast::Seq(vec![
-            Ast::Anim(RELYNG, "chars/relyng", RELYNG_INDICES_2, 0),
-            Ast::Slide(RELYNG, (200, 336), true, false, 0.5),
+            Ast::SetSprite(RELYNG, "chars/relyng", 6),
+            Ast::Slide(RELYNG, (333, 288), true, false, 0.5),
             Ast::Remove(RELYNG),
             Ast::Wait(0.25),
             Ast::SetBg("prolog_security"),
@@ -261,6 +383,7 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
                        spawned.  We're going to need one."),
         ]),
         Ast::Seq(vec![
+            // TODO: Show fire spreading into security station
             Ast::Wait(1.0),
             Ast::Par(vec![
                 Ast::Seq(vec![
@@ -273,31 +396,139 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
         ]),
         Ast::Seq(vec![
             Ast::Remove(UGRENT),
-            // TODO: Write the rest of this cutscene.
             Ast::Wait(1.0),
+            Ast::Queue(1, 0), // Hide status indicator
+            Ast::SetBg("prolog_spawn"),
+            Ast::Place(SYSTEM, "chars/system", 0, (240, 96)),
+            Ast::Place(ELEVATOR_LEFT, "shift/platforms", 2, (456, 336)),
+            Ast::Place(ELEVATOR_RIGHT, "shift/platforms", 2, (488, 336)),
+            Ast::Wait(1.0),
+            Ast::Place(UGRENT, "chars/ugrent", 0, (-16, 304)),
+            Ast::Slide(UGRENT, (120, 304), false, true, 1.0),
+            Ast::Wait(0.25),
+            Ast::Sound(Sound::beep()),
+            Ast::Talk(SYSTEM, TalkStyle::System, TalkPos::SE,
+                      "Spawning new administrator\n\
+                       process.  Please stand back."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(UGRENT, (72, 304), true, true, 0.5),
+            Ast::Queue(5, 1), // Show spawning process
+            Ast::Sound(Sound::spawn_zap()),
+            Ast::Wait(0.8),
+            Ast::Sound(Sound::transform_final()),
+            Ast::Wait(2.0),
+            Ast::Queue(5, 0), // Hide spawning process
+            Ast::Place(MEZURE, "chars/mezure", 0, (240, 264)),
+            Ast::Wait(0.25),
+            Ast::Jump(MEZURE, (240, 272), JumpNode::time_to_fall(8)),
+            Ast::Wait(0.5),
+            Ast::Slide(UGRENT, (134, 304), true, true, 0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "Where...am I?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                      "You're aboard the $iH.L.S. System$r,\n\
+                       which is currently adrift somewhere\n\
+                       just south of the middle of nowhere."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(MEZURE, (200, 288), 0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "And...who are you?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                      "Ugrent.  Chief of security.\n\
+                       Any other questions?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "I think my name's...Mezure?\n\
+                       Do I have a job here?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                      "You do now.  You're our\n\
+                       new administrator."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(UGRENT, (192, 288), 0.5),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(UGRENT, (240, 272), 0.5),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(UGRENT, (288, 288), 0.5),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(UGRENT, (340, 304), 0.5),
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NW,
+                      "Congratulations and\n\
+                       welcome to the crew.\n\
+                       Now get back to work."),
+        ]),
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NW,
+                          "Follow me."),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.25),
+                Ast::Slide(UGRENT, (488, 304), true, true, 1.0),
+                Ast::Sound(Sound::platform_shift(4)),
+                Ast::Anim(ELEVATOR_RIGHT, "shift/platforms",
+                          ELEVATOR_INDICES, 2),
+                Ast::Par(vec![
+                    Ast::Slide(UGRENT, (488, 416), false, false, 0.8),
+                    Ast::Slide(ELEVATOR_RIGHT, (488, 448), false, false, 0.8),
+                ]),
+                Ast::Remove(ELEVATOR_RIGHT),
+            ]),
+        ]),
+        Ast::Seq(vec![
+            Ast::Remove(UGRENT),
+            Ast::Wait(1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "Gee, this place sure\n\
+                       is friendly, isn't it?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(MEZURE, (240, 272), 0.5),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(MEZURE, (288, 288), 0.5),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(MEZURE, (340, 304), 0.5),
+            Ast::Slide(MEZURE, (456, 304), false, true, 0.75),
+            Ast::Wait(0.25),
+            Ast::Sound(Sound::platform_shift(4)),
+            Ast::Anim(ELEVATOR_LEFT, "shift/platforms",
+                      ELEVATOR_INDICES, 2),
+            Ast::Par(vec![
+                Ast::Slide(MEZURE, (456, 416), false, false, 0.8),
+                Ast::Slide(ELEVATOR_LEFT, (456, 448), false, false, 0.8),
+            ]),
+            Ast::Remove(ELEVATOR_LEFT),
+            Ast::Remove(MEZURE),
+            Ast::Wait(1.0),
+            Ast::Sound(Sound::beep()),
+            Ast::Talk(SYSTEM, TalkStyle::System, TalkPos::SE, "No."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Wait(0.5),
         ]),
     ];
     Ast::compile_scene(resources, ast)
 }
-
-const FIRE_SLOTS_START: i32 = 10;
-const FIRE_POSITIONS: &[(i32, i32)] = &[
-    (112, 176),
-    (144, 176),
-    (440, 176),
-    (120, 272),
-    (176, 272),
-    (208, 272),
-    (240, 272),
-    (276, 288),
-    (348, 288),
-    (380, 288),
-    (424, 304),
-];
-const FIRE_INDICES: [&[usize]; 4] =
-    [&[0, 1, 2, 3], &[1, 2, 3, 0], &[2, 3, 0, 1], &[3, 0, 1, 2]];
-
-const RELYNG_INDICES_1: &[usize] = &[1, 2];
-const RELYNG_INDICES_2: &[usize] = &[0];
 
 // ========================================================================= //

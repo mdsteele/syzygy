@@ -22,8 +22,9 @@ use gui::{Resources, Sound};
 
 // ========================================================================= //
 
-const ARGONY: i32 = 1;
-const MEZURE: i32 = 0;
+const ARGONY: i32 = 2;
+const MEZURE: i32 = 1;
+const SYSTEM: i32 = 0;
 
 // ========================================================================= //
 
@@ -32,7 +33,9 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
             Ast::SetBg("a_light_in_the_attic"),
+            Ast::Place(SYSTEM, "chars/system", 0, (496, 80)),
             Ast::Dark(true),
+            Ast::Wait(0.5),
             Ast::Place(MEZURE, "chars/mezure", 0, (-16, 320)),
             Ast::Light(MEZURE, true),
             Ast::Slide(MEZURE, (88, 320), true, true, 1.0),

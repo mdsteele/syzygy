@@ -22,7 +22,8 @@ use gui::{Resources, Sound};
 
 // ========================================================================= //
 
-const UGRENT: i32 = 0;
+const SYSTEM: i32 = 0;
+const UGRENT: i32 = 1;
 
 // ========================================================================= //
 
@@ -31,6 +32,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
             Ast::SetBg("cross_the_line"),
+            Ast::Place(SYSTEM, "chars/system", 0, (288, 128)),
             Ast::Queue(0, 1), // Display "SAFE FACE"
             Ast::Wait(0.5),
             Ast::Place(UGRENT, "chars/ugrent", 0, (-16, 272)),

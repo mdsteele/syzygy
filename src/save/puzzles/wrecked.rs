@@ -62,6 +62,10 @@ pub struct WreckedState {
 }
 
 impl WreckedState {
+    pub fn new() -> WreckedState {
+        WreckedState::from_toml(toml::Value::Boolean(false))
+    }
+
     pub fn solve(&mut self) {
         self.access = Access::Solved;
         self.grid = SOLVED_GRID.to_vec();

@@ -115,6 +115,12 @@ impl Sound {
         Sound::new(chord.adshr(0.01, 0.1, 0.5, 0.0, 0.75) * 0.3)
     }
 
+    pub fn spawn_zap() -> Sound {
+        let freq = (Wave::sine(15.0) * 0.02 + 1.0) * 450.0;
+        let tone = Wave::triangle(freq, 0.85);
+        Sound::new(tone.adshr(0.15, 0.0, 1.0, 1.0, 0.75) * 0.2)
+    }
+
     pub fn talk_annoyed_hi() -> Sound {
         Sound::new(Wave::pulse(Wave::slide(120.0, 200.0, -3000.0), 0.2)
                        .adshr(0.0, 0.0, 0.25, 0.25, 0.2) *

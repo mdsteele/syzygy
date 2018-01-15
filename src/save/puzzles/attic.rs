@@ -38,6 +38,10 @@ pub struct AtticState {
 }
 
 impl AtticState {
+    pub fn new() -> AtticState {
+        AtticState::from_toml(toml::Value::Boolean(false))
+    }
+
     pub fn solve(&mut self) {
         self.access = Access::Solved;
         self.toggled = SOLVED_TOGGLED.iter().cloned().collect();

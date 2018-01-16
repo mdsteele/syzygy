@@ -25,8 +25,12 @@ use gui::{Resources, Sound};
 const ELINSA: i32 = 2;
 const MEZURE: i32 = 1;
 const PLATFORM: i32 = 0;
+const SHIP: i32 = 3;
+const THRUST_TOP: i32 = 4;
+const THRUST_BOTTOM: i32 = 5;
 
 const PLATFORM_INDICES: &[usize] = &[2, 3];
+const THRUST_INDICES: &[usize] = &[0, 1, 2, 1];
 
 // ========================================================================= //
 
@@ -125,9 +129,34 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
         ]),
         Ast::Seq(vec![
             Ast::Shake(2),
+            Ast::Wait(0.5),
+            Ast::Remove(MEZURE),
+            Ast::Remove(ELINSA),
+            Ast::Remove(PLATFORM),
+            Ast::Queue(-2, 0), // Hide pipe grid
+            Ast::SetBg("space"),
+            Ast::Place(SHIP, "prolog/ship", 0, (288, 216)),
             Ast::Wait(1.0),
-            // TODO: camera cuts to space outside ship, engines start (reverse
-            // of what happens in the prolog)
+            Ast::Sound(Sound::explosion_small()),
+            Ast::SetBg("white"),
+            Ast::Wait(0.05),
+            Ast::SetBg("space"),
+            Ast::Queue(-1, 1), // Show moving stars
+            Ast::Place(THRUST_TOP, "prolog/thrust", 0, (334, 198)),
+            Ast::Anim(THRUST_TOP, "prolog/thrust", THRUST_INDICES, 3),
+            Ast::Place(THRUST_BOTTOM, "prolog/thrust", 0, (334, 208)),
+            Ast::Anim(THRUST_BOTTOM, "prolog/thrust", THRUST_INDICES, 3),
+            Ast::Wait(1.5),
+            Ast::Remove(SHIP),
+            Ast::Remove(THRUST_TOP),
+            Ast::Remove(THRUST_BOTTOM),
+            Ast::Queue(-1, 0), // Hide moving stars
+            Ast::SetBg("plane_as_day"),
+            Ast::Queue(-2, 1), // Show pipe grid
+            Ast::Place(MEZURE, "chars/mezure", 0, (115, 288)),
+            Ast::Place(ELINSA, "chars/elinsa", 0, (120, 112)),
+            Ast::Place(PLATFORM, "shift/platforms", 2, (120, 144)),
+            Ast::Wait(0.5),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::SE,
                       "You...you...do you\n\

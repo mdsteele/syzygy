@@ -17,7 +17,7 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use elements::{PuzzleCmd, PuzzleCore, PuzzleView};
+use elements::{MovingStars, PuzzleCmd, PuzzleCore, PuzzleView};
 use elements::plane::{PlaneCmd, PlaneGridView};
 use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sound};
 use modes::SOLVED_INFO_TEXT;
@@ -29,6 +29,8 @@ use super::scenes;
 pub struct View {
     core: PuzzleCore<Vec<(Point, Point)>>,
     grid: PlaneGridView,
+    grid_visible: bool,
+    stars_space: MovingStars,
 }
 
 impl View {
@@ -43,6 +45,8 @@ impl View {
         View {
             core: core,
             grid: PlaneGridView::new(resources, 196, 52),
+            grid_visible: true,
+            stars_space: MovingStars::new(0, 0, 576, 384),
         }
     }
 }
@@ -51,7 +55,10 @@ impl Element<Game, PuzzleCmd> for View {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
         let state = &game.plane_as_day;
         self.core.draw_back_layer(canvas);
-        self.grid.draw(state.grid(), canvas);
+        self.stars_space.draw(canvas);
+        if self.grid_visible {
+            self.grid.draw(state.grid(), canvas);
+        }
         self.core.draw_middle_layer(canvas);
         self.core.draw_front_layer(canvas, state);
     }
@@ -60,7 +67,7 @@ impl Element<Game, PuzzleCmd> for View {
                     -> Action<PuzzleCmd> {
         let state = &mut game.plane_as_day;
         let mut action = self.core.handle_event(event, state);
-        if !action.should_stop() && !state.is_solved() {
+        if !action.should_stop() && !state.is_solved() && self.grid_visible {
             let mut subaction = self.grid
                 .handle_event(event, state.grid_mut());
             match subaction.take_value() {
@@ -81,6 +88,11 @@ impl Element<Game, PuzzleCmd> for View {
                 None => {}
             }
             action.merge(subaction.but_no_value());
+        }
+        if event == &Event::ClockTick {
+            if self.stars_space.tick_animation() {
+                action.also_redraw();
+            }
         }
         if !action.should_stop() {
             self.core.begin_character_scene_on_click(event);
@@ -127,7 +139,11 @@ impl PuzzleView for View {
 
     fn drain_queue(&mut self) {
         for (word, letter) in self.core.drain_queue() {
-            if word >= 0 && (word as usize) < WORDS.len() {
+            if word == -2 {
+                self.grid_visible = letter != 0;
+            } else if word == -1 {
+                self.stars_space.set_visible(letter != 0);
+            } else if word >= 0 && (word as usize) < WORDS.len() {
                 let (col, row, letters) = WORDS[word as usize];
                 if letter >= 0 && (letter as usize) < letters.len() {
                     self.grid.add_letter(Point::new(col + letter, row),

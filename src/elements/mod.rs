@@ -33,6 +33,7 @@ pub mod plane;
 mod progress;
 mod puzzle;
 pub mod shift;
+mod stars;
 
 pub use self::crossword::CrosswordView;
 pub use self::cutscene::{Ast, Scene, TalkPos, TalkStyle, Theater};
@@ -42,5 +43,6 @@ pub use self::hud::{Hud, HudCmd, HudInput};
 pub use self::paragraph::Paragraph;
 pub use self::progress::ProgressBar;
 pub use self::puzzle::{PuzzleCmd, PuzzleCore, PuzzleView};
+pub use self::stars::MovingStars;
 
 // ========================================================================= //

@@ -32,11 +32,14 @@ const MEZURE: i32 = 3;
 const RELYNG: i32 = -2;
 const SHIP: i32 = 8;
 const SYSTEM: i32 = 0;
+const THRUST_TOP: i32 = 9;
+const THRUST_BOTTOM: i32 = 10;
 const UGRENT: i32 = 7;
 const YTTRIS: i32 = 6;
 
 const ELEVATOR_INDICES: &[usize] = &[2, 3];
 const RELYNG_INDICES: &[usize] = &[4, 7];
+const THRUST_INDICES: &[usize] = &[0, 1, 2, 1];
 
 const BOOM_START: i32 = 1000;
 const BOOM_INDICES: &[usize] = &[0, 1, 2, 3, 4];
@@ -69,7 +72,10 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
             Ast::Queue(2, 1), // Show large moving starfield
             Ast::Place(SYSTEM, "chars/invis", 0, (224, 320)),
             Ast::Place(SHIP, "prolog/ship", 0, (288, 216)),
-            // TODO: Show ship thrusters
+            Ast::Place(THRUST_TOP, "prolog/thrust", 0, (334, 198)),
+            Ast::Anim(THRUST_TOP, "prolog/thrust", THRUST_INDICES, 3),
+            Ast::Place(THRUST_BOTTOM, "prolog/thrust", 0, (334, 208)),
+            Ast::Anim(THRUST_BOTTOM, "prolog/thrust", THRUST_INDICES, 3),
             Ast::Wait(1.0),
             Ast::Talk(SYSTEM, TalkStyle::System, TalkPos::NE,
                       "Somewhere in deep space..."),
@@ -77,6 +83,8 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Wait(1.0),
             Ast::Remove(SHIP),
+            Ast::Remove(THRUST_TOP),
+            Ast::Remove(THRUST_BOTTOM),
             Ast::SetBg("prolog_security"),
             Ast::Queue(2, 2), // Show moving stars through windows
             Ast::Queue(1, 1), // Show status indicator
@@ -157,10 +165,16 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
             Ast::SetBg("space"),
             Ast::Queue(2, 1), // Show large moving starfield
             Ast::Place(SHIP, "prolog/ship", 0, (288, 216)),
+            Ast::Place(THRUST_TOP, "prolog/thrust", 0, (334, 198)),
+            Ast::Anim(THRUST_TOP, "prolog/thrust", THRUST_INDICES, 3),
+            Ast::Place(THRUST_BOTTOM, "prolog/thrust", 0, (334, 208)),
+            Ast::Anim(THRUST_BOTTOM, "prolog/thrust", THRUST_INDICES, 3),
             Ast::Wait(0.5),
             Ast::Sound(Sound::explosion_small()),
             Ast::Queue(2, 0), // Hide moving stars
             Ast::Shake(16),
+            Ast::Remove(THRUST_TOP),
+            Ast::Remove(THRUST_BOTTOM),
             Ast::SetBg("white"),
             Ast::Wait(0.05),
             Ast::SetBg("space"),

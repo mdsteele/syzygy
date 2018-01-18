@@ -26,6 +26,7 @@ use gui::Window;
 use modes::{Mode, run_puzzle};
 use save::Game;
 use self::view::View;
+pub use self::view::Atlatl;
 
 // ========================================================================= //
 

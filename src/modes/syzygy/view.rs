@@ -626,7 +626,7 @@ impl Element<(), ()> for SyzygyProgress {
 
 // ========================================================================= //
 
-struct Atlatl {
+pub struct Atlatl {
     atlatl_sprites: Vec<Sprite>,
     indicator_sprites: Vec<Sprite>,
     sparkle_sprites: Vec<Sprite>,
@@ -634,12 +634,19 @@ struct Atlatl {
 }
 
 impl Atlatl {
-    fn new(resources: &mut Resources) -> Atlatl {
+    pub fn new(resources: &mut Resources) -> Atlatl {
         Atlatl {
             atlatl_sprites: resources.get_sprites("syzygy/atlatl"),
             indicator_sprites: resources.get_sprites("syzygy/indicator"),
             sparkle_sprites: resources.get_sprites("syzygy/sparkle"),
             indicator_anim: [0; 6],
+        }
+    }
+
+    pub fn set_all_indicators(&mut self, enabled: bool) {
+        let value = if enabled { 9 } else { 0 };
+        for anim in self.indicator_anim.iter_mut() {
+            *anim = value;
         }
     }
 

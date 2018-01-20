@@ -915,6 +915,7 @@ pub struct TalkNode {
     talk_pos: TalkPos,
     paragraph: Rc<Paragraph>,
     status: Status,
+    terminated_by_pause: bool,
 }
 
 impl TalkNode {
@@ -929,6 +930,7 @@ impl TalkNode {
             talk_pos: talk_pos,
             paragraph: Rc::new(paragraph),
             status: Status::Active,
+            terminated_by_pause: false,
         }
     }
 }
@@ -939,20 +941,23 @@ impl SceneNode for TalkNode {
     fn status(&self) -> Status { self.status }
 
     fn begin(&mut self, theater: &mut Theater, terminated_by_pause: bool) {
+        self.terminated_by_pause = terminated_by_pause;
         if terminated_by_pause {
             self.status = Status::Paused;
-            theater.set_actor_speech(self.slot,
-                                     self.bubble_sprites.clone(),
-                                     self.bg_color,
-                                     self.talk_pos,
-                                     self.paragraph.clone());
         } else {
-            self.skip(theater);
+            self.status = Status::Twiddling;
         }
+        theater.set_actor_speech(self.slot,
+                                 self.bubble_sprites.clone(),
+                                 self.bg_color,
+                                 self.talk_pos,
+                                 self.paragraph.clone());
     }
 
-    fn tick(&mut self, theater: &mut Theater, _: bool) -> bool {
-        if self.status == Status::Twiddling {
+    fn tick(&mut self, theater: &mut Theater, keep_twiddling: bool) -> bool {
+        if self.status == Status::Twiddling &&
+            (self.terminated_by_pause || !keep_twiddling)
+        {
             self.skip(theater);
             true
         } else {

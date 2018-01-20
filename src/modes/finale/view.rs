@@ -34,6 +34,7 @@ pub struct View {
     planets_visible: bool,
     atlatl: Atlatl,
     atlatl_visible: bool,
+    atlatl_beam: AtlatlBeam,
 }
 
 impl View {
@@ -51,6 +52,7 @@ impl View {
             planets_visible: false,
             atlatl: Atlatl::new(resources),
             atlatl_visible: false,
+            atlatl_beam: AtlatlBeam::new(),
         }
     }
 }
@@ -74,6 +76,7 @@ impl Element<Game, PuzzleCmd> for View {
         if self.atlatl_visible {
             self.atlatl.draw(&(), canvas);
         }
+        self.atlatl_beam.draw(canvas);
         self.core.draw_front_layer(canvas, state);
     }
 
@@ -83,6 +86,9 @@ impl Element<Game, PuzzleCmd> for View {
         let mut action = self.core.handle_event(event, state);
         if event == &Event::ClockTick {
             if self.stars_space.tick_animation() {
+                action.also_redraw();
+            }
+            if self.atlatl_beam.tick_animation() {
                 action.also_redraw();
             }
         }
@@ -115,9 +121,77 @@ impl PuzzleView for View {
                 2 => self.planets_visible = value != 0,
                 3 => self.atlatl_visible = value != 0,
                 4 => self.atlatl.set_all_indicators(value != 0),
+                5 => {
+                    if value == 1 {
+                        self.atlatl_beam.turn_on(258, 258);
+                    } else if value == 2 {
+                        self.atlatl_beam.turn_on(576, 576);
+                    } else if value == 3 {
+                        self.atlatl_beam.turn_on(576, 280);
+                    } else {
+                        self.atlatl_beam.turn_off();
+                    }
+                }
                 _ => {}
             }
         }
+    }
+}
+
+// ========================================================================= //
+
+const BEAM_SPEED: u32 = 32; // pixels/frame
+const BEAM_THICKNESS: u32 = 3;
+
+struct AtlatlBeam {
+    start: i32,
+    length: u32,
+    max_length: u32,
+    anim: u32,
+}
+
+impl AtlatlBeam {
+    fn new() -> AtlatlBeam {
+        AtlatlBeam {
+            start: 0,
+            length: 0,
+            max_length: 0,
+            anim: 0,
+        }
+    }
+
+    fn turn_on(&mut self, start: i32, max_length: u32) {
+        self.start = start;
+        self.length = 0;
+        self.max_length = max_length;
+        self.anim = 0;
+    }
+
+    fn turn_off(&mut self) {
+        self.length = 0;
+        self.max_length = 0;
+    }
+
+    fn draw(&self, canvas: &mut Canvas) {
+        if self.length > 0 {
+            let color = (if self.anim != 0 { 255 } else { 128 },
+                         if self.anim != 1 { 255 } else { 128 },
+                         if self.anim != 2 { 255 } else { 128 });
+            let rect = Rect::new(self.start - (self.length as i32),
+                                 197 - (BEAM_THICKNESS / 2) as i32,
+                                 self.length,
+                                 BEAM_THICKNESS);
+            canvas.fill_rect(color, rect);
+        }
+    }
+
+    fn tick_animation(&mut self) -> bool {
+        if self.max_length == 0 {
+            return false;
+        }
+        self.length = (self.length + BEAM_SPEED).min(self.max_length);
+        self.anim = (self.anim + 1) % 3;
+        true
     }
 }
 

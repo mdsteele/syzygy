@@ -37,11 +37,14 @@ const SYSTEM: i32 = 2;
 const THRUST_TOP: i32 = 6;
 const THRUST_BOTTOM: i32 = 7;
 const UGRENT: i32 = 11;
+const XANADU_III: i32 = 8;
+const XANADU_IV: i32 = 9;
 const YTTRIS: i32 = 15;
 
 const BOOM_INDICES: &[usize] = &[0, 1, 2, 3, 4];
 const CHARGE_INDICES: &[usize] = &[0, 1, 2];
 const SRB_TUMBLE_INDICES: &[usize] = &[0, 5, 6, 7];
+const TINYBOOM_INDICES: &[usize] = &[0, 1, 2];
 const THRUST_INDICES: &[usize] = &[0, 1, 2, 1];
 
 // ========================================================================= //
@@ -158,6 +161,11 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
                        are too late!!"),
         ]),
         Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(SRB, TalkStyle::Evil, TalkPos::NE,
+                      "Your planet is doomed!"),
+        ]),
+        Ast::Seq(vec![
             Ast::SetSprite(SRB, "chars/srbdmg", 3),
             Ast::Wait(0.5),
             Ast::Remove(SYSTEM),
@@ -176,9 +184,11 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
             Ast::Queue(3, 0), // Hide ATLATL
             Ast::SetBg("space"),
             Ast::Place(SHIP, "prolog/ship", 0, (288, 216)),
-            // TODO: show emitter charging up (outside view)
+            Ast::Place(CHARGE, "finale/charge_tiny", 0, (256, 211)),
+            Ast::Anim(CHARGE, "finale/charge_tiny", CHARGE_INDICES, 3),
             Ast::Wait(2.0),
             Ast::Remove(SHIP),
+            Ast::Remove(CHARGE),
             Ast::SetBg("finale_pit"),
             Ast::Place(SYSTEM, "chars/system", 0, (96, 128)),
             Ast::Place(SRB, "chars/srbdmg", 3, (144, 272)),
@@ -243,9 +253,12 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
             }).collect()),
             Ast::SetBg("space"),
             Ast::Place(SHIP, "prolog/ship", 0, (288, 216)),
+            Ast::Place(CHARGE, "finale/charge_tiny", 0, (256, 211)),
+            Ast::Anim(CHARGE, "finale/charge_tiny", CHARGE_INDICES, 3),
             Ast::Wait(1.0),
             // TODO: show ship aligning
             Ast::Remove(SHIP),
+            Ast::Remove(CHARGE),
             Ast::SetBg("finale_pit"),
             Ast::Place(SYSTEM, "chars/system", 0, (96, 128)),
             Ast::Place(SRB, "chars/srbdmg", 1, (144, 272)),
@@ -257,7 +270,13 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
             Ast::Anim(SRB, "chars/srbdmg", SRB_TUMBLE_INDICES, 3),
             Ast::Par(vec![
                 Ast::Seq(vec![
-                    // TODO: lower-left side of pit rises
+                    Ast::Sound(Sound::platform_shift(1)),
+                    Ast::Wait(0.1),
+                    Ast::SetBg("finale_pit_2"),
+                    Ast::Wait(0.1),
+                    Ast::Sound(Sound::platform_shift(1)),
+                    Ast::Wait(0.1),
+                    Ast::SetBg("finale_pit_3"),
                 ]),
                 Ast::Slide(SRB, (288, 288), false, false, 0.5),
             ]),
@@ -269,10 +288,27 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
         ]),
         Ast::Seq(vec![
             Ast::SetSprite(SRB, "chars/srbdmg", 9),
-            // TODO: upper and lower right side of pit move together
-            Ast::Wait(0.5),
-            // TODO: upper middle section falls, exploding SRB thru airlock
-            Ast::SetSprite(SRB, "chars/srbdmg", 6),
+            Ast::Sound(Sound::platform_shift(1)),
+            Ast::Wait(0.1),
+            Ast::SetBg("finale_pit_4"),
+            Ast::Wait(0.1),
+            Ast::Sound(Sound::platform_shift(1)),
+            Ast::Wait(0.1),
+            Ast::SetBg("finale_pit_5"),
+            Ast::Wait(0.75),
+            Ast::Sound(Sound::platform_shift(1)),
+            Ast::Wait(0.1),
+            Ast::SetBg("finale_pit_6"),
+            Ast::Wait(0.1),
+            Ast::Sound(Sound::platform_shift(1)),
+            Ast::Wait(0.1),
+            Ast::SetBg("finale_pit_7"),
+            Ast::Wait(0.1),
+            Ast::Sound(Sound::platform_shift(1)),
+            Ast::Wait(0.1),
+            Ast::SetBg("finale_pit_8"),
+            Ast::Sound(Sound::character_collision()),
+            Ast::SetSprite(SRB, "chars/srbdmg", 0),
             Ast::Par(vec![
                 Ast::Par((0..3).map(|index| {
                     let slot = BOOM_START + index;
@@ -287,6 +323,7 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
                 Ast::Seq((0..6).map(|idx| {
                     Ast::Remove(AIRLOCK_START + idx)
                 }).collect()),
+                Ast::Sound(Sound::explosion_small()),
                 Ast::Sound(Sound::talk_hi()),
                 Ast::Talk(SRB, TalkStyle::Evil, TalkPos::NE,
                           "Waaah!!"),
@@ -299,16 +336,57 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
             Ast::Remove(SYSTEM),
             Ast::SetBg("space"),
             Ast::Place(SHIP, "prolog/ship", 0, (288, 216)),
+            Ast::Place(CHARGE, "finale/charge_tiny", 0, (256, 211)),
+            Ast::Anim(CHARGE, "finale/charge_tiny", CHARGE_INDICES, 3),
             Ast::Wait(1.0),
-            // TODO: show tiny explosion and point of light as SRB is ejected
-            // TODO: ejection makes ship drift up slightly as ATLATL charges
-            // TODO: ATLATL fires
+            Ast::Par(vec![
+                Ast::Par((0..2).map(|index| {
+                    let slot = BOOM_START + index;
+                    Ast::Seq(vec![
+                        Ast::Place(slot, "finale/tinyboom", 0,
+                                   (285 + 5 * index, 218)),
+                        Ast::Anim(slot, "finale/tinyboom",
+                                  TINYBOOM_INDICES, 2),
+                        Ast::Wait(0.25),
+                        Ast::Remove(slot),
+                    ])
+                }).collect()),
+                Ast::Seq(vec![
+                    Ast::Place(SRB, "finale/tinysrb", 0, (288, 216)),
+                    Ast::Slide(SRB, (288, 400), false, false, 2.0),
+                    Ast::Remove(SRB),
+                ]),
+                Ast::Seq(vec![
+                    Ast::Wait(0.25),
+                    Ast::Talk(SRB, TalkStyle::Evil, TalkPos::E, "Aaaah!"),
+                ]),
+                Ast::Slide(SHIP, (288, 200), false, false, 4.0),
+                Ast::Seq(vec![
+                    Ast::Slide(CHARGE, (256, 199), false, false, 3.0),
+                    Ast::Remove(CHARGE),
+                    Ast::Queue(5, 1), // Animate ATLATL beam from ship
+                ]),
+            ]),
+            Ast::Queue(5, 0), // Hide ATLATL beam
             Ast::Remove(SHIP),
-            // TODO: cut to Xanadu III, show beam just barely missing
-            // TODO: cut to Xanadu IV, show beam just barely hitting
-            // TODO: Xanadu IV warms up under beam, then beam turns off
+            Ast::SetBg("space2"),
+            Ast::Place(XANADU_III, "title/xanadu3", 0, (288, 264)),
+            Ast::Wait(0.5),
+            Ast::Queue(5, 2), // Animate ATLATL beam across screen
+            Ast::Wait(2.5),
+            Ast::Queue(5, 0), // Hide ATLATL beam
+            Ast::Remove(XANADU_III),
+            Ast::SetBg("space"),
+            Ast::Place(XANADU_IV, "title/xanadu4", 0, (288, 222)),
+            Ast::Wait(0.5),
+            Ast::Queue(5, 3), // Animate ATLATL beam hitting planet
+            Ast::Wait(3.5),
+            // TODO: Xanadu IV warms up under beam
+            Ast::Queue(5, 0), // Hide ATLATL beam
+            Ast::Remove(XANADU_IV),
             Ast::SetBg("system_syzygy"),
             Ast::Queue(3, 1), // Show ATLATL
+            // TODO: Show beam turning off
             Ast::Wait(0.75),
             Ast::Queue(4, 0), // Turn off ATLATL indicators
             Ast::Sound(Sound::small_jump()),

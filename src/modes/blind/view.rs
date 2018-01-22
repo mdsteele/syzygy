@@ -35,11 +35,14 @@ pub struct View {
 impl View {
     pub fn new(resources: &mut Resources, visible: Rect, state: &BlindState)
                -> View {
-        let core = {
+        let mut core = {
             let intro = scenes::compile_intro_scene(resources);
             let outro = scenes::compile_outro_scene(resources);
             PuzzleCore::new(resources, visible, state, intro, outro)
         };
+        core.add_extra_scene(scenes::compile_elinsa_midscene(resources));
+        core.add_extra_scene(scenes::compile_mezure_midscene(resources));
+        core.add_extra_scene(scenes::compile_ugrent_midscene(resources));
         View {
             core: core,
             grid: GridView::new(resources, 80, 64, state.grid()),

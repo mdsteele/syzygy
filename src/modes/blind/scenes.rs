@@ -22,6 +22,7 @@ use gui::{Resources, Sound};
 
 // ========================================================================= //
 
+const ARGONY: i32 = 4;
 const ELINSA: i32 = 1;
 const MEZURE: i32 = 3;
 const UGRENT: i32 = 2;
@@ -113,14 +114,14 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Sound(Sound::talk_lo()),
             Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NW,
                       "Ugrent's being paranoid again.\n\
-                       He think's there's something\n\
+                       He thinks there's something\n\
                        suspicious about the damage\n\
                        to this storage section."),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NW,
-                      "Oh.  What's seems\n\
+                      "Oh.  What seems\n\
                        suspicious about it?"),
         ]),
         Ast::Seq(vec![
@@ -233,8 +234,94 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Sound(Sound::solve_puzzle_chime()),
             Ast::Wait(1.0),
-            Ast::Slide(ELINSA, (592, 288), true, false, 1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NW,
+                      "There, it's fixed."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NW,
+                      "Except for whatever it\n\
+                       was that got deleted."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_annoyed_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NW,
+                      "Whatever's still missing, it's not\n\
+                       one of the things that keeps this ship\n\
+                       from flying into a star, which is $ikinda$r\n\
+                       what I'm focused on right now, thanks."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NW,
+                      "Meanwhile, I'm got other\n\
+                       ship-explodey-prevention\n\
+                       things to fix, which I should\n\
+                       probably get to ASAP."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(ELINSA, (592, 288), true, false, 0.75),
             Ast::Remove(ELINSA),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NW,
+                      "And I guess I should\n\
+                       go check on how the\n\
+                       others are doing."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(MEZURE, (496, 160), 0.5),
+            Ast::Slide(MEZURE, (592, 160), false, false, 0.5),
+            Ast::Remove(MEZURE),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NW,
+                      "Hmph.  I still say\n\
+                       something's fishy here."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(UGRENT, (400, 304), 0.5),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(UGRENT, (448, 288), 0.5),
+            Ast::Slide(UGRENT, (592, 288), false, false, 0.75),
+            Ast::Remove(UGRENT),
+            Ast::Wait(1.0),
+            Ast::Place(ARGONY, "chars/argony", 0, (592, 160)),
+            Ast::Slide(ARGONY, (496, 160), false, true, 1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::W,
+                      "Ah, good, it looks like\n\
+                       Elinsa has already been\n\
+                       by to fix this section."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Wait(0.75),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::W,
+                      "Hmm, but it looks like the\n\
+                       ATLATL programming reference\n\
+                       manual got deleted somehow?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::W,
+                      "Shame to lose that.\n\
+                       Kids these days just\n\
+                       don't appreciate those\n\
+                       old-timey systems."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::W,
+                      "Ah, well, I suppose we're\n\
+                       not likely to need to reprogram\n\
+                       the ATLATL.  We can re-upload\n\
+                       the manual when we get home."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(ARGONY, (592, 160), true, false, 1.0),
+            Ast::Remove(ARGONY),
             Ast::Wait(1.0),
             Ast::Queue(1, 0),
             Ast::Wait(0.1),

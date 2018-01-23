@@ -375,7 +375,9 @@ pub fn compile_argony_midscene_1(resources: &mut Resources) -> (i32, Scene) {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(ARGONY_1, TalkStyle::Normal, TalkPos::SE,
-                      "TODO a1"),
+                      "$iSigh.$r  We could probably use that\n\
+                       ATLATL programming reference\n\
+                       manual right about now."),
         ]),
     ];
     (ARGONY_1, Ast::compile_scene(resources, ast))
@@ -401,7 +403,8 @@ pub fn compile_ugrent_midscene_1(resources: &mut Resources) -> (i32, Scene) {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(UGRENT_1, TalkStyle::Normal, TalkPos::SW,
-                      "TODO u1"),
+                      "Be careful, Yttris.  We can't\n\
+                       afford any mistakes here."),
         ]),
     ];
     (UGRENT_1, Ast::compile_scene(resources, ast))
@@ -723,7 +726,9 @@ pub fn compile_ugrent_midscene_3(resources: &mut Resources) -> (i32, Scene) {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(UGRENT_3, TalkStyle::Normal, TalkPos::SW,
-                      "TODO u3"),
+                      "Just please don't jury-rig\n\
+                       this like you did with that\n\
+                       one elevator, Elinsa."),
         ]),
     ];
     (UGRENT_3, Ast::compile_scene(resources, ast))

@@ -17,7 +17,7 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use elements::{ProgressBar, PuzzleCmd, PuzzleCore, PuzzleView};
+use elements::{FadeStyle, ProgressBar, PuzzleCmd, PuzzleCore, PuzzleView};
 use elements::cross::{ClueDisplay, InputDisplay};
 use gui::{Action, Canvas, Element, Event, Rect, Resources, Sound};
 use modes::SOLVED_INFO_TEXT;
@@ -39,9 +39,10 @@ impl View {
     pub fn new(resources: &mut Resources, visible: Rect, state: &DoubleState)
                -> View {
         let mut core = {
+            let fade = (FadeStyle::LeftToRight, FadeStyle::LeftToRight);
             let intro = scenes::compile_intro_scene(resources);
             let outro = scenes::compile_outro_scene(resources);
-            PuzzleCore::new(resources, visible, state, intro, outro)
+            PuzzleCore::new(resources, visible, state, fade, intro, outro)
         };
         core.add_extra_scene(scenes::compile_ugrent_midscene(resources));
         View {

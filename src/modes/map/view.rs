@@ -211,7 +211,9 @@ impl View {
             map_sprites.push((sprites[5].clone(), Point::new(464, 272)));
         }
         View {
-            screen_fade: ScreenFade::new(resources, FadeStyle::Radial),
+            screen_fade: ScreenFade::new(resources,
+                                         FadeStyle::Radial,
+                                         FadeStyle::Radial),
             hud: Hud::new(resources, visible, Location::Map),
             background: resources.get_background("map"),
             map_sprites: map_sprites,

@@ -20,7 +20,7 @@
 use std::cmp;
 use std::rc::Rc;
 
-use elements::{self, PuzzleCmd, PuzzleCore, PuzzleView};
+use elements::{self, FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
 use elements::column::ColumnsView;
 use elements::lasers::{LaserCmd, LaserField};
 use elements::plane::{PlaneCmd, PlaneGridView};
@@ -70,9 +70,10 @@ impl View {
                state: &mut SyzygyState)
                -> View {
         let mut core = {
+            let fade = (FadeStyle::TopToBottom, FadeStyle::RightToLeft);
             let intro = scenes::compile_intro_scene(resources);
             let outro = scenes::compile_outro_scene(resources);
-            PuzzleCore::new(resources, visible, state, intro, outro)
+            PuzzleCore::new(resources, visible, state, fade, intro, outro)
         };
         core.add_extra_scene(scenes::compile_yttris_midscene_1(resources));
         core.add_extra_scene(scenes::compile_argony_midscene_1(resources));

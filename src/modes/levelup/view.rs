@@ -17,7 +17,7 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use elements::{CrosswordView, PuzzleCmd, PuzzleCore, PuzzleView};
+use elements::{CrosswordView, FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
 use gui::{Action, Canvas, Element, Event, Rect, Resources};
 use modes::SOLVED_INFO_TEXT;
 use save::{Game, LevelUpState, PuzzleState};
@@ -36,9 +36,10 @@ impl View {
                state: &LevelUpState)
                -> View {
         let mut core = {
+            let fade = (FadeStyle::BottomToTop, FadeStyle::RightToLeft);
             let intro = scenes::compile_intro_scene(resources);
             let outro = scenes::compile_outro_scene(resources, visible);
-            PuzzleCore::new(resources, visible, state, intro, outro)
+            PuzzleCore::new(resources, visible, state, fade, intro, outro)
         };
         core.add_extra_scene(scenes::compile_elinsa_midscene(resources));
         core.add_extra_scene(scenes::compile_ugrent_midscene(resources));

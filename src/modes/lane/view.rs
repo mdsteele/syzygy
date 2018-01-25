@@ -17,7 +17,8 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use elements::{Paragraph, ProgressBar, PuzzleCmd, PuzzleCore, PuzzleView};
+use elements::{FadeStyle, Paragraph, ProgressBar, PuzzleCmd, PuzzleCore,
+               PuzzleView};
 use elements::memory::{FLIP_SLOWDOWN, MemoryGridView, NextShapeView};
 use gui::{Action, Align, Canvas, Element, Event, Point, Rect, Resources,
           Sound, Sprite};
@@ -48,9 +49,10 @@ impl View {
     pub fn new(resources: &mut Resources, visible: Rect, state: &LaneState)
                -> View {
         let mut core = {
+            let fade = (FadeStyle::LeftToRight, FadeStyle::LeftToRight);
             let intro = scenes::compile_intro_scene(resources);
             let outro = scenes::compile_outro_scene(resources);
-            PuzzleCore::new(resources, visible, state, intro, outro)
+            PuzzleCore::new(resources, visible, state, fade, intro, outro)
         };
         core.add_extra_scene(scenes::compile_argony_midscene(resources));
         core.add_extra_scene(scenes::compile_ugrent_midscene(resources));

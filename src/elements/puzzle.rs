@@ -69,7 +69,8 @@ pub struct PuzzleCore<U> {
 
 impl<U: Clone> PuzzleCore<U> {
     pub fn new<S: PuzzleState>(resources: &mut Resources, visible: Rect,
-                               state: &S, mut intro_scene: Scene,
+                               state: &S, fade: (FadeStyle, FadeStyle),
+                               mut intro_scene: Scene,
                                mut outro_scene: Scene)
                                -> PuzzleCore<U> {
         let mut theater = Theater::new();
@@ -88,7 +89,7 @@ impl<U: Clone> PuzzleCore<U> {
             outro_scene: outro_scene,
             extra_scenes: HashMap::new(),
             hud: Hud::new(resources, visible, S::location()),
-            screen_fade: ScreenFade::new(resources, FadeStyle::RightLeft),
+            screen_fade: ScreenFade::new(resources, fade.0, fade.1),
             undo_stack: Vec::new(),
             redo_stack: Vec::new(),
             previously_solved: state.access() >= Access::Solved,

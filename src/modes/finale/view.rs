@@ -17,7 +17,8 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use elements::{MovingStars, PuzzleCmd, PuzzleCore, PuzzleView, Scene};
+use elements::{FadeStyle, MovingStars, PuzzleCmd, PuzzleCore, PuzzleView,
+               Scene};
 use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sprite};
 use modes::syzygy::Atlatl;
 use save::{FinaleState, Game, PuzzleState};
@@ -40,9 +41,12 @@ pub struct View {
 impl View {
     pub fn new(resources: &mut Resources, visible: Rect, state: &FinaleState)
                -> View {
-        let intro = scenes::compile_scene(resources);
-        let outro = Scene::empty();
-        let core = PuzzleCore::new(resources, visible, state, intro, outro);
+        let core = {
+            let fade = (FadeStyle::BottomToTop, FadeStyle::TopToBottom);
+            let intro = scenes::compile_scene(resources);
+            let outro = Scene::empty();
+            PuzzleCore::new(resources, visible, state, fade, intro, outro)
+        };
         View {
             core: core,
             stars_space: MovingStars::new(0, 0, 576, 384),

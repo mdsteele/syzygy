@@ -19,7 +19,7 @@
 
 use std::rc::Rc;
 
-use elements::{PuzzleCmd, PuzzleCore, PuzzleView};
+use elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
 use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
           Resources, Sound};
 use modes::SOLVED_INFO_TEXT;
@@ -40,9 +40,10 @@ impl View {
     pub fn new(resources: &mut Resources, visible: Rect, state: &LineState)
                -> View {
         let mut core = {
+            let fade = (FadeStyle::LeftToRight, FadeStyle::LeftToRight);
             let intro = scenes::compile_intro_scene(resources);
             let outro = scenes::compile_outro_scene(resources);
-            PuzzleCore::new(resources, visible, state, intro, outro)
+            PuzzleCore::new(resources, visible, state, fade, intro, outro)
         };
         core.add_extra_scene(scenes::compile_ugrent_midscene(resources));
         View {

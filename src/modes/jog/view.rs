@@ -17,12 +17,12 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use elements::{ProgressBar, PuzzleCmd, PuzzleCore, PuzzleView};
+use elements::{FadeStyle, ProgressBar, PuzzleCmd, PuzzleCore, PuzzleView};
 use elements::memory::{FLIP_SLOWDOWN, MemoryGridView, NextShapeView};
 use gui::{Action, Canvas, Element, Event, Rect, Resources, Sound};
 use modes::SOLVED_INFO_TEXT;
 use save::{Direction, Game, JogState, PuzzleState};
-use super::scenes::{compile_intro_scene, compile_outro_scene};
+use super::scenes;
 
 // ========================================================================= //
 
@@ -43,10 +43,14 @@ pub struct View {
 impl View {
     pub fn new(resources: &mut Resources, visible: Rect, state: &JogState)
                -> View {
-        let intro = compile_intro_scene(resources);
-        let outro = compile_outro_scene(resources);
+        let core = {
+            let fade = (FadeStyle::LeftToRight, FadeStyle::RightToLeft);
+            let intro = scenes::compile_intro_scene(resources);
+            let outro = scenes::compile_outro_scene(resources);
+            PuzzleCore::new(resources, visible, state, fade, intro, outro)
+        };
         View {
-            core: PuzzleCore::new(resources, visible, state, intro, outro),
+            core: core,
             grid: MemoryGridView::new(resources,
                                       "memory/jog",
                                       (352, 80),

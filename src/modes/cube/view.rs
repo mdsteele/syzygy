@@ -20,7 +20,7 @@
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use elements::{PuzzleCmd, PuzzleCore, PuzzleView};
+use elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
 use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
           Resources, Sprite};
 use modes::SOLVED_INFO_TEXT;
@@ -39,9 +39,10 @@ impl View {
     pub fn new(resources: &mut Resources, visible: Rect, state: &CubeState)
                -> View {
         let mut core = {
+            let fade = (FadeStyle::BottomToTop, FadeStyle::LeftToRight);
             let intro = scenes::compile_intro_scene(resources);
             let outro = scenes::compile_outro_scene(resources);
-            PuzzleCore::new(resources, visible, state, intro, outro)
+            PuzzleCore::new(resources, visible, state, fade, intro, outro)
         };
         core.add_extra_scene(scenes::compile_elinsa_midscene(resources));
         View {
@@ -412,12 +413,12 @@ impl Element<CubeState, PuzzleCmd> for SolutionDisplay {
 // ========================================================================= //
 
 const LETTERS: &[(i32, i32, char)] = &[
-    (1, 0, 'Y'),
-    (0, 1, 'T'),
-    (1, 1, 'I'),
+    (0, 0, 'Y'),
+    (0, 3, 'T'),
+    (1, 2, 'I'),
     (2, 1, 'O'),
-    (3, 1, 'N'),
-    (2, 2, 'R'),
+    (3, 0, 'N'),
+    (3, 3, 'R'),
 ];
 
 const INFO_BOX_TEXT: &str = "\

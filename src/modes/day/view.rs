@@ -17,7 +17,7 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use elements::{MovingStars, PuzzleCmd, PuzzleCore, PuzzleView};
+use elements::{FadeStyle, MovingStars, PuzzleCmd, PuzzleCore, PuzzleView};
 use elements::plane::{PlaneCmd, PlaneGridView};
 use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sound};
 use modes::SOLVED_INFO_TEXT;
@@ -37,9 +37,10 @@ impl View {
     pub fn new(resources: &mut Resources, visible: Rect, state: &DayState)
                -> View {
         let mut core = {
+            let fade = (FadeStyle::LeftToRight, FadeStyle::BottomToTop);
             let intro = scenes::compile_intro_scene(resources);
             let outro = scenes::compile_outro_scene(resources);
-            PuzzleCore::new(resources, visible, state, intro, outro)
+            PuzzleCore::new(resources, visible, state, fade, intro, outro)
         };
         core.add_extra_scene(scenes::compile_mezure_midscene(resources));
         View {

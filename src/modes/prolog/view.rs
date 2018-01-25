@@ -19,13 +19,14 @@
 
 use std::rc::Rc;
 
-use elements::{MovingStars, PuzzleCmd, PuzzleCore, PuzzleView, Scene};
+use elements::{FadeStyle, MovingStars, PuzzleCmd, PuzzleCore, PuzzleView,
+               Scene};
 use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
           Resources, Sprite};
 use modes::attic::AtticGrid;
 use modes::wrecked::{WreckedDisplay, WreckedGrid};
 use save::{AtticState, Game, PrologState, PuzzleState, WreckedState};
-use super::scenes::compile_scene;
+use super::scenes;
 
 // ========================================================================= //
 
@@ -48,9 +49,12 @@ pub struct View {
 impl View {
     pub fn new(resources: &mut Resources, visible: Rect, state: &PrologState)
                -> View {
-        let intro = compile_scene(resources);
-        let outro = Scene::empty();
-        let core = PuzzleCore::new(resources, visible, state, intro, outro);
+        let core = {
+            let fade = (FadeStyle::BottomToTop, FadeStyle::TopToBottom);
+            let intro = scenes::compile_scene(resources);
+            let outro = Scene::empty();
+            PuzzleCore::new(resources, visible, state, fade, intro, outro)
+        };
 
         let mut wrecked_display = WreckedDisplay::new(resources);
         wrecked_display.set_panic(true);

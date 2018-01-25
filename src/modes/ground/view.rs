@@ -19,7 +19,7 @@
 
 use std::cmp;
 
-use elements::{PuzzleCmd, PuzzleCore, PuzzleView, Scene};
+use elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView, Scene};
 use elements::cutscene::{JumpNode, ParallelNode, QueueNode, SceneNode,
                          SequenceNode, SlideNode, SoundNode, WaitNode};
 use elements::shift::{ArrowPair, Platform};
@@ -43,9 +43,10 @@ impl View {
     pub fn new(resources: &mut Resources, visible: Rect, state: &GroundState)
                -> View {
         let mut core = {
+            let fade = (FadeStyle::TopToBottom, FadeStyle::BottomToTop);
             let intro = scenes::compile_intro_scene(resources);
             let outro = scenes::compile_outro_scene(resources);
-            PuzzleCore::new(resources, visible, state, intro, outro)
+            PuzzleCore::new(resources, visible, state, fade, intro, outro)
         };
         core.add_extra_scene(scenes::compile_elinsa_midscene(resources));
         core.add_extra_scene(scenes::compile_yttris_midscene(resources));

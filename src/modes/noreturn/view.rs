@@ -21,7 +21,7 @@ use std::cmp;
 use std::collections::HashSet;
 use std::rc::Rc;
 
-use elements::{PuzzleCmd, PuzzleCore, PuzzleView, Scene};
+use elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView, Scene};
 use elements::cutscene::{JumpNode, QueueNode, SceneNode, SequenceNode,
                          SetPosNode, ShakeNode, SlideNode, SoundNode};
 use elements::cutscene::WaitNode;
@@ -46,9 +46,10 @@ impl View {
                state: &NoReturnState)
                -> View {
         let core = {
+            let fade = (FadeStyle::LeftToRight, FadeStyle::LeftToRight);
             let intro = scenes::compile_intro_scene(resources);
             let outro = scenes::compile_outro_scene(resources);
-            PuzzleCore::new(resources, visible, state, intro, outro)
+            PuzzleCore::new(resources, visible, state, fade, intro, outro)
         };
         let mut view = View {
             core: core,

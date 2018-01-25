@@ -188,25 +188,6 @@ pub fn compile_mezure_midscene(resources: &mut Resources) -> (i32, Scene) {
 }
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-pub fn compile_system_midscene(resources: &mut Resources) -> (i32, Scene) {
-    let ast = vec![
-        Ast::Seq(vec![
-            Ast::Sound(Sound::beep()),
-            Ast::Talk(SYSTEM, TalkStyle::System, TalkPos::NE,
-                      "Warning: Factory FAB\n\
-                       unit is still offline."),
-        ]),
-        Ast::Seq(vec![
-            Ast::Sound(Sound::talk_lo()),
-            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SE,
-                      "Yes, $ithank you$r  for that\n\
-                       update.  We're working on it."),
-        ]),
-    ];
-    (SYSTEM, Ast::compile_scene(resources, ast))
-}
-
-#[cfg_attr(rustfmt, rustfmt_skip)]
 pub fn compile_yttris_midscene(resources: &mut Resources) -> (i32, Scene) {
     let ast = vec![
         Ast::Par(vec![

@@ -55,7 +55,9 @@ impl View {
         let lower_y = 302;
         let spacing = 128;
         View {
-            screen_fade: ScreenFade::new(resources, FadeStyle::Uniform),
+            screen_fade: ScreenFade::new(resources,
+                                         FadeStyle::Uniform,
+                                         FadeStyle::Uniform),
             background: resources.get_background("space"),
             sun_sprites: resources.get_sprites("title/sun"),
             xanadu3_sprites: resources.get_sprites("title/xanadu3"),

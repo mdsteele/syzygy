@@ -20,8 +20,8 @@
 use std::cmp::{max, min};
 use std::rc::Rc;
 
-use elements::{CrosswordView, Paragraph, PuzzleCmd, PuzzleCore, PuzzleView,
-               TalkPos};
+use elements::{CrosswordView, FadeStyle, Paragraph, PuzzleCmd, PuzzleCore,
+               PuzzleView, TalkPos};
 use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
           Resources, Sound, Sprite};
 use modes::SOLVED_INFO_TEXT;
@@ -54,9 +54,10 @@ impl View {
                state: &PasswordState)
                -> View {
         let mut core = {
+            let fade = (FadeStyle::LeftToRight, FadeStyle::TopToBottom);
             let intro = scenes::compile_intro_scene(resources);
             let outro = scenes::compile_outro_scene(resources);
-            PuzzleCore::new(resources, visible, state, intro, outro)
+            PuzzleCore::new(resources, visible, state, fade, intro, outro)
         };
         core.add_extra_scene(scenes::compile_pre_sliders_scene(resources));
         if state.all_crosswords_done() && !state.is_solved() {

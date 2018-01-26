@@ -23,6 +23,8 @@ use gui::{Resources, Sound};
 // ========================================================================= //
 
 pub const YTTRIS: i32 = 1;
+pub const DOOR_UPPER: i32 = -3;
+pub const DOOR_LOWER: i32 = -2;
 
 // ========================================================================= //
 
@@ -31,6 +33,9 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
             Ast::SetBg("point_of_no_return"),
+            Ast::Place(DOOR_UPPER, "tiles/caution_walls", 5, (505, 160)),
+            Ast::Place(DOOR_LOWER, "tiles/caution_walls", 4, (505, 176)),
+            Ast::Wait(0.5),
             Ast::Place(YTTRIS, "chars/yttris", 0, (-16, 176)),
             Ast::Slide(YTTRIS, (100, 176), true, true, 1.0),
             Ast::Wait(0.5),
@@ -48,6 +53,12 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
 pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
+            Ast::Seq((0..16).map(|col| {
+                Ast::Queue(0, col) // Hide bridge
+            }).collect()),
+            Ast::Remove(DOOR_UPPER),
+            Ast::Remove(DOOR_LOWER),
+            Ast::SetPos(YTTRIS, (508, 176)),
             Ast::Sound(Sound::solve_puzzle_chime()),
             Ast::Wait(1.0),
             Ast::Slide(YTTRIS, (592, 176), true, false, 1.0),

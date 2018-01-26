@@ -29,10 +29,10 @@ use super::PuzzleState;
 const ORDER_KEY: &str = "order";
 
 const TILES: [&[i32]; 8] = [
-    &[7, 5],
+    &[-1, 4],
     &[-3, 3],
     &[-6, 4, 2],
-    &[-1, 4],
+    &[7, 5],
     &[6, 3],
     &[-4, -4],
     &[-1],
@@ -41,7 +41,7 @@ const TILES: [&[i32]; 8] = [
 
 const INITIAL_ORDER: [usize; 8] = [0, 1, 2, 3, 4, 5, 6, 7];
 // Solved arragement is f6-f3 b1-f4 b1 b3-f3 f7-f5 b1-f2 b6-f4-f2 b4-b4
-const SOLVED_ORDER: [usize; 8] = [4, 3, 6, 1, 0, 7, 2, 5];
+const SOLVED_ORDER: [usize; 8] = [4, 0, 6, 1, 3, 7, 2, 5];
 
 // ========================================================================= //
 

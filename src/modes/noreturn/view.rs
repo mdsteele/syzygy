@@ -22,14 +22,15 @@ use std::collections::HashSet;
 use std::rc::Rc;
 
 use elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView, Scene};
-use elements::cutscene::{JumpNode, QueueNode, SceneNode, SequenceNode,
-                         SetPosNode, ShakeNode, SlideNode, SoundNode};
+use elements::cutscene::{JumpNode, ParallelNode, QueueNode, SceneNode,
+                         SequenceNode, SetPosNode, ShakeNode, SlideNode,
+                         SoundNode};
 use elements::cutscene::WaitNode;
 use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
           Resources, Sound, Sprite};
 use modes::SOLVED_INFO_TEXT;
 use save::{Game, NoReturnState, PuzzleState};
-use super::scenes::{self, YTTRIS};
+use super::scenes::{self, DOOR_LOWER, DOOR_UPPER, YTTRIS};
 
 // ========================================================================= //
 
@@ -54,7 +55,7 @@ impl View {
         let mut view = View {
             core: core,
             bridge: TileBridge::new(resources, 112, 176),
-            button: StartStopButton::new(resources, 96, 189),
+            button: StartStopButton::new(resources, 96, 208),
             animation: Scene::empty(),
             running: false,
         };
@@ -81,28 +82,42 @@ impl View {
         let mut seq: Vec<Box<SceneNode>> = Vec::new();
         loop {
             seq.push(Box::new(SoundNode::new(Sound::small_jump())));
-            if next_col < 0 {
-                let pt = Point::new(91, 160);
+            if next_col == -1 {
+                let pt = self.bridge.tile_center_top(-1);
                 seq.push(Box::new(JumpNode::new(YTTRIS, pt, 0.5)));
+                seq.push(Box::new(QueueNode::new((-1, 0))));
+            } else if next_col < 0 {
+                let pt = Point::new(91, 160);
+                seq.push(Box::new(JumpNode::new(YTTRIS, pt, 0.4)));
                 let sound = Sound::character_collision();
                 seq.push(Box::new(SoundNode::new(sound)));
                 let pt = self.bridge.tile_center_top(-1);
                 seq.push(Box::new(JumpNode::new(YTTRIS, pt, 0.2)));
                 seq.push(Box::new(QueueNode::new((-1, 0))));
+            } else if next_col == num_cols && visited.len() == values.len() {
+                let pt = self.bridge.tile_center_top(num_cols);
+                let mut par: Vec<Box<SceneNode>> = Vec::new();
+                par.push(Box::new(SlideNode::new(DOOR_UPPER,
+                                                 Point::new(505, 144),
+                                                 false,
+                                                 false,
+                                                 0.3)));
+                par.push(Box::new(SlideNode::new(DOOR_LOWER,
+                                                 Point::new(505, 192),
+                                                 false,
+                                                 false,
+                                                 0.3)));
+                par.push(Box::new(JumpNode::new(YTTRIS, pt, 0.5)));
+                seq.push(Box::new(ParallelNode::new(par)));
             } else if next_col >= num_cols {
-                if visited.len() == values.len() {
-                    let pt = self.bridge.tile_center_top(num_cols);
-                    seq.push(Box::new(JumpNode::new(YTTRIS, pt, 0.5)));
-                } else {
-                    let pt = Point::new(483, 160);
-                    seq.push(Box::new(JumpNode::new(YTTRIS, pt, 0.5)));
-                    let sound = Sound::character_collision();
-                    seq.push(Box::new(SoundNode::new(sound)));
-                    let pt = Point::new(450, 416);
-                    let fall_time = JumpNode::time_to_fall(416 - 160);
-                    seq.push(Box::new(JumpNode::new(YTTRIS, pt, fall_time)));
-                    self.yttris_land_on_floor(&mut seq);
-                }
+                let pt = Point::new(483, 160);
+                seq.push(Box::new(JumpNode::new(YTTRIS, pt, 0.5)));
+                let sound = Sound::character_collision();
+                seq.push(Box::new(SoundNode::new(sound)));
+                let pt = Point::new(450, 416);
+                let fall_time = JumpNode::time_to_fall(416 - 160);
+                seq.push(Box::new(JumpNode::new(YTTRIS, pt, fall_time)));
+                self.yttris_land_on_floor(&mut seq);
             } else if visited.contains(&next_col) {
                 let pt = self.bridge.tile_center_top(next_col);
                 seq.push(Box::new(JumpNode::new(YTTRIS, pt, 0.5)));
@@ -141,8 +156,8 @@ impl Element<Game, PuzzleCmd> for View {
         self.core.draw_back_layer(canvas);
         self.button
             .draw(&(self.running, self.core.theater().shake_offset()), canvas);
-        self.core.draw_middle_layer(canvas);
         self.bridge.draw(state, canvas);
+        self.core.draw_middle_layer(canvas);
         self.core.draw_front_layer(canvas, state);
     }
 
@@ -150,12 +165,13 @@ impl Element<Game, PuzzleCmd> for View {
                     -> Action<PuzzleCmd> {
         let state = &mut game.point_of_no_return;
         let mut action = self.core.handle_event(event, state);
-        if !action.should_stop() {
+        if !action.should_stop() && !state.is_solved() {
             let mut input = (self.running, self.core.theater().shake_offset());
             let subaction = self.button.handle_event(event, &mut input);
             if let Some(&run) = subaction.value() {
                 self.stop_and_refresh();
                 if run {
+                    state.check_if_solved();
                     self.start_animation(state);
                 }
             }
@@ -166,15 +182,16 @@ impl Element<Game, PuzzleCmd> for View {
                 .handle_event(event, self.core.theater_mut());
             action.merge(subaction.but_no_value());
             self.drain_queue();
-            if self.animation.is_finished() {
+            if self.running && self.animation.is_finished() {
                 self.running = false;
-                if state.check_if_solved() {
+                if state.is_solved() {
                     self.core.begin_outro_scene();
                 }
             }
         }
         if !action.should_stop() &&
-            (!self.running || event == &Event::ClockTick)
+            (!self.running && !state.is_solved() ||
+                 event == &Event::ClockTick)
         {
             let subaction = self.bridge.handle_event(event, state);
             if let Some(&(old_index, new_index)) = subaction.value() {
@@ -222,7 +239,7 @@ impl PuzzleView for View {
     fn solve(&mut self, game: &mut Game) {
         game.point_of_no_return.solve();
         self.stop_and_refresh();
-        self.core.begin_outro_scene();
+        self.start_animation(&game.point_of_no_return);
     }
 
     fn drain_queue(&mut self) {
@@ -311,6 +328,10 @@ impl Element<NoReturnState, (usize, usize)> for TileBridge {
             self.draw_tile(col, tile, x, canvas);
             col += tile.len() as i32;
         }
+        canvas.draw_sprite(&self.sprites[6],
+                           Point::new(self.left - TILE_SIZE, self.top));
+        canvas.draw_sprite(&self.sprites[7],
+                           Point::new(self.left + TILE_SIZE * col, self.top));
         if let Some(ref drag) = self.drag {
             let col = start_cols[drag.index];
             let tile = tiles[drag.index];
@@ -372,36 +393,34 @@ impl Element<NoReturnState, (usize, usize)> for TileBridge {
 const TILE_SLIDE_SPEED: i32 = 10;
 
 struct TileDrag {
-    index: usize,
-    new_col: i32,
-    new_index: usize,
-    from: i32,
-    to: i32,
-    num_cols: i32,
-    tile_spans: Vec<(i32, usize)>,
-    offsets: Vec<(i32, i32)>,
+    index: usize, // original index in state.tiles() of tile being dragged
+    new_index: usize, // new index where dragged tile will be inserted
+    new_col: i32, // new start_col of dragged tile once inserted
+    from: i32, // mouse x where drag started
+    to: i32, // current mouse x
+    tile_spans: Vec<(i32, usize)>, // original (start_col, size) of each tile
+    offsets: Vec<(i32, i32)>, // (current_dx, goal_dx) of each tile
 }
 
 impl TileDrag {
     fn new(index: usize, from: i32, state: &NoReturnState) -> TileDrag {
         let tiles = state.tiles();
-        let (tile_spans, num_cols) = {
+        let tile_spans = {
             let mut tile_spans = Vec::new();
             let mut col: i32 = 0;
             for &tile in tiles.iter() {
                 tile_spans.push((col, tile.len()));
                 col += tile.len() as i32;
             }
-            (tile_spans, col)
+            tile_spans
         };
-        let new_col = tile_spans[index].0;
+        let col = tile_spans[index].0;
         TileDrag {
             index: index,
-            new_col: new_col,
             new_index: index,
+            new_col: col,
             from: from,
             to: from,
-            num_cols: num_cols,
             tile_spans: tile_spans,
             offsets: vec![(0, 0); tiles.len()],
         }
@@ -409,28 +428,44 @@ impl TileDrag {
 
     fn set_to(&mut self, to: i32) {
         self.to = to;
+        let left = self.new_col * TILE_SIZE + self.to - self.from;
         let tile_width = self.tile_spans[self.index].1 as i32;
-        let new_col = cmp::min(cmp::max(0,
-                                        self.new_col +
-                                            (self.to - self.from) /
-                                                TILE_SIZE),
-                               self.num_cols);
-        let mut new_index: usize = 0;
-        for &(start_col, _) in self.tile_spans.iter() {
-            if new_col <= start_col {
-                break;
+
+        let mut new_index = self.new_index;
+        let mut new_col = self.new_col;
+        let mut smallest_gap = (self.to - self.from).abs();
+        for index in 0..self.tile_spans.len() {
+            let col = {
+                let mut col: i32 = 0;
+                let mut num_tiles: usize = 0;
+                for (idx, &(_, width)) in self.tile_spans.iter().enumerate() {
+                    if num_tiles == index {
+                        break;
+                    }
+                    if idx != self.index {
+                        col += width as i32;
+                        num_tiles += 1;
+                    }
+                }
+                col
+            };
+            let gap = (col * TILE_SIZE - left).abs();
+            if gap < smallest_gap {
+                new_index = index;
+                new_col = col;
+                smallest_gap = gap;
             }
-            new_index += 1;
-        }
-        if new_index > self.index {
-            new_index -= 1;
         }
         debug_assert!(new_index < self.tile_spans.len());
+
+        // If tile has been dragged far enough so far to change index, update
+        // fields accordingly.
         if self.new_index != new_index {
             self.from += (new_col - self.new_col) * TILE_SIZE;
             self.new_index = new_index;
             self.new_col = new_col;
             let old_index = self.index;
+            // Update draw offset goals for other tiles that got shifted.
             for (index, &mut (_, ref mut goal)) in
                 self.offsets.iter_mut().enumerate()
             {
@@ -443,6 +478,8 @@ impl TileDrag {
                 }
             }
         }
+
+        // Set draw offset of tile being dragged.
         let old_col = self.tile_spans[self.index].0;
         let offset = (self.new_col - old_col) * TILE_SIZE + self.to -
             self.from;
@@ -511,7 +548,12 @@ impl Element<(bool, Point), bool> for StartStopButton {
 
 const INFO_BOX_TEXT: &str = "\
 Your goal is to reorder the pieces of the walkway so that
-Yttris can cross while landing on each square exactly once.
+Yttris can cross from ``BEGIN'' to ``END'' while landing on
+each square exactly once.
+
+Once the last remaining square has been eliminated, the
+door on the right-hand side will open, allowing Yttris to
+land on the ``END'' platform.
 
 Drag pieces left and right with $M{your finger}{the mouse} to reorder them.
 When you're ready, $M{tap}{click} the green triangle button on the

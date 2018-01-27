@@ -88,7 +88,8 @@ impl View {
                 seq.push(Box::new(QueueNode::new((-1, 0))));
             } else if next_col < 0 {
                 let pt = Point::new(91, 160);
-                seq.push(Box::new(JumpNode::new(YTTRIS, pt, 0.4)));
+                let time = 0.6 + 0.1 * next_col as f64;
+                seq.push(Box::new(JumpNode::new(YTTRIS, pt, time)));
                 let sound = Sound::character_collision();
                 seq.push(Box::new(SoundNode::new(sound)));
                 let pt = self.bridge.tile_center_top(-1);
@@ -111,7 +112,8 @@ impl View {
                 seq.push(Box::new(ParallelNode::new(par)));
             } else if next_col >= num_cols {
                 let pt = Point::new(483, 160);
-                seq.push(Box::new(JumpNode::new(YTTRIS, pt, 0.5)));
+                let time = 0.5 - 0.1 * (next_col - num_cols) as f64;
+                seq.push(Box::new(JumpNode::new(YTTRIS, pt, time)));
                 let sound = Sound::character_collision();
                 seq.push(Box::new(SoundNode::new(sound)));
                 let pt = Point::new(450, 416);
@@ -177,12 +179,12 @@ impl Element<Game, PuzzleCmd> for View {
             }
             action.merge(subaction.but_no_value());
         }
-        if !action.should_stop() {
+        if !action.should_stop() && self.running {
             let subaction = self.animation
                 .handle_event(event, self.core.theater_mut());
             action.merge(subaction.but_no_value());
             self.drain_queue();
-            if self.running && self.animation.is_finished() {
+            if self.animation.is_finished() {
                 self.running = false;
                 if state.is_solved() {
                     self.core.begin_outro_scene();
@@ -248,6 +250,10 @@ impl PuzzleView for View {
                 self.bridge.visited.clear();
             } else if command == 0 {
                 self.bridge.visited.insert(index);
+            } else if command == 1 {
+                if index >= 0 && (index as usize) < LETTERS.len() {
+                    self.bridge.letter_cols.insert(index);
+                }
             }
         }
     }
@@ -260,22 +266,26 @@ const TILE_SIZE: i32 = TILE_USIZE as i32;
 
 struct TileBridge {
     sprites: Vec<Sprite>,
-    font: Rc<Font>,
+    numbers_font: Rc<Font>,
     left: i32,
     top: i32,
     drag: Option<TileDrag>,
     visited: HashSet<i32>,
+    letters_font: Rc<Font>,
+    letter_cols: HashSet<i32>,
 }
 
 impl TileBridge {
     fn new(resources: &mut Resources, left: i32, top: i32) -> TileBridge {
         TileBridge {
             sprites: resources.get_sprites("point/no_return"),
-            font: resources.get_font("roman"),
+            numbers_font: resources.get_font("no_return"),
             left: left,
             top: top,
             drag: None,
             visited: HashSet::new(),
+            letters_font: resources.get_font("block"),
+            letter_cols: HashSet::new(),
         }
     }
 
@@ -286,26 +296,34 @@ impl TileBridge {
     fn draw_tile(&self, start_col: i32, tile: &[i32], x: i32,
                  canvas: &mut Canvas) {
         for (index, &value) in tile.iter().enumerate() {
-            if self.visited.contains(&(start_col + index as i32)) {
-                continue;
-            }
+            let col = start_col + index as i32;
             let pt = Point::new(x + TILE_SIZE * (index as i32), self.top);
-            let bg_index = if tile.len() == 1 {
-                0
-            } else if index == 0 {
-                2
-            } else if index + 1 == tile.len() {
-                3
+            let mut arrow_index = if value < 0 { 4 } else { 5 };
+            if self.visited.contains(&col) {
+                arrow_index += 2;
             } else {
-                1
-            };
-            canvas.draw_sprite(&self.sprites[bg_index], pt);
-            let arrow_index = if value < 0 { 4 } else { 5 };
+                let bg_index = if tile.len() == 1 {
+                    0
+                } else if index == 0 {
+                    2
+                } else if index + 1 == tile.len() {
+                    3
+                } else {
+                    1
+                };
+                canvas.draw_sprite(&self.sprites[bg_index], pt);
+            }
             canvas.draw_sprite(&self.sprites[arrow_index], pt);
-            canvas.draw_text(&self.font,
+            canvas.draw_text(&self.numbers_font,
                              Align::Center,
                              pt + Point::new(12, 20),
                              &format!("{}", value.abs()));
+            if self.letter_cols.contains(&col) {
+                canvas.draw_char(&self.letters_font,
+                                 Align::Center,
+                                 pt + Point::new(12, -2),
+                                 LETTERS[col as usize]);
+            }
         }
     }
 }
@@ -328,9 +346,9 @@ impl Element<NoReturnState, (usize, usize)> for TileBridge {
             self.draw_tile(col, tile, x, canvas);
             col += tile.len() as i32;
         }
-        canvas.draw_sprite(&self.sprites[6],
+        canvas.draw_sprite(&self.sprites[8],
                            Point::new(self.left - TILE_SIZE, self.top));
-        canvas.draw_sprite(&self.sprites[7],
+        canvas.draw_sprite(&self.sprites[9],
                            Point::new(self.left + TILE_SIZE * col, self.top));
         if let Some(ref drag) = self.drag {
             let col = start_cols[drag.index];
@@ -545,6 +563,25 @@ impl Element<(bool, Point), bool> for StartStopButton {
 }
 
 // ========================================================================= //
+
+const LETTERS: &[char] = &[
+    '*',
+    'S',
+    'E',
+    'I',
+    'V',
+    'T',
+    'I',
+    'N',
+    'O',
+    'G',
+    'N',
+    'I',
+    '*',
+    'A',
+    '?',
+    'T',
+];
 
 const INFO_BOX_TEXT: &str = "\
 Your goal is to reorder the pieces of the walkway so that

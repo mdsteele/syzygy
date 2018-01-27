@@ -28,26 +28,25 @@ use super::PuzzleState;
 
 const ORDER_KEY: &str = "order";
 
-const TILES: [&[i32]; 8] = [
-    &[-1, 4],
-    &[-3, 3],
-    &[-6, 4, 2],
-    &[7, 5],
-    &[6, 3],
-    &[-4, -4],
+const TILES: [&[i32]; 7] = [
     &[-1],
-    &[-1, 2],
+    &[4, 4],
+    &[3, -3, 2],
+    &[-2, -4],
+    &[3, 4],
+    &[4, -2, 1],
+    &[-3, 4, 2],
 ];
 
-const INITIAL_ORDER: [usize; 8] = [0, 1, 2, 3, 4, 5, 6, 7];
-// Solved arragement is f6-f3 b1-f4 b1 b3-f3 f7-f5 b1-f2 b6-f4-f2 b4-b4
-const SOLVED_ORDER: [usize; 8] = [4, 0, 6, 1, 3, 7, 2, 5];
+const INITIAL_ORDER: [usize; 7] = [0, 1, 2, 3, 4, 5, 6];
+// Solved arragement is: f3-f4 b1 f4-b2-f1 f3-b3-f2 f4-f4 b3-f4-f2 b2-b4
+const SOLVED_ORDER: [usize; 7] = [4, 0, 5, 2, 1, 6, 3];
 
 // ========================================================================= //
 
 pub struct NoReturnState {
     access: Access,
-    order: [usize; 8],
+    order: [usize; 7],
 }
 
 impl NoReturnState {
@@ -142,7 +141,7 @@ impl Tomlable for NoReturnState {
         let order = if access.is_solved() {
             SOLVED_ORDER
         } else {
-            let mut order = [0; 8];
+            let mut order = [0; 7];
             let order_toml = pop_array(&mut table, ORDER_KEY);
             for (index, value) in order_toml.into_iter().enumerate() {
                 if index >= order.len() {
@@ -182,11 +181,11 @@ mod tests {
     fn toml_round_trip() {
         let mut state = NoReturnState::from_toml(toml::Value::Boolean(false));
         state.access = Access::Replaying;
-        state.order = [3, 1, 4, 5, 2, 6, 7, 0];
+        state.order = [3, 1, 4, 5, 2, 6, 0];
 
         let state = NoReturnState::from_toml(state.to_toml());
         assert_eq!(state.access, Access::Replaying);
-        assert_eq!(state.order, [3, 1, 4, 5, 2, 6, 7, 0]);
+        assert_eq!(state.order, [3, 1, 4, 5, 2, 6, 0]);
     }
 
     #[test]

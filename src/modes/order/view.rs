@@ -87,6 +87,7 @@ impl Element<Game, PuzzleCmd> for View {
                 if state.is_solved() {
                     self.core.begin_outro_scene();
                 } else if state.current_row() > old_row {
+                    action.also_play_sound(Sound::mid_puzzle_chime());
                     self.core.clear_undo_redo();
                 } else {
                     self.core.push_undo((old_index, new_index));
@@ -206,6 +207,8 @@ impl Element<OrderState, (usize, usize)> for TileRow {
                 let value = state.row_order(self.row)[drag.index];
                 let x = self.left + TILE_SPACING * (drag.index as i32) + 1 +
                     drag.offset(drag.index);
+                let x = x.max(self.left - TILE_SPACING / 2 + 1);
+                let x = x.min(self.left + (TILE_SPACING * 11) / 2 + 1);
                 let pt = Point::new(x, self.top + 1);
                 let symbol_index = 6 * self.row + value;
                 canvas.draw_sprite(&self.tile_sprites[0], pt);

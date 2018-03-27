@@ -17,7 +17,6 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use std::ascii::AsciiExt;
 use std::collections::HashSet;
 use toml;
 

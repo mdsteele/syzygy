@@ -115,7 +115,7 @@ impl Element<(), (i32, i32)> for ArrowPair {
             }
             &Event::MouseDown(pt) => {
                 let rect = self.rect();
-                if rect.contains(pt) {
+                if rect.contains_point(pt) {
                     if pt.x() - rect.x() <= (rect.width() / 2) as i32 {
                         self.blink_left = ARROW_BLINK_FRAMES;
                         Action::redraw().and_return((self.row, -self.delta()))

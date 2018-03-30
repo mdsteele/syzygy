@@ -287,7 +287,7 @@ impl Element<WreckedState, (Direction, i32, i32)> for WreckedGrid {
             Rect::new(GRID_LEFT, GRID_TOP, 9 * TILE_USIZE, 7 * TILE_USIZE);
         match event {
             &Event::MouseDown(pt) if !state.is_solved() => {
-                if rect.contains(pt) {
+                if rect.contains_point(pt) {
                     let rel_pt = pt - rect.top_left();
                     let col = rel_pt.x() / TILE_SIZE;
                     let row = rel_pt.y() / TILE_SIZE;

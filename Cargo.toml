@@ -24,8 +24,7 @@ single meta-puzzle.
 app_dirs = "1.1"
 getopts = "0.2"
 num-integer = "0.1"
-rand = "0.3"
-sdl2 = { version = "0.28", features = ["use_mac_framework"] }
+rand = "0.4"
 toml = "0.4"
 
 [dependencies.ahi]
@@ -35,3 +34,8 @@ rev = "8dfd2b39ba35d77a3260d95d53369c149e875ecf"
 [dependencies.itersynth]
 git = "https://github.com/mdsteele/itersynth"
 rev = "bc1e3ffe726c80e3a931bf9e58f4a98f213c2bf5"
+
+[dependencies.sdl2]
+git = "https://github.com/mdsteele/rust-sdl2"
+branch = "hash"
+features = ["unsafe_textures", "use_mac_framework"]

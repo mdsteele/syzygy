@@ -335,7 +335,7 @@ impl Element<PovState, PovCmd> for PovGridView {
                 }
             }
             &Event::MouseDown(pt) if !state.is_solved() => {
-                if self.rect.contains(pt) {
+                if self.rect.contains_point(pt) {
                     let pt = pt - self.rect.top_left();
                     let col = pt.x() / GRID_CELL_SIZE;
                     let row = pt.y() / GRID_CELL_SIZE;

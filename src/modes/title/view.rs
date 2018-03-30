@@ -194,7 +194,7 @@ impl Element<SaveData, Cmd> for Button {
             return Action::ignore();
         }
         match event {
-            &Event::MouseDown(pt) if self.rect().contains(pt) => {
+            &Event::MouseDown(pt) if self.rect().contains_point(pt) => {
                 self.active = true;
                 Action::redraw()
                     .and_play_sound(Sound::beep())

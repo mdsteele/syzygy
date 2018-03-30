@@ -185,7 +185,7 @@ impl Element<PlaneGrid, PlaneCmd> for PlaneGridView {
     fn handle_event(&mut self, event: &Event, grid: &mut PlaneGrid)
                     -> Action<PlaneCmd> {
         match event {
-            &Event::MouseDown(pt) if self.rect(grid).contains(pt) => {
+            &Event::MouseDown(pt) if self.rect(grid).contains_point(pt) => {
                 self.drag_from = self.pt_to_coords(grid, pt);
                 Action::ignore().and_stop()
             }

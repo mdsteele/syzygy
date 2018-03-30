@@ -195,7 +195,7 @@ impl Element<Grid, i8> for MemoryGridView {
                 Action::redraw_if(redraw)
             }
             &Event::MouseDown(pt)
-                if self.rect.contains(pt) && self.flip_symbol == 0 => {
+                if self.rect.contains_point(pt) && self.flip_symbol == 0 => {
                 let pt = pt - self.rect.top_left();
                 let col = pt.x() / 32;
                 let row = pt.y() / 32;
@@ -264,10 +264,10 @@ impl Element<Option<Shape>, Point> for NextShapeView {
             &Event::MouseDown(pt) => {
                 if let &mut Some(ref shape) = next_shape {
                     let rect = self.rect();
-                    if rect.contains(pt) {
+                    if rect.contains_point(pt) {
                         let rel_pt = pt - rect.top_left();
                         for (coords, _) in shape.tiles() {
-                            if self.cell_rect(coords).contains(rel_pt) {
+                            if self.cell_rect(coords).contains_point(rel_pt) {
                                 self.drag = Some(ShapeDrag::new(pt));
                                 let sound = Sound::device_pickup();
                                 return Action::ignore().and_play_sound(sound);

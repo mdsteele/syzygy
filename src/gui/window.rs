@@ -20,8 +20,9 @@
 use sdl2::{AudioSubsystem, EventPump, Sdl, VideoSubsystem};
 use sdl2::audio::AudioDevice;
 use sdl2::rect::{Point, Rect};
-use sdl2::render::Renderer;
+use sdl2::render::Canvas as SdlCanvas;
 use sdl2::video::FullscreenType;
+use sdl2::video::Window as SdlWindow;
 use std::rc::Rc;
 use std::sync::Arc;
 
@@ -39,7 +40,7 @@ pub struct Window {
     _audio_device: AudioDevice<SoundMixer>,
     sound_queue: Arc<SoundQueue>,
     _video_subsystem: VideoSubsystem,
-    renderer: Renderer<'static>,
+    renderer: SdlCanvas<SdlWindow>,
     full_rect: Rect,
     event_pump: EventPump,
     resource_cache: ResourceCache,
@@ -86,7 +87,7 @@ impl Window {
             }
         };
         let mut renderer =
-            sdl_window.renderer().present_vsync().build().unwrap();
+            sdl_window.into_canvas().present_vsync().build().unwrap();
         renderer.set_logical_size(actual_width, actual_height).unwrap();
         let offset_x = (actual_width as i32 - full_width as i32) / 2;
         let offset_y = (actual_height as i32 - full_height as i32) / 2;
@@ -126,8 +127,7 @@ impl Window {
 
     #[allow(dead_code)]
     pub fn is_fullscreen(&self) -> bool {
-        self.renderer.window().unwrap().fullscreen_state() !=
-            FullscreenType::Off
+        self.renderer.window().fullscreen_state() != FullscreenType::Off
     }
 
     #[allow(dead_code)]
@@ -141,7 +141,7 @@ impl Window {
             if cfg!(debug_assertions) {
                 println!("Setting fullscreen to {:?}.", state);
             }
-            self.renderer.window_mut().unwrap().set_fullscreen(state).unwrap();
+            self.renderer.window_mut().set_fullscreen(state).unwrap();
         }
     }
 

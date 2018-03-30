@@ -144,7 +144,7 @@ impl Element<Columns, (usize, i32)> for ColumnsView {
             }
             &Event::MouseDown(pt) => {
                 for col in 0..columns.num_columns() {
-                    if self.column_rect(columns, col).contains(pt) &&
+                    if self.column_rect(columns, col).contains_point(pt) &&
                         !columns.column_linkages(col).is_empty()
                     {
                         self.drag = Some((col, pt.y(), pt.y()));

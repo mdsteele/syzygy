@@ -230,7 +230,7 @@ impl Element<OrderState, (usize, usize)> for TileRow {
                 for index in 0..num_tiles {
                     let tile_left = self.left + TILE_SPACING * (index as i32);
                     let rect = Rect::new(tile_left, self.top, 28, 28);
-                    if rect.contains(pt) {
+                    if rect.contains_point(pt) {
                         self.drag =
                             Some(TileDrag::new(index, pt.x(), num_tiles));
                         let sound = Sound::device_pickup();

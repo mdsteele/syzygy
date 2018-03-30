@@ -116,7 +116,7 @@ impl Theater {
 
     pub fn actor_at_point(&self, point: Point) -> Option<i32> {
         for (&slot, actor) in self.actors.iter().rev() {
-            if actor.rect().contains(point) {
+            if actor.rect().contains_point(point) {
                 return Some(slot);
             }
         }

@@ -123,7 +123,7 @@ impl Element<SyzygyState, (i32, i32)> for ToggleLight {
                             &mut self.light_radius,
                             TOGGLE_MAX_LIGHT_RADIUS)
             }
-            &Event::MouseDown(pt) if self.rect().contains(pt) => {
+            &Event::MouseDown(pt) if self.rect().contains_point(pt) => {
                 Action::redraw().and_return(self.position)
             }
             _ => Action::ignore(),

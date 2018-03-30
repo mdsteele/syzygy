@@ -374,7 +374,7 @@ impl Element<NoReturnState, (usize, usize)> for TileBridge {
                                          self.top,
                                          TILE_USIZE * tile.len() as u32,
                                          TILE_USIZE);
-                    if rect.contains(pt) {
+                    if rect.contains_point(pt) {
                         self.drag = Some(TileDrag::new(index, pt.x(), state));
                         let sound = Sound::device_pickup();
                         return Action::redraw().and_play_sound(sound);
@@ -553,7 +553,7 @@ impl Element<(bool, Point), bool> for StartStopButton {
     fn handle_event(&mut self, event: &Event, input: &mut (bool, Point))
                     -> Action<bool> {
         match event {
-            &Event::MouseDown(pt) if self.rect.contains(pt) => {
+            &Event::MouseDown(pt) if self.rect.contains_point(pt) => {
                 // TODO: play sound
                 Action::redraw().and_return(!input.0)
             }

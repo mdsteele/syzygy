@@ -260,7 +260,7 @@ impl Element<AtticState, (i32, i32)> for ToggleLight {
                             TOGGLE_MAX_LIGHT_RADIUS)
             }
             &Event::MouseDown(pt)
-                if self.rect().contains(pt) && !state.is_solved() => {
+                if self.rect().contains_point(pt) && !state.is_solved() => {
                 Action::redraw().and_return(self.position)
             }
             _ => Action::ignore(),

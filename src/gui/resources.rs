@@ -18,7 +18,8 @@
 // +--------------------------------------------------------------------------+
 
 use ahi;
-use sdl2::render::Renderer;
+use sdl2::render::Canvas as SdlCanvas;
+use sdl2::video::Window as SdlWindow;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io;
@@ -32,12 +33,13 @@ use super::sprite::Sprite;
 // ========================================================================= //
 
 pub struct Resources<'a> {
-    renderer: &'a Renderer<'static>,
+    renderer: &'a SdlCanvas<SdlWindow>,
     cache: &'a mut ResourceCache,
 }
 
 impl<'a> Resources<'a> {
-    pub fn new(renderer: &'a Renderer<'static>, cache: &'a mut ResourceCache)
+    pub fn new(renderer: &'a SdlCanvas<SdlWindow>,
+               cache: &'a mut ResourceCache)
                -> Resources<'a> {
         Resources {
             renderer: renderer,
@@ -75,7 +77,7 @@ impl ResourceCache {
         }
     }
 
-    fn get_background(&mut self, renderer: &Renderer, name: &str)
+    fn get_background(&mut self, renderer: &SdlCanvas<SdlWindow>, name: &str)
                       -> Rc<Background> {
         if let Some(background) = self.backgrounds.get(name) {
             return background.clone();
@@ -94,7 +96,8 @@ impl ResourceCache {
         background
     }
 
-    fn get_font(&mut self, renderer: &Renderer, name: &str) -> Rc<Font> {
+    fn get_font(&mut self, renderer: &SdlCanvas<SdlWindow>, name: &str)
+                -> Rc<Font> {
         if let Some(font) = self.fonts.get(name) {
             return font.clone();
         }
@@ -109,7 +112,8 @@ impl ResourceCache {
         font
     }
 
-    fn get_sprites(&mut self, renderer: &Renderer, name: &str) -> Vec<Sprite> {
+    fn get_sprites(&mut self, renderer: &SdlCanvas<SdlWindow>, name: &str)
+                   -> Vec<Sprite> {
         if let Some(vec) = self.sprites.get(name) {
             return vec.clone();
         }

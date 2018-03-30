@@ -18,7 +18,8 @@
 // +--------------------------------------------------------------------------+
 
 use ahi;
-use sdl2::render::Renderer;
+use sdl2::render::Canvas as SdlCanvas;
+use sdl2::video::Window as SdlWindow;
 use std::collections::HashMap;
 use super::sprite::Sprite;
 
@@ -31,7 +32,7 @@ pub struct Font {
 }
 
 impl Font {
-    pub fn new(renderer: &Renderer, font: &ahi::Font) -> Font {
+    pub fn new(renderer: &SdlCanvas<SdlWindow>, font: &ahi::Font) -> Font {
         let mut glyphs = HashMap::new();
         for chr in font.chars() {
             glyphs.insert(chr, Glyph::new(renderer, &font[chr]));
@@ -70,7 +71,7 @@ pub struct Glyph {
 }
 
 impl Glyph {
-    fn new(renderer: &Renderer, glyph: &ahi::Glyph) -> Glyph {
+    fn new(renderer: &SdlCanvas<SdlWindow>, glyph: &ahi::Glyph) -> Glyph {
         Glyph {
             sprite: Sprite::new(renderer, glyph.image()),
             left_edge: glyph.left_edge(),

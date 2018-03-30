@@ -314,7 +314,7 @@ impl Element<CubeState, (Direction, i32, i32)> for CubeGrid {
         let rect = self.rect();
         match event {
             &Event::MouseDown(pt) if !state.is_solved() => {
-                if rect.contains(pt) {
+                if rect.contains_point(pt) {
                     let rel_pt = pt - rect.top_left();
                     self.drag = Some(Drag::new(rel_pt));
                 }

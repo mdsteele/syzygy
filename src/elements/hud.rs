@@ -243,7 +243,7 @@ impl Element<HudInput, HudCmd> for HudButton {
             }
             &Event::MouseDown(pt)
                 if self.scroll == 0 && self.is_enabled(input) &&
-                       self.rect.contains(pt) => {
+                       self.rect.contains_point(pt) => {
                 self.blink_frames = BLINK_FRAMES;
                 self.flashing = false;
                 self.click_action()
@@ -394,7 +394,7 @@ impl Element<HudInput, HudCmd> for SkipIndicator {
                     -> Action<HudCmd> {
         match event {
             &Event::MouseDown(pt)
-                if input.show_skip && self.outer_rect.contains(pt) => {
+                if input.show_skip && self.outer_rect.contains_point(pt) => {
                 Action::redraw().and_return(HudCmd::Skip)
             }
             &Event::KeyDown(Keycode::Escape, _) if input.show_skip => {

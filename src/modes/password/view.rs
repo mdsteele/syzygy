@@ -401,7 +401,7 @@ impl Element<PasswordState, (i32, i32)> for PasswordSlider {
         match event {
             &Event::MouseDown(pt) if !state.is_solved() => {
                 for col in 0..6 {
-                    if self.get_slider_rect(state, col).contains(pt) {
+                    if self.get_slider_rect(state, col).contains_point(pt) {
                         self.drag = Some(SliderDrag {
                                              col: col,
                                              from_y: pt.y(),

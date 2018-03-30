@@ -282,7 +282,7 @@ impl Element<LineState, ()> for LetterGrid {
                 };
                 let rect = self.grid_rect(num_cols, num_chars);
                 let mut new_selected = self.selected;
-                if rect.contains(pt) {
+                if rect.contains_point(pt) {
                     let col = (pt.x() - rect.left()) / BOX_SIZE;
                     let row = (pt.y() - rect.top()) / BOX_SIZE;
                     let index = (row * num_cols + col) as usize;
@@ -291,7 +291,7 @@ impl Element<LineState, ()> for LetterGrid {
                     } else {
                         new_selected = Some(index);
                     }
-                } else if self.max_rect().contains(pt) {
+                } else if self.max_rect().contains_point(pt) {
                     new_selected = None;
                 }
                 if new_selected != self.selected {

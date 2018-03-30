@@ -19,7 +19,8 @@
 
 use sdl2::pixels::Color;
 use sdl2::rect::{Point, Rect};
-use sdl2::render::Renderer;
+use sdl2::render::Canvas as SdlCanvas;
+use sdl2::video::Window as SdlWindow;
 use super::background::Background;
 use super::font::Font;
 use super::sprite::Sprite;
@@ -27,14 +28,15 @@ use super::sprite::Sprite;
 // ========================================================================= //
 
 pub struct Canvas<'a> {
-    renderer: &'a mut Renderer<'static>,
+    renderer: &'a mut SdlCanvas<SdlWindow>,
     offset_rect: Rect,
     clip_rect: Option<Rect>,
     prev_clip_rect: Option<Rect>,
 }
 
 impl<'a> Canvas<'a> {
-    pub fn new(renderer: &'a mut Renderer<'static>, rect: Rect) -> Canvas<'a> {
+    pub fn new(renderer: &'a mut SdlCanvas<SdlWindow>, rect: Rect)
+               -> Canvas<'a> {
         Canvas {
             renderer: renderer,
             offset_rect: rect,

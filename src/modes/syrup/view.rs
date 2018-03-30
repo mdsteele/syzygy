@@ -300,7 +300,7 @@ impl Element<SyrupState, (i32, i32)> for ToggleLight {
                                       tick_radius(blue, &mut self.blue_radius))
             }
             &Event::MouseDown(pt)
-                if self.rect().contains(pt) && !state.is_solved() => {
+                if self.rect().contains_point(pt) && !state.is_solved() => {
                 Action::redraw().and_return(self.position)
             }
             _ => Action::ignore(),

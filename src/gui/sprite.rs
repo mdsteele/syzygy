@@ -20,8 +20,10 @@
 use ahi;
 use sdl2::pixels::PixelFormatEnum;
 use sdl2::rect::Rect;
-use sdl2::render::{Renderer, Texture};
+use sdl2::render::Canvas as SdlCanvas;
+use sdl2::render::Texture;
 use sdl2::surface::Surface;
+use sdl2::video::Window as SdlWindow;
 use std::rc::Rc;
 
 // ========================================================================= //
@@ -34,7 +36,7 @@ pub struct Sprite {
 }
 
 impl Sprite {
-    pub fn new(renderer: &Renderer, image: &ahi::Image) -> Sprite {
+    pub fn new(renderer: &SdlCanvas<SdlWindow>, image: &ahi::Image) -> Sprite {
         let width = image.width();
         let height = image.height();
         let mut data = image.rgba_data();

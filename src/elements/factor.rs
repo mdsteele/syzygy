@@ -191,7 +191,8 @@ impl Element<Vec<i8>, i8> for TransformButton {
                 Action::ignore()
             }
             &Event::MouseDown(pt)
-                if self.rect.contains(pt) && !seq.contains(&self.index) => {
+                if self.rect.contains_point(pt) &&
+                       !seq.contains(&self.index) => {
                 Action::redraw().and_return(self.index)
             }
             _ => Action::ignore(),

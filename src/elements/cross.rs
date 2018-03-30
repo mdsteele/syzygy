@@ -176,7 +176,7 @@ impl Element<(), bool> for ArrowButton {
                 }
                 Action::ignore()
             }
-            &Event::MouseDown(pt) if self.rect().contains(pt) => {
+            &Event::MouseDown(pt) if self.rect().contains_point(pt) => {
                 self.activate()
             }
             &Event::KeyDown(Keycode::Left, _) if !self.next => self.activate(),

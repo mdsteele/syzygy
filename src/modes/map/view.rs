@@ -334,7 +334,7 @@ impl Element<Option<Location>, Location> for PuzzleNode {
                     selected: &mut Option<Location>)
                     -> Action<Location> {
         match event {
-            &Event::MouseDown(pt) if self.rect.contains(pt) => {
+            &Event::MouseDown(pt) if self.rect.contains_point(pt) => {
                 if *selected == Some(self.loc) {
                     Action::redraw().and_return(self.loc)
                 } else {

@@ -165,7 +165,8 @@ impl Grid {
                 indices.push(index);
             }
         }
-        let sample = rand::sample(&mut rand::thread_rng(), indices, num);
+        let sample =
+            rand::seq::sample_slice(&mut rand::thread_rng(), &indices, num);
         for index in sample {
             self.values[index] = -self.values[index];
         }

@@ -159,7 +159,7 @@ impl<A: Clone> Element<(), A> for DialogButton<A> {
 
     fn handle_event(&mut self, event: &Event, _: &mut ()) -> Action<A> {
         match event {
-            &Event::MouseDown(pt) if self.rect.contains(pt) => {
+            &Event::MouseDown(pt) if self.rect.contains_point(pt) => {
                 Action::redraw().and_return(self.value.clone())
             }
             _ => Action::ignore(),

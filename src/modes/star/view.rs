@@ -279,7 +279,7 @@ impl Element<StarState, (i32, i32, WordDir, i32)> for LetterColumns {
             }
             &Event::MouseDown(pt) => {
                 let rect = self.rect();
-                if rect.contains(pt) {
+                if rect.contains_point(pt) {
                     let col = (pt.x() - rect.left()) / BLOCK_WIDTH;
                     let row = (rect.bottom() - pt.y()) / BLOCK_HEIGHT;
                     if row < state.column_letters(col).len() as i32 {

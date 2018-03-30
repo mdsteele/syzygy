@@ -409,9 +409,10 @@ impl Board {
                 println!("Found single best move (score = {})", best_score);
             }
         }
-        rand::sample(&mut rand::thread_rng(), best_moves, 1)
-            .pop()
+        rand::seq::sample_iter(&mut rand::thread_rng(), best_moves, 1)
             .expect("no moves were possible")
+            .pop()
+            .unwrap()
     }
 
     /// Returns the best board score that the given team can guarantee getting

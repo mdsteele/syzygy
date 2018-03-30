@@ -497,7 +497,7 @@ impl Element<DeviceGrid, LaserCmd> for LaserField {
                 }
             }
             &Event::MouseDown(pt) => {
-                if self.rect.contains(pt) {
+                if self.rect.contains_point(pt) {
                     let pt = pt - self.rect.top_left();
                     let col = pt.x() / GRID_CELL_SIZE;
                     let row = pt.y() / GRID_CELL_SIZE;

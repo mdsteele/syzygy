@@ -205,8 +205,8 @@ impl GridView {
                                        center,
                                        direction.degrees(),
                                        false,
-                                       (direction == Direction::South ||
-                                            direction == Direction::West));
+                                       direction == Direction::South ||
+                                           direction == Direction::West);
     }
 
     pub fn draw_objects(&self, grid: &ObjectGrid, canvas: &mut Canvas) {

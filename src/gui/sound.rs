@@ -102,7 +102,7 @@ impl Sound {
             .adshr(0.01, 0.1, 0.5, 0.0, 0.2);
         let g4 = Wave::triangle(391.99, duty.clone())
             .adshr(0.01, 0.1, 0.5, 0.0, 0.4);
-        Sound::new((c4 + e4.delayed(0.05) + g4.delayed(0.1)))
+        Sound::new(c4 + e4.delayed(0.05) + g4.delayed(0.1))
     }
 
     pub fn solve_puzzle_chime() -> Sound {

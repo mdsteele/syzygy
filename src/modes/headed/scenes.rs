@@ -311,7 +311,7 @@ pub fn compile_yttris_midscene(resources: &mut Resources) -> (i32, Scene) {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_thought()),
             Ast::Talk(YTTRIS, TalkStyle::Thought, TalkPos::NE,
-                      "This is arduous."),
+                      "This is pretty arduous!"),
         ]),
     ];
     (YTTRIS, Ast::compile_scene(resources, ast))

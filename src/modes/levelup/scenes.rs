@@ -205,9 +205,13 @@ pub fn compile_elinsa_midscene(resources: &mut Resources) -> (i32, Scene) {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_thought()),
             Ast::Talk(ELINSA, TalkStyle::Thought, TalkPos::NE,
-                      "These words are all\n\
-                       too long...gotta make\n\
-                       `em fit somehow."),
+                      "These words are\n\
+                       all too long..."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_thought()),
+            Ast::Talk(ELINSA, TalkStyle::Thought, TalkPos::NE,
+                      "This is a bit dotty."),
         ]),
     ];
     (ELINSA, Ast::compile_scene(resources, ast))

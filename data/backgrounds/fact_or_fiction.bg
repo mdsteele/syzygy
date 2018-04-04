@@ -5,13 +5,14 @@
 >green_pipes
 >miniblocks
 >bg_miniblocks
+>gray_blocks
 
-                      AB                      AB
-                      AB                      AB
-                      AB        FK            AB
-                      AB        FOFBFG        AB
-BABABDAAAAAAAABCBABABABABD      FOFLFO      BCBABABABABABABDAAAAAAAABCBA
-                                FDFOFO
+                      AB        DB  DB        AB
+                      AB        DFDDDB        AB
+                      AB        FKDBDB        AB
+                      AB        EGGEGFEH      AB
+BABABDAAAAAAAABCBABABABABD      EGGGGHEH    BCBABABABABABABDAAAAAAAABCBA
+                                FDEIEI
                                   FMFH
                                   FC
 DADGDADDDCDGDADADADGDADADADADADDDCDADADADGDADADADADADADADGDADDDCDADADADA

@@ -39,12 +39,13 @@ impl View {
     pub fn new(resources: &mut Resources, visible: Rect,
                state: &FictionState)
                -> View {
-        let core = {
+        let mut core = {
             let fade = (FadeStyle::LeftToRight, FadeStyle::LeftToRight);
             let intro = scenes::compile_intro_scene(resources);
             let outro = scenes::compile_outro_scene(resources);
             PuzzleCore::new(resources, visible, state, fade, intro, outro)
         };
+        core.add_extra_scene(scenes::compile_argony_midscene(resources));
         let buttons = resources.get_sprites("factor/fiction");
         let seq = state.sequence();
         View {
@@ -114,6 +115,9 @@ impl Element<Game, PuzzleCmd> for View {
                 }
             }
             action.merge(subaction.but_no_value());
+        }
+        if !action.should_stop() {
+            self.core.begin_character_scene_on_click(event);
         }
         action
     }

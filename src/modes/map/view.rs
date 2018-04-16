@@ -46,7 +46,7 @@ const NODES: &[(Location, (i32, i32), bool)] = &[
     (Location::DoubleCross, (320, 112), false),
     (Location::FactOrFiction, (352, 256), true),
     (Location::HexSpangled, (328, 160), true),
-    (Location::IceToMeetYou, (416, 192), true),
+    (Location::IceToMeetYou, (416, 191), true),
     (Location::IfMemoryServes, (384, 208), false),
     (Location::JogYourMemory, (480, 256), false),
     (Location::LevelHeaded, (440, 128), false),
@@ -67,7 +67,7 @@ const NODES: &[(Location, (i32, i32), bool)] = &[
     (Location::StarCrossed, (432, 224), true),
     (Location::SystemFailure, (192, 240), true),
     (Location::SystemSyzygy, (224, 272), false),
-    (Location::TheIceIsRight, (448, 192), false),
+    (Location::TheIceIsRight, (448, 191), false),
     (Location::TheYFactor, (296, 144), true),
     (Location::ThreeBlindIce, (448, 160), true),
     (Location::TreadLightly, (288, 112), false),
@@ -156,6 +156,10 @@ impl View {
         }
         let mut map_sprites = Vec::new();
         let biodome_is_open = game.is_unlocked(Location::WhatchaColumn);
+        let ckpt1_is_open = game.is_unlocked(Location::CrossTheLine);
+        let ckpt2_is_open = game.is_unlocked(Location::DoubleCross);
+        let ckpt3_is_open = game.is_unlocked(Location::CrossSauce);
+        let ckpt4_is_open = game.is_unlocked(Location::StarCrossed);
         let cold_storage_is_open = game.is_unlocked(Location::IceToMeetYou);
         let main_power_is_open = game.is_unlocked(Location::ALightInTheAttic);
         let lower_decks_are_open = game.is_unlocked(Location::ShiftGears);
@@ -193,6 +197,14 @@ impl View {
             map_sprites.push((sprites.swap_remove(idx), Point::new(400, 144)));
         }
         {
+            let sprites = resources.get_sprites("map/maineng");
+            map_sprites.push((sprites[0].clone(), Point::new(240, 240)));
+            map_sprites.push((sprites[1].clone(), Point::new(272, 240)));
+            map_sprites.push((sprites[2].clone(), Point::new(304, 240)));
+            map_sprites.push((sprites[3].clone(), Point::new(336, 240)));
+            map_sprites.push((sprites[4].clone(), Point::new(368, 240)));
+        }
+        {
             let sprites = resources.get_sprites("map/power");
             map_sprites.push((sprites[0].clone(), Point::new(176, 96)));
             map_sprites.push((sprites[1].clone(), Point::new(208, 96)));
@@ -224,14 +236,29 @@ impl View {
             if biodome_is_open {
                 map_sprites.push((sprites[0].clone(), Point::new(436, 98)));
             }
+            if ckpt1_is_open {
+                map_sprites.push((sprites[1].clone(), Point::new(148, 156)));
+            }
+            if ckpt2_is_open {
+                map_sprites.push((sprites[2].clone(), Point::new(308, 92)));
+            }
+            if ckpt3_is_open {
+                map_sprites.push((sprites[3].clone(), Point::new(372, 299)));
+            }
+            if ckpt4_is_open {
+                map_sprites.push((sprites[4].clone(), Point::new(420, 235)));
+            }
+            if cold_storage_is_open {
+                map_sprites.push((sprites[5].clone(), Point::new(408, 202)));
+            }
             if lower_decks_are_open {
-                map_sprites.push((sprites[2].clone(), Point::new(440, 285)));
+                map_sprites.push((sprites[6].clone(), Point::new(440, 285)));
             }
             if main_power_is_open {
-                map_sprites.push((sprites[3].clone(), Point::new(220, 91)));
+                map_sprites.push((sprites[7].clone(), Point::new(220, 92)));
             }
             if sewers_are_open {
-                map_sprites.push((sprites[4].clone(), Point::new(272, 301)));
+                map_sprites.push((sprites[8].clone(), Point::new(272, 301)));
             }
         }
         View {

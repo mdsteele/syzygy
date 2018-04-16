@@ -105,8 +105,8 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Slide(MEZURE, (180, 304), true, true, 0.5),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
-                      "Hmm.  I'm not sure\n\
-                       if I should be here."),
+                      "Hmm.  I'm not sure this\n\
+                       is where I should be."),
         ]),
         Ast::Seq(vec![
             Ast::Place(RELYNG, "chars/relyng", 0, (592, 160)),

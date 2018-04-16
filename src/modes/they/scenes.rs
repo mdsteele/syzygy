@@ -92,7 +92,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::SW,
                       "Oh, that's okay!  I'm sure\n\
-                       you're a very brave\n\
+                       you're a very $ibrave$r\n\
                        administrator process.")
         ]),
         Ast::Seq(vec![

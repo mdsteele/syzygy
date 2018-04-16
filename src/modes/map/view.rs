@@ -155,10 +155,23 @@ impl View {
             }
         }
         let mut map_sprites = Vec::new();
+        let biodome_is_open = game.is_unlocked(Location::WhatchaColumn);
+        let cold_storage_is_open = game.is_unlocked(Location::IceToMeetYou);
+        let main_power_is_open = game.is_unlocked(Location::ALightInTheAttic);
+        let lower_decks_are_open = game.is_unlocked(Location::ShiftGears);
+        let sewers_are_open = game.is_unlocked(Location::ShiftingGround);
+        {
+            let sprites = resources.get_sprites("map/aft");
+            map_sprites.push((sprites[0].clone(), Point::new(464, 144)));
+            map_sprites.push((sprites[1].clone(), Point::new(464, 176)));
+            map_sprites.push((sprites[2].clone(), Point::new(464, 208)));
+            map_sprites.push((sprites[3].clone(), Point::new(432, 208)));
+        }
         {
             let sprites = resources.get_sprites("map/biodome");
-            map_sprites.push((sprites[0].clone(), Point::new(336, 80)));
-            map_sprites.push((sprites[1].clone(), Point::new(400, 80)));
+            let idx = if biodome_is_open { 0 } else { 2 };
+            map_sprites.push((sprites[idx].clone(), Point::new(336, 80)));
+            map_sprites.push((sprites[idx + 1].clone(), Point::new(400, 80)));
         }
         {
             let sprites = resources.get_sprites("map/checkpoints");
@@ -176,11 +189,7 @@ impl View {
         }
         {
             let mut sprites = resources.get_sprites("map/icebox");
-            let is_open = game.is_unlocked(Location::IceToMeetYou) ||
-                game.is_unlocked(Location::TheIceIsRight) ||
-                game.is_unlocked(Location::ThreeBlindIce) ||
-                game.is_unlocked(Location::ColumnAsIcyEm);
-            let idx = if is_open { 1 } else { 0 };
+            let idx = if cold_storage_is_open { 1 } else { 0 };
             map_sprites.push((sprites.swap_remove(idx), Point::new(400, 144)));
         }
         {
@@ -209,6 +218,21 @@ impl View {
             map_sprites.push((sprites[3].clone(), Point::new(400, 272)));
             map_sprites.push((sprites[4].clone(), Point::new(432, 272)));
             map_sprites.push((sprites[5].clone(), Point::new(464, 272)));
+        }
+        {
+            let sprites = resources.get_sprites("map/labels");
+            if biodome_is_open {
+                map_sprites.push((sprites[0].clone(), Point::new(436, 98)));
+            }
+            if lower_decks_are_open {
+                map_sprites.push((sprites[2].clone(), Point::new(440, 285)));
+            }
+            if main_power_is_open {
+                map_sprites.push((sprites[3].clone(), Point::new(220, 91)));
+            }
+            if sewers_are_open {
+                map_sprites.push((sprites[4].clone(), Point::new(272, 301)));
+            }
         }
         View {
             screen_fade: ScreenFade::new(resources,

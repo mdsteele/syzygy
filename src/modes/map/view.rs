@@ -185,6 +185,32 @@ impl View {
             map_sprites.push((sprites[3].clone(), Point::new(416, 208)));
         }
         {
+            let sprites = resources.get_sprites("map/deck1");
+            map_sprites.push((sprites[0].clone(), Point::new(80, 128)));
+            map_sprites.push((sprites[1].clone(), Point::new(112, 128)));
+            map_sprites.push((sprites[2].clone(), Point::new(144, 128)));
+            map_sprites.push((sprites[3].clone(), Point::new(176, 128)));
+            map_sprites.push((sprites[4].clone(), Point::new(208, 128)));
+            map_sprites.push((sprites[5].clone(), Point::new(240, 128)));
+        }
+        {
+            let sprites = resources.get_sprites("map/deck2");
+            map_sprites.push((sprites[0].clone(), Point::new(80, 160)));
+            map_sprites.push((sprites[1].clone(), Point::new(112, 160)));
+            map_sprites.push((sprites[2].clone(), Point::new(176, 160)));
+            map_sprites.push((sprites[3].clone(), Point::new(208, 160)));
+            map_sprites.push((sprites[4].clone(), Point::new(240, 160)));
+        }
+        {
+            let sprites = resources.get_sprites("map/deck3");
+            map_sprites.push((sprites[0].clone(), Point::new(80, 192)));
+            map_sprites.push((sprites[1].clone(), Point::new(112, 192)));
+            map_sprites.push((sprites[2].clone(), Point::new(144, 192)));
+            map_sprites.push((sprites[3].clone(), Point::new(176, 192)));
+            map_sprites.push((sprites[4].clone(), Point::new(208, 192)));
+            map_sprites.push((sprites[5].clone(), Point::new(240, 192)));
+        }
+        {
             let sprites = resources.get_sprites("map/factory");
             map_sprites.push((sprites[0].clone(), Point::new(272, 128)));
             map_sprites.push((sprites[1].clone(), Point::new(304, 128)));

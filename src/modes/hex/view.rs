@@ -76,6 +76,7 @@ impl Element<Game, PuzzleCmd> for View {
                 state.rotate_wheel_cw(wheel, by);
                 if state.is_solved() {
                     self.core.begin_outro_scene();
+                    action = action.and_return(PuzzleCmd::Save);
                 } else {
                     self.core.push_undo((wheel, by));
                 }

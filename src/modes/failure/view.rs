@@ -195,6 +195,7 @@ impl Element<Game, PuzzleCmd> for View {
                     Some(&PyramidCmd::Win) => {
                         state.solve();
                         self.core.begin_outro_scene();
+                        action = action.and_return(PuzzleCmd::Save);
                     }
                     Some(&PyramidCmd::Lose) => {
                         self.core.begin_extra_scene(scenes::LOSE_GAME_SCENE);

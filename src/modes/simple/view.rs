@@ -72,6 +72,7 @@ impl Element<Game, PuzzleCmd> for View {
                         self.grid.cancel_drag_and_clear_changes();
                         if state.is_solved() {
                             self.core.begin_outro_scene();
+                            action = action.and_return(PuzzleCmd::Save);
                         } else {
                             action.also_play_sound(Sound::mid_puzzle_chime());
                         }

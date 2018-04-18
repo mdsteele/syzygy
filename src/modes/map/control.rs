@@ -19,13 +19,14 @@
 
 use gui::{Element, Event, Window};
 use modes::{Mode, run_info_box};
-use save::Game;
+use save::SaveData;
 
 use super::view::{Cmd, INFO_BOX_TEXT, View};
 
 // ========================================================================= //
 
-pub fn run_map_screen(window: &mut Window, game: &mut Game) -> Mode {
+pub fn run_map_screen(window: &mut Window, save_data: &mut SaveData) -> Mode {
+    let game = save_data.game_mut();
     let mut view = {
         let visible_rect = window.visible_rect();
         View::new(&mut window.resources(), visible_rect, game)

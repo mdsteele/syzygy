@@ -76,6 +76,7 @@ impl Element<Game, PuzzleCmd> for View {
                         println!("Puzzle solved, beginning outro.");
                     }
                     self.core.begin_outro_scene();
+                    action = action.and_return(PuzzleCmd::Save);
                 } else {
                     self.core.push_undo((dir, rank, by));
                 }

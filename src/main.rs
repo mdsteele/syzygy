@@ -143,141 +143,142 @@ fn main() {
                 modes::run_title_screen(&mut window, &mut save_data)
             }
             Mode::Location(loc) => {
-                if let Some(game) = save_data.game_mut() {
-                    game.location = loc;
-                    match loc {
-                        Location::Map => {
-                            modes::run_map_screen(&mut window, game)
-                        }
-                        Location::Prolog => {
-                            modes::run_prolog(&mut window, game)
-                        }
-                        Location::ALightInTheAttic => {
-                            modes::run_a_light_in_the_attic(&mut window, game)
-                        }
-                        Location::AutofacTour => {
-                            modes::run_autofac_tour(&mut window, game)
-                        }
-                        Location::BlackAndBlue => {
-                            modes::run_black_and_blue(&mut window, game)
-                        }
-                        Location::ColumnAsIcyEm => {
-                            modes::run_column_as_icy_em(&mut window, game)
-                        }
-                        Location::ConnectTheDots => {
-                            modes::run_connect_the_dots(&mut window, game)
-                        }
-                        Location::CrossSauce => {
-                            modes::run_cross_sauce(&mut window, game)
-                        }
-                        Location::CrossTheLine => {
-                            modes::run_cross_the_line(&mut window, game)
-                        }
-                        Location::CubeTangle => {
-                            modes::run_cube_tangle(&mut window, game)
-                        }
-                        Location::Disconnected => {
-                            modes::run_disconnected(&mut window, game)
-                        }
-                        Location::DoubleCross => {
-                            modes::run_double_cross(&mut window, game)
-                        }
-                        Location::FactOrFiction => {
-                            modes::run_fact_or_fiction(&mut window, game)
-                        }
-                        Location::HexSpangled => {
-                            modes::run_hex_spangled(&mut window, game)
-                        }
-                        Location::IceToMeetYou => {
-                            modes::run_ice_to_meet_you(&mut window, game)
-                        }
-                        Location::IfMemoryServes => {
-                            modes::run_if_memory_serves(&mut window, game)
-                        }
-                        Location::JogYourMemory => {
-                            modes::run_jog_your_memory(&mut window, game)
-                        }
-                        Location::LevelHeaded => {
-                            modes::run_level_headed(&mut window, game)
-                        }
-                        Location::LevelUp => {
-                            modes::run_level_up(&mut window, game)
-                        }
-                        Location::LightSyrup => {
-                            modes::run_light_syrup(&mut window, game)
-                        }
-                        Location::LogLevel => {
-                            modes::run_log_level(&mut window, game)
-                        }
-                        Location::MemoryLane => {
-                            modes::run_memory_lane(&mut window, game)
-                        }
-                        Location::MissedConnections => {
-                            modes::run_missed_connections(&mut window, game)
-                        }
-                        Location::PasswordFile => {
-                            modes::run_password_file(&mut window, game)
-                        }
-                        Location::PlaneAndSimple => {
-                            modes::run_plane_and_simple(&mut window, game)
-                        }
-                        Location::PlaneAsDay => {
-                            modes::run_plane_as_day(&mut window, game)
-                        }
-                        Location::PointOfNoReturn => {
-                            modes::run_point_of_no_return(&mut window, game)
-                        }
-                        Location::PointOfOrder => {
-                            modes::run_point_of_order(&mut window, game)
-                        }
-                        Location::PointOfView => {
-                            modes::run_point_of_view(&mut window, game)
-                        }
-                        Location::ShiftGears => {
-                            modes::run_shift_gears(&mut window, game)
-                        }
-                        Location::ShiftTheBlame => {
-                            modes::run_shift_the_blame(&mut window, game)
-                        }
-                        Location::ShiftingGround => {
-                            modes::run_shifting_ground(&mut window, game)
-                        }
-                        Location::StarCrossed => {
-                            modes::run_star_crossed(&mut window, game)
-                        }
-                        Location::SystemFailure => {
-                            modes::run_system_failure(&mut window, game)
-                        }
-                        Location::SystemSyzygy => {
-                            modes::run_system_syzygy(&mut window, game)
-                        }
-                        Location::TheIceIsRight => {
-                            modes::run_the_ice_is_right(&mut window, game)
-                        }
-                        Location::TheYFactor => {
-                            modes::run_the_y_factor(&mut window, game)
-                        }
-                        Location::ThreeBlindIce => {
-                            modes::run_three_blind_ice(&mut window, game)
-                        }
-                        Location::TreadLightly => {
-                            modes::run_tread_lightly(&mut window, game)
-                        }
-                        Location::WhatchaColumn => {
-                            modes::run_whatcha_column(&mut window, game)
-                        }
-                        Location::WreckedAngle => {
-                            modes::run_wrecked_angle(&mut window, game)
-                        }
-                        Location::Finale => {
-                            modes::run_finale(&mut window, game)
-                        }
+                save_data.game_mut().location = loc;
+                match loc {
+                    Location::Map => {
+                        modes::run_map_screen(&mut window, &mut save_data)
                     }
-                } else {
-                    if cfg!(debug_assertions) {
-                        println!("WARNING: no game, can't go to {:?}", loc);
+                    Location::Prolog => {
+                        modes::run_prolog(&mut window, &mut save_data)
                     }
-                    Mode::Title
+                    Location::ALightInTheAttic => {
+                        modes::run_a_light_in_the_attic(&mut window,
+                                                        &mut save_data)
+                    }
+                    Location::AutofacTour => {
+                        modes::run_autofac_tour(&mut window, &mut save_data)
+                    }
+                    Location::BlackAndBlue => {
+                        modes::run_black_and_blue(&mut window, &mut save_data)
+                    }
+                    Location::ColumnAsIcyEm => {
+                        modes::run_column_as_icy_em(&mut window,
+                                                    &mut save_data)
+                    }
+                    Location::ConnectTheDots => {
+                        modes::run_connect_the_dots(&mut window,
+                                                    &mut save_data)
+                    }
+                    Location::CrossSauce => {
+                        modes::run_cross_sauce(&mut window, &mut save_data)
+                    }
+                    Location::CrossTheLine => {
+                        modes::run_cross_the_line(&mut window, &mut save_data)
+                    }
+                    Location::CubeTangle => {
+                        modes::run_cube_tangle(&mut window, &mut save_data)
+                    }
+                    Location::Disconnected => {
+                        modes::run_disconnected(&mut window, &mut save_data)
+                    }
+                    Location::DoubleCross => {
+                        modes::run_double_cross(&mut window, &mut save_data)
+                    }
+                    Location::FactOrFiction => {
+                        modes::run_fact_or_fiction(&mut window, &mut save_data)
+                    }
+                    Location::HexSpangled => {
+                        modes::run_hex_spangled(&mut window, &mut save_data)
+                    }
+                    Location::IceToMeetYou => {
+                        modes::run_ice_to_meet_you(&mut window, &mut save_data)
+                    }
+                    Location::IfMemoryServes => {
+                        modes::run_if_memory_serves(&mut window,
+                                                    &mut save_data)
+                    }
+                    Location::JogYourMemory => {
+                        modes::run_jog_your_memory(&mut window, &mut save_data)
+                    }
+                    Location::LevelHeaded => {
+                        modes::run_level_headed(&mut window, &mut save_data)
+                    }
+                    Location::LevelUp => {
+                        modes::run_level_up(&mut window, &mut save_data)
+                    }
+                    Location::LightSyrup => {
+                        modes::run_light_syrup(&mut window, &mut save_data)
+                    }
+                    Location::LogLevel => {
+                        modes::run_log_level(&mut window, &mut save_data)
+                    }
+                    Location::MemoryLane => {
+                        modes::run_memory_lane(&mut window, &mut save_data)
+                    }
+                    Location::MissedConnections => {
+                        modes::run_missed_connections(&mut window,
+                                                      &mut save_data)
+                    }
+                    Location::PasswordFile => {
+                        modes::run_password_file(&mut window, &mut save_data)
+                    }
+                    Location::PlaneAndSimple => {
+                        modes::run_plane_and_simple(&mut window,
+                                                    &mut save_data)
+                    }
+                    Location::PlaneAsDay => {
+                        modes::run_plane_as_day(&mut window, &mut save_data)
+                    }
+                    Location::PointOfNoReturn => {
+                        modes::run_point_of_no_return(&mut window,
+                                                      &mut save_data)
+                    }
+                    Location::PointOfOrder => {
+                        modes::run_point_of_order(&mut window, &mut save_data)
+                    }
+                    Location::PointOfView => {
+                        modes::run_point_of_view(&mut window, &mut save_data)
+                    }
+                    Location::ShiftGears => {
+                        modes::run_shift_gears(&mut window, &mut save_data)
+                    }
+                    Location::ShiftTheBlame => {
+                        modes::run_shift_the_blame(&mut window, &mut save_data)
+                    }
+                    Location::ShiftingGround => {
+                        modes::run_shifting_ground(&mut window, &mut save_data)
+                    }
+                    Location::StarCrossed => {
+                        modes::run_star_crossed(&mut window, &mut save_data)
+                    }
+                    Location::SystemFailure => {
+                        modes::run_system_failure(&mut window, &mut save_data)
+                    }
+                    Location::SystemSyzygy => {
+                        modes::run_system_syzygy(&mut window, &mut save_data)
+                    }
+                    Location::TheIceIsRight => {
+                        modes::run_the_ice_is_right(&mut window,
+                                                    &mut save_data)
+                    }
+                    Location::TheYFactor => {
+                        modes::run_the_y_factor(&mut window, &mut save_data)
+                    }
+                    Location::ThreeBlindIce => {
+                        modes::run_three_blind_ice(&mut window, &mut save_data)
+                    }
+                    Location::TreadLightly => {
+                        modes::run_tread_lightly(&mut window, &mut save_data)
+                    }
+                    Location::WhatchaColumn => {
+                        modes::run_whatcha_column(&mut window, &mut save_data)
+                    }
+                    Location::WreckedAngle => {
+                        modes::run_wrecked_angle(&mut window, &mut save_data)
+                    }
+                    Location::Finale => {
+                        modes::run_finale(&mut window, &mut save_data)
+                    }
                 }
             }
             Mode::Quit => break,

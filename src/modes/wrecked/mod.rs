@@ -22,18 +22,21 @@ mod view;
 
 use gui::Window;
 use modes::{Mode, run_puzzle};
-use save::Game;
+use save::SaveData;
 use self::view::View;
 pub use self::view::{WreckedDisplay, WreckedGrid};
 
 // ========================================================================= //
 
-pub fn run_wrecked_angle(window: &mut Window, game: &mut Game) -> Mode {
+pub fn run_wrecked_angle(window: &mut Window, save_data: &mut SaveData)
+                         -> Mode {
     let view = {
         let visible_rect = window.visible_rect();
-        View::new(&mut window.resources(), visible_rect, &game.wrecked_angle)
+        View::new(&mut window.resources(),
+                  visible_rect,
+                  &save_data.game_mut().wrecked_angle)
     };
-    run_puzzle(window, game, view)
+    run_puzzle(window, save_data, view)
 }
 
 // ========================================================================= //

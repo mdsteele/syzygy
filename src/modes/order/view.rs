@@ -86,6 +86,7 @@ impl Element<Game, PuzzleCmd> for View {
                 state.move_tile(old_index, new_index);
                 if state.is_solved() {
                     self.core.begin_outro_scene();
+                    action = action.and_return(PuzzleCmd::Save);
                 } else if state.current_row() > old_row {
                     action.also_play_sound(Sound::mid_puzzle_chime());
                     self.core.clear_undo_redo();

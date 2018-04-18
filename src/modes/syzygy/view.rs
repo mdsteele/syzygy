@@ -311,6 +311,7 @@ impl Element<Game, PuzzleCmd> for View {
                         if state.is_solved() {
                             self.mezure.refresh(state);
                             self.core.begin_outro_scene();
+                            action = action.and_return(PuzzleCmd::Save);
                         } else {
                             self.core.push_undo(UndoRedo::Mezure(cmd));
                         }

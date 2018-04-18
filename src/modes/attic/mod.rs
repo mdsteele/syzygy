@@ -22,20 +22,22 @@ mod view;
 
 use gui::Window;
 use modes::{Mode, run_puzzle};
-use save::Game;
+use save::SaveData;
 use self::view::View;
 pub use self::view::AtticGrid;
 
 // ========================================================================= //
 
-pub fn run_a_light_in_the_attic(window: &mut Window, game: &mut Game) -> Mode {
+pub fn run_a_light_in_the_attic(window: &mut Window,
+                                save_data: &mut SaveData)
+                                -> Mode {
     let view = {
         let visible_rect = window.visible_rect();
         View::new(&mut window.resources(),
                   visible_rect,
-                  &game.a_light_in_the_attic)
+                  &save_data.game_mut().a_light_in_the_attic)
     };
-    run_puzzle(window, game, view)
+    run_puzzle(window, save_data, view)
 }
 
 // ========================================================================= //

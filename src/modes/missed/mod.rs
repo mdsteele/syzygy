@@ -22,19 +22,20 @@ mod view;
 
 use gui::Window;
 use modes::{Mode, run_puzzle};
-use save::Game;
+use save::SaveData;
 use self::view::View;
 
 // ========================================================================= //
 
-pub fn run_missed_connections(window: &mut Window, game: &mut Game) -> Mode {
+pub fn run_missed_connections(window: &mut Window, save_data: &mut SaveData)
+                              -> Mode {
     let view = {
         let visible_rect = window.visible_rect();
         View::new(&mut window.resources(),
                   visible_rect,
-                  &game.missed_connections)
+                  &save_data.game_mut().missed_connections)
     };
-    run_puzzle(window, game, view)
+    run_puzzle(window, save_data, view)
 }
 
 // ========================================================================= //

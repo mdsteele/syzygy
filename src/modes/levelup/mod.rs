@@ -22,17 +22,19 @@ mod view;
 
 use gui::Window;
 use modes::{Mode, run_puzzle};
-use save::Game;
+use save::SaveData;
 use self::view::View;
 
 // ========================================================================= //
 
-pub fn run_level_up(window: &mut Window, game: &mut Game) -> Mode {
+pub fn run_level_up(window: &mut Window, save_data: &mut SaveData) -> Mode {
     let view = {
         let visible_rect = window.visible_rect();
-        View::new(&mut window.resources(), visible_rect, &game.level_up)
+        View::new(&mut window.resources(),
+                  visible_rect,
+                  &save_data.game_mut().level_up)
     };
-    run_puzzle(window, game, view)
+    run_puzzle(window, save_data, view)
 }
 
 // ========================================================================= //

@@ -80,6 +80,7 @@ impl Element<Game, PuzzleCmd> for View {
                 if state.is_solved() {
                     self.crossword.reset_cursor();
                     self.core.begin_outro_scene();
+                    action = action.and_return(PuzzleCmd::Save);
                 } else {
                     self.core.push_undo((row, index, old_chr, chr));
                 }

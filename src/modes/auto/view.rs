@@ -105,6 +105,7 @@ impl Element<Game, PuzzleCmd> for View {
                 }
                 if state.is_solved() {
                     self.core.begin_outro_scene();
+                    action = action.and_return(PuzzleCmd::Save);
                 } else {
                     self.core.push_undo(state.sequence().clone());
                     let sound = Sound::transform_step(state.sequence().len());

@@ -203,6 +203,7 @@ impl Element<Game, PuzzleCmd> for View {
                     state.set_slider_offset(col, new_offset);
                     if state.is_solved() {
                         self.core.begin_outro_scene();
+                        action = action.and_return(PuzzleCmd::Save);
                     } else {
                         self.core.push_undo(UndoRedo::Slider(col,
                                                              old_offset,

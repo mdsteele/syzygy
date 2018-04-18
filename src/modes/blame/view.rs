@@ -415,6 +415,7 @@ impl Element<Game, PuzzleCmd> for View {
             self.drain_queue();
             if state.is_solved() && self.animation.is_finished() {
                 self.core.begin_outro_scene();
+                action = action.and_return(PuzzleCmd::Save);
             }
         }
         if !action.should_stop() &&

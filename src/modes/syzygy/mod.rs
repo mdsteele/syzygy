@@ -24,20 +24,21 @@ mod view;
 
 use gui::Window;
 use modes::{Mode, run_puzzle};
-use save::Game;
+use save::SaveData;
 use self::view::View;
 pub use self::view::Atlatl;
 
 // ========================================================================= //
 
-pub fn run_system_syzygy(window: &mut Window, game: &mut Game) -> Mode {
+pub fn run_system_syzygy(window: &mut Window, save_data: &mut SaveData)
+                         -> Mode {
     let view = {
         let visible_rect = window.visible_rect();
         View::new(&mut window.resources(),
                   visible_rect,
-                  &mut game.system_syzygy)
+                  &mut save_data.game_mut().system_syzygy)
     };
-    run_puzzle(window, game, view)
+    run_puzzle(window, save_data, view)
 }
 
 // ========================================================================= //

@@ -85,6 +85,7 @@ impl Element<Game, PuzzleCmd> for View {
                     self.columns.animate_fall(col, row, dir, len);
                     if state.is_solved() {
                         self.core.begin_outro_scene();
+                        action = action.and_return(PuzzleCmd::Save);
                     }
                 }
             }

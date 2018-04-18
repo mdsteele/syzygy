@@ -20,22 +20,26 @@
 use elements::{PuzzleCmd, PuzzleView};
 use gui::{Event, Window};
 use modes::{Mode, run_info_box};
-use save::{Game, Location};
+use save::{Location, SaveData};
 
 // ========================================================================= //
 
-pub fn run_puzzle<V: PuzzleView>(window: &mut Window, game: &mut Game,
-                                 mut view: V)
+pub fn run_puzzle<V: PuzzleView>(window: &mut Window,
+                                 save_data: &mut SaveData, mut view: V)
                                  -> Mode {
     view.drain_queue();
-    let location = game.location;
-    game.puzzle_state_mut(location).revisit();
-    window.render(game, &view);
+    let location = {
+        let game = save_data.game_mut();
+        let location = game.location;
+        game.puzzle_state_mut(location).revisit();
+        window.render(game, &view);
+        location
+    };
     loop {
         let mut action = match window.next_event() {
             Event::Quit => return Mode::Quit,
             event => {
-                let action = view.handle_event(&event, game);
+                let action = view.handle_event(&event, save_data.game_mut());
                 view.drain_queue();
                 action
             }
@@ -44,34 +48,40 @@ pub fn run_puzzle<V: PuzzleView>(window: &mut Window, game: &mut Game,
         match action.value() {
             Some(&PuzzleCmd::Back) => return Mode::Location(Location::Map),
             Some(&PuzzleCmd::Info) => {
+                let game = save_data.game_mut();
                 game.ever_clicked_info = true;
                 let text = view.info_text(game);
                 if !run_info_box(window, &view, game, text) {
                     return Mode::Quit;
                 }
             }
-            Some(&PuzzleCmd::Undo) => view.undo(game),
-            Some(&PuzzleCmd::Redo) => view.redo(game),
-            Some(&PuzzleCmd::Reset) => view.reset(game),
+            Some(&PuzzleCmd::Undo) => view.undo(save_data.game_mut()),
+            Some(&PuzzleCmd::Redo) => view.redo(save_data.game_mut()),
+            Some(&PuzzleCmd::Reset) => view.reset(save_data.game_mut()),
             Some(&PuzzleCmd::Replay) => {
-                game.puzzle_state_mut(location).replay();
+                save_data.game_mut().puzzle_state_mut(location).replay();
                 return Mode::Location(location);
             }
             Some(&PuzzleCmd::Solve) => {
-                view.solve(game);
+                view.solve(save_data.game_mut());
                 view.drain_queue();
             }
             Some(&PuzzleCmd::Next) => {
                 let mut next = location.next();
-                if !game.is_unlocked(next) {
+                if !save_data.game_mut().is_unlocked(next) {
                     next = Location::Map;
                 }
                 return Mode::Location(next);
             }
+            Some(&PuzzleCmd::Save) => {
+                if let Err(error) = save_data.save_to_disk() {
+                    println!("Failed to auto-save game: {}", error);
+                }
+            }
             None => {}
         }
         if action.should_redraw() {
-            window.render(game, &view);
+            window.render(save_data.game_mut(), &view);
         }
     }
 }

@@ -117,10 +117,11 @@ impl SaveData {
         }
     }
 
-    pub fn game_mut(&mut self) -> Option<&mut Game> {
-        match self.game {
-            Some(ref mut game) => Some(game),
-            None => None,
+    pub fn game_mut(&mut self) -> &mut Game {
+        if let Some(ref mut game) = self.game {
+            game
+        } else {
+            self.start_new_game()
         }
     }
 

@@ -22,20 +22,23 @@ mod view;
 
 use gui::Window;
 use modes::{Mode, run_puzzle};
-use save::Game;
+use save::SaveData;
 use self::view::View;
 
 // ========================================================================= //
 
-pub fn run_disconnected(window: &mut Window, game: &mut Game) -> Mode {
+pub fn run_disconnected(window: &mut Window, save_data: &mut SaveData)
+                        -> Mode {
     let mut view = {
         let visible_rect = window.visible_rect();
-        View::new(&mut window.resources(), visible_rect, &game.disconnected)
+        View::new(&mut window.resources(),
+                  visible_rect,
+                  &save_data.game_mut().disconnected)
     };
-    if !game.ever_clicked_info {
+    if !save_data.game_mut().ever_clicked_info {
         view.flash_info_button();
     }
-    run_puzzle(window, game, view)
+    run_puzzle(window, save_data, view)
 }
 
 // ========================================================================= //

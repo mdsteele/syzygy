@@ -95,6 +95,7 @@ impl Element<Game, PuzzleCmd> for View {
                 if self.laser_field.all_detectors_satisfied(state.grid()) {
                     state.mark_solved();
                     self.core.begin_outro_scene();
+                    action = action.and_return(PuzzleCmd::Save);
                 } else {
                     self.core.push_undo(cmd);
                 }

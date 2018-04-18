@@ -91,6 +91,7 @@ impl Element<Game, PuzzleCmd> for View {
                     }
                     if state.is_solved() {
                         self.core.begin_outro_scene();
+                        action = action.and_return(PuzzleCmd::Save);
                     }
                     action.also_redraw();
                 }

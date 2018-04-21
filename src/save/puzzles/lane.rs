@@ -283,6 +283,13 @@ mod tests {
         assert_eq!(state.stage, 0);
         assert!(!state.is_solved());
     }
+
+    #[test]
+    fn symbol_decay() {
+        let mut state = LaneState::from_toml(toml::Value::Boolean(false));
+        assert_eq!(state.try_place_shape(-1, 0), Some(1));
+        state.decay_symbol_all(1);
+    }
 }
 
 // ========================================================================= //

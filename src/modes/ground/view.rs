@@ -33,6 +33,7 @@ use super::scenes;
 pub struct View {
     core: PuzzleCore<(i32, i32, i32)>,
     animation: Scene,
+    animating: bool,
     platforms: Vec<Platform>,
     arrows: Vec<ArrowPair>,
     platforms_and_arrows_visible: bool,
@@ -53,6 +54,7 @@ impl View {
         let mut view = View {
             core: core,
             animation: Scene::empty(),
+            animating: false,
             platforms: vec![
                 Platform::new(resources, (160, 88), state.get_position(0)),
                 Platform::new(resources, (160, 120), state.get_position(1)),
@@ -302,6 +304,7 @@ impl View {
         self.animation =
             Scene::new(vec![Box::new(SequenceNode::new(top_seq))]);
         self.animation.begin(self.core.theater_mut());
+        self.animating = true;
         self.drain_queue();
     }
 }
@@ -327,14 +330,17 @@ impl Element<Game, PuzzleCmd> for View {
             let subaction = self.platforms.handle_event(event, &mut ());
             action.merge(subaction.but_no_value());
         }
-        if !action.should_stop() {
+        if !action.should_stop() && self.animating {
             let subaction = self.animation
                 .handle_event(event, self.core.theater_mut());
             action.merge(subaction.but_no_value());
             self.drain_queue();
-            if state.is_solved() && self.animation.is_finished() {
-                self.core.begin_outro_scene();
-                action = action.and_return(PuzzleCmd::Save);
+            if self.animation.is_finished() {
+                self.animating = false;
+                if state.is_solved() {
+                    self.core.begin_outro_scene();
+                    action = action.and_return(PuzzleCmd::Save);
+                }
             }
         }
         if !action.should_stop() && self.platforms_and_arrows_visible &&
@@ -365,6 +371,7 @@ impl PuzzleView for View {
     fn undo(&mut self, game: &mut Game) {
         if let Some((row, dx, dy)) = self.core.pop_undo() {
             self.animation = Scene::empty();
+            self.animating = false;
             let state = &mut game.shifting_ground;
             let new_pos = state.get_position(row) - dx;
             let new_elinsa = state.get_elinsa_row() - dy;

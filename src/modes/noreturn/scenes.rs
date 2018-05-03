@@ -22,6 +22,7 @@ use gui::{Resources, Sound};
 
 // ========================================================================= //
 
+pub const RELYNG: i32 = -1;
 pub const YTTRIS: i32 = 1;
 pub const DOOR_UPPER: i32 = -3;
 pub const DOOR_LOWER: i32 = -2;
@@ -35,13 +36,161 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::SetBg("point_of_no_return"),
             Ast::Place(DOOR_UPPER, "tiles/caution_walls", 5, (505, 160)),
             Ast::Place(DOOR_LOWER, "tiles/caution_walls", 4, (505, 176)),
-            Ast::Wait(0.5),
+            Ast::Wait(1.0),
             Ast::Place(YTTRIS, "chars/yttris", 0, (-16, 176)),
-            Ast::Slide(YTTRIS, (100, 176), true, true, 1.0),
+            Ast::Slide(YTTRIS, (66, 176), false, true, 0.5),
+            Ast::Wait(0.25),
+            Ast::Par(vec![
+                Ast::Seq(vec![
+                    Ast::Sound(Sound::talk_hi()),
+                    Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NE,
+                              "Okay, here we-"),
+                ]),
+                Ast::Seq(vec![
+                    Ast::Slide(YTTRIS, (124, 176), true, false, 0.75),
+                    Ast::Par(vec![
+                        Ast::Seq(vec![
+                            Ast::Queue(0, 0), // Hide first bridge tile
+                            Ast::Sound(Sound::small_jump()),
+                            Ast::Jump(YTTRIS, (100, 176), 0.5),
+                            Ast::Queue(-1, 0), // Unhide bridge
+                        ]),
+                        Ast::Seq(vec![
+                            Ast::Wait(0.15),
+                            Ast::Sound(Sound::talk_hi()),
+                            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NE,
+                                      "Whoops!"),
+                        ]),
+                    ]),
+                ]),
+            ]),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NE, "Huh?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(YTTRIS, (124, 176), true, false, 0.5),
+            Ast::Queue(0, 0), // Hide first bridge tile
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(YTTRIS, (100, 176), 0.5),
+            Ast::Queue(-1, 0), // Unhide bridge
+            Ast::Wait(0.5),
+            Ast::Slide(YTTRIS, (124, 176), true, false, 0.4),
+            Ast::Queue(0, 0), // Hide first bridge tile
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(YTTRIS, (100, 176), 0.5),
+            Ast::Queue(-1, 0), // Unhide bridge
+            Ast::Wait(1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NE,
+                      "I don't think this is how\n\
+                       bridges are supposed to work."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NE,
+                      "How am I supposed\n\
+                       to get across?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Place(RELYNG, "chars/relyng", 0, (-16, 176)),
+            Ast::Slide(RELYNG, (72, 176), false, false, 0.3),
+            Ast::Par(vec![
+                Ast::Seq(vec![
+                    Ast::Sound(Sound::talk_lo()),
+                    Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::SE,
+                              "Sometimes you can only\n\
+                               move forward when\n\
+                               there's no way back."),
+                ]),
+                Ast::Seq(vec![
+                    Ast::Wait(0.1),
+                    Ast::Par(vec![
+                        Ast::Sound(Sound::small_jump()),
+                        Ast::Jump(YTTRIS, (100, 176), 0.25),
+                        Ast::Sound(Sound::talk_hi()),
+                        Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NE,
+                                  "Eeep!"),
+                    ]),
+                ]),
+            ]),
+        ]),
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NE,
+                          "How did-"),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.15),
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::SE,
+                          "Sometimes, new doors will\n\
+                           open for you only when you've\n\
+                           burned your bridges."),
+            ]),
+        ]),
+        Ast::Seq(vec![
             Ast::Wait(0.5),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NE,
-                      "Let's have a look."),
+                      "Wow...that's...that's a pretty\n\
+                       deep metaphor for life, isn't it!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::SE,
+                      "No, I mean that door over there\n\
+                       will literally only open once\n\
+                       this whole bridge is eliminated."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::SE,
+                      "You're going to have to use up\n\
+                       every single tile as you cross it."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NE,
+                      "But if the bridge is gone,\n\
+                       then...how will I get back?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::SE,
+                      "What part of ``no way back''\n\
+                       was confusing to you?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NE,
+                      "Um, the ``no way'' part didn't\n\
+                       really make a lot of sense."),
+        ]),
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::Wait(0.1),
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NE,
+                          "...the ``back'' part\n\
+                           was fine I guess."),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.3),
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::SE,
+                          "If you really want to pass\n\
+                           beyond that door, you'll have\n\
+                           to make your choice."),
+            ]),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(RELYNG, (65, 176), true, true, 0.3),
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::SE,
+                      "Choose wisely."),
         ]),
     ];
     Ast::compile_scene(resources, ast)

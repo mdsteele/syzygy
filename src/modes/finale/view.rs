@@ -127,11 +127,11 @@ impl PuzzleView for View {
                 4 => self.atlatl.set_all_indicators(value != 0),
                 5 => {
                     if value == 1 {
-                        self.atlatl_beam.turn_on(258, 258);
+                        self.atlatl_beam.turn_on(258, 258, 197, true);
                     } else if value == 2 {
-                        self.atlatl_beam.turn_on(576, 576);
+                        self.atlatl_beam.turn_on(576, 576, 193, true);
                     } else if value == 3 {
-                        self.atlatl_beam.turn_on(576, 280);
+                        self.atlatl_beam.turn_on(576, 275, 183, false);
                     } else {
                         self.atlatl_beam.turn_off();
                     }
@@ -146,12 +146,15 @@ impl PuzzleView for View {
 
 const BEAM_SPEED: u32 = 32; // pixels/frame
 const BEAM_THICKNESS: u32 = 3;
+const BEAM_DRIFT_SLOWDOWN: i32 = 6; // frames/pixel
 
 struct AtlatlBeam {
     start: i32,
     length: u32,
     max_length: u32,
     anim: u32,
+    y_pos: i32,
+    drift_timer: i32,
 }
 
 impl AtlatlBeam {
@@ -161,14 +164,19 @@ impl AtlatlBeam {
             length: 0,
             max_length: 0,
             anim: 0,
+            y_pos: 0,
+            drift_timer: 0,
         }
     }
 
-    fn turn_on(&mut self, start: i32, max_length: u32) {
+    fn turn_on(&mut self, start: i32, max_length: u32, y_pos: i32,
+               drift: bool) {
         self.start = start;
         self.length = 0;
         self.max_length = max_length;
         self.anim = 0;
+        self.y_pos = y_pos;
+        self.drift_timer = if drift { 0 } else { -1 };
     }
 
     fn turn_off(&mut self) {
@@ -182,7 +190,7 @@ impl AtlatlBeam {
                          if self.anim != 1 { 255 } else { 128 },
                          if self.anim != 2 { 255 } else { 128 });
             let rect = Rect::new(self.start - (self.length as i32),
-                                 197 - (BEAM_THICKNESS / 2) as i32,
+                                 self.y_pos - (BEAM_THICKNESS / 2) as i32,
                                  self.length,
                                  BEAM_THICKNESS);
             canvas.fill_rect(color, rect);
@@ -195,6 +203,13 @@ impl AtlatlBeam {
         }
         self.length = (self.length + BEAM_SPEED).min(self.max_length);
         self.anim = (self.anim + 1) % 3;
+        if self.drift_timer >= 0 {
+            self.drift_timer += 1;
+            if self.drift_timer >= BEAM_DRIFT_SLOWDOWN {
+                self.drift_timer = 0;
+                self.y_pos -= 1;
+            }
+        }
         true
     }
 }

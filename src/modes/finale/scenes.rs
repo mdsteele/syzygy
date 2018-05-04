@@ -23,12 +23,13 @@ use gui::{Resources, Sound};
 // ========================================================================= //
 
 const AIRLOCK_START: i32 = 100;
-const ARGONY: i32 = 14;
+const ARGONY: i32 = 13;
 const BOOM_START: i32 = 200;
 const CHARGE: i32 = 20;
-const ELINSA: i32 = 13;
-const MEZURE: i32 = 12;
+const ELINSA: i32 = 14;
+const MEZURE: i32 = 11;
 const RELYNG: i32 = 10;
+const RELYNG_BG: i32 = -1;
 const SHIP: i32 = 3;
 const SHIP2: i32 = 4;
 const SHIP3: i32 = 5;
@@ -36,9 +37,10 @@ const SRB: i32 = 1;
 const SYSTEM: i32 = 2;
 const THRUST_TOP: i32 = 6;
 const THRUST_BOTTOM: i32 = 7;
-const UGRENT: i32 = 11;
+const UGRENT: i32 = 12;
 const XANADU_III: i32 = 8;
 const XANADU_IV: i32 = 9;
+const XANADU_IV_GLOW: i32 = 16;
 const YTTRIS: i32 = 15;
 
 const BOOM_INDICES: &[usize] = &[0, 1, 2, 3, 4];
@@ -46,6 +48,8 @@ const CHARGE_INDICES: &[usize] = &[0, 1, 2];
 const SRB_TUMBLE_INDICES: &[usize] = &[0, 5, 6, 7];
 const TINYBOOM_INDICES: &[usize] = &[0, 1, 2];
 const THRUST_INDICES: &[usize] = &[0, 1, 2, 1];
+const X4_GLOW_INDICES: &[usize] = &[0, 1, 2];
+const X4_INDICES: &[&[usize]] = &[&[0, 1], &[1, 2], &[2, 3], &[3, 4]];
 
 // ========================================================================= //
 
@@ -173,10 +177,23 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
             Ast::Seq((0..6).map(|idx| {
                 Ast::Remove(AIRLOCK_START + idx)
             }).collect()),
+            Ast::SetBg("space"),
+            Ast::Queue(2, 1), // Show sun and planets
+            Ast::Place(SHIP, "title/ship", 0, (26, 352)),
+            Ast::Place(SHIP2, "title/ship", 1, (79, 352)),
+            Ast::Place(SHIP3, "title/ship", 2, (132, 352)),
+            Ast::Wait(1.0),
+            Ast::Place(CHARGE, "finale/charge_med", 0, (115, 330)),
+            Ast::Anim(CHARGE, "finale/charge_med", CHARGE_INDICES, 2),
+            Ast::Wait(2.0),
+            Ast::Remove(CHARGE),
+            Ast::Remove(SHIP),
+            Ast::Remove(SHIP2),
+            Ast::Remove(SHIP3),
+            Ast::Queue(2, 0), // Hide sun and planets
             Ast::SetBg("system_syzygy"),
             Ast::Queue(3, 1), // Show ATLATL
             Ast::Queue(4, 1), // Turn on ATLATL indicators
-            Ast::Wait(1.0),
             Ast::Place(CHARGE, "finale/charge_big", 0, (120, 216)),
             Ast::Anim(CHARGE, "finale/charge_big", CHARGE_INDICES, 2),
             Ast::Wait(2.0),
@@ -370,23 +387,36 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
             Ast::Queue(5, 0), // Hide ATLATL beam
             Ast::Remove(SHIP),
             Ast::SetBg("space2"),
-            Ast::Place(XANADU_III, "title/xanadu3", 0, (288, 264)),
+            Ast::Place(XANADU_III, "title/xanadu3", 0, (288, 258)),
             Ast::Wait(0.5),
             Ast::Queue(5, 2), // Animate ATLATL beam across screen
             Ast::Wait(2.5),
             Ast::Queue(5, 0), // Hide ATLATL beam
             Ast::Remove(XANADU_III),
             Ast::SetBg("space"),
-            Ast::Place(XANADU_IV, "title/xanadu4", 0, (288, 222)),
+            Ast::Place(XANADU_IV, "finale/xanadu4big", 0, (288, 242)),
             Ast::Wait(0.5),
             Ast::Queue(5, 3), // Animate ATLATL beam hitting planet
-            Ast::Wait(3.5),
-            // TODO: Xanadu IV warms up under beam
+            Ast::Wait(0.5),
+            Ast::Place(XANADU_IV_GLOW, "finale/xanadu4glow", 0, (288, 242)),
+            Ast::Anim(XANADU_IV_GLOW, "finale/xanadu4glow",
+                      X4_GLOW_INDICES, 1),
+            Ast::Wait(0.75),
+            Ast::Anim(XANADU_IV, "finale/xanadu4big", X4_INDICES[0], 1),
+            Ast::Wait(0.75),
+            Ast::Anim(XANADU_IV, "finale/xanadu4big", X4_INDICES[1], 1),
+            Ast::Wait(0.75),
+            Ast::Anim(XANADU_IV, "finale/xanadu4big", X4_INDICES[2], 1),
+            Ast::Wait(0.75),
+            Ast::Anim(XANADU_IV, "finale/xanadu4big", X4_INDICES[3], 1),
+            Ast::Wait(0.75),
+            Ast::SetSprite(XANADU_IV, "finale/xanadu4big", 5),
             Ast::Queue(5, 0), // Hide ATLATL beam
+            Ast::Remove(XANADU_IV_GLOW),
+            Ast::Wait(3.0),
             Ast::Remove(XANADU_IV),
             Ast::SetBg("system_syzygy"),
             Ast::Queue(3, 1), // Show ATLATL
-            // TODO: Show beam turning off
             Ast::Wait(0.75),
             Ast::Queue(4, 0), // Turn off ATLATL indicators
             Ast::Sound(Sound::small_jump()),
@@ -457,13 +487,114 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
                        team effort, after all."),
         ]),
         Ast::Seq(vec![
-            // TODO: Relyng: <something witty>
-            // TODO: Mezure: "Wait, what?"
-            Ast::Remove(YTTRIS),
-            Ast::Remove(ARGONY),
-            Ast::Remove(ELINSA),
+            Ast::Wait(1.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SW,
+                      "So, um, what happens now?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::SE,
+                      "Now our work $ireally$r  begins.\n\
+                       We need to introduce the flora in\n\
+                       the bio-dome onto the surface so\n\
+                       the incoming colonists will have\n\
+                       an ecosystem to work with."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SW,
+                      "Ah, I was wondering what\n\
+                       that thing was for."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(YTTRIS, (115, 80), true, true, 0.25),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::SE,
+                      "Oh no, I forgot!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::SE,
+                      "I never fixed those\n\
+                       life-support sensors!"),
+        ]),
+        Ast::Par(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::SE,
+                      "Aaaaaaaaaa!"),
+            Ast::Seq(vec![
+                Ast::Slide(YTTRIS, (592, 80), true, false, 1.0),
+                Ast::Wait(0.5),
+                Ast::Remove(YTTRIS),
+                Ast::Wait(1.0),
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::SW,
+                          "I should go contact HQ and\n\
+                           inform them of our success."),
+            ]),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(UGRENT, (592, 80), true, false, 1.0),
             Ast::Remove(UGRENT),
-            Ast::Remove(RELYNG),
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::SE,
+                      "And I'd better get the\n\
+                       nav system fixed."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(ELINSA, (-16, 80), true, false, 1.0),
+            Ast::Remove(ELINSA),
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::SW,
+                      "...I have my own\n\
+                       affairs to look into."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Swap(RELYNG, RELYNG_BG),
+            Ast::Sound(Sound::small_jump()),
+            Ast::Jump(RELYNG_BG, (400, 96), 0.5),
+            Ast::SetSprite(RELYNG_BG, "chars/relyng", 6),
+            Ast::Slide(RELYNG_BG, (400, 112), false, false, 0.2),
+            Ast::Remove(RELYNG_BG),
+            Ast::Wait(1.5),
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::SE,
+                      "Yes, child, now the real work begins.\n\
+                       And these vagabonds are going to need\n\
+                       your organizational oversight more than\n\
+                       ever if we're going to get it all done."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SW,
+                      "No more puzzles, though?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::SE,
+                      "No, I think we're all\n\
+                       done with puzzles, now."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(ARGONY, (100, 80), true, true, 1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::SE,
+                      "Unless, of course, they ever\n\
+                       write a sequel to this game."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(ARGONY, (-16, 80), true, false, 0.75),
+            Ast::Remove(ARGONY),
+            Ast::Wait(1.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SW,
+                      "Wait, what?"),
+        ]),
+        Ast::Seq(vec![
             Ast::Remove(MEZURE),
             Ast::Queue(3, 0), // Hide ATLATL
             Ast::SetBg("space"),

@@ -28,7 +28,7 @@ use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
           Resources, Sprite};
 use save::{Access, FailureState, Game, Location, PuzzleState};
 use save::pyramid::{Board, Coords, MAX_REMOVALS, Move, Team};
-use super::coords::{PYRAMID_TILE_SIZE, coords_to_pt, pt_to_coords};
+use super::coords::{coords_to_pt, pt_to_coords};
 use super::scenes;
 
 // ========================================================================= //
@@ -855,7 +855,8 @@ enum PyramidCmd {
 // ========================================================================= //
 
 struct PyramidView {
-    sprites: Vec<Sprite>,
+    chip_sprites: Vec<Sprite>,
+    possible_sprites: Vec<Sprite>,
     font: Rc<Font>,
     step: PyramidStep,
     team_override: Option<Team>,
@@ -865,7 +866,8 @@ struct PyramidView {
 impl PyramidView {
     fn new(resources: &mut Resources, state: &FailureState) -> PyramidView {
         PyramidView {
-            sprites: resources.get_sprites("failure/chips"),
+            chip_sprites: resources.get_sprites("failure/chips"),
+            possible_sprites: resources.get_sprites("failure/possible"),
             font: resources.get_font("debug"),
             step: PyramidStep::you_ready(state),
             team_override: None,
@@ -879,7 +881,7 @@ impl PyramidView {
             Team::SRB => (board.srb_supply(), srb_supply_pt(), 0),
         };
         if supply > 0 {
-            canvas.draw_sprite(&self.sprites[sprite_index], top_left);
+            canvas.draw_sprite(&self.chip_sprites[sprite_index], top_left);
             let pt = top_left + Point::new(16, 20);
             let text = format!("{}", supply);
             canvas.draw_text(&self.font, Align::Center, pt, &text);
@@ -910,17 +912,18 @@ impl Element<FailureState, PyramidCmd> for PyramidView {
                     sprite_index += 2;
                 }
                 let top_left = coords_to_pt(coords);
-                canvas.draw_sprite(&self.sprites[sprite_index], top_left);
+                canvas.draw_sprite(&self.chip_sprites[sprite_index], top_left);
             }
         }
         // Outline possible moves:
         for coords in self.step.possible_coords() {
             let pt = coords_to_pt(coords);
-            let rect = Rect::new(pt.x(),
-                                 pt.y(),
-                                 PYRAMID_TILE_SIZE as u32,
-                                 PYRAMID_TILE_SIZE as u32);
-            canvas.draw_rect((255, 255, 0), rect);
+            let index = if state.board().piece_at(coords).is_some() {
+                1
+            } else {
+                0
+            };
+            canvas.draw_sprite(&self.possible_sprites[index], pt);
         }
         // Draw animated piece (if any):
         if let Some((_, team, top_left)) = animation {
@@ -928,7 +931,7 @@ impl Element<FailureState, PyramidCmd> for PyramidView {
                 Team::You => 1,
                 Team::SRB => 0,
             };
-            canvas.draw_sprite(&self.sprites[sprite_index], top_left);
+            canvas.draw_sprite(&self.chip_sprites[sprite_index], top_left);
         }
         self.draw_supply(Team::You, board, canvas);
         self.draw_supply(Team::SRB, board, canvas);

@@ -75,8 +75,18 @@ const DASHBOARD_CHIPS: &[(i32, i32, Location)] = &[
 
 // ========================================================================= //
 
+#[derive(Clone)]
+enum UndoRedo {
+    Place(Coords),
+    Jumping(Coords),
+    Jump(Coords, Coords),
+    Remove(Vec<Coords>, Vec<Coords>),
+}
+
+// ========================================================================= //
+
 pub struct View {
-    core: PuzzleCore<()>,
+    core: PuzzleCore<UndoRedo>,
     dashboard: Vec<DashChip>,
     pyramid: PyramidView,
     show_pyramid: bool,
@@ -165,12 +175,18 @@ impl Element<Game, PuzzleCmd> for View {
                             anim: 0,
                             at: coords,
                         };
+                        if state.board().formation_at(coords).is_some() {
+                            self.core.push_undo(UndoRedo::Place(coords));
+                        } else {
+                            self.core.clear_undo_redo();
+                        }
                     }
                     Some(&PyramidCmd::JumpFrom(from)) => {
                         self.pyramid.step = PyramidStep::YouJumping {
                             from: from,
                             possible: state.board().possible_jump_dests(from),
                         };
+                        self.core.push_undo(UndoRedo::Jumping(from));
                     }
                     Some(&PyramidCmd::Jump(from, to)) => {
                         state.board_mut().remove_piece(from);
@@ -180,6 +196,11 @@ impl Element<Game, PuzzleCmd> for View {
                             from: from,
                             to: to,
                         };
+                        if state.board().formation_at(to).is_some() {
+                            self.core.push_undo(UndoRedo::Jump(from, to));
+                        } else {
+                            self.core.clear_undo_redo();
+                        }
                     }
                     Some(&PyramidCmd::Remove(ref formation, ref so_far)) => {
                         debug_assert!(!so_far.is_empty());
@@ -191,6 +212,13 @@ impl Element<Game, PuzzleCmd> for View {
                             formation: formation.clone(),
                             so_far: so_far.clone(),
                         };
+                        if (so_far.len() as i32) < MAX_REMOVALS &&
+                            !state.board().possible_removals(Team::You).is_empty()
+                        {
+                            self.core.push_undo(UndoRedo::Remove(formation.clone(), so_far.clone()));
+                        } else {
+                            self.core.clear_undo_redo();
+                        }
                     }
                     Some(&PyramidCmd::Win) => {
                         state.solve();
@@ -224,15 +252,75 @@ impl PuzzleView for View {
         }
     }
 
-    fn undo(&mut self, _game: &mut Game) {
-        if let Some(()) = self.core.pop_undo() {
-            // TODO: support undo
+    fn undo(&mut self, game: &mut Game) {
+        let state = &mut game.system_failure;
+        match self.core.pop_undo() {
+            Some(UndoRedo::Place(at)) => {
+                state.board_mut().remove_piece(at);
+                self.pyramid.step = PyramidStep::you_ready(state);
+            }
+            Some(UndoRedo::Jumping(_from)) => {
+                self.pyramid.step = PyramidStep::you_ready(state);
+            }
+            Some(UndoRedo::Jump(from, to)) => {
+                state.board_mut().remove_piece(to);
+                state.board_mut().set_piece_at(from, Team::You);
+                self.pyramid.step = PyramidStep::YouJumping {
+                    from: from,
+                    possible: state.board().possible_jump_dests(from),
+                };
+            }
+            Some(UndoRedo::Remove(formation, mut so_far)) => {
+                debug_assert!(!so_far.is_empty());
+                let coords = so_far.pop().unwrap();
+                state.board_mut().set_piece_at(coords, Team::You);
+                self.pyramid.step = PyramidStep::YouRemoving {
+                    formation: formation,
+                    so_far: so_far,
+                    possible: state.board().possible_removals(Team::You),
+                };
+            }
+            None => {}
         }
     }
 
-    fn redo(&mut self, _game: &mut Game) {
-        if let Some(()) = self.core.pop_redo() {
-            // TODO: support redo
+    fn redo(&mut self, game: &mut Game) {
+        let state = &mut game.system_failure;
+        match self.core.pop_redo() {
+            Some(UndoRedo::Place(at)) => {
+                state.board_mut().set_piece_at(at, Team::You);
+                self.pyramid.step = PyramidStep::YouRemoving {
+                    formation: state.board().formation_at(at).unwrap(),
+                    so_far: Vec::new(),
+                    possible: state.board().possible_removals(Team::You),
+                };
+            }
+            Some(UndoRedo::Jumping(from)) => {
+                self.pyramid.step = PyramidStep::YouJumping {
+                    from: from,
+                    possible: state.board().possible_jump_dests(from),
+                };
+            }
+            Some(UndoRedo::Jump(from, to)) => {
+                state.board_mut().remove_piece(from);
+                state.board_mut().set_piece_at(to, Team::You);
+                self.pyramid.step = PyramidStep::YouRemoving {
+                    formation: state.board().formation_at(to).unwrap(),
+                    so_far: Vec::new(),
+                    possible: state.board().possible_removals(Team::You),
+                };
+            }
+            Some(UndoRedo::Remove(formation, so_far)) => {
+                debug_assert!(!so_far.is_empty());
+                let &coords = so_far.last().unwrap();
+                state.board_mut().remove_piece(coords);
+                self.pyramid.step = PyramidStep::YouRemoving {
+                    formation: formation,
+                    so_far: so_far,
+                    possible: state.board().possible_removals(Team::You),
+                };
+            }
+            None => {}
         }
     }
 

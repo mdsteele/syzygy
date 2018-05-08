@@ -32,7 +32,9 @@ pub fn run_system_failure(window: &mut Window, save_data: &mut SaveData)
                           -> Mode {
     let view = {
         let visible_rect = window.visible_rect();
-        View::new(&mut window.resources(), visible_rect, save_data.game_mut())
+        let game = save_data.game_mut();
+        game.system_failure.roll_back_board();
+        View::new(&mut window.resources(), visible_rect, game)
     };
     run_puzzle(window, save_data, view)
 }

@@ -35,6 +35,7 @@ pub struct FailureState {
     access: Access,
     mid_scene_done: bool,
     board: Board,
+    committed_board: Board,
 }
 
 impl FailureState {
@@ -64,6 +65,18 @@ impl FailureState {
     pub fn board(&self) -> &Board { &self.board }
 
     pub fn board_mut(&mut self) -> &mut Board { &mut self.board }
+
+    pub fn roll_back_board(&mut self) {
+        self.board = self.committed_board.clone();
+    }
+
+    pub fn commit_board(&mut self) {
+        self.committed_board = self.board.clone();
+    }
+
+    pub fn clear_committed_board(&mut self) {
+        self.committed_board = Board::new();
+    }
 }
 
 impl PuzzleState for FailureState {
@@ -75,7 +88,10 @@ impl PuzzleState for FailureState {
 
     fn can_reset(&self) -> bool { !self.board.is_empty() }
 
-    fn reset(&mut self) { self.board = Board::new(); }
+    fn reset(&mut self) {
+        self.board = Board::new();
+        self.committed_board = Board::new();
+    }
 }
 
 impl Tomlable for FailureState {
@@ -85,7 +101,8 @@ impl Tomlable for FailureState {
         if self.mid_scene_done {
             table.insert(MID_SCENE_DONE_KEY.to_string(),
                          toml::Value::Boolean(self.mid_scene_done));
-            table.insert(BOARD_KEY.to_string(), self.board.to_toml());
+            table
+                .insert(BOARD_KEY.to_string(), self.committed_board.to_toml());
         }
         toml::Value::Table(table)
     }
@@ -93,11 +110,13 @@ impl Tomlable for FailureState {
     fn from_toml(value: toml::Value) -> FailureState {
         let mut table = to_table(value);
         let access = Access::pop_from_table(&mut table, ACCESS_KEY);
+        let board = Board::pop_from_table(&mut table, BOARD_KEY);
         let mut state = FailureState {
             access: access,
             mid_scene_done: bool::pop_from_table(&mut table,
                                                  MID_SCENE_DONE_KEY),
-            board: Board::pop_from_table(&mut table, BOARD_KEY),
+            board: board.clone(),
+            committed_board: board,
         };
         if access.is_solved() {
             state.solve();
@@ -124,6 +143,7 @@ mod tests {
         state.mid_scene_done = true;
         state.board.set_piece_at(Coords::new(0, 1), Team::You);
         state.board.set_piece_at(Coords::new(0, 5), Team::SRB);
+        state.commit_board();
 
         let state = FailureState::from_toml(state.to_toml());
         assert_eq!(state.access, Access::Replaying);

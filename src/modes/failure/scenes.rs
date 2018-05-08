@@ -329,7 +329,7 @@ pub fn compile_lose_game_scene(resources: &mut Resources) -> (i32, Scene) {
         ]),
         Ast::Seq(vec![
             Ast::SetSprite(SRB, "chars/srb", 5),
-            Ast::Queue(2, -1), // Clear hilights.
+            Ast::Queue(5, 1), // Reset board.
         ]),
     ];
     (LOSE_GAME_SCENE, Ast::compile_scene(resources, ast))

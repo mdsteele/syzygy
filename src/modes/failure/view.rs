@@ -25,7 +25,7 @@ use std::time;
 
 use elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
 use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
-          Resources, Sprite};
+          Resources, Sound, Sprite};
 use save::{Access, FailureState, Game, Location, PuzzleState};
 use save::pyramid::{Board, Coords, MAX_REMOVALS, Move, Team};
 use super::coords::{coords_to_pt, pt_to_coords};
@@ -91,6 +91,7 @@ pub struct View {
     pyramid: PyramidView,
     show_pyramid: bool,
     should_mark_mid_scene_done: bool,
+    should_reset: bool,
 }
 
 impl View {
@@ -132,6 +133,7 @@ impl View {
             pyramid: PyramidView::new(resources, state),
             show_pyramid: false,
             should_mark_mid_scene_done: false,
+            should_reset: false,
         }
     }
 }
@@ -157,6 +159,12 @@ impl Element<Game, PuzzleCmd> for View {
         if self.should_mark_mid_scene_done {
             game.system_failure.set_mid_scene_is_done(true);
             self.should_mark_mid_scene_done = false;
+        }
+        if self.should_reset {
+            self.should_reset = false;
+            self.reset(game);
+            action.also_play_sound(Sound::reset());
+            self.pyramid.hilight_override.clear();
         }
         if !self.show_pyramid {
             if !action.should_stop() {
@@ -213,9 +221,14 @@ impl Element<Game, PuzzleCmd> for View {
                             so_far: so_far.clone(),
                         };
                         if (so_far.len() as i32) < MAX_REMOVALS &&
-                            !state.board().possible_removals(Team::You).is_empty()
+                            !state
+                                .board()
+                                .possible_removals(Team::You)
+                                .is_empty()
                         {
-                            self.core.push_undo(UndoRedo::Remove(formation.clone(), so_far.clone()));
+                            self.core
+                                .push_undo(UndoRedo::Remove(formation.clone(),
+                                                            so_far.clone()));
                         } else {
                             self.core.clear_undo_redo();
                         }
@@ -366,6 +379,8 @@ impl PuzzleView for View {
                 };
             } else if kind == 4 {
                 self.should_mark_mid_scene_done = value != 0;
+            } else if kind == 5 {
+                self.should_reset = value != 0;
             }
         }
     }
@@ -497,8 +512,9 @@ impl PyramidStep {
         }
     }
 
-    fn srb_thinking(state: &FailureState) -> PyramidStep {
+    fn srb_thinking(state: &mut FailureState) -> PyramidStep {
         if state.board().you_supply() == 0 {
+            state.clear_committed_board();
             return PyramidStep::AnimateVictory {
                 anim: 0,
                 team: Team::SRB,
@@ -732,6 +748,7 @@ impl PyramidStep {
                 *anim += 1;
                 if *anim >= ANIM_PLACE_FRAMES {
                     if to_remove.is_empty() {
+                        state.commit_board();
                         next = Some(PyramidStep::you_ready(state));
                     } else {
                         debug_assert!(!formation.is_empty());
@@ -753,6 +770,7 @@ impl PyramidStep {
                 *anim += 1;
                 if *anim >= ANIM_JUMP_FRAMES {
                     if to_remove.is_empty() {
+                        state.commit_board();
                         next = Some(PyramidStep::you_ready(state));
                     } else {
                         debug_assert!(!formation.is_empty());
@@ -794,6 +812,7 @@ impl PyramidStep {
                 *anim += 1;
                 if *anim >= ANIM_REMOVE_FRAMES {
                     if remaining.is_empty() {
+                        state.commit_board();
                         next = Some(PyramidStep::you_ready(state));
                     } else {
                         let mut remaining = remaining.clone();

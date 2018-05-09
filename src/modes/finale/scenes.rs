@@ -27,12 +27,16 @@ const ARGONY: i32 = 13;
 const BOOM_START: i32 = 200;
 const CHARGE: i32 = 20;
 const ELINSA: i32 = 14;
+const FIRE_1: i32 = 301;
+const FIRE_2: i32 = 302;
+const FIRE_3: i32 = 303;
 const MEZURE: i32 = 11;
 const RELYNG: i32 = 10;
 const RELYNG_BG: i32 = -1;
 const SHIP: i32 = 3;
 const SHIP2: i32 = 4;
 const SHIP3: i32 = 5;
+const SHOWER_START: i32 = 400;
 const SRB: i32 = 1;
 const SYSTEM: i32 = 2;
 const THRUST_TOP: i32 = 6;
@@ -45,11 +49,17 @@ const YTTRIS: i32 = 15;
 
 const BOOM_INDICES: &[usize] = &[0, 1, 2, 3, 4];
 const CHARGE_INDICES: &[usize] = &[0, 1, 2];
+const FIRE_INDICES: &[usize] = &[0, 1, 2, 3];
+const SHOWER_INDICES: &[usize] = &[0, 1, 2];
+const SMOKE_INDICES: &[usize] = &[3, 4, 4];
 const SRB_TUMBLE_INDICES: &[usize] = &[0, 5, 6, 7];
 const TINYBOOM_INDICES: &[usize] = &[0, 1, 2];
 const THRUST_INDICES: &[usize] = &[0, 1, 2, 1];
 const X4_GLOW_INDICES: &[usize] = &[0, 1, 2];
 const X4_INDICES: &[&[usize]] = &[&[0, 1], &[1, 2], &[2, 3], &[3, 4]];
+
+const SHOWER_POSITIONS: &[(i32, i32)] =
+    &[(112, 240), (144, 240), (416, 240), (448, 240), (480, 240)];
 
 // ========================================================================= //
 
@@ -75,14 +85,47 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
             Ast::Remove(SHIP),
             Ast::SetBg("prolog_bridge"),
             Ast::Place(SYSTEM, "chars/system", 0, (432, 112)),
+            Ast::Place(FIRE_1, "chars/fire", 0, (120, 272)),
+            Ast::Anim(FIRE_1, "chars/fire", FIRE_INDICES, 2),
+            Ast::Place(FIRE_2, "chars/fire", 0, (176, 272)),
+            Ast::Anim(FIRE_2, "chars/fire", FIRE_INDICES, 2),
+            Ast::Place(FIRE_3, "chars/fire", 0, (424, 304)),
+            Ast::Anim(FIRE_3, "chars/fire", FIRE_INDICES, 2),
+            Ast::Seq(SHOWER_POSITIONS.iter().enumerate().map(|(index, &pos)| {
+                let slot = SHOWER_START + index as i32;
+                Ast::Seq(vec![
+                    Ast::Place(slot, "chars/shower", 0, pos),
+                    Ast::Anim(slot, "chars/shower", SHOWER_INDICES, 2),
+                ])
+            }).collect()),
             Ast::Wait(0.5),
+            Ast::Anim(FIRE_2, "chars/boom", SMOKE_INDICES, 5),
+            Ast::Wait(0.4),
+            Ast::Remove(FIRE_2),
+            Ast::Wait(0.1),
             Ast::Sound(Sound::beep()),
             Ast::Talk(SYSTEM, TalkStyle::System, TalkPos::SW,
                       "Now arriving in\n\
                        the Xanadu system."),
         ]),
         Ast::Seq(vec![
-            Ast::Wait(0.5),
+            Ast::Par(vec![
+                Ast::Seq(vec![
+                    Ast::Wait(0.25),
+                    Ast::Anim(FIRE_3, "chars/boom", SMOKE_INDICES, 5),
+                    Ast::Wait(0.4),
+                    Ast::Remove(FIRE_3),
+                ]),
+                Ast::Seq(vec![
+                    Ast::Wait(0.5),
+                    Ast::Anim(FIRE_1, "chars/boom", SMOKE_INDICES, 5),
+                    Ast::Wait(0.4),
+                    Ast::Remove(FIRE_1),
+                ]),
+            ]),
+            Ast::Seq((0..SHOWER_POSITIONS.len()).map(|index| {
+                Ast::Remove(SHOWER_START + index as i32)
+            }).collect()),
             Ast::Remove(SYSTEM),
             Ast::SetBg("finale_pit"),
             Ast::Place(SYSTEM, "chars/system", 0, (96, 128)),

@@ -62,6 +62,10 @@ const FIRE_POSITIONS: &[(i32, i32)] = &[
     (424, 304),
 ];
 
+const SHOWER_START: i32 = 3000;
+const SHOWER_INDICES: &[usize] = &[0, 1, 2];
+const SMOKE_INDICES: &[usize] = &[3, 4, 4];
+
 // ========================================================================= //
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
@@ -132,7 +136,7 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
                       "Are there any enemy ships\n\
-                       within 20 light years?"),
+                       within 50 light years?"),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::beep()),
@@ -384,21 +388,31 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
             Ast::Queue(1, 4), // Show status indicator
             Ast::Place(SYSTEM, "chars/system", 0, (464, 208)),
             Ast::Place(UGRENT, "chars/ugrent", 0, (144, 304)),
-            Ast::Wait(0.5),
+            Ast::Place(FIRE_START + 0, "chars/fire", 0, (-6, 304)),
+            Ast::Anim(FIRE_START + 0, "chars/fire", &FIRE_INDICES[0], 2),
+            Ast::Wait(0.25),
+            Ast::Place(FIRE_START + 1, "chars/fire", 0, (26, 304)),
+            Ast::Anim(FIRE_START + 1, "chars/fire", &FIRE_INDICES[1], 2),
+            Ast::Wait(0.25),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
                       "End broadcast."),
         ]),
         Ast::Seq(vec![
-            Ast::Wait(0.5),
+            Ast::Wait(0.25),
+            Ast::Place(FIRE_START + 2, "chars/fire", 0, (58, 304)),
+            Ast::Anim(FIRE_START + 2, "chars/fire", &FIRE_INDICES[2], 2),
+            Ast::Wait(0.25),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
                       "System, get a new administrator process\n\
                        spawned.  We're going to need one."),
         ]),
         Ast::Seq(vec![
-            // TODO: Show fire spreading into security station
-            Ast::Wait(1.0),
+            Ast::Wait(0.25),
+            Ast::Place(FIRE_START + 3, "chars/fire", 0, (90, 304)),
+            Ast::Anim(FIRE_START + 3, "chars/fire", &FIRE_INDICES[3], 2),
+            Ast::Wait(0.75),
             Ast::Par(vec![
                 Ast::Seq(vec![
                     Ast::Sound(Sound::talk_hi()),
@@ -410,8 +424,26 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
         ]),
         Ast::Seq(vec![
             Ast::Remove(UGRENT),
+            Ast::Seq((0..3).map(|index| {
+                let slot = SHOWER_START + index;
+                let pos = (32 + 32 * index, 304);
+                Ast::Seq(vec![
+                    Ast::Place(slot, "chars/shower", 0, pos),
+                    Ast::Anim(slot, "chars/shower", SHOWER_INDICES, 2),
+                ])
+            }).collect()),
             Ast::Wait(1.0),
+            Ast::Anim(FIRE_START + 3, "chars/boom", SMOKE_INDICES, 5),
+            Ast::Wait(0.4),
+            Ast::Remove(FIRE_START + 3),
+            Ast::Wait(0.6),
             Ast::Queue(1, 0), // Hide status indicator
+            Ast::Seq((0..3).map(|index| {
+                Ast::Seq(vec![
+                    Ast::Remove(SHOWER_START + index),
+                    Ast::Remove(FIRE_START + index),
+                ])
+            }).collect()),
             Ast::SetBg("prolog_spawn"),
             Ast::Place(SYSTEM, "chars/system", 0, (240, 96)),
             Ast::Place(ELEVATOR_LEFT, "shift/platforms", 2, (456, 336)),

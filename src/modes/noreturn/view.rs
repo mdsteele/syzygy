@@ -46,12 +46,14 @@ impl View {
     pub fn new(resources: &mut Resources, visible: Rect,
                state: &NoReturnState)
                -> View {
-        let core = {
+        let mut core = {
             let fade = (FadeStyle::LeftToRight, FadeStyle::LeftToRight);
             let intro = scenes::compile_intro_scene(resources);
             let outro = scenes::compile_outro_scene(resources);
             PuzzleCore::new(resources, visible, state, fade, intro, outro)
         };
+        core.add_extra_scene(scenes::compile_relyng_midscene(resources));
+        core.add_extra_scene(scenes::compile_yttris_midscene(resources));
         let mut view = View {
             core: core,
             bridge: TileBridge::new(resources, 112, 176),

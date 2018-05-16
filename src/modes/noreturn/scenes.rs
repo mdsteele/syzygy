@@ -199,6 +199,35 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
 // ========================================================================= //
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_relyng_midscene(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::SE,
+                      "Your last jump has to land you on\n\
+                       the END tile exactly, so think about\n\
+                       which tile will get you there."),
+        ]),
+    ];
+    (RELYNG, Ast::compile_scene(resources, ast))
+}
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_yttris_midscene(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_thought()),
+            Ast::Talk(YTTRIS, TalkStyle::Thought, TalkPos::NE,
+                      "$iShudder$r...This bridge\n\
+                       is kind of creepy!"),
+        ]),
+    ];
+    (YTTRIS, Ast::compile_scene(resources, ast))
+}
+
+// ========================================================================= //
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
 pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
@@ -210,9 +239,34 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
             Ast::SetPos(YTTRIS, (508, 176)),
             Ast::Sound(Sound::solve_puzzle_chime()),
             Ast::Wait(1.0),
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NW,
+                          "I made it!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(RELYNG, (79, 176), true, true, 0.3),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::SE,
+                      "Hmmm."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Wait(0.75),
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::SE,
+                      "...Interesting choice."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(RELYNG, (-16, 176), true, false, 1.0),
+            Ast::Remove(RELYNG),
+            Ast::Wait(1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NW,
+                      "I hope this was worth it!"),
+        ]),
+        Ast::Seq(vec![
             Ast::Slide(YTTRIS, (592, 176), true, false, 1.0),
             Ast::Remove(YTTRIS),
-            Ast::Wait(1.0),
+            Ast::Wait(1.5),
             Ast::Queue(1, 1),
             Ast::Wait(0.05),
             Ast::Queue(1, 9),

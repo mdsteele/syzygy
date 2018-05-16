@@ -81,18 +81,15 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
             Ast::Place(THRUST_BOTTOM, "prolog/thrust", 0, (334, 208)),
             Ast::Anim(THRUST_BOTTOM, "prolog/thrust", THRUST_INDICES, 3),
             Ast::Wait(1.0),
-            Ast::Talk(SYSTEM, TalkStyle::System, TalkPos::NE,
-                      "Somewhere in deep space..."),
-        ]),
-        Ast::Seq(vec![
-            Ast::Wait(1.0),
+            Ast::Queue(6, 1), // Show "Somewhere in deep space..." text
+            Ast::Wait(3.5),
+            Ast::Queue(6, 0), // Hide "Somewhere in deep space..." text
             Ast::Remove(SHIP),
             Ast::Remove(THRUST_TOP),
             Ast::Remove(THRUST_BOTTOM),
             Ast::SetBg("prolog_security"),
             Ast::Queue(2, 2), // Show moving stars through windows
             Ast::Queue(1, 1), // Show status indicator
-            // TODO: Show other security station screens
             Ast::Place(SYSTEM, "chars/system", 0, (464, 208)),
             Ast::Place(UGRENT, "chars/ugrent", 0, (224, 240)),
             Ast::Wait(1.0),

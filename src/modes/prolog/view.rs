@@ -32,7 +32,9 @@ use super::scenes;
 
 pub struct View {
     core: PuzzleCore<()>,
+    somewhere: SomewhereHeading,
     status: StatusIndicator,
+    monitor_screens: Vec<MonitorScreen>,
     stars_space: MovingStars,
     stars_window1: MovingStars,
     stars_window2: MovingStars,
@@ -66,7 +68,50 @@ impl View {
 
         View {
             core: core,
+            somewhere: SomewhereHeading::new(resources),
             status: StatusIndicator::new(resources, 304, 64),
+            monitor_screens: vec![
+                MonitorScreen::new(resources,
+                                   "prolog/screen1g",
+                                   (80, 128),
+                                   1),
+                MonitorScreen::new(resources,
+                                   "prolog/screen1r",
+                                   (80, 128),
+                                   1),
+                MonitorScreen::new(resources,
+                                   "prolog/screen2g",
+                                   (80, 160),
+                                   1),
+                MonitorScreen::new(resources,
+                                   "prolog/screen2r",
+                                   (80, 160),
+                                   1),
+                MonitorScreen::new(resources,
+                                   "prolog/screen3g",
+                                   (160, 80),
+                                   4),
+                MonitorScreen::new(resources,
+                                   "prolog/screen3r",
+                                   (160, 80),
+                                   6),
+                MonitorScreen::new(resources,
+                                   "prolog/screen4g",
+                                   (192, 80),
+                                   1),
+                MonitorScreen::new(resources,
+                                   "prolog/screen4r",
+                                   (192, 80),
+                                   3),
+                MonitorScreen::new(resources,
+                                   "prolog/screen5g",
+                                   (240, 80),
+                                   1),
+                MonitorScreen::new(resources,
+                                   "prolog/screen5r",
+                                   (240, 80),
+                                   1),
+            ],
             stars_space: MovingStars::new(0, 0, 576, 384),
             stars_window1: MovingStars::new(144, 144, 64, 32),
             stars_window2: MovingStars::new(336, 144, 64, 32),
@@ -89,7 +134,11 @@ impl Element<Game, PuzzleCmd> for View {
         self.stars_space.draw(canvas);
         self.stars_window1.draw(canvas);
         self.stars_window2.draw(canvas);
+        self.somewhere.draw(canvas);
         self.status.draw(self.core.theater().shake_offset(), canvas);
+        for screen in self.monitor_screens.iter() {
+            screen.draw(self.core.theater().shake_offset(), canvas);
+        }
         if self.wrecked_visible {
             self.wrecked_display.draw(&self.wrecked_state, canvas);
             self.wrecked_grid.draw(&self.wrecked_state, canvas);
@@ -107,8 +156,16 @@ impl Element<Game, PuzzleCmd> for View {
         let state = &mut game.prolog;
         let mut action = self.core.handle_event(event, state);
         if event == &Event::ClockTick {
+            if self.somewhere.tick_animation() {
+                action.also_redraw();
+            }
             if self.status.tick_animation() {
                 action.also_redraw();
+            }
+            for screen in self.monitor_screens.iter_mut() {
+                if screen.tick_animation() {
+                    action.also_redraw();
+                }
             }
             if self.stars_space.tick_animation() {
                 action.also_redraw();
@@ -149,7 +206,21 @@ impl PuzzleView for View {
     fn drain_queue(&mut self) {
         for (device, value) in self.core.drain_queue() {
             match device {
-                1 => self.status.set_mode(value),
+                1 => {
+                    self.status.set_mode(value);
+                    if value == 0 {
+                        for screen in self.monitor_screens.iter_mut() {
+                            screen.visible = false;
+                        }
+                    } else {
+                        for (index, screen) in self.monitor_screens
+                            .iter_mut()
+                            .enumerate()
+                        {
+                            screen.visible = (index % 2 == 0) ^ (value > 1);
+                        }
+                    }
+                }
                 2 => {
                     match value {
                         1 => {
@@ -177,8 +248,61 @@ impl PuzzleView for View {
                     }
                 }
                 5 => self.spawn_point.visible = value != 0,
+                6 => self.somewhere.set_visible(value != 0),
                 _ => {}
             }
+        }
+    }
+}
+
+// ========================================================================= //
+
+const SOMEWHERE_TEXT_SLOWDOWN: i32 = 2;
+
+struct SomewhereHeading {
+    font: Rc<Font>,
+    visible: bool,
+    show: usize,
+    anim_timer: i32,
+}
+
+impl SomewhereHeading {
+    fn new(resources: &mut Resources) -> SomewhereHeading {
+        SomewhereHeading {
+            font: resources.get_font("system"),
+            visible: false,
+            show: 0,
+            anim_timer: 0,
+        }
+    }
+
+    fn set_visible(&mut self, visible: bool) {
+        self.visible = visible;
+        self.show = 0;
+        self.anim_timer = 0;
+    }
+
+    fn draw(&self, canvas: &mut Canvas) {
+        if self.visible && self.show > 0 {
+            let text = "Somewhere in deep space...";
+            canvas.draw_text(&self.font,
+                             Align::Left,
+                             Point::new(200, 275),
+                             &text[..self.show.min(text.len())]);
+        }
+    }
+
+    fn tick_animation(&mut self) -> bool {
+        if !self.visible {
+            return false;
+        }
+        self.anim_timer += 1;
+        if self.anim_timer >= SOMEWHERE_TEXT_SLOWDOWN {
+            self.anim_timer = 0;
+            self.show += 1;
+            true
+        } else {
+            false
         }
     }
 }
@@ -248,6 +372,48 @@ impl StatusIndicator {
         } else {
             false
         }
+    }
+}
+
+// ========================================================================= //
+
+struct MonitorScreen {
+    sprites: Vec<Sprite>,
+    topleft: Point,
+    visible: bool,
+    anim: usize,
+    slowdown: usize,
+}
+
+impl MonitorScreen {
+    fn new(resources: &mut Resources, name: &str, (left, top): (i32, i32),
+           slowdown: usize)
+           -> MonitorScreen {
+        MonitorScreen {
+            sprites: resources.get_sprites(name),
+            topleft: Point::new(left + 4, top + 4),
+            visible: false,
+            anim: 0,
+            slowdown: slowdown,
+        }
+    }
+
+    fn draw(&self, offset: Point, canvas: &mut Canvas) {
+        if self.visible {
+            let sprite = &self.sprites[self.anim / self.slowdown];
+            canvas.draw_sprite(sprite, self.topleft + offset);
+        }
+    }
+
+    fn tick_animation(&mut self) -> bool {
+        if self.sprites.len() <= 1 {
+            return false;
+        }
+        self.anim += 1;
+        if self.anim >= self.sprites.len() * self.slowdown {
+            self.anim = 0;
+        }
+        self.visible && (self.anim % self.slowdown) == 0
     }
 }
 

@@ -22,7 +22,7 @@ use gui::{Resources, Sound};
 
 // ========================================================================= //
 
-pub const RELYNG: i32 = -1;
+const RELYNG: i32 = -1;
 pub const YTTRIS: i32 = 1;
 pub const DOOR_UPPER: i32 = -3;
 pub const DOOR_LOWER: i32 = -2;
@@ -258,7 +258,13 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Slide(RELYNG, (-16, 176), true, false, 1.0),
             Ast::Remove(RELYNG),
-            Ast::Wait(1.0),
+            Ast::Wait(1.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NW,
+                      "Um, I guess I'm trapped\n\
+                       on this side forever now?"),
+        ]),
+        Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NW,
                       "I hope this was worth it!"),

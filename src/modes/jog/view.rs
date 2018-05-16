@@ -38,17 +38,20 @@ pub struct View {
     progress: ProgressBar,
     progress_adjust: u32,
     remove_countdown: i32,
+    show_next: bool,
 }
 
 impl View {
     pub fn new(resources: &mut Resources, visible: Rect, state: &JogState)
                -> View {
-        let core = {
+        let mut core = {
             let fade = (FadeStyle::LeftToRight, FadeStyle::RightToLeft);
             let intro = scenes::compile_intro_scene(resources);
             let outro = scenes::compile_outro_scene(resources);
             PuzzleCore::new(resources, visible, state, fade, intro, outro)
         };
+        core.add_extra_scene(scenes::compile_argony_midscene(resources));
+        core.add_extra_scene(scenes::compile_yttris_midscene(resources));
         View {
             core: core,
             grid: MemoryGridView::new(resources,
@@ -62,6 +65,7 @@ impl View {
                                        (191, 191, 0)),
             progress_adjust: 0,
             remove_countdown: 0,
+            show_next: false,
         }
     }
 }
@@ -77,7 +81,9 @@ impl Element<Game, PuzzleCmd> for View {
         }
         self.grid.draw(state.grid(), canvas);
         self.core.draw_middle_layer(canvas);
-        self.next.draw(&state.next_shape(), canvas);
+        if self.show_next {
+            self.next.draw(&state.next_shape(), canvas);
+        }
         self.core.draw_front_layer(canvas, state);
     }
 
@@ -139,6 +145,9 @@ impl Element<Game, PuzzleCmd> for View {
             }
             action.merge(subaction.but_no_value());
         }
+        if !action.should_stop() {
+            self.core.begin_character_scene_on_click(event);
+        }
         action
     }
 }
@@ -167,8 +176,10 @@ impl PuzzleView for View {
     }
 
     fn drain_queue(&mut self) {
-        for (command, value) in self.core.drain_queue() {
-            if command == 1 {
+        for (kind, value) in self.core.drain_queue() {
+            if kind == 0 {
+                self.show_next = value != 0;
+            } else if kind == 1 {
                 if value >= 0 && (value as usize) < LETTERS.len() {
                     let (col, row, letter) = LETTERS[value as usize];
                     self.grid.add_letter(col, row, letter);

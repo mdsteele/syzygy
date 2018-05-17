@@ -160,11 +160,100 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
             Ast::Sound(Sound::solve_puzzle_chime()),
             Ast::Wait(1.0),
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::SE, "Much better."),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::SW,
+                      "That's the last memory bank fixed.\n\
+                       Now then, what was this clue you\n\
+                       said you thought was stored here?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::SE,
+                      "Um, I sorta forget.  I think\n\
+                       maybe it was a cake recipe?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::SW,
+                      "...You came all the way down here,\n\
+                       despite thinking you'd be trapped\n\
+                       beyond the bridge, because you were\n\
+                       looking for a cake recipe?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::SE,
+                      "I'm not actually sure, but\n\
+                       it does seem plausible!"),
+        ]),
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::Sound(Sound::talk_lo()),
+                Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::SW,
+                          "Sadly, it does."),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.75),
+                Ast::Par(vec![
+                    Ast::Sound(Sound::talk_hi()),
+                    Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::SW,
+                              "Sadly, it does-\n\
+                               Hold on now,\n\
+                               what's this?"),
+                    Ast::Slide(ARGONY, (310, 144), true, true, 0.5),
+                ]),
+            ]),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::SW,
+                      "According to this memory bank,\n\
+                       it seems that just after the initial\n\
+                       disaster, primary engine repairs were\n\
+                       delegated to the ``system repair bot.''"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::SE,
+                      "I didn't know we had\n\
+                       a system repair bot!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::SW,
+                      "$iWe don't.$r  Something\n\
+                       fishy is going on here."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::SW,
+                      "All the other context seems to have\n\
+                       been erased, though, so I'm not\n\
+                       exactly sure what to make of this."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(YTTRIS, (164, 144), true, true, 0.5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::SE,
+                      "Hmm, let me see-\n\
+                       $iOh no!!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::SE,
+                      " $iThe cake recipe got erased too!$r "),
         ]),
         Ast::Seq(vec![
             Ast::Slide(YTTRIS, (-16, 144), true, false, 0.5),
             Ast::Remove(YTTRIS),
+            Ast::Wait(1.0),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::SW,
+                      "Well, I'm glad we all have\n\
+                       our priorities straight here."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(ARGONY, (-16, 144), true, false, 1.0),
+            Ast::Remove(ARGONY),
             Ast::Wait(1.0),
             Ast::Sound(Sound::transform_step(1)),
             Ast::Queue(1, 0),
@@ -183,7 +272,7 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
             Ast::Queue(1, 9),
             Ast::Queue(1, 10),
             Ast::Queue(1, 11),
-            Ast::Wait(1.0),
+            Ast::Wait(1.5),
         ]),
     ];
     Ast::compile_scene(resources, ast)

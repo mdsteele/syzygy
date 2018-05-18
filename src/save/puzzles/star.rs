@@ -48,7 +48,7 @@ const WORDS: &[(i32, &str, i32, i32, WordDir)] = &[
     (10, "Mirzam",    0, 1, WordDir::Vertical),
     (12, "Norma",     5, 0, WordDir::DiagUp),
     (19, "Pavo",      8, 4, WordDir::Vertical),
-    (23, "Polaris",   2, 4, WordDir::Horizontal),
+    (23, "Polaris",   2, 5, WordDir::Horizontal),
     (17, "Procyon",   1, 5, WordDir::Horizontal),
     (22, "Regulus",   0, 7, WordDir::Horizontal),
     ( 6, "Rigel",     5, 5, WordDir::DiagDown),
@@ -223,7 +223,7 @@ mod tests {
     use std::collections::{BTreeSet, HashSet};
     use toml;
 
-    use save::Access;
+    use save::{Access, PuzzleState};
     use save::util::{ACCESS_KEY, Tomlable};
     use super::{FINAL_WORD, FOUND_KEY, StarState, WORDS, WordDir};
 
@@ -231,7 +231,7 @@ mod tests {
     fn toml_round_trip() {
         let mut state = StarState::from_toml(toml::Value::Boolean(false));
         state.access = Access::Replaying;
-        assert!(state.try_remove_word(2, 4, WordDir::Horizontal, 7));
+        assert!(state.try_remove_word(2, 5, WordDir::Horizontal, 7));
         assert_eq!(state.found.len(), 1);
         let found = state.found.clone();
         let columns = state.columns.clone();
@@ -294,7 +294,7 @@ mod tests {
     }
 
     #[test]
-    fn word_order() {
+    fn words_are_ordered_alphabetically() {
         let mut prev = "";
         for entry in WORDS {
             assert!(entry.1 > prev);
@@ -302,7 +302,75 @@ mod tests {
         }
     }
 
-    // TODO: test that you can't get stuck by finding words in wrong order
+    #[test]
+    fn correct_removal_order_works() {
+        let mut state = StarState::from_toml(toml::Value::Boolean(false));
+        let mut words = WORDS.to_vec();
+        words.sort_by_key(|entry| -entry.0);
+        for (_, word, col, mut row, dir) in words {
+            if dir == WordDir::Vertical {
+                row += word.len() as i32 - 1;
+            }
+            assert!(!state.is_solved());
+            assert!(state.try_remove_word(col, row, dir, word.len() as i32),
+                    "Could not remove {} from ({}, {})",
+                    word,
+                    col,
+                    row);
+        }
+        assert!(state.is_solved());
+    }
+
+    #[test]
+    fn words_can_only_be_found_in_order() {
+        let mut state = StarState::from_toml(toml::Value::Boolean(false));
+        let mut words = WORDS.to_vec();
+        words.sort_by_key(|entry| -entry.0);
+        let num_columns = FINAL_WORD.len() as i32;
+        let all_dirs = [
+            WordDir::DiagUp,
+            WordDir::Horizontal,
+            WordDir::DiagDown,
+            WordDir::Vertical,
+        ];
+        for i in 0..words.len() {
+            let (_, correct_word, correct_col, mut correct_row, correct_dir) =
+                words[i];
+            let correct_length = correct_word.len() as i32;
+            if correct_dir == WordDir::Vertical {
+                correct_row += correct_length - 1;
+            }
+            let correct_tuple =
+                (correct_col, correct_row, correct_dir, correct_length);
+            // First, try removing every word except the correct one.
+            for col in 0..num_columns {
+                for row in 0..(state.columns[col as usize].len() as i32) {
+                    for &dir in all_dirs.iter() {
+                        for length in 3..10 {
+                            if (col, row, dir, length) == correct_tuple {
+                                continue;
+                            }
+                            assert!(!state.try_remove_word(col, row, dir,
+                                                           length),
+                                    "Removed ({}, {}, {:?}, {}) on step {}",
+                                    col, row, dir, length, i);
+                            assert!(!state.is_solved());
+                        }
+                    }
+                }
+            }
+            // Now remove the correct word.
+            assert!(state.try_remove_word(correct_col,
+                                          correct_row,
+                                          correct_dir,
+                                          correct_length),
+                    "Could not remove {} from ({}, {})",
+                    correct_word,
+                    correct_col,
+                    correct_row);
+        }
+        assert!(state.is_solved());
+    }
 }
 
 // ========================================================================= //

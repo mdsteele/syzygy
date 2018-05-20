@@ -414,9 +414,11 @@ pub fn compile_ugrent_midscene_1(resources: &mut Resources) -> (i32, Scene) {
 pub fn compile_relyng_midscene_1(resources: &mut Resources) -> (i32, Scene) {
     let ast = vec![
         Ast::Seq(vec![
-            Ast::Sound(Sound::talk_hi()),
+            Ast::Sound(Sound::talk_lo()),
             Ast::Talk(RELYNG_1, TalkStyle::Normal, TalkPos::SW,
-                      "TODO r1"),
+                      "This isn't exactly the most\n\
+                       robust cryptographic\n\
+                       system I've ever seen."),
         ]),
     ];
     (RELYNG_1, Ast::compile_scene(resources, ast))
@@ -569,7 +571,9 @@ pub fn compile_ugrent_midscene_2(resources: &mut Resources) -> (i32, Scene) {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(UGRENT_2, TalkStyle::Normal, TalkPos::SW,
-                      "TODO u2"),
+                      "Hmph.  I don't think ``archaic''\n\
+                       is a properly respectful\n\
+                       term for Her Ladyship."),
         ]),
     ];
     (UGRENT_2, Ast::compile_scene(resources, ast))
@@ -581,7 +585,9 @@ pub fn compile_relyng_midscene_2(resources: &mut Resources) -> (i32, Scene) {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(RELYNG_2, TalkStyle::Normal, TalkPos::SW,
-                      "TODO r2"),
+                      "They say long-term\n\
+                       data storage is a dish\n\
+                       best served cold."),
         ]),
     ];
     (RELYNG_2, Ast::compile_scene(resources, ast))
@@ -727,8 +733,8 @@ pub fn compile_ugrent_midscene_3(resources: &mut Resources) -> (i32, Scene) {
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(UGRENT_3, TalkStyle::Normal, TalkPos::SW,
                       "Just please don't jury-rig\n\
-                       this like you did with that\n\
-                       one elevator, Elinsa."),
+                       these controls like you did with\n\
+                       that one elevator, Elinsa."),
         ]),
     ];
     (UGRENT_3, Ast::compile_scene(resources, ast))
@@ -740,7 +746,9 @@ pub fn compile_relyng_midscene_3(resources: &mut Resources) -> (i32, Scene) {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(RELYNG_3, TalkStyle::Normal, TalkPos::SW,
-                      "TODO r3"),
+                      "Now, $iwhy$r  the controls\n\
+                       are designed this way shall\n\
+                       forever be a mystery."),
         ]),
     ];
     (RELYNG_3, Ast::compile_scene(resources, ast))
@@ -750,8 +758,8 @@ pub fn compile_relyng_midscene_3(resources: &mut Resources) -> (i32, Scene) {
 pub fn compile_mezure_midscene_3(resources: &mut Resources) -> (i32, Scene) {
     let ast = vec![
         Ast::Seq(vec![
-            Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(MEZURE_3, TalkStyle::Normal, TalkPos::SW,
+            Ast::Sound(Sound::talk_thought()),
+            Ast::Talk(MEZURE_3, TalkStyle::Thought, TalkPos::SW,
                       "This is all very\n\
                        confusing."),
         ]),
@@ -863,7 +871,9 @@ pub fn compile_relyng_midscene_4(resources: &mut Resources) -> (i32, Scene) {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(RELYNG_4, TalkStyle::Normal, TalkPos::SW,
-                      "TODO r4"),
+                      "This doesn't actually seem\n\
+                       that much more complicated\n\
+                       than ``pew pew!''"),
         ]),
     ];
     (RELYNG_4, Ast::compile_scene(resources, ast))
@@ -873,8 +883,8 @@ pub fn compile_relyng_midscene_4(resources: &mut Resources) -> (i32, Scene) {
 pub fn compile_mezure_midscene_4(resources: &mut Resources) -> (i32, Scene) {
     let ast = vec![
         Ast::Seq(vec![
-            Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(MEZURE_4, TalkStyle::Normal, TalkPos::SW,
+            Ast::Sound(Sound::talk_thought()),
+            Ast::Talk(MEZURE_4, TalkStyle::Thought, TalkPos::SW,
                       "At least this one doesn't\n\
                        involve any stuck doors."),
         ]),

@@ -54,6 +54,7 @@ impl FailureState {
         }
         debug_assert_eq!(self.board.you_supply(), 0);
         debug_assert_eq!(self.board.srb_supply(), 0);
+        self.commit_board();
     }
 
     pub fn mid_scene_is_done(&self) -> bool { self.mid_scene_done }

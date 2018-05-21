@@ -309,6 +309,98 @@ pub fn compile_middle_scene(resources: &mut Resources) -> (i32, Scene) {
 // ========================================================================= //
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_argony_midscene(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::E,
+                      "Forming lines is the\n\
+                       key to victory here."),
+        ]),
+    ];
+    (ARGONY, Ast::compile_scene(resources, ast))
+}
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_elinsa_midscene(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::E,
+                      "Eh, when in doubt I say just\n\
+                       try the greedy strategy."),
+        ]),
+    ];
+    (ELINSA, Ast::compile_scene(resources, ast))
+}
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_mezure_midscene(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "If we work together,\n\
+                       I think we can win!"),
+        ]),
+    ];
+    (MEZURE, Ast::compile_scene(resources, ast))
+}
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_srb_midscene(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::SetSprite(SRB, "chars/srb", 6),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(SRB, TalkStyle::Evil, TalkPos::NW,
+                      "You fools will\n\
+                       never beat me!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::SetSprite(SRB, "chars/srb", 5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "We'll just see\n\
+                       about that!"),
+        ]),
+    ];
+    (SRB, Ast::compile_scene(resources, ast))
+}
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_ugrent_midscene(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                      "Try to think about how to\n\
+                       block the robot's best moves."),
+        ]),
+    ];
+    (UGRENT, Ast::compile_scene(resources, ast))
+}
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+pub fn compile_yttris_midscene(resources: &mut Resources) -> (i32, Scene) {
+    let ast = vec![
+        Ast::Par(vec![
+            Ast::Loop(0, 2, Box::new(Ast::Seq(vec![
+                Ast::Sound(Sound::small_jump()),
+                Ast::Jump(YTTRIS, (64, 192), 0.5),
+            ]))),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NE,
+                      "Don't forget to jump\n\
+                       pieces when you can!"),
+        ]),
+    ];
+    (YTTRIS, Ast::compile_scene(resources, ast))
+}
+
+// ========================================================================= //
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
 pub fn compile_lose_game_scene(resources: &mut Resources) -> (i32, Scene) {
     let ast = vec![
         Ast::Seq(vec![
@@ -344,10 +436,6 @@ pub fn compile_lose_game_scene(resources: &mut Resources) -> (i32, Scene) {
     ];
     (LOSE_GAME_SCENE, Ast::compile_scene(resources, ast))
 }
-
-// ========================================================================= //
-
-// TODO: add character midscenes
 
 // ========================================================================= //
 

@@ -111,6 +111,12 @@ impl View {
             PuzzleCore::new(resources, visible, state, fade, intro, outro)
         };
         core.add_extra_scene(scenes::compile_middle_scene(resources));
+        core.add_extra_scene(scenes::compile_argony_midscene(resources));
+        core.add_extra_scene(scenes::compile_elinsa_midscene(resources));
+        core.add_extra_scene(scenes::compile_mezure_midscene(resources));
+        core.add_extra_scene(scenes::compile_srb_midscene(resources));
+        core.add_extra_scene(scenes::compile_ugrent_midscene(resources));
+        core.add_extra_scene(scenes::compile_yttris_midscene(resources));
         core.add_extra_scene(scenes::compile_lose_game_scene(resources));
         for index in 0..scenes::num_hints() {
             core.add_extra_scene(scenes::compile_hint_scene(resources, index));
@@ -253,6 +259,9 @@ impl Element<Game, PuzzleCmd> for View {
                 }
                 action.merge(subaction.but_no_value());
             }
+        }
+        if !action.should_stop() {
+            self.core.begin_character_scene_on_click(event);
         }
         action
     }

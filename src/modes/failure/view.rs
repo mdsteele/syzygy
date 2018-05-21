@@ -116,10 +116,14 @@ impl View {
             core.add_extra_scene(scenes::compile_hint_scene(resources, index));
         }
         if !state.is_solved() {
-            if state.mid_scene_is_done() &&
-                state.access() != Access::BeginReplay
-            {
-                core.skip_extra_scene(scenes::MIDDLE_SCENE);
+            if state.mid_scene_is_done() {
+                if state.access() == Access::BeginReplay {
+                    // The puzzle core will run the middle scene once the intro
+                    // scene finishes.
+                    core.begin_extra_scene(scenes::MIDDLE_SCENE);
+                } else {
+                    core.skip_extra_scene(scenes::MIDDLE_SCENE);
+                }
             } else if all_puzzles_solved {
                 core.begin_extra_scene(scenes::MIDDLE_SCENE);
             }
@@ -381,6 +385,17 @@ impl PuzzleView for View {
                 self.should_mark_mid_scene_done = value != 0;
             } else if kind == 5 {
                 self.should_reset = value != 0;
+            } else if kind == 6 {
+                if value < 0 {
+                    for chip in self.dashboard.iter_mut() {
+                        chip.force_red = false;
+                    }
+                } else {
+                    let index = value as usize;
+                    if index < self.dashboard.len() {
+                        self.dashboard[index].force_red = true;
+                    }
+                }
             }
         }
     }
@@ -397,6 +412,7 @@ struct DashChip {
     topleft: Point,
     location: Location,
     anim: i32,
+    force_red: bool,
 }
 
 impl DashChip {
@@ -409,17 +425,19 @@ impl DashChip {
             location: location,
             anim: (left + top) %
                 (DASH_ANIM_SLOWDOWN * DASH_ANIM_INDICES.len() as i32),
+            force_red: false,
         }
     }
 }
 
 impl Element<Game, ()> for DashChip {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
-        let index = if game.has_been_solved(self.location) {
-            DASH_ANIM_INDICES[(self.anim / DASH_ANIM_SLOWDOWN) as usize]
-        } else {
-            0
-        };
+        let index =
+            if !self.force_red && game.has_been_solved(self.location) {
+                DASH_ANIM_INDICES[(self.anim / DASH_ANIM_SLOWDOWN) as usize]
+            } else {
+                0
+            };
         canvas.draw_sprite(&self.sprites[index], self.topleft);
     }
 

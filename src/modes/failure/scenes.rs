@@ -26,6 +26,7 @@ use super::coords::{PYRAMID_TILE_SIZE, coords_to_pt};
 
 pub const MIDDLE_SCENE: i32 = 1000;
 pub const LOSE_GAME_SCENE: i32 = 1001;
+
 const HINTS_START: i32 = 2000;
 const HILIGHTS_START: i32 = -1000;
 
@@ -48,6 +49,13 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
     let ast = vec![
         Ast::Seq(vec![
             Ast::SetBg("system_failure"),
+            Ast::Seq((0..36).filter_map(|index| {
+                if index == 18 || index == 33 {
+                    None
+                } else {
+                    Some(Ast::Queue(6, index)) // Force chip to be red.
+                }
+            }).collect()),
             Ast::Wait(0.5),
             Ast::Place(MEZURE, "chars/mezure", 0, (-16, 192)),
             Ast::Slide(MEZURE, (120, 192), false, true, 0.75),
@@ -260,6 +268,8 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::SetSprite(SRB, "chars/srb", 5),
             Ast::Slide(SRB, (592, 144), true, false, 0.75),
             Ast::Remove(SRB),
+            Ast::Wait(1.0),
+            Ast::Queue(6, -1), // Stop forcing chips to be red.
         ]),
     ];
     Ast::compile_scene(resources, ast)
@@ -273,7 +283,7 @@ pub fn compile_middle_scene(resources: &mut Resources) -> (i32, Scene) {
         Ast::Seq(vec![
             Ast::Wait(1.0),
             Ast::Place(MEZURE, "chars/mezure", 0, (-16, 192)),
-            Ast::Slide(MEZURE, (120, 192), false, true, 0.75),
+            Ast::Slide(MEZURE, (128, 192), false, true, 0.75),
             Ast::Place(UGRENT, "chars/ugrent", 0, (-16, 192)),
             Ast::Slide(UGRENT, (96, 192), false, true, 0.75),
             Ast::Place(YTTRIS, "chars/yttris", 0, (-16, 192)),

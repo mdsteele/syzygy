@@ -34,43 +34,43 @@ use super::scenes;
 // ========================================================================= //
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-const DASHBOARD_CHIPS: &[(i32, i32, Location)] = &[
-    (167, 71, Location::ThreeBlindIce),
-    (209, 71, Location::LevelHeaded),
-    (251, 71, Location::AutofacTour),
-    (293, 71, Location::TreadLightly),
-    (335, 71, Location::PointOfOrder),
-    (377, 71, Location::MissedConnections),
-    (167, 113, Location::JogYourMemory),
-    (209, 113, Location::ColumnAsIcyEm),
-    (251, 113, Location::StarCrossed),
-    (293, 113, Location::TheIceIsRight),
-    (335, 113, Location::PlaneAsDay),
-    (377, 113, Location::ShiftTheBlame),
-    (167, 155, Location::LevelUp),
-    (209, 155, Location::HexSpangled),
-    (251, 155, Location::WhatchaColumn),
-    (293, 155, Location::PointOfNoReturn),
-    (335, 155, Location::CrossSauce),
-    (377, 155, Location::PointOfView),
-    (167, 197, Location::LogLevel),
-    (209, 197, Location::ShiftGears),
-    (251, 197, Location::IceToMeetYou),
-    (293, 197, Location::BlackAndBlue),
-    (335, 197, Location::DoubleCross),
-    (377, 197, Location::LightSyrup),
-    (167, 239, Location::IfMemoryServes),
-    (209, 239, Location::ConnectTheDots),
-    (251, 239, Location::CubeTangle),
-    (293, 239, Location::FactOrFiction),
-    (335, 239, Location::PlaneAndSimple),
-    (377, 239, Location::ShiftingGround),
-    (167, 281, Location::CrossTheLine),
-    (209, 281, Location::ALightInTheAttic),
-    (251, 281, Location::WreckedAngle),
-    (293, 281, Location::Disconnected),
-    (335, 281, Location::MemoryLane),
-    (377, 281, Location::TheYFactor),
+const DASHBOARD_CHIPS: &[(i32, i32, char, Location)] = &[
+    (167, 71,  'B', Location::ThreeBlindIce),
+    (209, 71,  'R', Location::LevelHeaded),
+    (251, 71,  'I', Location::AutofacTour),
+    (293, 71,  'D', Location::TreadLightly),
+    (335, 71,  'G', Location::PointOfOrder),
+    (377, 71,  'E', Location::MissedConnections),
+    (167, 113, 'S', Location::JogYourMemory),
+    (209, 113, 'H', Location::ColumnAsIcyEm),
+    (251, 113, 'A', Location::StarCrossed),
+    (293, 113, 'L', Location::TheIceIsRight),
+    (335, 113, 'L', Location::PlaneAsDay),
+    (377, 113, ' ', Location::ShiftTheBlame),
+    (167, 155, 'E', Location::LevelUp),
+    (209, 155, 'X', Location::HexSpangled),
+    (251, 155, 'T', Location::WhatchaColumn),
+    (293, 155, 'E', Location::PointOfNoReturn),
+    (335, 155, 'N', Location::CrossSauce),
+    (377, 155, 'D', Location::PointOfView),
+    (167, 197, ' ', Location::ShiftGears),
+    (209, 197, 'A', Location::LogLevel),
+    (251, 197, 'F', Location::IceToMeetYou),
+    (293, 197, 'T', Location::BlackAndBlue),
+    (335, 197, 'E', Location::DoubleCross),
+    (377, 197, 'R', Location::LightSyrup),
+    (167, 239, 'F', Location::IfMemoryServes),
+    (209, 239, 'I', Location::ConnectTheDots),
+    (251, 239, 'N', Location::CubeTangle),
+    (293, 239, 'I', Location::FactOrFiction),
+    (335, 239, 'S', Location::PlaneAndSimple),
+    (377, 239, 'H', Location::ShiftingGround),
+    (167, 281, 'R', Location::CrossTheLine),
+    (209, 281, 'E', Location::ALightInTheAttic),
+    (251, 281, 'P', Location::Disconnected),
+    (293, 281, 'A', Location::WreckedAngle),
+    (335, 281, 'I', Location::MemoryLane),
+    (377, 281, 'R', Location::TheYFactor),
 ];
 
 // ========================================================================= //
@@ -97,7 +97,7 @@ pub struct View {
 impl View {
     pub fn new(resources: &mut Resources, visible: Rect, game: &Game) -> View {
         let mut all_puzzles_solved = true;
-        for &(_, _, location) in DASHBOARD_CHIPS.iter() {
+        for &(_, _, _, location) in DASHBOARD_CHIPS.iter() {
             if !game.has_been_solved(location) {
                 all_puzzles_solved = false;
                 break;
@@ -138,7 +138,9 @@ impl View {
             core: core,
             dashboard: DASHBOARD_CHIPS
                 .iter()
-                .map(|&(x, y, loc)| DashChip::new(resources, x, y, loc))
+                .map(|&(x, y, chr, loc)| {
+                         DashChip::new(resources, x, y, loc, chr)
+                     })
                 .collect(),
             pyramid: PyramidView::new(resources, state),
             show_pyramid: false,
@@ -398,11 +400,29 @@ impl PuzzleView for View {
                 if value < 0 {
                     for chip in self.dashboard.iter_mut() {
                         chip.force_red = false;
+                        chip.hide_letter = false;
                     }
                 } else {
                     let index = value as usize;
                     if index < self.dashboard.len() {
                         self.dashboard[index].force_red = true;
+                        self.dashboard[index].hide_letter = true;
+                    }
+                }
+            } else if kind == 7 {
+                self.dashboard[9].force_red = true;
+                self.dashboard[9].letter = 'N';
+                self.dashboard[10].force_red = true;
+                self.dashboard[10].letter = 'T';
+            } else if kind == 8 {
+                for (index, chip) in self.dashboard.iter_mut().enumerate() {
+                    chip.hide_letter = true;
+                    if (index % 6) < 3 {
+                        chip.force_red = false;
+                        chip.goal_topleft = you_supply_pt();
+                    } else {
+                        chip.force_red = true;
+                        chip.goal_topleft = srb_supply_pt();
                     }
                 }
             }
@@ -415,25 +435,35 @@ impl PuzzleView for View {
 const DASH_ANIM_SLOWDOWN: i32 = 4;
 const DASH_ANIM_INDICES: &[usize] =
     &[4, 5, 6, 7, 8, 9, 10, 11, 12, 7, 6, 13, 14, 15];
+const DASH_SLIDE_SPEED: f64 = 30.0; // pixels/frame
 
 struct DashChip {
     sprites: Vec<Sprite>,
+    font: Rc<Font>,
     topleft: Point,
+    goal_topleft: Point,
     location: Location,
+    letter: char,
     anim: i32,
+    hide_letter: bool,
     force_red: bool,
 }
 
 impl DashChip {
     fn new(resources: &mut Resources, left: i32, top: i32,
-           location: Location)
+           location: Location, letter: char)
            -> DashChip {
+        let topleft = Point::new(left, top);
         DashChip {
             sprites: resources.get_sprites("failure/chips"),
-            topleft: Point::new(left, top),
+            font: resources.get_font("roman"),
+            topleft: topleft,
+            goal_topleft: topleft,
             location: location,
+            letter: letter,
             anim: (left + top) %
                 (DASH_ANIM_SLOWDOWN * DASH_ANIM_INDICES.len() as i32),
+            hide_letter: false,
             force_red: false,
         }
     }
@@ -441,13 +471,33 @@ impl DashChip {
 
 impl Element<Game, ()> for DashChip {
     fn draw(&self, game: &Game, canvas: &mut Canvas) {
-        let index =
-            if !self.force_red && game.has_been_solved(self.location) {
-                DASH_ANIM_INDICES[(self.anim / DASH_ANIM_SLOWDOWN) as usize]
+        let solved = game.has_been_solved(self.location);
+        let index = if solved && !self.force_red {
+            if self.hide_letter {
+                1
             } else {
-                0
-            };
+                DASH_ANIM_INDICES[(self.anim / DASH_ANIM_SLOWDOWN) as usize]
+            }
+        } else {
+            0
+        };
         canvas.draw_sprite(&self.sprites[index], self.topleft);
+        if solved && !self.hide_letter && self.letter != ' ' {
+            canvas.fill_rect((191, 191, 191),
+                             Rect::new(self.topleft.x() + 13,
+                                       self.topleft.y() + 11,
+                                       6,
+                                       10));
+            canvas.fill_rect((191, 191, 191),
+                             Rect::new(self.topleft.x() + 12,
+                                       self.topleft.y() + 12,
+                                       8,
+                                       8));
+            canvas.draw_char(&self.font,
+                             Align::Center,
+                             self.topleft + Point::new(16, 20),
+                             self.letter);
+        }
     }
 
     fn handle_event(&mut self, event: &Event, _: &mut Game) -> Action<()> {
@@ -458,6 +508,20 @@ impl Element<Game, ()> for DashChip {
                     DASH_ANIM_INDICES.len() as i32 * DASH_ANIM_SLOWDOWN
                 {
                     self.anim = 0;
+                }
+                if self.topleft != self.goal_topleft {
+                    let dx = (self.goal_topleft.x() - self.topleft.x()) as f64;
+                    let dy = (self.goal_topleft.y() - self.topleft.y()) as f64;
+                    let dist = (dx * dx + dy * dy).sqrt();
+                    if dist <= DASH_SLIDE_SPEED {
+                        self.topleft = self.goal_topleft;
+                    } else {
+                        let scale = DASH_SLIDE_SPEED / dist;
+                        self.topleft = self.topleft +
+                            Point::new((dx * scale).round() as i32,
+                                       (dy * scale).round() as i32);
+                    }
+                    return Action::redraw();
                 }
                 Action::redraw_if(self.anim % DASH_ANIM_SLOWDOWN == 0)
             }
@@ -1106,7 +1170,7 @@ mod tests {
         locations.remove(&Location::PasswordFile);
         locations.remove(&Location::SystemSyzygy);
         locations.remove(&Location::Finale);
-        for &(_, _, loc) in DASHBOARD_CHIPS {
+        for &(_, _, _, loc) in DASHBOARD_CHIPS {
             locations.remove(&loc);
         }
         assert!(locations.is_empty(),
@@ -1117,7 +1181,7 @@ mod tests {
     #[test]
     fn no_repeated_locations_on_dashboard() {
         let mut locations: HashSet<Location> = HashSet::new();
-        for &(_, _, loc) in DASHBOARD_CHIPS {
+        for &(_, _, _, loc) in DASHBOARD_CHIPS {
             assert!(!locations.contains(&loc), "Repeated: {:?}", loc);
             locations.insert(loc);
         }

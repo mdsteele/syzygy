@@ -50,7 +50,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::SetBg("system_failure"),
             Ast::Seq((0..36).filter_map(|index| {
-                if index == 18 || index == 33 {
+                if index == 19 || index == 32 {
                     None
                 } else {
                     Some(Ast::Queue(6, index)) // Force chip to be red.
@@ -284,21 +284,202 @@ pub fn compile_middle_scene(resources: &mut Resources) -> (i32, Scene) {
             Ast::Wait(1.0),
             Ast::Place(MEZURE, "chars/mezure", 0, (-16, 192)),
             Ast::Slide(MEZURE, (128, 192), false, true, 0.75),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "Well, I think we've\n\
+                       finally done it."),
+        ]),
+        Ast::Seq(vec![
             Ast::Place(UGRENT, "chars/ugrent", 0, (-16, 192)),
             Ast::Slide(UGRENT, (96, 192), false, true, 0.75),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                      "``Bridge shall extend\n\
+                       after finish repair.''"),
+        ]),
+        Ast::Seq(vec![
             Ast::Place(YTTRIS, "chars/yttris", 0, (-16, 192)),
             Ast::Slide(YTTRIS, (64, 192), false, true, 0.75),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NE,
+                      "And it looks like\n\
+                       repairs are done?"),
+        ]),
+        Ast::Seq(vec![
             Ast::Place(ELINSA, "chars/elinsa", 0, (-16, 128)),
             Ast::Slide(ELINSA, (96, 128), false, true, 0.75),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::SE,
+                      "Just about.  I mean, manual nav\n\
+                       control is still shot, but autopilot\n\
+                       is working and still locked to our\n\
+                       destination, so we should be good."),
+        ]),
+        Ast::Seq(vec![
             Ast::Place(ARGONY, "chars/argony", 0, (-16, 128)),
             Ast::Slide(ARGONY, (64, 128), false, true, 0.75),
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
-                      "Hello, world."),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::E,
+                      "Well, then, let's get\n\
+                       that bridge extended."),
+        ]),
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::Seq((0..15).map(|index| {
+                    Ast::Seq(vec![
+                        Ast::Sound(Sound::platform_shift(1)),
+                        Ast::Place(BRIDGE_START + index,
+                                   "tiles/miniblocks", 14,
+                                   (144 + 16 * index, 208)),
+                        Ast::Wait(0.1),
+                    ])
+                }).collect()),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.9),
+                Ast::Place(SRB, "chars/srb", 5, (592, 192)),
+                Ast::Slide(SRB, (448, 192), false, false, 0.25),
+                Ast::Par(vec![
+                    Ast::Sound(Sound::character_collision()),
+                    Ast::Queue(7, 1), // Change "SHALL" to "SHANT"
+                    Ast::Seq((0..16).map(|index| {
+                        Ast::Seq(vec![
+                            Ast::Remove(BRIDGE_START + 15 - index),
+                            Ast::Wait(0.05),
+                        ])
+                    }).collect()),
+                    Ast::SetSprite(SRB, "chars/srb", 6),
+                    Ast::Sound(Sound::talk_hi()),
+                    Ast::Talk(SRB, TalkStyle::Evil, TalkPos::NW, "Nope!"),
+                    Ast::Seq(vec![
+                        Ast::Wait(0.25),
+                        Ast::Sound(Sound::talk_hi()),
+                        Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                                  "Huh!?"),
+                    ]),
+                ]),
+            ]),
+        ]),
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::Sound(Sound::beep()),
+                Ast::Queue(6, 9),
+                Ast::Queue(6, 10),
+                Ast::Wait(0.1),
+                Ast::Queue(6, 3),
+                Ast::Queue(6, 4),
+                Ast::Queue(6, 8),
+                Ast::Queue(6, 11),
+                Ast::Queue(6, 15),
+                Ast::Queue(6, 16),
+                Ast::Wait(0.1),
+                Ast::Queue(6, 2),
+                Ast::Queue(6, 5),
+                Ast::Queue(6, 7),
+                Ast::Queue(6, 14),
+                Ast::Queue(6, 17),
+                Ast::Queue(6, 21),
+                Ast::Queue(6, 22),
+                Ast::Wait(0.1),
+                Ast::Queue(6, 1),
+                Ast::Queue(6, 6),
+                Ast::Queue(6, 13),
+                Ast::Queue(6, 20),
+                Ast::Queue(6, 23),
+                Ast::Queue(6, 27),
+                Ast::Queue(6, 28),
+                Ast::Wait(0.1),
+                Ast::Queue(6, 0),
+                Ast::Queue(6, 12),
+                Ast::Queue(6, 19),
+                Ast::Queue(6, 26),
+                Ast::Queue(6, 29),
+                Ast::Queue(6, 33),
+                Ast::Queue(6, 34),
+                Ast::Wait(0.1),
+                Ast::Queue(6, 18),
+                Ast::Queue(6, 25),
+                Ast::Queue(6, 32),
+                Ast::Queue(6, 35),
+                Ast::Wait(0.1),
+                Ast::Queue(6, 24),
+                Ast::Queue(6, 31),
+                Ast::Wait(0.1),
+                Ast::Queue(6, 30),
+                Ast::Wait(1.0),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.5),
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(SRB, TalkStyle::Evil, TalkPos::NW,
+                          "While you fools have been\n\
+                           scurrying around fixing the\n\
+                           irrelevant systems I sabotaged,\n\
+                           I've been enacting my REAL plan."),
+            ]),
         ]),
         Ast::Seq(vec![
-            Ast::Place(SRB, "chars/srb", 5, (592, 192)),
-            Ast::Slide(SRB, (448, 192), false, true, 0.75),
+            Ast::SetSprite(SRB, "chars/srb", 5),
+            Ast::Sound(Sound::talk_annoyed_hi()),
+            Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::E,
+                      "Oh yeah?  And what's that?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::SetSprite(SRB, "chars/srb", 6),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(SRB, TalkStyle::Evil, TalkPos::NW,
+                      "Ha!  Wouldn't you\n\
+                       like to know!"),
+        ]),
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(SRB, TalkStyle::Evil, TalkPos::NW,
+                          "You've all been playing\n\
+                           right into my hands.  Little\n\
+                           Mezure here even did me the\n\
+                           favor of restarting the engines!"),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.75),
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::E,
+                          "...gulp..."),
+            ]),
+        ]),
+        Ast::Seq(vec![
+            Ast::SetSprite(SRB, "chars/srb", 5),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
+                      "You...you haven't won yet!\n\
+                       We'll find a way to beat you!"),
+        ]),
+        Ast::Seq(vec![
+            Ast::SetSprite(SRB, "chars/srb", 6),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(SRB, TalkStyle::Evil, TalkPos::NW,
+                      "Oh?  You think so?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(SRB, TalkStyle::Evil, TalkPos::NW,
+                      "Well, if you want to cross this\n\
+                       bridge so badly...how about\n\
+                       we play a little game for it?"),
+        ]),
+        Ast::Seq(vec![
+            Ast::SetSprite(SRB, "chars/srb", 5),
+            Ast::Queue(8, 1), // Animate moving chips to supply points.
+            Ast::Wait(0.5),
+            Ast::SetSprite(SRB, "chars/srb", 6),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(SRB, TalkStyle::Evil, TalkPos::NW,
+                      "First to the top wins.\n\
+                       I'll even let you go first!\n\
+                       Heh heh heh..."),
+        ]),
+        Ast::Seq(vec![
+            Ast::SetSprite(SRB, "chars/srb", 5),
             Ast::Queue(0, 1), // Hide dashboard.
             Ast::Queue(4, 1), // Mark middle scene as done.
         ]),
@@ -509,7 +690,7 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
                 Ast::Seq(vec![
                     Ast::Wait(0.5),
                     Ast::Sound(Sound::talk_hi()),
-                    Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::E, "Huh!?"),
+                    Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::E, "Hey!"),
                 ]),
             ]),
         ]),

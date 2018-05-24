@@ -177,6 +177,12 @@ impl View {
             map_sprites.push((sprites[6].clone(), Point::new(368, 176)));
         }
         {
+            let sprites = resources.get_sprites("map/atlatl");
+            map_sprites.push((sprites[0].clone(), Point::new(144, 256)));
+            map_sprites.push((sprites[1].clone(), Point::new(176, 256)));
+            map_sprites.push((sprites[2].clone(), Point::new(208, 256)));
+        }
+        {
             let sprites = resources.get_sprites("map/biodome");
             let idx = if biodome_is_open { 0 } else { 2 };
             map_sprites.push((sprites[idx].clone(), Point::new(336, 80)));
@@ -261,7 +267,7 @@ impl View {
         }
         if !game.is_unlocked(Location::SystemSyzygy) {
             let sprites = resources.get_sprites("map/secret");
-            map_sprites.push((sprites[0].clone(), Point::new(176, 256)));
+            map_sprites.push((sprites[0].clone(), Point::new(164, 258)));
         }
         {
             let sprites = resources.get_sprites("map/sewer");

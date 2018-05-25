@@ -36,6 +36,7 @@ const BOOM_START: i32 = 100;
 const ELINSA: i32 = 4;
 const MEZURE: i32 = 1;
 const RELYNG: i32 = -100;
+const RELYNG_FG: i32 = 7;
 const SRB: i32 = 6;
 const UGRENT: i32 = 2;
 const YTTRIS: i32 = 3;
@@ -171,8 +172,9 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             ]),
         ]),
         Ast::Seq(vec![
-            Ast::SetSprite(SRB, "chars/srb", 2),
+            Ast::SetSprite(SRB, "chars/srb", 4),
             Ast::Wait(0.5),
+            Ast::SetSprite(SRB, "chars/srb", 2),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
                       "Okay, okay, ``System\n\
@@ -180,8 +182,9 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         ]),
         Ast::Seq(vec![
             Ast::SetSprite(SRB, "chars/srb", 0),
-            Ast::Slide(SRB, (416, 96), true, true, 0.5),
+            Ast::Slide(SRB, (426, 96), true, true, 0.5),
             Ast::SetSprite(SRB, "chars/srb", 1),
+            Ast::Sound(Sound::talk_hi()),
             Ast::Talk(SRB, TalkStyle::Good, TalkPos::SW,
                       "And I can help!  See all\n\
                        these red indicators?  These\n\
@@ -189,14 +192,16 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
                        that are broken."),
         ]),
         Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
             Ast::Talk(SRB, TalkStyle::Good, TalkPos::SW,
                       "Engines, external sensors,\n\
                        navigational control..."),
         ]),
         Ast::Seq(vec![
             Ast::SetSprite(SRB, "chars/srb", 0),
-            Ast::Slide(SRB, (416, 144), true, true, 0.5),
+            Ast::Slide(SRB, (426, 144), true, true, 0.5),
             Ast::SetSprite(SRB, "chars/srb", 1),
+            Ast::Sound(Sound::talk_hi()),
             Ast::Talk(SRB, TalkStyle::Good, TalkPos::SW,
                       "To get the ship moving again,\n\
                        you'll need to travel around\n\
@@ -257,6 +262,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::SetSprite(SRB, "chars/srb", 0),
             Ast::Wait(0.75),
+            // TODO: play sound here
             Ast::SetSprite(SRB, "chars/srb", 5),
             Ast::Wait(0.75),
             Ast::SetSprite(SRB, "chars/srb", 6),
@@ -689,7 +695,7 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
                 }).collect()),
                 Ast::Seq(vec![
                     Ast::Wait(0.5),
-                    Ast::Sound(Sound::talk_hi()),
+                    Ast::Sound(Sound::talk_annoyed_hi()),
                     Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::E, "Hey!"),
                 ]),
             ]),
@@ -727,8 +733,8 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
             ]),
             Ast::Seq(vec![
                 Ast::Wait(0.25),
-                Ast::Place(RELYNG, "chars/relyng", 0, (448, 224)),
-                Ast::Slide(RELYNG, (448, 202), false, false, 0.35),
+                Ast::Place(RELYNG, "chars/relyng", 0, (490, 224)),
+                Ast::Slide(RELYNG, (456, 202), false, false, 0.2),
             ]),
             Ast::Seq(vec![
                 Ast::Wait(0.35),
@@ -760,7 +766,7 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
                                 Ast::Wait(0.5),
                                 Ast::Sound(Sound::talk_hi()),
                                 Ast::Talk(MEZURE, TalkStyle::Normal,
-                                          TalkPos::SE, "Wait, what?"),
+                                          TalkPos::E, "Whoa!"),
                             ]),
                         ]),
                     ]),
@@ -801,21 +807,118 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
             ]),
             Ast::Wait(1.0),
             Ast::Sound(Sound::small_jump()),
-            Ast::Jump(RELYNG, (448, 192), 0.5),
+            Ast::Jump(RELYNG, (456, 192), 0.5),
             Ast::Wait(0.5),
             Ast::Sound(Sound::talk_hi()),
-            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NW,
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::W,
                       "Good riddance."),
         ]),
         Ast::Seq(vec![
-            Ast::Queue(3, 1), // Turn whole board green.
-            Ast::Seq((0..19).map(|index| {
-                Ast::Seq(vec![
-                    Ast::Place(BRIDGE_START + index, "tiles/miniblocks", 14,
-                               (144 + 16 * index, 208)),
-                    Ast::Wait(0.05),
-                ])
-            }).collect()),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NW,
+                      "Madam, I am pleased to\n\
+                       report that I have found and\n\
+                       disposed of our saboteur."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::E,
+                      "Thank you, Relyng.  Now be a\n\
+                       dear and get us that bridge back."),
+        ]),
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NW,
+                          "But of course."),
+            ]),
+            Ast::Seq(vec![
+                Ast::Sound(Sound::small_jump()),
+                Ast::Jump(RELYNG, (456, 192), 0.35),
+                Ast::Sound(Sound::character_collision()),
+                Ast::Queue(3, 1), // Turn whole board green.
+                Ast::Seq((0..19).map(|index| {
+                    Ast::Seq(vec![
+                        Ast::Place(BRIDGE_START + index,
+                                   "tiles/miniblocks", 14,
+                                   (144 + 16 * index, 208)),
+                        Ast::Wait(0.05),
+                    ])
+                }).collect()),
+            ]),
+        ]),
+        Ast::Seq(vec![
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                      "Well, let's get a move on!"),
+        ]),
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::Wait(0.2),
+                Ast::Slide(ARGONY, (-16, 128), true, false, 0.75),
+                Ast::Wait(0.5),
+                Ast::SetPos(ARGONY, (-16, 192)),
+                Ast::Slide(ARGONY, (592, 192), false, false, 2.0),
+                Ast::Remove(ARGONY),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.4),
+                Ast::Slide(ELINSA, (-16, 128), true, false, 0.75),
+                Ast::Wait(0.75),
+                Ast::SetPos(ELINSA, (-16, 192)),
+                Ast::Slide(ELINSA, (592, 192), false, false, 1.75),
+                Ast::Remove(ELINSA),
+            ]),
+            Ast::Seq(vec![
+                Ast::Slide(UGRENT, (592, 192), true, false, 1.75),
+                Ast::Remove(UGRENT),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.5),
+                Ast::Slide(YTTRIS, (592, 192), true, false, 1.5),
+                Ast::Remove(YTTRIS),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(2.0),
+                Ast::Slide(MEZURE, (358, 192), true, true, 2.0),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(5.0),
+                Ast::Sound(Sound::talk_annoyed_hi()),
+                Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NW,
+                          "You cooperating with\n\
+                           that thing $iprobably$r\n\
+                           wasn't a good idea."),
+            ]),
+        ]),
+        Ast::Par(vec![
+            Ast::Seq(vec![
+                Ast::Sound(Sound::talk_hi()),
+                Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NW,
+                          "But I didn't kn-"),
+            ]),
+            Ast::Seq(vec![
+                Ast::Wait(0.25),
+                Ast::Sound(Sound::talk_annoyed_lo()),
+                Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NW,
+                          "We'll have\n\
+                           words later."),
+            ]),
+        ]),
+        Ast::Seq(vec![
+            Ast::Swap(RELYNG, RELYNG_FG),
+            Ast::Slide(RELYNG_FG, (592, 192), true, false, 0.75),
+            Ast::Remove(RELYNG_FG),
+            Ast::Wait(1.25),
+            Ast::Sound(Sound::talk_hi()),
+            Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NW,
+                      "$iSigh$r...maybe not the ideal\n\
+                       first day on the job."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Slide(MEZURE, (592, 192), true, false, 1.0),
+            Ast::Remove(MEZURE),
+            Ast::Wait(0.75),
         ]),
     ];
     Ast::compile_scene(resources, ast)

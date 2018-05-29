@@ -99,8 +99,11 @@ impl Coords {
         None
     }
 
+    /// Returns the row.  Row 0 is the bottom row of the pyramid; row 7 is the
+    /// top cell.
     pub fn row(&self) -> i32 { self.row }
 
+    /// Returns the column.  Column 0 is the left cell of the row.
     pub fn col(&self) -> i32 { self.col }
 
     fn index(&self) -> usize {
@@ -293,13 +296,43 @@ impl Board {
     }
 
     pub fn possible_removals(&self, team: Team) -> HashSet<Coords> {
-        let mut results = HashSet::new();
+        self.possible_removals_vec(team).into_iter().collect()
+    }
+
+    // This is a relatively hot function when calling best_srb_move, so it's
+    // been optimized a bit.
+    fn possible_removals_vec(&self, team: Team) -> Vec<Coords> {
+        // There can never be more than 8 possible removals (one for each
+        // column), so we can pre-allocate the vector.  (There's a debug_assert
+        // below to check that this limit is correct.)
+        let results_capacity = 8;
+        let mut results = Vec::with_capacity(results_capacity);
         let value = team.value();
-        for coords in Coords::all() {
-            if self.get(coords) == value && self.can_remove_from(coords) {
-                results.insert(coords);
+        // The most straightforward implementation would be this:
+        //     for coords in Coords::all() {
+        //         if self.get(coords) == value &&
+        //            self.can_remove_from(coords)
+        //         {
+        //             results.push(coords);
+        //         }
+        //     }
+        // However, the below version makes finding the best SRB move about
+        // twice as fast in practice (a potentially multi-second savings).
+        for col in 0..7 {
+            let mut row = 7 - col;
+            while row >= 0 {
+                let coords = Coords::new(row, col);
+                let cell = self.get(coords);
+                if cell == 0 {
+                    row -= 1;
+                    continue;
+                } else if cell == value && self.can_remove_from(coords) {
+                    results.push(coords);
+                }
+                break;
             }
         }
+        debug_assert!(results.len() <= results_capacity);
         results
     }
 
@@ -419,6 +452,7 @@ impl Board {
     /// if it gets to make the next move.
     fn minimax(&self, depth: i32, mut alpha: f64, beta: f64, team: Team)
                -> f64 {
+        debug_assert!(depth >= 0);
         if depth == 0 || self.you == 0 || self.srb == 0 {
             return self.favoribility(team);
         }
@@ -499,9 +533,9 @@ impl Board {
 
     fn all_removals(&self, team: Team) -> Vec<(Vec<Coords>, Board)> {
         let mut results = HashMap::new();
-        for coords1 in self.possible_removals(team) {
+        for coords1 in self.possible_removals_vec(team) {
             let board2 = self.with_removed(coords1);
-            let removals2 = board2.possible_removals(team);
+            let removals2 = board2.possible_removals_vec(team);
             if removals2.is_empty() {
                 let key = board2.cells.clone();
                 results.insert(key, (vec![coords1], board2));
@@ -595,11 +629,11 @@ mod tests {
         assert!(board.is_empty());
         board.set_piece_at(Coords::new(0, 1), Team::You);
         assert!(!board.is_empty());
-        board = board.with_removed(Coords::new(0, 1));
+        board.remove_piece(Coords::new(0, 1));
         assert!(board.is_empty());
         board.set_piece_at(Coords::new(0, 6), Team::SRB);
         assert!(!board.is_empty());
-        board = board.with_removed(Coords::new(0, 6));
+        board.remove_piece(Coords::new(0, 6));
         assert!(board.is_empty());
     }
 
@@ -641,6 +675,42 @@ mod tests {
             vec![Coords::new(0, 4), Coords::new(1, 1)],
         ];
         assert_eq!(actual_removals, expected_removals);
+    }
+
+    #[test]
+    #[cfg_attr(rustfmt, rustfmt_skip)]
+    fn board_favoribility() {
+        let board = Board::new();
+        assert_eq!(board.you_supply(), 18);
+        assert_eq!(board.srb_supply(), 18);
+        assert_eq!(board.favoribility(Team::You), 1.0);
+        assert_eq!(board.favoribility(Team::SRB), 1.0);
+
+        let board = Board::from_cells(vec![0,
+                                         0, 0,
+                                       0, 0, 0,
+                                     0, 0, 0, 0,
+                                   0, 0, 0, 0, 0,
+                                 2, 1, 2, 1, 2, 1,
+                               2, 2, 1, 2, 2, 1, 2,
+                             1, 2, 1, 2, 2, 2, 1, 2]);
+        assert_eq!(board.you_supply(), 10);
+        assert_eq!(board.srb_supply(), 5);
+        assert_eq!(board.favoribility(Team::You), 2.0);
+        assert_eq!(board.favoribility(Team::SRB), 0.5);
+
+        let board = Board::from_cells(vec![0,
+                                         0, 0,
+                                       0, 0, 0,
+                                     1, 2, 1, 2,
+                                   2, 1, 2, 2, 1,
+                                 2, 1, 2, 1, 2, 1,
+                               2, 2, 1, 2, 2, 1, 2,
+                             1, 2, 1, 2, 2, 2, 1, 2]);
+        assert_eq!(board.you_supply(), 6);
+        assert_eq!(board.srb_supply(), 0);
+        assert_eq!(board.favoribility(Team::You), f64::INFINITY);
+        assert_eq!(board.favoribility(Team::SRB), 0.0);
     }
 
     #[test]

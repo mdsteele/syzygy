@@ -65,7 +65,9 @@ impl Element<Game, PuzzleCmd> for View {
                     -> Action<PuzzleCmd> {
         let state = &mut game.column_as_icy_em;
         let mut action = self.core.handle_event(event, state);
-        if !action.should_stop() && self.show_columns {
+        if !action.should_stop() && self.show_columns &&
+            (event == &Event::ClockTick || !state.is_solved())
+        {
             let subaction = self.columns
                 .handle_event(event, state.columns_mut());
             if let Some(&(col, by)) = subaction.value() {

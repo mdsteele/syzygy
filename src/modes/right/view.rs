@@ -63,7 +63,9 @@ impl Element<Game, PuzzleCmd> for View {
                     -> Action<PuzzleCmd> {
         let state = &mut game.the_ice_is_right;
         let mut action = self.core.handle_event(event, state);
-        if !action.should_stop() {
+        if !action.should_stop() &&
+            (event == &Event::ClockTick || !state.is_solved())
+        {
             let subaction = self.grid.handle_event(event, state.grid_mut());
             if let Some(&(coords, dir)) = subaction.value() {
                 if let Some(slide) = state.slide_ice_block(coords, dir) {

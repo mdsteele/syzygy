@@ -289,15 +289,17 @@ impl Element<HexState, (usize, i32)> for HexWheel {
         canvas.draw_sprite_centered(&self.hub_sprites[0], self.center);
     }
 
-    fn handle_event(&mut self, event: &Event, _state: &mut HexState)
+    fn handle_event(&mut self, event: &Event, state: &mut HexState)
                     -> Action<(usize, i32)> {
         match event {
             &Event::MouseDown(pt) => {
-                let delta = pt - self.center;
-                let sqdist = delta.x() * delta.x() + delta.y() * delta.y();
-                if sqdist <= 32 * 32 {
-                    self.drag = Some(WheelDrag::new(delta));
-                    return Action::ignore().and_stop();
+                if !state.is_solved() {
+                    let delta = pt - self.center;
+                    let sqdist = delta.x() * delta.x() + delta.y() * delta.y();
+                    if sqdist <= 32 * 32 {
+                        self.drag = Some(WheelDrag::new(delta));
+                        return Action::ignore().and_stop();
+                    }
                 }
             }
             &Event::MouseDrag(pt) => {

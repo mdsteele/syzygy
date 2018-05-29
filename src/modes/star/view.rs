@@ -279,13 +279,15 @@ impl Element<StarState, (i32, i32, WordDir, i32)> for LetterColumns {
                 Action::redraw_if(redraw)
             }
             &Event::MouseDown(pt) => {
-                let rect = self.rect();
-                if rect.contains_point(pt) {
-                    let col = (pt.x() - rect.left()) / BLOCK_WIDTH;
-                    let row = (rect.bottom() - pt.y()) / BLOCK_HEIGHT;
-                    if row < state.column_letters(col).len() as i32 {
-                        self.drag = Some(Drag::new(col, row));
-                        return Action::redraw();
+                if !state.is_solved() {
+                    let rect = self.rect();
+                    if rect.contains_point(pt) {
+                        let col = (pt.x() - rect.left()) / BLOCK_WIDTH;
+                        let row = (rect.bottom() - pt.y()) / BLOCK_HEIGHT;
+                        if row < state.column_letters(col).len() as i32 {
+                            self.drag = Some(Drag::new(col, row));
+                            return Action::redraw();
+                        }
                     }
                 }
                 Action::ignore()

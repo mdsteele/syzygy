@@ -19,7 +19,7 @@
 
 use elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
 use elements::ice::GridView;
-use gui::{Action, Canvas, Element, Event, Rect, Resources};
+use gui::{Action, Canvas, Element, Event, Rect, Resources, Sound};
 use modes::SOLVED_INFO_TEXT;
 use save::{BlindState, Game, PuzzleState};
 use save::ice::BlockSlide;
@@ -70,6 +70,7 @@ impl Element<Game, PuzzleCmd> for View {
             let subaction = self.grid.handle_event(event, state.grid_mut());
             if let Some(&(coords, dir)) = subaction.value() {
                 if let Some(slide) = state.slide_ice_block(coords, dir) {
+                    action.also_play_sound(Sound::device_slide());
                     self.grid.animate_slide(&slide);
                     if state.is_solved() {
                         self.core.begin_outro_scene();

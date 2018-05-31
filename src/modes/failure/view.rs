@@ -195,7 +195,6 @@ impl Element<Game, PuzzleCmd> for View {
                             anim: 0,
                             at: coords,
                         };
-                        // TODO: use ice-slide sound here instead
                         action.also_play_sound(Sound::device_pickup());
                         if state.board().formation_at(coords).is_some() {
                             self.core.push_undo(UndoRedo::Place(coords));
@@ -819,7 +818,6 @@ impl PyramidStep {
                                         to_remove: remove,
                                     });
                         action.also_redraw();
-                        // TODO: use ice-slide sound here instead
                         action.also_play_sound(Sound::device_pickup())
                     }
                     Some(Move::Jump {

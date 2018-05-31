@@ -315,20 +315,14 @@ impl Element<ObjectGrid, (Point, Direction)> for GridView {
                                 anim.slide_dir.delta() * new_dist;
                             match grid.objects().get(&coords) {
                                 Some(&Object::Rotator) => {
-                                    action.also_play_sound(
-                                        Sound::transform_step(0));
                                     anim.transform = anim.transform
                                         .rotated_cw()
                                 }
                                 Some(&Object::Reflector(false)) => {
-                                    action.also_play_sound(
-                                        Sound::transform_step(0));
                                     anim.transform = anim.transform
                                         .flipped_horz()
                                 }
                                 Some(&Object::Reflector(true)) => {
-                                    action.also_play_sound(
-                                        Sound::transform_step(0));
                                     anim.transform = anim.transform
                                         .flipped_vert()
                                 }
@@ -362,7 +356,6 @@ impl Element<ObjectGrid, (Point, Direction)> for GridView {
                     GridSwipe::Reset => self.drag = None,
                     GridSwipe::Swipe(coords, dir) => {
                         self.drag = None;
-                        // TODO: play "slide" sound
                         return Action::redraw().and_return((coords, dir));
                     }
                 }

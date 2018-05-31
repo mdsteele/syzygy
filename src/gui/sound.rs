@@ -76,6 +76,12 @@ impl Sound {
         Sound::new(Wave::noise(8000.0).adshr(0.0, 0.0, 0.25, 0.0, 0.05) * 0.4)
     }
 
+    pub fn device_slide() -> Sound {
+        Sound::new(Wave::noise(Wave::slide(7000.0, -7000.0, 0.0))
+                       .adshr(0.05, 0.0, 1.0, 0.0, 0.25) *
+                       Wave::slide(0.125, -0.5, 0.0))
+    }
+
     pub fn explosion_small() -> Sound {
         Sound::new(Wave::noise(Wave::from(1500.0) + Wave::sine(20.0) * 250.0)
                        .adshr(0.0, 0.0, 0.5, 0.0, 0.5) *

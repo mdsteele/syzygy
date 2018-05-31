@@ -315,17 +315,20 @@ impl Element<ObjectGrid, (Point, Direction)> for GridView {
                                 anim.slide_dir.delta() * new_dist;
                             match grid.objects().get(&coords) {
                                 Some(&Object::Rotator) => {
-                                    // TODO: play sound
+                                    action.also_play_sound(
+                                        Sound::transform_step(0));
                                     anim.transform = anim.transform
                                         .rotated_cw()
                                 }
                                 Some(&Object::Reflector(false)) => {
-                                    // TODO: play sound
+                                    action.also_play_sound(
+                                        Sound::transform_step(0));
                                     anim.transform = anim.transform
                                         .flipped_horz()
                                 }
                                 Some(&Object::Reflector(true)) => {
-                                    // TODO: play sound
+                                    action.also_play_sound(
+                                        Sound::transform_step(0));
                                     anim.transform = anim.transform
                                         .flipped_vert()
                                 }
@@ -345,7 +348,6 @@ impl Element<ObjectGrid, (Point, Direction)> for GridView {
                 let coords = Point::new(col, row);
                 if grid.ice_blocks().contains_key(&coords) {
                     self.drag = Some(GridDrag::new(coords, pt));
-                    // TODO: play "grab" sound
                     return Action::ignore().and_stop();
                 }
             }

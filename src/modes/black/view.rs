@@ -23,7 +23,7 @@ use std::rc::Rc;
 
 use elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
 use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
-          Resources, Sprite};
+          Resources, Sound, Sprite};
 use modes::SOLVED_INFO_TEXT;
 use save::{BlackState, Game, PuzzleState};
 use save::tree::{BasicTree, TreeOp};
@@ -92,7 +92,14 @@ impl Element<Game, PuzzleCmd> for View {
                     TreeCmd::Remove(key) => state.remove(key),
                 };
                 if !ops.is_empty() {
-                    // TODO: play sound
+                    match cmd {
+                        TreeCmd::Insert(_) => {
+                            action.also_play_sound(Sound::device_pickup());
+                        }
+                        TreeCmd::Remove(_) => {
+                            action.also_play_sound(Sound::device_drop());
+                        }
+                    }
                     self.tree.start_animation(basic, ops);
                     if state.is_solved() {
                         self.core.begin_outro_scene();
@@ -182,7 +189,7 @@ struct TreeView {
     fruit_sprites: Vec<Sprite>,
     leaf_sprites: Vec<Sprite>,
     fruit: HashMap<i32, (Point, Point, Point)>,
-    animation: Option<(BasicTree, Vec<TreeOp>, i32)>,
+    animation: Option<(BasicTree, Vec<TreeOp>, i32, usize)>,
     override_fruits: bool,
 }
 
@@ -210,7 +217,7 @@ impl TreeView {
         basic.perform_op(&ops[0]);
         self.move_fruit_to_goals();
         self.update_fruit_goals(&basic);
-        self.animation = Some((basic, ops, OP_ANIMATION_FRAMES));
+        self.animation = Some((basic, ops, OP_ANIMATION_FRAMES, 0));
     }
 
     fn update_fruit_positions(&mut self, state: &BlackState) {
@@ -305,7 +312,7 @@ impl TreeView {
     }
 
     fn draw_loose_fruits(&self, state: &BlackState, canvas: &mut Canvas) {
-        let tree = if let Some((ref basic, _, _)) = self.animation {
+        let tree = if let Some((ref basic, _, _, _)) = self.animation {
             basic
         } else {
             state.tree().as_basic()
@@ -316,7 +323,7 @@ impl TreeView {
 
 impl Element<BlackState, TreeCmd> for TreeView {
     fn draw(&self, state: &BlackState, canvas: &mut Canvas) {
-        let tree = if let Some((ref basic, _, _)) = self.animation {
+        let tree = if let Some((ref basic, _, _, _)) = self.animation {
             basic
         } else {
             state.tree().as_basic()
@@ -373,36 +380,45 @@ impl Element<BlackState, TreeCmd> for TreeView {
                     -> Action<TreeCmd> {
         match event {
             &Event::ClockTick => {
-                let mut redraw = false;
-                if let Some((mut basic, mut ops, mut frames)) =
+                let mut action = Action::ignore();
+                if let Some((mut basic, mut ops, mut frames, mut recolors)) =
                     self.animation.take()
                 {
                     debug_assert!(!ops.is_empty());
                     frames -= 1;
                     if frames <= 0 {
-                        redraw = true;
+                        action.also_redraw();
                         ops.remove(0);
-                        // TODO: play sound
-                        if ops.is_empty() ||
-                            (ops.len() == 1 && ops[0].is_set_red())
-                        {
+                        if ops.is_empty() {
                             self.update_fruit_positions(state);
                         } else {
-                            basic.perform_op(&ops[0]);
-                            frames = OP_ANIMATION_FRAMES;
-                            self.move_fruit_to_goals();
-                            self.update_fruit_goals(&basic);
-                            self.animation = Some((basic, ops, frames));
+                            if ops[0].is_rotate() {
+                                action.also_play_sound(Sound::device_rotate());
+                            } else if ops[0].is_set_red() {
+                                recolors += 1;
+                                action.also_play_sound(
+                                    Sound::transform_step(recolors));
+                            }
+                            if ops.len() == 1 && ops[0].is_set_red() {
+                                self.update_fruit_positions(state);
+                            } else {
+                                basic.perform_op(&ops[0]);
+                                frames = OP_ANIMATION_FRAMES;
+                                self.move_fruit_to_goals();
+                                self.update_fruit_goals(&basic);
+                                self.animation =
+                                    Some((basic, ops, frames, recolors));
+                            }
                         }
                     } else {
                         if !ops[0].is_set_red() {
                             self.update_fruit_currents(frames);
-                            redraw = true;
+                            action.also_redraw();
                         }
-                        self.animation = Some((basic, ops, frames));
+                        self.animation = Some((basic, ops, frames, recolors));
                     }
                 }
-                Action::redraw_if(redraw)
+                action
             }
             &Event::MouseDown(pt)
                 if self.animation.is_none() && !state.is_solved() => {
@@ -415,7 +431,6 @@ impl Element<BlackState, TreeCmd> for TreeView {
                         } else {
                             TreeCmd::Insert(key)
                         };
-                        // TODO: play sound
                         return Action::redraw().and_return(cmd);
                     }
                 }

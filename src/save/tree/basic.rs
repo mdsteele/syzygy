@@ -34,6 +34,14 @@ pub enum TreeOp {
 }
 
 impl TreeOp {
+    pub fn is_rotate(&self) -> bool {
+        match self {
+            &TreeOp::RotateLeft(_) |
+            &TreeOp::RotateRight(_) => true,
+            _ => false,
+        }
+    }
+
     pub fn is_set_red(&self) -> bool {
         match self {
             &TreeOp::SetRed(_) => true,

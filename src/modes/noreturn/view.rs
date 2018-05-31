@@ -557,8 +557,11 @@ impl Element<(bool, Point), bool> for StartStopButton {
                     -> Action<bool> {
         match event {
             &Event::MouseDown(pt) if self.rect.contains_point(pt) => {
-                // TODO: play sound
-                Action::redraw().and_return(!input.0)
+                let mut action = Action::redraw().and_return(!input.0);
+                if input.0 {
+                    action.also_play_sound(Sound::talk_annoyed_hi())
+                }
+                action
             }
             _ => Action::ignore(),
         }

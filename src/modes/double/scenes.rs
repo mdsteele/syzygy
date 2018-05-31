@@ -271,7 +271,8 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
             Ast::Slide(RELYNG_FG, (592, 240), true, false, 1.0),
             Ast::Remove(RELYNG_FG),
             Ast::Wait(1.0),
-            Ast::Queue(1, 3), // Show metapuzzle clue.  TODO: Play sound.
+            Ast::Sound(Sound::beep()),
+            Ast::Queue(1, 3), // Show metapuzzle clue.
             Ast::Wait(1.0),
         ]),
     ];

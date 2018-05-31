@@ -262,7 +262,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::SetSprite(SRB, "chars/srb", 0),
             Ast::Wait(0.75),
-            // TODO: play sound here
+            Ast::Sound(Sound::talk_annoyed_hi()),
             Ast::SetSprite(SRB, "chars/srb", 5),
             Ast::Wait(0.75),
             Ast::SetSprite(SRB, "chars/srb", 6),

@@ -195,6 +195,8 @@ impl Element<Game, PuzzleCmd> for View {
                             anim: 0,
                             at: coords,
                         };
+                        // TODO: use ice-slide sound here instead
+                        action.also_play_sound(Sound::device_pickup());
                         if state.board().formation_at(coords).is_some() {
                             self.core.push_undo(UndoRedo::Place(coords));
                         } else {
@@ -206,6 +208,7 @@ impl Element<Game, PuzzleCmd> for View {
                             from: from,
                             possible: state.board().possible_jump_dests(from),
                         };
+                        action.also_play_sound(Sound::device_rotate());
                         self.core.push_undo(UndoRedo::Jumping(from));
                     }
                     Some(&PyramidCmd::Jump(from, to)) => {
@@ -216,6 +219,7 @@ impl Element<Game, PuzzleCmd> for View {
                             from: from,
                             to: to,
                         };
+                        action.also_play_sound(Sound::small_jump());
                         if state.board().formation_at(to).is_some() {
                             self.core.push_undo(UndoRedo::Jump(from, to));
                         } else {
@@ -232,6 +236,7 @@ impl Element<Game, PuzzleCmd> for View {
                             formation: formation.clone(),
                             so_far: so_far.clone(),
                         };
+                        action.also_play_sound(Sound::device_pickup());
                         if (so_far.len() as i32) < MAX_REMOVALS &&
                             !state
                                 .board()
@@ -536,7 +541,7 @@ const ANIM_PLACE_FRAMES: i32 = 12;
 const ANIM_JUMP_FRAMES: i32 = 12;
 const ANIM_REMOVE_FRAMES: i32 = ANIM_PLACE_FRAMES;
 const ANIM_FORMATION_SLOWDOWN: i32 = 2;
-const ANIM_VICTORY_SLOWDOWN: i32 = 2;
+const ANIM_VICTORY_SLOWDOWN: i32 = 3;
 
 enum PyramidStep {
     YouReady { possible: HashSet<Coords> },
@@ -716,17 +721,17 @@ impl PyramidStep {
         }
     }
 
-    fn clock_tick(&mut self, state: &mut FailureState) -> bool {
+    fn clock_tick(&mut self, state: &mut FailureState) -> Action<()> {
         let mut next = None;
-        let redraw = match self {
+        let mut action = Action::ignore();
+        match self {
             &mut PyramidStep::YouReady { .. } |
             &mut PyramidStep::YouJumping { .. } |
-            &mut PyramidStep::YouRemoving { .. } => false,
+            &mut PyramidStep::YouRemoving { .. } => {}
             &mut PyramidStep::YouAnimatePlace { ref mut anim, at } => {
                 *anim += 1;
                 if *anim >= ANIM_PLACE_FRAMES {
                     if let Some(formation) = state.board().formation_at(at) {
-                        // TODO: sound effects
                         next = Some(PyramidStep::YouAnimateFormation {
                                         anim: 0,
                                         formation: formation,
@@ -734,8 +739,9 @@ impl PyramidStep {
                     } else {
                         next = Some(PyramidStep::srb_thinking(state));
                     }
+                    action.also_play_sound(Sound::device_drop());
                 }
-                true
+                action.also_redraw();
             }
             &mut PyramidStep::YouAnimateJump { ref mut anim, to, .. } => {
                 *anim += 1;
@@ -748,8 +754,9 @@ impl PyramidStep {
                     } else {
                         next = Some(PyramidStep::srb_thinking(state));
                     }
+                    action.also_play_sound(Sound::device_drop());
                 }
-                true
+                action.also_redraw();
             }
             &mut PyramidStep::YouAnimateFormation {
                 ref mut anim,
@@ -766,7 +773,10 @@ impl PyramidStep {
                                             .possible_removals(Team::You),
                                 });
                 }
-                *anim % ANIM_FORMATION_SLOWDOWN == 0
+                if *anim % ANIM_FORMATION_SLOWDOWN == 0 {
+                    action.also_redraw();
+                    action.also_play_sound(Sound::device_rotate());
+                }
             }
             &mut PyramidStep::YouAnimateRemove {
                 ref mut anim,
@@ -792,7 +802,7 @@ impl PyramidStep {
                         next = Some(PyramidStep::srb_thinking(state));
                     }
                 }
-                true
+                action.also_redraw();
             }
             &mut PyramidStep::SrbThinking { ref result } => {
                 match result.lock().unwrap().take() {
@@ -808,7 +818,9 @@ impl PyramidStep {
                                         formation: formation,
                                         to_remove: remove,
                                     });
-                        true
+                        action.also_redraw();
+                        // TODO: use ice-slide sound here instead
+                        action.also_play_sound(Sound::device_pickup())
                     }
                     Some(Move::Jump {
                              from,
@@ -825,9 +837,10 @@ impl PyramidStep {
                                         formation: formation,
                                         to_remove: remove,
                                     });
-                        true
+                        action.also_redraw();
+                        action.also_play_sound(Sound::small_jump());
                     }
-                    None => false,
+                    None => {}
                 }
             }
             &mut PyramidStep::SrbAnimatePlace {
@@ -849,8 +862,9 @@ impl PyramidStep {
                                         to_remove: to_remove.clone(),
                                     });
                     }
+                    action.also_play_sound(Sound::device_drop())
                 }
-                true
+                action.also_redraw();
             }
             &mut PyramidStep::SrbAnimateJump {
                 ref mut anim,
@@ -871,8 +885,9 @@ impl PyramidStep {
                                         to_remove: to_remove.clone(),
                                     });
                     }
+                    action.also_play_sound(Sound::device_drop());
                 }
-                true
+                action.also_redraw();
             }
             &mut PyramidStep::SrbAnimateFormation {
                 ref mut anim,
@@ -880,6 +895,10 @@ impl PyramidStep {
                 ref to_remove,
             } => {
                 *anim += 1;
+                if *anim % ANIM_FORMATION_SLOWDOWN == 0 {
+                    action.also_redraw();
+                    action.also_play_sound(Sound::device_rotate());
+                }
                 if *anim >= ANIM_FORMATION_SLOWDOWN * formation.len() as i32 {
                     debug_assert!(!to_remove.is_empty());
                     let mut remaining = to_remove.clone();
@@ -891,8 +910,8 @@ impl PyramidStep {
                                     from: from,
                                     remaining: remaining,
                                 });
+                    action.also_play_sound(Sound::device_pickup());
                 }
-                *anim % ANIM_FORMATION_SLOWDOWN == 0
             }
             &mut PyramidStep::SrbAnimateRemove {
                 ref mut anim,
@@ -915,9 +934,10 @@ impl PyramidStep {
                                         from: from,
                                         remaining: remaining,
                                     });
+                        action.also_play_sound(Sound::device_pickup());
                     }
                 }
-                true
+                action.also_redraw();
             }
             &mut PyramidStep::AnimateVictory { ref mut anim, team } => {
                 *anim += 1;
@@ -932,21 +952,21 @@ impl PyramidStep {
                             break;
                         }
                     }
-                    if !changed {
+                    if changed {
+                        action.also_redraw();
+                        action.also_play_sound(Sound::device_drop());
+                    } else {
                         next = Some(PyramidStep::Victory { winner: team });
                     }
-                    changed
-                } else {
-                    false
                 }
             }
-            &mut PyramidStep::Victory { .. } => false,
-            &mut PyramidStep::GameOver => false,
+            &mut PyramidStep::Victory { .. } => {}
+            &mut PyramidStep::GameOver => {}
         };
         if let Some(step) = next {
             *self = step;
         }
-        redraw
+        action
     }
 }
 
@@ -1051,8 +1071,7 @@ impl Element<FailureState, PyramidCmd> for PyramidView {
                     -> Action<PyramidCmd> {
         match event {
             &Event::ClockTick => {
-                let mut action = Action::redraw_if(self.step
-                                                       .clock_tick(state));
+                let mut action = self.step.clock_tick(state).but_no_value();
                 match self.step {
                     PyramidStep::Victory { winner: Team::You } => {
                         action = action.and_return(PyramidCmd::Win);

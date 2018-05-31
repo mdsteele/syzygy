@@ -294,6 +294,7 @@ impl Element<Game, PuzzleCmd> for View {
                 SyzygyStage::Relyng => {
                     let subaction = self.relyng.handle_event(event, state);
                     if let Some(&pos) = subaction.value() {
+                        action.also_play_sound(Sound::device_rotate());
                         state.relyng_toggle(pos);
                         if state.relyng_is_done() {
                             self.core.clear_undo_redo();

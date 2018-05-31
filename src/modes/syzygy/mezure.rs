@@ -24,7 +24,7 @@ use elements::column::ColumnsView;
 use elements::lasers::LaserField;
 use elements::plane::{PlaneCmd, PlaneGridView};
 use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
-          Resources, Sprite};
+          Resources, Sound, Sprite};
 use save::SyzygyState;
 use save::ice::BlockSlide;
 
@@ -161,6 +161,7 @@ impl Element<SyzygyState, MezureCmd> for MezureView {
                     .slide_ice_block(coords, dir)
                 {
                     state.mezure_regenerate_laser_grid();
+                    action.also_play_sound(Sound::device_slide());
                     self.ice_grid.animate_slide(&slide);
                     self.laser_grid.clear_lasers();
                     self.animating_slide = true;

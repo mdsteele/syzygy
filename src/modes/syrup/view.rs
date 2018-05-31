@@ -22,7 +22,7 @@ use std::rc::Rc;
 
 use elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
 use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
-          Resources, Sprite};
+          Resources, Sound, Sprite};
 use modes::SOLVED_INFO_TEXT;
 use save::{Game, PrimaryColor, PuzzleState, SyrupState};
 use super::scenes;
@@ -92,6 +92,7 @@ impl Element<Game, PuzzleCmd> for View {
         if !action.should_stop() {
             let subaction = self.toggles.handle_event(event, state);
             if let Some(&position) = subaction.value() {
+                action.also_play_sound(Sound::device_rotate());
                 state.toggle(position);
                 if state.is_solved() {
                     self.core.begin_outro_scene();

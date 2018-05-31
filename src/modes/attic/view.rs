@@ -20,7 +20,8 @@
 use std::cmp;
 
 use elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
-use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sprite};
+use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sound,
+          Sprite};
 use modes::SOLVED_INFO_TEXT;
 use save::{AtticState, Game, PuzzleState};
 use super::scenes;
@@ -66,6 +67,7 @@ impl Element<Game, PuzzleCmd> for View {
         if !action.should_stop() {
             let subaction = self.grid.handle_event(event, state);
             if let Some(&position) = subaction.value() {
+                action.also_play_sound(Sound::device_rotate());
                 state.toggle(position);
                 if state.is_solved() {
                     self.core.begin_outro_scene();

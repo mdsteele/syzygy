@@ -238,6 +238,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
 pub fn compile_pre_sliders_scene(resources: &mut Resources) -> (i32, Scene) {
     let ast = vec![
         Ast::Seq(vec![
+            Ast::Sound(Sound::solve_puzzle_chime()),
             Ast::Wait(1.0),
             Ast::Queue(0, 0), // Hide crosswords.
             Ast::Wait(1.0),
@@ -259,8 +260,10 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Queue(0, 0), // Hide crosswords.
             Ast::Queue(2, 6), // Show sliders.
-            Ast::Sound(Sound::solve_puzzle_chime()),
-            Ast::Wait(1.0),
+            Ast::Queue(3, 1), // Animate glowing password.
+            Ast::Sound(Sound::transform_final()),
+            Ast::Wait(2.5),
+            Ast::Queue(3, 0), // Stop animating glowing password.
             Ast::Queue(2, 0), // Hide sliders.
             Ast::Wait(0.5),
             Ast::Sound(Sound::beep()),

@@ -19,6 +19,7 @@
 
 use std::cmp::{max, min};
 use std::rc::Rc;
+use std::f64;
 
 use elements::{CrosswordView, FadeStyle, Paragraph, PuzzleCmd, PuzzleCore,
                PuzzleView, TalkPos};
@@ -174,13 +175,14 @@ impl Element<Game, PuzzleCmd> for View {
                     if state.check_crossword(idx) {
                         self.crosswords[idx].reset_cursor();
                         self.crosswords[idx].animate_center_word();
-                        let sound = Sound::solve_puzzle_chime();
-                        action.also_play_sound(sound);
                         self.display_crossword_speech(state);
                         self.core.clear_undo_redo();
                         if state.all_crosswords_done() {
                             self.core
                                 .begin_extra_scene(scenes::PRE_SLIDERS_SCENE);
+                        } else {
+                            let sound = Sound::solve_puzzle_chime();
+                            action.also_play_sound(sound);
                         }
                     } else {
                         self.core.push_undo(UndoRedo::Crossword(idx,
@@ -293,13 +295,19 @@ impl PuzzleView for View {
 
     fn solve(&mut self, game: &mut Game) {
         self.slider.drag = None;
-        let state = &mut game.password_file;
-        state.solve();
         for crossword in &mut self.crosswords {
             crossword.reset_cursor();
         }
-        self.display_crossword_speech(state);
-        self.core.begin_outro_scene();
+        let state = &mut game.password_file;
+        if !state.all_crosswords_done() {
+            state.solve_all_crosswords();
+            self.display_crossword_speech(state);
+            self.core.begin_extra_scene(scenes::PRE_SLIDERS_SCENE);
+        } else {
+            state.solve();
+            self.display_crossword_speech(state);
+            self.core.begin_outro_scene();
+        }
     }
 
     fn drain_queue(&mut self) {
@@ -310,6 +318,9 @@ impl PuzzleView for View {
                 self.should_display_speech = value != 0;
             } else if kind == 2 {
                 self.slider.show_num_cols = value.max(0).min(6);
+            } else if kind == 3 {
+                self.slider.glow_anim =
+                    if value != 0 { GLOW_ANIM_FRAMES } else { 0 };
             }
         }
     }
@@ -319,6 +330,7 @@ impl PuzzleView for View {
 
 const BOX_USIZE: u32 = 24;
 const BOX_SIZE: i32 = BOX_USIZE as i32;
+const GLOW_ANIM_FRAMES: i32 = 50;
 const SLIDER_LEFT: i32 = 216;
 const SLIDER_TOP: i32 = 178;
 const SLIDER_WORDS: [&str; 6] =
@@ -334,6 +346,7 @@ struct PasswordSlider {
     font: Rc<Font>,
     drag: Option<SliderDrag>,
     show_num_cols: i32,
+    glow_anim: i32,
 }
 
 impl PasswordSlider {
@@ -342,6 +355,7 @@ impl PasswordSlider {
             font: resources.get_font("block"),
             drag: None,
             show_num_cols: 0,
+            glow_anim: 0,
         }
     }
 
@@ -355,6 +369,12 @@ impl PasswordSlider {
 
 impl Element<PasswordState, (i32, i32)> for PasswordSlider {
     fn draw(&self, state: &PasswordState, canvas: &mut Canvas) {
+        let hilight_color = {
+            let glow = ((self.glow_anim as f64) * f64::consts::PI /
+                            (GLOW_ANIM_FRAMES as f64))
+                .sin();
+            (63 + (192.0 * glow) as u8, 31, 63)
+        };
         for col in 0..self.show_num_cols {
             let rect = self.get_slider_rect(state, col);
             let left = rect.left();
@@ -374,7 +394,7 @@ impl Element<PasswordState, (i32, i32)> for PasswordSlider {
                 let color = if index == -state.get_slider_offset(col) {
                     match self.drag {
                         Some(ref drag) if col == drag.col => (0, 0, 0),
-                        _ => (63, 31, 63),
+                        _ => hilight_color,
                     }
                 } else {
                     (0, 0, 0)
@@ -404,6 +424,12 @@ impl Element<PasswordState, (i32, i32)> for PasswordSlider {
     fn handle_event(&mut self, event: &Event, state: &mut PasswordState)
                     -> Action<(i32, i32)> {
         match event {
+            &Event::ClockTick => {
+                if self.glow_anim > 0 {
+                    self.glow_anim -= 1;
+                    return Action::redraw();
+                }
+            }
             &Event::MouseDown(pt) if !state.is_solved() => {
                 for col in 0..6 {
                     if self.get_slider_rect(state, col).contains_point(pt) {

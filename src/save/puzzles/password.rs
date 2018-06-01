@@ -105,7 +105,7 @@ impl PasswordState {
         self.sliders = SOLVED_SLIDERS;
     }
 
-    fn solve_all_crosswords(&mut self) {
+    pub fn solve_all_crosswords(&mut self) {
         self.crosswords = [
             (true, CrosswordState::new(VALID, ELINSA_WORDS)),
             (true, CrosswordState::new(VALID, ARGONY_WORDS)),

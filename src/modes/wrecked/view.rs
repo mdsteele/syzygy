@@ -104,23 +104,31 @@ impl PuzzleView for View {
 
     fn undo(&mut self, game: &mut Game) {
         if let Some((dir, rank, by)) = self.core.pop_undo() {
-            game.wrecked_angle.shift_tiles(dir, rank, -by);
+            let state = &mut game.wrecked_angle;
+            self.grid.clear_drag(state);
+            state.shift_tiles(dir, rank, -by);
         }
     }
 
     fn redo(&mut self, game: &mut Game) {
         if let Some((dir, rank, by)) = self.core.pop_redo() {
-            game.wrecked_angle.shift_tiles(dir, rank, by);
+            let state = &mut game.wrecked_angle;
+            self.grid.clear_drag(state);
+            state.shift_tiles(dir, rank, by);
         }
     }
 
     fn reset(&mut self, game: &mut Game) {
+        let state = &mut game.wrecked_angle;
+        self.grid.clear_drag(state);
         self.core.clear_undo_redo();
-        game.wrecked_angle.reset();
+        state.reset();
     }
 
     fn solve(&mut self, game: &mut Game) {
-        game.wrecked_angle.solve();
+        let state = &mut game.wrecked_angle;
+        self.grid.clear_drag(state);
+        state.solve();
         self.core.begin_outro_scene();
     }
 
@@ -242,6 +250,14 @@ impl WreckedGrid {
             drag: None,
             font: resources.get_font("danger"),
             letters: HashMap::new(),
+        }
+    }
+
+    fn clear_drag(&mut self, state: &mut WreckedState) {
+        if let Some(drag) = self.drag.take() {
+            if let Some((dir, rank, by)) = drag.accum() {
+                state.shift_tiles(dir, rank, -by);
+            }
         }
     }
 }

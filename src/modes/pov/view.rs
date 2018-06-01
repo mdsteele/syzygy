@@ -103,6 +103,7 @@ impl PuzzleView for View {
 
     fn undo(&mut self, game: &mut Game) {
         if let Some(cmd) = self.core.pop_undo() {
+            self.grid.drag = None;
             let state = &mut game.point_of_view;
             match cmd {
                 PovCmd::Moved(from, to) => {
@@ -117,6 +118,7 @@ impl PuzzleView for View {
 
     fn redo(&mut self, game: &mut Game) {
         if let Some(cmd) = self.core.pop_redo() {
+            self.grid.drag = None;
             let state = &mut game.point_of_view;
             match cmd {
                 PovCmd::Moved(from, to) => {
@@ -131,10 +133,12 @@ impl PuzzleView for View {
 
     fn reset(&mut self, game: &mut Game) {
         self.core.clear_undo_redo();
+        self.grid.drag = None;
         game.point_of_view.reset();
     }
 
     fn solve(&mut self, game: &mut Game) {
+        self.grid.drag = None;
         game.point_of_view.solve();
         self.core.begin_outro_scene();
     }

@@ -70,6 +70,14 @@ impl PlaneGridView {
         self.changes.clear();
     }
 
+    pub fn cancel_drag_and_undo_changes(&mut self, grid: &mut PlaneGrid) {
+        self.drag_from = None;
+        for &(coords1, coords2) in self.changes.iter().rev() {
+            grid.toggle_pipe(coords1, coords2);
+        }
+        self.changes.clear();
+    }
+
     pub fn add_letter(&mut self, coords: Point, letter: char) {
         self.letters.insert(coords, letter);
     }

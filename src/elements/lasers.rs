@@ -210,6 +210,7 @@ impl LaserField {
     pub fn clear_lasers(&mut self) {
         self.lasers.clear();
         self.sparks.clear();
+        self.drag = None;
     }
 
     pub fn recalculate_lasers(&mut self, grid: &DeviceGrid) {

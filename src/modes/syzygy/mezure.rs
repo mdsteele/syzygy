@@ -95,6 +95,12 @@ impl MezureView {
         }
     }
 
+    pub fn clear_drag(&mut self, state: &mut SyzygyState) {
+        self.pipe_grid
+            .cancel_drag_and_undo_changes(state.mezure_pipe_grid_mut());
+        self.columns.clear_drag();
+    }
+
     pub fn refresh(&mut self, state: &mut SyzygyState) {
         self.recalculate_lasers_and_lights(state);
         self.ice_grid.reset_animation();

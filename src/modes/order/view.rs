@@ -62,6 +62,12 @@ impl View {
             show_tiles: false,
         }
     }
+
+    fn clear_drag(&mut self) {
+        for row in self.rows.iter_mut() {
+            row.drag = None;
+        }
+    }
 }
 
 impl Element<Game, PuzzleCmd> for View {
@@ -114,23 +120,27 @@ impl PuzzleView for View {
 
     fn undo(&mut self, game: &mut Game) {
         if let Some((old_index, new_index)) = self.core.pop_undo() {
+            self.clear_drag();
             game.point_of_order.move_tile(new_index, old_index);
         }
     }
 
     fn redo(&mut self, game: &mut Game) {
         if let Some((old_index, new_index)) = self.core.pop_redo() {
+            self.clear_drag();
             game.point_of_order.move_tile(old_index, new_index);
         }
     }
 
     fn reset(&mut self, game: &mut Game) {
         self.core.clear_undo_redo();
+        self.clear_drag();
         game.point_of_order.reset();
     }
 
     fn solve(&mut self, game: &mut Game) {
         game.point_of_order.solve();
+        self.clear_drag();
         self.core.begin_outro_scene();
     }
 

@@ -104,22 +104,26 @@ impl PuzzleView for View {
 
     fn undo(&mut self, game: &mut Game) {
         if let Some((wheel, by)) = self.core.pop_undo() {
+            self.wheels.clear_drag();
             game.hex_spangled.rotate_wheel_cw(wheel, -by);
         }
     }
 
     fn redo(&mut self, game: &mut Game) {
         if let Some((wheel, by)) = self.core.pop_redo() {
+            self.wheels.clear_drag();
             game.hex_spangled.rotate_wheel_cw(wheel, by);
         }
     }
 
     fn reset(&mut self, game: &mut Game) {
+        self.wheels.clear_drag();
         self.core.clear_undo_redo();
         game.hex_spangled.reset();
     }
 
     fn solve(&mut self, game: &mut Game) {
+        self.wheels.clear_drag();
         game.hex_spangled.solve();
         self.core.begin_outro_scene();
     }
@@ -206,6 +210,12 @@ impl HexWheels {
             token_sprites: resources.get_sprites("hex/tokens"),
             font: resources.get_font("roman"),
             letters: HashMap::new(),
+        }
+    }
+
+    fn clear_drag(&mut self) {
+        for wheel in self.wheels.iter_mut() {
+            wheel.drag = None;
         }
     }
 }

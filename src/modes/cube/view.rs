@@ -100,23 +100,31 @@ impl PuzzleView for View {
 
     fn undo(&mut self, game: &mut Game) {
         if let Some((dir, rank, by)) = self.core.pop_undo() {
-            game.cube_tangle.rotate_cubes(dir, rank, -by);
+            let state = &mut game.cube_tangle;
+            self.grid.clear_drag(state);
+            state.rotate_cubes(dir, rank, -by);
         }
     }
 
     fn redo(&mut self, game: &mut Game) {
         if let Some((dir, rank, by)) = self.core.pop_redo() {
-            game.cube_tangle.rotate_cubes(dir, rank, by);
+            let state = &mut game.cube_tangle;
+            self.grid.clear_drag(state);
+            state.rotate_cubes(dir, rank, by);
         }
     }
 
     fn reset(&mut self, game: &mut Game) {
+        let state = &mut game.cube_tangle;
+        self.grid.clear_drag(state);
         self.core.clear_undo_redo();
-        game.cube_tangle.reset();
+        state.reset();
     }
 
     fn solve(&mut self, game: &mut Game) {
-        game.cube_tangle.solve();
+        let state = &mut game.cube_tangle;
+        self.grid.clear_drag(state);
+        state.solve();
         self.core.begin_outro_scene();
     }
 
@@ -255,6 +263,14 @@ impl CubeGrid {
             drag.tilt_dir_for(col, row)
         } else {
             None
+        }
+    }
+
+    fn clear_drag(&mut self, state: &mut CubeState) {
+        if let Some(drag) = self.drag.take() {
+            if let Some((dir, rank, by)) = drag.accum() {
+                state.rotate_cubes(dir, rank, -by);
+            }
         }
     }
 }

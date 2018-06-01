@@ -99,22 +99,26 @@ impl PuzzleView for View {
 
     fn undo(&mut self, game: &mut Game) {
         if let Some((col, by)) = self.core.pop_undo() {
+            self.columns.clear_drag();
             game.column_as_icy_em.rotate_column(col, -by);
         }
     }
 
     fn redo(&mut self, game: &mut Game) {
         if let Some((col, by)) = self.core.pop_redo() {
+            self.columns.clear_drag();
             game.column_as_icy_em.rotate_column(col, by);
         }
     }
 
     fn reset(&mut self, game: &mut Game) {
+        self.columns.clear_drag();
         self.core.clear_undo_redo();
         game.column_as_icy_em.reset();
     }
 
     fn solve(&mut self, game: &mut Game) {
+        self.columns.clear_drag();
         game.column_as_icy_em.solve();
         self.core.begin_outro_scene();
     }

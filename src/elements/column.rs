@@ -64,6 +64,8 @@ impl ColumnsView {
         self.hilights.remove(&col);
     }
 
+    pub fn clear_drag(&mut self) { self.drag = None; }
+
     fn column_rect(&self, columns: &Columns, col: usize) -> Rect {
         let mut left = self.left + 32 * col as i32;
         let mut top = self.top + BOX_SIZE * columns.column_offset(col);

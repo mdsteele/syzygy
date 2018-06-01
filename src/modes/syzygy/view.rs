@@ -349,6 +349,7 @@ impl PuzzleView for View {
         let state = &mut game.system_syzygy;
         match self.core.pop_undo() {
             Some(UndoRedo::Yttris(col, by)) => {
+                self.yttris.clear_drag();
                 state.yttris_columns_mut().rotate_column(col, -by);
             }
             Some(UndoRedo::Argony(slide)) => {
@@ -356,6 +357,8 @@ impl PuzzleView for View {
                 self.argony.reset_animation();
             }
             Some(UndoRedo::Elinsa(changes)) => {
+                self.elinsa
+                    .cancel_drag_and_undo_changes(state.elinsa_grid_mut());
                 for (coords1, coords2) in changes.into_iter().rev() {
                     state.elinsa_grid_mut().toggle_pipe(coords1, coords2);
                 }
@@ -374,6 +377,7 @@ impl PuzzleView for View {
             }
             Some(UndoRedo::Relyng(pos)) => state.relyng_untoggle(pos),
             Some(UndoRedo::Mezure(MezureCmd::Pipes(changes))) => {
+                self.mezure.clear_drag(state);
                 for (coords1, coords2) in changes.into_iter().rev() {
                     state.mezure_pipe_grid_mut().toggle_pipe(coords1, coords2);
                 }
@@ -381,11 +385,13 @@ impl PuzzleView for View {
                 self.mezure.refresh(state);
             }
             Some(UndoRedo::Mezure(MezureCmd::IceBlocks(slide))) => {
+                self.mezure.clear_drag(state);
                 state.mezure_ice_grid_mut().undo_slide(&slide);
                 state.mezure_regenerate_laser_grid();
                 self.mezure.refresh(state);
             }
             Some(UndoRedo::Mezure(MezureCmd::Columns(col, by))) => {
+                self.mezure.clear_drag(state);
                 state.mezure_columns_mut().rotate_column(col, -by);
             }
             None => {}
@@ -396,6 +402,7 @@ impl PuzzleView for View {
         let state = &mut game.system_syzygy;
         match self.core.pop_redo() {
             Some(UndoRedo::Yttris(col, by)) => {
+                self.yttris.clear_drag();
                 state.yttris_columns_mut().rotate_column(col, by);
             }
             Some(UndoRedo::Argony(slide)) => {
@@ -403,6 +410,8 @@ impl PuzzleView for View {
                 self.argony.reset_animation();
             }
             Some(UndoRedo::Elinsa(changes)) => {
+                self.elinsa
+                    .cancel_drag_and_undo_changes(state.elinsa_grid_mut());
                 for (coords1, coords2) in changes.into_iter() {
                     state.elinsa_grid_mut().toggle_pipe(coords1, coords2);
                 }
@@ -421,6 +430,7 @@ impl PuzzleView for View {
             }
             Some(UndoRedo::Relyng(pos)) => state.relyng_toggle(pos),
             Some(UndoRedo::Mezure(MezureCmd::Pipes(changes))) => {
+                self.mezure.clear_drag(state);
                 for (coords1, coords2) in changes.into_iter() {
                     state.mezure_pipe_grid_mut().toggle_pipe(coords1, coords2);
                 }
@@ -428,11 +438,13 @@ impl PuzzleView for View {
                 self.mezure.refresh(state);
             }
             Some(UndoRedo::Mezure(MezureCmd::IceBlocks(slide))) => {
+                self.mezure.clear_drag(state);
                 state.mezure_ice_grid_mut().redo_slide(&slide);
                 state.mezure_regenerate_laser_grid();
                 self.mezure.refresh(state);
             }
             Some(UndoRedo::Mezure(MezureCmd::Columns(col, by))) => {
+                self.mezure.clear_drag(state);
                 state.mezure_columns_mut().rotate_column(col, by);
             }
             None => {}
@@ -441,8 +453,12 @@ impl PuzzleView for View {
 
     fn reset(&mut self, game: &mut Game) {
         let state = &mut game.system_syzygy;
+        self.elinsa.cancel_drag_and_undo_changes(state.elinsa_grid_mut());
+        self.mezure.clear_drag(state);
         self.core.clear_undo_redo();
         state.reset();
+        self.yttris.clear_drag();
+        self.argony.reset_animation();
         self.ugrent.recalculate_lasers(state.ugrent_grid());
         self.mezure.refresh(state);
     }
@@ -451,12 +467,16 @@ impl PuzzleView for View {
         self.core.clear_undo_redo();
         let state = &mut game.system_syzygy;
         let stage = state.stage();
+        self.elinsa.cancel_drag_and_undo_changes(state.elinsa_grid_mut());
+        self.mezure.clear_drag(state);
         state.solve_stage();
         match stage {
             SyzygyStage::Yttris => {
+                self.yttris.clear_drag();
                 self.core.begin_extra_scene(scenes::POST_YTTRIS_SCENE);
             }
             SyzygyStage::Argony => {
+                self.argony.reset_animation();
                 self.core.begin_extra_scene(scenes::POST_ARGONY_SCENE);
             }
             SyzygyStage::Elinsa => {

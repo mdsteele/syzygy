@@ -114,28 +114,35 @@ impl PuzzleView for View {
 
     fn undo(&mut self, game: &mut Game) {
         if let Some(changes) = self.core.pop_undo() {
+            let state_grid = game.plane_as_day.grid_mut();
+            self.grid.cancel_drag_and_undo_changes(state_grid);
             for &(coords1, coords2) in changes.iter().rev() {
-                game.plane_as_day.grid_mut().toggle_pipe(coords1, coords2);
+                state_grid.toggle_pipe(coords1, coords2);
             }
         }
     }
 
     fn redo(&mut self, game: &mut Game) {
         if let Some(changes) = self.core.pop_redo() {
+            let state_grid = game.plane_as_day.grid_mut();
+            self.grid.cancel_drag_and_undo_changes(state_grid);
             for &(coords1, coords2) in changes.iter() {
-                game.plane_as_day.grid_mut().toggle_pipe(coords1, coords2);
+                state_grid.toggle_pipe(coords1, coords2);
             }
         }
     }
 
     fn reset(&mut self, game: &mut Game) {
         let state = &mut game.plane_as_day;
+        self.grid.cancel_drag_and_undo_changes(state.grid_mut());
         self.core.clear_undo_redo();
         state.reset();
     }
 
     fn solve(&mut self, game: &mut Game) {
-        game.plane_as_day.solve();
+        let state = &mut game.plane_as_day;
+        self.grid.cancel_drag_and_undo_changes(state.grid_mut());
+        state.solve();
         self.core.begin_outro_scene();
     }
 

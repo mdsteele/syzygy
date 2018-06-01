@@ -259,6 +259,7 @@ impl PuzzleView for View {
                 self.crosswords[index].reset_cursor();
             }
             Some(UndoRedo::Slider(col, old_offset, _new_offset)) => {
+                self.slider.drag = None;
                 state.set_slider_offset(col, old_offset);
             }
             None => {}
@@ -274,6 +275,7 @@ impl PuzzleView for View {
                 self.crosswords[index].reset_cursor();
             }
             Some(UndoRedo::Slider(col, _old_offset, new_offset)) => {
+                self.slider.drag = None;
                 state.set_slider_offset(col, new_offset);
             }
             None => {}
@@ -281,6 +283,7 @@ impl PuzzleView for View {
     }
 
     fn reset(&mut self, game: &mut Game) {
+        self.slider.drag = None;
         self.core.clear_undo_redo();
         game.password_file.reset();
         for crossword in &mut self.crosswords {
@@ -289,6 +292,7 @@ impl PuzzleView for View {
     }
 
     fn solve(&mut self, game: &mut Game) {
+        self.slider.drag = None;
         let state = &mut game.password_file;
         state.solve();
         for crossword in &mut self.crosswords {

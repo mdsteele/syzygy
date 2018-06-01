@@ -1,0 +1,52 @@
+@font-face {
+    font-family: 'Chicago';
+    src: url('chicago.ttf') format('truetype');
+}
+
+body {
+    background-color: black;
+    color: white;
+    font: 18px 'Chicago';
+    margin: 50px auto;
+    max-width: 640px;
+    padding: 5px;
+}
+
+header {
+    text-align: center;
+}
+
+h1 {
+    font-size: 48px;
+    text-transform: uppercase;
+}
+
+.floatleft, .floatright {
+    clear: both;
+    display: block;
+    height: 240px;
+    margin: 10px auto;
+    width: 360px;
+}
+@media (max-width: 360px) {
+    .floatleft, .floatright {
+        height: 160px;
+        width: 240px;
+    }
+}
+@media (min-width: 500px) {
+    .floatleft {
+        float: left;
+        margin: 0 20px 18px 0;
+    }
+    .floatright {
+        float: right;
+        margin: 0 0 18px 20px;
+    }
+}
+
+footer {
+    clear: both;
+    color: #444;
+    text-align: center;
+}

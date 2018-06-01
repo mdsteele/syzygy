@@ -162,6 +162,8 @@ impl View {
         let ckpt3_is_open = game.is_unlocked(Location::CrossSauce);
         let ckpt4_is_open = game.is_unlocked(Location::StarCrossed);
         let cold_storage_is_open = game.is_unlocked(Location::IceToMeetYou);
+        let factory_stage_2_is_open = game.is_unlocked(Location::HexSpangled);
+        let factory_stage_3_is_open = game.is_unlocked(Location::AutofacTour);
         let main_eng_is_open = game.is_unlocked(Location::WreckedAngle);
         let main_power_is_open = game.is_unlocked(Location::ALightInTheAttic);
         let lower_decks_are_open = game.is_unlocked(Location::ShiftGears);
@@ -240,10 +242,17 @@ impl View {
         }
         {
             let sprites = resources.get_sprites("map/factory");
-            map_sprites.push((sprites[0].clone(), Point::new(272, 128)));
-            map_sprites.push((sprites[1].clone(), Point::new(304, 128)));
-            map_sprites.push((sprites[2].clone(), Point::new(336, 128)));
-            map_sprites.push((sprites[3].clone(), Point::new(368, 128)));
+            let idx = if factory_stage_3_is_open {
+                (0, 4, 6, 7)
+            } else if factory_stage_2_is_open {
+                (0, 4, 5, 3)
+            } else {
+                (0, 1, 2, 3)
+            };
+            map_sprites.push((sprites[idx.0].clone(), Point::new(272, 128)));
+            map_sprites.push((sprites[idx.1].clone(), Point::new(304, 128)));
+            map_sprites.push((sprites[idx.2].clone(), Point::new(336, 128)));
+            map_sprites.push((sprites[idx.3].clone(), Point::new(368, 128)));
         }
         {
             let mut sprites = resources.get_sprites("map/icebox");
@@ -308,17 +317,20 @@ impl View {
             if cold_storage_is_open {
                 map_sprites.push((sprites[6].clone(), Point::new(408, 202)));
             }
+            if factory_stage_2_is_open {
+                map_sprites.push((sprites[7].clone(), Point::new(285, 170)));
+            }
             if lower_decks_are_open {
-                map_sprites.push((sprites[7].clone(), Point::new(440, 285)));
+                map_sprites.push((sprites[8].clone(), Point::new(440, 285)));
             }
             if main_eng_is_open {
-                map_sprites.push((sprites[8].clone(), Point::new(311, 226)));
+                map_sprites.push((sprites[9].clone(), Point::new(311, 226)));
             }
             if main_power_is_open {
-                map_sprites.push((sprites[9].clone(), Point::new(220, 92)));
+                map_sprites.push((sprites[10].clone(), Point::new(220, 92)));
             }
             if sewers_are_open {
-                map_sprites.push((sprites[10].clone(), Point::new(272, 301)));
+                map_sprites.push((sprites[11].clone(), Point::new(272, 301)));
             }
         }
         View {

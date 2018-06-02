@@ -145,6 +145,12 @@ impl StarState {
     }
 
     fn regenerate_columns(&mut self) {
+        if !self.try_regenerate_columns() {
+            assert!(false);
+        }
+    }
+
+    fn try_regenerate_columns(&mut self) -> bool {
         let mut insertions: Vec<(i32, usize)> = WORDS
             .iter()
             .enumerate()
@@ -158,13 +164,19 @@ impl StarState {
             let mut pt = Point::new(col, row);
             for chr in word.chars() {
                 let chr = chr.to_ascii_uppercase();
-                assert!(pt.x() >= 0 && pt.y() >= 0);
+                if pt.x() < 0 || (pt.x() as usize) >= self.columns.len() ||
+                    pt.y() < 0 ||
+                    (pt.y() as usize) > self.columns[pt.x() as usize].len()
+                {
+                    return false;
+                }
                 self.columns[pt.x() as usize].insert(pt.y() as usize, chr);
                 if dir != WordDir::Vertical {
                     pt = pt + dir.delta();
                 }
             }
         }
+        true
     }
 }
 
@@ -211,7 +223,9 @@ impl Tomlable for StarState {
             found: found,
             columns: Vec::new(),
         };
-        state.regenerate_columns(); // TODO: don't panic if invalid
+        if !state.try_regenerate_columns() {
+            state.reset();
+        }
         state
     }
 }
@@ -262,6 +276,16 @@ mod tests {
                        .chars()
                        .map(|chr| vec![chr])
                        .collect::<Vec<Vec<char>>>());
+    }
+
+    #[test]
+    fn from_invalid_found_words_toml() {
+        let mut table = toml::value::Table::new();
+        let found: HashSet<i32> = vec![1, 3, 5, 7, 9].into_iter().collect();
+        table.insert(FOUND_KEY.to_string(), found.to_toml());
+
+        let state = StarState::from_toml(toml::Value::Table(table));
+        assert!(state.found.is_empty());
     }
 
     #[test]

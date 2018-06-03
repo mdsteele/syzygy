@@ -103,7 +103,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
-                      "Oh!  Um, yes please."),
+                      "Oh!  Um, yes, please."),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),

@@ -142,7 +142,7 @@ impl PuzzleView for View {
 
 const INFO_BOX_TEXT: &str = "\
 Your goal is to slide the columns of letters until the
-hilighted letters form a word horizontally across.
+highlighted letters form a word horizontally across.
 There is only one possible word that can be formed.
 
 Drag a column up or down with $M{your finger}{the mouse} to rotate

@@ -141,9 +141,9 @@ impl PuzzleView for View {
 
 const INFO_BOX_TEXT: &str = "\
 Your goal is to slide the columns of letters until the
-hilighted letters form two words horizontally across.
-There is only one possible pair of words that can be
-formed simultaneously.
+highlighted letters form two words horizontally
+across.  There is only one possible pair of words that
+can be formed simultaneously.
 
 Drag a column up or down with $M{your finger}{the mouse} to rotate
 its letters.  Moving one column may also cause other

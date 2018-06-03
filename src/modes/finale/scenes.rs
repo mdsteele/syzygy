@@ -46,6 +46,7 @@ const XANADU_III: i32 = 8;
 const XANADU_IV: i32 = 9;
 const XANADU_IV_GLOW: i32 = 16;
 const YTTRIS: i32 = 15;
+const YTTRIS_BG: i32 = -2;
 
 const BOOM_INDICES: &[usize] = &[0, 1, 2, 3, 4];
 const CHARGE_INDICES: &[usize] = &[0, 1, 2];
@@ -640,8 +641,99 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Remove(MEZURE),
             Ast::Queue(3, 0), // Hide ATLATL
+            Ast::SetBg("point_of_order"),
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::bridge_crack()),
+            Ast::Queue(11, 1), // Show "SYSTEM"
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::bridge_crack()),
+            Ast::Queue(11, 2), // Show "SYZYGY"
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::bridge_crack()),
+            Ast::Queue(11, 3), // Show "a game by mdsteele"
+            Ast::Wait(1.0),
+            Ast::Par(vec![
+                Ast::Seq(vec![
+                    Ast::Place(YTTRIS_BG, "chars/invis", 0, (-16, 304)),
+                    Ast::Sound(Sound::talk_hi()),
+                    Ast::Talk(YTTRIS_BG, TalkStyle::Normal, TalkPos::NE,
+                              "Aaaaaaaaaaa!  Aaaaaaa!"),
+                ]),
+                Ast::Seq(vec![
+                    Ast::Wait(0.5),
+                    Ast::Place(YTTRIS, "chars/yttris", 0, (-16, 336)),
+                    Ast::Slide(YTTRIS, (64, 336), false, false, 0.3),
+                    Ast::Slide(YTTRIS, (80, 320), false, false, 0.15),
+                    Ast::Slide(YTTRIS, (262, 320), false, true, 1.0),
+                    Ast::Sound(Sound::talk_hi()),
+                    Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NW,
+                              "Aaa...wait, never mind,\n\
+                               the life-support is fine."),
+                ]),
+            ]),
+        ]),
+        Ast::Seq(vec![
+            Ast::Remove(YTTRIS_BG),
+            Ast::Par(vec![
+                Ast::Seq(vec![
+                    Ast::Sound(Sound::talk_hi()),
+                    Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NW,
+                              "Sorry, false alarm!"),
+                ]),
+                Ast::Seq(vec![
+                    Ast::Slide(YTTRIS, (80, 320), true, false, 0.6),
+                    Ast::Slide(YTTRIS, (64, 336), false, false, 0.1),
+                    Ast::Slide(YTTRIS, (-16, 336), false, false, 0.3),
+                ]),
+            ]),
+        ]),
+        Ast::Seq(vec![
+            Ast::Remove(YTTRIS),
+            Ast::Queue(11, 0), // Hide title credit
+            Ast::SetBg("log_level"),
+            Ast::Queue(6, 1), // Show crossword
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::solve_puzzle_chime()),
+            Ast::Queue(7, 0), // Animate crossword
+            Ast::Wait(1.0),
+            Ast::Par(vec![
+                Ast::Seq(vec![
+                    Ast::Place(MEZURE, "chars/mezure", 0, (-16, 160)),
+                    Ast::Slide(MEZURE, (145, 160), false, true, 0.75),
+                    Ast::Wait(0.75),
+                    Ast::Sound(Sound::talk_hi()),
+                    Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NW,
+                              "See, don't we\n\
+                               need guard\n\
+                               rails here?"),
+                ]),
+                Ast::Seq(vec![
+                    Ast::Wait(0.5),
+                    Ast::Place(ELINSA, "chars/elinsa", 0, (-16, 160)),
+                    Ast::Slide(ELINSA, (84, 160), false, true, 0.75),
+                    Ast::Wait(0.75),
+                    Ast::Sound(Sound::talk_hi()),
+                    Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::SE,
+                              "Eh, seems\n\
+                               unnecessary."),
+                ]),
+            ]),
+        ]),
+        Ast::Seq(vec![
+            Ast::Remove(ELINSA),
+            Ast::Remove(MEZURE),
+            Ast::Queue(6, 0), // Hide crossword
+            Ast::SetBg("star_crossed"),
+            Ast::Queue(8, 1), // Show letter columns
+            Ast::Queue(9, 0), // Animate letter columns
+            Ast::Wait(1.0),
+            Ast::Pause,
+        ]),
+        Ast::Seq(vec![
+            Ast::Queue(10, 0), // Stop animating letter columns
+            Ast::Queue(8, 0), // Hide letter columns
             Ast::SetBg("space"),
-            // TODO: credits
+            // TODO: rest of credits
         ]),
     ];
     Ast::compile_scene(resources, ast)

@@ -17,11 +17,14 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use elements::{FadeStyle, MovingStars, PuzzleCmd, PuzzleCore, PuzzleView,
-               Scene};
-use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sprite};
+use std::rc::Rc;
+
+use elements::{CrosswordView, FadeStyle, MovingStars, PuzzleCmd, PuzzleCore,
+               PuzzleView, Scene};
+use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
+          Resources, Sound, Sprite};
 use modes::syzygy::Atlatl;
-use save::{FinaleState, Game, PuzzleState};
+use save::{CrosswordState, FinaleState, Game, PuzzleState, ValidChars};
 use super::scenes;
 
 // ========================================================================= //
@@ -36,6 +39,12 @@ pub struct View {
     atlatl: Atlatl,
     atlatl_visible: bool,
     atlatl_beam: AtlatlBeam,
+    title_credit: TitleCredit,
+    crossword_state: CrosswordState,
+    crossword_view: CrosswordView,
+    crossword_visible: bool,
+    letter_columns: LetterColumns,
+    letter_columns_visible: bool,
 }
 
 impl View {
@@ -57,6 +66,17 @@ impl View {
             atlatl: Atlatl::new(resources),
             atlatl_visible: false,
             atlatl_beam: AtlatlBeam::new(),
+            title_credit: TitleCredit::new(resources),
+            crossword_state:
+                CrosswordState::new(ValidChars::LettersAndSymbols,
+                                    CROSSWORD_WORDS),
+            crossword_view: CrosswordView::new(resources,
+                                               (364, 56),
+                                               CROSSWORD_OFFSETS,
+                                               (364, 304)),
+            crossword_visible: false,
+            letter_columns: LetterColumns::new(resources),
+            letter_columns_visible: false,
         }
     }
 }
@@ -75,6 +95,13 @@ impl Element<Game, PuzzleCmd> for View {
                                         Point::new(288, 225));
             canvas.draw_sprite_centered(&self.xanadu4_sprites[0],
                                         Point::new(421, 166));
+        }
+        self.title_credit.draw(canvas);
+        if self.crossword_visible {
+            self.crossword_view.draw(&self.crossword_state, canvas);
+        }
+        if self.letter_columns_visible {
+            self.letter_columns.draw(&(), canvas);
         }
         self.core.draw_middle_layer(canvas);
         if self.atlatl_visible {
@@ -100,6 +127,14 @@ impl Element<Game, PuzzleCmd> for View {
             let subaction = self.atlatl.handle_event(event, &mut ());
             action.merge(subaction.but_no_value());
         }
+        if event == &Event::ClockTick {
+            let subaction =
+                self.crossword_view
+                    .handle_event(event, &mut self.crossword_state);
+            action.merge(subaction.but_no_value());
+            let subaction = self.letter_columns.handle_event(event, &mut ());
+            action.merge(subaction.but_no_value());
+        }
         if state.is_solved() {
             self.core.begin_outro_scene();
         }
@@ -119,8 +154,8 @@ impl PuzzleView for View {
     fn solve(&mut self, _game: &mut Game) {}
 
     fn drain_queue(&mut self) {
-        for (device, value) in self.core.drain_queue() {
-            match device {
+        for (kind, value) in self.core.drain_queue() {
+            match kind {
                 1 => self.stars_space.set_visible(value != 0),
                 2 => self.planets_visible = value != 0,
                 3 => self.atlatl_visible = value != 0,
@@ -136,6 +171,23 @@ impl PuzzleView for View {
                         self.atlatl_beam.turn_off();
                     }
                 }
+                6 => self.crossword_visible = value != 0,
+                7 => self.crossword_view.animate_center_word(),
+                8 => self.letter_columns_visible = value != 0,
+                9 => {
+                    self.letter_columns.animate_fall(0, 2, 10);
+                    self.letter_columns.animate_fall(1, 0, 13);
+                    self.letter_columns.animate_fall(2, 0, 16);
+                    self.letter_columns.animate_fall(3, 1, 19);
+                    self.letter_columns.animate_fall(4, 0, 22);
+                    self.letter_columns.animate_fall(5, 0, 25);
+                    self.letter_columns.animate_fall(6, 0, 28);
+                    self.letter_columns.animate_fall(7, 1, 31);
+                    self.letter_columns.animate_fall(8, 3, 34);
+                    self.letter_columns.animate_fall(9, 2, 37);
+                }
+                10 => self.letter_columns.stop_animation(),
+                11 => self.title_credit.display = value,
                 _ => {}
             }
         }
@@ -215,6 +267,159 @@ impl AtlatlBeam {
 }
 
 // ========================================================================= //
+
+pub struct TitleCredit {
+    font1: Rc<Font>,
+    font2: Rc<Font>,
+    display: i32,
+}
+
+impl TitleCredit {
+    fn new(resources: &mut Resources) -> TitleCredit {
+        TitleCredit {
+            font1: resources.get_font("block"),
+            font2: resources.get_font("system"),
+            display: 0,
+        }
+    }
+
+    fn draw(&self, canvas: &mut Canvas) {
+        if self.display >= 1 {
+            canvas.draw_text(&self.font1,
+                             Align::Center,
+                             Point::new(408, 150),
+                             "SYSTEM");
+        }
+        if self.display >= 2 {
+            canvas.draw_text(&self.font1,
+                             Align::Center,
+                             Point::new(408, 182),
+                             "SYZYGY");
+        }
+        if self.display >= 3 {
+            canvas.draw_text(&self.font2,
+                             Align::Center,
+                             Point::new(408, 240),
+                             "a game by mdsteele");
+        }
+    }
+}
+
+// ========================================================================= //
+
+const BLOCK_WIDTH: i32 = 24;
+const BLOCK_HEIGHT: i32 = 24;
+
+struct LetterColumns {
+    font: Rc<Font>,
+    sprites: Vec<Sprite>,
+    fall_anim: [(i32, i32, i32); 10],
+}
+
+impl LetterColumns {
+    fn new(resources: &mut Resources) -> LetterColumns {
+        LetterColumns {
+            font: resources.get_font("block"),
+            sprites: resources.get_sprites("cross/star"),
+            fall_anim: [(0, 0, 0); 10],
+        }
+    }
+
+    fn animate_fall(&mut self, col: i32, row: i32, length: i32) {
+        self.fall_anim[col as usize] = (row, length * BLOCK_HEIGHT, 0);
+    }
+
+    fn stop_animation(&mut self) { self.fall_anim = [(0, 0, 0); 10]; }
+
+    fn rect(&self) -> Rect { Rect::new(256, 56, 240, 240) }
+}
+
+impl Element<(), ()> for LetterColumns {
+    fn draw(&self, _: &(), canvas: &mut Canvas) {
+        let rect = self.rect();
+        let mut canvas = canvas.subcanvas(rect);
+        for col in 0..10 {
+            for (row, &letter) in COLUMN_LETTERS[col].iter().enumerate() {
+                let row = row as i32;
+                let (gap_row, gap, _) = self.fall_anim[col];
+                let gap = if row >= gap_row { gap } else { 0 };
+                let pt = Point::new((col as i32) * BLOCK_WIDTH,
+                                    rect.height() as i32 - gap -
+                                        (1 + row) * BLOCK_HEIGHT);
+                canvas.draw_sprite(&self.sprites[0], pt);
+                let pt = pt + Point::new(BLOCK_WIDTH / 2, BLOCK_HEIGHT - 3);
+                canvas.draw_char(&self.font, Align::Center, pt, letter);
+            }
+        }
+    }
+
+    fn handle_event(&mut self, event: &Event, _: &mut ()) -> Action<()> {
+        let mut action = Action::ignore();
+        match event {
+            &Event::ClockTick => {
+                for &mut (_, ref mut gap, ref mut speed) in
+                    self.fall_anim.iter_mut()
+                {
+                    if *gap > 0 {
+                        *gap = (*gap - *speed).max(0);
+                        *speed += 1;
+                        action.also_redraw();
+                        if *gap == 0 {
+                            action.also_play_sound(Sound::device_rotate());
+                        }
+                    }
+                }
+            }
+            _ => {}
+        }
+        action
+    }
+}
+
+// ========================================================================= //
+
+const CROSSWORD_WORDS: &[&str] = &[
+    "KIPP",
+    "JULIE",
+    "BARBARA",
+    "GUY",
+    "T",
+    "DAVE&ERIN",
+    "CHRIS",
+    "STEPH",
+    "CAROLINE",
+    "BEN",
+    "G",
+];
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+const CROSSWORD_OFFSETS: &[(i32, &str)] = &[
+    (2, ""),
+    (2, ""),
+    (4, ""),
+    (2, ""),
+    (0, ""),
+    (5, ""),
+    (4, ""),
+    (1, ""),
+    (5, ""),
+    (2, ""),
+    (0, ""),
+];
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+const COLUMN_LETTERS: [&[char]; 10] = [
+    &[' ', ' ', 'A', ' ', 'A', ' ', ' ', 'C', ' ', 'A'],
+    &['T', ' ', 'N', ' ', 'N', 'A', ' ', 'L', ' ', 'P'],
+    &['O', 'C', 'D', ' ', 'D', 'N', ' ', 'I', ' ', 'O'],
+    &[' ', 'O', ' ', 'P', 'R', 'D', 'J', 'F', ' ', 'L'],
+    &['Y', 'U', ' ', 'L', 'E', ' ', 'O', 'F', ' ', 'O'],
+    &['O', 'R', 'O', 'O', 'W', ' ', 'H', ' ', ' ', 'G'],
+    &['U', 'S', 'F', 'T', ' ', ' ', 'N', ' ', ' ', 'I'],
+    &['.', 'E', ' ', 'K', ' ', 'T', 'S', ' ', ' ', 'E'],
+    &['.', ' ', ' ', 'I', ' ', 'O', 'O', ' ', 'T', 'S'],
+    &['.', ' ', ' ', 'N', ' ', ' ', 'N', ' ', 'O', ' '],
+];
 
 pub const INFO_BOX_TEXT: &str = "\
 Return to the map to select another scene.";

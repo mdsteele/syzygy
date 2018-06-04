@@ -442,22 +442,36 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
             Ast::Wait(0.5),
             Ast::Queue(5, 3), // Animate ATLATL beam hitting planet
             Ast::Wait(0.5),
-            Ast::Place(XANADU_IV_GLOW, "finale/xanadu4glow", 0, (288, 242)),
-            Ast::Anim(XANADU_IV_GLOW, "finale/xanadu4glow",
-                      X4_GLOW_INDICES, 1),
-            Ast::Wait(0.75),
-            Ast::Anim(XANADU_IV, "finale/xanadu4big", X4_INDICES[0], 1),
-            Ast::Wait(0.75),
-            Ast::Anim(XANADU_IV, "finale/xanadu4big", X4_INDICES[1], 1),
-            Ast::Wait(0.75),
-            Ast::Anim(XANADU_IV, "finale/xanadu4big", X4_INDICES[2], 1),
-            Ast::Wait(0.75),
-            Ast::Anim(XANADU_IV, "finale/xanadu4big", X4_INDICES[3], 1),
-            Ast::Wait(0.75),
-            Ast::SetSprite(XANADU_IV, "finale/xanadu4big", 5),
-            Ast::Queue(5, 0), // Hide ATLATL beam
-            Ast::Remove(XANADU_IV_GLOW),
-            Ast::Wait(3.0),
+            Ast::Par(vec![
+                Ast::Seq(vec![
+                    Ast::Sound(Sound::spawn_zap()),
+                    Ast::Wait(0.8),
+                    Ast::Sound(Sound::transform_final()),
+                ]),
+                Ast::Seq(vec![
+                    Ast::Place(XANADU_IV_GLOW, "finale/xanadu4glow", 0,
+                               (288, 242)),
+                    Ast::Anim(XANADU_IV_GLOW, "finale/xanadu4glow",
+                              X4_GLOW_INDICES, 1),
+                    Ast::Wait(0.75),
+                    Ast::Anim(XANADU_IV, "finale/xanadu4big",
+                              X4_INDICES[0], 1),
+                    Ast::Wait(0.75),
+                    Ast::Anim(XANADU_IV, "finale/xanadu4big",
+                              X4_INDICES[1], 1),
+                    Ast::Wait(0.75),
+                    Ast::Anim(XANADU_IV, "finale/xanadu4big",
+                              X4_INDICES[2], 1),
+                    Ast::Wait(0.75),
+                    Ast::Anim(XANADU_IV, "finale/xanadu4big",
+                              X4_INDICES[3], 1),
+                    Ast::Wait(0.75),
+                    Ast::SetSprite(XANADU_IV, "finale/xanadu4big", 5),
+                    Ast::Queue(5, 0), // Hide ATLATL beam
+                    Ast::Remove(XANADU_IV_GLOW),
+                    Ast::Wait(3.0)
+                ]),
+            ]),
             Ast::Remove(XANADU_IV),
             Ast::SetBg("system_syzygy"),
             Ast::Queue(3, 1), // Show ATLATL
@@ -657,7 +671,14 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
                     Ast::Place(YTTRIS_BG, "chars/invis", 0, (-16, 304)),
                     Ast::Sound(Sound::talk_hi()),
                     Ast::Talk(YTTRIS_BG, TalkStyle::Normal, TalkPos::NE,
-                              "Aaaaaaaaaaa!  Aaaaaaa!"),
+                              "Aaaaaaaaaaaa!"),
+                ]),
+                Ast::Seq(vec![
+                    Ast::Wait(0.5),
+                    Ast::SetPos(YTTRIS_BG, (-15, 304)),
+                    Ast::Sound(Sound::talk_hi()),
+                    Ast::Talk(YTTRIS_BG, TalkStyle::Normal, TalkPos::NE,
+                              "Aaaaaaaaaaaa!  Aaaaaa!"),
                 ]),
                 Ast::Seq(vec![
                     Ast::Wait(0.5),
@@ -712,7 +733,7 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
                     Ast::Place(ELINSA, "chars/elinsa", 0, (-16, 160)),
                     Ast::Slide(ELINSA, (84, 160), false, true, 0.75),
                     Ast::Wait(0.75),
-                    Ast::Sound(Sound::talk_hi()),
+                    Ast::Sound(Sound::talk_lo()),
                     Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::SE,
                               "Eh, seems\n\
                                unnecessary."),
@@ -726,14 +747,78 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
             Ast::SetBg("star_crossed"),
             Ast::Queue(8, 1), // Show letter columns
             Ast::Queue(9, 0), // Animate letter columns
-            Ast::Wait(1.0),
-            Ast::Pause,
+            Ast::Place(ARGONY, "chars/argony", 0, (240, 272)),
+            Ast::Wait(0.5),
+            Ast::Par(vec![
+                Ast::Seq(vec![
+                    Ast::Sound(Sound::talk_hi()),
+                    Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::NW,
+                              "Now then-"),
+                ]),
+                Ast::Seq(vec![
+                    Ast::Wait(0.75),
+                    Ast::Slide(ARGONY, (224, 272), false, false, 0.25),
+                    Ast::Sound(Sound::talk_hi()),
+                    Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::NW,
+                              "-oh my!"),
+                ]),
+            ]),
         ]),
         Ast::Seq(vec![
+            Ast::Place(UGRENT, "chars/ugrent", 0, (-16, 272)),
+            Ast::Slide(UGRENT, (112, 272), false, true, 0.75),
+            Ast::Par(vec![
+                Ast::Seq(vec![
+                    Ast::Sound(Sound::talk_hi()),
+                    Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
+                              "Security measures\n\
+                               are back in place,\n\
+                               Lady Argony."),
+                ]),
+                Ast::Seq(vec![
+                    Ast::Wait(0.5),
+                    Ast::Sound(Sound::talk_annoyed_hi()),
+                    Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::SW,
+                              "Yes, I can see that."),
+                ]),
+            ]),
+        ]),
+        Ast::Seq(vec![
+            Ast::Remove(UGRENT),
+            Ast::Remove(ARGONY),
             Ast::Queue(10, 0), // Stop animating letter columns
             Ast::Queue(8, 0), // Hide letter columns
+            Ast::SetBg("cross_sauce"),
+            Ast::Wait(0.5),
+            Ast::Sound(Sound::transform_step(1)),
+            Ast::Queue(12, 1), // Show special thanks
+            Ast::Wait(0.2),
+            Ast::Sound(Sound::transform_step(2)),
+            Ast::Queue(12, 2),
+            Ast::Wait(0.2),
+            Ast::Sound(Sound::transform_step(3)),
+            Ast::Queue(12, 3),
+            Ast::Wait(0.2),
+            Ast::Sound(Sound::transform_step(4)),
+            Ast::Queue(12, 4),
+            Ast::Wait(0.75),
+            Ast::Place(RELYNG, "chars/relyng", 0, (592, 240)),
+            Ast::Slide(RELYNG, (465, 240), false, true, 1.0),
+            Ast::Sound(Sound::talk_lo()),
+            Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::W,
+                      "Ah, good, I was just coming\n\
+                       down here to make sure you\n\
+                       didn't forget this part."),
+        ]),
+        Ast::Seq(vec![
+            Ast::Remove(RELYNG),
+            Ast::Queue(12, 0), // Hide special thanks
             Ast::SetBg("space"),
-            // TODO: rest of credits
+            Ast::Place(XANADU_IV, "finale/xanadu4big", 6, (288, 242)),
+            Ast::Wait(1.0),
+            Ast::Sound(Sound::talk_thought()),
+            Ast::Queue(13, 1), // Show "THE END"
+            Ast::Wait(0.5),
         ]),
     ];
     Ast::compile_scene(resources, ast)

@@ -45,6 +45,8 @@ pub struct View {
     crossword_visible: bool,
     letter_columns: LetterColumns,
     letter_columns_visible: bool,
+    special_thanks: SpecialThanks,
+    the_end: TheEnd,
 }
 
 impl View {
@@ -77,6 +79,8 @@ impl View {
             crossword_visible: false,
             letter_columns: LetterColumns::new(resources),
             letter_columns_visible: false,
+            special_thanks: SpecialThanks::new(resources),
+            the_end: TheEnd::new(resources),
         }
     }
 }
@@ -103,6 +107,8 @@ impl Element<Game, PuzzleCmd> for View {
         if self.letter_columns_visible {
             self.letter_columns.draw(&(), canvas);
         }
+        self.special_thanks.draw(canvas);
+        self.the_end.draw(canvas);
         self.core.draw_middle_layer(canvas);
         if self.atlatl_visible {
             self.atlatl.draw(&(), canvas);
@@ -175,19 +181,21 @@ impl PuzzleView for View {
                 7 => self.crossword_view.animate_center_word(),
                 8 => self.letter_columns_visible = value != 0,
                 9 => {
-                    self.letter_columns.animate_fall(0, 2, 10);
-                    self.letter_columns.animate_fall(1, 0, 13);
-                    self.letter_columns.animate_fall(2, 0, 16);
-                    self.letter_columns.animate_fall(3, 1, 19);
-                    self.letter_columns.animate_fall(4, 0, 22);
-                    self.letter_columns.animate_fall(5, 0, 25);
-                    self.letter_columns.animate_fall(6, 0, 28);
-                    self.letter_columns.animate_fall(7, 1, 31);
-                    self.letter_columns.animate_fall(8, 3, 34);
-                    self.letter_columns.animate_fall(9, 2, 37);
+                    self.letter_columns.animate_fall(0, 2, 20);
+                    self.letter_columns.animate_fall(1, 0, 24);
+                    self.letter_columns.animate_fall(2, 0, 28);
+                    self.letter_columns.animate_fall(3, 1, 32);
+                    self.letter_columns.animate_fall(4, 0, 36);
+                    self.letter_columns.animate_fall(5, 0, 40);
+                    self.letter_columns.animate_fall(6, 0, 44);
+                    self.letter_columns.animate_fall(7, 1, 48);
+                    self.letter_columns.animate_fall(8, 3, 52);
+                    self.letter_columns.animate_fall(9, 2, 56);
                 }
                 10 => self.letter_columns.stop_animation(),
                 11 => self.title_credit.display = value,
+                12 => self.special_thanks.display = value,
+                13 => self.the_end.display = value,
                 _ => {}
             }
         }
@@ -373,6 +381,80 @@ impl Element<(), ()> for LetterColumns {
             _ => {}
         }
         action
+    }
+}
+
+// ========================================================================= //
+
+pub struct SpecialThanks {
+    font1: Rc<Font>,
+    font2: Rc<Font>,
+    display: i32,
+}
+
+impl SpecialThanks {
+    fn new(resources: &mut Resources) -> SpecialThanks {
+        SpecialThanks {
+            font1: resources.get_font("system"),
+            font2: resources.get_font("block"),
+            display: 0,
+        }
+    }
+
+    fn draw(&self, canvas: &mut Canvas) {
+        if self.display >= 1 {
+            canvas.draw_text(&self.font1,
+                             Align::Center,
+                             Point::new(288, 140),
+                             "...and many thanks for extreme patience from:");
+        }
+        if self.display >= 3 {
+            canvas.draw_text(&self.font2,
+                             Align::Left,
+                             Point::new(133, 281),
+                             "HOLLY");
+        }
+        if self.display >= 2 {
+            canvas.draw_text(&self.font2,
+                             Align::Center,
+                             Point::new(288, 281),
+                             "STEPH");
+        }
+        if self.display >= 4 {
+            canvas.draw_text(&self.font2,
+                             Align::Right,
+                             Point::new(443, 281),
+                             "EMILY");
+        }
+    }
+}
+
+// ========================================================================= //
+
+pub struct TheEnd {
+    font: Rc<Font>,
+    display: i32,
+}
+
+impl TheEnd {
+    fn new(resources: &mut Resources) -> TheEnd {
+        TheEnd {
+            font: resources.get_font("system"),
+            display: 0,
+        }
+    }
+
+    fn draw(&self, canvas: &mut Canvas) {
+        if self.display >= 1 {
+            canvas.draw_text(&self.font,
+                             Align::Right,
+                             Point::new(248, 214),
+                             "T  H  E");
+            canvas.draw_text(&self.font,
+                             Align::Left,
+                             Point::new(328, 214),
+                             "E  N  D");
+        }
     }
 }
 

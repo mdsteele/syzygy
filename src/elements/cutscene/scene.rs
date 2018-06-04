@@ -613,59 +613,6 @@ impl SceneNode for LightNode {
 // ========================================================================= //
 
 #[derive(Clone)]
-pub struct PauseNode {
-    status: Status,
-    terminated_by_pause: bool,
-}
-
-impl PauseNode {
-    pub fn new() -> PauseNode {
-        PauseNode {
-            status: Status::Active,
-            terminated_by_pause: false,
-        }
-    }
-}
-
-impl SceneNode for PauseNode {
-    fn box_clone(&self) -> Box<SceneNode> { Box::new(self.clone()) }
-
-    fn status(&self) -> Status { self.status }
-
-    fn begin(&mut self, _: &mut Theater, terminated_by_pause: bool) {
-        self.terminated_by_pause = terminated_by_pause;
-        if terminated_by_pause {
-            self.status = Status::Paused;
-        } else {
-            self.status = Status::Twiddling;
-        }
-    }
-
-    fn tick(&mut self, theater: &mut Theater, keep_twiddling: bool) -> bool {
-        if self.status == Status::Twiddling &&
-            (self.terminated_by_pause || !keep_twiddling)
-        {
-            self.skip(theater);
-            true
-        } else {
-            false
-        }
-    }
-
-    fn skip(&mut self, _: &mut Theater) { self.status = Status::Done; }
-
-    fn reset(&mut self) { self.status = Status::Active; }
-
-    fn unpause(&mut self) {
-        if self.status == Status::Paused {
-            self.status = Status::Twiddling;
-        }
-    }
-}
-
-// ========================================================================= //
-
-#[derive(Clone)]
 pub struct PlaceNode {
     slot: i32,
     sprite: Sprite,

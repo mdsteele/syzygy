@@ -36,6 +36,9 @@ const RELYNG_BG: i32 = -1;
 const SHIP: i32 = 3;
 const SHIP2: i32 = 4;
 const SHIP3: i32 = 5;
+const SHIP_ALIGN_1: i32 = 501;
+const SHIP_ALIGN_2: i32 = 502;
+const SHIP_ALIGN_3: i32 = 503;
 const SHOWER_START: i32 = 400;
 const SRB: i32 = 1;
 const SYSTEM: i32 = 2;
@@ -227,6 +230,7 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
             Ast::Place(SHIP2, "title/ship", 1, (79, 352)),
             Ast::Place(SHIP3, "title/ship", 2, (132, 352)),
             Ast::Wait(1.0),
+            // TODO: Play sound for ATLATL charging
             Ast::Place(CHARGE, "finale/charge_med", 0, (115, 330)),
             Ast::Anim(CHARGE, "finale/charge_med", CHARGE_INDICES, 2),
             Ast::Wait(2.0),
@@ -317,7 +321,21 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
             Ast::Place(CHARGE, "finale/charge_tiny", 0, (256, 211)),
             Ast::Anim(CHARGE, "finale/charge_tiny", CHARGE_INDICES, 3),
             Ast::Wait(1.0),
-            // TODO: show ship aligning
+            Ast::Sound(Sound::platform_shift(2)),
+            Ast::Place(SHIP_ALIGN_1, "finale/ship_align", 0, (285, 209)),
+            Ast::Slide(SHIP_ALIGN_1, (285, 207), false, false, 0.25),
+            Ast::Wait(0.35),
+            Ast::Sound(Sound::platform_shift(2)),
+            Ast::Place(SHIP_ALIGN_2, "finale/ship_align", 1, (324, 203)),
+            Ast::Slide(SHIP_ALIGN_2, (324, 204), false, false, 0.25),
+            Ast::Wait(0.35),
+            Ast::Sound(Sound::platform_shift(2)),
+            Ast::Place(SHIP_ALIGN_3, "finale/ship_align", 1, (315, 203)),
+            Ast::Slide(SHIP_ALIGN_3, (315, 204), false, false, 0.25),
+            Ast::Wait(0.5),
+            Ast::Remove(SHIP_ALIGN_1),
+            Ast::Remove(SHIP_ALIGN_2),
+            Ast::Remove(SHIP_ALIGN_3),
             Ast::Remove(SHIP),
             Ast::Remove(CHARGE),
             Ast::SetBg("finale_pit"),
@@ -397,6 +415,9 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
             Ast::Remove(SYSTEM),
             Ast::SetBg("space"),
             Ast::Place(SHIP, "prolog/ship", 0, (288, 216)),
+            Ast::Place(SHIP_ALIGN_1, "finale/ship_align", 0, (285, 207)),
+            Ast::Place(SHIP_ALIGN_2, "finale/ship_align", 1, (324, 204)),
+            Ast::Place(SHIP_ALIGN_3, "finale/ship_align", 1, (315, 204)),
             Ast::Place(CHARGE, "finale/charge_tiny", 0, (256, 211)),
             Ast::Anim(CHARGE, "finale/charge_tiny", CHARGE_INDICES, 3),
             Ast::Wait(1.0),
@@ -422,17 +443,25 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
                     Ast::Talk(SRB, TalkStyle::Evil, TalkPos::E, "Aaaah!"),
                 ]),
                 Ast::Slide(SHIP, (288, 200), false, false, 4.0),
+                Ast::Slide(SHIP_ALIGN_1, (285, 191), false, false, 4.0),
+                Ast::Slide(SHIP_ALIGN_2, (324, 188), false, false, 4.0),
+                Ast::Slide(SHIP_ALIGN_3, (315, 188), false, false, 4.0),
                 Ast::Seq(vec![
                     Ast::Slide(CHARGE, (256, 199), false, false, 3.0),
                     Ast::Remove(CHARGE),
+                    Ast::Sound(Sound::atlatl_beam(0)),
                     Ast::Queue(5, 1), // Animate ATLATL beam from ship
                 ]),
             ]),
             Ast::Queue(5, 0), // Hide ATLATL beam
+            Ast::Remove(SHIP_ALIGN_1),
+            Ast::Remove(SHIP_ALIGN_2),
+            Ast::Remove(SHIP_ALIGN_3),
             Ast::Remove(SHIP),
             Ast::SetBg("space2"),
             Ast::Place(XANADU_III, "title/xanadu3", 0, (288, 258)),
             Ast::Wait(0.5),
+            Ast::Sound(Sound::atlatl_beam(1)),
             Ast::Queue(5, 2), // Animate ATLATL beam across screen
             Ast::Wait(2.5),
             Ast::Queue(5, 0), // Hide ATLATL beam
@@ -440,12 +469,15 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
             Ast::SetBg("space"),
             Ast::Place(XANADU_IV, "finale/xanadu4big", 0, (288, 242)),
             Ast::Wait(0.5),
+            Ast::Sound(Sound::atlatl_beam(2)),
             Ast::Queue(5, 3), // Animate ATLATL beam hitting planet
             Ast::Wait(0.5),
             Ast::Par(vec![
                 Ast::Seq(vec![
                     Ast::Sound(Sound::spawn_zap()),
-                    Ast::Wait(0.8),
+                    Ast::Wait(1.0),
+                    Ast::Sound(Sound::spawn_zap()),
+                    Ast::Wait(1.0),
                     Ast::Sound(Sound::transform_final()),
                 ]),
                 Ast::Seq(vec![

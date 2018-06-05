@@ -39,6 +39,12 @@ pub struct Sound {
 impl Sound {
     fn new(wave: Wave) -> Sound { Sound { wave: wave } }
 
+    pub fn atlatl_beam(stage: i32) -> Sound {
+        Sound::new(Wave::pulse(Wave::from(420.0 - 35.0 * (stage as f32))
+                                   .adshr(0.0, 0.0, 1.0, 0.0, 1.0),
+                               0.4) * 0.25)
+    }
+
     pub fn beep() -> Sound {
         Sound::new(Wave::pulse(440.0, 0.5).adshr(0.0, 0.0, 0.25, 0.3, 0.05) *
                        0.4)

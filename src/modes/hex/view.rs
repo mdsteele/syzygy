@@ -24,7 +24,7 @@ use std::rc::Rc;
 
 use elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
 use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
-          Resources, Sprite};
+          Resources, Sound, Sprite};
 use modes::SOLVED_INFO_TEXT;
 use save::{Game, HexState, PuzzleState};
 use super::scenes;
@@ -317,16 +317,27 @@ impl Element<HexState, (usize, i32)> for HexWheel {
                     let old_rotation = drag.sprite_rotation();
                     drag.set_current(pt - self.center);
                     let new_rotation = drag.sprite_rotation();
-                    return Action::redraw_if(new_rotation != old_rotation);
+                    if new_rotation != old_rotation {
+                        let mut action = Action::redraw();
+                        if new_rotation % 4 == 0 {
+                            action.also_play_sound(Sound::device_rotate());
+                        }
+                        return action;
+                    }
                 }
             }
             &Event::MouseUp => {
                 if let Some(drag) = self.drag.take() {
                     let by = drag.token_rotation();
-                    if by == 0 {
-                        return Action::redraw();
+                    let mut action = if by == 0 {
+                        Action::redraw()
+                    } else {
+                        Action::redraw().and_return((self.index, by))
+                    };
+                    if drag.sprite_rotation() % 4 != 0 {
+                        action.also_play_sound(Sound::device_rotate());
                     }
-                    return Action::redraw().and_return((self.index, by));
+                    return action;
                 }
             }
             _ => {}

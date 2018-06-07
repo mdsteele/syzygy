@@ -122,6 +122,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         ]),
         Ast::Seq(vec![
             Ast::SetSprite(SYSTEM, "chars/invis", 0),
+            Ast::Sound(Sound::transform_step(1)),
             Ast::Queue(1, 1), // make crossword visible
             Ast::Wait(1.0),
             Ast::Sound(Sound::talk_lo()),

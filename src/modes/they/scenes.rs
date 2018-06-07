@@ -114,8 +114,8 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Wait(1.75),
             Ast::Sound(Sound::talk_lo()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
-                      "...What do you\n\
-                       work on here, Yttris?")
+                      "...What do you work\n\
+                       on here, Yttris?")
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
@@ -184,8 +184,8 @@ pub fn compile_yttris_midscene(resources: &mut Resources) -> (i32, Scene) {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_lo()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
-                      "Thanks.  That's very\n\
-                       reassuring."),
+                      "Thanks.  That's\n\
+                       very reassuring."),
         ]),
     ];
     (YTTRIS, Ast::compile_scene(resources, ast))
@@ -222,7 +222,7 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
             Ast::Slide(MEZURE, (163, 272), true, false, 0.4),
             Ast::Sound(Sound::small_jump()),
             Ast::Jump(MEZURE, (221, 272), 0.5),
-            Ast::Slide(MEZURE, (372, 272), false, true, 0.8),
+            Ast::Slide(MEZURE, (372, 272), true, true, 1.0),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NW,
                       "I dunno, I thought ``maximize''\n\
@@ -234,6 +234,7 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
             Ast::Jump(MEZURE, (512, 272), 0.5),
             Ast::Slide(MEZURE, (592, 272), true, false, 0.35),
             Ast::Remove(MEZURE),
+            Ast::Wait(0.5),
         ]),
     ];
     Ast::compile_scene(resources, ast)

@@ -106,7 +106,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
                       "Oh, $isure$r.  Why don't you run\n\
                        down to the supply depot and\n\
                        fetch me a jar of elbow grease?\n\
-                       That would be a $ihuge$r help."),
+                       That would be a $ihuge$r  help."),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_lo()),
@@ -140,7 +140,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
                        more important things to be doing."),
         ]),
         Ast::Seq(vec![
-            Ast::Slide(ELINSA, (592, 304), true, false, 0.5),
+            Ast::Slide(ELINSA, (592, 304), true, false, 0.75),
             Ast::Wait(0.25),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SE,
@@ -159,8 +159,8 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Par(vec![
                 Ast::Sound(Sound::talk_lo()),
                 Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::W,
-                          "$iSigh.$r  See that big thing?\n\
-                           You need to make it look like this."),
+                          "$iSigh.$r  See that big thing?  You\n\
+                           need to make it look like this."),
                 Ast::Sound(Sound::small_jump()),
                 Ast::Jump(ELINSA, (480, 304), 0.5),
                 Ast::Seq(vec![
@@ -274,7 +274,8 @@ pub fn compile_outro_scene(resources: &mut Resources, visible: Rect) -> Scene {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SE,
-                      "...maybe that support beam?"),
+                      "...uh, like maybe\n\
+                       that support beam?"),
         ]),
         Ast::Par(vec![
             Ast::Seq(vec![

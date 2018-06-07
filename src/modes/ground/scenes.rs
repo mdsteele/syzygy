@@ -43,8 +43,8 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Wait(1.0),
             Ast::Sound(Sound::talk_lo()),
             Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NW,
-                      "Okay, so, productivity checklist\n\
-                       for today so far:"),
+                      "Okay, so, productivity\n\
+                       checklist for today so far:"),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
@@ -55,8 +55,8 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_annoyed_hi()),
             Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NW,
-                      "On the downside, now I'm\n\
-                       $istuck down here$r."),
+                      "On the downside, now\n\
+                       I'm $istuck down here$r."),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
@@ -156,8 +156,9 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NE,
-                      "And I should probably be replacing\n\
-                       those smashed life-support sensors!"),
+                      "And I should probably be\n\
+                       replacing those smashed\n\
+                       life-support sensors!"),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
@@ -318,7 +319,8 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
             Ast::Wait(1.0),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::SW,
-                      "Oh wait, the system is still broken!"),
+                      "Oh wait, the system\n\
+                       is still broken!"),
         ]),
         Ast::Par(vec![
             Ast::Seq(vec![

@@ -250,6 +250,7 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Slide(MEZURE, (592, 288), true, false, 0.75),
             Ast::Remove(MEZURE),
+            Ast::Wait(0.5),
         ]),
     ];
     Ast::compile_scene(resources, ast)

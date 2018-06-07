@@ -195,7 +195,6 @@ pub fn compile_outro_scene(resources: &mut Resources, visible: Rect) -> Scene {
                       "Ah, thanks muchly.")
         ]),
         Ast::Seq(vec![
-            Ast::Slide(MEZURE, (170, 288), true, true, 0.5),
             Ast::Slide(MEZURE, (592, 288), true, false, 1.2),
             Ast::SetPos(MEZURE, (visible.right() + 16, 288)),
             Ast::Wait(1.0),
@@ -206,6 +205,7 @@ pub fn compile_outro_scene(resources: &mut Resources, visible: Rect) -> Scene {
         ]),
         Ast::Seq(vec![
             // Hilight L in red:
+            Ast::Sound(Sound::transform_step(2)),
             Ast::Queue(3, 1),
             Ast::Wait(0.1),
             Ast::Queue(8, 1),
@@ -215,6 +215,7 @@ pub fn compile_outro_scene(resources: &mut Resources, visible: Rect) -> Scene {
             Ast::Queue(14, 1),
             Ast::Wait(0.5),
             // Hilight L in green:
+            Ast::Sound(Sound::transform_step(3)),
             Ast::Queue(0, 2),
             Ast::Wait(0.1),
             Ast::Queue(4, 2),
@@ -224,6 +225,7 @@ pub fn compile_outro_scene(resources: &mut Resources, visible: Rect) -> Scene {
             Ast::Queue(10, 2),
             Ast::Wait(0.5),
             // Hilight Y in blue:
+            Ast::Sound(Sound::transform_step(4)),
             Ast::Queue(5, 3),
             Ast::Wait(0.1),
             Ast::Queue(7, 3),
@@ -233,6 +235,7 @@ pub fn compile_outro_scene(resources: &mut Resources, visible: Rect) -> Scene {
             Ast::Queue(16, 3),
             Ast::Wait(0.5),
             // Show EDER letters:
+            Ast::Sound(Sound::talk_annoyed_lo()),
             Ast::Queue(-2, 0),
             Ast::Wait(1.5),
         ]),

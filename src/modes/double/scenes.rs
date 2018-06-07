@@ -41,8 +41,8 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Slide(MEZURE, (122, 272), false, true, 1.0),
             Ast::Sound(Sound::talk_lo()),
             Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NW,
-                      "You there!  How\n\
-                       is progress coming?"),
+                      "You there!  How is\n\
+                       progress coming?"),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
@@ -74,21 +74,21 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
                 Ast::Slide(MEZURE, (156, 272), true, false, 0.5),
                 Ast::Sound(Sound::small_jump()),
                 Ast::Jump(MEZURE, (192, 256), 0.5),
-                Ast::Slide(MEZURE, (332, 256), true, true, 0.75),
+                Ast::Slide(MEZURE, (332, 256), true, true, 1.0),
                 Ast::Wait(0.5),
                 Ast::Sound(Sound::talk_hi()),
                 Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NW,
-                          "Um, what are $iyou$r\n\
-                           working on?"),
+                          "Um, what are\n\
+                           $iyou$r  working on?"),
             ]),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(UGRENT, TalkStyle::Normal, TalkPos::NE,
-                      "Inspecting the character sets\n\
-                       at this checkpoint.  I need to\n\
-                       re-double-check each one\n\
-                       a second time."),
+                      "Inspecting the character\n\
+                       sets at this checkpoint.\n\
+                       I need to re-double-check\n\
+                       each one a second time."),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),

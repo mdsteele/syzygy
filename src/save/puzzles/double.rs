@@ -136,7 +136,6 @@ impl DoubleState {
         self.done.insert(self.current);
         if self.done.len() == WORD_CLUES.len() {
             self.access = Access::Solved;
-            self.current = 0;
         }
         (prefix, false, true)
     }
@@ -164,9 +163,10 @@ impl Tomlable for DoubleState {
         if !self.access.is_solved() {
             table.insert(CURRENT_KEY.to_string(),
                          toml::Value::Integer(self.current as i64));
-            let done = self.done
-                .iter()
-                .map(|&idx| toml::Value::Integer(idx as i64))
+            let mut done: Vec<i32> = self.done.iter().cloned().collect();
+            done.sort();
+            let done = done.into_iter()
+                .map(|idx| toml::Value::Integer(idx as i64))
                 .collect();
             table.insert(DONE_KEY.to_string(), toml::Value::Array(done));
         }

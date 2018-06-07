@@ -44,8 +44,8 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Wait(0.5),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
-                      "Now what's $ithis$r\n\
-                       all about?"),
+                      "Now what's\n\
+                       $ithis$r  all about?"),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::small_jump()),
@@ -77,13 +77,16 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Slide(MEZURE_BG, (450, 304), true, true, 1.0),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE_BG, TalkStyle::Normal, TalkPos::NW,
-                      "This must be some kind of bio-dome.\n\
-                       Why would we need that on this ship?"),
+                      "This must be some\n\
+                       kind of bio-dome.\n\
+                       Why would we need\n\
+                       that on this ship?"),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE_BG, TalkStyle::Normal, TalkPos::NW,
-                      "I'd better take a look inside."),
+                      "I'd better take\n\
+                       a look inside."),
         ]),
         Ast::Seq(vec![
             Ast::Slide(MEZURE_BG, (592, 304), true, false, 0.75),
@@ -99,7 +102,8 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Wait(1.0),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
-                      "This thing seems fine, I guess."),
+                      "This thing seems\n\
+                       fine, I guess."),
         ]),
         Ast::Seq(vec![
             Ast::Slide(MEZURE, (180, 304), true, true, 0.5),
@@ -209,8 +213,8 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Wait(1.0),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
-                      "Well, how was I supposed\n\
-                       to know that?"),
+                      "Well, how was I\n\
+                       supposed to know that?"),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),

@@ -41,7 +41,8 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Slide(MEZURE, (88, 320), true, true, 1.0),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
-                      "Whoa.  It sure is dark up here.")
+                      "Whoa.  It sure is\n\
+                       dark up here.")
         ]),
         Ast::Seq(vec![
             Ast::Slide(MEZURE, (104, 320), true, true, 0.5),
@@ -55,12 +56,14 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
-                      "What's this place even for?"),
+                      "What is this\n\
+                       place even for?"),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
-                      "Maybe I can just pass through...")
+                      "Maybe I can just\n\
+                       pass through...")
         ]),
         Ast::Seq(vec![
             Ast::Slide(MEZURE, (176, 320), true, false, 0.5),
@@ -73,10 +76,11 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Place(ARGONY, "chars/argony", 0, (-16, 112)),
             Ast::Light(ARGONY, true),
-            Ast::Slide(ARGONY, (170, 112), false, true, 0.5),
+            Ast::Slide(ARGONY, (170, 112), false, true, 1.0),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::SE,
-                      "Stumbling about in the dark, child?"),
+                      "Stumbling about in\n\
+                       the dark, child?"),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_lo()),
@@ -209,13 +213,15 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
-                      "I'm Mezure.  Pleased to meet you."),
+                      "I'm Mezure.  Pleased\n\
+                       to meet you."),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::SE,
-                      "Likewise.  Now get back to work,\n\
-                       whippersnapper.  The system is a wreck."),
+                      "Likewise.  Now get back\n\
+                       to work, whippersnapper.\n\
+                       The system is a wreck."),
         ]),
         Ast::Par(vec![
             Ast::Sound(Sound::talk_hi()),
@@ -235,12 +241,13 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
             Ast::Remove(MEZURE),
             Ast::Sound(Sound::talk_thought()),
             Ast::Talk(ARGONY, TalkStyle::Thought, TalkPos::SE,
-                      "I wonder where Relyng's\n\
-                       gone off to?"),
+                      "I wonder where\n\
+                       Relyng's gone off to?"),
         ]),
         Ast::Seq(vec![
-            Ast::Slide(ARGONY, (-16, 112), true, false, 0.5),
+            Ast::Slide(ARGONY, (-16, 112), true, false, 1.0),
             Ast::Remove(ARGONY),
+            Ast::Wait(0.5),
         ]),
     ];
     Ast::compile_scene(resources, ast)

@@ -9,7 +9,12 @@ build = "build.rs"
 [package.metadata.bundle]
 name = "System Syzygy"
 identifier = "io.github.mdsteele.syzygy"
-resources = ["data"]
+icon = ["data/icon/*.png"]
+resources = [
+    "data/backgrounds/*.bg",
+    "data/fonts/*.ahf",
+    "data/sprites/**/*.ahi",
+]
 copyright = "Copyright 2016 Matthew D. Steele"
 long_description = """
 System Syzygy is a story and a puzzle game, in the style of Cliff Johnson's

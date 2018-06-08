@@ -87,7 +87,9 @@ impl BlameState {
     pub fn fall_from(&self, mut row: i32, pos: i32) -> i32 {
         row += 1;
         while row < NUM_ROWS {
-            if self.get_position(row) == pos {
+            if self.get_position(row) == pos &&
+                self.get_position(row - 1) != pos
+            {
                 break;
             }
             row += 1;
@@ -261,6 +263,20 @@ mod tests {
                                             .collect()));
         let state = BlameState::from_toml(toml::Value::Table(table));
         assert_eq!(&state.positions as &[i32], INITIAL_POSITIONS);
+    }
+
+    #[test]
+    fn fall_from_platform() {
+        let mut state = BlameState::from_toml(toml::Value::Boolean(false));
+        state.positions = vec![1, 0, 1, 2, 0, 3, 2, 0];
+        assert_eq!(state.fall_from(1, 0), 4);
+    }
+
+    #[test]
+    fn fall_from_stacked_platforms() {
+        let mut state = BlameState::from_toml(toml::Value::Boolean(false));
+        state.positions = vec![1, 0, 0, 0, 0, 1, 0, 1];
+        assert_eq!(state.fall_from(1, 0), 6);
     }
 }
 

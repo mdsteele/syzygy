@@ -94,7 +94,16 @@ impl GearsState {
         row += 1;
         while row < NUM_ROWS {
             if self.get_position(row) == pos {
-                break;
+                let prev_row_clear = if row == 4 {
+                    self.get_position(2) != pos
+                } else if row == 5 {
+                    self.get_position(3) != pos && self.get_position(4) != pos
+                } else {
+                    self.get_position(row - 1) != pos
+                };
+                if prev_row_clear {
+                    break;
+                }
             }
             row += 1;
         }
@@ -270,6 +279,34 @@ mod tests {
                                             .collect()));
         let state = GearsState::from_toml(toml::Value::Table(table));
         assert_eq!(&state.positions as &[i32], INITIAL_POSITIONS);
+    }
+
+    #[test]
+    fn fall_from_platform() {
+        let mut state = GearsState::from_toml(toml::Value::Boolean(false));
+        state.positions = vec![1, 0, 0, 0, 10, 10, 1, 9];
+        assert_eq!(state.fall_from(0, 1), 6);
+    }
+
+    #[test]
+    fn fall_from_stacked_platforms_1() {
+        let mut state = GearsState::from_toml(toml::Value::Boolean(false));
+        state.positions = vec![0, 1, 1, 2, 10, 10, 1, 1];
+        assert_eq!(state.fall_from(1, 1), 6);
+    }
+
+    #[test]
+    fn fall_from_stacked_platforms_2() {
+        let mut state = GearsState::from_toml(toml::Value::Boolean(false));
+        state.positions = vec![0, 1, 1, 1, 10, 1, 2, 1];
+        assert_eq!(state.fall_from(1, 1), 7);
+    }
+
+    #[test]
+    fn fall_from_stacked_platforms_3() {
+        let mut state = GearsState::from_toml(toml::Value::Boolean(false));
+        state.positions = vec![9, 10, 10, 0, 10, 10, 9, 10];
+        assert_eq!(state.fall_from(1, 10), 7);
     }
 }
 

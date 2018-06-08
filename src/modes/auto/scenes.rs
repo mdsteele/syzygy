@@ -104,7 +104,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NW,
-                      "Okay, well, what $iis$r\n\
+                      " Okay, well, what $iis$r \n\
                        the correct word?"),
         ]),
         Ast::Seq(vec![

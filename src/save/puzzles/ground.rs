@@ -85,7 +85,9 @@ impl GroundState {
     pub fn fall_from(&self, mut row: i32, pos: i32) -> i32 {
         row += 1;
         while row < NUM_ROWS {
-            if self.get_position(row) == pos {
+            if self.get_position(row) == pos &&
+                self.get_position(row - 1) != pos
+            {
                 break;
             }
             row += 1;
@@ -258,6 +260,20 @@ mod tests {
                                             .collect()));
         let state = GroundState::from_toml(toml::Value::Table(table));
         assert_eq!(&state.positions as &[i32], INITIAL_POSITIONS);
+    }
+
+    #[test]
+    fn fall_from_platform() {
+        let mut state = GroundState::from_toml(toml::Value::Boolean(false));
+        state.positions = vec![7, 8, 4, 9, 9, 8, 9];
+        assert_eq!(state.fall_from(1, 9), 3);
+    }
+
+    #[test]
+    fn fall_from_stacked_platforms() {
+        let mut state = GroundState::from_toml(toml::Value::Boolean(false));
+        state.positions = vec![8, 9, 9, 9, 9, 8, 9];
+        assert_eq!(state.fall_from(1, 9), 6);
     }
 }
 

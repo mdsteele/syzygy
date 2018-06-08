@@ -17,13 +17,21 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
+extern crate gcc;
+
 // ========================================================================= //
 
 fn main() {
     let target = std::env::var("TARGET").unwrap();
     if target.ends_with("-apple-darwin") {
+        gcc::Build::new().file("src/gui/path_mac.m").compile("syzygysys");
         println!("cargo:rustc-link-search=framework=/Library/Frameworks");
         println!("cargo:rustc-link-lib=framework=Foundation");
+    } else if target.ends_with("-linux-gnu") {
+        gcc::Build::new().file("src/gui/path_linux.c").compile("syzygysys");
+    } else {
+        println!("cargo:warning=System Syzygy doesn't currently support {}",
+                 target);
     }
 }
 

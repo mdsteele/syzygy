@@ -20,6 +20,9 @@ game, all the different puzzles and pieces of the story come together into a
 single meta-puzzle.
 """
 
+[build-dependencies]
+gcc = "0.3"
+
 [dependencies]
 app_dirs = "1.2"
 getopts = "0.2"

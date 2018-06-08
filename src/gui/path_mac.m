@@ -17,30 +17,20 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod action;
-mod background;
-mod canvas;
-mod element;
-mod event;
-mod font;
-mod path;
-mod resources;
-mod sound;
-mod sprite;
-mod window;
+#include <Foundation/Foundation.h>
 
-pub use sdl2::rect::{Point, Rect};
-pub use self::action::Action;
-pub use self::background::Background;
-pub use self::canvas::{Align, Canvas};
-pub use self::element::Element;
-pub use self::event::{Event, KeyMod, Keycode};
-pub use self::font::Font;
-pub use self::resources::Resources;
-pub use self::sound::Sound;
-pub use self::sprite::Sprite;
-pub use self::window::Window;
+// ========================================================================= //
 
-pub const FRAME_DELAY_MILLIS: u32 = 40;
+const char *syzygy_rsrc_root(char *buffer, unsigned int size) {
+  CFBundleRef bundle = CFBundleGetMainBundle();
+  CFURLRef url = CFBundleCopyResourcesDirectoryURL(bundle);
+  BOOL ok = CFURLGetFileSystemRepresentation(url, YES, (UInt8*)buffer, size);
+  CFRelease(url);
+  CFRelease(bundle);
+  if (!ok) {
+    return "CFURLGetFileSystemRepresentation failed";
+  }
+  return "";
+}
 
 // ========================================================================= //

@@ -127,7 +127,7 @@ impl Location {
             Location::ALightInTheAttic => Location::LightSyrup,
             Location::AutofacTour => Location::ColumnAsIcyEm,
             Location::BlackAndBlue => Location::ShiftTheBlame,
-            Location::ColumnAsIcyEm => Location::LevelHeaded,
+            Location::ColumnAsIcyEm => Location::BlackAndBlue,
             Location::ConnectTheDots => Location::MissedConnections,
             Location::CrossSauce => Location::ShiftGears,
             Location::CrossTheLine => Location::PlaneAndSimple,

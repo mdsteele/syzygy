@@ -135,13 +135,13 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
-                      "$iThat's$r a hazardous\n\
+                      "$iThat's$r  a hazardous\n\
                        area of the ship?"),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
-                      "There are no guardrails $ianywhere$r.\n\
+                      "There are no guard rails $ianywhere$r.\n\
                        I almost fell into a pit of $ispikes$r  up\n\
                        in the power station.  People are\n\
                        routinely getting stuck behind\n\

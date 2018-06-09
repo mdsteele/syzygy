@@ -230,7 +230,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
                       "Again with\n\
-                       the $i``sigh.'' "),
+                       the ``$isigh.$r''"),
         ]),
         Ast::Seq(vec![
             Ast::Slide(MEZURE, (592, 304), true, false, 1.0),

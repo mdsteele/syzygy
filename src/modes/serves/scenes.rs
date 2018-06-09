@@ -223,7 +223,7 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::SW,
-                      "You are the $iadministrator$r,  not a\n\
+                      "You are the $iadministrator$r, not a\n\
                        lackey.  Your job is to manage this\n\
                        motley crew and get our efforts\n\
                        organized, so we're not all\n\

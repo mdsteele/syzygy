@@ -68,8 +68,8 @@ pub fn compile_intro_scene(resources: &mut Resources, visible: Rect) -> Scene {
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
                       "Well, whatever.  That's done.\n\
-                       Maybe now I can finally focus\n\
-                       on my actual job."),
+                       Maybe now I can finally\n\
+                       focus on my actual job."),
         ]),
         Ast::Par(vec![
             Ast::Seq(vec![
@@ -214,7 +214,16 @@ pub fn compile_intro_scene(resources: &mut Resources, visible: Rect) -> Scene {
                 Ast::Slide(ELINSA, (325, 320), true, true, 0.75),
                 Ast::Slide(MEZURE, (345, 320), true, true, 0.75),
             ]),
-            Ast::Wait(1.0),
+            Ast::Wait(0.5),
+            Ast::Loop(2, 2, Box::new(Ast::Seq(vec![
+                Ast::Sound(Sound::device_slide()),
+                Ast::SetPos(ELINSA, (326, 320)),
+                Ast::SetPos(MEZURE, (346, 320)),
+                Ast::Wait(0.25),
+                Ast::SetPos(ELINSA, (325, 320)),
+                Ast::SetPos(MEZURE, (345, 320)),
+                Ast::Wait(0.75),
+            ]))),
             Ast::Par(vec![
                 Ast::Slide(ELINSA, (180, 320), true, true, 0.75),
                 Ast::Seq(vec![
@@ -318,6 +327,7 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
                 Ast::Slide(MEZURE, (345, 320), true, true, 0.75),
             ]),
             Ast::Wait(0.5),
+            Ast::Sound(Sound::device_slide()),
             Ast::Par(vec![
                 Ast::Slide(ELINSA, (357, 320), false, false, 0.4),
                 Ast::Slide(MEZURE, (377, 320), false, false, 0.4),

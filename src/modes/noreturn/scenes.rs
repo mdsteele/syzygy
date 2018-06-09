@@ -143,7 +143,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::SE,
                       "No, I mean that door over there\n\
                        will literally only open once\n\
-                       this whole bridge is eliminated."),
+                       this whole bridge is gone."),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),

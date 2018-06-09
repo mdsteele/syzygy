@@ -83,7 +83,7 @@ impl Sound {
     }
 
     pub fn device_slide() -> Sound {
-        Sound::new(Wave::noise(Wave::slide(7000.0, -7000.0, 0.0))
+        Sound::new(Wave::noise(Wave::slide(8000.0, -8000.0, 0.0))
                        .adshr(0.05, 0.0, 1.0, 0.0, 0.25) *
                        Wave::slide(0.125, -0.5, 0.0))
     }

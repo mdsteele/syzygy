@@ -1,7 +1,7 @@
 [[package]]
 name = "ahi"
 version = "0.1.0"
-source = "git+https://github.com/mdsteele/ahi?rev=8dfd2b39ba35d77a3260d95d53369c149e875ecf#8dfd2b39ba35d77a3260d95d53369c149e875ecf"
+source = "git+https://github.com/mdsteele/ahi?tag=v0.1.0#8dfd2b39ba35d77a3260d95d53369c149e875ecf"
 
 [[package]]
 name = "app_dirs"
@@ -168,7 +168,7 @@ dependencies = [
 name = "syzygy"
 version = "0.1.0"
 dependencies = [
- "ahi 0.1.0 (git+https://github.com/mdsteele/ahi?rev=8dfd2b39ba35d77a3260d95d53369c149e875ecf)",
+ "ahi 0.1.0 (git+https://github.com/mdsteele/ahi?tag=v0.1.0)",
  "app_dirs 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "gcc 0.3.54 (registry+https://github.com/rust-lang/crates.io-index)",
  "getopts 0.2.17 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -222,7 +222,7 @@ version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [metadata]
-"checksum ahi 0.1.0 (git+https://github.com/mdsteele/ahi?rev=8dfd2b39ba35d77a3260d95d53369c149e875ecf)" = "<none>"
+"checksum ahi 0.1.0 (git+https://github.com/mdsteele/ahi?tag=v0.1.0)" = "<none>"
 "checksum app_dirs 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "e73a24bad9bd6a94d6395382a6c69fe071708ae4409f763c5475e14ee896313d"
 "checksum bitflags 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)" = "aad18937a628ec6abcd26d1489012cc0e18c21798210f491af69ded9b881106d"
 "checksum bitflags 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)" = "b3c30d3802dfb7281680d6285f2ccdaa8c2d8fee41f93805dba5c4cf50dc23cf"

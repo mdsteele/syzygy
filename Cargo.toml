@@ -29,15 +29,12 @@ single meta-puzzle.
 gcc = "0.3"
 
 [dependencies]
+ahi = { git = "https://github.com/mdsteele/ahi", tag = "v0.1.0" }
 app_dirs = "1.2"
 getopts = "0.2"
 num-integer = "0.1"
 rand = "0.4"
 toml = "0.4"
-
-[dependencies.ahi]
-git = "https://github.com/mdsteele/ahi"
-rev = "8dfd2b39ba35d77a3260d95d53369c149e875ecf"
 
 [dependencies.itersynth]
 git = "https://github.com/mdsteele/itersynth"

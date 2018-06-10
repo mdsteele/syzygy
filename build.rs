@@ -27,6 +27,7 @@ fn main() {
         gcc::Build::new().file("src/gui/path_mac.m").compile("syzygysys");
         println!("cargo:rustc-link-search=framework=/Library/Frameworks");
         println!("cargo:rustc-link-lib=framework=Foundation");
+        println!("cargo:rustc-env=MACOSX_DEPLOYMENT_TARGET=10.11");
     } else if target.ends_with("-linux-gnu") {
         gcc::Build::new().file("src/gui/path_linux.c").compile("syzygysys");
     } else {

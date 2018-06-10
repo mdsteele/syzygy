@@ -184,7 +184,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::SE,
                       "It $idoes$r  have a safety mechanism.\n\
-                       It can only fire when the ship is\n\
+                       It can fire only when the ship is\n\
                        pointed directly at a preselected\n\
                        target, with the expected planetary\n\
                        conditions.  In this case, Xanadu-IV."),

@@ -90,7 +90,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
                        transmission power alignment grid,\n\
                        for calibrating our attitude thrusters.\n\
                        At the moment, it happens to also be\n\
-                       1) shot to hell, and therefore\n\
+                       1) shot to heck, and therefore\n\
                        2) a complete waste of my time.\n\
                        Any other questions?"),
         ]),

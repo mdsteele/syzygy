@@ -241,7 +241,7 @@ pub fn compile_intro_scene(resources: &mut Resources, visible: Rect) -> Scene {
             Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
                       "You know, I think it's colder in here\n\
                        than it's supposed to be.  Which\n\
-                       will also complicate data retreival\n\
+                       will also complicate data retrieval\n\
                        whenever we need to do that."),
         ]),
         Ast::Seq(vec![

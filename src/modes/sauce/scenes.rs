@@ -114,8 +114,8 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::NE,
-                      "All facts I am well aware\n\
-                       of, dear.  And you don't\n\
+                      "All facts of which I am well\n\
+                       aware, dear.  And you don't\n\
                        need to call me ``Lady.''"),
         ]),
         Ast::Seq(vec![

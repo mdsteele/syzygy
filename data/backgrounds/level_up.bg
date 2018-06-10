@@ -1,31 +1,30 @@
 @BG 10 15 25
 >blue_ells
 >green_pipes
->teal_struts
 >girders
 >caution_walls
 
-                  DB                DBDB
-                  DB                DBDB
-                  DB                DBDB
-                  DB                DBDB    EKEIEIEIEL        DE
-                  DB                DBDB    EGEOEOEOEHDADADADADCDADADADA
-ACACACACACACACAG  DB                DBDB    EGEOEOEOEHDADADADADCDADADADA
-AAAAAAAAAAAAAAAB  DB                DBDB    EGEOEOEOEH
-AAAAAAAAAAALAEAH  DB                DBDB    EGEOEOEOEH
-AEAEAEAEAEAH      DB                DBDB    EGEOEOEOEH
-                  DB                DBDB    EGEOEOEOEH
-                  DB              DFDCDCDADAEGEOEOEOEH
-                  DB              DFDCDCDADAEGEOEOEOEH
-                  DB                DG      EGEOEOEOEH
-                  DB                        EGEOEOEOEHDADADADADADADADADA
-                  DB                        EGEOEOEOEHDADADADADADADADADA
-                  DB        DEDE            EGEOEOEOEH
-                  DB        DCDCDADADADADADAEGEOEOEOEH
-ACACACACACACACAG  DB      DFDCDCDADADADADADAEGEOEOEOEH      BCBABABGBABA
-AAAAAAAAAAAAAAAB  DB        DBDB            EMEJEJEJEN      BB    BFBABA
-AAAAAAAAAAALAEAH  DB        DBDB                            BB
-AAAAAAAAAAAB      DB        DBDB                            BB
-AAAAAAAAAAAB      DB        DBDB                            BB
-AAAAAAALAEAH      DB        DBDB                            BB
-AAAAAAAB          DB        DBDB                            BB
+                  CB                CBCB
+                  CB                CBCB
+                  CB                CBCB
+                  CB                CBCB    DKDIDIDIDL        CE
+                  CB                CBCB    DGDODODODHCACACACACCCACACACA
+ACACACACACACACAG  CB                CBCB    DGDODODODHCACACACACCCACACACA
+AAAAAAAAAAAAAAAB  CB                CBCB    DGDODODODH
+AAAAAAAAAAALAEAH  CB                CBCB    DGDODODODH
+AEAEAEAEAEAH      CB                CBCB    DGDODODODH
+                  CB                CBCB    DGDODODODH
+                  CB              CFCCCCCACADGDODODODH
+                  CB              CFCCCCCACADGDODODODH
+                  CB                CG      DGDODODODH
+                  CB                        DGDODODODHCACACACACACACACACA
+                  CB                        DGDODODODHCACACACACACACACACA
+                  CB        CECE            DGDODODODH
+                  CB        CCCCCACACACACACADGDODODODH
+ACACACACACACACAG  CB      CFCCCCCACACACACACADGDODODODH      BCBABABGBABA
+AAAAAAAAAAAAAAAB  CB        CBCB            DMDJDJDJDN      BB    BFBABA
+AAAAAAAAAAALAEAH  CB        CBCB                            BB
+AAAAAAAAAAAB      CB        CBCB                            BB
+AAAAAAAAAAAB      CB        CBCB                            BB
+AAAAAAALAEAH      CB        CBCB                            BB
+AAAAAAAB          CB        CBCB                            BB

@@ -80,7 +80,7 @@ impl Location {
             Location::ALightInTheAttic => "A Light in the Attic",
             Location::AutofacTour => "Autofac Tour",
             Location::BlackAndBlue => "Black and Blue",
-            Location::ColumnAsIcyEm => "Column as Icy `Em",
+            Location::ColumnAsIcyEm => "Column as Icy 'Em",
             Location::ConnectTheDots => "Connect the Dots",
             Location::CrossSauce => "Cross Sauce",
             Location::CrossTheLine => "Cross the Line",

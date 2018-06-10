@@ -152,7 +152,7 @@ const OFFSETS_CLUES: &[(i32, &str)] = &[
     (2, "to bleach"),
     (3, "a senior figure"),
     (2, "a white pool sphere"),
-    (3, "overjoyed; rapturous"),
+    (3, "overjoyed; enraptured"),
     (2, "the ocean floor"),
     (3, "an organic lens cap"),
 ];

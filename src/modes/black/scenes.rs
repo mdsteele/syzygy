@@ -229,7 +229,7 @@ pub fn compile_mezure_midscene(resources: &mut Resources) -> (i32, Scene) {
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NE,
                       "Oh sure!  I handle most\n\
-                       of the, ah, aethetic\n\
+                       of the, ah, aesthetic\n\
                        concerns on this ship."),
         ]),
     ];

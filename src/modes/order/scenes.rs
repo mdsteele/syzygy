@@ -289,7 +289,7 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
             Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NW,
                       "And there $iyou$r  are,\n\
                        listed right between\n\
-                       Elinsa and myself."),
+                       Elinsa and me."),
         ]),
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
@@ -372,7 +372,7 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(RELYNG, TalkStyle::Normal, TalkPos::NW,
                       "So it seems that either\n\
-                       out saboteur is lousy at\n\
+                       our saboteur is lousy at\n\
                        their job, or...something\n\
                        deeper is going on."),
         ]),

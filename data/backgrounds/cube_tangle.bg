@@ -1,5 +1,4 @@
 @BG 15 20 30
->green_pipes
 >caution_walls
 >girders
 >red_brick
@@ -7,27 +6,27 @@
 >cyan_walls
 >purple_walls
 
-                                GF          FF  GF
-                                GIGH        FF  GF
-                                  GF        FF  GF
-                              FC  GE  FC  FGFJ  GE      GGGDGDGKGDGH
-GDGH                          FF  FC  FF  FF    FC      GF    GF  GIGDGD
-  GIGDGDGDGDGH            FAFDFOFDFOFDFOFDFOFDFDFJ    GGGJ    GF
-            GF        FC      FF  FF  FF  FF          GF      GIGDGDGDGD
-          GGGNGDGH    FIFDFDFDFOFDFOFDFOFDFOFDFB      GF
-GDGDGDGDGDGL    GF            FF  FF  FF  FF          GF
-          GF    GMGDGDGBFAFDFDFOFDFOFDFOFDFOFDFDFBGAGDGJ
-          GIGDGDGJ            FF  FF  FF  FF
-                          FAFDFOFDFOFDFOFDFOFDFDFDFB
-                              FF  FF  FF  FF
-                              FE  FF  FF  FE
-CACACACACABCBABABABABD            FF  FE          BCBABABABABDCACACACACA
-          CB        CB          FAFJ              CB        CB
-          CB        CB                            CB        CB
-          CB        CB                            CB        CB
-          CB        CB                            CB        CB
-          CB    CABCBABABABABABABD    BCBABABABABABABDCACABCBABABABABABA
-DBDBDBDBDBDGEG    DIDADADADADADC      EEDEDADADADADCEC    EIDEDADADADADA
-DADADLDJDNDADGEBEG  DEDADNDADADCEBEBEBEADEDADADADADCEC      DEDADADADADA
-DADNDJDJDJDADCEAEAEBDEDKDJDNDADHEAEAEDEADEDADADADADCEH    EFDEDADADADADA
-DLDJDMDADKDNDCEAEAEADEDLDMDKDCEAEAEC  EEDEDLDJDNDADADG  EFDFDADADADADADA
+                                FF          EF  FF
+                                FIFH        EF  FF
+                                  FF        EF  FF
+                              EC  FE  EC  EGEJ  FE      FGFDFDFKFDFH
+FDFH                          EF  EC  EF  EF    EC      FF    FF  FIFDFD
+  FIFDFDFDFDFH            EAEDEOEDEOEDEOEDEOEDEDEJ    FGFJ    FF
+            FF        EC      EF  EF  EF  EF          FF      FIFDFDFDFD
+          FGFNFDFH    EIEDEDEDEOEDEOEDEOEDEOEDEB      FF
+FDFDFDFDFDFL    FF            EF  EF  EF  EF          FF
+          FF    FMFDFDFBEAEDEDEOEDEOEDEOEDEOEDEDEBFAFDFJ
+          FIFDFDFJ            EF  EF  EF  EF
+                          EAEDEOEDEOEDEOEDEOEDEDEDEB
+                              EF  EF  EF  EF
+                              EE  EF  EF  EE
+BABABABABAACAAAAAAAAAD            EF  EE          ACAAAAAAAAADBABABABABA
+          BB        BB          EAEJ              BB        BB
+          BB        BB                            BB        BB
+          BB        BB                            BB        BB
+          BB        BB                            BB        BB
+          BB    BAACAAAAAAAAAAAAAD    ACAAAAAAAAAAAAADBABAACAAAAAAAAAAAA
+CBCBCBCBCBCGDG    CICACACACACACC      DECECACACACACCDC    DICECACACACACA
+CACACLCJCNCACGDBDG  CECACNCACACCDBDBDBDACECACACACACCDC      CECACACACACA
+CACNCJCJCJCACCDADADBCECKCJCNCACHDADADDDACECACACACACCDH    DFCECACACACACA
+CLCJCMCACKCNCCDADADACECLCMCKCCDADADC  DECECLCJCNCACACG  DFCFCACACACACACA

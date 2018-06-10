@@ -95,7 +95,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::SW,
-                      "Now then, let's you and I get\n\
+                      "Now then, let's you and me get\n\
                        these memory banks reset."),
         ]),
         Ast::Seq(vec![

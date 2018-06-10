@@ -4,22 +4,39 @@
 }
 
 body {
-    background-color: black;
+    background: black url(../images/stars.png);
     color: white;
-    font: 18px 'Chicago';
+    font: 16px 'Chicago';
     margin: 50px auto;
     max-width: 640px;
     padding: 5px;
 }
 
-header {
-    text-align: center;
-}
+header { text-align: center; }
 
-h1 {
-    font-size: 48px;
-    text-transform: uppercase;
+h1 { margin: 5px 0; }
+
+h1 img { max-width: 100%; }
+
+header > nav {
+    width: 100%;
 }
+header > nav > a {
+    background-color: #0cc;
+    border: 3px dotted black;
+    border-radius: 8px;
+    color: black;
+    display: inline-block;
+    font-size: 18px;
+    margin: 7px 5px;
+    padding: 3px;
+    text-decoration: none;
+    text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.75);
+    width: 100px;
+}
+header > nav > a.selected { border-color: white; }
+header > nav > a:hover { background-color: #cff; }
+header > nav > a:active { background-color: #c66; }
 
 .floatleft, .floatright {
     clear: both;
@@ -47,6 +64,6 @@ h1 {
 
 footer {
     clear: both;
-    color: #444;
+    color: #555;
     text-align: center;
 }

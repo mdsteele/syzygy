@@ -32,13 +32,10 @@ gcc = "0.3"
 ahi = { git = "https://github.com/mdsteele/ahi", tag = "v0.1.0" }
 app_dirs = "1.2"
 getopts = "0.2"
+itersynth = { git = "https://github.com/mdsteele/itersynth", tag = "v0.1.0" }
 num-integer = "0.1"
 rand = "0.4"
 toml = "0.4"
-
-[dependencies.itersynth]
-git = "https://github.com/mdsteele/itersynth"
-rev = "bc1e3ffe726c80e3a931bf9e58f4a98f213c2bf5"
 
 [dependencies.sdl2]
 git = "https://github.com/mdsteele/rust-sdl2"

@@ -131,11 +131,11 @@ impl Location {
             Location::ConnectTheDots => Location::MissedConnections,
             Location::CrossSauce => Location::ShiftGears,
             Location::CrossTheLine => Location::PlaneAndSimple,
-            Location::CubeTangle => Location::Map,
+            Location::CubeTangle => Location::MissedConnections,
             Location::Disconnected => Location::LogLevel,
             Location::DoubleCross => Location::WhatchaColumn,
             Location::FactOrFiction => Location::Map,
-            Location::HexSpangled => Location::Map,
+            Location::HexSpangled => Location::AutofacTour,
             Location::IceToMeetYou => Location::TheIceIsRight,
             Location::IfMemoryServes => Location::IceToMeetYou,
             Location::JogYourMemory => Location::Map,
@@ -384,7 +384,7 @@ mod tests {
     }
 
     #[test]
-    fn leads_to_only_dependent() {
+    fn leads_to_a_dependent() {
         let mut dependents: HashMap<Location, Vec<Location>> = HashMap::new();
         for &location in Location::all() {
             for prereq in location.prereqs().into_iter() {
@@ -395,15 +395,21 @@ mod tests {
             }
         }
         for (&location, direct_dependents) in dependents.iter() {
-            if direct_dependents.len() == 1 {
-                let dependent = direct_dependents.first().cloned().unwrap();
-                let next = location.next();
-                assert_eq!(dependent,
-                           next,
+            let next = location.next();
+            if direct_dependents.is_empty() {
+                assert_eq!(next,
+                           Location::Map,
                            "{:?} leads to {:?}, but it should lead to {:?}",
                            location,
                            next,
-                           dependent);
+                           Location::Map);
+            } else {
+                assert!(direct_dependents.contains(&next),
+                        "{:?} leads to {:?}, but it should lead to one of \
+                         {:?}",
+                        location,
+                        next,
+                        direct_dependents);
             }
         }
     }

@@ -438,7 +438,8 @@ impl Element<PasswordState, (i32, i32)> for PasswordSlider {
                                              from_y: pt.y(),
                                              to_y: pt.y(),
                                          });
-                        return Action::redraw();
+                        return Action::redraw()
+                            .and_play_sound(Sound::device_pickup());
                     }
                 }
             }
@@ -455,7 +456,9 @@ impl Element<PasswordState, (i32, i32)> for PasswordSlider {
                                      BOX_SIZE as f64)
                         .round() as i32;
                     let new_offset = max(-5, min(0, old_offset + delta));
-                    return Action::redraw().and_return((drag.col, new_offset));
+                    return Action::redraw()
+                        .and_play_sound(Sound::device_drop())
+                        .and_return((drag.col, new_offset));
                 }
             }
             _ => {}

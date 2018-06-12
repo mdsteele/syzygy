@@ -82,6 +82,7 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
             Ast::Queue(1, 0), // Hide moving starfield
             Ast::Remove(THRUST_TOP),
             Ast::Remove(THRUST_BOTTOM),
+            Ast::Sound(Sound::bridge_break()),
             Ast::SetBg("white"),
             Ast::Wait(0.05),
             Ast::SetBg("space"),
@@ -230,7 +231,7 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
             Ast::Place(SHIP2, "title/ship", 1, (79, 352)),
             Ast::Place(SHIP3, "title/ship", 2, (132, 352)),
             Ast::Wait(1.0),
-            // TODO: Play sound for ATLATL charging
+            Ast::Sound(Sound::atlatl_charge(0.1)),
             Ast::Place(CHARGE, "finale/charge_med", 0, (115, 330)),
             Ast::Anim(CHARGE, "finale/charge_med", CHARGE_INDICES, 2),
             Ast::Wait(2.0),
@@ -242,6 +243,7 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
             Ast::SetBg("system_syzygy"),
             Ast::Queue(3, 1), // Show ATLATL
             Ast::Queue(4, 1), // Turn on ATLATL indicators
+            Ast::Sound(Sound::atlatl_charge(0.05)),
             Ast::Place(CHARGE, "finale/charge_big", 0, (120, 216)),
             Ast::Anim(CHARGE, "finale/charge_big", CHARGE_INDICES, 2),
             Ast::Wait(2.0),
@@ -249,6 +251,7 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
             Ast::Queue(3, 0), // Hide ATLATL
             Ast::SetBg("space"),
             Ast::Place(SHIP, "prolog/ship", 0, (288, 216)),
+            Ast::Sound(Sound::atlatl_charge(0.2)),
             Ast::Place(CHARGE, "finale/charge_tiny", 0, (256, 211)),
             Ast::Anim(CHARGE, "finale/charge_tiny", CHARGE_INDICES, 3),
             Ast::Wait(2.0),
@@ -463,7 +466,7 @@ pub fn compile_scene(resources: &mut Resources) -> Scene {
             Ast::Wait(0.5),
             Ast::Sound(Sound::atlatl_beam(1)),
             Ast::Queue(5, 2), // Animate ATLATL beam across screen
-            Ast::Wait(2.5),
+            Ast::Wait(1.75),
             Ast::Queue(5, 0), // Hide ATLATL beam
             Ast::Remove(XANADU_III),
             Ast::SetBg("space"),

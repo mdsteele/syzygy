@@ -93,6 +93,7 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
         Ast::Seq(vec![
             Ast::Sound(Sound::solve_puzzle_chime()),
             Ast::Wait(1.0),
+            Ast::Sound(Sound::talk_thought()),
             Ast::Shake(2),
             Ast::Wait(1.0),
             Ast::Sound(Sound::talk_hi()),
@@ -128,6 +129,7 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
                       "You WHAT!?"),
         ]),
         Ast::Seq(vec![
+            Ast::Sound(Sound::talk_thought()),
             Ast::Shake(2),
             Ast::Wait(0.5),
             Ast::Remove(MEZURE),

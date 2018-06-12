@@ -21,7 +21,7 @@ use std::collections::HashMap;
 
 use elements::{FadeStyle, Hud, HudCmd, HudInput, Scene, ScreenFade, Theater};
 use gui::{Action, Canvas, Element, Event, Rect, Resources};
-use save::{Access, Game, PuzzleState};
+use save::{Access, Game, Location, PuzzleState};
 
 // ========================================================================= //
 
@@ -277,7 +277,8 @@ impl<U: Clone> PuzzleCore<U> {
                 self.middle_scene = None;
             }
             if !self.previously_solved && self.outro_scene.is_finished() &&
-                self.screen_fade.is_transparent()
+                self.screen_fade.is_transparent() &&
+                S::location() != Location::Finale
             {
                 self.screen_fade.fade_out_and_return(PuzzleCmd::Next);
             }

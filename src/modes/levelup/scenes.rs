@@ -266,15 +266,11 @@ pub fn compile_outro_scene(resources: &mut Resources, visible: Rect) -> Scene {
         Ast::Par(vec![
             Ast::Slide(ELINSA, (152, -32), false, false, 1.0),
             Ast::Seq(vec![
-                Ast::Sound(Sound::platform_shift(5)),
+                Ast::Sound(Sound::platform_shift_double(5)),
                 Ast::Anim(PLATFORM, "shift/platforms",
                           PLATFORM_INDICES, 2),
                 Ast::Slide(PLATFORM, (152, 0), false, false, 1.0),
                 Ast::SetSprite(PLATFORM, "shift/platforms", 2),
-            ]),
-            Ast::Seq(vec![
-                Ast::Wait(0.1),
-                Ast::Sound(Sound::platform_shift(5)),
             ]),
             Ast::Seq(vec![
                 Ast::Wait(0.2),
@@ -296,7 +292,7 @@ pub fn compile_outro_scene(resources: &mut Resources, visible: Rect) -> Scene {
                     Ast::Jump(ELINSA, (112, 80), 0.5),
                 ]),
                 Ast::Seq(vec![
-                    Ast::Sound(Sound::platform_shift(6)),
+                    Ast::Sound(Sound::platform_shift_double(6)),
                     Ast::Anim(PLATFORM, "shift/platforms",
                               PLATFORM_INDICES, 2),
                     Ast::Slide(PLATFORM, (152, 448), false, false, 1.2),
@@ -309,10 +305,6 @@ pub fn compile_outro_scene(resources: &mut Resources, visible: Rect) -> Scene {
                     Ast::Slide(BOOM, (152, visible.bottom() - 34),
                                false, false, 0.4),
                     Ast::Remove(BOOM),
-                ]),
-                Ast::Seq(vec![
-                    Ast::Wait(0.1),
-                    Ast::Sound(Sound::platform_shift(6)),
                 ]),
             ]),
             Ast::Wait(2.0),

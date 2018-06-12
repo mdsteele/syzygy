@@ -45,6 +45,14 @@ impl Sound {
                                0.4) * 0.25)
     }
 
+    pub fn atlatl_charge(duty: f32) -> Sound {
+        Sound::new(Wave::triangle(Wave::slide(340.0, 100.0, 0.0) +
+                                      Wave::sine(40.0) * 10.0,
+                                  duty)
+                       .adshr(0.125, 0.0, 1.0, 0.0, 1.5) *
+                       0.5)
+    }
+
     pub fn beep() -> Sound {
         Sound::new(Wave::pulse(440.0, 0.5).adshr(0.0, 0.0, 0.25, 0.3, 0.05) *
                        0.4)
@@ -98,6 +106,13 @@ impl Sound {
         Sound::new(Wave::noise(800.0)
                        .adshr(0.071, 0.0, 1.0, 0.0, 0.142)
                        .repeated(num_times) * 0.1)
+    }
+
+    pub fn platform_shift_double(num_times: i32) -> Sound {
+        let shift = Wave::noise(800.0)
+            .adshr(0.071, 0.0, 1.0, 0.0, 0.142)
+            .repeated(num_times) * 0.1;
+        Sound::new(shift.clone() + shift.delayed(0.1065))
     }
 
     pub fn small_jump() -> Sound {

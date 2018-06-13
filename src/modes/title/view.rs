@@ -208,12 +208,13 @@ impl Element<SaveData, Cmd> for Button {
 // ========================================================================= //
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-pub const ABOUT_BOX_TEXT: &str = "\
-$C$f{block}SYSTEM SYZYGY$r$L\n\
+pub const ABOUT_BOX_TEXT: &str = concat!("\
+$C$f{block}SYSTEM SYZYGY$r$Rv", env!("CARGO_PKG_VERSION"), " $L\n\
 \n\
 Copyright 2016 Matthew D. Steele <mdsteele@alum.mit.edu>\n\
 \n\
-Source code:$Rhttps://github.com/mdsteele/syzygy/$L\n\
+Game website:$Rhttps://mdsteele.games/syzygy/ $L\n\
+Source code:$Rhttps://github.com/mdsteele/syzygy/ $L\n\
 \n\
 $iSystem Syzygy$r  comes with ABSOLUTELY NO WARRANTY.\n\
 $iSystem Syzygy$r  is free software: you can redistribute it and/or\n\
@@ -221,7 +222,7 @@ modify it under the terms of the GNU General Public License as\n\
 published by the Free Software Foundation, either version 3 of\n\
 the License, or (at your option) any later version.\n\
 \n\
-$CThanks for playing!";
+$CThanks for playing!");
 
 // ========================================================================= //
 

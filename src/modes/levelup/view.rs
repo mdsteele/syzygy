@@ -152,8 +152,8 @@ const OFFSETS_CLUES: &[(i32, &str)] = &[
     (1, "one who settles a distant land"),
     (0, "a sweet, creamy pastry filling"),
     (0, "somewhat rare"),
-    (2, "military officier just below a general"),
-    (2, "rod used by an orchastra conductor"),
+    (2, "military officer just below a general"),
+    (2, "rod used by an orchestra conductor"),
     (1, "a quantity beyond what is needed"),
     (3, "authoritative orders"),
 ];

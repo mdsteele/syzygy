@@ -262,7 +262,7 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
                 Ast::Wait(0.7),
                 Ast::Sound(Sound::talk_hi()),
                 Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NE,
-                          "I'm a little suprised\n\
+                          "I'm a little surprised\n\
                            he didn't just do it\n\
                            this way, though."),
             ]),

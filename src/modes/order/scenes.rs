@@ -251,7 +251,7 @@ pub fn compile_yttris_midscene(resources: &mut Resources) -> (i32, Scene) {
             Ast::Talk(ARGONY, TalkStyle::Normal, TalkPos::NW,
                       "Under normal circumstances,\n\
                        we probably would've had a\n\
-                       meet-and-greet or somesuch\n\
+                       meet-and-greet or some such\n\
                        nonsense for Mezure here."),
         ]),
         Ast::Seq(vec![

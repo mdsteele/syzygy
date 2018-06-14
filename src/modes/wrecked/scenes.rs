@@ -338,7 +338,7 @@ pub fn compile_outro_scene(resources: &mut Resources, visible: Rect) -> Scene {
             Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NW,
                       "Well then, thank you very much\n\
                        for your kind offer of $ibeing no\n\
-                       help whatsover$r, but I'm sure\n\
+                       help whatsoever$r, but I'm sure\n\
                        I'll be just fine on my own."),
         ]),
         Ast::Seq(vec![

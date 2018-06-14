@@ -89,7 +89,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Talk(SYSTEM, TalkStyle::System, TalkPos::NW,
                       "Please provide\n\
                        justification\n\
-                       for accesssing\n\
+                       for accessing\n\
                        Level 7 secure\n\
                        logs."),
         ]),

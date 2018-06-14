@@ -50,7 +50,7 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::NE,
                       "$iWhew$r...that Argony...she's\n\
-                       suprisingly fast on her\n\
+                       surprisingly fast on her\n\
                        feet for someone her age."),
         ]),
         Ast::Seq(vec![

@@ -215,7 +215,8 @@ pub fn compile_intro_scene(resources: &mut Resources) -> Scene {
             Ast::Wait(1.0),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(MEZURE, TalkStyle::Normal, TalkPos::SE,
-                      "Well, at least this one is\nalready two thirds done."),
+                      "Well, at least this one is\n\
+                       already two thirds done."),
         ]),
     ];
     Ast::compile_scene(resources, ast)

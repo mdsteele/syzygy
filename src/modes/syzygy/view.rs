@@ -778,7 +778,7 @@ const RELYNG_INFO_BOX_TEXT: &str = "\
 Your goal is to turn all twenty lights OFF.
 
 $M{Tap}{Click} one of the lights to toggle that light and some
-of the adjacent lights.  The pattern of adjancent
+of the adjacent lights.  The pattern of adjacent
 lights toggled will change after each move.
 
 $M{Tap}{Click} on a character in the scene to hear their

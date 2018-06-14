@@ -305,7 +305,7 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
             Ast::Wait(1.0),
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(ELINSA, TalkStyle::Normal, TalkPos::NE,
-                      "There we go.  The tempurature\n\
+                      "There we go.  The temperature\n\
                        should get back to normal now."),
         ]),
         Ast::Seq(vec![

@@ -329,7 +329,7 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
             Ast::Sound(Sound::talk_hi()),
             Ast::Talk(YTTRIS, TalkStyle::Normal, TalkPos::NE,
                       "There!  Now I'd call that a\n\
-                       $ithorougly-repaired$r\n\
+                       $ithoroughly-repaired$r\n\
                        thermal thingamawhatsit."),
         ]),
         Ast::Seq(vec![

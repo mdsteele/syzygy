@@ -129,7 +129,7 @@ impl View {
                                                  state.argony_grid()),
             elinsa: PlaneGridView::new(resources, 168, 120),
             ugrent: LaserField::new(resources, 176, 112, state.ugrent_grid()),
-            relyng: LightsGrid::new(resources, 168, 128, state),
+            relyng: LightsGrid::new(resources, 192, 128, state),
             mezure: MezureView::new(resources, state),
             should_reveal: false,
             reveal_amount: 0,

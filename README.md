@@ -53,3 +53,15 @@ The complete license can be found in the LICENSE file.
     $ ditto -c -k --keepParent target/release/bundle/osx/System\ Syzygy.app \
         ./System-Syzygy-v1.0.0-Mac.zip
     ```
+
+### Debian Linux
+
+1. Install [`cargo-bundle`](https://github.com/burtonageo/cargo-bundle).
+2. Run `cargo build --release`.
+3. Strip the binary:
+
+    ```shell
+    $ strip target/release/syzygy
+    ```
+
+4. Run `cargo bundle --release --format=deb`.

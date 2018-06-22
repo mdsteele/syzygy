@@ -445,20 +445,20 @@ impl Element<BlackState, TreeCmd> for TreeView {
 
 const LETTERS: [(char, bool); 15] = [
     ('A', true),
-    ('S', false),
+    ('M', false),
     ('R', true),
     ('T', true),
     ('I', true),
+    ('S', false),
     ('A', false),
-    ('R', false),
     ('S', true),
     ('T', true),
     ('C', false),
     ('I', true),
+    ('R', false),
     ('A', false),
-    ('S', false),
     ('C', true),
-    ('M', false),
+    ('S', false),
 ];
 
 const INFO_BOX_TEXT: &str = "\

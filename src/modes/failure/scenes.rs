@@ -928,19 +928,42 @@ pub fn compile_outro_scene(resources: &mut Resources) -> Scene {
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
 const PASSWORD_HINTS: &[(&[usize], &str)] = &[
-    (&[4, 0, 1], "Three are divided\ninto unequal angles."),
-    (&[9, 2, 5], "Three are split\ninto equal memories."),
-    (&[7, 8], "Two are broken\nup in plane sight."),
-    (&[6, 3, 10], "Three have\nmixed the point."),
+    (&[4, 0, 1],
+     "Three can be found in angles; each\n\
+      is divided into three unequal parts."),
+    (&[9, 2, 5],
+     "Three can be found in memories;\n\
+      each is divided into three equal parts."),
+    (&[7, 8],
+     "Two can be found in planes;\n\
+      each is divided into two parts."),
+    (&[6, 3, 10],
+     "Three can be found in points;\n\
+      each is jumbled in a different way."),
     (&[11, 12, 13, 14],
-     "Four cross forwards and back,\nscrambled and jumbled."),
-    (&[16, 15, 17], "Three are\non the level."),
-    (&[19, 18, 20], "Three are\nsimple factors."),
-    (&[22, 21, 23, 24], "Four are skating\non thin ice."),
-    (&[26, 25, 27], "Three are rows\nwithin columns."),
-    (&[29, 28, 30], "Three have basic\nconnections."),
-    (&[32, 31, 33], "Three are full of\nlight and magic."),
-    (&[34, 35], "Two have\nthe blues."),
+     "$LFour can be found\n\
+      at cross checkpoints:\
+      \n    one crosses forward,\
+      \n    one crosses backward,\
+      \n    two more cross scrambled,\
+      \n    each separately."),
+    (&[16, 17, 22],
+     "Three can be found in levels."),
+    (&[19, 18, 20],
+     "Three can be found in factors."),
+    (&[15, 21, 29, 28],
+     "Four can be found in ice; each is\n\
+      broken into overlapping parts."),
+    (&[26, 27, 33],
+     "Three can be found in columns."),
+    (&[23, 24, 30],
+     "Three can be found in connections."),
+    (&[31, 25, 32],
+     "Three can be found in lights\n\
+      (though one is scrambled)."),
+    (&[34, 35],
+     "$LOne is blue and\n   one is black;\n\
+      the first runs forward,\n   the second back."),
 ];
 
 pub fn num_hints() -> usize { PASSWORD_HINTS.len() }

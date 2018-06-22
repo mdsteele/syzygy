@@ -47,7 +47,15 @@ The complete license can be found in the LICENSE file.
     $ strip target/release/bundle/osx/System\ Syzygy.app/Contents/MacOS/syzygy
     ```
 
-6. Compress the app bundle:
+6. (Optional) Sign the app bundle:
+
+   ```shell
+   $ codesign --deep --verbose --sign "<identity>" \
+       target/release/bundle/osx/System\ Syzygy.app
+   $ codesign --verify -vvvv target/release/bundle/osx/System\ Syzygy.app
+   ```
+
+7. Compress the app bundle:
 
     ```shell
     $ ditto -c -k --keepParent target/release/bundle/osx/System\ Syzygy.app \

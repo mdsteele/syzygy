@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["Matthew D. Steele <mdsteele@alum.mit.edu>"]
 license = "GPL-3.0+"
 description = "A narrative meta-puzzle game."
+homepage = "https://mdsteele.games/syzygy/"
 build = "build.rs"
 
 [package.metadata.bundle]

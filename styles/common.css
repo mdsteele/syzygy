@@ -54,6 +54,10 @@ header > nav > a.selected { border-color: white; }
 header > nav > a:hover { background-color: #cff; }
 header > nav > a:active { background-color: #c66; }
 
+section a { color: #6ff; }
+section a:visited { color: #f6f; }
+section a:active { color: #f99; }
+
 .floatleft, .floatright {
     clear: both;
     display: block;

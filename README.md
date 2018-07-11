@@ -24,16 +24,20 @@ The complete license can be found in the LICENSE file.
 
 ### Mac OS X
 
-1. Install [`cargo-bundle`](https://github.com/burtonageo/cargo-bundle).
-2. Run `cargo bundle --release`.
-3. Fix the binary's rpath:
+1. Install the [SDL2 framework](https://www.libsdl.org/download-2.0.php) under
+   `/Library/Frameworks/`.
+1. Install [`cargo-bundle`](https://github.com/burtonageo/cargo-bundle) from
+   head (version 0.3.0 as published on crates.io is still missing some needed
+   bugfixes).
+1. Run `cargo bundle --release`.
+1. Fix the binary's rpath:
 
     ```shell
     $ install_name_tool -add_rpath "@executable_path/../Frameworks" \
         target/release/bundle/osx/System\ Syzygy.app/Contents/MacOS/syzygy
     ```
 
-4. Add the SDL2 framework to the app bundle:
+1. Add the SDL2 framework to the app bundle:
 
     ```shell
     $ mkdir target/release/bundle/osx/System\ Syzygy.app/Contents/Frameworks
@@ -41,13 +45,13 @@ The complete license can be found in the LICENSE file.
         target/release/bundle/osx/System\ Syzygy.app/Contents/Frameworks/
     ```
 
-5. Strip the binary:
+1. Strip the binary:
 
     ```shell
     $ strip target/release/bundle/osx/System\ Syzygy.app/Contents/MacOS/syzygy
     ```
 
-6. (Optional) Sign the app bundle:
+1. (Optional) Sign the app bundle:
 
    ```shell
    $ codesign --deep --verbose --sign "<identity>" \
@@ -55,18 +59,19 @@ The complete license can be found in the LICENSE file.
    $ codesign --verify -vvvv target/release/bundle/osx/System\ Syzygy.app
    ```
 
-7. Compress the app bundle:
-
-    ```shell
-    $ ditto -c -k --keepParent target/release/bundle/osx/System\ Syzygy.app \
-        ./System-Syzygy-v1.0.0-Mac.zip
-    ```
-
 ### Debian Linux
 
-1. Install [`cargo-bundle`](https://github.com/burtonageo/cargo-bundle).
-2. Run `cargo build --release`.
-3. Strip the binary:
+1. Install SDL2:
+
+    ```shell
+    $ sudo apt-get install libsdl2-dev
+    ```
+
+1. Install [`cargo-bundle`](https://github.com/burtonageo/cargo-bundle) from
+   head (version 0.3.0 as published on crates.io is still missing some needed
+   bugfixes).
+1. Run `cargo build --release`.
+1. Strip the binary:
 
     ```shell
     $ strip target/release/syzygy

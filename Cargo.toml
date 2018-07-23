@@ -17,6 +17,7 @@ resources = [
     "data/sprites/**/*.ahi",
 ]
 copyright = "Copyright 2016 Matthew D. Steele"
+category = "Puzzle Game"
 long_description = """
 System Syzygy is a story and a puzzle game, in the style of Cliff Johnson's
 _The Fool's Errand_ and _3 in Three_, and of Andrew Plotkin's _System's
@@ -26,6 +27,7 @@ game, all the different puzzles and pieces of the story come together into a
 single meta-puzzle.
 """
 deb_depends = ["libsdl2-2.0-0 (>= 2.0.2)"]
+osx_frameworks = ["SDL2"]
 
 [build-dependencies]
 gcc = "0.3"

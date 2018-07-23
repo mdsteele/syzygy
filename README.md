@@ -37,19 +37,19 @@ The complete license can be found in the LICENSE file.
         target/release/bundle/osx/System\ Syzygy.app/Contents/MacOS/syzygy
     ```
 
-1. Add the SDL2 framework to the app bundle:
-
-    ```shell
-    $ mkdir target/release/bundle/osx/System\ Syzygy.app/Contents/Frameworks
-    $ cp -R /Library/Frameworks/SDL2.framework \
-        target/release/bundle/osx/System\ Syzygy.app/Contents/Frameworks/
-    ```
-
 1. Strip the binary:
 
     ```shell
     $ strip target/release/bundle/osx/System\ Syzygy.app/Contents/MacOS/syzygy
     ```
+
+1. (Optional) Remove i386 architecture from the bundled SDL2 framework:
+
+   ```shell
+   $ BUNDLE="target/release/bundle/osx/System Syzygy.app"; \
+       FILE="${BUNDLE}/Contents/Frameworks/SDL2.framework/Versions/A/SDL2"; \
+       lipo "${FILE}" -remove i386 -output "${FILE}"
+   ```
 
 1. (Optional) Sign the app bundle:
 
@@ -57,6 +57,14 @@ The complete license can be found in the LICENSE file.
    $ codesign --deep --verbose --sign "<identity>" \
        target/release/bundle/osx/System\ Syzygy.app
    $ codesign --verify -vvvv target/release/bundle/osx/System\ Syzygy.app
+   ```
+
+1. (Optional) Create signed installer package:
+
+   ```shell
+   $ productbuild --component "target/release/bundle/osx/System Syzygy.app" \
+       /Applications --sign "3rd Party Mac Developer Installer" \
+       "target/release/bundle/osx/System Syzygy.pkg"
    ```
 
 ### Debian Linux

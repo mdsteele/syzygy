@@ -55,6 +55,7 @@ The complete license can be found in the LICENSE file.
 
    ```shell
    $ codesign --deep --verbose --sign "<identity>" \
+       --entitlements "data/osx/entitlements.plist" \
        target/release/bundle/osx/System\ Syzygy.app
    $ codesign --verify -vvvv target/release/bundle/osx/System\ Syzygy.app
    ```

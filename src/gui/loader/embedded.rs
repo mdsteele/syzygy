@@ -17,30 +17,53 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod action;
-mod background;
-mod canvas;
-mod element;
-mod event;
-mod font;
-mod loader;
-mod resources;
-mod sound;
-mod sprite;
-mod window;
+use std::io;
+use std::path::Path;
 
-pub use sdl2::rect::{Point, Rect};
-pub use self::action::Action;
-pub use self::background::Background;
-pub use self::canvas::{Align, Canvas};
-pub use self::element::Element;
-pub use self::event::{Event, KeyMod, Keycode};
-pub use self::font::Font;
-pub use self::resources::Resources;
-pub use self::sound::Sound;
-pub use self::sprite::Sprite;
-pub use self::window::Window;
+include!(concat!(env!("OUT_DIR"), "/rsrc_data.rs"));
 
-pub const FRAME_DELAY_MILLIS: u32 = 40;
+// ========================================================================= //
+
+pub struct ResourceLoader {}
+
+impl ResourceLoader {
+    pub fn new() -> ResourceLoader {
+        if cfg!(debug_assertions) {
+            println!("using embedded resource data");
+        }
+        ResourceLoader {}
+    }
+
+    pub fn load(&self, path: &Path) -> io::Result<ResourceFile> {
+        if let Some(string) = path.to_str() {
+            if let Ok(index) =
+                RSRC_DATA.binary_search_by_key(&string, |entry| entry.0)
+            {
+                return Ok(RSRC_DATA[index].1);
+            }
+        }
+        let msg = format!("no such embedded resource file: {:?}", path);
+        Err(io::Error::new(io::ErrorKind::NotFound, msg))
+    }
+}
+
+pub type ResourceFile = &'static [u8];
+
+// ========================================================================= //
+
+#[cfg(test)]
+mod tests {
+    use super::RSRC_DATA;
+
+    #[test]
+    fn rsrc_data_is_sorted() {
+        let mut prev = "";
+        for entry in RSRC_DATA {
+            let path: &str = entry.0;
+            assert!(path > prev);
+            prev = path;
+        }
+    }
+}
 
 // ========================================================================= //

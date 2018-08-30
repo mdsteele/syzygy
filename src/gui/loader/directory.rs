@@ -17,30 +17,32 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod action;
-mod background;
-mod canvas;
-mod element;
-mod event;
-mod font;
-mod loader;
-mod resources;
-mod sound;
-mod sprite;
-mod window;
+use std::fs::File;
+use std::io::{self, BufReader};
+use std::path::{Path, PathBuf};
 
-pub use sdl2::rect::{Point, Rect};
-pub use self::action::Action;
-pub use self::background::Background;
-pub use self::canvas::{Align, Canvas};
-pub use self::element::Element;
-pub use self::event::{Event, KeyMod, Keycode};
-pub use self::font::Font;
-pub use self::resources::Resources;
-pub use self::sound::Sound;
-pub use self::sprite::Sprite;
-pub use self::window::Window;
+use super::path::resource_data_root_dir;
 
-pub const FRAME_DELAY_MILLIS: u32 = 40;
+// ========================================================================= //
+
+pub struct ResourceLoader {
+    root_dir: PathBuf,
+}
+
+impl ResourceLoader {
+    pub fn new() -> ResourceLoader {
+        let root_dir = resource_data_root_dir();
+        if cfg!(debug_assertions) {
+            println!("resource_data_root_dir: {:?}", root_dir);
+        }
+        ResourceLoader { root_dir: root_dir }
+    }
+
+    pub fn load(&self, path: &Path) -> io::Result<ResourceFile> {
+        Ok(BufReader::new(File::open(self.root_dir.join(path))?))
+    }
+}
+
+pub type ResourceFile = BufReader<File>;
 
 // ========================================================================= //

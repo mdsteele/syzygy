@@ -18,7 +18,6 @@
 // +--------------------------------------------------------------------------+
 
 use sdl2::rect::Point;
-use std::fs::File;
 use std::io::{self, Read};
 use std::path::Path;
 
@@ -39,11 +38,12 @@ pub struct Background {
 }
 
 impl Background {
-    pub fn load<F>(path: &Path, mut get_sprites: F) -> io::Result<Background>
+    pub fn load<R, F>(path: &Path, mut file: R, mut get_sprites: F)
+                      -> io::Result<Background>
     where
+        R: Read,
         F: FnMut(&str) -> Vec<Sprite>,
     {
-        let mut file = io::BufReader::new(File::open(path)?);
         read_exactly(file.by_ref(), b"@BG ")?;
         let red = read_int(file.by_ref(), b' ')? as u8;
         let green = read_int(file.by_ref(), b' ')? as u8;

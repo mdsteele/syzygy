@@ -17,30 +17,16 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-mod action;
-mod background;
-mod canvas;
-mod element;
-mod event;
-mod font;
-mod loader;
-mod resources;
-mod sound;
-mod sprite;
-mod window;
+#[cfg(not(windows))]
+mod directory;
+#[cfg(windows)]
+mod embedded;
+#[cfg(not(windows))]
+mod path;
 
-pub use sdl2::rect::{Point, Rect};
-pub use self::action::Action;
-pub use self::background::Background;
-pub use self::canvas::{Align, Canvas};
-pub use self::element::Element;
-pub use self::event::{Event, KeyMod, Keycode};
-pub use self::font::Font;
-pub use self::resources::Resources;
-pub use self::sound::Sound;
-pub use self::sprite::Sprite;
-pub use self::window::Window;
-
-pub const FRAME_DELAY_MILLIS: u32 = 40;
+#[cfg(not(windows))]
+pub use self::directory::{ResourceFile, ResourceLoader};
+#[cfg(windows)]
+pub use self::embedded::{ResourceFile, ResourceLoader};
 
 // ========================================================================= //

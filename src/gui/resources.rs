@@ -21,14 +21,13 @@ use ahi;
 use sdl2::render::Canvas as SdlCanvas;
 use sdl2::video::Window as SdlWindow;
 use std::collections::HashMap;
-use std::fs::File;
 use std::io;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 
 use super::background::Background;
 use super::font::Font;
-use super::path::resource_data_root_dir;
+use super::loader::ResourceLoader;
 use super::sprite::Sprite;
 
 // ========================================================================= //
@@ -64,20 +63,16 @@ pub struct ResourceCache {
     backgrounds: HashMap<String, Rc<Background>>,
     fonts: HashMap<String, Rc<Font>>,
     sprites: HashMap<String, Vec<Sprite>>,
-    root_dir: PathBuf,
+    loader: ResourceLoader,
 }
 
 impl ResourceCache {
     pub fn new() -> ResourceCache {
-        let root_dir = resource_data_root_dir();
-        if cfg!(debug_assertions) {
-            println!("resource_data_root_dir: {:?}", root_dir);
-        }
         ResourceCache {
             backgrounds: HashMap::new(),
             fonts: HashMap::new(),
             sprites: HashMap::new(),
-            root_dir: root_dir,
+            loader: ResourceLoader::new(),
         }
     }
 
@@ -90,9 +85,10 @@ impl ResourceCache {
             println!("Loading background: {}", name);
         }
         let path =
-            self.root_dir.join("backgrounds").join(name).with_extension("bg");
+            PathBuf::from("backgrounds").join(name).with_extension("bg");
+        let file = self.loader.load(&path).expect(name);
         let background = Rc::new(
-            Background::load(&path, |name| {
+            Background::load(&path, file, |name| {
                 self.get_sprites(renderer, &format!("tiles/{}", name))
             }).expect(name),
         );
@@ -108,9 +104,8 @@ impl ResourceCache {
         if cfg!(debug_assertions) {
             println!("Loading font: {}", name);
         }
-        let path =
-            self.root_dir.join("fonts").join(name).with_extension("ahf");
-        let ahf = load_ahf_from_file(&path).expect(name);
+        let path = PathBuf::from("fonts").join(name).with_extension("ahf");
+        let ahf = load_ahf_from_file(&self.loader, &path).expect(name);
         let font = Rc::new(Font::new(renderer, &ahf));
         self.fonts.insert(name.to_string(), font.clone());
         font
@@ -124,9 +119,8 @@ impl ResourceCache {
         if cfg!(debug_assertions) {
             println!("Loading sprites: {}", name);
         }
-        let path =
-            self.root_dir.join("sprites").join(name).with_extension("ahi");
-        let ahi = load_ahi_from_file(&path).expect(name);
+        let path = PathBuf::from("sprites").join(name).with_extension("ahi");
+        let ahi = load_ahi_from_file(&self.loader, &path).expect(name);
         let vec: Vec<Sprite> =
             ahi.iter().map(|image| Sprite::new(renderer, image)).collect();
         self.sprites.insert(name.to_string(), vec.clone());
@@ -136,13 +130,15 @@ impl ResourceCache {
 
 // ========================================================================= //
 
-fn load_ahf_from_file(path: &Path) -> io::Result<ahi::Font> {
-    let mut file = File::open(path)?;
+fn load_ahf_from_file(loader: &ResourceLoader, path: &Path)
+                      -> io::Result<ahi::Font> {
+    let mut file = loader.load(path)?;
     ahi::Font::read(&mut file)
 }
 
-fn load_ahi_from_file(path: &Path) -> io::Result<Vec<ahi::Image>> {
-    let mut file = File::open(path)?;
+fn load_ahi_from_file(loader: &ResourceLoader, path: &Path)
+                      -> io::Result<Vec<ahi::Image>> {
+    let mut file = loader.load(path)?;
     ahi::Image::read_all(&mut file)
 }
 

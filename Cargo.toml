@@ -32,6 +32,7 @@ osx_minimum_system_version = "10.11"
 
 [build-dependencies]
 gcc = "0.3"
+glob = "0.2"
 
 [dependencies]
 ahi = { git = "https://github.com/mdsteele/ahi", tag = "v0.1.0" }

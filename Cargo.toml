@@ -30,9 +30,16 @@ deb_depends = ["libsdl2-2.0-0 (>= 2.0.2)"]
 osx_frameworks = ["SDL2"]
 osx_minimum_system_version = "10.11"
 
+[package.metadata.winres]
+LegalCopyright = "Copyright 2016 Matthew D. Steele"
+OriginalFilename = "syzygy.exe"
+ProductName = "System Syzygy"
+
 [build-dependencies]
 gcc = "0.3"
 glob = "0.2"
+ico = "0.1"
+winres = { git = "https://github.com/mdsteele/winres", branch = "compile" }
 
 [dependencies]
 ahi = { git = "https://github.com/mdsteele/ahi", tag = "v0.1.0" }

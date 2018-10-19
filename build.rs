@@ -19,6 +19,8 @@
 
 extern crate gcc;
 extern crate glob;
+extern crate ico;
+extern crate winres;
 
 use std::fs::File;
 use std::io::{self, Write};
@@ -41,6 +43,11 @@ fn main() {
             .compile("syzygysys");
     } else if target.contains("-pc-windows-") {
         generate_rsrc_data_file().unwrap();
+        let icon_path = generate_ico_file().unwrap();
+        let mut res = winres::WindowsResource::new();
+        res.set_icon(icon_path.to_str().unwrap());
+        res.set_language(0x0409); // en_US
+        res.compile().unwrap();
     } else {
         println!("cargo:warning=System Syzygy doesn't currently support {}",
                  target);
@@ -73,6 +80,27 @@ fn generate_rsrc_data_file() -> io::Result<()> {
     }
     writeln!(file, "];")?;
     Ok(())
+}
+
+// ========================================================================= //
+
+const ICON_PNG_PATHS: &[&str] = &[
+    "data/icon/32x32.png",
+    "data/icon/128x128.png",
+];
+
+fn generate_ico_file() -> io::Result<PathBuf> {
+    let out_dir = PathBuf::from(std::env::var("OUT_DIR").unwrap());
+    let ico_path = out_dir.join("icon.ico");
+    let mut icon_dir = ico::IconDir::new(ico::ResourceType::Icon);
+    for png_path in ICON_PNG_PATHS.iter() {
+        let png_file = File::open(png_path)?;
+        let image = ico::IconImage::read_png(png_file)?;
+        icon_dir.add_entry(ico::IconDirEntry::encode(&image)?);
+    }
+    let ico_file = File::create(&ico_path).unwrap();
+    icon_dir.write(ico_file)?;
+    Ok(ico_path)
 }
 
 // ========================================================================= //

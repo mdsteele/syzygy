@@ -89,10 +89,10 @@ impl<A: 'static + Clone> Element<(), A> for DialogBox<A> {
         {
             let mut canvas = canvas.subcanvas(self.rect);
             canvas.fill_rect((200, 200, 200),
-                             Rect::new(12,
-                                       12,
-                                       self.rect.width() - 24,
-                                       self.rect.height() - 24));
+                             Rect::new(11,
+                                       11,
+                                       self.rect.width() - 22,
+                                       self.rect.height() - 22));
             let right = self.rect.width() as i32 - 16;
             let bottom = self.rect.height() as i32 - 16;
             canvas.draw_sprite(&self.bg_sprites[0], Point::new(0, 0));

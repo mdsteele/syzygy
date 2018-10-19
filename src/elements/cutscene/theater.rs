@@ -189,7 +189,10 @@ impl Theater {
             let mut rects = vec![canvas.rect()];
             for actor in self.actors.values() {
                 if let Some(ref sprite) = actor.light {
-                    let mut rect = sprite.rect();
+                    let mut rect = Rect::new(0,
+                                             0,
+                                             sprite.width() - 2,
+                                             sprite.height() - 2);
                     rect.center_on(actor.rect().center());
                     canvas.draw_sprite(&sprite, rect.top_left());
                     remove_rect(&mut rects, rect);
@@ -471,10 +474,10 @@ impl SpeechBubble {
                                            180);
             }
             canvas.fill_rect(self.bg_color,
-                             Rect::new(16,
-                                       16,
-                                       (right - 16) as u32,
-                                       (bottom - 16) as u32));
+                             Rect::new(15,
+                                       15,
+                                       (right - 14) as u32,
+                                       (bottom - 14) as u32));
         }
         // Draw tail:
         canvas.draw_sprite_transformed(&self.sprites[4],

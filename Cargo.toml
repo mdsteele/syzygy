@@ -39,7 +39,7 @@ ProductName = "System Syzygy"
 gcc = "0.3"
 glob = "0.2"
 ico = "0.1"
-winres = { git = "https://github.com/mdsteele/winres", branch = "compile" }
+winres = { git = "https://github.com/mdsteele/winres", branch = "escape" }
 
 [dependencies]
 ahi = { git = "https://github.com/mdsteele/ahi", tag = "v0.1.0" }

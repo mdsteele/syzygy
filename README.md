@@ -26,9 +26,8 @@ The complete license can be found in the LICENSE file.
 
 1. Install the [SDL2 framework](https://www.libsdl.org/download-2.0.php) under
    `/Library/Frameworks/`.
-1. Install [`cargo-bundle`](https://github.com/burtonageo/cargo-bundle) from
-   head (version 0.3.0 as published on crates.io is still missing some needed
-   bugfixes).
+1. Install [`cargo-bundle`](https://crates.io/crates/cargo-bundle) (version
+   0.4.0 or later).
 1. Run `cargo bundle --release`.
 1. Fix the binary's rpath:
 
@@ -77,9 +76,8 @@ The complete license can be found in the LICENSE file.
     $ sudo apt-get install libsdl2-dev
     ```
 
-1. Install [`cargo-bundle`](https://github.com/burtonageo/cargo-bundle) from
-   head (version 0.3.0 as published on crates.io is still missing some needed
-   bugfixes).
+1. Install [`cargo-bundle`](https://crates.io/crates/cargo-bundle) (version
+   0.4.0 or later).
 1. Run `cargo build --release`.
 1. Strip the binary:
 
@@ -88,3 +86,14 @@ The complete license can be found in the LICENSE file.
     ```
 
 4. Run `cargo bundle --release --format=deb`.
+
+### Windows
+
+1. Follow
+   [these instructions](https://github.com/Rust-SDL2/rust-sdl2#windows-msvc)
+   for installing SDL2 where Rust can find it.
+1. Run `cargo build --release`.
+1. Copy `SDL2.dll` to `target/release/SDL2.dll`.
+1. To create the zip archive, open `target/release/` in Windows Explorer,
+   select both `syzygy.exe` and `SDL2.dll`, right-click, and select "Send to >
+   Compressed (zipped) folder".

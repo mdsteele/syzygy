@@ -20,7 +20,24 @@ FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 The complete license can be found in the LICENSE file.
 
-## Building a release
+## Building and running locally
+
+To compile and run the game without having to build a release package, run:
+
+```shell
+$ cargo run --release
+```
+
+(Building/running in release mode is highly recommended for playing the game;
+the non-release build enables some otherwise-distracting features intended for
+development/debugging, and also there's one particular late-game puzzle that
+runs quite slowly in debug mode.)
+
+Note that invoking the built binary directly via `./target/release/syzygy` does
+not work on some platforms, because it confuses the game's resource-loading
+code.  Always run via `cargo` or from an installed release package.
+
+## Building a release package
 
 ### Mac OS X
 

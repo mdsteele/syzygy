@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=syzygy
+Comment=A narrative meta-puzzle game
+Exec=syzygy
+Icon=syzygy
+Terminal=false
+Type=Application
+Categories=Game;

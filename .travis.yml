@@ -1,0 +1,35 @@
+language: cpp
+compiler: gcc
+sudo: require
+dist: trusty
+
+install:
+  - sudo apt-get update
+  - sudo apt-get install libegl1-mesa-dev libgles2-mesa-dev # https://github.com/travis-ci/travis-ci/issues/9065
+  - sudo apt-get -y install libsdl2-dev python curl curl libssl-dev cargo rustc
+  - cargo build --release
+
+script:
+  - mkdir -p  syzygy.AppDir/usr/bin # "make install" is missing, hence doing it by hand
+  - mkdir -p  syzygy.AppDir/usr/lib/syzygy
+  - mkdir -p syzygy.AppDir/usr/share/applications/
+  - mkdir -p syzygy.AppDir/usr/share/icons/hicolor/scalable/apps/
+  - touch syzygy.AppDir/usr/share/icons/hicolor/scalable/apps/syzygy.svg # FIXME
+  - cp data/linux/syzygy.desktop syzygy.AppDir/usr/share/applications/
+  - cp ./target/release/syzygy syzygy.AppDir/usr/bin/
+  - cp -r ./data syzygy.AppDir/usr/lib/syzygy/
+  - sed -i -e 's|/usr|././|g' ./syzygy.AppDir/usr/bin/syzygy # FIXME; https://github.com/mdsteele/syzygy/issues/3#issuecomment-440459518
+  - wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
+  - chmod a+x linuxdeployqt-continuous-x86_64.AppImage
+  - ./linuxdeployqt-continuous-x86_64.AppImage --appimage-extract # FIXME; https://github.com/mdsteele/syzygy/issues/3#issuecomment-440459518
+  - unset QTDIR; unset QT_PLUGIN_PATH ; unset LD_LIBRARY_PATH
+  - export VERSION=$(git rev-parse --short HEAD) # linuxdeployqt uses this for naming the file
+  - ./linuxdeployqt-continuous-x86_64.AppImage syzygy.AppDir/usr/share/applications/*.desktop -bundle-non-qt-libs # FIXME; https://github.com/mdsteele/syzygy/issues/3#issuecomment-440459518
+  - rm -f ./syzygy.AppDir/AppRun && wget -c "https://github.com/AppImage/AppImageKit/releases/download/continuous/AppRun-x86_64" -O ./syzygy.AppDir/AppRun && chmod +x ./syzygy.AppDir/AppRun
+  - PATH=./squashfs-root/usr/bin:$PATH ./squashfs-root/usr/bin/appimagetool --no-appstream ./syzygy.AppDir -g # FIXME; https://github.com/mdsteele/syzygy/issues/3#issuecomment-440459518
+  
+after_success:
+  - find syzygy.AppDir/ -executable -type f -exec ldd {} \; | grep " => /usr" | cut -d " " -f 2-3 | sort | uniq
+  - # curl --upload-file syzygy*.AppImage https://transfer.sh/syzygy-git.$(git rev-parse --short HEAD)-x86_64.AppImage
+  - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
+  - bash upload.sh syzygy*.AppImage*

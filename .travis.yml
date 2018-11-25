@@ -30,6 +30,6 @@ script:
   
 after_success:
   - find syzygy.AppDir/ -executable -type f -exec ldd {} \; | grep " => /usr" | cut -d " " -f 2-3 | sort | uniq
-  - # curl --upload-file syzygy*.AppImage https://transfer.sh/syzygy-git.$(git rev-parse --short HEAD)-x86_64.AppImage
+  - # curl --upload-file System_Syzygy*.AppImage https://transfer.sh/System_Syzygy-git.$(git rev-parse --short HEAD)-x86_64.AppImage
   - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
-  - bash upload.sh syzygy*.AppImage*
+  - bash upload.sh System_Syzygy*.AppImage*

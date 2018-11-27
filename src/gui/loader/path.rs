@@ -26,7 +26,10 @@ use std::path::PathBuf;
 // ========================================================================= //
 
 pub fn resource_data_root_dir() -> PathBuf {
-    if env::var("CARGO").is_ok() {
+    if let Some(path) = env::var_os("SYZYGY_DATA_DIR") {
+        return PathBuf::from(path);
+    }
+    if env::var_os("CARGO").is_some() {
         return PathBuf::from("./data");
     }
     let mut buffer = [0; 2048];

@@ -22,7 +22,7 @@ The complete license can be found in the LICENSE file.
 
 ## Building and running locally
 
-To compile and run the game without having to build a release package, run:
+To compile and run the game without having to install a release package, run:
 
 ```shell
 $ cargo run --release
@@ -33,11 +33,19 @@ the non-release build enables some otherwise-distracting features intended for
 development/debugging, and also there's one particular late-game puzzle that
 runs quite slowly in debug mode.)
 
-Note that invoking the built binary directly via `./target/release/syzygy` does
-not work on some platforms, because it confuses the game's resource-loading
-code.  Always run via `cargo` or from an installed release package.
+Alternatively, if you want to invoke the built binary directly, use the
+`SYZYGY_DATA_DIR` environment variable to tell the game where to find its
+resource files, e.g.:
+
+```shell
+$ cargo build --release
+$ SYZYGY_DATA_DIR="${PWD}/data" ./target/release/syzygy
+```
 
 ## Building a release package
+
+The below instructions are for reference purposes.  To install a pre-built
+release package, visit https://mdsteele.games/syzygy/download/
 
 ### Mac OS X
 

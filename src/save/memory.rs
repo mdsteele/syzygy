@@ -21,8 +21,8 @@ use rand;
 use std::collections::{HashMap, HashSet};
 use toml;
 
-use save::Direction;
-use save::util::Tomlable;
+use crate::save::Direction;
+use crate::save::util::Tomlable;
 
 // ========================================================================= //
 

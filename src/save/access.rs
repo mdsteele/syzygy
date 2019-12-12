@@ -20,7 +20,7 @@
 use std::default::Default;
 use toml;
 
-use save::util::Tomlable;
+use crate::save::util::Tomlable;
 
 // ========================================================================= //
 
@@ -92,7 +92,7 @@ impl Tomlable for Access {
 
 #[cfg(test)]
 mod tests {
-    use save::util::Tomlable;
+    use crate::save::util::Tomlable;
     use super::Access;
 
     #[test]

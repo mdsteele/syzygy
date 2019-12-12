@@ -21,8 +21,8 @@ use std::char;
 use std::collections::HashSet;
 use toml;
 
-use save::{Access, Location};
-use save::util::{ACCESS_KEY, Tomlable, to_table};
+use crate::save::{Access, Location};
+use crate::save::util::{ACCESS_KEY, Tomlable, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -193,8 +193,8 @@ fn apply_transformation(letters: &mut Vec<char>, index: i8) {
 mod tests {
     use toml;
 
-    use save::Access;
-    use save::util::{ACCESS_KEY, Tomlable};
+    use crate::save::Access;
+    use crate::save::util::{ACCESS_KEY, Tomlable};
     use super::{INITIAL_LETTERS, SEQUENCE_KEY, SOLVED_LETTERS,
                 SOLVED_SEQUENCE, TheYState, apply_transformation};
 

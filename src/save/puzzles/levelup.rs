@@ -19,8 +19,8 @@
 
 use toml;
 
-use save::{Access, CrosswordState, Location, ValidChars};
-use save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
+use crate::save::{Access, CrosswordState, Location, ValidChars};
+use crate::save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -111,8 +111,8 @@ impl Tomlable for LevelUpState {
 mod tests {
     use toml;
 
-    use save::Access;
-    use save::util::{ACCESS_KEY, Tomlable};
+    use crate::save::Access;
+    use crate::save::util::{ACCESS_KEY, Tomlable};
     use super::{LevelUpState, SOLVED_WORDS};
 
     #[test]

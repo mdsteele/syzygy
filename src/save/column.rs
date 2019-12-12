@@ -20,7 +20,7 @@
 use num_integer::mod_floor;
 use toml;
 
-use save::util::Tomlable;
+use crate::save::util::Tomlable;
 
 // ========================================================================= //
 

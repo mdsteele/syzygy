@@ -17,10 +17,10 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use elements::{PuzzleCmd, PuzzleView};
-use gui::{Event, Window};
-use modes::{Mode, run_info_box};
-use save::{Location, SaveData};
+use crate::elements::{PuzzleCmd, PuzzleView};
+use crate::gui::{Event, Window};
+use crate::modes::{Mode, run_info_box};
+use crate::save::{Location, SaveData};
 
 // ========================================================================= //
 

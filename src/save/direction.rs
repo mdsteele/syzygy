@@ -20,8 +20,8 @@
 use num_integer::mod_floor;
 use toml;
 
-use gui::Point;
-use save::util::Tomlable;
+use crate::gui::Point;
+use crate::save::util::Tomlable;
 
 // ========================================================================= //
 
@@ -155,8 +155,8 @@ impl Tomlable for Direction {
 
 #[cfg(test)]
 mod tests {
-    use gui::Point;
-    use save::util::Tomlable;
+    use crate::gui::Point;
+    use crate::save::util::Tomlable;
     use super::Direction;
 
     #[test]

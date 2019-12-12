@@ -17,8 +17,8 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use elements::Paragraph;
-use gui::{Align, Point, Resources, Sound};
+use crate::elements::Paragraph;
+use crate::gui::{Align, Point, Resources, Sound};
 use super::scene::{AnimNode, DarkNode, JumpNode, LightNode, LoopNode,
                    ParallelNode, PlaceNode, QueueNode, RemoveNode, Scene,
                    SceneNode, SequenceNode, SetBgNode, SetPosNode,

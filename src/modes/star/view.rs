@@ -21,11 +21,11 @@ use std::cmp;
 use std::collections::HashSet;
 use std::rc::Rc;
 
-use elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
-use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
+use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
+use crate::gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
           Resources, Sound, Sprite};
-use modes::SOLVED_INFO_TEXT;
-use save::{Game, PuzzleState, StarState, WordDir};
+use crate::modes::SOLVED_INFO_TEXT;
+use crate::save::{Game, PuzzleState, StarState, WordDir};
 use super::scenes;
 
 // ========================================================================= //

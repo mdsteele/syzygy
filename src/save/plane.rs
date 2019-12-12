@@ -21,9 +21,9 @@ use std::cmp;
 use std::collections::{HashMap, HashSet};
 use toml;
 
-use gui::Point;
-use save::MixedColor;
-use save::util::Tomlable;
+use crate::gui::Point;
+use crate::save::MixedColor;
+use crate::save::util::Tomlable;
 
 // ========================================================================= //
 

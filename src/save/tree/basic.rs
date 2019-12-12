@@ -20,7 +20,7 @@
 use std::collections::{HashMap, HashSet};
 use toml;
 
-use save::util::Tomlable;
+use crate::save::util::Tomlable;
 
 // ========================================================================= //
 
@@ -523,7 +523,7 @@ impl Tomlable for BasicTree {
 
 #[cfg(test)]
 mod tests {
-    use save::util::Tomlable;
+    use crate::save::util::Tomlable;
     use super::BasicTree;
 
     #[test]

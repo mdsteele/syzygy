@@ -21,12 +21,12 @@ use std::cmp::min;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
-use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
+use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
+use crate::gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
           Resources, Sound, Sprite};
-use modes::SOLVED_INFO_TEXT;
-use save::{BlackState, Game, PuzzleState};
-use save::tree::{BasicTree, TreeOp};
+use crate::modes::SOLVED_INFO_TEXT;
+use crate::save::{BlackState, Game, PuzzleState};
+use crate::save::tree::{BasicTree, TreeOp};
 use super::scenes;
 
 // ========================================================================= //

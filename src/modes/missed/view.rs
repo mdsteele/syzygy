@@ -17,11 +17,11 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
-use elements::lasers::{DangerSign, LaserCmd, LaserField};
-use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sprite};
-use modes::SOLVED_INFO_TEXT;
-use save::{Game, MissedState, PuzzleState};
+use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
+use crate::elements::lasers::{DangerSign, LaserCmd, LaserField};
+use crate::gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sprite};
+use crate::modes::SOLVED_INFO_TEXT;
+use crate::save::{Game, MissedState, PuzzleState};
 use super::scenes;
 
 // ========================================================================= //

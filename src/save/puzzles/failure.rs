@@ -19,9 +19,9 @@
 
 use toml;
 
-use save::{Access, Location};
-use save::pyramid::{Board, Coords, Team};
-use save::util::{ACCESS_KEY, Tomlable, to_table};
+use crate::save::{Access, Location};
+use crate::save::pyramid::{Board, Coords, Team};
+use crate::save::util::{ACCESS_KEY, Tomlable, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -132,9 +132,9 @@ impl Tomlable for FailureState {
 mod tests {
     use toml;
 
-    use save::Access;
-    use save::pyramid::{Coords, Team};
-    use save::util::{ACCESS_KEY, Tomlable};
+    use crate::save::Access;
+    use crate::save::pyramid::{Coords, Team};
+    use crate::save::util::{ACCESS_KEY, Tomlable};
     use super::FailureState;
 
     #[test]

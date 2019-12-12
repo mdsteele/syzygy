@@ -19,12 +19,12 @@
 
 use std::rc::Rc;
 
-use elements::{CrosswordView, FadeStyle, MovingStars, PuzzleCmd, PuzzleCore,
+use crate::elements::{CrosswordView, FadeStyle, MovingStars, PuzzleCmd, PuzzleCore,
                PuzzleView, Scene};
-use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
+use crate::gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
           Resources, Sound, Sprite};
-use modes::syzygy::Atlatl;
-use save::{CrosswordState, FinaleState, Game, PuzzleState, ValidChars};
+use crate::modes::syzygy::Atlatl;
+use crate::save::{CrosswordState, FinaleState, Game, PuzzleState, ValidChars};
 use super::scenes;
 
 // ========================================================================= //

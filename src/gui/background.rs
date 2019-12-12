@@ -21,7 +21,7 @@ use sdl2::rect::Point;
 use std::io::{self, Read};
 use std::path::Path;
 
-use gui::Sprite;
+use crate::gui::Sprite;
 
 // ========================================================================= //
 

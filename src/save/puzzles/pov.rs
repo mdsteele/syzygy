@@ -21,8 +21,8 @@ use std::cmp::{max, min};
 use std::collections::{HashMap, HashSet, VecDeque};
 use toml;
 
-use save::{Access, Location};
-use save::util::{ACCESS_KEY, Tomlable, rotate_deque, to_table};
+use crate::save::{Access, Location};
+use crate::save::util::{ACCESS_KEY, Tomlable, rotate_deque, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -323,8 +323,8 @@ fn rotate(mut tile: [u8; 4], by: i32) -> [u8; 4] {
 mod tests {
     use toml;
 
-    use save::Access;
-    use save::util::{ACCESS_KEY, Tomlable};
+    use crate::save::Access;
+    use crate::save::util::{ACCESS_KEY, Tomlable};
     use super::{GOALS, INITIAL_GRID, PovState};
 
     #[test]

@@ -20,9 +20,9 @@
 use std::cmp::min;
 use toml;
 
-use save::{Access, Location};
-use save::memory::{Grid, Shape};
-use save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
+use crate::save::{Access, Location};
+use crate::save::memory::{Grid, Shape};
+use crate::save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -198,8 +198,8 @@ mod tests {
     use std::iter::FromIterator;
     use toml;
 
-    use save::{Access, PuzzleState};
-    use save::util::{ACCESS_KEY, Tomlable};
+    use crate::save::{Access, PuzzleState};
+    use crate::save::util::{ACCESS_KEY, Tomlable};
     use super::{NUM_PLACED_KEY, NUM_SYMBOLS, REMOVALS, SHAPES, ServesState};
 
     #[test]

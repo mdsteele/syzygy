@@ -21,15 +21,15 @@ use std::cmp;
 use std::collections::HashSet;
 use std::rc::Rc;
 
-use elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView, Scene};
-use elements::cutscene::{JumpNode, ParallelNode, QueueNode, SceneNode,
+use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView, Scene};
+use crate::elements::cutscene::{JumpNode, ParallelNode, QueueNode, SceneNode,
                          SequenceNode, SetPosNode, ShakeNode, SlideNode,
                          SoundNode};
-use elements::cutscene::WaitNode;
-use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
+use crate::elements::cutscene::WaitNode;
+use crate::gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
           Resources, Sound, Sprite};
-use modes::SOLVED_INFO_TEXT;
-use save::{Game, NoReturnState, PuzzleState};
+use crate::modes::SOLVED_INFO_TEXT;
+use crate::save::{Game, NoReturnState, PuzzleState};
 use super::scenes::{self, DOOR_LOWER, DOOR_UPPER, YTTRIS};
 
 // ========================================================================= //

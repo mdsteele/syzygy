@@ -19,13 +19,13 @@
 
 use std::cmp;
 
-use elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView, Scene};
-use elements::cutscene::{JumpNode, ParallelNode, QueueNode, SceneNode,
+use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView, Scene};
+use crate::elements::cutscene::{JumpNode, ParallelNode, QueueNode, SceneNode,
                          SequenceNode, SlideNode, SoundNode, WaitNode};
-use elements::shift::{ArrowPair, Platform};
-use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sound};
-use modes::SOLVED_INFO_TEXT;
-use save::{Game, GroundState, PuzzleState};
+use crate::elements::shift::{ArrowPair, Platform};
+use crate::gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sound};
+use crate::modes::SOLVED_INFO_TEXT;
+use crate::save::{Game, GroundState, PuzzleState};
 use super::scenes;
 
 // ========================================================================= //

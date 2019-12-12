@@ -19,9 +19,9 @@
 
 use toml;
 
-use save::{Access, Location};
-use save::tree::{RedBlackTree, TreeOp};
-use save::util::{ACCESS_KEY, Tomlable, to_table};
+use crate::save::{Access, Location};
+use crate::save::tree::{RedBlackTree, TreeOp};
+use crate::save::util::{ACCESS_KEY, Tomlable, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -208,8 +208,8 @@ impl Tomlable for BlackState {
 mod tests {
     use toml;
 
-    use save::Access;
-    use save::util::{ACCESS_KEY, Tomlable};
+    use crate::save::Access;
+    use crate::save::util::{ACCESS_KEY, Tomlable};
     use super::{BlackState, SOLVED_SIGNATURE};
 
     #[test]

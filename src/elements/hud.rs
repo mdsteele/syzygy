@@ -20,10 +20,10 @@
 use std::cmp;
 use std::rc::Rc;
 
-use elements::Paragraph;
-use gui::{Action, Align, Canvas, Element, Event, Font, KeyMod, Keycode,
+use crate::elements::Paragraph;
+use crate::gui::{Action, Align, Canvas, Element, Event, Font, KeyMod, Keycode,
           Point, Rect, Resources, Sound, Sprite};
-use save::{Access, Location};
+use crate::save::{Access, Location};
 
 // ========================================================================= //
 

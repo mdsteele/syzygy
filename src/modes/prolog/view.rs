@@ -19,13 +19,13 @@
 
 use std::rc::Rc;
 
-use elements::{FadeStyle, MovingStars, PuzzleCmd, PuzzleCore, PuzzleView,
+use crate::elements::{FadeStyle, MovingStars, PuzzleCmd, PuzzleCore, PuzzleView,
                Scene};
-use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
+use crate::gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
           Resources, Sprite};
-use modes::attic::AtticGrid;
-use modes::wrecked::{WreckedDisplay, WreckedGrid};
-use save::{AtticState, Game, PrologState, PuzzleState, WreckedState};
+use crate::modes::attic::AtticGrid;
+use crate::modes::wrecked::{WreckedDisplay, WreckedGrid};
+use crate::save::{AtticState, Game, PrologState, PuzzleState, WreckedState};
 use super::scenes;
 
 // ========================================================================= //

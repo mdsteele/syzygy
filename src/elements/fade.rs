@@ -17,7 +17,7 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sprite};
+use crate::gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sprite};
 
 // ========================================================================= //
 

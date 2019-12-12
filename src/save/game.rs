@@ -19,7 +19,7 @@
 
 use toml;
 
-use save::{AtticState, AutoState, BlackState, BlameState, BlindState,
+use crate::save::{AtticState, AutoState, BlackState, BlameState, BlindState,
            CubeState, DayState, DisconState, DotsState, DoubleState,
            FailureState, FictionState, FinaleState, GearsState, GroundState,
            HeadedState, HexState, IcyEmState, JogState, LaneState,
@@ -28,7 +28,7 @@ use save::{AtticState, AutoState, BlackState, BlameState, BlindState,
            PrologState, PuzzleState, RightState, SauceState, ServesState,
            SimpleState, StarState, SyrupState, SyzygyState, TheYState,
            TreadState, WhatchaState, WreckedState};
-use save::util::{Tomlable, to_table};
+use crate::save::util::{Tomlable, to_table};
 
 // ========================================================================= //
 
@@ -265,7 +265,7 @@ impl Game {
 
 #[cfg(test)]
 mod tests {
-    use save::{Access, Location, PuzzleState};
+    use crate::save::{Access, Location, PuzzleState};
     use super::Game;
 
     #[test]

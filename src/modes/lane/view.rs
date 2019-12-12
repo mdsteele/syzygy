@@ -17,13 +17,13 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use elements::{FadeStyle, Paragraph, ProgressBar, PuzzleCmd, PuzzleCore,
+use crate::elements::{FadeStyle, Paragraph, ProgressBar, PuzzleCmd, PuzzleCore,
                PuzzleView};
-use elements::memory::{FLIP_SLOWDOWN, MemoryGridView, NextShapeView};
-use gui::{Action, Align, Canvas, Element, Event, Point, Rect, Resources,
+use crate::elements::memory::{FLIP_SLOWDOWN, MemoryGridView, NextShapeView};
+use crate::gui::{Action, Align, Canvas, Element, Event, Point, Rect, Resources,
           Sound, Sprite};
-use modes::SOLVED_INFO_TEXT;
-use save::{Direction, Game, LaneState, PuzzleState};
+use crate::modes::SOLVED_INFO_TEXT;
+use crate::save::{Direction, Game, LaneState, PuzzleState};
 use super::scenes;
 
 // ========================================================================= //

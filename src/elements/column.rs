@@ -22,8 +22,8 @@ use std::cmp;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources};
-use save::column::Columns;
+use crate::gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources};
+use crate::save::column::Columns;
 
 // ========================================================================= //
 

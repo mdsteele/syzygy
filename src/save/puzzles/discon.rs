@@ -19,9 +19,9 @@
 
 use toml;
 
-use save::{Access, Direction, Location, MixedColor};
-use save::device::{Device, DeviceGrid};
-use save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
+use crate::save::{Access, Direction, Location, MixedColor};
+use crate::save::device::{Device, DeviceGrid};
+use crate::save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -146,9 +146,9 @@ impl Tomlable for DisconState {
 mod tests {
     use toml;
 
-    use save::{Access, Direction, PuzzleState};
-    use save::device::Device;
-    use save::util::{ACCESS_KEY, Tomlable};
+    use crate::save::{Access, Direction, PuzzleState};
+    use crate::save::device::Device;
+    use crate::save::util::{ACCESS_KEY, Tomlable};
     use super::DisconState;
 
     #[test]

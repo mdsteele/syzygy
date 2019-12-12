@@ -19,7 +19,7 @@
 
 use toml;
 
-use save::util::Tomlable;
+use crate::save::util::Tomlable;
 use super::basic::{BasicTree, TreeOp};
 
 // ========================================================================= //
@@ -383,7 +383,7 @@ impl Tomlable for RedBlackTree {
 
 #[cfg(test)]
 mod tests {
-    use save::util::Tomlable;
+    use crate::save::util::Tomlable;
     use super::{RedBlackTree, TreeOp};
 
     #[test]

@@ -20,8 +20,8 @@
 use num_integer::mod_floor;
 use toml;
 
-use save::Direction;
-use save::util::Tomlable;
+use crate::save::Direction;
+use crate::save::util::Tomlable;
 
 // ========================================================================= //
 
@@ -138,8 +138,8 @@ impl Tomlable for Transform {
 
 #[cfg(test)]
 mod tests {
-    use save::Direction;
-    use save::util::Tomlable;
+    use crate::save::Direction;
+    use crate::save::util::Tomlable;
     use super::Transform;
 
     #[test]

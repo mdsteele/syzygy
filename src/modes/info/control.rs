@@ -17,7 +17,7 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use gui::{Element, Event, Window};
+use crate::gui::{Element, Event, Window};
 
 use super::view::View;
 

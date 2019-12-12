@@ -20,8 +20,8 @@
 use std::collections::VecDeque;
 use toml;
 
-use save::{Access, Direction, Location};
-use save::util::{ACCESS_KEY, Tomlable, rotate_deque, to_table};
+use crate::save::{Access, Direction, Location};
+use crate::save::util::{ACCESS_KEY, Tomlable, rotate_deque, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -201,8 +201,8 @@ impl Tomlable for WreckedState {
 mod tests {
     use toml;
 
-    use save::{Access, Direction};
-    use save::util::{ACCESS_KEY, Tomlable};
+    use crate::save::{Access, Direction};
+    use crate::save::util::{ACCESS_KEY, Tomlable};
     use super::{GRID_KEY, INITIAL_GRID, SOLVED_GRID, WreckedState};
 
     #[test]

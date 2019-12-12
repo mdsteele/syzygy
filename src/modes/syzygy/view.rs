@@ -20,14 +20,14 @@
 use std::cmp;
 use std::rc::Rc;
 
-use elements::{self, FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
-use elements::column::ColumnsView;
-use elements::lasers::{LaserCmd, LaserField};
-use elements::plane::{PlaneCmd, PlaneGridView};
-use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
+use crate::elements::{self, FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
+use crate::elements::column::ColumnsView;
+use crate::elements::lasers::{LaserCmd, LaserField};
+use crate::elements::plane::{PlaneCmd, PlaneGridView};
+use crate::gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
           Resources, Sound, Sprite};
-use modes::SOLVED_INFO_TEXT;
-use save::{self, Game, PuzzleState, SyzygyStage, SyzygyState};
+use crate::modes::SOLVED_INFO_TEXT;
+use crate::save::{self, Game, PuzzleState, SyzygyStage, SyzygyState};
 use super::mezure::{MezureCmd, MezureView};
 use super::relyng::LightsGrid;
 use super::scenes;

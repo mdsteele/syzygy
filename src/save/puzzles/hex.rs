@@ -20,8 +20,8 @@
 use std::collections::VecDeque;
 use toml;
 
-use save::{Access, Location, PuzzleState};
-use save::util::{ACCESS_KEY, Tomlable, rotate_deque, to_table};
+use crate::save::{Access, Location, PuzzleState};
+use crate::save::util::{ACCESS_KEY, Tomlable, rotate_deque, to_table};
 
 // ========================================================================= //
 
@@ -154,8 +154,8 @@ impl Tomlable for HexState {
 mod tests {
     use toml;
 
-    use save::Access;
-    use save::util::{ACCESS_KEY, Tomlable};
+    use crate::save::Access;
+    use crate::save::util::{ACCESS_KEY, Tomlable};
     use super::{HexState, INITIAL_TOKENS, SOLVED_TOKENS, TOKENS_KEY};
 
     #[cfg_attr(rustfmt, rustfmt_skip)]

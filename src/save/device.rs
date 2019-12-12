@@ -20,8 +20,8 @@
 use std::collections::HashMap;
 use toml;
 
-use save::{Direction, MixedColor};
-use save::util::{Tomlable, to_table};
+use crate::save::{Direction, MixedColor};
+use crate::save::util::{Tomlable, to_table};
 
 // ========================================================================= //
 
@@ -318,8 +318,8 @@ impl Tomlable for Device {
 
 #[cfg(test)]
 mod tests {
-    use save::Direction;
-    use save::util::{Tomlable, to_array};
+    use crate::save::Direction;
+    use crate::save::util::{Tomlable, to_array};
     use super::{Device, DeviceGrid};
 
     #[test]

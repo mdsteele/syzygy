@@ -20,9 +20,9 @@
 use std::cmp::{max, min};
 use std::rc::Rc;
 
-use gui::{Action, Align, Canvas, Element, Event, Font, Keycode, Point, Rect,
+use crate::gui::{Action, Align, Canvas, Element, Event, Font, Keycode, Point, Rect,
           Resources};
-use save::CrosswordState;
+use crate::save::CrosswordState;
 
 // ========================================================================= //
 

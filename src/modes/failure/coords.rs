@@ -17,8 +17,8 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use gui::Point;
-use save::pyramid::Coords;
+use crate::gui::Point;
+use crate::save::pyramid::Coords;
 
 // ========================================================================= //
 

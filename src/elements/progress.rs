@@ -19,8 +19,8 @@
 
 use std::cmp;
 
-use gui::{Canvas, Rect};
-use save::Direction;
+use crate::gui::{Canvas, Rect};
+use crate::save::Direction;
 
 // ========================================================================= //
 

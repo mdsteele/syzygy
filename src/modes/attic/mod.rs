@@ -20,9 +20,9 @@
 mod scenes;
 mod view;
 
-use gui::Window;
-use modes::{Mode, run_puzzle};
-use save::SaveData;
+use crate::gui::Window;
+use crate::modes::{Mode, run_puzzle};
+use crate::save::SaveData;
 use self::view::View;
 pub use self::view::AtticGrid;
 

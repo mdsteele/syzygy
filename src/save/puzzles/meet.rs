@@ -19,10 +19,10 @@
 
 use toml;
 
-use gui::Point;
-use save::{Access, Direction, Location};
-use save::ice::{BlockSlide, Object, ObjectGrid, Symbol};
-use save::util::{ACCESS_KEY, Tomlable, pop_table, to_table};
+use crate::gui::Point;
+use crate::save::{Access, Direction, Location};
+use crate::save::ice::{BlockSlide, Object, ObjectGrid, Symbol};
+use crate::save::util::{ACCESS_KEY, Tomlable, pop_table, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -133,9 +133,9 @@ impl Tomlable for MeetState {
 mod tests {
     use toml;
 
-    use gui::Point;
-    use save::{Access, Direction};
-    use save::util::{ACCESS_KEY, Tomlable};
+    use crate::gui::Point;
+    use crate::save::{Access, Direction};
+    use crate::save::util::{ACCESS_KEY, Tomlable};
     use super::MeetState;
 
     #[test]

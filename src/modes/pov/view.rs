@@ -20,11 +20,11 @@
 use std::cmp;
 use std::rc::Rc;
 
-use elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
-use gui::{Action, Canvas, Element, Event, FRAME_DELAY_MILLIS, Font, Point,
+use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
+use crate::gui::{Action, Canvas, Element, Event, FRAME_DELAY_MILLIS, Font, Point,
           Rect, Resources, Sound, Sprite};
-use modes::SOLVED_INFO_TEXT;
-use save::{Game, PovState, PuzzleState};
+use crate::modes::SOLVED_INFO_TEXT;
+use crate::save::{Game, PovState, PuzzleState};
 use super::scenes;
 
 // ========================================================================= //

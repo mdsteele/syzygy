@@ -20,9 +20,9 @@
 use std::collections::HashSet;
 use toml;
 
-use gui::Point;
-use save::{Access, Location};
-use save::util::{ACCESS_KEY, Tomlable, to_table};
+use crate::gui::Point;
+use crate::save::{Access, Location};
+use crate::save::util::{ACCESS_KEY, Tomlable, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -237,8 +237,8 @@ mod tests {
     use std::collections::{BTreeSet, HashSet};
     use toml;
 
-    use save::{Access, PuzzleState};
-    use save::util::{ACCESS_KEY, Tomlable};
+    use crate::save::{Access, PuzzleState};
+    use crate::save::util::{ACCESS_KEY, Tomlable};
     use super::{FINAL_WORD, FOUND_KEY, StarState, WORDS, WordDir};
 
     #[test]

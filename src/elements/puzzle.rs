@@ -19,9 +19,9 @@
 
 use std::collections::HashMap;
 
-use elements::{FadeStyle, Hud, HudCmd, HudInput, Scene, ScreenFade, Theater};
-use gui::{Action, Canvas, Element, Event, Rect, Resources};
-use save::{Access, Game, Location, PuzzleState};
+use crate::elements::{FadeStyle, Hud, HudCmd, HudInput, Scene, ScreenFade, Theater};
+use crate::gui::{Action, Canvas, Element, Event, Rect, Resources};
+use crate::save::{Access, Game, Location, PuzzleState};
 
 // ========================================================================= //
 

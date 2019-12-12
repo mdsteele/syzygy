@@ -19,10 +19,10 @@
 
 use toml;
 
-use gui::Point;
-use save::{Access, Location};
-use save::plane::{PlaneGrid, PlaneObj};
-use save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
+use crate::gui::Point;
+use crate::save::{Access, Location};
+use crate::save::plane::{PlaneGrid, PlaneObj};
+use crate::save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -242,9 +242,9 @@ impl Tomlable for DayState {
 mod tests {
     use toml;
 
-    use gui::Point;
-    use save::Access;
-    use save::util::{ACCESS_KEY, Tomlable};
+    use crate::gui::Point;
+    use crate::save::Access;
+    use crate::save::util::{ACCESS_KEY, Tomlable};
     use super::{DayState, FIRST_STAGE, LAST_STAGE, STAGE_KEY};
 
     #[test]

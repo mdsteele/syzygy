@@ -17,12 +17,12 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
-use elements::ice::GridView;
-use gui::{Action, Canvas, Element, Event, Rect, Resources, Sound};
-use modes::SOLVED_INFO_TEXT;
-use save::{Game, MeetState, PuzzleState};
-use save::ice::BlockSlide;
+use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
+use crate::elements::ice::GridView;
+use crate::gui::{Action, Canvas, Element, Event, Rect, Resources, Sound};
+use crate::modes::SOLVED_INFO_TEXT;
+use crate::save::{Game, MeetState, PuzzleState};
+use crate::save::ice::BlockSlide;
 use super::scenes;
 
 // ========================================================================= //

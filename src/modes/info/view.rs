@@ -19,8 +19,8 @@
 
 use std::marker::PhantomData;
 
-use gui::{Action, Canvas, Element, Event, Rect, Resources};
-use elements::DialogBox;
+use crate::gui::{Action, Canvas, Element, Event, Rect, Resources};
+use crate::elements::DialogBox;
 
 // ========================================================================= //
 

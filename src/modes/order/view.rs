@@ -21,11 +21,11 @@ use num_integer::div_mod_floor;
 use std::cmp;
 use std::collections::HashSet;
 
-use elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
-use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sound};
-use gui::Sprite;
-use modes::SOLVED_INFO_TEXT;
-use save::{Game, OrderState, PuzzleState};
+use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
+use crate::gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sound};
+use crate::gui::Sprite;
+use crate::modes::SOLVED_INFO_TEXT;
+use crate::save::{Game, OrderState, PuzzleState};
 use super::scenes;
 
 // ========================================================================= //

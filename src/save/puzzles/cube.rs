@@ -19,8 +19,8 @@
 
 use toml;
 
-use save::{Access, Direction, Location};
-use save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
+use crate::save::{Access, Direction, Location};
+use crate::save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -232,8 +232,8 @@ fn rotate_vert(orientation: i32, by: i32) -> i32 {
 mod tests {
     use toml;
 
-    use save::Access;
-    use save::util::{ACCESS_KEY, Tomlable};
+    use crate::save::Access;
+    use crate::save::util::{ACCESS_KEY, Tomlable};
     use super::{CubeState, INITIAL_GRID, NUM_COLS, NUM_ROWS, SOLVED_GRID,
                 rotate_vert};
 

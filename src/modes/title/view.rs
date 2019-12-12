@@ -19,10 +19,10 @@
 
 use std::rc::Rc;
 
-use gui::{Action, Align, Background, Canvas, Element, Event, Font, Point,
+use crate::gui::{Action, Align, Background, Canvas, Element, Event, Font, Point,
           Rect, Resources, Sound, Sprite};
-use elements::{DialogBox, FadeStyle, ScreenFade};
-use save::SaveData;
+use crate::elements::{DialogBox, FadeStyle, ScreenFade};
+use crate::save::SaveData;
 
 // ========================================================================= //
 

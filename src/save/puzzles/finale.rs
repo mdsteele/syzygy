@@ -19,8 +19,8 @@
 
 use toml;
 
-use save::{Access, Location};
-use save::util::{ACCESS_KEY, Tomlable, to_table};
+use crate::save::{Access, Location};
+use crate::save::util::{ACCESS_KEY, Tomlable, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -64,8 +64,8 @@ impl Tomlable for FinaleState {
 mod tests {
     use toml;
 
-    use save::Access;
-    use save::util::{ACCESS_KEY, Tomlable};
+    use crate::save::Access;
+    use crate::save::util::{ACCESS_KEY, Tomlable};
     use super::FinaleState;
 
     #[test]

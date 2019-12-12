@@ -22,9 +22,9 @@ use std::collections::BTreeMap;
 use std::mem;
 use std::rc::Rc;
 
-use elements::Paragraph;
-use gui::{Background, Canvas, Point, Rect, Sound, Sprite};
-use save::Direction;
+use crate::elements::Paragraph;
+use crate::gui::{Background, Canvas, Point, Rect, Sound, Sprite};
+use crate::save::Direction;
 
 // ========================================================================= //
 

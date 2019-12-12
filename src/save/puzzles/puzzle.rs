@@ -19,8 +19,8 @@
 
 use toml;
 
-use save::{Access, Location};
-use save::util::Tomlable;
+use crate::save::{Access, Location};
+use crate::save::util::Tomlable;
 
 // ========================================================================= //
 

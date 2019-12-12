@@ -20,8 +20,8 @@
 use std::collections::HashSet;
 use toml;
 
-use save::{Access, Location, PrimaryColor};
-use save::util::{ACCESS_KEY, Tomlable, to_table};
+use crate::save::{Access, Location, PrimaryColor};
+use crate::save::util::{ACCESS_KEY, Tomlable, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -295,8 +295,8 @@ fn pop_toggled(mut table: &mut toml::value::Table, key: &str) -> HashSet<i32> {
 mod tests {
     use toml;
 
-    use save::{Access, PrimaryColor};
-    use save::util::{ACCESS_KEY, Tomlable};
+    use crate::save::{Access, PrimaryColor};
+    use crate::save::util::{ACCESS_KEY, Tomlable};
     use super::{BLUE_TOGGLED_KEY, GREEN_TOGGLED_KEY, INITIAL_BLUE_GRID,
                 INITIAL_GREEN_GRID, INITIAL_RED_GRID, RED_TOGGLED_KEY,
                 SOLVED_BLUE_TOGGLED, SOLVED_GREEN_TOGGLED,

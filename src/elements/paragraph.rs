@@ -22,7 +22,7 @@ use std::mem;
 use std::rc::Rc;
 use std::str::Chars;
 
-use gui::{Align, Canvas, Font, Point, Resources};
+use crate::gui::{Align, Canvas, Font, Point, Resources};
 
 // ========================================================================= //
 

@@ -152,7 +152,7 @@ impl BitOrAssign for KeyMod {
 mod tests {
     use sdl2;
 
-    use gui::Point;
+    use crate::gui::Point;
     use super::{Event, KeyMod};
 
     #[test]

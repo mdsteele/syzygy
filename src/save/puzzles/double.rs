@@ -21,8 +21,8 @@ use std::cmp::{max, min};
 use std::collections::HashSet;
 use toml;
 
-use save::{Access, Location};
-use save::util::{ACCESS_KEY, Tomlable, to_table};
+use crate::save::{Access, Location};
+use crate::save::util::{ACCESS_KEY, Tomlable, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -211,8 +211,8 @@ impl Tomlable for DoubleState {
 mod tests {
     use toml;
 
-    use save::Access;
-    use save::util::{ACCESS_KEY, Tomlable};
+    use crate::save::Access;
+    use crate::save::util::{ACCESS_KEY, Tomlable};
     use super::{CURRENT_KEY, DONE_KEY, DoubleState, WORD_CLUES};
 
     #[test]

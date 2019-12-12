@@ -21,10 +21,10 @@ use std::cmp::min;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use elements::{FadeStyle, Hud, HudCmd, HudInput, ScreenFade};
-use gui::{Action, Background, Canvas, Element, Event, Point, Rect, Resources,
+use crate::elements::{FadeStyle, Hud, HudCmd, HudInput, ScreenFade};
+use crate::gui::{Action, Background, Canvas, Element, Event, Point, Rect, Resources,
           Sprite};
-use save::{Access, Game, Location};
+use crate::save::{Access, Game, Location};
 
 // ========================================================================= //
 
@@ -485,8 +485,8 @@ Repaired nodes are marked in green.";
 mod tests {
     use std::collections::{HashMap, HashSet};
 
-    use gui::Rect;
-    use save::Location;
+    use crate::gui::Rect;
+    use crate::save::Location;
     use super::{NODES, NODE_HEIGHT, NODE_WIDTH};
 
     #[test]

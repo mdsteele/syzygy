@@ -20,8 +20,8 @@
 use std::cmp;
 use std::rc::Rc;
 
-use elements::Paragraph;
-use gui::{Action, Background, Canvas, Element, Event, FRAME_DELAY_MILLIS,
+use crate::elements::Paragraph;
+use crate::gui::{Action, Background, Canvas, Element, Event, FRAME_DELAY_MILLIS,
           Keycode, Point, Sound, Sprite};
 use super::theater::{TalkPos, Theater};
 

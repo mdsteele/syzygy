@@ -22,10 +22,10 @@ use std::cmp;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
+use crate::gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
           Resources, Sound, Sprite};
-use save::Direction;
-use save::ice::{BlockSlide, Object, ObjectGrid, Transform};
+use crate::save::Direction;
+use crate::save::ice::{BlockSlide, Object, ObjectGrid, Transform};
 
 // ========================================================================= //
 

@@ -19,8 +19,8 @@
 
 use std::f64::consts::FRAC_PI_3;
 
-use elements::{Ast, Scene, TalkPos, TalkStyle};
-use gui::{Resources, Sound};
+use crate::elements::{Ast, Scene, TalkPos, TalkStyle};
+use crate::gui::{Resources, Sound};
 
 // ========================================================================= //
 

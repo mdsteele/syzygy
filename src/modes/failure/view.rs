@@ -23,11 +23,11 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time;
 
-use elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
-use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
+use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
+use crate::gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
           Resources, Sound, Sprite};
-use save::{Access, FailureState, Game, Location, PuzzleState};
-use save::pyramid::{Board, Coords, MAX_REMOVALS, Move, Team};
+use crate::save::{Access, FailureState, Game, Location, PuzzleState};
+use crate::save::pyramid::{Board, Coords, MAX_REMOVALS, Move, Team};
 use super::coords::{coords_to_pt, pt_to_coords};
 use super::scenes;
 
@@ -1174,7 +1174,7 @@ $M{Tap}{Click} on a tile to get a password hint.";
 mod tests {
     use std::collections::HashSet;
 
-    use save::Location;
+    use crate::save::Location;
     use super::DASHBOARD_CHIPS;
 
     #[test]

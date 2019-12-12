@@ -19,7 +19,7 @@
 
 use std::rc::Rc;
 
-use gui::{Action, Align, Canvas, Element, Event, Font, Keycode, Point, Rect,
+use crate::gui::{Action, Align, Canvas, Element, Event, Font, Keycode, Point, Rect,
           Resources, Sprite};
 
 // ========================================================================= //

@@ -19,9 +19,9 @@
 
 use toml;
 
-use save::Direction;
-use save::ice::Transform;
-use save::util::{Tomlable, to_table};
+use crate::save::Direction;
+use crate::save::ice::Transform;
+use crate::save::util::{Tomlable, to_table};
 
 // ========================================================================= //
 
@@ -217,9 +217,9 @@ impl Tomlable for Symbol {
 
 #[cfg(test)]
 mod tests {
-    use save::Direction;
-    use save::ice::Transform;
-    use save::util::Tomlable;
+    use crate::save::Direction;
+    use crate::save::ice::Transform;
+    use crate::save::util::Tomlable;
     use super::Symbol;
 
     #[test]

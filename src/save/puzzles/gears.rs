@@ -20,8 +20,8 @@
 use std::cmp::{max, min};
 use toml;
 
-use save::{Access, Location};
-use save::util::{ACCESS_KEY, Tomlable, to_table};
+use crate::save::{Access, Location};
+use crate::save::util::{ACCESS_KEY, Tomlable, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -191,8 +191,8 @@ impl Tomlable for GearsState {
 mod tests {
     use toml;
 
-    use save::{Access, PuzzleState};
-    use save::util::{ACCESS_KEY, Tomlable};
+    use crate::save::{Access, PuzzleState};
+    use crate::save::util::{ACCESS_KEY, Tomlable};
     use super::{GearsState, INITIAL_POSITIONS, INITIAL_UGRENT_ROW,
                 MIN_UGRENT_ROW, POSITIONS_KEY, UGRENT_ROW_KEY};
 

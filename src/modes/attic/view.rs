@@ -19,11 +19,11 @@
 
 use std::cmp;
 
-use elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
-use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sound,
+use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
+use crate::gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sound,
           Sprite};
-use modes::SOLVED_INFO_TEXT;
-use save::{AtticState, Game, PuzzleState};
+use crate::modes::SOLVED_INFO_TEXT;
+use crate::save::{AtticState, Game, PuzzleState};
 use super::scenes;
 
 // ========================================================================= //

@@ -20,8 +20,8 @@
 use std::cmp::{max, min};
 use toml;
 
-use save::{Access, Location};
-use save::util::{ACCESS_KEY, Tomlable, to_table};
+use crate::save::{Access, Location};
+use crate::save::util::{ACCESS_KEY, Tomlable, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -176,8 +176,8 @@ impl Tomlable for BlameState {
 mod tests {
     use toml;
 
-    use save::{Access, PuzzleState};
-    use save::util::{ACCESS_KEY, Tomlable};
+    use crate::save::{Access, PuzzleState};
+    use crate::save::util::{ACCESS_KEY, Tomlable};
     use super::{BlameState, INITIAL_MEZURE_ROW, INITIAL_POSITIONS,
                 MEZURE_ROW_KEY, MIN_MEZURE_ROW, POSITIONS_KEY};
 

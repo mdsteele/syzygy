@@ -17,9 +17,9 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use gui::{Element, Event, Window};
-use modes::{Mode, run_info_box};
-use save::SaveData;
+use crate::gui::{Element, Event, Window};
+use crate::modes::{Mode, run_info_box};
+use crate::save::SaveData;
 
 use super::view::{Cmd, INFO_BOX_TEXT, View};
 

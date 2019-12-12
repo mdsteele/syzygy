@@ -17,8 +17,8 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use elements::{Ast, Scene, TalkPos, TalkStyle};
-use gui::{Rect, Resources, Sound};
+use crate::elements::{Ast, Scene, TalkPos, TalkStyle};
+use crate::gui::{Rect, Resources, Sound};
 
 // ========================================================================= //
 

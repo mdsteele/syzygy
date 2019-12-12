@@ -21,10 +21,10 @@ use std::cmp;
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::rc::Rc;
 
-use gui::{Action, Align, Canvas, Element, Event, FRAME_DELAY_MILLIS, Font,
+use crate::gui::{Action, Align, Canvas, Element, Event, FRAME_DELAY_MILLIS, Font,
           Point, Rect, Resources, Sound, Sprite};
-use save::{Direction, MixedColor};
-use save::device::{Device, DeviceGrid};
+use crate::save::{Direction, MixedColor};
+use crate::save::device::{Device, DeviceGrid};
 
 // ========================================================================= //
 

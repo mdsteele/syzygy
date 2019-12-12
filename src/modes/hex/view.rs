@@ -22,11 +22,11 @@ use std::collections::HashMap;
 use std::f64::consts::{FRAC_1_PI, FRAC_PI_3};
 use std::rc::Rc;
 
-use elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
-use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
+use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
+use crate::gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
           Resources, Sound, Sprite};
-use modes::SOLVED_INFO_TEXT;
-use save::{Game, HexState, PuzzleState};
+use crate::modes::SOLVED_INFO_TEXT;
+use crate::save::{Game, HexState, PuzzleState};
 use super::scenes;
 
 // ========================================================================= //

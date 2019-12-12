@@ -20,7 +20,7 @@
 use std::default::Default;
 use toml;
 
-use save::util::Tomlable;
+use crate::save::util::Tomlable;
 
 // ========================================================================= //
 
@@ -160,7 +160,7 @@ impl Default for MixedColor {
 
 #[cfg(test)]
 mod tests {
-    use save::util::Tomlable;
+    use crate::save::util::Tomlable;
     use super::{MixedColor, PrimaryColor};
 
     #[test]

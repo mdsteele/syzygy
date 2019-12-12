@@ -20,10 +20,10 @@
 use std::collections::HashMap;
 use toml;
 
-use gui::Point;
-use save::Direction;
-use save::ice::{Symbol, Transform};
-use save::util::{Tomlable, pop_array, to_table};
+use crate::gui::Point;
+use crate::save::Direction;
+use crate::save::ice::{Symbol, Transform};
+use crate::save::util::{Tomlable, pop_array, to_table};
 
 // ========================================================================= //
 

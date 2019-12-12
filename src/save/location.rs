@@ -20,7 +20,7 @@
 use std::default::Default;
 use toml;
 
-use save::util::Tomlable;
+use crate::save::util::Tomlable;
 
 // ========================================================================= //
 
@@ -356,7 +356,7 @@ const ALL_LOCATIONS: &[Location] = &[
 mod tests {
     use std::collections::{HashMap, HashSet};
 
-    use save::util::Tomlable;
+    use crate::save::util::Tomlable;
     use super::Location;
 
     #[test]

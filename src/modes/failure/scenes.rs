@@ -17,9 +17,9 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use elements::{Ast, Scene, TalkPos, TalkStyle};
-use gui::{Resources, Sound};
-use save::pyramid::Coords;
+use crate::elements::{Ast, Scene, TalkPos, TalkStyle};
+use crate::gui::{Resources, Sound};
+use crate::save::pyramid::Coords;
 use super::coords::{PYRAMID_TILE_SIZE, coords_to_pt};
 
 // ========================================================================= //

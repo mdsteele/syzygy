@@ -20,8 +20,8 @@
 use std::cmp;
 use toml;
 
-use save::{Access, Location};
-use save::util::{ACCESS_KEY, Tomlable, to_table};
+use crate::save::{Access, Location};
+use crate::save::util::{ACCESS_KEY, Tomlable, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -173,8 +173,8 @@ impl Tomlable for GroundState {
 mod tests {
     use toml;
 
-    use save::{Access, PuzzleState};
-    use save::util::{ACCESS_KEY, Tomlable};
+    use crate::save::{Access, PuzzleState};
+    use crate::save::util::{ACCESS_KEY, Tomlable};
     use super::{ELINSA_ROW_KEY, GroundState, INITIAL_ELINSA_ROW,
                 INITIAL_POSITIONS, MIN_ELINSA_ROW, POSITIONS_KEY};
 

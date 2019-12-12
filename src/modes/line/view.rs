@@ -19,11 +19,11 @@
 
 use std::rc::Rc;
 
-use elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
-use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
+use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
+use crate::gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
           Resources, Sound};
-use modes::SOLVED_INFO_TEXT;
-use save::{Game, LineState, PuzzleState};
+use crate::modes::SOLVED_INFO_TEXT;
+use crate::save::{Game, LineState, PuzzleState};
 use super::scenes;
 
 // ========================================================================= //

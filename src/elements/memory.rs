@@ -23,9 +23,9 @@ use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
+use crate::gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
           Sound, Sprite};
-use save::memory::{Grid, Shape};
+use crate::save::memory::{Grid, Shape};
 
 // ========================================================================= //
 

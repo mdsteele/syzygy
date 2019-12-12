@@ -20,8 +20,8 @@
 use std::cmp;
 use toml;
 
-use save::{Access, Location};
-use save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
+use crate::save::{Access, Location};
+use crate::save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -173,8 +173,8 @@ impl Tomlable for NoReturnState {
 mod tests {
     use toml;
 
-    use save::{Access, PuzzleState};
-    use save::util::{ACCESS_KEY, Tomlable};
+    use crate::save::{Access, PuzzleState};
+    use crate::save::util::{ACCESS_KEY, Tomlable};
     use super::{INITIAL_ORDER, NoReturnState, ORDER_KEY, SOLVED_ORDER};
 
     #[test]

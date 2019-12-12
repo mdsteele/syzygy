@@ -22,7 +22,7 @@ use std::collections::{HashSet, VecDeque};
 use std::hash::Hash;
 use toml;
 
-use gui::Point;
+use crate::gui::Point;
 
 // ========================================================================= //
 

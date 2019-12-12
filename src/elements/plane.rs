@@ -22,10 +22,10 @@ use std::collections::HashMap;
 use std::mem;
 use std::rc::Rc;
 
-use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
+use crate::gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
           Resources, Sprite};
-use save::Direction;
-use save::plane::{PlaneGrid, PlaneObj};
+use crate::save::Direction;
+use crate::save::plane::{PlaneGrid, PlaneObj};
 
 // ========================================================================= //
 

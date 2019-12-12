@@ -20,8 +20,8 @@
 use std::cmp::{max, min};
 use toml;
 
-use save::{Access, CrosswordState, Location, ValidChars};
-use save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
+use crate::save::{Access, CrosswordState, Location, ValidChars};
+use crate::save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -301,8 +301,8 @@ fn load(table: &mut toml::value::Table, access: Access, key: &str,
 mod tests {
     use toml;
 
-    use save::Access;
-    use save::util::{ACCESS_KEY, Tomlable};
+    use crate::save::Access;
+    use crate::save::util::{ACCESS_KEY, Tomlable};
     use super::{INIT_SLIDERS, PasswordState, SOLVED_SLIDERS};
 
     #[test]

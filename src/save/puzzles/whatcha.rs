@@ -19,9 +19,9 @@
 
 use toml;
 
-use save::{Access, Location};
-use save::column::Columns;
-use save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
+use crate::save::{Access, Location};
+use crate::save::column::Columns;
+use crate::save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -107,8 +107,8 @@ impl Tomlable for WhatchaState {
 mod tests {
     use toml;
 
-    use save::Access;
-    use save::util::{ACCESS_KEY, Tomlable};
+    use crate::save::Access;
+    use crate::save::util::{ACCESS_KEY, Tomlable};
     use super::{COLUMNS_SPEC, WhatchaState};
 
     #[test]

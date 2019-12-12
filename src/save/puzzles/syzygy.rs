@@ -20,13 +20,13 @@
 use std::collections::HashSet;
 use toml;
 
-use gui::Point;
-use save::{Access, Direction, Location, MixedColor};
-use save::column::Columns;
-use save::device::{Device, DeviceGrid};
-use save::ice::{Object, ObjectGrid, Symbol, Transform};
-use save::plane::{PlaneGrid, PlaneObj};
-use save::util::{ACCESS_KEY, Tomlable, pop_array, pop_table, to_table};
+use crate::gui::Point;
+use crate::save::{Access, Direction, Location, MixedColor};
+use crate::save::column::Columns;
+use crate::save::device::{Device, DeviceGrid};
+use crate::save::ice::{Object, ObjectGrid, Symbol, Transform};
+use crate::save::plane::{PlaneGrid, PlaneObj};
+use crate::save::util::{ACCESS_KEY, Tomlable, pop_array, pop_table, to_table};
 use super::PuzzleState;
 
 // ========================================================================= //
@@ -730,7 +730,7 @@ impl Tomlable for SyzygyState {
 
 #[cfg(test)]
 mod tests {
-    use save::util::Tomlable;
+    use crate::save::util::Tomlable;
     use super::SyzygyStage;
 
     const ALL_STAGES: &[SyzygyStage] = &[

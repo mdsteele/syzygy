@@ -17,11 +17,11 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
-use elements::plane::{PlaneCmd, PlaneGridView};
-use gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sound};
-use modes::SOLVED_INFO_TEXT;
-use save::{Game, PuzzleState, SimpleState};
+use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
+use crate::elements::plane::{PlaneCmd, PlaneGridView};
+use crate::gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sound};
+use crate::modes::SOLVED_INFO_TEXT;
+use crate::save::{Game, PuzzleState, SimpleState};
 use super::scenes;
 
 // ========================================================================= //

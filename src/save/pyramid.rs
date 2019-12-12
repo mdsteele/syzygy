@@ -22,7 +22,7 @@ use std::cmp;
 use std::collections::{HashMap, HashSet};
 use toml;
 
-use save::util::Tomlable;
+use crate::save::util::Tomlable;
 
 // ========================================================================= //
 
@@ -576,7 +576,7 @@ mod tests {
     use std::collections::HashSet;
     use std::f64;
 
-    use save::util::Tomlable;
+    use crate::save::util::Tomlable;
     use super::{Board, Coords, Move, NUM_CELLS, Team};
 
     #[test]

@@ -19,14 +19,14 @@
 
 use std::rc::Rc;
 
-use elements;
-use elements::column::ColumnsView;
-use elements::lasers::LaserField;
-use elements::plane::{PlaneCmd, PlaneGridView};
-use gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
+use crate::elements;
+use crate::elements::column::ColumnsView;
+use crate::elements::lasers::LaserField;
+use crate::elements::plane::{PlaneCmd, PlaneGridView};
+use crate::gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
           Resources, Sound, Sprite};
-use save::SyzygyState;
-use save::ice::BlockSlide;
+use crate::save::SyzygyState;
+use crate::save::ice::BlockSlide;
 
 // ========================================================================= //
 

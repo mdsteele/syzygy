@@ -19,8 +19,10 @@
 
 use std::rc::Rc;
 
-use crate::gui::{Action, Align, Canvas, Element, Event, Font, Keycode, Point, Rect,
-          Resources, Sprite};
+use crate::gui::{
+    Action, Align, Canvas, Element, Event, Font, Keycode, Point, Rect,
+    Resources, Sprite,
+};
 
 // ========================================================================= //
 
@@ -33,24 +35,30 @@ pub struct InputDisplay {
 impl InputDisplay {
     pub fn new(resources: &mut Resources, top: i32) -> InputDisplay {
         InputDisplay {
-            top: top,
+            top,
             font: resources.get_font("block"),
             text: String::new(),
         }
     }
 
-    pub fn set_text(&mut self, text: String) { self.text = text; }
+    pub fn set_text(&mut self, text: String) {
+        self.text = text;
+    }
 
-    pub fn clear_text(&mut self) { self.text.clear(); }
+    pub fn clear_text(&mut self) {
+        self.text.clear();
+    }
 }
 
 impl Element<(), String> for InputDisplay {
     fn draw(&self, _: &(), canvas: &mut Canvas) {
         if !self.text.is_empty() {
-            canvas.draw_text(&self.font,
-                             Align::Center,
-                             Point::new(288, self.top + 25),
-                             &self.text);
+            canvas.draw_text(
+                &self.font,
+                Align::Center,
+                Point::new(288, self.top + 25),
+                &self.text,
+            );
         }
     }
 
@@ -91,7 +99,7 @@ pub struct ClueDisplay {
 impl ClueDisplay {
     pub fn new(resources: &mut Resources, top: i32) -> ClueDisplay {
         ClueDisplay {
-            top: top,
+            top,
             font: resources.get_font("system"),
             arrows: vec![
                 ArrowButton::new(resources, false, 96, top),
@@ -101,22 +109,29 @@ impl ClueDisplay {
         }
     }
 
-    pub fn set_visible(&mut self, visible: bool) { self.visible = visible; }
+    pub fn set_visible(&mut self, visible: bool) {
+        self.visible = visible;
+    }
 }
 
 impl Element<&'static str, bool> for ClueDisplay {
     fn draw(&self, clue: &&'static str, canvas: &mut Canvas) {
         if self.visible {
-            canvas.draw_text(&self.font,
-                             Align::Center,
-                             Point::new(288, self.top + 12),
-                             *clue);
+            canvas.draw_text(
+                &self.font,
+                Align::Center,
+                Point::new(288, self.top + 12),
+                *clue,
+            );
             self.arrows.draw(&(), canvas);
         }
     }
 
-    fn handle_event(&mut self, event: &Event, _: &mut &'static str)
-                    -> Action<bool> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        _: &mut &'static str,
+    ) -> Action<bool> {
         if self.visible {
             self.arrows.handle_event(event, &mut ())
         } else {
@@ -136,18 +151,24 @@ struct ArrowButton {
 }
 
 impl ArrowButton {
-    fn new(resources: &mut Resources, next: bool, left: i32, top: i32)
-           -> ArrowButton {
+    fn new(
+        resources: &mut Resources,
+        next: bool,
+        left: i32,
+        top: i32,
+    ) -> ArrowButton {
         ArrowButton {
-            left: left,
-            top: top,
+            left,
+            top,
             sprites: resources.get_sprites("shift/arrows"),
-            next: next,
+            next,
             blink: 0,
         }
     }
 
-    fn rect(&self) -> Rect { Rect::new(self.left, self.top, 16, 16) }
+    fn rect(&self) -> Rect {
+        Rect::new(self.left, self.top, 16, 16)
+    }
 
     fn activate(&mut self) -> Action<bool> {
         self.blink = 3;

@@ -20,17 +20,19 @@
 use std::cmp;
 use std::rc::Rc;
 
-use crate::elements::{self, FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
-use crate::elements::column::ColumnsView;
-use crate::elements::lasers::{LaserCmd, LaserField};
-use crate::elements::plane::{PlaneCmd, PlaneGridView};
-use crate::gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
-          Resources, Sound, Sprite};
-use crate::modes::SOLVED_INFO_TEXT;
-use crate::save::{self, Game, PuzzleState, SyzygyStage, SyzygyState};
 use super::mezure::{MezureCmd, MezureView};
 use super::relyng::LightsGrid;
 use super::scenes;
+use crate::elements::column::ColumnsView;
+use crate::elements::lasers::{LaserCmd, LaserField};
+use crate::elements::plane::{PlaneCmd, PlaneGridView};
+use crate::elements::{self, FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
+use crate::gui::{
+    Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
+    Sound, Sprite,
+};
+use crate::modes::SOLVED_INFO_TEXT;
+use crate::save::{self, Game, PuzzleState, SyzygyStage, SyzygyState};
 
 // ========================================================================= //
 
@@ -66,9 +68,11 @@ pub struct View {
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect,
-               state: &mut SyzygyState)
-               -> View {
+    pub fn new(
+        resources: &mut Resources,
+        visible: Rect,
+        state: &mut SyzygyState,
+    ) -> View {
         let mut core = {
             let fade = (FadeStyle::TopToBottom, FadeStyle::RightToLeft);
             let intro = scenes::compile_intro_scene(resources);
@@ -119,14 +123,16 @@ impl View {
             }
         }
         View {
-            core: core,
+            core,
             progress: SyzygyProgress::new(resources, 320, 288),
             atlatl: Atlatl::new(resources),
             yttris: ColumnsView::new(resources, 196, 168, 0),
-            argony: elements::ice::GridView::new(resources,
-                                                 144,
-                                                 128,
-                                                 state.argony_grid()),
+            argony: elements::ice::GridView::new(
+                resources,
+                144,
+                128,
+                state.argony_grid(),
+            ),
             elinsa: PlaneGridView::new(resources, 168, 120),
             ugrent: LaserField::new(resources, 176, 112, state.ugrent_grid()),
             relyng: LightsGrid::new(resources, 192, 128, state),
@@ -150,10 +156,12 @@ impl Element<Game, PuzzleCmd> for View {
             let clip = if self.reveal_amount >= MAX_REVEAL {
                 canvas.rect()
             } else {
-                Rect::new(0,
-                          192 - self.reveal_amount,
-                          canvas.width(),
-                          2 * self.reveal_amount as u32)
+                Rect::new(
+                    0,
+                    192 - self.reveal_amount,
+                    canvas.width(),
+                    2 * self.reveal_amount as u32,
+                )
             };
             let mut canvas = canvas.clipped(clip);
             match self.stage {
@@ -179,8 +187,11 @@ impl Element<Game, PuzzleCmd> for View {
         self.core.draw_front_layer(canvas, state);
     }
 
-    fn handle_event(&mut self, event: &Event, game: &mut Game)
-                    -> Action<PuzzleCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        game: &mut Game,
+    ) -> Action<PuzzleCmd> {
         let state = &mut game.system_syzygy;
         let mut action = self.core.handle_event(event, state);
         if event == &Event::ClockTick {
@@ -207,14 +218,15 @@ impl Element<Game, PuzzleCmd> for View {
             let subaction = self.atlatl.handle_event(event, &mut ());
             action.merge(subaction.but_no_value());
         }
-        if self.should_reveal && self.reveal_amount >= MAX_REVEAL &&
-            !action.should_stop()
+        if self.should_reveal
+            && self.reveal_amount >= MAX_REVEAL
+            && !action.should_stop()
         {
             match self.stage {
                 SyzygyStage::Yttris => {
-                    let subaction =
-                        self.yttris
-                            .handle_event(event, state.yttris_columns_mut());
+                    let subaction = self
+                        .yttris
+                        .handle_event(event, state.yttris_columns_mut());
                     if let Some(&(col, by)) = subaction.value() {
                         state.yttris_columns_mut().rotate_column(col, by);
                         if state.yttris_columns().is_solved() {
@@ -229,14 +241,13 @@ impl Element<Game, PuzzleCmd> for View {
                     action.merge(subaction.but_no_value());
                 }
                 SyzygyStage::Argony => {
-                    let subaction =
-                        self.argony
-                            .handle_event(event, state.argony_grid_mut());
+                    let subaction = self
+                        .argony
+                        .handle_event(event, state.argony_grid_mut());
                     if let Some(&(coords, dir)) = subaction.value() {
-                        if let Some(slide) =
-                            state
-                                .argony_grid_mut()
-                                .slide_ice_block(coords, dir)
+                        if let Some(slide) = state
+                            .argony_grid_mut()
+                            .slide_ice_block(coords, dir)
                         {
                             action.also_play_sound(Sound::device_slide());
                             self.argony.animate_slide(&slide);
@@ -244,7 +255,8 @@ impl Element<Game, PuzzleCmd> for View {
                                 self.core.clear_undo_redo();
                                 state.advance_stage();
                                 self.core.begin_extra_scene(
-                                    scenes::POST_ARGONY_SCENE);
+                                    scenes::POST_ARGONY_SCENE,
+                                );
                             } else {
                                 self.core.push_undo(UndoRedo::Argony(slide));
                             }
@@ -253,9 +265,9 @@ impl Element<Game, PuzzleCmd> for View {
                     action.merge(subaction.but_no_value());
                 }
                 SyzygyStage::Elinsa => {
-                    let mut subaction =
-                        self.elinsa
-                            .handle_event(event, state.elinsa_grid_mut());
+                    let mut subaction = self
+                        .elinsa
+                        .handle_event(event, state.elinsa_grid_mut());
                     match subaction.take_value() {
                         Some(PlaneCmd::Changed) => {
                             if state.elinsa_grid().all_nodes_are_connected() {
@@ -263,7 +275,8 @@ impl Element<Game, PuzzleCmd> for View {
                                 self.elinsa.cancel_drag_and_clear_changes();
                                 state.advance_stage();
                                 self.core.begin_extra_scene(
-                                    scenes::POST_ELINSA_SCENE);
+                                    scenes::POST_ELINSA_SCENE,
+                                );
                             }
                         }
                         Some(PlaneCmd::PushUndo(changes)) => {
@@ -274,11 +287,12 @@ impl Element<Game, PuzzleCmd> for View {
                     action.merge(subaction.but_no_value());
                 }
                 SyzygyStage::Ugrent => {
-                    let subaction =
-                        self.ugrent
-                            .handle_event(event, state.ugrent_grid_mut());
+                    let subaction = self
+                        .ugrent
+                        .handle_event(event, state.ugrent_grid_mut());
                     if let Some(&cmd) = subaction.value() {
-                        if self.ugrent
+                        if self
+                            .ugrent
                             .all_detectors_satisfied(state.ugrent_grid())
                         {
                             self.core.clear_undo_redo();
@@ -552,8 +566,8 @@ struct SyzygyProgress {
 impl SyzygyProgress {
     fn new(resources: &mut Resources, left: i32, top: i32) -> SyzygyProgress {
         SyzygyProgress {
-            left: left,
-            top: top,
+            left,
+            top,
             font: resources.get_font("block"),
             num_chars: 0,
             brightness: [0; 6],
@@ -562,7 +576,9 @@ impl SyzygyProgress {
         }
     }
 
-    fn rect(&self) -> Rect { Rect::new(self.left, self.top, 192, 32) }
+    fn rect(&self) -> Rect {
+        Rect::new(self.left, self.top, 192, 32)
+    }
 
     fn start_display(&mut self) {
         self.num_chars = 1;
@@ -784,7 +800,8 @@ lights toggled will change after each move.
 $M{Tap}{Click} on a character in the scene to hear their
 words of wisdom.";
 
-const MEZURE_INFO_BOX_TEXT: &str = "\
-Your goal is to form the final, missing word.";
+const MEZURE_INFO_BOX_TEXT: &str =
+    "\
+     Your goal is to form the final, missing word.";
 
 // ========================================================================= //

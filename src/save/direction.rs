@@ -155,9 +155,9 @@ impl Tomlable for Direction {
 
 #[cfg(test)]
 mod tests {
+    use super::Direction;
     use crate::gui::Point;
     use crate::save::util::Tomlable;
-    use super::Direction;
 
     #[test]
     fn toml_round_trip() {

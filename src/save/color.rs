@@ -55,7 +55,9 @@ impl Tomlable for PrimaryColor {
 }
 
 impl Default for PrimaryColor {
-    fn default() -> PrimaryColor { PrimaryColor::Red }
+    fn default() -> PrimaryColor {
+        PrimaryColor::Red
+    }
 }
 
 // ========================================================================= //
@@ -153,15 +155,17 @@ impl MixedColor {
 }
 
 impl Default for MixedColor {
-    fn default() -> MixedColor { MixedColor::Red }
+    fn default() -> MixedColor {
+        MixedColor::Red
+    }
 }
 
 // ========================================================================= //
 
 #[cfg(test)]
 mod tests {
-    use crate::save::util::Tomlable;
     use super::{MixedColor, PrimaryColor};
+    use crate::save::util::Tomlable;
 
     #[test]
     fn primary_color_toml_round_trip() {

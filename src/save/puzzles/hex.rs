@@ -20,8 +20,8 @@
 use std::collections::VecDeque;
 use toml;
 
+use crate::save::util::{rotate_deque, to_table, Tomlable, ACCESS_KEY};
 use crate::save::{Access, Location, PuzzleState};
-use crate::save::util::{ACCESS_KEY, Tomlable, rotate_deque, to_table};
 
 // ========================================================================= //
 
@@ -74,7 +74,9 @@ impl HexState {
         self.is_initial = false;
     }
 
-    pub fn tokens(&self) -> &Vec<u8> { &self.tokens }
+    pub fn tokens(&self) -> &Vec<u8> {
+        &self.tokens
+    }
 
     pub fn rotate_wheel_cw(&mut self, wheel: usize, by: i32) {
         debug_assert!(wheel < WHEELS.len());
@@ -93,13 +95,21 @@ impl HexState {
 }
 
 impl PuzzleState for HexState {
-    fn location() -> Location { Location::HexSpangled }
+    fn location() -> Location {
+        Location::HexSpangled
+    }
 
-    fn access(&self) -> Access { self.access }
+    fn access(&self) -> Access {
+        self.access
+    }
 
-    fn access_mut(&mut self) -> &mut Access { &mut self.access }
+    fn access_mut(&mut self) -> &mut Access {
+        &mut self.access
+    }
 
-    fn can_reset(&self) -> bool { !self.is_initial }
+    fn can_reset(&self) -> bool {
+        !self.is_initial
+    }
 
     fn reset(&mut self) {
         self.tokens = INITIAL_TOKENS.to_vec();
@@ -112,7 +122,8 @@ impl Tomlable for HexState {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.is_solved() && !self.is_initial {
-            let tokens = self.tokens
+            let tokens = self
+                .tokens
                 .iter()
                 .map(|&token| toml::Value::Integer(token as i64))
                 .collect();
@@ -140,11 +151,7 @@ impl Tomlable for HexState {
             }
         };
         let is_initial = (&tokens as &[u8]) == INITIAL_TOKENS;
-        HexState {
-            access: access,
-            tokens: tokens,
-            is_initial: is_initial,
-        }
+        HexState { access, tokens, is_initial }
     }
 }
 
@@ -154,9 +161,9 @@ impl Tomlable for HexState {
 mod tests {
     use toml;
 
-    use crate::save::Access;
-    use crate::save::util::{ACCESS_KEY, Tomlable};
     use super::{HexState, INITIAL_TOKENS, SOLVED_TOKENS, TOKENS_KEY};
+    use crate::save::util::{Tomlable, ACCESS_KEY};
+    use crate::save::Access;
 
     #[cfg_attr(rustfmt, rustfmt_skip)]
     const ROUND_TRIP_TOKENS: &[u8] = &[
@@ -204,8 +211,10 @@ mod tests {
     #[test]
     fn from_invalid_tokens_toml() {
         let mut table = toml::value::Table::new();
-        table.insert(TOKENS_KEY.to_string(),
-                     toml::Value::Array(vec![toml::Value::Integer(0); 30]));
+        table.insert(
+            TOKENS_KEY.to_string(),
+            toml::Value::Array(vec![toml::Value::Integer(0); 30]),
+        );
         let state = HexState::from_toml(toml::Value::Table(table));
         assert_eq!(state.tokens, INITIAL_TOKENS.to_vec());
         assert!(state.is_initial);

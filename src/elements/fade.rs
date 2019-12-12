@@ -17,7 +17,9 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use crate::gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sprite};
+use crate::gui::{
+    Action, Canvas, Element, Event, Point, Rect, Resources, Sprite,
+};
 
 // ========================================================================= //
 
@@ -48,16 +50,16 @@ impl FadeStyle {
                 let dist = ((dx * dx + dy * dy) as f32).sqrt();
                 opacity - 8 + (0.5 * dist).ceil() as i32
             }
-            (FadeStyle::TopToBottom, true) |
-            (FadeStyle::BottomToTop, false) => opacity - row / 3,
-            (FadeStyle::TopToBottom, false) |
-            (FadeStyle::BottomToTop, true) => {
+            (FadeStyle::TopToBottom, true)
+            | (FadeStyle::BottomToTop, false) => opacity - row / 3,
+            (FadeStyle::TopToBottom, false)
+            | (FadeStyle::BottomToTop, true) => {
                 opacity - (NUM_ROWS - row - 1) / 2
             }
-            (FadeStyle::LeftToRight, true) |
-            (FadeStyle::RightToLeft, false) => opacity - col / 3,
-            (FadeStyle::LeftToRight, false) |
-            (FadeStyle::RightToLeft, true) => {
+            (FadeStyle::LeftToRight, true)
+            | (FadeStyle::RightToLeft, false) => opacity - col / 3,
+            (FadeStyle::LeftToRight, false)
+            | (FadeStyle::RightToLeft, true) => {
                 opacity - (NUM_COLS - col - 1) / 3
             }
         }
@@ -88,13 +90,15 @@ pub struct ScreenFade<A> {
 }
 
 impl<A> ScreenFade<A> {
-    pub fn new(resources: &mut Resources, fade_in_style: FadeStyle,
-               fade_out_style: FadeStyle)
-               -> ScreenFade<A> {
+    pub fn new(
+        resources: &mut Resources,
+        fade_in_style: FadeStyle,
+        fade_out_style: FadeStyle,
+    ) -> ScreenFade<A> {
         ScreenFade {
             sprites: resources.get_sprites("screen_fade"),
-            fade_in_style: fade_in_style,
-            fade_out_style: fade_out_style,
+            fade_in_style,
+            fade_out_style,
             opacity: fade_in_style.max_opacity() - 1,
             fade_out_command: None,
         }
@@ -129,16 +133,21 @@ impl<A> Element<(), A> for ScreenFade<A> {
                     let cell_opacity =
                         style.cell_opacity(col, row, self.opacity, out);
                     if cell_opacity >= MAX_CELL_OPACITY {
-                        canvas.fill_rect((0, 0, 0),
-                                         Rect::new(col * TILE_SIZE,
-                                                   row * TILE_SIZE,
-                                                   TILE_SIZE as u32,
-                                                   TILE_SIZE as u32));
+                        canvas.fill_rect(
+                            (0, 0, 0),
+                            Rect::new(
+                                col * TILE_SIZE,
+                                row * TILE_SIZE,
+                                TILE_SIZE as u32,
+                                TILE_SIZE as u32,
+                            ),
+                        );
                     } else if cell_opacity > 0 {
                         let sprite = &self.sprites[cell_opacity as usize - 1];
-                        canvas.draw_sprite(sprite,
-                                           Point::new(col * TILE_SIZE,
-                                                      row * TILE_SIZE));
+                        canvas.draw_sprite(
+                            sprite,
+                            Point::new(col * TILE_SIZE, row * TILE_SIZE),
+                        );
                     }
                 }
             }

@@ -31,30 +31,20 @@ pub struct Action<A> {
 
 impl<A> Action<A> {
     pub fn ignore() -> Action<A> {
-        Action {
-            redraw: false,
-            sounds: Vec::new(),
-            value: Value::Continue,
-        }
+        Action { redraw: false, sounds: Vec::new(), value: Value::Continue }
     }
 
     pub fn redraw() -> Action<A> {
-        Action {
-            redraw: true,
-            sounds: Vec::new(),
-            value: Value::Continue,
-        }
+        Action { redraw: true, sounds: Vec::new(), value: Value::Continue }
     }
 
     pub fn redraw_if(redraw: bool) -> Action<A> {
-        Action {
-            redraw: redraw,
-            sounds: Vec::new(),
-            value: Value::Continue,
-        }
+        Action { redraw, sounds: Vec::new(), value: Value::Continue }
     }
 
-    pub fn also_redraw(&mut self) { self.redraw = true; }
+    pub fn also_redraw(&mut self) {
+        self.redraw = true;
+    }
 
     pub fn and_play_sound(mut self, sound: Sound) -> Action<A> {
         self.sounds.push(sound);
@@ -99,7 +89,9 @@ impl<A> Action<A> {
         }
     }
 
-    pub fn should_redraw(&self) -> bool { self.redraw }
+    pub fn should_redraw(&self) -> bool {
+        self.redraw
+    }
 
     pub fn should_stop(&self) -> bool {
         match self.value {
@@ -158,12 +150,10 @@ impl<A> Value<A> {
     fn merge(&mut self, other: Value<A>) {
         match other {
             Value::Continue => {}
-            Value::Stop => {
-                match *self {
-                    Value::Continue => *self = other,
-                    _ => {}
-                }
-            }
+            Value::Stop => match *self {
+                Value::Continue => *self = other,
+                _ => {}
+            },
             Value::Return(_) => {
                 *self = other;
             }

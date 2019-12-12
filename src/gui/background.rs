@@ -38,8 +38,11 @@ pub struct Background {
 }
 
 impl Background {
-    pub fn load<R, F>(path: &Path, mut file: R, mut get_sprites: F)
-                      -> io::Result<Background>
+    pub fn load<R, F>(
+        path: &Path,
+        mut file: R,
+        mut get_sprites: F,
+    ) -> io::Result<Background>
     where
         R: Read,
         F: FnMut(&str) -> Vec<Sprite>,
@@ -59,8 +62,10 @@ impl Background {
                 b'\n' => break,
                 byte => {
                     let msg = format!("unexpected byte: {}", byte);
-                    return Err(io::Error::new(io::ErrorKind::InvalidData,
-                                              msg));
+                    return Err(io::Error::new(
+                        io::ErrorKind::InvalidData,
+                        msg,
+                    ));
                 }
             }
         }
@@ -77,8 +82,10 @@ impl Background {
                     break;
                 }
                 if col >= NUM_COLS {
-                    return Err(io::Error::new(io::ErrorKind::InvalidData,
-                                              "too many columns"));
+                    return Err(io::Error::new(
+                        io::ErrorKind::InvalidData,
+                        "too many columns",
+                    ));
                 }
                 let byte2 = read_byte(file.by_ref())?;
                 if byte1 == b' ' && byte2 == b' ' {
@@ -96,25 +103,21 @@ impl Background {
         }
         for file_index in 0..tileset.len() {
             if !used_file[file_index] {
-                println!("WARNING: {:?} doesn't use {}",
-                         path,
-                         tileset[file_index].0);
+                println!(
+                    "WARNING: {:?} doesn't use {}",
+                    path, tileset[file_index].0
+                );
             }
         }
-        Ok(Background {
-               color: (red, green, blue),
-               tiles: tiles,
-           })
+        Ok(Background { color: (red, green, blue), tiles })
     }
 
-    pub fn color(&self) -> (u8, u8, u8) { self.color }
+    pub fn color(&self) -> (u8, u8, u8) {
+        self.color
+    }
 
     pub fn tiles(&self) -> Tiles {
-        Tiles {
-            background: self,
-            col: 0,
-            row: 0,
-        }
+        Tiles { background: self, col: 0, row: 0 }
     }
 }
 
@@ -140,8 +143,10 @@ impl<'a> Iterator for Tiles<'a> {
             }
             let index = (self.row * NUM_COLS + self.col) as usize;
             if let Some(ref sprite) = self.background.tiles[index] {
-                let point = Point::new((self.col * TILE_WIDTH) as i32,
-                                       (self.row * TILE_HEIGHT) as i32);
+                let point = Point::new(
+                    (self.col * TILE_WIDTH) as i32,
+                    (self.row * TILE_HEIGHT) as i32,
+                );
                 self.col += 1;
                 return Some((sprite, point));
             } else {
@@ -184,9 +189,11 @@ fn read_exactly<R: io::Read>(mut reader: R, string: &[u8]) -> io::Result<()> {
     let mut actual = vec![0u8; string.len()];
     reader.read_exact(&mut actual)?;
     if &actual as &[u8] != string {
-        let msg = format!("expected '{}', found '{}'",
-                          String::from_utf8_lossy(string),
-                          String::from_utf8_lossy(&actual));
+        let msg = format!(
+            "expected '{}', found '{}'",
+            String::from_utf8_lossy(string),
+            String::from_utf8_lossy(&actual)
+        );
         Err(io::Error::new(io::ErrorKind::InvalidData, msg))
     } else {
         Ok(())
@@ -204,8 +211,10 @@ fn read_int<R: io::Read>(reader: R, terminator: u8) -> io::Result<u32> {
         if b'0' <= byte && byte <= b'9' {
             digit = byte - b'0';
         } else {
-            let msg = format!("invalid character in header field: '{}'",
-                              String::from_utf8_lossy(&[byte]));
+            let msg = format!(
+                "invalid character in header field: '{}'",
+                String::from_utf8_lossy(&[byte])
+            );
             return Err(io::Error::new(io::ErrorKind::InvalidData, msg));
         }
         value = value * 10 + digit as u32;

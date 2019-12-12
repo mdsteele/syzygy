@@ -36,8 +36,7 @@ pub enum TreeOp {
 impl TreeOp {
     pub fn is_rotate(&self) -> bool {
         match self {
-            &TreeOp::RotateLeft(_) |
-            &TreeOp::RotateRight(_) => true,
+            &TreeOp::RotateLeft(_) | &TreeOp::RotateRight(_) => true,
             _ => false,
         }
     }
@@ -70,10 +69,7 @@ pub struct BasicTree {
 
 impl BasicTree {
     pub fn new() -> BasicTree {
-        BasicTree {
-            nodes: HashMap::new(),
-            root: None,
-        }
+        BasicTree { nodes: HashMap::new(), root: None }
     }
 
     pub fn from_signature(signature: Vec<(i32, i32, bool)>) -> BasicTree {
@@ -97,7 +93,7 @@ impl BasicTree {
                 parent: opt_parent,
                 left_child: None,
                 right_child: None,
-                is_red: is_red,
+                is_red,
             };
             nodes.insert(key, node);
         }
@@ -132,10 +128,7 @@ impl BasicTree {
                 key = parent_key;
             }
         }
-        BasicTree {
-            nodes: nodes,
-            root: root,
-        }
+        BasicTree { nodes, root }
     }
 
     pub fn signature(&self) -> Vec<(i32, i32, bool)> {
@@ -147,13 +140,21 @@ impl BasicTree {
         signature
     }
 
-    pub fn len(&self) -> usize { self.nodes.len() }
+    pub fn len(&self) -> usize {
+        self.nodes.len()
+    }
 
-    pub fn contains(&self, key: i32) -> bool { self.nodes.contains_key(&key) }
+    pub fn contains(&self, key: i32) -> bool {
+        self.nodes.contains_key(&key)
+    }
 
-    pub fn keys(&self) -> Vec<i32> { self.nodes.keys().cloned().collect() }
+    pub fn keys(&self) -> Vec<i32> {
+        self.nodes.keys().cloned().collect()
+    }
 
-    pub fn root(&self) -> Option<i32> { self.root }
+    pub fn root(&self) -> Option<i32> {
+        self.root
+    }
 
     pub fn parent(&self, key: i32) -> Option<i32> {
         self.nodes.get(&key).and_then(|node| node.parent)
@@ -312,18 +313,17 @@ impl BasicTree {
         true
     }
 
-    pub fn rotate_left(&mut self, key: i32) -> bool { self.rotate(key, true) }
+    pub fn rotate_left(&mut self, key: i32) -> bool {
+        self.rotate(key, true)
+    }
 
     pub fn rotate_right(&mut self, key: i32) -> bool {
         self.rotate(key, false)
     }
 
     fn rotate(&mut self, key: i32, left: bool) -> bool {
-        let opt_child = if left {
-            self.right_child(key)
-        } else {
-            self.left_child(key)
-        };
+        let opt_child =
+            if left { self.right_child(key) } else { self.left_child(key) };
         if let Some(child_key) = opt_child {
             let opt_parent = self.parent(key);
             let opt_grandchild = if left {
@@ -378,8 +378,12 @@ impl BasicTree {
         self.nodes.get_mut(&child_key).unwrap().parent = new_parent;
     }
 
-    fn set_child(&mut self, opt_parent: Option<i32>, old_child_key: i32,
-                 new_child: Option<i32>) {
+    fn set_child(
+        &mut self,
+        opt_parent: Option<i32>,
+        old_child_key: i32,
+        new_child: Option<i32>,
+    ) {
         if let Some(parent_key) = opt_parent {
             debug_assert!(self.nodes.contains_key(&parent_key));
             let parent_node = self.nodes.get_mut(&parent_key).unwrap();
@@ -416,76 +420,82 @@ impl BasicTree {
                 if let Some(parent_node) = self.nodes.get(&parent_key) {
                     if key < parent_key {
                         if parent_node.left_child != Some(key) {
-                            println!("Node {} is not left child ({:?}) of \
-                                      its parent ({}).",
-                                     key,
-                                     parent_node.left_child,
-                                     parent_key);
+                            println!(
+                                "Node {} is not left child ({:?}) of \
+                                 its parent ({}).",
+                                key, parent_node.left_child, parent_key
+                            );
                             return false;
                         }
                     } else {
                         if parent_node.right_child != Some(key) {
-                            println!("Node {} is not right child ({:?}) of \
-                                      its parent ({}).",
-                                     key,
-                                     parent_node.right_child,
-                                     parent_key);
+                            println!(
+                                "Node {} is not right child ({:?}) of \
+                                 its parent ({}).",
+                                key, parent_node.right_child, parent_key
+                            );
                             return false;
                         }
                     }
                 } else {
-                    println!("Parent ({}) of {} not in tree.",
-                             parent_key,
-                             key);
+                    println!(
+                        "Parent ({}) of {} not in tree.",
+                        parent_key, key
+                    );
                     return false;
                 }
             } else if self.root != Some(key) {
-                println!("Node {} has no parent, but isn't root ({:?}).",
-                         key,
-                         self.root);
+                println!(
+                    "Node {} has no parent, but isn't root ({:?}).",
+                    key, self.root
+                );
                 return false;
             }
             if let Some(left_key) = node.left_child {
                 if left_key >= key {
-                    println!("Left child ({}) of {} is out of order.",
-                             left_key,
-                             key);
+                    println!(
+                        "Left child ({}) of {} is out of order.",
+                        left_key, key
+                    );
                     return false;
                 }
                 if let Some(left_node) = self.nodes.get(&left_key) {
                     if left_node.parent != Some(key) {
-                        println!("Left child ({}) of {} has wrong parent \
-                                  ({:?}).",
-                                 left_key,
-                                 key,
-                                 left_node.parent);
+                        println!(
+                            "Left child ({}) of {} has wrong parent \
+                             ({:?}).",
+                            left_key, key, left_node.parent
+                        );
                     }
                 } else {
-                    println!("Left child ({}) of {} not in tree.",
-                             left_key,
-                             key);
+                    println!(
+                        "Left child ({}) of {} not in tree.",
+                        left_key, key
+                    );
                     return false;
                 }
             }
             if let Some(right_key) = node.right_child {
                 if right_key <= key {
-                    println!("Right child ({}) of {} is out of order.",
-                             right_key,
-                             key);
+                    println!(
+                        "Right child ({}) of {} is out of order.",
+                        right_key, key
+                    );
                     return false;
                 }
                 if let Some(right_node) = self.nodes.get(&right_key) {
                     if right_node.parent != Some(key) {
-                        println!("Right child ({}) of {} has wrong parent \
-                                  ({:?}).",
-                                 right_key,
-                                 key,
-                                 right_node.parent);
+                        println!(
+                            "Right child ({}) of {} has wrong parent \
+                             ({:?}).",
+                            right_key, key, right_node.parent
+                        );
                     }
                 } else {
-                    println!("Right child ({}) of {} not in tree.",
-                             right_key,
-                             key);
+                    println!(
+                        "Right child ({}) of {} not in tree.",
+                        right_key, key
+                    );
                     return false;
                 }
             }
@@ -523,8 +533,8 @@ impl Tomlable for BasicTree {
 
 #[cfg(test)]
 mod tests {
-    use crate::save::util::Tomlable;
     use super::BasicTree;
+    use crate::save::util::Tomlable;
 
     #[test]
     fn tree_structure() {
@@ -850,9 +860,11 @@ mod tests {
 
     #[test]
     fn from_invalid_signature_with_loop() {
-        let tree = BasicTree::from_signature(
-            vec![(1, 1, false), (2, 3, true), (3, 2, true)],
-        );
+        let tree = BasicTree::from_signature(vec![
+            (1, 1, false),
+            (2, 3, true),
+            (3, 2, true),
+        ]);
         assert_eq!(tree.len(), 0);
     }
 }

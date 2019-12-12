@@ -34,11 +34,17 @@ pub enum Access {
 }
 
 impl Access {
-    pub fn has_been_solved(&self) -> bool { *self >= Access::Solved }
+    pub fn has_been_solved(&self) -> bool {
+        *self >= Access::Solved
+    }
 
-    pub fn is_solved(&self) -> bool { *self == Access::Solved }
+    pub fn is_solved(&self) -> bool {
+        *self == Access::Solved
+    }
 
-    pub fn has_been_visited(&self) -> bool { *self != Access::Unvisited }
+    pub fn has_been_visited(&self) -> bool {
+        *self != Access::Unvisited
+    }
 
     pub fn is_visited(&self) -> bool {
         *self != Access::Unvisited && *self != Access::BeginReplay
@@ -58,7 +64,9 @@ impl Access {
 }
 
 impl Default for Access {
-    fn default() -> Access { Access::Unvisited }
+    fn default() -> Access {
+        Access::Unvisited
+    }
 }
 
 impl Tomlable for Access {
@@ -92,8 +100,8 @@ impl Tomlable for Access {
 
 #[cfg(test)]
 mod tests {
-    use crate::save::util::Tomlable;
     use super::Access;
+    use crate::save::util::Tomlable;
 
     #[test]
     fn toml_round_trip() {

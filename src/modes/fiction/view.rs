@@ -17,12 +17,12 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
+use super::scenes;
 use crate::elements::factor::{LettersView, TransformButton};
+use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
 use crate::gui::{Action, Canvas, Element, Event, Rect, Resources, Sound};
 use crate::modes::SOLVED_INFO_TEXT;
 use crate::save::{FictionState, Game, PuzzleState};
-use super::scenes;
 
 // ========================================================================= //
 
@@ -36,9 +36,11 @@ pub struct View {
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect,
-               state: &FictionState)
-               -> View {
+    pub fn new(
+        resources: &mut Resources,
+        visible: Rect,
+        state: &FictionState,
+    ) -> View {
         let mut core = {
             let fade = (FadeStyle::LeftToRight, FadeStyle::LeftToRight);
             let intro = scenes::compile_intro_scene(resources);
@@ -49,7 +51,7 @@ impl View {
         let buttons = resources.get_sprites("factor/fiction");
         let seq = state.sequence();
         View {
-            core: core,
+            core,
             buttons: vec![
                 TransformButton::new(&buttons, 0, seq, 96, 192),
                 TransformButton::new(&buttons, 1, seq, 432, 208),
@@ -73,8 +75,11 @@ impl Element<Game, PuzzleCmd> for View {
         self.core.draw_front_layer(canvas, state);
     }
 
-    fn handle_event(&mut self, event: &Event, game: &mut Game)
-                    -> Action<PuzzleCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        game: &mut Game,
+    ) -> Action<PuzzleCmd> {
         let state = &mut game.fact_or_fiction;
         let mut action = self.core.handle_event(event, state);
         if event == &Event::ClockTick && self.retry_countdown > 0 {
@@ -88,9 +93,9 @@ impl Element<Game, PuzzleCmd> for View {
         }
         if !action.should_stop() {
             let mut letters = state.letters().clone();
-            action.merge(self.letters
-                             .handle_event(event, &mut letters)
-                             .but_no_value());
+            action.merge(
+                self.letters.handle_event(event, &mut letters).but_no_value(),
+            );
         }
         if !action.should_stop() {
             let mut sequence = state.sequence().clone();
@@ -148,11 +153,8 @@ impl PuzzleView for View {
             let state = &mut game.fact_or_fiction;
             state.set_sequence(seq);
             self.letters.reset(state.letters());
-            self.retry_countdown = if state.sequence().len() == 5 {
-                RETRY_DELAY
-            } else {
-                0
-            };
+            self.retry_countdown =
+                if state.sequence().len() == 5 { RETRY_DELAY } else { 0 };
         }
     }
 
@@ -172,7 +174,9 @@ impl PuzzleView for View {
         self.core.begin_outro_scene();
     }
 
-    fn drain_queue(&mut self) { self.core.drain_queue().clear(); }
+    fn drain_queue(&mut self) {
+        self.core.drain_queue().clear();
+    }
 }
 
 // ========================================================================= //

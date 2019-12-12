@@ -19,25 +19,17 @@
 
 use toml;
 
-use crate::save::{Access, CrosswordState, Location, ValidChars};
-use crate::save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
 use super::PuzzleState;
+use crate::save::util::{pop_array, to_table, Tomlable, ACCESS_KEY};
+use crate::save::{Access, CrosswordState, Location, ValidChars};
 
 // ========================================================================= //
 
 const WORDS_KEY: &str = "words";
 
 const SOLVED_WORDS: &[&str] = &[
-    "IN4MAL",
-    "FEMI9",
-    "CAR2N",
-    "1DERFUL",
-    "4EN6",
-    "PER48",
-    "42ITOUS",
-    "PHY6",
-    "QUI9",
-    "PUNC28",
+    "IN4MAL", "FEMI9", "CAR2N", "1DERFUL", "4EN6", "PER48", "42ITOUS", "PHY6",
+    "QUI9", "PUNC28",
 ];
 
 const VALID_CHARS: ValidChars = ValidChars::LettersAndNumbers;
@@ -61,21 +53,35 @@ impl LogLevelState {
         }
     }
 
-    pub fn crossword(&self) -> &CrosswordState { &self.words }
+    pub fn crossword(&self) -> &CrosswordState {
+        &self.words
+    }
 
-    pub fn crossword_mut(&mut self) -> &mut CrosswordState { &mut self.words }
+    pub fn crossword_mut(&mut self) -> &mut CrosswordState {
+        &mut self.words
+    }
 }
 
 impl PuzzleState for LogLevelState {
-    fn location() -> Location { Location::LogLevel }
+    fn location() -> Location {
+        Location::LogLevel
+    }
 
-    fn access(&self) -> Access { self.access }
+    fn access(&self) -> Access {
+        self.access
+    }
 
-    fn access_mut(&mut self) -> &mut Access { &mut self.access }
+    fn access_mut(&mut self) -> &mut Access {
+        &mut self.access
+    }
 
-    fn can_reset(&self) -> bool { self.words.can_reset() }
+    fn can_reset(&self) -> bool {
+        self.words.can_reset()
+    }
 
-    fn reset(&mut self) { self.words.reset(); }
+    fn reset(&mut self) {
+        self.words.reset();
+    }
 }
 
 impl Tomlable for LogLevelState {
@@ -94,14 +100,13 @@ impl Tomlable for LogLevelState {
         let words = if access == Access::Solved {
             CrosswordState::new(VALID_CHARS, SOLVED_WORDS)
         } else {
-            CrosswordState::from_toml(pop_array(&mut table, WORDS_KEY),
-                                      VALID_CHARS,
-                                      SOLVED_WORDS)
+            CrosswordState::from_toml(
+                pop_array(&mut table, WORDS_KEY),
+                VALID_CHARS,
+                SOLVED_WORDS,
+            )
         };
-        LogLevelState {
-            access: access,
-            words: words,
-        }
+        LogLevelState { access, words }
     }
 }
 
@@ -111,9 +116,9 @@ impl Tomlable for LogLevelState {
 mod tests {
     use toml;
 
-    use crate::save::Access;
-    use crate::save::util::{ACCESS_KEY, Tomlable};
     use super::{LogLevelState, SOLVED_WORDS};
+    use crate::save::util::{Tomlable, ACCESS_KEY};
+    use crate::save::Access;
 
     #[test]
     fn toml_round_trip() {

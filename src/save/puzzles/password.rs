@@ -20,9 +20,9 @@
 use std::cmp::{max, min};
 use toml;
 
-use crate::save::{Access, CrosswordState, Location, ValidChars};
-use crate::save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
 use super::PuzzleState;
+use crate::save::util::{pop_array, to_table, Tomlable, ACCESS_KEY};
+use crate::save::{Access, CrosswordState, Location, ValidChars};
 
 // ========================================================================= //
 
@@ -61,14 +61,8 @@ const MEZURE_WORDS: &[&str] = &[
     "JUNIOR",
     "LEADERSHIP",
 ];
-const YTTRIS_WORDS: &[&str] = &[
-    "ENERGY",
-    "EMOTION",
-    "SPONTANEOUS",
-    "FEARFUL",
-    "CREATIVE",
-    "ARTISTIC",
-];
+const YTTRIS_WORDS: &[&str] =
+    &["ENERGY", "EMOTION", "SPONTANEOUS", "FEARFUL", "CREATIVE", "ARTISTIC"];
 const UGRENT_WORDS: &[&str] = &[
     "CAUTION",
     "GRUFF",
@@ -116,7 +110,9 @@ impl PasswordState {
         ];
     }
 
-    pub fn active_index(&self) -> usize { self.active_index }
+    pub fn active_index(&self) -> usize {
+        self.active_index
+    }
 
     pub fn set_active_index(&mut self, index: usize) {
         debug_assert!(index < 6);
@@ -173,13 +169,21 @@ impl PasswordState {
 }
 
 impl PuzzleState for PasswordState {
-    fn location() -> Location { Location::PasswordFile }
+    fn location() -> Location {
+        Location::PasswordFile
+    }
 
-    fn access(&self) -> Access { self.access }
+    fn access(&self) -> Access {
+        self.access
+    }
 
-    fn access_mut(&mut self) -> &mut Access { &mut self.access }
+    fn access_mut(&mut self) -> &mut Access {
+        &mut self.access
+    }
 
-    fn allow_reset_for_undo_redo(&self) -> bool { false }
+    fn allow_reset_for_undo_redo(&self) -> bool {
+        false
+    }
 
     fn can_reset(&self) -> bool {
         if self.all_crosswords_done() {
@@ -215,26 +219,44 @@ impl Tomlable for PasswordState {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.is_solved() {
-            table.insert(ACTIVE_INDEX_KEY.to_string(),
-                         toml::Value::Integer(self.active_index as i64));
-            table.insert(ELINSA_KEY.to_string(),
-                         self.crosswords[0].1.to_toml());
-            table.insert(ARGONY_KEY.to_string(),
-                         self.crosswords[1].1.to_toml());
-            table.insert(MEZURE_KEY.to_string(),
-                         self.crosswords[2].1.to_toml());
-            table.insert(YTTRIS_KEY.to_string(),
-                         self.crosswords[3].1.to_toml());
-            table.insert(UGRENT_KEY.to_string(),
-                         self.crosswords[4].1.to_toml());
-            table.insert(RELYNG_KEY.to_string(),
-                         self.crosswords[5].1.to_toml());
-            table.insert(SLIDERS_KEY.to_string(),
-                         toml::Value::Array(self.sliders
-                                                .iter()
-                                                .map(|&off| off as i64)
-                                                .map(toml::Value::Integer)
-                                                .collect()));
+            table.insert(
+                ACTIVE_INDEX_KEY.to_string(),
+                toml::Value::Integer(self.active_index as i64),
+            );
+            table.insert(
+                ELINSA_KEY.to_string(),
+                self.crosswords[0].1.to_toml(),
+            );
+            table.insert(
+                ARGONY_KEY.to_string(),
+                self.crosswords[1].1.to_toml(),
+            );
+            table.insert(
+                MEZURE_KEY.to_string(),
+                self.crosswords[2].1.to_toml(),
+            );
+            table.insert(
+                YTTRIS_KEY.to_string(),
+                self.crosswords[3].1.to_toml(),
+            );
+            table.insert(
+                UGRENT_KEY.to_string(),
+                self.crosswords[4].1.to_toml(),
+            );
+            table.insert(
+                RELYNG_KEY.to_string(),
+                self.crosswords[5].1.to_toml(),
+            );
+            table.insert(
+                SLIDERS_KEY.to_string(),
+                toml::Value::Array(
+                    self.sliders
+                        .iter()
+                        .map(|&off| off as i64)
+                        .map(toml::Value::Integer)
+                        .collect(),
+                ),
+            );
         }
         toml::Value::Table(table)
     }
@@ -243,9 +265,8 @@ impl Tomlable for PasswordState {
         let mut table = to_table(value);
         let access = Access::pop_from_table(&mut table, ACCESS_KEY);
         let active_index =
-            max(0,
-                min(5, i32::pop_from_table(&mut table, ACTIVE_INDEX_KEY))) as
-                usize;
+            max(0, min(5, i32::pop_from_table(&mut table, ACTIVE_INDEX_KEY)))
+                as usize;
         let sliders = if access == Access::Solved {
             SOLVED_SLIDERS
         } else {
@@ -265,8 +286,8 @@ impl Tomlable for PasswordState {
             sliders
         };
         PasswordState {
-            access: access,
-            active_index: active_index,
+            access,
+            active_index,
             crosswords: [
                 load(&mut table, access, ELINSA_KEY, ELINSA_WORDS),
                 load(&mut table, access, ARGONY_KEY, ARGONY_WORDS),
@@ -275,22 +296,27 @@ impl Tomlable for PasswordState {
                 load(&mut table, access, UGRENT_KEY, UGRENT_WORDS),
                 load(&mut table, access, RELYNG_KEY, RELYNG_WORDS),
             ],
-            sliders: sliders,
+            sliders,
         }
     }
 }
 
 // ========================================================================= //
 
-fn load(table: &mut toml::value::Table, access: Access, key: &str,
-        solved_words: &[&str])
-        -> (bool, CrosswordState) {
+fn load(
+    table: &mut toml::value::Table,
+    access: Access,
+    key: &str,
+    solved_words: &[&str],
+) -> (bool, CrosswordState) {
     if access == Access::Solved {
         (true, CrosswordState::new(VALID, solved_words))
     } else {
-        let crossword = CrosswordState::from_toml(pop_array(table, key),
-                                                  VALID,
-                                                  solved_words);
+        let crossword = CrosswordState::from_toml(
+            pop_array(table, key),
+            VALID,
+            solved_words,
+        );
         (crossword.words_are(solved_words), crossword)
     }
 }
@@ -301,9 +327,9 @@ fn load(table: &mut toml::value::Table, access: Access, key: &str,
 mod tests {
     use toml;
 
+    use super::{PasswordState, INIT_SLIDERS, SOLVED_SLIDERS};
+    use crate::save::util::{Tomlable, ACCESS_KEY};
     use crate::save::Access;
-    use crate::save::util::{ACCESS_KEY, Tomlable};
-    use super::{INIT_SLIDERS, PasswordState, SOLVED_SLIDERS};
 
     #[test]
     fn toml_round_trip_crosswords() {
@@ -325,11 +351,15 @@ mod tests {
         assert_eq!(state.access, Access::Replaying);
         assert_eq!(state.active_index, 2);
         assert!(state.crossword(0).can_reset());
-        assert_eq!(state.crossword(0).words()[2],
-                   vec!['H', 'E', 'L', 'L', 'O', ' ', ' ', ' ', ' ']);
+        assert_eq!(
+            state.crossword(0).words()[2],
+            vec!['H', 'E', 'L', 'L', 'O', ' ', ' ', ' ', ' ']
+        );
         assert!(state.crossword(1).can_reset());
-        assert_eq!(state.crossword(1).words()[0],
-                   vec!['W', 'O', 'R', 'L', 'D', ' ', ' ', ' ', ' ']);
+        assert_eq!(
+            state.crossword(1).words()[0],
+            vec!['W', 'O', 'R', 'L', 'D', ' ', ' ', ' ', ' ']
+        );
         assert!(!state.crossword(2).can_reset());
     }
 
@@ -352,9 +382,9 @@ mod tests {
         assert_eq!(state.active_index, 0);
         assert!(state.crosswords.iter().all(|&(done, _)| !done));
         assert!(state
-                    .crosswords
-                    .iter()
-                    .all(|&(_, ref crossword)| !crossword.can_reset()));
+            .crosswords
+            .iter()
+            .all(|&(_, ref crossword)| !crossword.can_reset()));
         assert_eq!(state.sliders, INIT_SLIDERS);
     }
 

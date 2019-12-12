@@ -20,8 +20,10 @@
 use std::cmp::{max, min};
 use std::rc::Rc;
 
-use crate::gui::{Action, Align, Canvas, Element, Event, Font, Keycode, Point, Rect,
-          Resources};
+use crate::gui::{
+    Action, Align, Canvas, Element, Event, Font, Keycode, Point, Rect,
+    Resources,
+};
 use crate::save::CrosswordState;
 
 // ========================================================================= //
@@ -46,28 +48,33 @@ pub struct CrosswordView {
 }
 
 impl CrosswordView {
-    pub fn new(resources: &mut Resources,
-               (crossword_center_x, crossword_top): (i32, i32),
-               offsets_and_clues: &'static [(i32, &'static str)],
-               (clue_center_x, clue_top): (i32, i32))
-               -> CrosswordView {
+    pub fn new(
+        resources: &mut Resources,
+        (crossword_center_x, crossword_top): (i32, i32),
+        offsets_and_clues: &'static [(i32, &'static str)],
+        (clue_center_x, clue_top): (i32, i32),
+    ) -> CrosswordView {
         assert!(!offsets_and_clues.is_empty());
         CrosswordView {
             block_font: resources.get_font("block"),
             clue_font: resources.get_font("roman"),
-            crossword_center_x: crossword_center_x,
-            crossword_top: crossword_top,
-            offsets_and_clues: offsets_and_clues,
-            clue_center_x: clue_center_x,
-            clue_top: clue_top,
+            crossword_center_x,
+            crossword_top,
+            offsets_and_clues,
+            clue_center_x,
+            clue_top,
             cursor: None,
             animation: None,
         }
     }
 
-    pub fn reset_cursor(&mut self) { self.cursor = None; }
+    pub fn reset_cursor(&mut self) {
+        self.cursor = None;
+    }
 
-    pub fn animate_center_word(&mut self) { self.animation = Some(0); }
+    pub fn animate_center_word(&mut self) {
+        self.animation = Some(0);
+    }
 
     pub fn set_center_word_hilighted(&mut self, hilight: bool) {
         self.animation = if hilight { Some(self.anim_max()) } else { None }
@@ -179,16 +186,16 @@ impl Element<CrosswordState, (i32, i32, char)> for CrosswordView {
         for (row, word) in state.words().iter().enumerate() {
             let top = self.crossword_top + BOX_SIZE * row as i32;
             let offset = self.offsets_and_clues[row].0;
-            let word_left = self.crossword_center_x - BOX_SIZE / 2 -
-                BOX_SIZE * offset;
+            let word_left =
+                self.crossword_center_x - BOX_SIZE / 2 - BOX_SIZE * offset;
             for (index, &chr) in word.iter().enumerate() {
                 let index = index as i32;
                 let left = word_left + BOX_SIZE * index;
                 let rect = Rect::new(left, top, BOX_USIZE + 1, BOX_USIZE + 1);
                 canvas.fill_rect(self.box_color(row, index, chr), rect);
                 if chr != ' ' {
-                    let pt = Point::new(left + BOX_SIZE / 2,
-                                        top + BOX_SIZE - 3);
+                    let pt =
+                        Point::new(left + BOX_SIZE / 2, top + BOX_SIZE - 3);
                     canvas.draw_char(&self.block_font, Align::Center, pt, chr);
                 }
                 canvas.draw_rect((255, 255, 255), rect);
@@ -198,10 +205,12 @@ impl Element<CrosswordState, (i32, i32, char)> for CrosswordView {
             let clue = self.offsets_and_clues[row as usize].1;
             if !clue.is_empty() {
                 let width = max(0, self.clue_font.text_width(clue)) + 8;
-                let rect = Rect::new(self.clue_center_x - width / 2,
-                                     self.clue_top,
-                                     width as u32,
-                                     17);
+                let rect = Rect::new(
+                    self.clue_center_x - width / 2,
+                    self.clue_top,
+                    width as u32,
+                    17,
+                );
                 canvas.fill_rect((192, 192, 192), rect);
                 canvas.draw_rect((128, 128, 128), rect);
                 let pt = Point::new(self.clue_center_x, rect.top() + 12);
@@ -210,8 +219,11 @@ impl Element<CrosswordState, (i32, i32, char)> for CrosswordView {
         }
     }
 
-    fn handle_event(&mut self, event: &Event, state: &mut CrosswordState)
-                    -> Action<(i32, i32, char)> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        state: &mut CrosswordState,
+    ) -> Action<(i32, i32, char)> {
         match event {
             &Event::ClockTick => {
                 if let Some(frames) = self.animation {
@@ -228,11 +240,11 @@ impl Element<CrosswordState, (i32, i32, char)> for CrosswordView {
                     return Action::ignore();
                 }
                 let offset = self.offsets_and_clues[row as usize].0;
-                let word_left = self.crossword_center_x - BOX_SIZE / 2 -
-                    BOX_SIZE * offset;
+                let word_left =
+                    self.crossword_center_x - BOX_SIZE / 2 - BOX_SIZE * offset;
                 let index = (pt.x() - word_left) / BOX_SIZE;
-                if index < 0 ||
-                    index >= state.words()[row as usize].len() as i32
+                if index < 0
+                    || index >= state.words()[row as usize].len() as i32
                 {
                     return Action::ignore();
                 }

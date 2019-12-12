@@ -33,15 +33,18 @@ pub struct ProgressBar {
 }
 
 impl ProgressBar {
-    pub fn new((left, top): (i32, i32), dir: Direction, length: u32,
-               color: (u8, u8, u8))
-               -> ProgressBar {
+    pub fn new(
+        (left, top): (i32, i32),
+        dir: Direction,
+        length: u32,
+        color: (u8, u8, u8),
+    ) -> ProgressBar {
         ProgressBar {
             left: left + 1,
             top: top + 1,
-            dir: dir,
+            dir,
             length: if length > 2 { length - 2 } else { 0 },
-            color: color,
+            color,
         }
     }
 
@@ -52,18 +55,18 @@ impl ProgressBar {
             let rect = match self.dir {
                 Direction::East => Rect::new(self.left, self.top, length, 14),
                 Direction::South => Rect::new(self.left, self.top, 14, length),
-                Direction::West => {
-                    Rect::new(self.left + self.length as i32 - length as i32,
-                              self.top,
-                              length,
-                              14)
-                }
-                Direction::North => {
-                    Rect::new(self.left,
-                              self.top + self.length as i32 - length as i32,
-                              14,
-                              length)
-                }
+                Direction::West => Rect::new(
+                    self.left + self.length as i32 - length as i32,
+                    self.top,
+                    length,
+                    14,
+                ),
+                Direction::North => Rect::new(
+                    self.left,
+                    self.top + self.length as i32 - length as i32,
+                    14,
+                    length,
+                ),
             };
             canvas.fill_rect(self.color, rect);
         }

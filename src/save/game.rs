@@ -19,16 +19,17 @@
 
 use toml;
 
-use crate::save::{AtticState, AutoState, BlackState, BlameState, BlindState,
-           CubeState, DayState, DisconState, DotsState, DoubleState,
-           FailureState, FictionState, FinaleState, GearsState, GroundState,
-           HeadedState, HexState, IcyEmState, JogState, LaneState,
-           LevelUpState, LineState, Location, LogLevelState, MeetState,
-           MissedState, NoReturnState, OrderState, PasswordState, PovState,
-           PrologState, PuzzleState, RightState, SauceState, ServesState,
-           SimpleState, StarState, SyrupState, SyzygyState, TheYState,
-           TreadState, WhatchaState, WreckedState};
-use crate::save::util::{Tomlable, to_table};
+use crate::save::util::{to_table, Tomlable};
+use crate::save::{
+    AtticState, AutoState, BlackState, BlameState, BlindState, CubeState,
+    DayState, DisconState, DotsState, DoubleState, FailureState, FictionState,
+    FinaleState, GearsState, GroundState, HeadedState, HexState, IcyEmState,
+    JogState, LaneState, LevelUpState, LineState, Location, LogLevelState,
+    MeetState, MissedState, NoReturnState, OrderState, PasswordState,
+    PovState, PrologState, PuzzleState, RightState, SauceState, ServesState,
+    SimpleState, StarState, SyrupState, SyzygyState, TheYState, TreadState,
+    WhatchaState, WreckedState,
+};
 
 // ========================================================================= //
 
@@ -136,8 +137,10 @@ impl Game {
             whatcha_column: WhatchaState::pop_from_game_table(table_ref),
             wrecked_angle: WreckedState::pop_from_game_table(table_ref),
             finale: FinaleState::pop_from_game_table(table_ref),
-            ever_clicked_info: bool::pop_from_table(table_ref,
-                                                    EVER_CLICKED_INFO_KEY),
+            ever_clicked_info: bool::pop_from_table(
+                table_ref,
+                EVER_CLICKED_INFO_KEY,
+            ),
         }
     }
 
@@ -148,13 +151,17 @@ impl Game {
             if location != Location::Map {
                 let puzzle_state = self.puzzle_state(location);
                 if puzzle_state.has_been_visited() {
-                    table.insert(location.key().to_string(),
-                                 puzzle_state.to_toml());
+                    table.insert(
+                        location.key().to_string(),
+                        puzzle_state.to_toml(),
+                    );
                 }
             }
         }
-        table.insert(EVER_CLICKED_INFO_KEY.to_string(),
-                     toml::Value::Boolean(self.ever_clicked_info));
+        table.insert(
+            EVER_CLICKED_INFO_KEY.to_string(),
+            toml::Value::Boolean(self.ever_clicked_info),
+        );
         toml::Value::Table(table)
     }
 
@@ -265,8 +272,8 @@ impl Game {
 
 #[cfg(test)]
 mod tests {
-    use crate::save::{Access, Location, PuzzleState};
     use super::Game;
+    use crate::save::{Access, Location, PuzzleState};
 
     #[test]
     fn new_game() {

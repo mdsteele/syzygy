@@ -22,8 +22,8 @@ use std::collections::{HashMap, HashSet};
 use toml;
 
 use crate::gui::Point;
-use crate::save::MixedColor;
 use crate::save::util::Tomlable;
+use crate::save::MixedColor;
 
 // ========================================================================= //
 
@@ -42,20 +42,21 @@ impl PlaneObj {
     pub fn is_node(self) -> bool {
         match self {
             PlaneObj::Wall | PlaneObj::Cross => false,
-            PlaneObj::PurpleNode | PlaneObj::RedNode |
-            PlaneObj::GreenNode | PlaneObj::BlueNode | PlaneObj::GrayNode => {
-                true
-            }
+            PlaneObj::PurpleNode
+            | PlaneObj::RedNode
+            | PlaneObj::GreenNode
+            | PlaneObj::BlueNode
+            | PlaneObj::GrayNode => true,
         }
     }
 }
 
 #[derive(Clone, Copy)]
 enum PipePiece {
-    EmptyOrNode(bool), // false for empty, true for node
-    Start(usize), // pipe index
+    EmptyOrNode(bool),    // false for empty, true for node
+    Start(usize),         // pipe index
     Middle(usize, usize), // pipe index, piece index
-    End(usize), // pipe index
+    End(usize),           // pipe index
 }
 
 // ========================================================================= //
@@ -70,14 +71,16 @@ pub struct PlaneGrid {
 impl PlaneGrid {
     pub fn new(num_cols: u32, num_rows: u32) -> PlaneGrid {
         PlaneGrid {
-            num_cols: num_cols,
-            num_rows: num_rows,
+            num_cols,
+            num_rows,
             objects: HashMap::new(),
             pipes: Vec::new(),
         }
     }
 
-    pub fn pipes_to_toml(&self) -> toml::Value { self.pipes.to_toml() }
+    pub fn pipes_to_toml(&self) -> toml::Value {
+        self.pipes.to_toml()
+    }
 
     pub fn set_pipes_from_toml(&mut self, pipes: toml::value::Array) {
         self.pipes.clear();
@@ -94,16 +97,22 @@ impl PlaneGrid {
         }
     }
 
-    pub fn num_cols(&self) -> u32 { self.num_cols }
-
-    pub fn num_rows(&self) -> u32 { self.num_rows }
-
-    pub fn contains_coords(&self, pt: Point) -> bool {
-        (pt.x() >= 0 && (pt.x() as u32) < self.num_cols) &&
-            (pt.y() >= 0 && (pt.y() as u32) < self.num_rows)
+    pub fn num_cols(&self) -> u32 {
+        self.num_cols
     }
 
-    pub fn objects(&self) -> &HashMap<Point, PlaneObj> { &self.objects }
+    pub fn num_rows(&self) -> u32 {
+        self.num_rows
+    }
+
+    pub fn contains_coords(&self, pt: Point) -> bool {
+        (pt.x() >= 0 && (pt.x() as u32) < self.num_cols)
+            && (pt.y() >= 0 && (pt.y() as u32) < self.num_rows)
+    }
+
+    pub fn objects(&self) -> &HashMap<Point, PlaneObj> {
+        &self.objects
+    }
 
     pub fn place_object(&mut self, col: i32, row: i32, obj: PlaneObj) {
         let pt = Point::new(col, row);
@@ -118,9 +127,13 @@ impl PlaneGrid {
         self.objects.remove(&pt);
     }
 
-    pub fn pipes(&self) -> &Vec<Vec<Point>> { &self.pipes }
+    pub fn pipes(&self) -> &Vec<Vec<Point>> {
+        &self.pipes
+    }
 
-    pub fn remove_all_pipes(&mut self) { self.pipes.clear(); }
+    pub fn remove_all_pipes(&mut self) {
+        self.pipes.clear();
+    }
 
     fn pipe_piece_at(&self, coords: Point, is_vertical: bool) -> PipePiece {
         let obj = self.objects.get(&coords).cloned();
@@ -170,16 +183,18 @@ impl PlaneGrid {
             return false;
         }
         let is_vertical = dx == 0;
-        match (self.pipe_piece_at(coords1, is_vertical),
-                 self.pipe_piece_at(coords2, is_vertical)) {
+        match (
+            self.pipe_piece_at(coords1, is_vertical),
+            self.pipe_piece_at(coords2, is_vertical),
+        ) {
             (PipePiece::EmptyOrNode(node1), PipePiece::EmptyOrNode(node2)) => {
                 if node1 && node2 {
                     for p in 0..self.pipes.len() {
-                        if self.pipes[p].len() == 2 &&
-                            ((self.pipes[p][0] == coords1 &&
-                                  self.pipes[p][1] == coords2) ||
-                                 (self.pipes[p][0] == coords2 &&
-                                      self.pipes[p][1] == coords1))
+                        if self.pipes[p].len() == 2
+                            && ((self.pipes[p][0] == coords1
+                                && self.pipes[p][1] == coords2)
+                                || (self.pipes[p][0] == coords2
+                                    && self.pipes[p][1] == coords1))
                         {
                             self.pipes.swap_remove(p);
                             return true;
@@ -197,8 +212,9 @@ impl PlaneGrid {
                 }
             }
             (PipePiece::EmptyOrNode(is_node), PipePiece::End(p2)) => {
-                if is_node && self.pipes[p2].len() == 2 &&
-                    self.pipes[p2][0] == coords1
+                if is_node
+                    && self.pipes[p2].len() == 2
+                    && self.pipes[p2][0] == coords1
                 {
                     self.pipes.swap_remove(p2);
                 } else {
@@ -214,8 +230,9 @@ impl PlaneGrid {
                 }
             }
             (PipePiece::End(p1), PipePiece::EmptyOrNode(is_node)) => {
-                if is_node && self.pipes[p1].len() == 2 &&
-                    self.pipes[p1][0] == coords2
+                if is_node
+                    && self.pipes[p1].len() == 2
+                    && self.pipes[p1][0] == coords2
                 {
                     self.pipes.swap_remove(p1);
                 } else {
@@ -237,8 +254,8 @@ impl PlaneGrid {
                 pipe2.reverse();
                 self.pipes[p1].append(&mut pipe2);
             }
-            (PipePiece::End(p1), PipePiece::Start(p2)) |
-            (PipePiece::Start(p2), PipePiece::End(p1)) => {
+            (PipePiece::End(p1), PipePiece::Start(p2))
+            | (PipePiece::Start(p2), PipePiece::End(p1)) => {
                 if p1 == p2 {
                     if self.pipes[p1].len() == 2 {
                         self.pipes.swap_remove(p1);
@@ -255,16 +272,16 @@ impl PlaneGrid {
                     self.pipes.push(pipe1);
                 }
             }
-            (PipePiece::Start(p1), PipePiece::Middle(p2, i2)) |
-            (PipePiece::Middle(p2, i2), PipePiece::Start(p1)) => {
+            (PipePiece::Start(p1), PipePiece::Middle(p2, i2))
+            | (PipePiece::Middle(p2, i2), PipePiece::Start(p1)) => {
                 if p1 == p2 && i2 == 1 {
                     self.pipes[p1].remove(0);
                 } else {
                     return false;
                 }
             }
-            (PipePiece::Middle(p1, i1), PipePiece::End(p2)) |
-            (PipePiece::End(p2), PipePiece::Middle(p1, i1)) => {
+            (PipePiece::Middle(p1, i1), PipePiece::End(p2))
+            | (PipePiece::End(p2), PipePiece::Middle(p1, i1)) => {
                 if p1 == p2 && i1 + 2 == self.pipes[p1].len() {
                     self.pipes[p1].pop();
                 } else {
@@ -285,8 +302,9 @@ impl PlaneGrid {
             (PipePiece::Middle(p1, i1), PipePiece::EmptyOrNode(is_node)) => {
                 if is_node && i1 == 1 && self.pipes[p1][0] == coords2 {
                     self.pipes[p1].remove(0);
-                } else if is_node && i1 + 2 == self.pipes[p1].len() &&
-                           self.pipes[p1][i1 + 1] == coords2
+                } else if is_node
+                    && i1 + 2 == self.pipes[p1].len()
+                    && self.pipes[p1][i1 + 1] == coords2
                 {
                     self.pipes[p1].pop();
                 } else {
@@ -296,8 +314,9 @@ impl PlaneGrid {
             (PipePiece::EmptyOrNode(is_node), PipePiece::Middle(p2, i2)) => {
                 if is_node && i2 == 1 && self.pipes[p2][0] == coords1 {
                     self.pipes[p2].remove(0);
-                } else if is_node && i2 + 2 == self.pipes[p2].len() &&
-                           self.pipes[p2][i2 + 1] == coords1
+                } else if is_node
+                    && i2 + 2 == self.pipes[p2].len()
+                    && self.pipes[p2][i2 + 1] == coords1
                 {
                     self.pipes[p2].pop();
                 } else {

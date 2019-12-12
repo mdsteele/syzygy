@@ -21,12 +21,14 @@ use std::cmp;
 use std::collections::HashSet;
 use std::rc::Rc;
 
+use super::scenes;
 use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
-use crate::gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
-          Resources, Sound, Sprite};
+use crate::gui::{
+    Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
+    Sound, Sprite,
+};
 use crate::modes::SOLVED_INFO_TEXT;
 use crate::save::{Game, PuzzleState, StarState, WordDir};
-use super::scenes;
 
 // ========================================================================= //
 
@@ -38,8 +40,11 @@ pub struct View {
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect, state: &StarState)
-               -> View {
+    pub fn new(
+        resources: &mut Resources,
+        visible: Rect,
+        state: &StarState,
+    ) -> View {
         let mut core = {
             let fade = (FadeStyle::LeftToRight, FadeStyle::LeftToRight);
             let intro = scenes::compile_intro_scene(resources);
@@ -49,7 +54,7 @@ impl View {
         core.add_extra_scene(scenes::compile_mezure_midscene(resources));
         core.add_extra_scene(scenes::compile_ugrent_midscene(resources));
         View {
-            core: core,
+            core,
             wordlist: WordList::new(resources),
             wordlist_visible: true,
             columns: LetterColumns::new(resources),
@@ -69,8 +74,11 @@ impl Element<Game, PuzzleCmd> for View {
         self.core.draw_front_layer(canvas, state);
     }
 
-    fn handle_event(&mut self, event: &Event, game: &mut Game)
-                    -> Action<PuzzleCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        game: &mut Game,
+    ) -> Action<PuzzleCmd> {
         let state = &mut game.star_crossed;
         let mut action = self.core.handle_event(event, state);
         if !action.should_stop() {
@@ -153,8 +161,10 @@ impl Element<StarState, ()> for WordList {
             if !state.word_is_found(index) {
                 let word = state.word(index);
                 let index = index as i32;
-                let pt = Point::new(4 + 78 * (index / WORD_LIST_NUM_ROWS),
-                                    13 + 13 * (index % WORD_LIST_NUM_ROWS));
+                let pt = Point::new(
+                    4 + 78 * (index / WORD_LIST_NUM_ROWS),
+                    13 + 13 * (index % WORD_LIST_NUM_ROWS),
+                );
                 canvas.draw_text(&self.font, Align::Left, pt, word);
             }
         }
@@ -189,8 +199,13 @@ impl LetterColumns {
         }
     }
 
-    fn animate_fall(&mut self, start_col: i32, start_row: i32, dir: WordDir,
-                    length: i32) {
+    fn animate_fall(
+        &mut self,
+        start_col: i32,
+        start_row: i32,
+        dir: WordDir,
+        length: i32,
+    ) {
         match dir {
             WordDir::Vertical => {
                 self.fall_anim[start_col as usize] =
@@ -211,7 +226,9 @@ impl LetterColumns {
         self.hilight_anim = if enable { 1 } else { 0 };
     }
 
-    fn rect(&self) -> Rect { Rect::new(256, 56, 240, 240) }
+    fn rect(&self) -> Rect {
+        Rect::new(256, 56, 240, 240)
+    }
 
     fn hilighted_coords(&self) -> HashSet<(i32, i32)> {
         if let Some(ref drag) = self.drag {
@@ -228,14 +245,11 @@ impl Element<StarState, (i32, i32, WordDir, i32)> for LetterColumns {
         let rect = self.rect();
         let mut canvas = canvas.subcanvas(rect);
         for col in 0..state.num_columns() {
-            for (row, &letter) in state
-                .column_letters(col)
-                .iter()
-                .enumerate()
+            for (row, &letter) in state.column_letters(col).iter().enumerate()
             {
                 let row = row as i32;
-                let sprite_idx = if self.hilight_anim > col &&
-                    self.hilight_anim <= 10 + col
+                let sprite_idx = if self.hilight_anim > col
+                    && self.hilight_anim <= 10 + col
                 {
                     2
                 } else if hilighted.contains(&(col, row)) {
@@ -245,9 +259,10 @@ impl Element<StarState, (i32, i32, WordDir, i32)> for LetterColumns {
                 };
                 let (gap_row, gap, _) = self.fall_anim[col as usize];
                 let gap = if row >= gap_row { gap } else { 0 };
-                let pt = Point::new(col * BLOCK_WIDTH,
-                                    rect.height() as i32 - gap -
-                                        (1 + row) * BLOCK_HEIGHT);
+                let pt = Point::new(
+                    col * BLOCK_WIDTH,
+                    rect.height() as i32 - gap - (1 + row) * BLOCK_HEIGHT,
+                );
                 canvas.draw_sprite(&self.sprites[sprite_idx], pt);
                 let pt = pt + Point::new(BLOCK_WIDTH / 2, BLOCK_HEIGHT - 3);
                 canvas.draw_char(&self.font, Align::Center, pt, letter);
@@ -255,8 +270,11 @@ impl Element<StarState, (i32, i32, WordDir, i32)> for LetterColumns {
         }
     }
 
-    fn handle_event(&mut self, event: &Event, state: &mut StarState)
-                    -> Action<(i32, i32, WordDir, i32)> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        state: &mut StarState,
+    ) -> Action<(i32, i32, WordDir, i32)> {
         match event {
             &Event::ClockTick => {
                 let mut redraw = false;
@@ -295,11 +313,11 @@ impl Element<StarState, (i32, i32, WordDir, i32)> for LetterColumns {
             &Event::MouseDrag(pt) => {
                 let rect = self.rect();
                 if let Some(ref mut drag) = self.drag {
-                    let from = rect.bottom_left() +
-                        Point::new(drag.start_col * BLOCK_WIDTH +
-                                       BLOCK_WIDTH / 2,
-                                   -drag.start_row * BLOCK_HEIGHT -
-                                       BLOCK_HEIGHT / 2);
+                    let from = rect.bottom_left()
+                        + Point::new(
+                            drag.start_col * BLOCK_WIDTH + BLOCK_WIDTH / 2,
+                            -drag.start_row * BLOCK_HEIGHT - BLOCK_HEIGHT / 2,
+                        );
                     Action::redraw_if(drag.set_delta(pt - from, state))
                 } else {
                     Action::ignore()
@@ -350,8 +368,8 @@ impl Drag {
         let mut redraw = false;
         let xabs = delta.x().abs();
         let yabs = delta.y().abs();
-        if xabs < BLOCK_WIDTH + BLOCK_WIDTH / 2 &&
-            yabs < BLOCK_HEIGHT + BLOCK_HEIGHT / 2
+        if xabs < BLOCK_WIDTH + BLOCK_WIDTH / 2
+            && yabs < BLOCK_HEIGHT + BLOCK_HEIGHT / 2
         {
             let direction = if xabs > 2 * yabs {
                 Point::new(delta.x().signum(), 0)
@@ -382,10 +400,12 @@ impl Drag {
         }
         let mut length = dist.abs() + 1;
         for offset in 1..length {
-            let pt = Point::new(self.start_col, self.start_row) +
-                self.direction * offset;
-            if pt.x() < 0 || pt.x() >= state.num_columns() || pt.y() < 0 ||
-                pt.y() >= state.column_letters(pt.x()).len() as i32
+            let pt = Point::new(self.start_col, self.start_row)
+                + self.direction * offset;
+            if pt.x() < 0
+                || pt.x() >= state.num_columns()
+                || pt.y() < 0
+                || pt.y() >= state.column_letters(pt.x()).len() as i32
             {
                 length = offset;
                 break;

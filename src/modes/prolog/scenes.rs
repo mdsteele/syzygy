@@ -17,8 +17,8 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use crate::elements::{Ast, Scene, TalkPos, TalkStyle};
 use crate::elements::cutscene::JumpNode;
+use crate::elements::{Ast, Scene, TalkPos, TalkStyle};
 use crate::gui::{Resources, Sound};
 
 // ========================================================================= //

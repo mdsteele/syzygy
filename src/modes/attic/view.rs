@@ -19,12 +19,13 @@
 
 use std::cmp;
 
+use super::scenes;
 use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
-use crate::gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sound,
-          Sprite};
+use crate::gui::{
+    Action, Canvas, Element, Event, Point, Rect, Resources, Sound, Sprite,
+};
 use crate::modes::SOLVED_INFO_TEXT;
 use crate::save::{AtticState, Game, PuzzleState};
-use super::scenes;
 
 // ========================================================================= //
 
@@ -34,8 +35,11 @@ pub struct View {
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect, state: &AtticState)
-               -> View {
+    pub fn new(
+        resources: &mut Resources,
+        visible: Rect,
+        state: &AtticState,
+    ) -> View {
         let mut core = {
             let fade = (FadeStyle::LeftToRight, FadeStyle::LeftToRight);
             let intro = scenes::compile_intro_scene(resources);
@@ -44,10 +48,7 @@ impl View {
         };
         core.add_extra_scene(scenes::compile_argony_midscene(resources));
         core.add_extra_scene(scenes::compile_mezure_midscene(resources));
-        View {
-            core: core,
-            grid: AtticGrid::new(resources, state),
-        }
+        View { core, grid: AtticGrid::new(resources, state) }
     }
 }
 
@@ -60,8 +61,11 @@ impl Element<Game, PuzzleCmd> for View {
         self.core.draw_front_layer(canvas, state);
     }
 
-    fn handle_event(&mut self, event: &Event, game: &mut Game)
-                    -> Action<PuzzleCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        game: &mut Game,
+    ) -> Action<PuzzleCmd> {
         let state = &mut game.a_light_in_the_attic;
         let mut action = self.core.handle_event(event, state);
         if !action.should_stop() {
@@ -189,8 +193,11 @@ impl Element<AtticState, (i32, i32)> for AtticGrid {
         self.toggles.draw(state, canvas);
     }
 
-    fn handle_event(&mut self, event: &Event, state: &mut AtticState)
-                    -> Action<(i32, i32)> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        state: &mut AtticState,
+    ) -> Action<(i32, i32)> {
         let mut action = self.toggles.handle_event(event, state);
         if !action.should_stop() {
             action.merge(self.passives.handle_event(event, state));
@@ -211,15 +218,18 @@ struct ToggleLight {
 }
 
 impl ToggleLight {
-    fn new(resources: &mut Resources, state: &AtticState,
-           position: (i32, i32), label: char)
-           -> ToggleLight {
+    fn new(
+        resources: &mut Resources,
+        state: &AtticState,
+        position: (i32, i32),
+        label: char,
+    ) -> ToggleLight {
         let sprites = resources.get_sprites("light/toggle");
         ToggleLight {
             frame_off: sprites[0].clone(),
             frame_on: sprites[1].clone(),
             label: resources.get_font("block").glyph(label).sprite().clone(),
-            position: position,
+            position,
             light_radius: if state.is_lit(position) {
                 TOGGLE_MAX_LIGHT_RADIUS
             } else {
@@ -234,16 +244,20 @@ impl ToggleLight {
         Rect::new(LIGHTS_LEFT + 32 * col, LIGHTS_TOP + 32 * row, 32, 32)
     }
 
-    fn set_hilight(&mut self, hilight: bool) { self.hilight = hilight; }
+    fn set_hilight(&mut self, hilight: bool) {
+        self.hilight = hilight;
+    }
 }
 
 impl Element<AtticState, (i32, i32)> for ToggleLight {
     fn draw(&self, state: &AtticState, canvas: &mut Canvas) {
         let mut canvas = canvas.subcanvas(self.rect());
-        draw_light(&mut canvas,
-                   self.light_radius,
-                   TOGGLE_MAX_LIGHT_RADIUS,
-                   self.hilight);
+        draw_light(
+            &mut canvas,
+            self.light_radius,
+            TOGGLE_MAX_LIGHT_RADIUS,
+            self.hilight,
+        );
         let center = canvas.rect().center();
         canvas.draw_sprite_centered(&self.label, center);
         let frame = if state.is_toggled(self.position) {
@@ -254,16 +268,20 @@ impl Element<AtticState, (i32, i32)> for ToggleLight {
         canvas.draw_sprite_centered(frame, center);
     }
 
-    fn handle_event(&mut self, event: &Event, state: &mut AtticState)
-                    -> Action<(i32, i32)> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        state: &mut AtticState,
+    ) -> Action<(i32, i32)> {
         match event {
-            &Event::ClockTick => {
-                tick_radius(state.is_lit(self.position),
-                            &mut self.light_radius,
-                            TOGGLE_MAX_LIGHT_RADIUS)
-            }
+            &Event::ClockTick => tick_radius(
+                state.is_lit(self.position),
+                &mut self.light_radius,
+                TOGGLE_MAX_LIGHT_RADIUS,
+            ),
             &Event::MouseDown(pt)
-                if self.rect().contains_point(pt) && !state.is_solved() => {
+                if self.rect().contains_point(pt) && !state.is_solved() =>
+            {
                 Action::redraw().and_return(self.position)
             }
             _ => Action::ignore(),
@@ -282,9 +300,11 @@ struct PassiveLight {
 }
 
 impl PassiveLight {
-    fn new(resources: &mut Resources, state: &AtticState,
-           position: (i32, i32))
-           -> PassiveLight {
+    fn new(
+        resources: &mut Resources,
+        state: &AtticState,
+        position: (i32, i32),
+    ) -> PassiveLight {
         let sprites = resources.get_sprites("light/toggle");
         let (col, row) = position;
         let sprite_index = if col == 5 {
@@ -298,7 +318,7 @@ impl PassiveLight {
         };
         PassiveLight {
             frame: sprites[sprite_index].clone(),
-            position: position,
+            position,
             light_radius: if state.is_lit(position) {
                 PASSIVE_MAX_LIGHT_RADIUS
             } else {
@@ -316,22 +336,27 @@ impl PassiveLight {
 impl Element<AtticState, (i32, i32)> for PassiveLight {
     fn draw(&self, _: &AtticState, canvas: &mut Canvas) {
         let mut canvas = canvas.subcanvas(self.rect());
-        draw_light(&mut canvas,
-                   self.light_radius,
-                   PASSIVE_MAX_LIGHT_RADIUS,
-                   false);
+        draw_light(
+            &mut canvas,
+            self.light_radius,
+            PASSIVE_MAX_LIGHT_RADIUS,
+            false,
+        );
         let center = canvas.rect().center();
         canvas.draw_sprite_centered(&self.frame, center);
     }
 
-    fn handle_event(&mut self, event: &Event, state: &mut AtticState)
-                    -> Action<(i32, i32)> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        state: &mut AtticState,
+    ) -> Action<(i32, i32)> {
         match event {
-            &Event::ClockTick => {
-                tick_radius(state.is_lit(self.position),
-                            &mut self.light_radius,
-                            PASSIVE_MAX_LIGHT_RADIUS)
-            }
+            &Event::ClockTick => tick_radius(
+                state.is_lit(self.position),
+                &mut self.light_radius,
+                PASSIVE_MAX_LIGHT_RADIUS,
+            ),
             _ => Action::ignore(),
         }
     }
@@ -340,10 +365,12 @@ impl Element<AtticState, (i32, i32)> for PassiveLight {
 // ========================================================================= //
 
 fn light_rect(center: Point, radius: i32) -> Rect {
-    Rect::new(center.x() - radius,
-              center.y() - radius,
-              2 * radius as u32,
-              2 * radius as u32)
+    Rect::new(
+        center.x() - radius,
+        center.y() - radius,
+        2 * radius as u32,
+        2 * radius as u32,
+    )
 }
 
 fn draw_light(canvas: &mut Canvas, radius: i32, max: i32, hilight: bool) {

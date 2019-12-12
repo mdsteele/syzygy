@@ -19,9 +19,9 @@
 
 use toml;
 
-use crate::save::{Access, Direction, Location};
-use crate::save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
 use super::PuzzleState;
+use crate::save::util::{pop_array, to_table, Tomlable, ACCESS_KEY};
+use crate::save::{Access, Direction, Location};
 
 // ========================================================================= //
 
@@ -62,15 +62,15 @@ impl CubeState {
             assert!(rank >= 0 && rank < NUM_COLS);
             for row in 0..NUM_ROWS {
                 let index = (row * NUM_COLS + rank) as usize;
-                self.grid[index] = rotate_vert(self.grid[index],
-                                               dir.delta().y() * by);
+                self.grid[index] =
+                    rotate_vert(self.grid[index], dir.delta().y() * by);
             }
         } else {
             assert!(rank >= 0 && rank < NUM_ROWS);
             for col in 0..NUM_COLS {
                 let index = (rank * NUM_COLS + col) as usize;
-                self.grid[index] = rotate_horz(self.grid[index],
-                                               dir.delta().x() * by);
+                self.grid[index] =
+                    rotate_horz(self.grid[index], dir.delta().x() * by);
             }
         }
         self.is_initial = &self.grid as &[i32] == INITIAL_GRID;
@@ -81,13 +81,21 @@ impl CubeState {
 }
 
 impl PuzzleState for CubeState {
-    fn location() -> Location { Location::CubeTangle }
+    fn location() -> Location {
+        Location::CubeTangle
+    }
 
-    fn access(&self) -> Access { self.access }
+    fn access(&self) -> Access {
+        self.access
+    }
 
-    fn access_mut(&mut self) -> &mut Access { &mut self.access }
+    fn access_mut(&mut self) -> &mut Access {
+        &mut self.access
+    }
 
-    fn can_reset(&self) -> bool { !self.is_initial }
+    fn can_reset(&self) -> bool {
+        !self.is_initial
+    }
 
     fn reset(&mut self) {
         self.grid = INITIAL_GRID.to_vec();
@@ -100,7 +108,8 @@ impl Tomlable for CubeState {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.is_initial && !self.is_solved() {
-            let grid = self.grid
+            let grid = self
+                .grid
                 .iter()
                 .map(|&idx| toml::Value::Integer(idx as i64))
                 .collect();
@@ -127,11 +136,7 @@ impl Tomlable for CubeState {
             grid
         };
         let is_initial = &grid as &[i32] == INITIAL_GRID;
-        CubeState {
-            access: access,
-            grid: grid,
-            is_initial: is_initial,
-        }
+        CubeState { access, grid, is_initial }
     }
 }
 
@@ -232,10 +237,11 @@ fn rotate_vert(orientation: i32, by: i32) -> i32 {
 mod tests {
     use toml;
 
+    use super::{
+        rotate_vert, CubeState, INITIAL_GRID, NUM_COLS, NUM_ROWS, SOLVED_GRID,
+    };
+    use crate::save::util::{Tomlable, ACCESS_KEY};
     use crate::save::Access;
-    use crate::save::util::{ACCESS_KEY, Tomlable};
-    use super::{CubeState, INITIAL_GRID, NUM_COLS, NUM_ROWS, SOLVED_GRID,
-                rotate_vert};
 
     #[test]
     fn grid_sizes() {
@@ -262,8 +268,10 @@ mod tests {
 
         let state = CubeState::from_toml(state.to_toml());
         assert_eq!(state.access, Access::Replaying);
-        assert_eq!(state.grid,
-                   vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
+        assert_eq!(
+            state.grid,
+            vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+        );
         assert!(!state.is_initial);
     }
 

@@ -17,12 +17,14 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
+use super::scenes;
 use crate::elements::plane::{PlaneCmd, PlaneGridView};
-use crate::gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sound};
+use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
+use crate::gui::{
+    Action, Canvas, Element, Event, Point, Rect, Resources, Sound,
+};
 use crate::modes::SOLVED_INFO_TEXT;
 use crate::save::{Game, PuzzleState, SimpleState};
-use super::scenes;
 
 // ========================================================================= //
 
@@ -32,8 +34,11 @@ pub struct View {
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect, state: &SimpleState)
-               -> View {
+    pub fn new(
+        resources: &mut Resources,
+        visible: Rect,
+        state: &SimpleState,
+    ) -> View {
         let mut core = {
             let fade = (FadeStyle::LeftToRight, FadeStyle::LeftToRight);
             let intro = scenes::compile_intro_scene(resources);
@@ -42,10 +47,7 @@ impl View {
         };
         core.add_extra_scene(scenes::compile_ugrent_midscene(resources));
         core.add_extra_scene(scenes::compile_yttris_midscene(resources));
-        View {
-            core: core,
-            grid: PlaneGridView::new(resources, 128, 48),
-        }
+        View { core, grid: PlaneGridView::new(resources, 128, 48) }
     }
 }
 
@@ -58,13 +60,16 @@ impl Element<Game, PuzzleCmd> for View {
         self.core.draw_front_layer(canvas, state);
     }
 
-    fn handle_event(&mut self, event: &Event, game: &mut Game)
-                    -> Action<PuzzleCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        game: &mut Game,
+    ) -> Action<PuzzleCmd> {
         let state = &mut game.plane_and_simple;
         let mut action = self.core.handle_event(event, state);
         if !action.should_stop() && !state.is_solved() {
-            let mut subaction = self.grid
-                .handle_event(event, state.grid_mut());
+            let mut subaction =
+                self.grid.handle_event(event, state.grid_mut());
             match subaction.take_value() {
                 Some(PlaneCmd::Changed) => {
                     if state.advance_stage_if_done() {
@@ -140,8 +145,10 @@ impl PuzzleView for View {
             if word >= 0 && (word as usize) < WORDS.len() {
                 let (col, row, letters) = WORDS[word as usize];
                 if letter >= 0 && (letter as usize) < letters.len() {
-                    self.grid.add_letter(Point::new(col + letter, row),
-                                         letters[letter as usize]);
+                    self.grid.add_letter(
+                        Point::new(col + letter, row),
+                        letters[letter as usize],
+                    );
                 }
             }
         }

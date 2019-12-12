@@ -36,7 +36,9 @@ impl MovingStars {
         }
     }
 
-    pub fn set_visible(&mut self, visible: bool) { self.visible = visible; }
+    pub fn set_visible(&mut self, visible: bool) {
+        self.visible = visible;
+    }
 
     fn rand(range: u32, seed: &mut (u32, u32)) -> i32 {
         seed.0 = 36969 * (seed.0 & 0xffff) + (seed.0 >> 16);
@@ -45,13 +47,24 @@ impl MovingStars {
         (next % range) as i32
     }
 
-    fn draw_star(&self, x: i32, y: i32, width: u32, gray: u8,
-                 canvas: &mut Canvas) {
+    fn draw_star(
+        &self,
+        x: i32,
+        y: i32,
+        width: u32,
+        gray: u8,
+        canvas: &mut Canvas,
+    ) {
         canvas.fill_rect((gray, gray, gray), Rect::new(x, y, width, 1));
     }
 
-    fn draw_layer(&self, spacing: u32, speed: i32, gray: u8,
-                  canvas: &mut Canvas) {
+    fn draw_layer(
+        &self,
+        spacing: u32,
+        speed: i32,
+        gray: u8,
+        canvas: &mut Canvas,
+    ) {
         let mut seed = (123456789, 987654321);
         let star_width = (speed / 2) as u32;
         let modulus = (self.rect.width() + spacing) as i32;
@@ -60,8 +73,8 @@ impl MovingStars {
         while yoff < modulus {
             let mut xoff = 0;
             while xoff < modulus {
-                let x = ((xoff + scroll) % modulus) - spacing as i32 +
-                    MovingStars::rand(spacing, &mut seed);
+                let x = ((xoff + scroll) % modulus) - spacing as i32
+                    + MovingStars::rand(spacing, &mut seed);
                 let y = yoff + MovingStars::rand(spacing, &mut seed);
                 self.draw_star(x, y, star_width, gray, canvas);
                 xoff += spacing as i32;

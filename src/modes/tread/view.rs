@@ -20,12 +20,14 @@
 use std::cmp;
 use std::rc::Rc;
 
+use super::scenes;
 use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
-use crate::gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
-          Resources, Sound, Sprite};
+use crate::gui::{
+    Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
+    Sound, Sprite,
+};
 use crate::modes::SOLVED_INFO_TEXT;
 use crate::save::{Game, PuzzleState, TreadState};
-use super::scenes;
 
 // ========================================================================= //
 
@@ -37,8 +39,11 @@ pub struct View {
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect, state: &TreadState)
-               -> View {
+    pub fn new(
+        resources: &mut Resources,
+        visible: Rect,
+        state: &TreadState,
+    ) -> View {
         let mut core = {
             let fade = (FadeStyle::LeftToRight, FadeStyle::LeftToRight);
             let intro = scenes::compile_intro_scene(resources);
@@ -48,7 +53,7 @@ impl View {
         core.add_extra_scene(scenes::compile_mezure_midscene(resources));
         core.add_extra_scene(scenes::compile_relyng_midscene(resources));
         View {
-            core: core,
+            core,
             toggles: vec![
                 ToggleLight::new(resources, state, (1, 1)),
                 ToggleLight::new(resources, state, (2, 1)),
@@ -99,8 +104,11 @@ impl Element<Game, PuzzleCmd> for View {
         self.core.draw_front_layer(canvas, state);
     }
 
-    fn handle_event(&mut self, event: &Event, game: &mut Game)
-                    -> Action<PuzzleCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        game: &mut Game,
+    ) -> Action<PuzzleCmd> {
         let state = &mut game.tread_lightly;
         let mut action = self.core.handle_event(event, state);
         if !action.should_stop() {
@@ -188,13 +196,15 @@ struct ToggleLight {
 }
 
 impl ToggleLight {
-    fn new(resources: &mut Resources, state: &TreadState,
-           position: (i32, i32))
-           -> ToggleLight {
+    fn new(
+        resources: &mut Resources,
+        state: &TreadState,
+        position: (i32, i32),
+    ) -> ToggleLight {
         ToggleLight {
             font: resources.get_font("block"),
             frame: resources.get_sprites("light/toggle")[0].clone(),
-            position: position,
+            position,
             light_radius: if state.is_lit(position) {
                 TOGGLE_MAX_LIGHT_RADIUS
             } else {
@@ -209,16 +219,20 @@ impl ToggleLight {
         Rect::new(LIGHTS_LEFT + 32 * col, LIGHTS_TOP + 32 * row, 32, 32)
     }
 
-    fn set_hilight(&mut self, hilight: bool) { self.hilight = hilight; }
+    fn set_hilight(&mut self, hilight: bool) {
+        self.hilight = hilight;
+    }
 }
 
 impl Element<TreadState, (i32, i32)> for ToggleLight {
     fn draw(&self, state: &TreadState, canvas: &mut Canvas) {
         let mut canvas = canvas.subcanvas(self.rect());
-        draw_light(&mut canvas,
-                   self.light_radius,
-                   TOGGLE_MAX_LIGHT_RADIUS,
-                   self.hilight);
+        draw_light(
+            &mut canvas,
+            self.light_radius,
+            TOGGLE_MAX_LIGHT_RADIUS,
+            self.hilight,
+        );
         let center = canvas.rect().center();
         if let Some(chr) = state.toggled_label(self.position) {
             let pt = center + Point::new(0, 9);
@@ -227,16 +241,20 @@ impl Element<TreadState, (i32, i32)> for ToggleLight {
         canvas.draw_sprite_centered(&self.frame, center);
     }
 
-    fn handle_event(&mut self, event: &Event, state: &mut TreadState)
-                    -> Action<(i32, i32)> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        state: &mut TreadState,
+    ) -> Action<(i32, i32)> {
         match event {
-            &Event::ClockTick => {
-                tick_radius(state.is_lit(self.position),
-                            &mut self.light_radius,
-                            TOGGLE_MAX_LIGHT_RADIUS)
-            }
+            &Event::ClockTick => tick_radius(
+                state.is_lit(self.position),
+                &mut self.light_radius,
+                TOGGLE_MAX_LIGHT_RADIUS,
+            ),
             &Event::MouseDown(pt)
-                if self.rect().contains_point(pt) && !state.is_solved() => {
+                if self.rect().contains_point(pt) && !state.is_solved() =>
+            {
                 Action::redraw().and_return(self.position)
             }
             _ => Action::ignore(),
@@ -255,9 +273,11 @@ struct PassiveLight {
 }
 
 impl PassiveLight {
-    fn new(resources: &mut Resources, state: &TreadState,
-           position: (i32, i32))
-           -> PassiveLight {
+    fn new(
+        resources: &mut Resources,
+        state: &TreadState,
+        position: (i32, i32),
+    ) -> PassiveLight {
         let sprites = resources.get_sprites("light/toggle");
         let (col, row) = position;
         let sprite_index = if col == 5 {
@@ -271,7 +291,7 @@ impl PassiveLight {
         };
         PassiveLight {
             frame: sprites[sprite_index].clone(),
-            position: position,
+            position,
             light_radius: if state.is_lit(position) {
                 PASSIVE_MAX_LIGHT_RADIUS
             } else {
@@ -289,22 +309,27 @@ impl PassiveLight {
 impl Element<TreadState, PuzzleCmd> for PassiveLight {
     fn draw(&self, _: &TreadState, canvas: &mut Canvas) {
         let mut canvas = canvas.subcanvas(self.rect());
-        draw_light(&mut canvas,
-                   self.light_radius,
-                   PASSIVE_MAX_LIGHT_RADIUS,
-                   false);
+        draw_light(
+            &mut canvas,
+            self.light_radius,
+            PASSIVE_MAX_LIGHT_RADIUS,
+            false,
+        );
         let center = canvas.rect().center();
         canvas.draw_sprite_centered(&self.frame, center);
     }
 
-    fn handle_event(&mut self, event: &Event, state: &mut TreadState)
-                    -> Action<PuzzleCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        state: &mut TreadState,
+    ) -> Action<PuzzleCmd> {
         match event {
-            &Event::ClockTick => {
-                tick_radius(state.is_lit(self.position),
-                            &mut self.light_radius,
-                            PASSIVE_MAX_LIGHT_RADIUS)
-            }
+            &Event::ClockTick => tick_radius(
+                state.is_lit(self.position),
+                &mut self.light_radius,
+                PASSIVE_MAX_LIGHT_RADIUS,
+            ),
             _ => Action::ignore(),
         }
     }
@@ -319,10 +344,7 @@ struct NextLetter {
 
 impl NextLetter {
     fn new(resources: &mut Resources) -> NextLetter {
-        NextLetter {
-            font: resources.get_font("block"),
-            visible: false,
-        }
+        NextLetter { font: resources.get_font("block"), visible: false }
     }
 }
 
@@ -337,8 +359,11 @@ impl Element<TreadState, PuzzleCmd> for NextLetter {
         }
     }
 
-    fn handle_event(&mut self, event: &Event, _state: &mut TreadState)
-                    -> Action<PuzzleCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        _state: &mut TreadState,
+    ) -> Action<PuzzleCmd> {
         match event {
             _ => Action::ignore(),
         }
@@ -348,10 +373,12 @@ impl Element<TreadState, PuzzleCmd> for NextLetter {
 // ========================================================================= //
 
 fn light_rect(center: Point, radius: i32) -> Rect {
-    Rect::new(center.x() - radius,
-              center.y() - radius,
-              2 * radius as u32,
-              2 * radius as u32)
+    Rect::new(
+        center.x() - radius,
+        center.y() - radius,
+        2 * radius as u32,
+        2 * radius as u32,
+    )
 }
 
 fn draw_light(canvas: &mut Canvas, radius: i32, max: i32, hilight: bool) {

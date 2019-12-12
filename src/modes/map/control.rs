@@ -18,10 +18,10 @@
 // +--------------------------------------------------------------------------+
 
 use crate::gui::{Element, Event, Window};
-use crate::modes::{Mode, run_info_box};
+use crate::modes::{run_info_box, Mode};
 use crate::save::SaveData;
 
-use super::view::{Cmd, INFO_BOX_TEXT, View};
+use super::view::{Cmd, View, INFO_BOX_TEXT};
 
 // ========================================================================= //
 

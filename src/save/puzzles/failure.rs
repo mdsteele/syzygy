@@ -19,10 +19,10 @@
 
 use toml;
 
-use crate::save::{Access, Location};
-use crate::save::pyramid::{Board, Coords, Team};
-use crate::save::util::{ACCESS_KEY, Tomlable, to_table};
 use super::PuzzleState;
+use crate::save::pyramid::{Board, Coords, Team};
+use crate::save::util::{to_table, Tomlable, ACCESS_KEY};
+use crate::save::{Access, Location};
 
 // ========================================================================= //
 
@@ -57,15 +57,21 @@ impl FailureState {
         self.commit_board();
     }
 
-    pub fn mid_scene_is_done(&self) -> bool { self.mid_scene_done }
+    pub fn mid_scene_is_done(&self) -> bool {
+        self.mid_scene_done
+    }
 
     pub fn set_mid_scene_is_done(&mut self, done: bool) {
         self.mid_scene_done = done;
     }
 
-    pub fn board(&self) -> &Board { &self.board }
+    pub fn board(&self) -> &Board {
+        &self.board
+    }
 
-    pub fn board_mut(&mut self) -> &mut Board { &mut self.board }
+    pub fn board_mut(&mut self) -> &mut Board {
+        &mut self.board
+    }
 
     pub fn roll_back_board(&mut self) {
         self.board = self.committed_board.clone();
@@ -81,13 +87,21 @@ impl FailureState {
 }
 
 impl PuzzleState for FailureState {
-    fn location() -> Location { Location::SystemFailure }
+    fn location() -> Location {
+        Location::SystemFailure
+    }
 
-    fn access(&self) -> Access { self.access }
+    fn access(&self) -> Access {
+        self.access
+    }
 
-    fn access_mut(&mut self) -> &mut Access { &mut self.access }
+    fn access_mut(&mut self) -> &mut Access {
+        &mut self.access
+    }
 
-    fn can_reset(&self) -> bool { !self.board.is_empty() }
+    fn can_reset(&self) -> bool {
+        !self.board.is_empty()
+    }
 
     fn reset(&mut self) {
         self.board = Board::new();
@@ -100,8 +114,10 @@ impl Tomlable for FailureState {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if self.mid_scene_done {
-            table.insert(MID_SCENE_DONE_KEY.to_string(),
-                         toml::Value::Boolean(self.mid_scene_done));
+            table.insert(
+                MID_SCENE_DONE_KEY.to_string(),
+                toml::Value::Boolean(self.mid_scene_done),
+            );
             table
                 .insert(BOARD_KEY.to_string(), self.committed_board.to_toml());
         }
@@ -113,9 +129,11 @@ impl Tomlable for FailureState {
         let access = Access::pop_from_table(&mut table, ACCESS_KEY);
         let board = Board::pop_from_table(&mut table, BOARD_KEY);
         let mut state = FailureState {
-            access: access,
-            mid_scene_done: bool::pop_from_table(&mut table,
-                                                 MID_SCENE_DONE_KEY),
+            access,
+            mid_scene_done: bool::pop_from_table(
+                &mut table,
+                MID_SCENE_DONE_KEY,
+            ),
             board: board.clone(),
             committed_board: board,
         };
@@ -132,10 +150,10 @@ impl Tomlable for FailureState {
 mod tests {
     use toml;
 
-    use crate::save::Access;
-    use crate::save::pyramid::{Coords, Team};
-    use crate::save::util::{ACCESS_KEY, Tomlable};
     use super::FailureState;
+    use crate::save::pyramid::{Coords, Team};
+    use crate::save::util::{Tomlable, ACCESS_KEY};
+    use crate::save::Access;
 
     #[test]
     fn toml_round_trip() {

@@ -19,9 +19,9 @@
 
 use toml;
 
-use crate::save::{Access, Location};
-use crate::save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
 use super::PuzzleState;
+use crate::save::util::{pop_array, to_table, Tomlable, ACCESS_KEY};
+use crate::save::{Access, Location};
 
 // ========================================================================= //
 
@@ -90,9 +90,9 @@ impl TreadState {
 
     pub fn push_toggle(&mut self, pos: (i32, i32)) -> bool {
         let (col, row) = pos;
-        if self.toggled.len() < LETTERS.len() &&
-            (col >= 1 && col <= NUM_COLS) &&
-            (row >= 1 && row <= NUM_ROWS)
+        if self.toggled.len() < LETTERS.len()
+            && (col >= 1 && col <= NUM_COLS)
+            && (row >= 1 && row <= NUM_ROWS)
         {
             let index = (row - 1) * NUM_COLS + (col - 1);
             if !self.toggled.contains(&index) {
@@ -115,37 +115,35 @@ impl TreadState {
 
     fn rebuild_grid(&mut self) {
         self.grid = INITIAL_GRID.iter().cloned().collect();
-        debug_assert_eq!(self.grid.len() as i32,
-                         (NUM_ROWS + 2) * (NUM_COLS + 2));
+        debug_assert_eq!(
+            self.grid.len() as i32,
+            (NUM_ROWS + 2) * (NUM_COLS + 2)
+        );
         debug_assert!(self.toggled.len() <= LETTERS.len());
         for (char_index, &entry) in self.toggled.iter().enumerate() {
             let row = 1 + (entry / NUM_COLS);
             let col = 1 + (entry % NUM_COLS);
             let shape = match LETTERS[char_index] {
                 'A' => vec![(0, -1), (-1, 0), (0, 0), (1, 0), (-1, 1), (1, 1)],
-                'E' => {
-                    vec![
-                        (-1, -1),
-                        (0, -1),
-                        (1, -1),
-                        (-1, 0),
-                        (0, 0),
-                        (-1, 1),
-                        (0, 1),
-                        (1, 1),
-                    ]
-                }
-                'H' => {
-                    vec![
-                        (-1, -1),
-                        (1, -1),
-                        (-1, 0),
-                        (0, 0),
-                        (1, 0),
-                        (-1, 1),
-                        (1, 1),
-                    ]
-                }
+                'E' => vec![
+                    (-1, -1),
+                    (0, -1),
+                    (1, -1),
+                    (-1, 0),
+                    (0, 0),
+                    (-1, 1),
+                    (0, 1),
+                    (1, 1),
+                ],
+                'H' => vec![
+                    (-1, -1),
+                    (1, -1),
+                    (-1, 0),
+                    (0, 0),
+                    (1, 0),
+                    (-1, 1),
+                    (1, 1),
+                ],
                 'L' => vec![(0, -1), (0, 0), (0, 1), (1, 1)],
                 'S' => vec![(0, -1), (1, -1), (0, 0), (-1, 1), (0, 1)],
                 'T' => vec![(-1, -1), (0, -1), (1, -1), (0, 0), (0, 1)],
@@ -160,13 +158,21 @@ impl TreadState {
 }
 
 impl PuzzleState for TreadState {
-    fn location() -> Location { Location::TreadLightly }
+    fn location() -> Location {
+        Location::TreadLightly
+    }
 
-    fn access(&self) -> Access { self.access }
+    fn access(&self) -> Access {
+        self.access
+    }
 
-    fn access_mut(&mut self) -> &mut Access { &mut self.access }
+    fn access_mut(&mut self) -> &mut Access {
+        &mut self.access
+    }
 
-    fn can_reset(&self) -> bool { !self.toggled.is_empty() }
+    fn can_reset(&self) -> bool {
+        !self.toggled.is_empty()
+    }
 
     fn reset(&mut self) {
         self.toggled.clear();
@@ -179,7 +185,8 @@ impl Tomlable for TreadState {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.is_solved() && !self.toggled.is_empty() {
-            let toggled = self.toggled
+            let toggled = self
+                .toggled
                 .iter()
                 .map(|&idx| toml::Value::Integer(idx as i64))
                 .collect();
@@ -202,16 +209,12 @@ impl Tomlable for TreadState {
                 .collect();
             vec.into_iter().take(LETTERS.len()).collect()
         };
-        if (&toggled as &[i32]) == SOLVED_TOGGLED_1 ||
-            (&toggled as &[i32]) == SOLVED_TOGGLED_2
+        if (&toggled as &[i32]) == SOLVED_TOGGLED_1
+            || (&toggled as &[i32]) == SOLVED_TOGGLED_2
         {
             access = Access::Solved;
         }
-        let mut state = TreadState {
-            access: access,
-            toggled: toggled,
-            grid: Vec::new(),
-        };
+        let mut state = TreadState { access, toggled, grid: Vec::new() };
         state.rebuild_grid();
         debug_assert!(state.is_solved() ^ state.grid.iter().any(|&lit| lit));
         state
@@ -224,10 +227,12 @@ impl Tomlable for TreadState {
 mod tests {
     use toml;
 
+    use super::{
+        TreadState, INITIAL_GRID, SOLVED_TOGGLED_1, SOLVED_TOGGLED_2,
+        TOGGLED_KEY,
+    };
+    use crate::save::util::{Tomlable, ACCESS_KEY};
     use crate::save::Access;
-    use crate::save::util::{ACCESS_KEY, Tomlable};
-    use super::{INITIAL_GRID, SOLVED_TOGGLED_1, SOLVED_TOGGLED_2,
-                TOGGLED_KEY, TreadState};
 
     #[test]
     fn toml_round_trip() {
@@ -271,11 +276,12 @@ mod tests {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), Access::Unsolved.to_toml());
         let toggled = vec![-1, 0, 11, 12];
-        table.insert(TOGGLED_KEY.to_string(),
-                     toml::Value::Array(toggled
-                                            .into_iter()
-                                            .map(toml::Value::Integer)
-                                            .collect()));
+        table.insert(
+            TOGGLED_KEY.to_string(),
+            toml::Value::Array(
+                toggled.into_iter().map(toml::Value::Integer).collect(),
+            ),
+        );
 
         let state = TreadState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Unsolved);

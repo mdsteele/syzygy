@@ -20,9 +20,9 @@
 use rand::{self, Rng, SeedableRng};
 use toml;
 
-use crate::save::{Access, Location};
-use crate::save::util::{ACCESS_KEY, Tomlable, to_table};
 use super::PuzzleState;
+use crate::save::util::{to_table, Tomlable, ACCESS_KEY};
+use crate::save::{Access, Location};
 
 // ========================================================================= //
 
@@ -60,7 +60,9 @@ impl LineState {
         self.update_grids();
     }
 
-    pub fn current_stage(&self) -> i32 { self.stage }
+    pub fn current_stage(&self) -> i32 {
+        self.stage
+    }
 
     pub fn stage_letters(&self, stage: i32) -> (char, char) {
         assert!(stage >= 0);
@@ -69,9 +71,13 @@ impl LineState {
         (entry.1, entry.2)
     }
 
-    pub fn grid1(&self) -> &[char] { &self.grid1 }
+    pub fn grid1(&self) -> &[char] {
+        &self.grid1
+    }
 
-    pub fn grid2(&self) -> &[char] { &self.grid2 }
+    pub fn grid2(&self) -> &[char] {
+        &self.grid2
+    }
 
     pub fn num_cols(&self) -> i32 {
         debug_assert!(self.stage >= 0);
@@ -127,13 +133,21 @@ impl LineState {
 }
 
 impl PuzzleState for LineState {
-    fn location() -> Location { Location::CrossTheLine }
+    fn location() -> Location {
+        Location::CrossTheLine
+    }
 
-    fn access(&self) -> Access { self.access }
+    fn access(&self) -> Access {
+        self.access
+    }
 
-    fn access_mut(&mut self) -> &mut Access { &mut self.access }
+    fn access_mut(&mut self) -> &mut Access {
+        &mut self.access
+    }
 
-    fn can_reset(&self) -> bool { false }
+    fn can_reset(&self) -> bool {
+        false
+    }
 
     fn reset(&mut self) {
         self.stage = 0;
@@ -146,14 +160,20 @@ impl Tomlable for LineState {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.is_solved() {
-            table.insert(STAGE_KEY.to_string(),
-                         toml::Value::Integer(self.stage as i64));
-            table.insert(SEED_KEY.to_string(),
-                         toml::Value::Array(self.seed
-                                                .iter()
-                                                .map(|&value| value as i64)
-                                                .map(toml::Value::Integer)
-                                                .collect()));
+            table.insert(
+                STAGE_KEY.to_string(),
+                toml::Value::Integer(self.stage as i64),
+            );
+            table.insert(
+                SEED_KEY.to_string(),
+                toml::Value::Array(
+                    self.seed
+                        .iter()
+                        .map(|&value| value as i64)
+                        .map(toml::Value::Integer)
+                        .collect(),
+                ),
+            );
         }
         toml::Value::Table(table)
     }
@@ -169,8 +189,8 @@ impl Tomlable for LineState {
         let mut seed = [0; 8];
         if access != Access::Solved {
             let mut index = 0;
-            for value in Vec::<u32>::pop_from_table(&mut table, SEED_KEY)
-                .into_iter()
+            for value in
+                Vec::<u32>::pop_from_table(&mut table, SEED_KEY).into_iter()
             {
                 seed[index] = value;
                 index += 1;
@@ -184,9 +204,9 @@ impl Tomlable for LineState {
             }
         }
         let mut state = LineState {
-            access: access,
-            stage: stage,
-            seed: seed,
+            access,
+            stage,
+            seed,
             grid1: Vec::new(),
             grid2: Vec::new(),
         };
@@ -201,9 +221,9 @@ impl Tomlable for LineState {
 mod tests {
     use toml;
 
+    use super::{LineState, GRIDS};
+    use crate::save::util::{Tomlable, ACCESS_KEY};
     use crate::save::Access;
-    use crate::save::util::{ACCESS_KEY, Tomlable};
-    use super::{GRIDS, LineState};
 
     #[test]
     fn toml_round_trip() {

@@ -26,13 +26,14 @@ pub struct Prefs {
 }
 
 impl Prefs {
-    pub fn with_defaults() -> Prefs { Prefs { fullscreen: true } }
+    pub fn with_defaults() -> Prefs {
+        Prefs { fullscreen: true }
+    }
 
     pub fn from_toml(table: &toml::value::Table) -> Prefs {
         let mut prefs = Prefs::with_defaults();
-        if let Some(fullscreen) = table
-            .get(FULLSCREEN_KEY)
-            .and_then(toml::Value::as_bool)
+        if let Some(fullscreen) =
+            table.get(FULLSCREEN_KEY).and_then(toml::Value::as_bool)
         {
             prefs.fullscreen = fullscreen;
         }
@@ -41,12 +42,16 @@ impl Prefs {
 
     pub fn to_toml(&self) -> toml::Value {
         let mut table = toml::value::Table::new();
-        table.insert(FULLSCREEN_KEY.to_string(),
-                     toml::Value::Boolean(self.fullscreen));
+        table.insert(
+            FULLSCREEN_KEY.to_string(),
+            toml::Value::Boolean(self.fullscreen),
+        );
         toml::Value::Table(table)
     }
 
-    pub fn fullscreen(&self) -> bool { self.fullscreen }
+    pub fn fullscreen(&self) -> bool {
+        self.fullscreen
+    }
 
     #[allow(dead_code)]
     pub fn set_fullscreen(&mut self, fullscreen: bool) {

@@ -20,12 +20,14 @@
 use std::collections::HashMap;
 use std::rc::Rc;
 
+use super::scenes;
 use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
-use crate::gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
-          Resources, Sprite};
+use crate::gui::{
+    Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
+    Sprite,
+};
 use crate::modes::SOLVED_INFO_TEXT;
 use crate::save::{Direction, Game, PuzzleState, WreckedState};
-use super::scenes;
 
 // ========================================================================= //
 
@@ -36,9 +38,11 @@ pub struct View {
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect,
-               state: &WreckedState)
-               -> View {
+    pub fn new(
+        resources: &mut Resources,
+        visible: Rect,
+        state: &WreckedState,
+    ) -> View {
         let mut core = {
             let fade = (FadeStyle::TopToBottom, FadeStyle::TopToBottom);
             let intro = scenes::compile_intro_scene(resources);
@@ -47,7 +51,7 @@ impl View {
         };
         core.add_extra_scene(scenes::compile_mezure_midscene(resources));
         View {
-            core: core,
+            core,
             grid: WreckedGrid::new(resources),
             display: WreckedDisplay::new(resources),
         }
@@ -64,8 +68,11 @@ impl Element<Game, PuzzleCmd> for View {
         self.core.draw_front_layer(canvas, state);
     }
 
-    fn handle_event(&mut self, event: &Event, game: &mut Game)
-                    -> Action<PuzzleCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        game: &mut Game,
+    ) -> Action<PuzzleCmd> {
         let state = &mut game.wrecked_angle;
         let mut action = self.core.handle_event(event, state);
         if !action.should_stop() {
@@ -159,14 +166,12 @@ struct Drag {
 
 impl Drag {
     pub fn new(start: Point) -> Drag {
-        Drag {
-            from: start,
-            to: start,
-            accum: None,
-        }
+        Drag { from: start, to: start, accum: None }
     }
 
-    pub fn accum(self) -> Option<(Direction, i32, i32)> { self.accum }
+    pub fn accum(self) -> Option<(Direction, i32, i32)> {
+        self.accum
+    }
 
     pub fn set_to(&mut self, to: Point) -> Option<(Direction, i32, i32)> {
         self.to = to;
@@ -286,10 +291,12 @@ impl Element<WreckedState, (Direction, i32, i32)> for WreckedGrid {
                 if let Some(index) = state.tile_at(col, row) {
                     if let Some(&chr) = self.letters.get(&(col, row)) {
                         canvas.draw_sprite(&self.tile_sprites[3], pt);
-                        canvas.draw_char(&self.font,
-                                         Align::Center,
-                                         pt + Point::new(12, 17),
-                                         chr);
+                        canvas.draw_char(
+                            &self.font,
+                            Align::Center,
+                            pt + Point::new(12, 17),
+                            chr,
+                        );
                     } else {
                         canvas.draw_sprite(&self.tile_sprites[index], pt);
                     }
@@ -298,8 +305,11 @@ impl Element<WreckedState, (Direction, i32, i32)> for WreckedGrid {
         }
     }
 
-    fn handle_event(&mut self, event: &Event, state: &mut WreckedState)
-                    -> Action<(Direction, i32, i32)> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        state: &mut WreckedState,
+    ) -> Action<(Direction, i32, i32)> {
         let rect =
             Rect::new(GRID_LEFT, GRID_TOP, 9 * TILE_USIZE, 7 * TILE_USIZE);
         match event {
@@ -370,7 +380,9 @@ impl WreckedDisplay {
         }
     }
 
-    pub fn set_panic(&mut self, panic: bool) { self.panic = panic; }
+    pub fn set_panic(&mut self, panic: bool) {
+        self.panic = panic;
+    }
 
     fn set_index(&mut self, index: i32) {
         if index >= 0 {
@@ -385,13 +397,12 @@ impl WreckedDisplay {
 
 impl Element<WreckedState, PuzzleCmd> for WreckedDisplay {
     fn draw(&self, state: &WreckedState, canvas: &mut Canvas) {
-        let index = if self.anim > 0 {
-            ((self.anim / 2) % 3) + 3
-        } else {
-            self.index
-        };
-        canvas.draw_sprite(&self.sprites[index],
-                           Point::new(DISPLAY_LEFT, DISPLAY_TOP));
+        let index =
+            if self.anim > 0 { ((self.anim / 2) % 3) + 3 } else { self.index };
+        canvas.draw_sprite(
+            &self.sprites[index],
+            Point::new(DISPLAY_LEFT, DISPLAY_TOP),
+        );
         if index == 0 {
             let (text1, text2) = if self.panic {
                 ("PLEASE", "PANIC")
@@ -400,19 +411,26 @@ impl Element<WreckedState, PuzzleCmd> for WreckedDisplay {
             } else {
                 ("Status:", "BORKEN")
             };
-            canvas.draw_text(&self.font,
-                             Align::Center,
-                             Point::new(DISPLAY_LEFT + 28, DISPLAY_TOP + 18),
-                             text1);
-            canvas.draw_text(&self.font,
-                             Align::Center,
-                             Point::new(DISPLAY_LEFT + 28, DISPLAY_TOP + 32),
-                             text2);
+            canvas.draw_text(
+                &self.font,
+                Align::Center,
+                Point::new(DISPLAY_LEFT + 28, DISPLAY_TOP + 18),
+                text1,
+            );
+            canvas.draw_text(
+                &self.font,
+                Align::Center,
+                Point::new(DISPLAY_LEFT + 28, DISPLAY_TOP + 32),
+                text2,
+            );
         }
     }
 
-    fn handle_event(&mut self, event: &Event, _state: &mut WreckedState)
-                    -> Action<PuzzleCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        _state: &mut WreckedState,
+    ) -> Action<PuzzleCmd> {
         match event {
             &Event::ClockTick => {
                 if self.anim > 0 {

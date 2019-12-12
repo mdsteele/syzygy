@@ -19,14 +19,18 @@
 
 use std::cmp;
 
-use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView, Scene};
-use crate::elements::cutscene::{JumpNode, ParallelNode, QueueNode, SceneNode,
-                         SequenceNode, SlideNode, SoundNode, WaitNode};
+use super::scenes;
+use crate::elements::cutscene::{
+    JumpNode, ParallelNode, QueueNode, SceneNode, SequenceNode, SlideNode,
+    SoundNode, WaitNode,
+};
 use crate::elements::shift::{ArrowPair, Platform};
-use crate::gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sound};
+use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView, Scene};
+use crate::gui::{
+    Action, Canvas, Element, Event, Point, Rect, Resources, Sound,
+};
 use crate::modes::SOLVED_INFO_TEXT;
 use crate::save::{Game, GearsState, PuzzleState};
-use super::scenes;
 
 // ========================================================================= //
 
@@ -131,8 +135,12 @@ impl View {
         }
     }
 
-    fn shift_platform(&mut self, state: &mut GearsState, row: i32,
-                      mut delta: i32) {
+    fn shift_platform(
+        &mut self,
+        state: &mut GearsState,
+        row: i32,
+        mut delta: i32,
+    ) {
         let num_rows = GearsState::num_rows() as i32;
         let min_pos = GearsState::min_position_for_row(row);
         let max_pos = GearsState::max_position_for_row(row);
@@ -170,20 +178,27 @@ impl View {
             platform_seq.push(Box::new(SoundNode::new(sound)));
             platform_seq.push(Box::new(QueueNode::new((row, pos))));
             platform_seq.push(Box::new(WaitNode::new(travel_time)));
-            if ugrent_row >= 0 && ugrent_row < num_rows &&
-                (row == ugrent_row - 1 ||
-                     ((row == 2 || row == 3) && row == ugrent_row - 2))
+            if ugrent_row >= 0
+                && ugrent_row < num_rows
+                && (row == ugrent_row - 1
+                    || ((row == 2 || row == 3) && row == ugrent_row - 2))
             {
-                let impact = if pos > old_pos && ugrent_pos > old_pos &&
-                    ugrent_pos <= pos
+                let impact = if pos > old_pos
+                    && ugrent_pos > old_pos
+                    && ugrent_pos <= pos
                 {
-                    Some((Platform::travel_time(old_pos, ugrent_pos - 1),
-                          cmp::min(10, ugrent_pos + 1)))
-                } else if pos < old_pos && ugrent_pos >= pos &&
-                           ugrent_pos < old_pos
+                    Some((
+                        Platform::travel_time(old_pos, ugrent_pos - 1),
+                        cmp::min(10, ugrent_pos + 1),
+                    ))
+                } else if pos < old_pos
+                    && ugrent_pos >= pos
+                    && ugrent_pos < old_pos
                 {
-                    Some((Platform::travel_time(old_pos, ugrent_pos + 1),
-                          cmp::max(0, ugrent_pos - 1)))
+                    Some((
+                        Platform::travel_time(old_pos, ugrent_pos + 1),
+                        cmp::max(0, ugrent_pos - 1),
+                    ))
                 } else {
                     None
                 };
@@ -196,23 +211,22 @@ impl View {
                         self.floor_pt_for_pos(ugrent_pos)
                     };
                     let fall_dist = dest.y() - self.platform_top(row + 1);
-                    let time_to_fall = JumpNode::time_to_fall(fall_dist + 5) +
-                        JumpNode::time_to_fall(5);
+                    let time_to_fall = JumpNode::time_to_fall(fall_dist + 5)
+                        + JumpNode::time_to_fall(5);
                     ugrent_seq.push(Box::new(WaitNode::new(time_to_hit)));
                     let sound = Sound::character_collision();
                     ugrent_seq.push(Box::new(SoundNode::new(sound)));
-                    ugrent_seq.push(Box::new(JumpNode::new(scenes::UGRENT,
-                                                           dest,
-                                                           time_to_fall)));
+                    ugrent_seq.push(Box::new(JumpNode::new(
+                        scenes::UGRENT,
+                        dest,
+                        time_to_fall,
+                    )));
                     ugrent_seq
                         .push(Box::new(QueueNode::new((ugrent_row, -1))));
                 }
             } else if row == ugrent_row {
-                let barrier_pos_1 = if row > 0 {
-                    state.get_position(row - 1)
-                } else {
-                    5
-                };
+                let barrier_pos_1 =
+                    if row > 0 { state.get_position(row - 1) } else { 5 };
                 let barrier_pos_2 = if row == 4 || row == 5 {
                     state.get_position(row - 2)
                 } else {
@@ -220,8 +234,8 @@ impl View {
                 };
                 let impact = if pos > old_pos {
                     if barrier_pos_1 > old_pos && barrier_pos_1 <= pos {
-                        if barrier_pos_2 > old_pos &&
-                            barrier_pos_2 < barrier_pos_1
+                        if barrier_pos_2 > old_pos
+                            && barrier_pos_2 < barrier_pos_1
                         {
                             Some(barrier_pos_2 - 1)
                         } else {
@@ -234,8 +248,8 @@ impl View {
                     }
                 } else {
                     if barrier_pos_1 < old_pos && barrier_pos_1 >= pos {
-                        if barrier_pos_2 < old_pos &&
-                            barrier_pos_2 > barrier_pos_1
+                        if barrier_pos_2 < old_pos
+                            && barrier_pos_2 > barrier_pos_1
                         {
                             Some(barrier_pos_2 + 1)
                         } else {
@@ -248,8 +262,8 @@ impl View {
                     }
                 };
                 if let Some(new_ugrent_pos) = impact {
-                    let time_to_hit = Platform::travel_time(ugrent_pos,
-                                                            new_ugrent_pos);
+                    let time_to_hit =
+                        Platform::travel_time(ugrent_pos, new_ugrent_pos);
                     ugrent_pos = new_ugrent_pos;
                     ugrent_row = state.fall_from(ugrent_row, ugrent_pos);
                     let slide_dest = self.platform_pt_for_pos(row, ugrent_pos);
@@ -259,28 +273,34 @@ impl View {
                         self.floor_pt_for_pos(ugrent_pos)
                     };
                     let fall_dist = jump_dest.y() - self.platform_top(row);
-                    let time_to_fall = JumpNode::time_to_fall(fall_dist + 5) +
-                        JumpNode::time_to_fall(5);
-                    ugrent_seq.push(Box::new(SlideNode::new(scenes::UGRENT,
-                                                            slide_dest,
-                                                            false,
-                                                            false,
-                                                            time_to_hit)));
+                    let time_to_fall = JumpNode::time_to_fall(fall_dist + 5)
+                        + JumpNode::time_to_fall(5);
+                    ugrent_seq.push(Box::new(SlideNode::new(
+                        scenes::UGRENT,
+                        slide_dest,
+                        false,
+                        false,
+                        time_to_hit,
+                    )));
                     let sound = Sound::character_collision();
                     ugrent_seq.push(Box::new(SoundNode::new(sound)));
-                    ugrent_seq.push(Box::new(JumpNode::new(scenes::UGRENT,
-                                                           jump_dest,
-                                                           time_to_fall)));
+                    ugrent_seq.push(Box::new(JumpNode::new(
+                        scenes::UGRENT,
+                        jump_dest,
+                        time_to_fall,
+                    )));
                     ugrent_seq
                         .push(Box::new(QueueNode::new((ugrent_row, -1))));
                 } else {
                     ugrent_pos = pos;
                     let dest = self.platform_pt_for_pos(row, ugrent_pos);
-                    ugrent_seq.push(Box::new(SlideNode::new(scenes::UGRENT,
-                                                            dest,
-                                                            false,
-                                                            false,
-                                                            travel_time)));
+                    ugrent_seq.push(Box::new(SlideNode::new(
+                        scenes::UGRENT,
+                        dest,
+                        false,
+                        false,
+                        travel_time,
+                    )));
                 }
             }
             top_seq.push(Box::new(ParallelNode::new(vec![
@@ -293,11 +313,13 @@ impl View {
         // If Ugrent fell to the floor, get back on the starting platform:
         if ugrent_row == num_rows && original_ugrent_row != num_rows {
             let slide_time = 0.5 * Platform::travel_time(ugrent_pos, 0);
-            top_seq.push(Box::new(SlideNode::new(scenes::UGRENT,
-                                                 self.floor_pt_for_pos(0),
-                                                 false,
-                                                 false,
-                                                 slide_time)));
+            top_seq.push(Box::new(SlideNode::new(
+                scenes::UGRENT,
+                self.floor_pt_for_pos(0),
+                false,
+                false,
+                slide_time,
+            )));
             let dest = self.platform_pt(state, ugrent_row);
             top_seq.push(Box::new(SoundNode::new(Sound::small_jump())));
             top_seq.push(Box::new(JumpNode::new(scenes::UGRENT, dest, 0.5)));
@@ -306,9 +328,9 @@ impl View {
         // Make Ugrent climb upwards:
         let last_row = num_rows - 1;
         let min_pos_for_last_row = GearsState::min_position_for_row(last_row);
-        if ugrent_row == num_rows &&
-            state.get_position(last_row) == min_pos_for_last_row &&
-            state.get_position(last_row - 1) != min_pos_for_last_row
+        if ugrent_row == num_rows
+            && state.get_position(last_row) == min_pos_for_last_row
+            && state.get_position(last_row - 1) != min_pos_for_last_row
         {
             ugrent_row -= 1;
             let dest = self.platform_pt(state, ugrent_row);
@@ -326,14 +348,15 @@ impl View {
                     5
                 };
                 let mut next_row = ugrent_row;
-                if (ugrent_pos - pos_1).abs() == 1 && pos_2 != pos_1 &&
-                    pos_2 != ugrent_pos &&
-                    ((ugrent_row != 5 && ugrent_row != 6) ||
-                         state.get_position(ugrent_row - 3) != pos_1)
+                if (ugrent_pos - pos_1).abs() == 1
+                    && pos_2 != pos_1
+                    && pos_2 != ugrent_pos
+                    && ((ugrent_row != 5 && ugrent_row != 6)
+                        || state.get_position(ugrent_row - 3) != pos_1)
                 {
                     next_row = ugrent_row - 1;
-                } else if (ugrent_row == 4 || ugrent_row == 5) &&
-                           (ugrent_pos - pos_2).abs() == 1
+                } else if (ugrent_row == 4 || ugrent_row == 5)
+                    && (ugrent_pos - pos_2).abs() == 1
                 {
                     let pos_3 = state.get_position(ugrent_row - 3);
                     if pos_3 != pos_2 && pos_3 != ugrent_pos {
@@ -346,13 +369,16 @@ impl View {
                 ugrent_row = next_row;
                 let dest = self.platform_pt(state, ugrent_row);
                 top_seq.push(Box::new(SoundNode::new(Sound::small_jump())));
-                top_seq
-                    .push(Box::new(JumpNode::new(scenes::UGRENT, dest, 0.6)));
+                top_seq.push(Box::new(JumpNode::new(
+                    scenes::UGRENT,
+                    dest,
+                    0.6,
+                )));
                 top_seq.push(Box::new(QueueNode::new((ugrent_row, -1))));
             }
         }
-        if ugrent_row == 0 &&
-            state.get_position(0) == GearsState::max_position_for_row(0)
+        if ugrent_row == 0
+            && state.get_position(0) == GearsState::max_position_for_row(0)
         {
             ugrent_row -= 1;
             let dest = self.platform_pt(state, ugrent_row);
@@ -361,9 +387,11 @@ impl View {
             top_seq.push(Box::new(QueueNode::new((ugrent_row, -1))));
         }
         state.set_ugrent_row(ugrent_row);
-        self.core.push_undo((row,
-                             pos - original_position,
-                             ugrent_row - original_ugrent_row));
+        self.core.push_undo((
+            row,
+            pos - original_position,
+            ugrent_row - original_ugrent_row,
+        ));
 
         // Start animation:
         self.animation =
@@ -386,8 +414,11 @@ impl Element<Game, PuzzleCmd> for View {
         self.core.draw_front_layer(canvas, state);
     }
 
-    fn handle_event(&mut self, event: &Event, game: &mut Game)
-                    -> Action<PuzzleCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        game: &mut Game,
+    ) -> Action<PuzzleCmd> {
         let state = &mut game.shift_gears;
         let mut action = self.core.handle_event(event, state);
         self.drain_queue();
@@ -396,8 +427,8 @@ impl Element<Game, PuzzleCmd> for View {
             action.merge(subaction.but_no_value());
         }
         if !action.should_stop() && self.animating {
-            let subaction = self.animation
-                .handle_event(event, self.core.theater_mut());
+            let subaction =
+                self.animation.handle_event(event, self.core.theater_mut());
             action.merge(subaction.but_no_value());
             self.drain_queue();
             if self.animation.is_finished() {
@@ -408,8 +439,9 @@ impl Element<Game, PuzzleCmd> for View {
                 }
             }
         }
-        if !action.should_stop() && self.platforms_and_arrows_visible &&
-            (event == &Event::ClockTick || !state.is_solved())
+        if !action.should_stop()
+            && self.platforms_and_arrows_visible
+            && (event == &Event::ClockTick || !state.is_solved())
         {
             let subaction = self.arrows.handle_event(event, &mut ());
             if let Some(&(row, delta)) = subaction.value() {

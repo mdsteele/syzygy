@@ -20,8 +20,10 @@
 use std::cmp::{max, min};
 use std::rc::Rc;
 
-use crate::gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
-          Resources, Sprite};
+use crate::gui::{
+    Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
+    Sprite,
+};
 
 // ========================================================================= //
 
@@ -37,12 +39,15 @@ pub struct LettersView {
 }
 
 impl LettersView {
-    pub fn new(resources: &mut Resources, letters: &Vec<char>, cx: i32,
-               cy: i32)
-               -> LettersView {
+    pub fn new(
+        resources: &mut Resources,
+        letters: &Vec<char>,
+        cx: i32,
+        cy: i32,
+    ) -> LettersView {
         LettersView {
-            cx: cx,
-            cy: cy,
+            cx,
+            cy,
             font: resources.get_font("block"),
             letters: letters.clone(),
             hilights: Vec::new(),
@@ -64,11 +69,12 @@ impl LettersView {
         for &(from, to) in bars {
             let rect1 = self.letter_rect(from);
             let rect2 = self.letter_rect(to);
-            self.hilights.push(Rect::new(rect1.left(),
-                                         rect1.top(),
-                                         (rect2.right() - rect1.left()) as
-                                             u32,
-                                         rect1.height()));
+            self.hilights.push(Rect::new(
+                rect1.left(),
+                rect1.top(),
+                (rect2.right() - rect1.left()) as u32,
+                rect1.height(),
+            ));
         }
         self.countdown = HILIGHT_FRAMES;
     }
@@ -109,8 +115,11 @@ impl Element<Vec<char>, ()> for LettersView {
         }
     }
 
-    fn handle_event(&mut self, event: &Event, letters: &mut Vec<char>)
-                    -> Action<()> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        letters: &mut Vec<char>,
+    ) -> Action<()> {
         match event {
             &Event::ClockTick => {
                 if self.countdown > 0 {
@@ -142,21 +151,21 @@ pub struct TransformButton {
 }
 
 impl TransformButton {
-    pub fn new(sprites: &Vec<Sprite>, index: i8, seq: &Vec<i8>, left: i32,
-               top: i32)
-               -> TransformButton {
+    pub fn new(
+        sprites: &Vec<Sprite>,
+        index: i8,
+        seq: &Vec<i8>,
+        left: i32,
+        top: i32,
+    ) -> TransformButton {
         debug_assert!(index >= 0 && (index as usize) < sprites.len());
         let sprite = sprites[index as usize].clone();
         let rect = Rect::new(left, top, sprite.width(), sprite.height());
         TransformButton {
-            rect: rect,
-            sprite: sprite,
-            index: index,
-            anim: if seq.contains(&index) {
-                ANIM_MAX
-            } else {
-                ANIM_MIN
-            },
+            rect,
+            sprite,
+            index,
+            anim: if seq.contains(&index) { ANIM_MAX } else { ANIM_MIN },
         }
     }
 }
@@ -164,17 +173,22 @@ impl TransformButton {
 impl Element<Vec<i8>, i8> for TransformButton {
     fn draw(&self, _seq: &Vec<i8>, canvas: &mut Canvas) {
         if self.anim < ANIM_MAX {
-            let rect = Rect::new(self.rect.x(),
-                                 self.rect.y() + self.anim,
-                                 self.rect.width(),
-                                 self.rect.height() - 2 * self.anim as u32);
+            let rect = Rect::new(
+                self.rect.x(),
+                self.rect.y() + self.anim,
+                self.rect.width(),
+                self.rect.height() - 2 * self.anim as u32,
+            );
             let mut canvas = canvas.subcanvas(rect);
             canvas.draw_sprite(&self.sprite, Point::new(0, -self.anim));
         }
     }
 
-    fn handle_event(&mut self, event: &Event, seq: &mut Vec<i8>)
-                    -> Action<i8> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        seq: &mut Vec<i8>,
+    ) -> Action<i8> {
         match event {
             &Event::ClockTick => {
                 if seq.contains(&self.index) {
@@ -191,8 +205,9 @@ impl Element<Vec<i8>, i8> for TransformButton {
                 Action::ignore()
             }
             &Event::MouseDown(pt)
-                if self.rect.contains_point(pt) &&
-                       !seq.contains(&self.index) => {
+                if self.rect.contains_point(pt)
+                    && !seq.contains(&self.index) =>
+            {
                 Action::redraw().and_return(self.index)
             }
             _ => Action::ignore(),

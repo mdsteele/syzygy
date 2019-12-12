@@ -19,10 +19,10 @@
 
 use toml;
 
-use crate::save::{Access, Direction, Location, MixedColor};
-use crate::save::device::{Device, DeviceGrid};
-use crate::save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
 use super::PuzzleState;
+use crate::save::device::{Device, DeviceGrid};
+use crate::save::util::{pop_array, to_table, Tomlable, ACCESS_KEY};
+use crate::save::{Access, Direction, Location, MixedColor};
 
 // ========================================================================= //
 
@@ -36,16 +36,22 @@ pub struct MissedState {
 }
 
 impl MissedState {
-    pub fn mark_solved(&mut self) { self.access = Access::Solved; }
+    pub fn mark_solved(&mut self) {
+        self.access = Access::Solved;
+    }
 
     pub fn solve(&mut self) {
         self.access = Access::Solved;
         self.grid = MissedState::solved_grid();
     }
 
-    pub fn grid(&self) -> &DeviceGrid { &self.grid }
+    pub fn grid(&self) -> &DeviceGrid {
+        &self.grid
+    }
 
-    pub fn grid_mut(&mut self) -> &mut DeviceGrid { &mut self.grid }
+    pub fn grid_mut(&mut self) -> &mut DeviceGrid {
+        &mut self.grid
+    }
 
     fn base_grid() -> DeviceGrid {
         let mut grid = DeviceGrid::new(10, 5);
@@ -116,15 +122,25 @@ impl MissedState {
 }
 
 impl PuzzleState for MissedState {
-    fn location() -> Location { Location::MissedConnections }
+    fn location() -> Location {
+        Location::MissedConnections
+    }
 
-    fn access(&self) -> Access { self.access }
+    fn access(&self) -> Access {
+        self.access
+    }
 
-    fn access_mut(&mut self) -> &mut Access { &mut self.access }
+    fn access_mut(&mut self) -> &mut Access {
+        &mut self.access
+    }
 
-    fn can_reset(&self) -> bool { self.grid.is_modified() }
+    fn can_reset(&self) -> bool {
+        self.grid.is_modified()
+    }
 
-    fn reset(&mut self) { self.grid = MissedState::initial_grid(); }
+    fn reset(&mut self) {
+        self.grid = MissedState::initial_grid();
+    }
 }
 
 impl Tomlable for MissedState {
@@ -146,10 +162,7 @@ impl Tomlable for MissedState {
             let grid = pop_array(&mut table, GRID_KEY);
             DeviceGrid::from_toml(grid, &MissedState::initial_grid())
         };
-        MissedState {
-            access: access,
-            grid: grid,
-        }
+        MissedState { access, grid }
     }
 }
 
@@ -159,10 +172,10 @@ impl Tomlable for MissedState {
 mod tests {
     use toml;
 
-    use crate::save::{Access, Direction, PuzzleState};
-    use crate::save::device::Device;
-    use crate::save::util::{ACCESS_KEY, Tomlable};
     use super::MissedState;
+    use crate::save::device::Device;
+    use crate::save::util::{Tomlable, ACCESS_KEY};
+    use crate::save::{Access, Direction, PuzzleState};
 
     #[test]
     fn toml_round_trip() {
@@ -182,8 +195,10 @@ mod tests {
         let state = MissedState::from_toml(toml::Value::Boolean(false));
         assert_eq!(state.access, Access::Unvisited);
         assert!(!state.can_reset());
-        assert_eq!(state.grid().get(1, 3),
-                   Some((Device::Mixer, Direction::East)));
+        assert_eq!(
+            state.grid().get(1, 3),
+            Some((Device::Mixer, Direction::East))
+        );
         assert_eq!(state.grid().get(5, 1), None);
     }
 
@@ -195,10 +210,14 @@ mod tests {
         let state = MissedState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Solved);
         assert!(state.can_reset());
-        assert_eq!(state.grid().get(1, 3),
-                   Some((Device::Mirror, Direction::South)));
-        assert_eq!(state.grid().get(5, 1),
-                   Some((Device::Mixer, Direction::East)));
+        assert_eq!(
+            state.grid().get(1, 3),
+            Some((Device::Mirror, Direction::South))
+        );
+        assert_eq!(
+            state.grid().get(5, 1),
+            Some((Device::Mixer, Direction::East))
+        );
     }
 }
 

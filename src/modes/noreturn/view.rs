@@ -21,16 +21,19 @@ use std::cmp;
 use std::collections::HashSet;
 use std::rc::Rc;
 
-use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView, Scene};
-use crate::elements::cutscene::{JumpNode, ParallelNode, QueueNode, SceneNode,
-                         SequenceNode, SetPosNode, ShakeNode, SlideNode,
-                         SoundNode};
+use super::scenes::{self, DOOR_LOWER, DOOR_UPPER, YTTRIS};
 use crate::elements::cutscene::WaitNode;
-use crate::gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
-          Resources, Sound, Sprite};
+use crate::elements::cutscene::{
+    JumpNode, ParallelNode, QueueNode, SceneNode, SequenceNode, SetPosNode,
+    ShakeNode, SlideNode, SoundNode,
+};
+use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView, Scene};
+use crate::gui::{
+    Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
+    Sound, Sprite,
+};
 use crate::modes::SOLVED_INFO_TEXT;
 use crate::save::{Game, NoReturnState, PuzzleState};
-use super::scenes::{self, DOOR_LOWER, DOOR_UPPER, YTTRIS};
 
 // ========================================================================= //
 
@@ -43,9 +46,11 @@ pub struct View {
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect,
-               state: &NoReturnState)
-               -> View {
+    pub fn new(
+        resources: &mut Resources,
+        visible: Rect,
+        state: &NoReturnState,
+    ) -> View {
         let mut core = {
             let fade = (FadeStyle::LeftToRight, FadeStyle::LeftToRight);
             let intro = scenes::compile_intro_scene(resources);
@@ -55,7 +60,7 @@ impl View {
         core.add_extra_scene(scenes::compile_relyng_midscene(resources));
         core.add_extra_scene(scenes::compile_yttris_midscene(resources));
         let mut view = View {
-            core: core,
+            core,
             bridge: TileBridge::new(resources, 112, 176),
             button: StartStopButton::new(resources, 96, 208),
             animation: Scene::empty(),
@@ -100,16 +105,20 @@ impl View {
             } else if next_col == num_cols && visited.len() == values.len() {
                 let pt = self.bridge.tile_center_top(num_cols);
                 let mut par: Vec<Box<dyn SceneNode>> = Vec::new();
-                par.push(Box::new(SlideNode::new(DOOR_UPPER,
-                                                 Point::new(505, 144),
-                                                 false,
-                                                 false,
-                                                 0.3)));
-                par.push(Box::new(SlideNode::new(DOOR_LOWER,
-                                                 Point::new(505, 192),
-                                                 false,
-                                                 false,
-                                                 0.3)));
+                par.push(Box::new(SlideNode::new(
+                    DOOR_UPPER,
+                    Point::new(505, 144),
+                    false,
+                    false,
+                    0.3,
+                )));
+                par.push(Box::new(SlideNode::new(
+                    DOOR_LOWER,
+                    Point::new(505, 192),
+                    false,
+                    false,
+                    0.3,
+                )));
                 par.push(Box::new(JumpNode::new(YTTRIS, pt, 0.5)));
                 seq.push(Box::new(ParallelNode::new(par)));
             } else if next_col >= num_cols {
@@ -165,8 +174,11 @@ impl Element<Game, PuzzleCmd> for View {
         self.core.draw_front_layer(canvas, state);
     }
 
-    fn handle_event(&mut self, event: &Event, game: &mut Game)
-                    -> Action<PuzzleCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        game: &mut Game,
+    ) -> Action<PuzzleCmd> {
         let state = &mut game.point_of_no_return;
         let mut action = self.core.handle_event(event, state);
         if !action.should_stop() && !state.is_solved() {
@@ -182,8 +194,8 @@ impl Element<Game, PuzzleCmd> for View {
             action.merge(subaction.but_no_value());
         }
         if !action.should_stop() && self.running {
-            let subaction = self.animation
-                .handle_event(event, self.core.theater_mut());
+            let subaction =
+                self.animation.handle_event(event, self.core.theater_mut());
             action.merge(subaction.but_no_value());
             self.drain_queue();
             if self.animation.is_finished() {
@@ -194,9 +206,9 @@ impl Element<Game, PuzzleCmd> for View {
                 }
             }
         }
-        if !action.should_stop() &&
-            (!self.running && !state.is_solved() ||
-                 event == &Event::ClockTick)
+        if !action.should_stop()
+            && (!self.running && !state.is_solved()
+                || event == &Event::ClockTick)
         {
             let subaction = self.bridge.handle_event(event, state);
             if let Some(&(old_index, new_index)) = subaction.value() {
@@ -283,8 +295,8 @@ impl TileBridge {
         TileBridge {
             sprites: resources.get_sprites("point/no_return"),
             numbers_font: resources.get_font("no_return"),
-            left: left,
-            top: top,
+            left,
+            top,
             drag: None,
             visited: HashSet::new(),
             letters_font: resources.get_font("block"),
@@ -296,8 +308,13 @@ impl TileBridge {
         Point::new(self.left + TILE_SIZE / 2 + TILE_SIZE * col, self.top)
     }
 
-    fn draw_tile(&self, start_col: i32, tile: &[i32], x: i32,
-                 canvas: &mut Canvas) {
+    fn draw_tile(
+        &self,
+        start_col: i32,
+        tile: &[i32],
+        x: i32,
+        canvas: &mut Canvas,
+    ) {
         for (index, &value) in tile.iter().enumerate() {
             let col = start_col + index as i32;
             let pt = Point::new(x + TILE_SIZE * (index as i32), self.top);
@@ -317,15 +334,19 @@ impl TileBridge {
                 canvas.draw_sprite(&self.sprites[bg_index], pt);
             }
             canvas.draw_sprite(&self.sprites[arrow_index], pt);
-            canvas.draw_text(&self.numbers_font,
-                             Align::Center,
-                             pt + Point::new(12, 20),
-                             &format!("{}", value.abs()));
+            canvas.draw_text(
+                &self.numbers_font,
+                Align::Center,
+                pt + Point::new(12, 20),
+                &format!("{}", value.abs()),
+            );
             if self.letter_cols.contains(&col) {
-                canvas.draw_char(&self.letters_font,
-                                 Align::Center,
-                                 pt + Point::new(12, -2),
-                                 LETTERS[col as usize]);
+                canvas.draw_char(
+                    &self.letters_font,
+                    Align::Center,
+                    pt + Point::new(12, -2),
+                    LETTERS[col as usize],
+                );
             }
         }
     }
@@ -349,10 +370,14 @@ impl Element<NoReturnState, (usize, usize)> for TileBridge {
             self.draw_tile(col, tile, x, canvas);
             col += tile.len() as i32;
         }
-        canvas.draw_sprite(&self.sprites[8],
-                           Point::new(self.left - TILE_SIZE, self.top));
-        canvas.draw_sprite(&self.sprites[9],
-                           Point::new(self.left + TILE_SIZE * col, self.top));
+        canvas.draw_sprite(
+            &self.sprites[8],
+            Point::new(self.left - TILE_SIZE, self.top),
+        );
+        canvas.draw_sprite(
+            &self.sprites[9],
+            Point::new(self.left + TILE_SIZE * col, self.top),
+        );
         if let Some(ref drag) = self.drag {
             let col = start_cols[drag.index];
             let tile = tiles[drag.index];
@@ -361,8 +386,11 @@ impl Element<NoReturnState, (usize, usize)> for TileBridge {
         }
     }
 
-    fn handle_event(&mut self, event: &Event, state: &mut NoReturnState)
-                    -> Action<(usize, usize)> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        state: &mut NoReturnState,
+    ) -> Action<(usize, usize)> {
         match event {
             &Event::ClockTick => {
                 if let Some(ref mut drag) = self.drag {
@@ -373,10 +401,12 @@ impl Element<NoReturnState, (usize, usize)> for TileBridge {
                 let tiles = state.tiles();
                 let mut tile_left = self.left;
                 for (index, &tile) in tiles.iter().enumerate() {
-                    let rect = Rect::new(tile_left,
-                                         self.top,
-                                         TILE_USIZE * tile.len() as u32,
-                                         TILE_USIZE);
+                    let rect = Rect::new(
+                        tile_left,
+                        self.top,
+                        TILE_USIZE * tile.len() as u32,
+                        TILE_USIZE,
+                    );
                     if rect.contains_point(pt) {
                         self.drag = Some(TileDrag::new(index, pt.x(), state));
                         let sound = Sound::device_pickup();
@@ -417,8 +447,8 @@ struct TileDrag {
     index: usize, // original index in state.tiles() of tile being dragged
     new_index: usize, // new index where dragged tile will be inserted
     new_col: i32, // new start_col of dragged tile once inserted
-    from: i32, // mouse x where drag started
-    to: i32, // current mouse x
+    from: i32,    // mouse x where drag started
+    to: i32,      // current mouse x
     tile_spans: Vec<(i32, usize)>, // original (start_col, size) of each tile
     offsets: Vec<(i32, i32)>, // (current_dx, goal_dx) of each tile
 }
@@ -437,12 +467,12 @@ impl TileDrag {
         };
         let col = tile_spans[index].0;
         TileDrag {
-            index: index,
+            index,
             new_index: index,
             new_col: col,
-            from: from,
+            from,
             to: from,
-            tile_spans: tile_spans,
+            tile_spans,
             offsets: vec![(0, 0); tiles.len()],
         }
     }
@@ -502,12 +532,14 @@ impl TileDrag {
 
         // Set draw offset of tile being dragged.
         let old_col = self.tile_spans[self.index].0;
-        let offset = (self.new_col - old_col) * TILE_SIZE + self.to -
-            self.from;
+        let offset =
+            (self.new_col - old_col) * TILE_SIZE + self.to - self.from;
         self.offsets[self.index] = (offset, offset);
     }
 
-    fn offset(&self, index: usize) -> i32 { self.offsets[index].0 }
+    fn offset(&self, index: usize) -> i32 {
+        self.offsets[index].0
+    }
 
     fn tick_animation(&mut self) -> bool {
         let mut redraw = false;
@@ -537,11 +569,13 @@ impl StartStopButton {
         let width = sprites[0].width();
         let height = sprites[0].height();
         StartStopButton {
-            rect: Rect::new(cx - (width as i32 / 2),
-                            cy - (height as i32 / 2),
-                            width,
-                            height),
-            sprites: sprites,
+            rect: Rect::new(
+                cx - (width as i32 / 2),
+                cy - (height as i32 / 2),
+                width,
+                height,
+            ),
+            sprites,
         }
     }
 }
@@ -553,8 +587,11 @@ impl Element<(bool, Point), bool> for StartStopButton {
             .draw_sprite(&self.sprites[index], self.rect.top_left() + input.1);
     }
 
-    fn handle_event(&mut self, event: &Event, input: &mut (bool, Point))
-                    -> Action<bool> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        input: &mut (bool, Point),
+    ) -> Action<bool> {
         match event {
             &Event::MouseDown(pt) if self.rect.contains_point(pt) => {
                 let mut action = Action::redraw().and_return(!input.0);
@@ -571,21 +608,7 @@ impl Element<(bool, Point), bool> for StartStopButton {
 // ========================================================================= //
 
 const LETTERS: &[char] = &[
-    '*',
-    'S',
-    'E',
-    'I',
-    'V',
-    'T',
-    'I',
-    'N',
-    'O',
-    'G',
-    'N',
-    'I',
-    '*',
-    'A',
-    '?',
+    '*', 'S', 'E', 'I', 'V', 'T', 'I', 'N', 'O', 'G', 'N', 'I', '*', 'A', '?',
     'T',
 ];
 

@@ -17,13 +17,13 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
+use super::scenes;
 use crate::elements::ice::GridView;
+use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
 use crate::gui::{Action, Canvas, Element, Event, Rect, Resources, Sound};
 use crate::modes::SOLVED_INFO_TEXT;
-use crate::save::{Game, PuzzleState, RightState};
 use crate::save::ice::BlockSlide;
-use super::scenes;
+use crate::save::{Game, PuzzleState, RightState};
 
 // ========================================================================= //
 
@@ -33,8 +33,11 @@ pub struct View {
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect, state: &RightState)
-               -> View {
+    pub fn new(
+        resources: &mut Resources,
+        visible: Rect,
+        state: &RightState,
+    ) -> View {
         let mut core = {
             let fade = (FadeStyle::LeftToRight, FadeStyle::LeftToRight);
             let intro = scenes::compile_intro_scene(resources);
@@ -43,10 +46,7 @@ impl View {
         };
         core.add_extra_scene(scenes::compile_elinsa_midscene(resources));
         core.add_extra_scene(scenes::compile_yttris_midscene(resources));
-        View {
-            core: core,
-            grid: GridView::new(resources, 144, 48, state.grid()),
-        }
+        View { core, grid: GridView::new(resources, 144, 48, state.grid()) }
     }
 }
 
@@ -59,12 +59,15 @@ impl Element<Game, PuzzleCmd> for View {
         self.core.draw_front_layer(canvas, state);
     }
 
-    fn handle_event(&mut self, event: &Event, game: &mut Game)
-                    -> Action<PuzzleCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        game: &mut Game,
+    ) -> Action<PuzzleCmd> {
         let state = &mut game.the_ice_is_right;
         let mut action = self.core.handle_event(event, state);
-        if !action.should_stop() &&
-            (event == &Event::ClockTick || !state.is_solved())
+        if !action.should_stop()
+            && (event == &Event::ClockTick || !state.is_solved())
         {
             let subaction = self.grid.handle_event(event, state.grid_mut());
             if let Some(&(coords, dir)) = subaction.value() {

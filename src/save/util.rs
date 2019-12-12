@@ -17,9 +17,9 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use std::{i32, i8, u32, u8, usize};
 use std::collections::{HashSet, VecDeque};
 use std::hash::Hash;
+use std::{i32, i8, u32, u8, usize};
 use toml;
 
 use crate::gui::Point;
@@ -28,8 +28,10 @@ use crate::gui::Point;
 
 pub const ACCESS_KEY: &str = "access";
 
-pub fn pop_array(table: &mut toml::value::Table, key: &str)
-                 -> toml::value::Array {
+pub fn pop_array(
+    table: &mut toml::value::Table,
+    key: &str,
+) -> toml::value::Array {
     if let Some(value) = table.remove(key) {
         to_array(value)
     } else {
@@ -37,8 +39,10 @@ pub fn pop_array(table: &mut toml::value::Table, key: &str)
     }
 }
 
-pub fn pop_table(table: &mut toml::value::Table, key: &str)
-                 -> toml::value::Table {
+pub fn pop_table(
+    table: &mut toml::value::Table,
+    key: &str,
+) -> toml::value::Table {
     if let Some(value) = table.remove(key) {
         to_table(value)
     } else {
@@ -83,7 +87,9 @@ pub trait Tomlable {
 }
 
 impl Tomlable for bool {
-    fn to_toml(&self) -> toml::Value { toml::Value::Boolean(*self) }
+    fn to_toml(&self) -> toml::Value {
+        toml::Value::Boolean(*self)
+    }
 
     fn from_toml(value: toml::Value) -> bool {
         match value {
@@ -94,7 +100,9 @@ impl Tomlable for bool {
 }
 
 impl Tomlable for i8 {
-    fn to_toml(&self) -> toml::Value { toml::Value::Integer(*self as i64) }
+    fn to_toml(&self) -> toml::Value {
+        toml::Value::Integer(*self as i64)
+    }
 
     fn from_toml(value: toml::Value) -> i8 {
         match value {
@@ -113,7 +121,9 @@ impl Tomlable for i8 {
 }
 
 impl Tomlable for i32 {
-    fn to_toml(&self) -> toml::Value { toml::Value::Integer(*self as i64) }
+    fn to_toml(&self) -> toml::Value {
+        toml::Value::Integer(*self as i64)
+    }
 
     fn from_toml(value: toml::Value) -> i32 {
         match value {
@@ -132,7 +142,9 @@ impl Tomlable for i32 {
 }
 
 impl Tomlable for u8 {
-    fn to_toml(&self) -> toml::Value { toml::Value::Integer(*self as i64) }
+    fn to_toml(&self) -> toml::Value {
+        toml::Value::Integer(*self as i64)
+    }
 
     fn from_toml(value: toml::Value) -> u8 {
         match value {
@@ -151,7 +163,9 @@ impl Tomlable for u8 {
 }
 
 impl Tomlable for u32 {
-    fn to_toml(&self) -> toml::Value { toml::Value::Integer(*self as i64) }
+    fn to_toml(&self) -> toml::Value {
+        toml::Value::Integer(*self as i64)
+    }
 
     fn from_toml(value: toml::Value) -> u32 {
         match value {
@@ -182,7 +196,9 @@ impl<T: Hash + Ord + Tomlable> Tomlable for HashSet<T> {
 }
 
 impl Tomlable for Point {
-    fn to_toml(&self) -> toml::Value { vec![self.x(), self.y()].to_toml() }
+    fn to_toml(&self) -> toml::Value {
+        vec![self.x(), self.y()].to_toml()
+    }
 
     fn from_toml(value: toml::Value) -> Point {
         let array = Vec::<i32>::from_toml(value);
@@ -194,7 +210,9 @@ impl Tomlable for Point {
 }
 
 impl Tomlable for String {
-    fn to_toml(&self) -> toml::Value { toml::Value::String(self.clone()) }
+    fn to_toml(&self) -> toml::Value {
+        toml::Value::String(self.clone())
+    }
 
     fn from_toml(value: toml::Value) -> String {
         match value {
@@ -242,30 +260,42 @@ mod tests {
     use std::collections::VecDeque;
     use toml;
 
-    use super::{Tomlable, rotate_deque};
+    use super::{rotate_deque, Tomlable};
 
     #[test]
     fn deque_rotation() {
         let mut deque: VecDeque<i32> =
             [1, 2, 3, 4, 5].iter().cloned().collect();
         rotate_deque(&mut deque, 0);
-        assert_eq!(deque.iter().cloned().collect::<Vec<i32>>(),
-                   vec![1, 2, 3, 4, 5]);
+        assert_eq!(
+            deque.iter().cloned().collect::<Vec<i32>>(),
+            vec![1, 2, 3, 4, 5]
+        );
         rotate_deque(&mut deque, 1);
-        assert_eq!(deque.iter().cloned().collect::<Vec<i32>>(),
-                   vec![5, 1, 2, 3, 4]);
+        assert_eq!(
+            deque.iter().cloned().collect::<Vec<i32>>(),
+            vec![5, 1, 2, 3, 4]
+        );
         rotate_deque(&mut deque, -2);
-        assert_eq!(deque.iter().cloned().collect::<Vec<i32>>(),
-                   vec![2, 3, 4, 5, 1]);
+        assert_eq!(
+            deque.iter().cloned().collect::<Vec<i32>>(),
+            vec![2, 3, 4, 5, 1]
+        );
         rotate_deque(&mut deque, 8);
-        assert_eq!(deque.iter().cloned().collect::<Vec<i32>>(),
-                   vec![4, 5, 1, 2, 3]);
+        assert_eq!(
+            deque.iter().cloned().collect::<Vec<i32>>(),
+            vec![4, 5, 1, 2, 3]
+        );
         rotate_deque(&mut deque, -14);
-        assert_eq!(deque.iter().cloned().collect::<Vec<i32>>(),
-                   vec![3, 4, 5, 1, 2]);
+        assert_eq!(
+            deque.iter().cloned().collect::<Vec<i32>>(),
+            vec![3, 4, 5, 1, 2]
+        );
         rotate_deque(&mut deque, 15);
-        assert_eq!(deque.iter().cloned().collect::<Vec<i32>>(),
-                   vec![3, 4, 5, 1, 2]);
+        assert_eq!(
+            deque.iter().cloned().collect::<Vec<i32>>(),
+            vec![3, 4, 5, 1, 2]
+        );
     }
 
     #[test]
@@ -284,14 +314,22 @@ mod tests {
         assert_eq!(i32::from_toml(toml::Value::Boolean(false)), 0);
         assert_eq!(i32::from_toml(toml::Value::Boolean(true)), 0);
         assert_eq!(i32::from_toml(toml::Value::Integer(-17)), -17);
-        assert_eq!(i32::from_toml(toml::Value::Integer(2147483647)),
-                   2147483647);
-        assert_eq!(i32::from_toml(toml::Value::Integer(2147483648)),
-                   2147483647);
-        assert_eq!(i32::from_toml(toml::Value::Integer(-2147483648)),
-                   -2147483648);
-        assert_eq!(i32::from_toml(toml::Value::Integer(-2147483649)),
-                   -2147483648);
+        assert_eq!(
+            i32::from_toml(toml::Value::Integer(2147483647)),
+            2147483647
+        );
+        assert_eq!(
+            i32::from_toml(toml::Value::Integer(2147483648)),
+            2147483647
+        );
+        assert_eq!(
+            i32::from_toml(toml::Value::Integer(-2147483648)),
+            -2147483648
+        );
+        assert_eq!(
+            i32::from_toml(toml::Value::Integer(-2147483649)),
+            -2147483648
+        );
     }
 
     #[test]
@@ -300,12 +338,18 @@ mod tests {
         assert_eq!(u32::from_toml(toml::Value::Boolean(true)), 0);
         assert_eq!(u32::from_toml(toml::Value::Integer(-1)), 0);
         assert_eq!(u32::from_toml(toml::Value::Integer(1)), 1);
-        assert_eq!(u32::from_toml(toml::Value::Integer(2147483648)),
-                   2147483648);
-        assert_eq!(u32::from_toml(toml::Value::Integer(4294967295)),
-                   4294967295);
-        assert_eq!(u32::from_toml(toml::Value::Integer(4294967296)),
-                   4294967295);
+        assert_eq!(
+            u32::from_toml(toml::Value::Integer(2147483648)),
+            2147483648
+        );
+        assert_eq!(
+            u32::from_toml(toml::Value::Integer(4294967295)),
+            4294967295
+        );
+        assert_eq!(
+            u32::from_toml(toml::Value::Integer(4294967296)),
+            4294967295
+        );
         assert_eq!(u32::from_toml(toml::Value::Integer(-2147483648)), 0);
     }
 }

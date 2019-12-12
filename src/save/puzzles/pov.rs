@@ -21,9 +21,9 @@ use std::cmp::{max, min};
 use std::collections::{HashMap, HashSet, VecDeque};
 use toml;
 
-use crate::save::{Access, Location};
-use crate::save::util::{ACCESS_KEY, Tomlable, rotate_deque, to_table};
 use super::PuzzleState;
+use crate::save::util::{rotate_deque, to_table, Tomlable, ACCESS_KEY};
+use crate::save::{Access, Location};
 
 // ========================================================================= //
 
@@ -140,17 +140,19 @@ impl PovState {
         self.colors[row as usize]
     }
 
-    pub fn tiles(&self) -> &HashMap<(i32, i32), [u8; 4]> { &self.grid }
+    pub fn tiles(&self) -> &HashMap<(i32, i32), [u8; 4]> {
+        &self.grid
+    }
 
     pub fn tile_at(&self, coords: (i32, i32)) -> Option<[u8; 4]> {
         self.grid.get(&coords).cloned()
     }
 
     pub fn move_tile(&mut self, from: (i32, i32), to: (i32, i32)) -> bool {
-        if (from.0 < 0 || from.0 >= NUM_COLS) ||
-            (from.1 < 0 || from.1 >= NUM_ROWS) ||
-            (to.0 < 0 || to.0 >= NUM_COLS) ||
-            (to.1 < 0 || to.1 >= NUM_ROWS)
+        if (from.0 < 0 || from.0 >= NUM_COLS)
+            || (from.1 < 0 || from.1 >= NUM_ROWS)
+            || (to.0 < 0 || to.0 >= NUM_COLS)
+            || (to.1 < 0 || to.1 >= NUM_ROWS)
         {
             return false;
         }
@@ -167,8 +169,8 @@ impl PovState {
     }
 
     pub fn rotate_tile(&mut self, coords: (i32, i32), by: i32) -> bool {
-        if (coords.0 < 0 || coords.0 >= NUM_COLS) ||
-            (coords.1 < 0 || coords.1 >= NUM_ROWS)
+        if (coords.0 < 0 || coords.0 >= NUM_COLS)
+            || (coords.1 < 0 || coords.1 >= NUM_ROWS)
         {
             return false;
         }
@@ -236,13 +238,21 @@ impl PovState {
 }
 
 impl PuzzleState for PovState {
-    fn location() -> Location { Location::PointOfView }
+    fn location() -> Location {
+        Location::PointOfView
+    }
 
-    fn access(&self) -> Access { self.access }
+    fn access(&self) -> Access {
+        self.access
+    }
 
-    fn access_mut(&mut self) -> &mut Access { &mut self.access }
+    fn access_mut(&mut self) -> &mut Access {
+        &mut self.access
+    }
 
-    fn can_reset(&self) -> bool { !self.is_initial }
+    fn can_reset(&self) -> bool {
+        !self.is_initial
+    }
 
     fn reset(&mut self) {
         self.grid = INITIAL_GRID.iter().cloned().collect();
@@ -277,8 +287,7 @@ impl Tomlable for PovState {
             SOLVED_GRID.iter().cloned().collect()
         } else {
             let mut grid = HashMap::new();
-            for entry in Vec::<Vec<i32>>::pop_from_table(&mut table,
-                                                         GRID_KEY)
+            for entry in Vec::<Vec<i32>>::pop_from_table(&mut table, GRID_KEY)
                 .into_iter()
             {
                 if entry.len() != 6 {
@@ -297,12 +306,8 @@ impl Tomlable for PovState {
                 INITIAL_GRID.iter().cloned().collect()
             }
         };
-        let mut state = PovState {
-            access: access,
-            grid: grid,
-            colors: [255; 20],
-            is_initial: true,
-        };
+        let mut state =
+            PovState { access, grid, colors: [255; 20], is_initial: true };
         state.regenerate();
         state
     }
@@ -323,9 +328,9 @@ fn rotate(mut tile: [u8; 4], by: i32) -> [u8; 4] {
 mod tests {
     use toml;
 
+    use super::{PovState, GOALS, INITIAL_GRID};
+    use crate::save::util::{Tomlable, ACCESS_KEY};
     use crate::save::Access;
-    use crate::save::util::{ACCESS_KEY, Tomlable};
-    use super::{GOALS, INITIAL_GRID, PovState};
 
     #[test]
     fn toml_round_trip() {

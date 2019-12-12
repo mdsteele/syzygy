@@ -19,14 +19,18 @@
 
 use std::cmp::{max, min};
 
-use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView, Scene};
-use crate::elements::cutscene::{JumpNode, ParallelNode, QueueNode, SceneNode,
-                         SequenceNode, SlideNode, SoundNode, WaitNode};
+use super::scenes;
+use crate::elements::cutscene::{
+    JumpNode, ParallelNode, QueueNode, SceneNode, SequenceNode, SlideNode,
+    SoundNode, WaitNode,
+};
 use crate::elements::shift::{ArrowPair, Platform};
-use crate::gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sound};
+use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView, Scene};
+use crate::gui::{
+    Action, Canvas, Element, Event, Point, Rect, Resources, Sound,
+};
 use crate::modes::SOLVED_INFO_TEXT;
 use crate::save::{BlameState, Game, PuzzleState};
-use super::scenes;
 
 // ========================================================================= //
 
@@ -114,8 +118,12 @@ impl View {
         }
     }
 
-    fn shift_platform(&mut self, state: &mut BlameState, row_1: i32,
-                      delta: i32) {
+    fn shift_platform(
+        &mut self,
+        state: &mut BlameState,
+        row_1: i32,
+        delta: i32,
+    ) {
         let num_rows = BlameState::num_rows() as i32;
         let last_row = num_rows - 1;
         let max_pos_for_last_row = BlameState::max_position_for_row(last_row);
@@ -197,12 +205,14 @@ impl View {
                         Some(max_pos_for_row_5 - 1)
                     } else if row_1 > 0 {
                         let pos_0 = state.get_position(row_1 - 1);
-                        if pos_1 > old_pos_1 && pos_0 > old_pos_1 &&
-                            pos_0 <= pos_1
+                        if pos_1 > old_pos_1
+                            && pos_0 > old_pos_1
+                            && pos_0 <= pos_1
                         {
                             Some(pos_0 - 1)
-                        } else if pos_1 < old_pos_1 && pos_0 < old_pos_1 &&
-                                   pos_0 >= pos_1
+                        } else if pos_1 < old_pos_1
+                            && pos_0 < old_pos_1
+                            && pos_0 >= pos_1
                         {
                             Some(pos_0 + 1)
                         } else {
@@ -238,8 +248,8 @@ impl View {
                     let mut slide_dest =
                         self.platform_pt_for_pos(row, mezure_pos);
                     if row == row_2 && (old_pos_1 - old_pos_2).abs() % 2 == 0 {
-                        slide_dest = slide_dest +
-                            if old_pos_1 < old_pos_2 {
+                        slide_dest = slide_dest
+                            + if old_pos_1 < old_pos_2 {
                                 Point::new(-16, 0)
                             } else {
                                 Point::new(16, 0)
@@ -252,39 +262,53 @@ impl View {
                         self.floor_pt_for_pos(mezure_pos)
                     };
                     let fall_dist = jump_dest.y() - self.platform_top(row);
-                    let time_to_fall = JumpNode::time_to_fall(fall_dist + 5) +
-                        JumpNode::time_to_fall(5);
-                    mezure_seq.push(Box::new(SlideNode::new(scenes::MEZURE,
-                                                            slide_dest,
-                                                            false,
-                                                            false,
-                                                            time_to_hit)));
+                    let time_to_fall = JumpNode::time_to_fall(fall_dist + 5)
+                        + JumpNode::time_to_fall(5);
+                    mezure_seq.push(Box::new(SlideNode::new(
+                        scenes::MEZURE,
+                        slide_dest,
+                        false,
+                        false,
+                        time_to_hit,
+                    )));
                     let sound = Sound::character_collision();
                     mezure_seq.push(Box::new(SoundNode::new(sound)));
-                    mezure_seq.push(Box::new(JumpNode::new(scenes::MEZURE,
-                                                           jump_dest,
-                                                           time_to_fall)));
+                    mezure_seq.push(Box::new(JumpNode::new(
+                        scenes::MEZURE,
+                        jump_dest,
+                        time_to_fall,
+                    )));
                 } else {
                     mezure_pos = pos;
                     let dest = self.platform_pt_for_pos(row, mezure_pos);
-                    mezure_seq.push(Box::new(SlideNode::new(scenes::MEZURE,
-                                                            dest,
-                                                            false,
-                                                            false,
-                                                            travel_time)));
+                    mezure_seq.push(Box::new(SlideNode::new(
+                        scenes::MEZURE,
+                        dest,
+                        false,
+                        false,
+                        travel_time,
+                    )));
                 }
             } else if mezure_row < num_rows && mezure_row == row_2 + 1 {
-                let impact = if pos_2 > old_pos_2 && mezure_pos > old_pos_2 &&
-                    mezure_pos <= pos_2
+                let impact = if pos_2 > old_pos_2
+                    && mezure_pos > old_pos_2
+                    && mezure_pos <= pos_2
                 {
-                    Some((Platform::travel_time(old_pos_2, mezure_pos - 1),
-                          min(BlameState::max_position_for_row(mezure_row),
-                              mezure_pos + 1)))
-                } else if pos_2 < old_pos_2 && mezure_pos >= pos_2 &&
-                           mezure_pos < old_pos_2
+                    Some((
+                        Platform::travel_time(old_pos_2, mezure_pos - 1),
+                        min(
+                            BlameState::max_position_for_row(mezure_row),
+                            mezure_pos + 1,
+                        ),
+                    ))
+                } else if pos_2 < old_pos_2
+                    && mezure_pos >= pos_2
+                    && mezure_pos < old_pos_2
                 {
-                    Some((Platform::travel_time(old_pos_2, mezure_pos + 1),
-                          max(0, mezure_pos - 1)))
+                    Some((
+                        Platform::travel_time(old_pos_2, mezure_pos + 1),
+                        max(0, mezure_pos - 1),
+                    ))
                 } else {
                     None
                 };
@@ -297,14 +321,16 @@ impl View {
                         self.floor_pt_for_pos(mezure_pos)
                     };
                     let fall_dist = dest.y() - self.platform_top(row_2 + 1);
-                    let time_to_fall = JumpNode::time_to_fall(fall_dist + 5) +
-                        JumpNode::time_to_fall(5);
+                    let time_to_fall = JumpNode::time_to_fall(fall_dist + 5)
+                        + JumpNode::time_to_fall(5);
                     mezure_seq.push(Box::new(WaitNode::new(time_to_hit)));
                     let sound = Sound::character_collision();
                     mezure_seq.push(Box::new(SoundNode::new(sound)));
-                    mezure_seq.push(Box::new(JumpNode::new(scenes::MEZURE,
-                                                           dest,
-                                                           time_to_fall)));
+                    mezure_seq.push(Box::new(JumpNode::new(
+                        scenes::MEZURE,
+                        dest,
+                        time_to_fall,
+                    )));
                 }
             }
             top_seq.push(Box::new(ParallelNode::new(vec![
@@ -316,8 +342,8 @@ impl View {
 
         // If Mezure fell to the floor, get back on the starting platform:
         if mezure_row == num_rows && original_mezure_row != num_rows {
-            let time = 0.5 *
-                Platform::travel_time(mezure_pos, max_pos_for_last_row);
+            let time =
+                0.5 * Platform::travel_time(mezure_pos, max_pos_for_last_row);
             let dest = Point::new(408, 320);
             let slide =
                 SlideNode::new(scenes::MEZURE, dest, false, false, time);
@@ -333,9 +359,9 @@ impl View {
         }
 
         // Make Mezure climb upwards:
-        if mezure_row == num_rows &&
-            state.get_position(last_row) == max_pos_for_last_row &&
-            state.get_position(last_row - 1) != max_pos_for_last_row
+        if mezure_row == num_rows
+            && state.get_position(last_row) == max_pos_for_last_row
+            && state.get_position(last_row - 1) != max_pos_for_last_row
         {
             mezure_row -= 1;
             let dest = self.platform_pt(state, mezure_row);
@@ -355,22 +381,25 @@ impl View {
                         break;
                     }
                 }
-                if mezure_row == last_row &&
-                    (pos_0 == max_pos_for_last_row ||
-                         pos_1 == max_pos_for_last_row) ||
-                    mezure_row == 1 && (pos_0 == 0 || pos_1 == 0)
+                if mezure_row == last_row
+                    && (pos_0 == max_pos_for_last_row
+                        || pos_1 == max_pos_for_last_row)
+                    || mezure_row == 1 && (pos_0 == 0 || pos_1 == 0)
                 {
                     break;
                 }
                 mezure_row -= 1;
                 let dest = self.platform_pt(state, mezure_row);
                 top_seq.push(Box::new(SoundNode::new(Sound::small_jump())));
-                top_seq
-                    .push(Box::new(JumpNode::new(scenes::MEZURE, dest, 0.6)));
+                top_seq.push(Box::new(JumpNode::new(
+                    scenes::MEZURE,
+                    dest,
+                    0.6,
+                )));
             }
         }
-        if mezure_row == 0 &&
-            state.get_position(0) == BlameState::max_position_for_row(0)
+        if mezure_row == 0
+            && state.get_position(0) == BlameState::max_position_for_row(0)
         {
             mezure_row -= 1;
             let dest = self.platform_pt(state, mezure_row);
@@ -378,10 +407,12 @@ impl View {
             top_seq.push(Box::new(JumpNode::new(scenes::MEZURE, dest, 0.6)));
         }
         state.set_mezure_row(mezure_row);
-        self.core.push_undo((row_1,
-                             pos_1 - original_pos_1,
-                             pos_2 - original_pos_2,
-                             mezure_row - original_mezure_row));
+        self.core.push_undo((
+            row_1,
+            pos_1 - original_pos_1,
+            pos_2 - original_pos_2,
+            mezure_row - original_mezure_row,
+        ));
 
         // Start animation:
         self.animation =
@@ -402,8 +433,11 @@ impl Element<Game, PuzzleCmd> for View {
         self.core.draw_front_layer(canvas, state);
     }
 
-    fn handle_event(&mut self, event: &Event, game: &mut Game)
-                    -> Action<PuzzleCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        game: &mut Game,
+    ) -> Action<PuzzleCmd> {
         let state = &mut game.shift_the_blame;
         let mut action = self.core.handle_event(event, state);
         self.drain_queue();
@@ -412,8 +446,8 @@ impl Element<Game, PuzzleCmd> for View {
             action.merge(subaction.but_no_value());
         }
         if !action.should_stop() && self.animating {
-            let subaction = self.animation
-                .handle_event(event, self.core.theater_mut());
+            let subaction =
+                self.animation.handle_event(event, self.core.theater_mut());
             action.merge(subaction.but_no_value());
             self.drain_queue();
             if self.animation.is_finished() {
@@ -424,8 +458,8 @@ impl Element<Game, PuzzleCmd> for View {
                 }
             }
         }
-        if !action.should_stop() &&
-            (event == &Event::ClockTick || !state.is_solved())
+        if !action.should_stop()
+            && (event == &Event::ClockTick || !state.is_solved())
         {
             let subaction = self.arrows.handle_event(event, &mut ());
             if let Some(&(row, delta)) = subaction.value() {

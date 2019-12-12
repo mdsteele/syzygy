@@ -19,14 +19,16 @@
 
 use crate::elements::{PuzzleCmd, PuzzleView};
 use crate::gui::{Event, Window};
-use crate::modes::{Mode, run_info_box};
+use crate::modes::{run_info_box, Mode};
 use crate::save::{Location, SaveData};
 
 // ========================================================================= //
 
-pub fn run_puzzle<V: PuzzleView>(window: &mut Window,
-                                 save_data: &mut SaveData, mut view: V)
-                                 -> Mode {
+pub fn run_puzzle<V: PuzzleView>(
+    window: &mut Window,
+    save_data: &mut SaveData,
+    mut view: V,
+) -> Mode {
     view.drain_queue();
     let location = {
         let game = save_data.game_mut();

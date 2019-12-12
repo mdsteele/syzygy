@@ -22,8 +22,9 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 use crate::elements::{FadeStyle, Hud, HudCmd, HudInput, ScreenFade};
-use crate::gui::{Action, Background, Canvas, Element, Event, Point, Rect, Resources,
-          Sprite};
+use crate::gui::{
+    Action, Background, Canvas, Element, Event, Point, Rect, Resources, Sprite,
+};
 use crate::save::{Access, Game, Location};
 
 // ========================================================================= //
@@ -117,37 +118,61 @@ impl View {
                         let h = (py - y).abs() as u32;
                         if (w < h) ^ invert {
                             if w > 0 {
-                                paths_outer.push(Rect::new(min(x, px) - 1,
-                                                           y - 2,
-                                                           w + 2,
-                                                           4));
-                                paths_inner
-                                    .push(Rect::new(min(x, px), y - 1, w, 2));
+                                paths_outer.push(Rect::new(
+                                    min(x, px) - 1,
+                                    y - 2,
+                                    w + 2,
+                                    4,
+                                ));
+                                paths_inner.push(Rect::new(
+                                    min(x, px),
+                                    y - 1,
+                                    w,
+                                    2,
+                                ));
                             }
                             if h > 0 {
-                                paths_outer.push(Rect::new(px - 2,
-                                                           min(y, py) - 1,
-                                                           4,
-                                                           h + 2));
-                                paths_inner
-                                    .push(Rect::new(px - 1, min(y, py), 2, h));
+                                paths_outer.push(Rect::new(
+                                    px - 2,
+                                    min(y, py) - 1,
+                                    4,
+                                    h + 2,
+                                ));
+                                paths_inner.push(Rect::new(
+                                    px - 1,
+                                    min(y, py),
+                                    2,
+                                    h,
+                                ));
                             }
                         } else {
                             if h > 0 {
-                                paths_outer.push(Rect::new(x - 2,
-                                                           min(y, py) - 1,
-                                                           4,
-                                                           h + 2));
-                                paths_inner
-                                    .push(Rect::new(x - 1, min(y, py), 2, h));
+                                paths_outer.push(Rect::new(
+                                    x - 2,
+                                    min(y, py) - 1,
+                                    4,
+                                    h + 2,
+                                ));
+                                paths_inner.push(Rect::new(
+                                    x - 1,
+                                    min(y, py),
+                                    2,
+                                    h,
+                                ));
                             }
                             if w > 0 {
-                                paths_outer.push(Rect::new(min(x, px) - 1,
-                                                           py - 2,
-                                                           w + 2,
-                                                           4));
-                                paths_inner
-                                    .push(Rect::new(min(x, px), py - 1, w, 2));
+                                paths_outer.push(Rect::new(
+                                    min(x, px) - 1,
+                                    py - 2,
+                                    w + 2,
+                                    4,
+                                ));
+                                paths_inner.push(Rect::new(
+                                    min(x, px),
+                                    py - 1,
+                                    w,
+                                    2,
+                                ));
                             }
                         }
                     }
@@ -334,15 +359,17 @@ impl View {
             }
         }
         View {
-            screen_fade: ScreenFade::new(resources,
-                                         FadeStyle::Radial,
-                                         FadeStyle::Radial),
+            screen_fade: ScreenFade::new(
+                resources,
+                FadeStyle::Radial,
+                FadeStyle::Radial,
+            ),
             hud: Hud::new(resources, visible, Location::Map),
             background: resources.get_background("map"),
-            map_sprites: map_sprites,
-            nodes: nodes,
-            paths_outer: paths_outer,
-            paths_inner: paths_inner,
+            map_sprites,
+            nodes,
+            paths_outer,
+            paths_inner,
             selected: None,
         }
     }
@@ -385,16 +412,13 @@ impl Element<Game, Cmd> for View {
             let mut input = self.hud_input();
             let subaction = self.hud.handle_event(event, &mut input);
             action.merge(match subaction.value() {
-                             Some(&HudCmd::Back) => {
-                                 self.screen_fade
-                                     .fade_out_and_return(Cmd::ReturnToTitle);
-                                 subaction.but_no_value()
-                             }
-                             Some(&HudCmd::Info) => {
-                                 subaction.but_return(Cmd::ShowInfoBox)
-                             }
-                             _ => subaction.but_no_value(),
-                         });
+                Some(&HudCmd::Back) => {
+                    self.screen_fade.fade_out_and_return(Cmd::ReturnToTitle);
+                    subaction.but_no_value()
+                }
+                Some(&HudCmd::Info) => subaction.but_return(Cmd::ShowInfoBox),
+                _ => subaction.but_no_value(),
+            });
         }
         if !action.should_stop() {
             let subaction = self.nodes.handle_event(event, &mut self.selected);
@@ -423,13 +447,16 @@ struct PuzzleNode {
 }
 
 impl PuzzleNode {
-    fn new(resources: &mut Resources, rect: Rect, location: Location,
-           game: &Game)
-           -> PuzzleNode {
+    fn new(
+        resources: &mut Resources,
+        rect: Rect,
+        location: Location,
+        game: &Game,
+    ) -> PuzzleNode {
         let sprite_index = if game.has_been_solved(location) {
             1
-        } else if location == Location::SystemFailure &&
-                   !game.system_failure.mid_scene_is_done()
+        } else if location == Location::SystemFailure
+            && !game.system_failure.mid_scene_is_done()
         {
             2
         } else {
@@ -437,8 +464,8 @@ impl PuzzleNode {
         };
         PuzzleNode {
             sprites: resources.get_sprites("map/nodes"),
-            sprite_index: sprite_index,
-            rect: rect,
+            sprite_index,
+            rect,
             loc: location,
         }
     }
@@ -453,9 +480,11 @@ impl Element<Option<Location>, Location> for PuzzleNode {
         }
     }
 
-    fn handle_event(&mut self, event: &Event,
-                    selected: &mut Option<Location>)
-                    -> Action<Location> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        selected: &mut Option<Location>,
+    ) -> Action<Location> {
         match event {
             &Event::MouseDown(pt) if self.rect.contains_point(pt) => {
                 if *selected == Some(self.loc) {
@@ -485,9 +514,9 @@ Repaired nodes are marked in green.";
 mod tests {
     use std::collections::{HashMap, HashSet};
 
+    use super::{NODES, NODE_HEIGHT, NODE_WIDTH};
     use crate::gui::Rect;
     use crate::save::Location;
-    use super::{NODES, NODE_HEIGHT, NODE_WIDTH};
 
     #[test]
     fn all_locations_represented_on_map() {
@@ -497,9 +526,11 @@ mod tests {
         for &(loc, _, _) in NODES {
             locations.remove(&loc);
         }
-        assert!(locations.is_empty(),
-                "Unrepresented locations: {:?}",
-                locations);
+        assert!(
+            locations.is_empty(),
+            "Unrepresented locations: {:?}",
+            locations
+        );
     }
 
     #[test]
@@ -516,20 +547,26 @@ mod tests {
         let rects: HashMap<Location, Rect> = NODES
             .iter()
             .map(|&(loc, (x, y), _)| {
-                     (loc,
-                      Rect::new(x - (NODE_WIDTH / 2) as i32,
-                                y - (NODE_HEIGHT / 2) as i32,
-                                NODE_WIDTH,
-                                NODE_HEIGHT))
-                 })
+                (
+                    loc,
+                    Rect::new(
+                        x - (NODE_WIDTH / 2) as i32,
+                        y - (NODE_HEIGHT / 2) as i32,
+                        NODE_WIDTH,
+                        NODE_HEIGHT,
+                    ),
+                )
+            })
             .collect();
         for (&loc1, &rect1) in rects.iter() {
             for (&loc2, &rect2) in rects.iter() {
                 if loc1 != loc2 {
-                    assert!(!rect1.has_intersection(rect2),
-                            "{:?} intersects {:?}",
-                            loc1,
-                            loc2);
+                    assert!(
+                        !rect1.has_intersection(rect2),
+                        "{:?} intersects {:?}",
+                        loc1,
+                        loc2
+                    );
                 }
             }
         }

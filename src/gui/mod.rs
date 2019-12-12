@@ -29,7 +29,6 @@ mod sound;
 mod sprite;
 mod window;
 
-pub use sdl2::rect::{Point, Rect};
 pub use self::action::Action;
 pub use self::background::Background;
 pub use self::canvas::{Align, Canvas};
@@ -40,6 +39,7 @@ pub use self::resources::Resources;
 pub use self::sound::Sound;
 pub use self::sprite::Sprite;
 pub use self::window::Window;
+pub use sdl2::rect::{Point, Rect};
 
 pub const FRAME_DELAY_MILLIS: u32 = 40;
 

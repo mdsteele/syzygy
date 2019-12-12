@@ -23,23 +23,24 @@ use std::path::PathBuf;
 
 // ========================================================================= //
 
-const APP_INFO: AppInfo = AppInfo {
-    name: "System Syzygy",
-    author: "mdsteele",
-};
+const APP_INFO: AppInfo =
+    AppInfo { name: "System Syzygy", author: "mdsteele" };
 
 pub fn get_default_save_file_path() -> io::Result<PathBuf> {
-    let mut path = match app_dirs::app_root(AppDataType::UserData,
-                                              &APP_INFO) {
+    let mut path = match app_dirs::app_root(AppDataType::UserData, &APP_INFO) {
         Ok(path) => path,
         Err(AppDirsError::Io(error)) => return Err(error),
         Err(AppDirsError::NotSupported) => {
-            return Err(io::Error::new(io::ErrorKind::Other,
-                                      "app directory not supported"));
+            return Err(io::Error::new(
+                io::ErrorKind::Other,
+                "app directory not supported",
+            ));
         }
         Err(AppDirsError::InvalidAppInfo) => {
-            return Err(io::Error::new(io::ErrorKind::Other,
-                                      "app info invalid"));
+            return Err(io::Error::new(
+                io::ErrorKind::Other,
+                "app info invalid",
+            ));
         }
     };
     path.push("save_data.toml");

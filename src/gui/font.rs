@@ -17,11 +17,11 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
+use super::sprite::Sprite;
 use ahi;
 use sdl2::render::Canvas as SdlCanvas;
 use sdl2::video::Window as SdlWindow;
 use std::collections::HashMap;
-use super::sprite::Sprite;
 
 // ========================================================================= //
 
@@ -38,15 +38,19 @@ impl Font {
             glyphs.insert(chr, Glyph::new(renderer, &font[chr]));
         }
         Font {
-            glyphs: glyphs,
+            glyphs,
             default_glyph: Glyph::new(renderer, font.default_glyph()),
             baseline: font.baseline(),
         }
     }
 
-    pub fn baseline(&self) -> i32 { self.baseline }
+    pub fn baseline(&self) -> i32 {
+        self.baseline
+    }
 
-    pub fn height(&self) -> u32 { self.default_glyph.sprite().height() }
+    pub fn height(&self) -> u32 {
+        self.default_glyph.sprite().height()
+    }
 
     pub fn text_width(&self, text: &str) -> i32 {
         let mut width = 0;
@@ -79,11 +83,17 @@ impl Glyph {
         }
     }
 
-    pub fn sprite(&self) -> &Sprite { &self.sprite }
+    pub fn sprite(&self) -> &Sprite {
+        &self.sprite
+    }
 
-    pub fn left_edge(&self) -> i32 { self.left_edge }
+    pub fn left_edge(&self) -> i32 {
+        self.left_edge
+    }
 
-    pub fn right_edge(&self) -> i32 { self.right_edge }
+    pub fn right_edge(&self) -> i32 {
+        self.right_edge
+    }
 }
 
 // ========================================================================= //

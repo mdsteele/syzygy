@@ -20,12 +20,14 @@
 use std::cmp;
 use std::rc::Rc;
 
+use super::scenes;
 use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
-use crate::gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
-          Resources, Sound, Sprite};
+use crate::gui::{
+    Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
+    Sound, Sprite,
+};
 use crate::modes::SOLVED_INFO_TEXT;
 use crate::save::{Game, PrimaryColor, PuzzleState, SyrupState};
-use super::scenes;
 
 // ========================================================================= //
 
@@ -36,8 +38,11 @@ pub struct View {
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect, state: &SyrupState)
-               -> View {
+    pub fn new(
+        resources: &mut Resources,
+        visible: Rect,
+        state: &SyrupState,
+    ) -> View {
         let mut core = {
             let fade = (FadeStyle::LeftToRight, FadeStyle::LeftToRight);
             let intro = scenes::compile_intro_scene(resources);
@@ -46,7 +51,7 @@ impl View {
         };
         core.add_extra_scene(scenes::compile_mezure_midscene(resources));
         View {
-            core: core,
+            core,
             toggles: vec![
                 ToggleLight::new(resources, state, (1, 0)),
                 ToggleLight::new(resources, state, (2, 0)),
@@ -85,8 +90,11 @@ impl Element<Game, PuzzleCmd> for View {
         self.core.draw_front_layer(canvas, state);
     }
 
-    fn handle_event(&mut self, event: &Event, game: &mut Game)
-                    -> Action<PuzzleCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        game: &mut Game,
+    ) -> Action<PuzzleCmd> {
         let state = &mut game.light_syrup;
         let mut action = self.core.handle_event(event, state);
         if !action.should_stop() {
@@ -178,13 +186,15 @@ struct ToggleLight {
 }
 
 impl ToggleLight {
-    fn new(resources: &mut Resources, state: &SyrupState,
-           position: (i32, i32))
-           -> ToggleLight {
+    fn new(
+        resources: &mut Resources,
+        state: &SyrupState,
+        position: (i32, i32),
+    ) -> ToggleLight {
         let (red, green, blue) = state.light_colors(position);
         ToggleLight {
             frame: resources.get_sprites("light/toggle")[0].clone(),
-            position: position,
+            position,
             red_radius: if red { MAX_LIGHT_RADIUS } else { 0 },
             green_radius: if green { MAX_LIGHT_RADIUS } else { 0 },
             blue_radius: if blue { MAX_LIGHT_RADIUS } else { 0 },
@@ -199,110 +209,137 @@ impl ToggleLight {
         Rect::new(LIGHTS_LEFT + 32 * col, LIGHTS_TOP + 32 * row, 32, 32)
     }
 
-    fn set_hilight(&mut self, color: i32) { self.hilight = color; }
+    fn set_hilight(&mut self, color: i32) {
+        self.hilight = color;
+    }
 }
 
 impl Element<SyrupState, (i32, i32)> for ToggleLight {
     fn draw(&self, _state: &SyrupState, canvas: &mut Canvas) {
         let mut canvas = canvas.subcanvas(self.rect());
         if self.hilight == 1 {
-            draw_light(&mut canvas,
-                       0,
-                       0,
-                       (0, 0, 0),
-                       MAX_LIGHT_RADIUS,
-                       (255, 0, 0));
+            draw_light(
+                &mut canvas,
+                0,
+                0,
+                (0, 0, 0),
+                MAX_LIGHT_RADIUS,
+                (255, 0, 0),
+            );
         } else if self.hilight == 2 {
-            draw_light(&mut canvas,
-                       0,
-                       0,
-                       (0, 0, 0),
-                       MAX_LIGHT_RADIUS,
-                       (0, 255, 0));
+            draw_light(
+                &mut canvas,
+                0,
+                0,
+                (0, 0, 0),
+                MAX_LIGHT_RADIUS,
+                (0, 255, 0),
+            );
         } else if self.hilight == 3 {
-            draw_light(&mut canvas,
-                       0,
-                       0,
-                       (0, 0, 0),
-                       MAX_LIGHT_RADIUS,
-                       (0, 0, 255));
-        } else if self.red_radius <= self.green_radius &&
-                   self.red_radius <= self.blue_radius
+            draw_light(
+                &mut canvas,
+                0,
+                0,
+                (0, 0, 0),
+                MAX_LIGHT_RADIUS,
+                (0, 0, 255),
+            );
+        } else if self.red_radius <= self.green_radius
+            && self.red_radius <= self.blue_radius
         {
             // Red is smallest.
             if self.green_radius <= self.blue_radius {
-                draw_light(&mut canvas,
-                           self.red_radius,
-                           self.green_radius,
-                           (0, 255, 255),
-                           self.blue_radius,
-                           (0, 0, 255));
+                draw_light(
+                    &mut canvas,
+                    self.red_radius,
+                    self.green_radius,
+                    (0, 255, 255),
+                    self.blue_radius,
+                    (0, 0, 255),
+                );
             } else {
-                draw_light(&mut canvas,
-                           self.red_radius,
-                           self.blue_radius,
-                           (0, 255, 255),
-                           self.green_radius,
-                           (0, 255, 0));
+                draw_light(
+                    &mut canvas,
+                    self.red_radius,
+                    self.blue_radius,
+                    (0, 255, 255),
+                    self.green_radius,
+                    (0, 255, 0),
+                );
             }
         } else if self.green_radius <= self.blue_radius {
             // Green is smallest.
             if self.red_radius <= self.blue_radius {
-                draw_light(&mut canvas,
-                           self.green_radius,
-                           self.red_radius,
-                           (255, 0, 255),
-                           self.blue_radius,
-                           (0, 0, 255));
+                draw_light(
+                    &mut canvas,
+                    self.green_radius,
+                    self.red_radius,
+                    (255, 0, 255),
+                    self.blue_radius,
+                    (0, 0, 255),
+                );
             } else {
-                draw_light(&mut canvas,
-                           self.green_radius,
-                           self.blue_radius,
-                           (255, 0, 255),
-                           self.red_radius,
-                           (255, 0, 0));
+                draw_light(
+                    &mut canvas,
+                    self.green_radius,
+                    self.blue_radius,
+                    (255, 0, 255),
+                    self.red_radius,
+                    (255, 0, 0),
+                );
             }
         } else {
             // Blue is smallest.
             if self.red_radius <= self.green_radius {
-                draw_light(&mut canvas,
-                           self.blue_radius,
-                           self.red_radius,
-                           (255, 255, 0),
-                           self.green_radius,
-                           (0, 255, 0));
+                draw_light(
+                    &mut canvas,
+                    self.blue_radius,
+                    self.red_radius,
+                    (255, 255, 0),
+                    self.green_radius,
+                    (0, 255, 0),
+                );
             } else {
-                draw_light(&mut canvas,
-                           self.blue_radius,
-                           self.green_radius,
-                           (255, 255, 0),
-                           self.red_radius,
-                           (255, 0, 0));
+                draw_light(
+                    &mut canvas,
+                    self.blue_radius,
+                    self.green_radius,
+                    (255, 255, 0),
+                    self.red_radius,
+                    (255, 0, 0),
+                );
             }
         }
         let center = canvas.rect().center();
         if let Some(chr) = self.letter {
-            canvas.draw_char(&self.font,
-                             Align::Center,
-                             center + Point::new(0, 9),
-                             chr);
+            canvas.draw_char(
+                &self.font,
+                Align::Center,
+                center + Point::new(0, 9),
+                chr,
+            );
         }
         canvas.draw_sprite_centered(&self.frame, center);
     }
 
-    fn handle_event(&mut self, event: &Event, state: &mut SyrupState)
-                    -> Action<(i32, i32)> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        state: &mut SyrupState,
+    ) -> Action<(i32, i32)> {
         match event {
             &Event::ClockTick => {
                 let (red, green, blue) = state.light_colors(self.position);
                 // N.B. The below ORs must be non-short-circuiting.
-                Action::redraw_if(tick_radius(red, &mut self.red_radius) |
-                                      tick_radius(green,
-                                                  &mut self.green_radius) |
-                                      tick_radius(blue, &mut self.blue_radius))
+                Action::redraw_if(
+                    tick_radius(red, &mut self.red_radius)
+                        | tick_radius(green, &mut self.green_radius)
+                        | tick_radius(blue, &mut self.blue_radius),
+                )
             }
             &Event::MouseDown(pt)
-                if self.rect().contains_point(pt) && !state.is_solved() => {
+                if self.rect().contains_point(pt) && !state.is_solved() =>
+            {
                 Action::redraw().and_return(self.position)
             }
             _ => Action::ignore(),
@@ -340,8 +377,11 @@ impl Element<SyrupState, PuzzleCmd> for NextColor {
         }
     }
 
-    fn handle_event(&mut self, event: &Event, _state: &mut SyrupState)
-                    -> Action<PuzzleCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        _state: &mut SyrupState,
+    ) -> Action<PuzzleCmd> {
         match event {
             _ => Action::ignore(),
         }
@@ -351,16 +391,28 @@ impl Element<SyrupState, PuzzleCmd> for NextColor {
 // ========================================================================= //
 
 fn light_rect(center: Point, radius: i32) -> Rect {
-    Rect::new(center.x() - radius,
-              center.y() - radius,
-              2 * radius as u32,
-              2 * radius as u32)
+    Rect::new(
+        center.x() - radius,
+        center.y() - radius,
+        2 * radius as u32,
+        2 * radius as u32,
+    )
 }
 
-fn draw_light(canvas: &mut Canvas, radius1: i32, radius2: i32,
-              color2: (u8, u8, u8), radius3: i32, color3: (u8, u8, u8)) {
-    debug_assert!(0 <= radius1 && radius1 <= radius2 && radius2 <= radius3 &&
-                      radius3 <= MAX_LIGHT_RADIUS);
+fn draw_light(
+    canvas: &mut Canvas,
+    radius1: i32,
+    radius2: i32,
+    color2: (u8, u8, u8),
+    radius3: i32,
+    color3: (u8, u8, u8),
+) {
+    debug_assert!(
+        0 <= radius1
+            && radius1 <= radius2
+            && radius2 <= radius3
+            && radius3 <= MAX_LIGHT_RADIUS
+    );
     let center = canvas.rect().center();
     if radius3 < MAX_LIGHT_RADIUS {
         canvas.fill_rect((0, 0, 32), light_rect(center, MAX_LIGHT_RADIUS));

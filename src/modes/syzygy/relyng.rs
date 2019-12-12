@@ -20,8 +20,10 @@
 use std::cmp;
 use std::rc::Rc;
 
-use crate::gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
-          Resources, Sprite};
+use crate::gui::{
+    Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
+    Sprite,
+};
 use crate::save::SyzygyState;
 
 // ========================================================================= //
@@ -34,9 +36,12 @@ pub struct LightsGrid {
 }
 
 impl LightsGrid {
-    pub fn new(resources: &mut Resources, left: i32, top: i32,
-               state: &SyzygyState)
-               -> LightsGrid {
+    pub fn new(
+        resources: &mut Resources,
+        left: i32,
+        top: i32,
+        state: &SyzygyState,
+    ) -> LightsGrid {
         let mut lights = Vec::new();
         for row in 0..4 {
             for col in 0..5 {
@@ -44,9 +49,9 @@ impl LightsGrid {
             }
         }
         LightsGrid {
-            left: left,
-            top: top,
-            lights: lights,
+            left,
+            top,
+            lights,
             next: NextShape::new(resources, left + 176, top + 32),
         }
     }
@@ -55,16 +60,21 @@ impl LightsGrid {
 impl Element<SyzygyState, (i32, i32)> for LightsGrid {
     fn draw(&self, state: &SyzygyState, canvas: &mut Canvas) {
         self.next.draw(state, canvas);
-        let rect = Rect::new(self.left,
-                             self.top,
-                             5 * TOGGLE_LIGHT_SIZE,
-                             4 * TOGGLE_LIGHT_SIZE);
+        let rect = Rect::new(
+            self.left,
+            self.top,
+            5 * TOGGLE_LIGHT_SIZE,
+            4 * TOGGLE_LIGHT_SIZE,
+        );
         let mut canvas = canvas.subcanvas(rect);
         self.lights.draw(state, &mut canvas);
     }
 
-    fn handle_event(&mut self, event: &Event, state: &mut SyzygyState)
-                    -> Action<(i32, i32)> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        state: &mut SyzygyState,
+    ) -> Action<(i32, i32)> {
         let mut action = self.next.handle_event(event, state);
         let event = event.translate(-self.left, -self.top);
         action.merge(self.lights.handle_event(&event, state));
@@ -84,12 +94,14 @@ struct ToggleLight {
 }
 
 impl ToggleLight {
-    fn new(resources: &mut Resources, state: &SyzygyState,
-           position: (i32, i32))
-           -> ToggleLight {
+    fn new(
+        resources: &mut Resources,
+        state: &SyzygyState,
+        position: (i32, i32),
+    ) -> ToggleLight {
         ToggleLight {
             frame: resources.get_sprites("light/toggle")[0].clone(),
-            position: position,
+            position,
             light_radius: if state.relyng_is_lit(position) {
                 TOGGLE_MAX_LIGHT_RADIUS
             } else {
@@ -100,10 +112,12 @@ impl ToggleLight {
 
     fn rect(&self) -> Rect {
         let (col, row) = self.position;
-        Rect::new(col * TOGGLE_LIGHT_SIZE as i32,
-                  row * TOGGLE_LIGHT_SIZE as i32,
-                  TOGGLE_LIGHT_SIZE,
-                  TOGGLE_LIGHT_SIZE)
+        Rect::new(
+            col * TOGGLE_LIGHT_SIZE as i32,
+            row * TOGGLE_LIGHT_SIZE as i32,
+            TOGGLE_LIGHT_SIZE,
+            TOGGLE_LIGHT_SIZE,
+        )
     }
 }
 
@@ -115,14 +129,17 @@ impl Element<SyzygyState, (i32, i32)> for ToggleLight {
         canvas.draw_sprite_centered(&self.frame, center);
     }
 
-    fn handle_event(&mut self, event: &Event, state: &mut SyzygyState)
-                    -> Action<(i32, i32)> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        state: &mut SyzygyState,
+    ) -> Action<(i32, i32)> {
         match event {
-            &Event::ClockTick => {
-                tick_radius(state.relyng_is_lit(self.position),
-                            &mut self.light_radius,
-                            TOGGLE_MAX_LIGHT_RADIUS)
-            }
+            &Event::ClockTick => tick_radius(
+                state.relyng_is_lit(self.position),
+                &mut self.light_radius,
+                TOGGLE_MAX_LIGHT_RADIUS,
+            ),
             &Event::MouseDown(pt) if self.rect().contains_point(pt) => {
                 Action::redraw().and_return(self.position)
             }
@@ -147,26 +164,33 @@ impl NextShape {
             frame: resources.get_sprites("light/toggle")[2].clone(),
             spacer: resources.get_sprites("light/spacer")[0].clone(),
             font: resources.get_font("block"),
-            left: left,
-            top: top,
+            left,
+            top,
         }
     }
 }
 
 impl Element<SyzygyState, (i32, i32)> for NextShape {
     fn draw(&self, state: &SyzygyState, canvas: &mut Canvas) {
-        canvas.fill_rect((0, 0, 32),
-                         Rect::new(self.left + 5, self.top + 5, 22, 22));
+        canvas.fill_rect(
+            (0, 0, 32),
+            Rect::new(self.left + 5, self.top + 5, 22, 22),
+        );
         canvas.draw_sprite(&self.frame, Point::new(self.left, self.top));
-        canvas.draw_sprite(&self.spacer,
-                           Point::new(self.left - 16, self.top + 8));
+        canvas.draw_sprite(
+            &self.spacer,
+            Point::new(self.left - 16, self.top + 8),
+        );
         let chr = state.relyng_next_shape();
         let pt = Point::new(self.left + 16, self.top + 25);
         canvas.draw_char(&self.font, Align::Center, pt, chr);
     }
 
-    fn handle_event(&mut self, _event: &Event, _state: &mut SyzygyState)
-                    -> Action<(i32, i32)> {
+    fn handle_event(
+        &mut self,
+        _event: &Event,
+        _state: &mut SyzygyState,
+    ) -> Action<(i32, i32)> {
         Action::ignore()
     }
 }
@@ -174,10 +198,12 @@ impl Element<SyzygyState, (i32, i32)> for NextShape {
 // ========================================================================= //
 
 fn light_rect(center: Point, radius: i32) -> Rect {
-    Rect::new(center.x() - radius,
-              center.y() - radius,
-              2 * radius as u32,
-              2 * radius as u32)
+    Rect::new(
+        center.x() - radius,
+        center.y() - radius,
+        2 * radius as u32,
+        2 * radius as u32,
+    )
 }
 
 fn draw_light(canvas: &mut Canvas, radius: i32, max: i32) {

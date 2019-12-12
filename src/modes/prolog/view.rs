@@ -19,14 +19,17 @@
 
 use std::rc::Rc;
 
-use crate::elements::{FadeStyle, MovingStars, PuzzleCmd, PuzzleCore, PuzzleView,
-               Scene};
-use crate::gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
-          Resources, Sprite};
+use super::scenes;
+use crate::elements::{
+    FadeStyle, MovingStars, PuzzleCmd, PuzzleCore, PuzzleView, Scene,
+};
+use crate::gui::{
+    Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
+    Sprite,
+};
 use crate::modes::attic::AtticGrid;
 use crate::modes::wrecked::{WreckedDisplay, WreckedGrid};
 use crate::save::{AtticState, Game, PrologState, PuzzleState, WreckedState};
-use super::scenes;
 
 // ========================================================================= //
 
@@ -49,8 +52,11 @@ pub struct View {
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect, state: &PrologState)
-               -> View {
+    pub fn new(
+        resources: &mut Resources,
+        visible: Rect,
+        state: &PrologState,
+    ) -> View {
         let core = {
             let fade = (FadeStyle::BottomToTop, FadeStyle::TopToBottom);
             let intro = scenes::compile_scene(resources);
@@ -67,60 +73,30 @@ impl View {
         attic_grid.do_not_show_corner_lights();
 
         View {
-            core: core,
+            core,
             somewhere: SomewhereHeading::new(resources),
             status: StatusIndicator::new(resources, 304, 64),
             monitor_screens: vec![
-                MonitorScreen::new(resources,
-                                   "prolog/screen1g",
-                                   (80, 128),
-                                   1),
-                MonitorScreen::new(resources,
-                                   "prolog/screen1r",
-                                   (80, 128),
-                                   1),
-                MonitorScreen::new(resources,
-                                   "prolog/screen2g",
-                                   (80, 160),
-                                   1),
-                MonitorScreen::new(resources,
-                                   "prolog/screen2r",
-                                   (80, 160),
-                                   1),
-                MonitorScreen::new(resources,
-                                   "prolog/screen3g",
-                                   (160, 80),
-                                   4),
-                MonitorScreen::new(resources,
-                                   "prolog/screen3r",
-                                   (160, 80),
-                                   6),
-                MonitorScreen::new(resources,
-                                   "prolog/screen4g",
-                                   (192, 80),
-                                   1),
-                MonitorScreen::new(resources,
-                                   "prolog/screen4r",
-                                   (192, 80),
-                                   3),
-                MonitorScreen::new(resources,
-                                   "prolog/screen5g",
-                                   (240, 80),
-                                   1),
-                MonitorScreen::new(resources,
-                                   "prolog/screen5r",
-                                   (240, 80),
-                                   1),
+                MonitorScreen::new(resources, "prolog/screen1g", (80, 128), 1),
+                MonitorScreen::new(resources, "prolog/screen1r", (80, 128), 1),
+                MonitorScreen::new(resources, "prolog/screen2g", (80, 160), 1),
+                MonitorScreen::new(resources, "prolog/screen2r", (80, 160), 1),
+                MonitorScreen::new(resources, "prolog/screen3g", (160, 80), 4),
+                MonitorScreen::new(resources, "prolog/screen3r", (160, 80), 6),
+                MonitorScreen::new(resources, "prolog/screen4g", (192, 80), 1),
+                MonitorScreen::new(resources, "prolog/screen4r", (192, 80), 3),
+                MonitorScreen::new(resources, "prolog/screen5g", (240, 80), 1),
+                MonitorScreen::new(resources, "prolog/screen5r", (240, 80), 1),
             ],
             stars_space: MovingStars::new(0, 0, 576, 384),
             stars_window1: MovingStars::new(144, 144, 64, 32),
             stars_window2: MovingStars::new(336, 144, 64, 32),
             wrecked_state: WreckedState::new(),
             wrecked_grid: WreckedGrid::new(resources),
-            wrecked_display: wrecked_display,
+            wrecked_display,
             wrecked_visible: false,
-            attic_state: attic_state,
-            attic_grid: attic_grid,
+            attic_state,
+            attic_grid,
             attic_visible: false,
             spawn_point: SpawnPoint::new(resources, 240, 248),
         }
@@ -151,8 +127,11 @@ impl Element<Game, PuzzleCmd> for View {
         self.core.draw_front_layer(canvas, state);
     }
 
-    fn handle_event(&mut self, event: &Event, game: &mut Game)
-                    -> Action<PuzzleCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        game: &mut Game,
+    ) -> Action<PuzzleCmd> {
         let state = &mut game.prolog;
         let mut action = self.core.handle_event(event, state);
         if event == &Event::ClockTick {
@@ -193,7 +172,9 @@ impl Element<Game, PuzzleCmd> for View {
 }
 
 impl PuzzleView for View {
-    fn info_text(&self, _game: &Game) -> &'static str { INFO_BOX_TEXT }
+    fn info_text(&self, _game: &Game) -> &'static str {
+        INFO_BOX_TEXT
+    }
 
     fn undo(&mut self, _game: &mut Game) {}
 
@@ -213,33 +194,30 @@ impl PuzzleView for View {
                             screen.visible = false;
                         }
                     } else {
-                        for (index, screen) in self.monitor_screens
-                            .iter_mut()
-                            .enumerate()
+                        for (index, screen) in
+                            self.monitor_screens.iter_mut().enumerate()
                         {
                             screen.visible = (index % 2 == 0) ^ (value > 1);
                         }
                     }
                 }
-                2 => {
-                    match value {
-                        1 => {
-                            self.stars_space.set_visible(true);
-                            self.stars_window1.set_visible(false);
-                            self.stars_window2.set_visible(false);
-                        }
-                        2 => {
-                            self.stars_space.set_visible(false);
-                            self.stars_window1.set_visible(true);
-                            self.stars_window2.set_visible(true);
-                        }
-                        _ => {
-                            self.stars_space.set_visible(false);
-                            self.stars_window1.set_visible(false);
-                            self.stars_window2.set_visible(false);
-                        }
+                2 => match value {
+                    1 => {
+                        self.stars_space.set_visible(true);
+                        self.stars_window1.set_visible(false);
+                        self.stars_window2.set_visible(false);
                     }
-                }
+                    2 => {
+                        self.stars_space.set_visible(false);
+                        self.stars_window1.set_visible(true);
+                        self.stars_window2.set_visible(true);
+                    }
+                    _ => {
+                        self.stars_space.set_visible(false);
+                        self.stars_window1.set_visible(false);
+                        self.stars_window2.set_visible(false);
+                    }
+                },
                 3 => self.wrecked_visible = value != 0,
                 4 => {
                     self.attic_visible = value != 0;
@@ -285,10 +263,12 @@ impl SomewhereHeading {
     fn draw(&self, canvas: &mut Canvas) {
         if self.visible && self.show > 0 {
             let text = "Somewhere in deep space...";
-            canvas.draw_text(&self.font,
-                             Align::Left,
-                             Point::new(200, 275),
-                             &text[..self.show.min(text.len())]);
+            canvas.draw_text(
+                &self.font,
+                Align::Left,
+                Point::new(200, 275),
+                &text[..self.show.min(text.len())],
+            );
         }
     }
 
@@ -324,14 +304,16 @@ impl StatusIndicator {
     fn new(resources: &mut Resources, left: i32, top: i32) -> StatusIndicator {
         StatusIndicator {
             font: resources.get_font("roman"),
-            left: left,
-            top: top,
+            left,
+            top,
             mode: 0,
             anim: 0,
         }
     }
 
-    fn is_visible(&self) -> bool { self.mode > 0 }
+    fn is_visible(&self) -> bool {
+        self.mode > 0
+    }
 
     fn set_mode(&mut self, mode: i32) {
         self.mode = mode;
@@ -346,16 +328,20 @@ impl StatusIndicator {
             4 => ((255, 63, 63), "SOMETHING", "IS ON FIRE"),
             _ => return,
         };
-        let mut canvas = canvas.subcanvas(Rect::new(self.left + offset.x(),
-                                                    self.top + offset.y(),
-                                                    96,
-                                                    32));
+        let mut canvas = canvas.subcanvas(Rect::new(
+            self.left + offset.x(),
+            self.top + offset.y(),
+            96,
+            32,
+        ));
         if self.anim < STATUS_ON_FRAMES {
             canvas.fill_rect(color, Rect::new(3, 3, 90, 14));
-            canvas.draw_text(&self.font,
-                             Align::Center,
-                             Point::new(48, 14),
-                             msg1);
+            canvas.draw_text(
+                &self.font,
+                Align::Center,
+                Point::new(48, 14),
+                msg1,
+            );
         } else {
             canvas.fill_rect((47, 47, 63), Rect::new(3, 3, 90, 14));
         }
@@ -386,15 +372,18 @@ struct MonitorScreen {
 }
 
 impl MonitorScreen {
-    fn new(resources: &mut Resources, name: &str, (left, top): (i32, i32),
-           slowdown: usize)
-           -> MonitorScreen {
+    fn new(
+        resources: &mut Resources,
+        name: &str,
+        (left, top): (i32, i32),
+        slowdown: usize,
+    ) -> MonitorScreen {
         MonitorScreen {
             sprites: resources.get_sprites(name),
             topleft: Point::new(left + 4, top + 4),
             visible: false,
             anim: 0,
-            slowdown: slowdown,
+            slowdown,
         }
     }
 
@@ -442,19 +431,23 @@ impl SpawnPoint {
 
     fn draw(&self, canvas: &mut Canvas) {
         if self.visible {
-            let sprite = &self.lightning_sprites[((self.anim / 2) % 4) as
-                                                     usize];
+            let sprite =
+                &self.lightning_sprites[((self.anim / 2) % 4) as usize];
             canvas.draw_sprite_centered(sprite, self.center);
             if self.anim > SPAWN_DELAY_FRAMES {
                 let height = (self.anim - SPAWN_DELAY_FRAMES).min(32);
-                let rect = Rect::new(self.center.x() - 16,
-                                     self.center.y() + 16 - height as i32,
-                                     32,
-                                     height);
+                let rect = Rect::new(
+                    self.center.x() - 16,
+                    self.center.y() + 16 - height as i32,
+                    32,
+                    height,
+                );
                 let mut subcanvas = canvas.subcanvas(rect);
                 let sprite = &self.mezure_sprites[0];
-                let pt = Point::new(-((self.anim % 2) as i32),
-                                    (height as i32) - 32);
+                let pt = Point::new(
+                    -((self.anim % 2) as i32),
+                    (height as i32) - 32,
+                );
                 subcanvas.draw_sprite(sprite, pt);
             }
         }
@@ -473,6 +466,6 @@ impl SpawnPoint {
 // ========================================================================= //
 
 pub const INFO_BOX_TEXT: &str = "\
-Return to the map to select another scene.";
+                                 Return to the map to select another scene.";
 
 // ========================================================================= //

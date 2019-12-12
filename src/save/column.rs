@@ -39,18 +39,18 @@ pub struct Columns {
 }
 
 impl Columns {
-    pub fn from_toml(spec: &[(&str, i32, i32, &[(usize, i32)])],
-                     array: toml::value::Array)
-                     -> Columns {
-        let mut columns: Vec<Column> = spec.iter()
-            .map(|&(word, offset, solved, linkages)| {
-                Column {
-                    letters: word.chars().collect(),
-                    linkages: linkages.iter().cloned().collect(),
-                    offset: offset,
-                    current_position: 0,
-                    solved_position: solved,
-                }
+    pub fn from_toml(
+        spec: &[(&str, i32, i32, &[(usize, i32)])],
+        array: toml::value::Array,
+    ) -> Columns {
+        let mut columns: Vec<Column> = spec
+            .iter()
+            .map(|&(word, offset, solved, linkages)| Column {
+                letters: word.chars().collect(),
+                linkages: linkages.iter().cloned().collect(),
+                offset,
+                current_position: 0,
+                solved_position: solved,
             })
             .collect();
         for (index, value) in array.into_iter().enumerate() {
@@ -63,18 +63,22 @@ impl Columns {
                 column.current_position = value;
             }
         }
-        Columns { columns: columns }
+        Columns { columns }
     }
 
     pub fn to_toml(&self) -> toml::Value {
-        toml::Value::Array(self.columns
-                               .iter()
-                               .map(|column| column.current_position as i64)
-                               .map(toml::Value::Integer)
-                               .collect())
+        toml::Value::Array(
+            self.columns
+                .iter()
+                .map(|column| column.current_position as i64)
+                .map(toml::Value::Integer)
+                .collect(),
+        )
     }
 
-    pub fn num_columns(&self) -> usize { self.columns.len() }
+    pub fn num_columns(&self) -> usize {
+        self.columns.len()
+    }
 
     pub fn column_linkages(&self, col: usize) -> &[(usize, i32)] {
         &self.columns[col].linkages
@@ -115,9 +119,10 @@ impl Columns {
         let linkages = self.columns[col].linkages.clone();
         for (other, factor) in linkages.into_iter() {
             let column = &mut self.columns[other];
-            column.current_position = mod_floor(column.current_position -
-                                                    by * factor,
-                                                column.letters.len() as i32);
+            column.current_position = mod_floor(
+                column.current_position - by * factor,
+                column.letters.len() as i32,
+            );
         }
     }
 

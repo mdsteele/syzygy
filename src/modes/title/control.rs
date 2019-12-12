@@ -18,10 +18,10 @@
 // +--------------------------------------------------------------------------+
 
 use crate::gui::{Element, Event, Window};
-use crate::modes::{Mode, run_info_box};
+use crate::modes::{run_info_box, Mode};
 use crate::save::SaveData;
 
-use super::view::{ABOUT_BOX_TEXT, Cmd, ConfirmEraseView, View};
+use super::view::{Cmd, ConfirmEraseView, View, ABOUT_BOX_TEXT};
 
 // ========================================================================= //
 
@@ -80,8 +80,11 @@ enum Confirmation {
     Quit,
 }
 
-fn confirm_erase(window: &mut Window, title_view: &View, data: &mut SaveData)
-                 -> Confirmation {
+fn confirm_erase(
+    window: &mut Window,
+    title_view: &View,
+    data: &mut SaveData,
+) -> Confirmation {
     let mut view = {
         let visible = window.visible_rect();
         ConfirmEraseView::new(&mut window.resources(), visible, title_view)

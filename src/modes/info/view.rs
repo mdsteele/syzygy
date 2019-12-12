@@ -19,8 +19,8 @@
 
 use std::marker::PhantomData;
 
-use crate::gui::{Action, Canvas, Element, Event, Rect, Resources};
 use crate::elements::DialogBox;
+use crate::gui::{Action, Canvas, Element, Event, Rect, Resources};
 
 // ========================================================================= //
 
@@ -31,16 +31,15 @@ pub struct View<'a, A, E: 'a> {
 }
 
 impl<'a, A, E> View<'a, A, E> {
-    pub fn new(resources: &mut Resources, visible: Rect,
-               original_view: &'a E, text: &str)
-               -> View<'a, A, E> {
+    pub fn new(
+        resources: &mut Resources,
+        visible: Rect,
+        original_view: &'a E,
+        text: &str,
+    ) -> View<'a, A, E> {
         let buttons = vec![("OK".to_string(), ())];
         let dialog = DialogBox::new(resources, visible, text, buttons);
-        View {
-            original_view: original_view,
-            dialog: dialog,
-            phantom: PhantomData,
-        }
+        View { original_view, dialog, phantom: PhantomData }
     }
 }
 

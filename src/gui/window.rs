@@ -17,12 +17,12 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use sdl2::{AudioSubsystem, EventPump, Sdl, VideoSubsystem};
 use sdl2::audio::AudioDevice;
 use sdl2::rect::{Point, Rect};
 use sdl2::render::Canvas as SdlCanvas;
 use sdl2::video::FullscreenType;
 use sdl2::video::Window as SdlWindow;
+use sdl2::{AudioSubsystem, EventPump, Sdl, VideoSubsystem};
 use std::rc::Rc;
 use std::sync::Arc;
 
@@ -49,9 +49,14 @@ pub struct Window {
 }
 
 impl Window {
-    pub fn new(sdl_context: &Sdl, title: &str, full_size: (u32, u32),
-               ideal_size: (u32, u32), force_ideal: bool, fullscreen: bool)
-               -> Window {
+    pub fn new(
+        sdl_context: &Sdl,
+        title: &str,
+        full_size: (u32, u32),
+        ideal_size: (u32, u32),
+        force_ideal: bool,
+        fullscreen: bool,
+    ) -> Window {
         // Init video:
         let (full_width, full_height) = full_size;
         let (ideal_width, ideal_height) = ideal_size;
@@ -77,12 +82,12 @@ impl Window {
             let aspect_ratio = (native_width as f64) / (native_height as f64);
             let ideal_ratio = (ideal_width as f64) / (ideal_height as f64);
             if aspect_ratio > ideal_ratio {
-                let actual_width = (aspect_ratio * (ideal_height as f64))
-                    .round() as u32;
+                let actual_width =
+                    (aspect_ratio * (ideal_height as f64)).round() as u32;
                 (actual_width, ideal_height)
             } else {
-                let actual_height = ((ideal_width as f64) / aspect_ratio)
-                    .round() as u32;
+                let actual_height =
+                    ((ideal_width as f64) / aspect_ratio).round() as u32;
                 (ideal_width, actual_height)
             }
         };
@@ -102,20 +107,20 @@ impl Window {
         // Init audio:
         let audio_subsystem = sdl_context.audio().unwrap();
         let sound_queue = Arc::new(SoundQueue::new());
-        let audio_device = SoundMixer::audio_device(&audio_subsystem,
-                                                    sound_queue.clone());
+        let audio_device =
+            SoundMixer::audio_device(&audio_subsystem, sound_queue.clone());
         audio_device.resume();
 
         Window {
             _audio_subsystem: audio_subsystem,
             _audio_device: audio_device,
-            sound_queue: sound_queue,
+            sound_queue,
             _video_subsystem: video_subsystem,
-            renderer: renderer,
+            renderer,
             full_rect: Rect::new(offset_x, offset_y, full_width, full_height),
             event_pump: sdl_context.event_pump().unwrap(),
-            resource_cache: resource_cache,
-            debug_font: debug_font,
+            resource_cache,
+            debug_font,
             debug_counter: 0,
         }
     }
@@ -154,16 +159,16 @@ impl Window {
             let visible = self.visible_rect();
             let mut canvas = Canvas::new(&mut self.renderer, self.full_rect);
             if let Some(ref font) = self.debug_font {
-                canvas.fill_rect((0, 0, 0),
-                                 Rect::new(visible.right() - 24,
-                                           visible.top() + 2,
-                                           22,
-                                           10));
-                canvas.draw_text(&font,
-                                 Align::Right,
-                                 Point::new(visible.right() - 2,
-                                            visible.top() + 11),
-                                 &format!("{:03}", self.debug_counter));
+                canvas.fill_rect(
+                    (0, 0, 0),
+                    Rect::new(visible.right() - 24, visible.top() + 2, 22, 10),
+                );
+                canvas.draw_text(
+                    &font,
+                    Align::Right,
+                    Point::new(visible.right() - 2, visible.top() + 11),
+                    &format!("{:03}", self.debug_counter),
+                );
                 self.debug_counter = (self.debug_counter + 1) % 1000;
             }
         }
@@ -175,8 +180,8 @@ impl Window {
         loop {
             match Event::from_sdl2(&self.event_pump.wait_event()) {
                 Some(event) => {
-                    return event.translate(-self.full_rect.x(),
-                                           -self.full_rect.y())
+                    return event
+                        .translate(-self.full_rect.x(), -self.full_rect.y())
                 }
                 None => {}
             }

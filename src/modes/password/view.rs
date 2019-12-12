@@ -18,16 +18,20 @@
 // +--------------------------------------------------------------------------+
 
 use std::cmp::{max, min};
-use std::rc::Rc;
 use std::f64;
+use std::rc::Rc;
 
-use crate::elements::{CrosswordView, FadeStyle, Paragraph, PuzzleCmd, PuzzleCore,
-               PuzzleView, TalkPos};
-use crate::gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
-          Resources, Sound, Sprite};
+use super::scenes;
+use crate::elements::{
+    CrosswordView, FadeStyle, Paragraph, PuzzleCmd, PuzzleCore, PuzzleView,
+    TalkPos,
+};
+use crate::gui::{
+    Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
+    Sound, Sprite,
+};
 use crate::modes::SOLVED_INFO_TEXT;
 use crate::save::{Game, PasswordState, PuzzleState};
-use super::scenes;
 
 // ========================================================================= //
 
@@ -51,9 +55,11 @@ pub struct View {
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect,
-               state: &PasswordState)
-               -> View {
+    pub fn new(
+        resources: &mut Resources,
+        visible: Rect,
+        state: &PasswordState,
+    ) -> View {
         let mut core = {
             let fade = (FadeStyle::LeftToRight, FadeStyle::TopToBottom);
             let intro = scenes::compile_intro_scene(resources);
@@ -65,7 +71,7 @@ impl View {
             core.skip_extra_scene(scenes::PRE_SLIDERS_SCENE);
         }
         let mut view = View {
-            core: core,
+            core,
             speech_bubble: resources.get_sprites("speech/normal"),
             paragraphs: [
                 make_speech(resources, TalkPos::E, ELINSA_SPEECH),
@@ -76,30 +82,42 @@ impl View {
                 make_speech(resources, TalkPos::W, RELYNG_SPEECH),
             ],
             crosswords: [
-                CrosswordView::new(resources,
-                                   (264, 116),
-                                   ELINSA_OFFS,
-                                   (264, 80)),
-                CrosswordView::new(resources,
-                                   (264, 116),
-                                   ARGONY_OFFS,
-                                   (264, 80)),
-                CrosswordView::new(resources,
-                                   (276, 116),
-                                   MEZURE_OFFS,
-                                   (276, 80)),
-                CrosswordView::new(resources,
-                                   (276, 116),
-                                   YTTRIS_OFFS,
-                                   (276, 80)),
-                CrosswordView::new(resources,
-                                   (212, 116),
-                                   UGRENT_OFFS,
-                                   (212, 80)),
-                CrosswordView::new(resources,
-                                   (276, 116),
-                                   RELYNG_OFFS,
-                                   (276, 80)),
+                CrosswordView::new(
+                    resources,
+                    (264, 116),
+                    ELINSA_OFFS,
+                    (264, 80),
+                ),
+                CrosswordView::new(
+                    resources,
+                    (264, 116),
+                    ARGONY_OFFS,
+                    (264, 80),
+                ),
+                CrosswordView::new(
+                    resources,
+                    (276, 116),
+                    MEZURE_OFFS,
+                    (276, 80),
+                ),
+                CrosswordView::new(
+                    resources,
+                    (276, 116),
+                    YTTRIS_OFFS,
+                    (276, 80),
+                ),
+                CrosswordView::new(
+                    resources,
+                    (212, 116),
+                    UGRENT_OFFS,
+                    (212, 80),
+                ),
+                CrosswordView::new(
+                    resources,
+                    (276, 116),
+                    RELYNG_OFFS,
+                    (276, 80),
+                ),
             ],
             slider: PasswordSlider::new(resources),
             show_crosswords: false,
@@ -126,11 +144,13 @@ impl View {
         let index = state.active_index();
         if !state.crossword_is_done(index) {
             let (paragraph, talk_pos) = self.paragraphs[index].clone();
-            theater.set_actor_speech(scenes::slot_for_crossword_index(index),
-                                     self.speech_bubble.clone(),
-                                     (255, 255, 255),
-                                     talk_pos,
-                                     paragraph);
+            theater.set_actor_speech(
+                scenes::slot_for_crossword_index(index),
+                self.speech_bubble.clone(),
+                (255, 255, 255),
+                talk_pos,
+                paragraph,
+            );
             true
         } else {
             false
@@ -154,8 +174,11 @@ impl Element<Game, PuzzleCmd> for View {
         self.core.draw_front_layer(canvas, state);
     }
 
-    fn handle_event(&mut self, event: &Event, game: &mut Game)
-                    -> Action<PuzzleCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        game: &mut Game,
+    ) -> Action<PuzzleCmd> {
         let state = &mut game.password_file;
         let mut action = self.core.handle_event(event, state);
         if !action.should_stop() && self.should_display_speech {
@@ -185,18 +208,17 @@ impl Element<Game, PuzzleCmd> for View {
                             action.also_play_sound(sound);
                         }
                     } else {
-                        self.core.push_undo(UndoRedo::Crossword(idx,
-                                                                row,
-                                                                index,
-                                                                old_chr,
-                                                                chr));
+                        self.core.push_undo(UndoRedo::Crossword(
+                            idx, row, index, old_chr, chr,
+                        ));
                     }
                 }
                 action.merge(subaction.but_no_value());
             }
         }
-        if !action.should_stop() && self.slider.show_num_cols >= 6 &&
-            self.sliders_anim == 0
+        if !action.should_stop()
+            && self.slider.show_num_cols >= 6
+            && self.sliders_anim == 0
         {
             let subaction = self.slider.handle_event(event, state);
             if let Some(&(col, new_offset)) = subaction.value() {
@@ -207,9 +229,9 @@ impl Element<Game, PuzzleCmd> for View {
                         self.core.begin_outro_scene();
                         action = action.and_return(PuzzleCmd::Save);
                     } else {
-                        self.core.push_undo(UndoRedo::Slider(col,
-                                                             old_offset,
-                                                             new_offset));
+                        self.core.push_undo(UndoRedo::Slider(
+                            col, old_offset, new_offset,
+                        ));
                     }
                 }
             }
@@ -219,11 +241,11 @@ impl Element<Game, PuzzleCmd> for View {
             match event {
                 &Event::MouseDown(pt) => {
                     if !state.all_crosswords_done() {
-                        let opt_index =
-                            self.core
-                                .theater()
-                                .actor_at_point(pt)
-                                .and_then(scenes::crossword_index_for_slot);
+                        let opt_index = self
+                            .core
+                            .theater()
+                            .actor_at_point(pt)
+                            .and_then(scenes::crossword_index_for_slot);
                         if let Some(index) = opt_index {
                             state.set_active_index(index);
                             self.crosswords[index].reset_cursor();
@@ -360,18 +382,20 @@ impl PasswordSlider {
     }
 
     fn get_slider_rect(&self, state: &PasswordState, col: i32) -> Rect {
-        Rect::new(SLIDER_LEFT + BOX_SIZE * col,
-                  SLIDER_TOP + BOX_SIZE * state.get_slider_offset(col),
-                  BOX_USIZE,
-                  BOX_USIZE * 6)
+        Rect::new(
+            SLIDER_LEFT + BOX_SIZE * col,
+            SLIDER_TOP + BOX_SIZE * state.get_slider_offset(col),
+            BOX_USIZE,
+            BOX_USIZE * 6,
+        )
     }
 }
 
 impl Element<PasswordState, (i32, i32)> for PasswordSlider {
     fn draw(&self, state: &PasswordState, canvas: &mut Canvas) {
         let hilight_color = {
-            let glow = ((self.glow_anim as f64) * f64::consts::PI /
-                            (GLOW_ANIM_FRAMES as f64))
+            let glow = ((self.glow_anim as f64) * f64::consts::PI
+                / (GLOW_ANIM_FRAMES as f64))
                 .sin();
             (63 + (192.0 * glow) as u8, 31, 63)
         };
@@ -382,8 +406,10 @@ impl Element<PasswordState, (i32, i32)> for PasswordSlider {
             if let Some(ref drag) = self.drag {
                 if col == drag.col {
                     word_top += drag.to_y - drag.from_y;
-                    word_top = max(SLIDER_TOP - 5 * BOX_SIZE,
-                                   min(SLIDER_TOP, word_top));
+                    word_top = max(
+                        SLIDER_TOP - 5 * BOX_SIZE,
+                        min(SLIDER_TOP, word_top),
+                    );
                 }
             }
             let word = SLIDER_WORDS[col as usize];
@@ -408,21 +434,32 @@ impl Element<PasswordState, (i32, i32)> for PasswordSlider {
             }
         }
         if self.show_num_cols >= 6 {
-            canvas.draw_rect((255, 128, 128),
-                             Rect::new(SLIDER_LEFT - 1,
-                                       SLIDER_TOP - 1,
-                                       6 * BOX_USIZE + 3,
-                                       BOX_USIZE + 3));
-            canvas.draw_rect((192, 64, 64),
-                             Rect::new(SLIDER_LEFT - 2,
-                                       SLIDER_TOP - 2,
-                                       6 * BOX_USIZE + 5,
-                                       BOX_USIZE + 5));
+            canvas.draw_rect(
+                (255, 128, 128),
+                Rect::new(
+                    SLIDER_LEFT - 1,
+                    SLIDER_TOP - 1,
+                    6 * BOX_USIZE + 3,
+                    BOX_USIZE + 3,
+                ),
+            );
+            canvas.draw_rect(
+                (192, 64, 64),
+                Rect::new(
+                    SLIDER_LEFT - 2,
+                    SLIDER_TOP - 2,
+                    6 * BOX_USIZE + 5,
+                    BOX_USIZE + 5,
+                ),
+            );
         }
     }
 
-    fn handle_event(&mut self, event: &Event, state: &mut PasswordState)
-                    -> Action<(i32, i32)> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        state: &mut PasswordState,
+    ) -> Action<(i32, i32)> {
         match event {
             &Event::ClockTick => {
                 if self.glow_anim > 0 {
@@ -434,10 +471,10 @@ impl Element<PasswordState, (i32, i32)> for PasswordSlider {
                 for col in 0..6 {
                     if self.get_slider_rect(state, col).contains_point(pt) {
                         self.drag = Some(SliderDrag {
-                                             col: col,
-                                             from_y: pt.y(),
-                                             to_y: pt.y(),
-                                         });
+                            col,
+                            from_y: pt.y(),
+                            to_y: pt.y(),
+                        });
                         return Action::redraw()
                             .and_play_sound(Sound::device_pickup());
                     }
@@ -452,8 +489,8 @@ impl Element<PasswordState, (i32, i32)> for PasswordSlider {
             &Event::MouseUp => {
                 if let Some(drag) = self.drag.take() {
                     let old_offset = state.get_slider_offset(drag.col);
-                    let delta = ((drag.to_y - drag.from_y) as f64 /
-                                     BOX_SIZE as f64)
+                    let delta = ((drag.to_y - drag.from_y) as f64
+                        / BOX_SIZE as f64)
                         .round() as i32;
                     let new_offset = max(-5, min(0, old_offset + delta));
                     return Action::redraw()
@@ -488,8 +525,11 @@ const RELYNG_SPEECH: &str = "\
 Sometimes you have to hide your
 own cards to uncover the truth.";
 
-fn make_speech(resources: &mut Resources, pos: TalkPos, text: &str)
-               -> (Rc<Paragraph>, TalkPos) {
+fn make_speech(
+    resources: &mut Resources,
+    pos: TalkPos,
+    text: &str,
+) -> (Rc<Paragraph>, TalkPos) {
     (Rc::new(Paragraph::new(resources, "roman", Align::Center, text)), pos)
 }
 

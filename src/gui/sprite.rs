@@ -46,28 +46,38 @@ impl Sprite {
         } else {
             PixelFormatEnum::ABGR8888
         };
-        let surface = Surface::from_data(&mut data,
-                                         width,
-                                         height,
-                                         width * bytes_per_pixel,
-                                         format)
-            .unwrap();
+        let surface = Surface::from_data(
+            &mut data,
+            width,
+            height,
+            width * bytes_per_pixel,
+            format,
+        )
+        .unwrap();
         Sprite {
-            width: width,
-            height: height,
-            texture: Rc::new(renderer
-                                 .create_texture_from_surface(&surface)
-                                 .unwrap()),
+            width,
+            height,
+            texture: Rc::new(
+                renderer.create_texture_from_surface(&surface).unwrap(),
+            ),
         }
     }
 
-    pub fn width(&self) -> u32 { self.width }
+    pub fn width(&self) -> u32 {
+        self.width
+    }
 
-    pub fn height(&self) -> u32 { self.height }
+    pub fn height(&self) -> u32 {
+        self.height
+    }
 
-    pub fn rect(&self) -> Rect { Rect::new(0, 0, self.width, self.height) }
+    pub fn rect(&self) -> Rect {
+        Rect::new(0, 0, self.width, self.height)
+    }
 
-    pub fn sdl2_texture(&self) -> &Texture { &self.texture }
+    pub fn sdl2_texture(&self) -> &Texture {
+        &self.texture
+    }
 }
 
 // ========================================================================= //

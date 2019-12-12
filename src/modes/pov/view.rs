@@ -20,12 +20,14 @@
 use std::cmp;
 use std::rc::Rc;
 
+use super::scenes;
 use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
-use crate::gui::{Action, Canvas, Element, Event, FRAME_DELAY_MILLIS, Font, Point,
-          Rect, Resources, Sound, Sprite};
+use crate::gui::{
+    Action, Canvas, Element, Event, Font, Point, Rect, Resources, Sound,
+    Sprite, FRAME_DELAY_MILLIS,
+};
 use crate::modes::SOLVED_INFO_TEXT;
 use crate::save::{Game, PovState, PuzzleState};
-use super::scenes;
 
 // ========================================================================= //
 
@@ -43,8 +45,11 @@ pub struct View {
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect, state: &PovState)
-               -> View {
+    pub fn new(
+        resources: &mut Resources,
+        visible: Rect,
+        state: &PovState,
+    ) -> View {
         let mut core = {
             let fade = (FadeStyle::LeftToRight, FadeStyle::LeftToRight);
             let intro = scenes::compile_intro_scene(resources);
@@ -53,10 +58,7 @@ impl View {
         };
         core.add_extra_scene(scenes::compile_argony_midscene(resources));
         core.add_extra_scene(scenes::compile_yttris_midscene(resources));
-        View {
-            core: core,
-            grid: PovGridView::new(resources, 128, 64),
-        }
+        View { core, grid: PovGridView::new(resources, 128, 64) }
     }
 }
 
@@ -69,8 +71,11 @@ impl Element<Game, PuzzleCmd> for View {
         self.core.draw_front_layer(canvas, state);
     }
 
-    fn handle_event(&mut self, event: &Event, game: &mut Game)
-                    -> Action<PuzzleCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        game: &mut Game,
+    ) -> Action<PuzzleCmd> {
         let state = &mut game.point_of_view;
         let mut action = self.core.handle_event(event, state);
         if !action.should_stop() {
@@ -160,9 +165,11 @@ const INDICATOR_COLOR_THICKNESS: i32 = 3;
 const INDICATOR_MARGIN: i32 = 2;
 const INDICATOR_SPACING: i32 = 2;
 const INDICATOR_LENGTH: u32 = (GRID_CELL_SIZE - 2 * INDICATOR_MARGIN) as u32;
-const INDICATOR_TOTAL_THICKNESS: i32 =
-    INDICATOR_MARGIN + INDICATOR_GOAL_THICKNESS + INDICATOR_SPACING +
-        INDICATOR_COLOR_THICKNESS + INDICATOR_MARGIN;
+const INDICATOR_TOTAL_THICKNESS: i32 = INDICATOR_MARGIN
+    + INDICATOR_GOAL_THICKNESS
+    + INDICATOR_SPACING
+    + INDICATOR_COLOR_THICKNESS
+    + INDICATOR_MARGIN;
 const ROTATE_MAX_MILLIS: u32 = 200;
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
@@ -210,10 +217,12 @@ pub struct PovGridView {
 impl PovGridView {
     fn new(resources: &mut Resources, left: i32, top: i32) -> PovGridView {
         PovGridView {
-            rect: Rect::new(left,
-                            top,
-                            (5 * GRID_CELL_SIZE) as u32,
-                            (5 * GRID_CELL_SIZE) as u32),
+            rect: Rect::new(
+                left,
+                top,
+                (5 * GRID_CELL_SIZE) as u32,
+                (5 * GRID_CELL_SIZE) as u32,
+            ),
             tile_sprites: resources.get_sprites("point/view"),
             drag: None,
             font: resources.get_font("block"),
@@ -234,10 +243,10 @@ impl Element<PovState, PovCmd> for PovGridView {
         canvas.fill_rect((64, 64, 64), self.rect);
         for index in 0..self.num_letters {
             let (col, row, chr, degrees) = LETTERS[index];
-            let center = Point::new(self.rect.left() + GRID_CELL_SIZE * col +
-                                        GRID_CELL_SIZE / 2,
-                                    self.rect.top() + GRID_CELL_SIZE * row +
-                                        GRID_CELL_SIZE / 2);
+            let center = Point::new(
+                self.rect.left() + GRID_CELL_SIZE * col + GRID_CELL_SIZE / 2,
+                self.rect.top() + GRID_CELL_SIZE * row + GRID_CELL_SIZE / 2,
+            );
             let sprite = self.font.glyph(chr).sprite();
             canvas.draw_sprite_rotated(sprite, center, degrees);
         }
@@ -247,34 +256,50 @@ impl Element<PovState, PovCmd> for PovGridView {
             let color = state.row_left_color(row);
             let left = self.rect.left() - INDICATOR_TOTAL_THICKNESS;
             let top = self.rect.top() + GRID_CELL_SIZE * row;
-            canvas.fill_rect(get_color(goal),
-                             Rect::new(left + INDICATOR_MARGIN,
-                                       top + INDICATOR_MARGIN,
-                                       INDICATOR_GOAL_THICKNESS as u32,
-                                       INDICATOR_LENGTH));
-            canvas.fill_rect(get_color(color),
-                             Rect::new(left + INDICATOR_MARGIN +
-                                           INDICATOR_GOAL_THICKNESS +
-                                           INDICATOR_SPACING,
-                                       top + INDICATOR_MARGIN,
-                                       INDICATOR_COLOR_THICKNESS as u32,
-                                       INDICATOR_LENGTH));
+            canvas.fill_rect(
+                get_color(goal),
+                Rect::new(
+                    left + INDICATOR_MARGIN,
+                    top + INDICATOR_MARGIN,
+                    INDICATOR_GOAL_THICKNESS as u32,
+                    INDICATOR_LENGTH,
+                ),
+            );
+            canvas.fill_rect(
+                get_color(color),
+                Rect::new(
+                    left + INDICATOR_MARGIN
+                        + INDICATOR_GOAL_THICKNESS
+                        + INDICATOR_SPACING,
+                    top + INDICATOR_MARGIN,
+                    INDICATOR_COLOR_THICKNESS as u32,
+                    INDICATOR_LENGTH,
+                ),
+            );
             // Right:
             let goal = state.row_right_goal(row);
             let color = state.row_right_color(row);
             let left = self.rect.right();
-            canvas.fill_rect(get_color(color),
-                             Rect::new(left + INDICATOR_MARGIN,
-                                       top + INDICATOR_MARGIN,
-                                       INDICATOR_COLOR_THICKNESS as u32,
-                                       INDICATOR_LENGTH));
-            canvas.fill_rect(get_color(goal),
-                             Rect::new(left + INDICATOR_MARGIN +
-                                           INDICATOR_COLOR_THICKNESS +
-                                           INDICATOR_SPACING,
-                                       top + INDICATOR_MARGIN,
-                                       INDICATOR_GOAL_THICKNESS as u32,
-                                       INDICATOR_LENGTH));
+            canvas.fill_rect(
+                get_color(color),
+                Rect::new(
+                    left + INDICATOR_MARGIN,
+                    top + INDICATOR_MARGIN,
+                    INDICATOR_COLOR_THICKNESS as u32,
+                    INDICATOR_LENGTH,
+                ),
+            );
+            canvas.fill_rect(
+                get_color(goal),
+                Rect::new(
+                    left + INDICATOR_MARGIN
+                        + INDICATOR_COLOR_THICKNESS
+                        + INDICATOR_SPACING,
+                    top + INDICATOR_MARGIN,
+                    INDICATOR_GOAL_THICKNESS as u32,
+                    INDICATOR_LENGTH,
+                ),
+            );
         }
         for col in 0..5 {
             // Top:
@@ -282,34 +307,50 @@ impl Element<PovState, PovCmd> for PovGridView {
             let color = state.col_top_color(col);
             let left = self.rect.left() + GRID_CELL_SIZE * col;
             let top = self.rect.top() - INDICATOR_TOTAL_THICKNESS;
-            canvas.fill_rect(get_color(goal),
-                             Rect::new(left + INDICATOR_MARGIN,
-                                       top + INDICATOR_MARGIN,
-                                       INDICATOR_LENGTH,
-                                       INDICATOR_GOAL_THICKNESS as u32));
-            canvas.fill_rect(get_color(color),
-                             Rect::new(left + INDICATOR_MARGIN,
-                                       top + INDICATOR_MARGIN +
-                                           INDICATOR_GOAL_THICKNESS +
-                                           INDICATOR_SPACING,
-                                       INDICATOR_LENGTH,
-                                       INDICATOR_COLOR_THICKNESS as u32));
+            canvas.fill_rect(
+                get_color(goal),
+                Rect::new(
+                    left + INDICATOR_MARGIN,
+                    top + INDICATOR_MARGIN,
+                    INDICATOR_LENGTH,
+                    INDICATOR_GOAL_THICKNESS as u32,
+                ),
+            );
+            canvas.fill_rect(
+                get_color(color),
+                Rect::new(
+                    left + INDICATOR_MARGIN,
+                    top + INDICATOR_MARGIN
+                        + INDICATOR_GOAL_THICKNESS
+                        + INDICATOR_SPACING,
+                    INDICATOR_LENGTH,
+                    INDICATOR_COLOR_THICKNESS as u32,
+                ),
+            );
             // Bottom:
             let goal = state.col_bottom_goal(col);
             let color = state.col_bottom_color(col);
             let top = self.rect.bottom();
-            canvas.fill_rect(get_color(color),
-                             Rect::new(left + INDICATOR_MARGIN,
-                                       top + INDICATOR_MARGIN,
-                                       INDICATOR_LENGTH,
-                                       INDICATOR_COLOR_THICKNESS as u32));
-            canvas.fill_rect(get_color(goal),
-                             Rect::new(left + INDICATOR_MARGIN,
-                                       top + INDICATOR_MARGIN +
-                                           INDICATOR_COLOR_THICKNESS +
-                                           INDICATOR_SPACING,
-                                       INDICATOR_LENGTH,
-                                       INDICATOR_GOAL_THICKNESS as u32));
+            canvas.fill_rect(
+                get_color(color),
+                Rect::new(
+                    left + INDICATOR_MARGIN,
+                    top + INDICATOR_MARGIN,
+                    INDICATOR_LENGTH,
+                    INDICATOR_COLOR_THICKNESS as u32,
+                ),
+            );
+            canvas.fill_rect(
+                get_color(goal),
+                Rect::new(
+                    left + INDICATOR_MARGIN,
+                    top + INDICATOR_MARGIN
+                        + INDICATOR_COLOR_THICKNESS
+                        + INDICATOR_SPACING,
+                    INDICATOR_LENGTH,
+                    INDICATOR_GOAL_THICKNESS as u32,
+                ),
+            );
         }
         for (&coords, &tile) in state.tiles() {
             if let Some(ref drag) = self.drag {
@@ -317,26 +358,33 @@ impl Element<PovState, PovCmd> for PovGridView {
                     continue;
                 }
             }
-            let pt = Point::new(self.rect.left() + coords.0 * GRID_CELL_SIZE,
-                                self.rect.top() + coords.1 * GRID_CELL_SIZE);
+            let pt = Point::new(
+                self.rect.left() + coords.0 * GRID_CELL_SIZE,
+                self.rect.top() + coords.1 * GRID_CELL_SIZE,
+            );
             self.draw_tile(pt, tile, canvas);
         }
         if let Some(ref drag) = self.drag {
             if drag.from_pt != drag.to_pt {
-                let pt = self.rect.top_left() + drag.to_pt -
-                    Point::new(GRID_CELL_SIZE / 2, GRID_CELL_SIZE / 2);
+                let pt = self.rect.top_left() + drag.to_pt
+                    - Point::new(GRID_CELL_SIZE / 2, GRID_CELL_SIZE / 2);
                 self.draw_tile(pt, drag.tile, canvas);
             }
         }
     }
 
-    fn handle_event(&mut self, event: &Event, state: &mut PovState)
-                    -> Action<PovCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        state: &mut PovState,
+    ) -> Action<PovCmd> {
         match event {
             &Event::ClockTick => {
                 if let Some(ref mut drag) = self.drag {
-                    drag.millis = cmp::min(drag.millis + FRAME_DELAY_MILLIS,
-                                           ROTATE_MAX_MILLIS + 1);
+                    drag.millis = cmp::min(
+                        drag.millis + FRAME_DELAY_MILLIS,
+                        ROTATE_MAX_MILLIS + 1,
+                    );
                 }
             }
             &Event::MouseDown(pt) if !state.is_solved() => {
@@ -346,13 +394,13 @@ impl Element<PovState, PovCmd> for PovGridView {
                     let row = pt.y() / GRID_CELL_SIZE;
                     if let Some(tile) = state.tile_at((col, row)) {
                         self.drag = Some(GridDrag {
-                                             tile: tile,
-                                             from_coords: (col, row),
-                                             from_pt: pt,
-                                             to_pt: pt,
-                                             millis: 0,
-                                             moved: false,
-                                         });
+                            tile,
+                            from_coords: (col, row),
+                            from_pt: pt,
+                            to_pt: pt,
+                            millis: 0,
+                            moved: false,
+                        });
                     }
                 }
             }
@@ -369,8 +417,10 @@ impl Element<PovState, PovCmd> for PovGridView {
             }
             &Event::MouseUp => {
                 if let Some(drag) = self.drag.take() {
-                    let to_coords = (drag.to_pt.x() / GRID_CELL_SIZE,
-                                     drag.to_pt.y() / GRID_CELL_SIZE);
+                    let to_coords = (
+                        drag.to_pt.x() / GRID_CELL_SIZE,
+                        drag.to_pt.y() / GRID_CELL_SIZE,
+                    );
                     return if to_coords == drag.from_coords {
                         if drag.millis <= ROTATE_MAX_MILLIS {
                             state.rotate_tile(drag.from_coords, 1);
@@ -386,8 +436,10 @@ impl Element<PovState, PovCmd> for PovGridView {
                         if success {
                             Action::redraw()
                                 .and_play_sound(Sound::device_drop())
-                                .and_return(PovCmd::Moved(drag.from_coords,
-                                                          to_coords))
+                                .and_return(PovCmd::Moved(
+                                    drag.from_coords,
+                                    to_coords,
+                                ))
                         } else {
                             Action::redraw()
                         }

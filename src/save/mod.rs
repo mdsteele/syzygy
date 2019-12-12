@@ -45,17 +45,15 @@ pub use self::game::Game;
 pub use self::location::Location;
 pub use self::path::get_default_save_file_path;
 pub use self::prefs::Prefs;
-pub use self::puzzles::{AtticState, AutoState, BlackState, BlameState,
-                        BlindState, CubeState, DayState, DisconState,
-                        DotsState, DoubleState, FailureState, FictionState,
-                        FinaleState, GearsState, GroundState, HeadedState,
-                        HexState, IcyEmState, JogState, LaneState,
-                        LevelUpState, LineState, LogLevelState, MeetState,
-                        MissedState, NoReturnState, OrderState,
-                        PasswordState, PovState, PrologState, PuzzleState,
-                        RightState, SauceState, ServesState, SimpleState,
-                        StarState, SyrupState, SyzygyStage, SyzygyState,
-                        TheYState, TreadState, WhatchaState, WordDir,
-                        WreckedState};
+pub use self::puzzles::{
+    AtticState, AutoState, BlackState, BlameState, BlindState, CubeState,
+    DayState, DisconState, DotsState, DoubleState, FailureState, FictionState,
+    FinaleState, GearsState, GroundState, HeadedState, HexState, IcyEmState,
+    JogState, LaneState, LevelUpState, LineState, LogLevelState, MeetState,
+    MissedState, NoReturnState, OrderState, PasswordState, PovState,
+    PrologState, PuzzleState, RightState, SauceState, ServesState,
+    SimpleState, StarState, SyrupState, SyzygyStage, SyzygyState, TheYState,
+    TreadState, WhatchaState, WordDir, WreckedState,
+};
 
 // ========================================================================= //

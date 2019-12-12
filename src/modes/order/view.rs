@@ -21,12 +21,14 @@ use num_integer::div_mod_floor;
 use std::cmp;
 use std::collections::HashSet;
 
+use super::scenes;
 use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
-use crate::gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sound};
 use crate::gui::Sprite;
+use crate::gui::{
+    Action, Canvas, Element, Event, Point, Rect, Resources, Sound,
+};
 use crate::modes::SOLVED_INFO_TEXT;
 use crate::save::{Game, OrderState, PuzzleState};
-use super::scenes;
 
 // ========================================================================= //
 
@@ -37,8 +39,11 @@ pub struct View {
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect, state: &OrderState)
-               -> View {
+    pub fn new(
+        resources: &mut Resources,
+        visible: Rect,
+        state: &OrderState,
+    ) -> View {
         let mut core = {
             let fade = (FadeStyle::LeftToRight, FadeStyle::RightToLeft);
             let intro = scenes::compile_intro_scene(resources);
@@ -50,7 +55,7 @@ impl View {
         core.add_extra_scene(scenes::compile_relyng_midscene(resources));
         core.add_extra_scene(scenes::compile_yttris_midscene(resources));
         View {
-            core: core,
+            core,
             rows: vec![
                 TileRow::new(resources, 0, 321, 95),
                 TileRow::new(resources, 1, 321, 127),
@@ -81,8 +86,11 @@ impl Element<Game, PuzzleCmd> for View {
         self.core.draw_front_layer(canvas, state);
     }
 
-    fn handle_event(&mut self, event: &Event, game: &mut Game)
-                    -> Action<PuzzleCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        game: &mut Game,
+    ) -> Action<PuzzleCmd> {
         let state = &mut game.point_of_order;
         let mut action = self.core.handle_event(event, state);
         if !action.should_stop() && self.show_tiles {
@@ -171,29 +179,32 @@ struct TileRow {
 }
 
 impl TileRow {
-    fn new(resources: &mut Resources, row: usize, left: i32, top: i32)
-           -> TileRow {
+    fn new(
+        resources: &mut Resources,
+        row: usize,
+        left: i32,
+        top: i32,
+    ) -> TileRow {
         TileRow {
             symbol_sprites: resources.get_sprites("point/order"),
             tile_sprites: resources.get_sprites("point/tiles"),
-            row: row,
-            left: left,
-            top: top,
+            row,
+            left,
+            top,
             drag: None,
             hilights: HashSet::new(),
         }
     }
 
-    fn hilight_tile(&mut self, index: usize) { self.hilights.insert(index); }
+    fn hilight_tile(&mut self, index: usize) {
+        self.hilights.insert(index);
+    }
 }
 
 impl Element<OrderState, (usize, usize)> for TileRow {
     fn draw(&self, state: &OrderState, canvas: &mut Canvas) {
         if state.current_row() >= self.row {
-            for (index, value) in state
-                .row_order(self.row)
-                .iter()
-                .enumerate()
+            for (index, value) in state.row_order(self.row).iter().enumerate()
             {
                 let mut x = self.left + TILE_SPACING * (index as i32) + 1;
                 if let Some(ref drag) = self.drag {
@@ -216,8 +227,10 @@ impl Element<OrderState, (usize, usize)> for TileRow {
             }
             if let Some(ref drag) = self.drag {
                 let value = state.row_order(self.row)[drag.index];
-                let x = self.left + TILE_SPACING * (drag.index as i32) + 1 +
-                    drag.offset(drag.index);
+                let x = self.left
+                    + TILE_SPACING * (drag.index as i32)
+                    + 1
+                    + drag.offset(drag.index);
                 let x = x.max(self.left - TILE_SPACING / 2 + 1);
                 let x = x.min(self.left + (TILE_SPACING * 11) / 2 + 1);
                 let pt = Point::new(x, self.top + 1);
@@ -228,8 +241,11 @@ impl Element<OrderState, (usize, usize)> for TileRow {
         }
     }
 
-    fn handle_event(&mut self, event: &Event, state: &mut OrderState)
-                    -> Action<(usize, usize)> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        state: &mut OrderState,
+    ) -> Action<(usize, usize)> {
         match event {
             &Event::ClockTick => {
                 if let Some(ref mut drag) = self.drag {
@@ -290,9 +306,9 @@ struct TileDrag {
 impl TileDrag {
     fn new(index: usize, from: i32, num_tiles: usize) -> TileDrag {
         TileDrag {
-            index: index,
+            index,
             new_index: index,
-            from: from,
+            from,
             to: from,
             offsets: vec![(0, 0); num_tiles],
         }
@@ -300,14 +316,16 @@ impl TileDrag {
 
     fn set_to(&mut self, to: i32) {
         self.to = to;
-        let new_index =
-            cmp::min(cmp::max(0,
-                              self.new_index as i32 +
-                                  (self.to - self.from) / TILE_SPACING),
-                     self.offsets.len() as i32 - 1) as usize;
+        let new_index = cmp::min(
+            cmp::max(
+                0,
+                self.new_index as i32 + (self.to - self.from) / TILE_SPACING,
+            ),
+            self.offsets.len() as i32 - 1,
+        ) as usize;
         if self.new_index != new_index {
-            self.from += (new_index as i32 - self.new_index as i32) *
-                TILE_SPACING;
+            self.from +=
+                (new_index as i32 - self.new_index as i32) * TILE_SPACING;
             self.new_index = new_index;
             let old_index = self.index;
             for (index, &mut (_, ref mut goal)) in
@@ -322,12 +340,16 @@ impl TileDrag {
                 }
             }
         }
-        let offset = (self.new_index as i32 - self.index as i32) *
-            TILE_SPACING + self.to - self.from;
+        let offset = (self.new_index as i32 - self.index as i32)
+            * TILE_SPACING
+            + self.to
+            - self.from;
         self.offsets[self.index] = (offset, offset);
     }
 
-    fn offset(&self, index: usize) -> i32 { self.offsets[index].0 }
+    fn offset(&self, index: usize) -> i32 {
+        self.offsets[index].0
+    }
 
     fn tick_animation(&mut self) -> bool {
         let mut redraw = false;

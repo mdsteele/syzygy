@@ -17,12 +17,14 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use crate::elements::{FadeStyle, ProgressBar, PuzzleCmd, PuzzleCore, PuzzleView};
+use super::scenes;
 use crate::elements::cross::{ClueDisplay, InputDisplay};
+use crate::elements::{
+    FadeStyle, ProgressBar, PuzzleCmd, PuzzleCore, PuzzleView,
+};
 use crate::gui::{Action, Canvas, Element, Event, Rect, Resources, Sound};
 use crate::modes::SOLVED_INFO_TEXT;
 use crate::save::{Direction, Game, PuzzleState, SauceState};
-use super::scenes;
 
 // ========================================================================= //
 
@@ -36,8 +38,11 @@ pub struct View {
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect, state: &SauceState)
-               -> View {
+    pub fn new(
+        resources: &mut Resources,
+        visible: Rect,
+        state: &SauceState,
+    ) -> View {
         let mut core = {
             let fade = (FadeStyle::LeftToRight, FadeStyle::LeftToRight);
             let intro = scenes::compile_intro_scene(resources);
@@ -48,11 +53,13 @@ impl View {
         core.add_extra_scene(scenes::compile_ugrent_midscene(resources));
         core.add_extra_scene(scenes::compile_yttris_midscene(resources));
         View {
-            core: core,
-            progress: ProgressBar::new((240, 96),
-                                       Direction::East,
-                                       96,
-                                       (95, 95, 95)),
+            core,
+            progress: ProgressBar::new(
+                (240, 96),
+                Direction::East,
+                96,
+                (95, 95, 95),
+            ),
             input: InputDisplay::new(resources, 256),
             clue: ClueDisplay::new(resources, 128),
             text_timer: 0,
@@ -67,16 +74,22 @@ impl Element<Game, PuzzleCmd> for View {
         self.core.draw_back_layer(canvas);
         self.input.draw(&(), canvas);
         if !state.is_solved() || self.text_timer > 0 {
-            self.progress
-                .draw(state.num_clues_done(), state.total_num_clues(), canvas);
+            self.progress.draw(
+                state.num_clues_done(),
+                state.total_num_clues(),
+                canvas,
+            );
             self.clue.draw(&state.current_clue(), canvas);
         }
         self.core.draw_middle_layer(canvas);
         self.core.draw_front_layer(canvas, state);
     }
 
-    fn handle_event(&mut self, event: &Event, game: &mut Game)
-                    -> Action<PuzzleCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        game: &mut Game,
+    ) -> Action<PuzzleCmd> {
         let state = &mut game.cross_sauce;
         let mut action = self.core.handle_event(event, state);
         if !action.should_stop() && event == &Event::ClockTick {
@@ -111,8 +124,7 @@ impl Element<Game, PuzzleCmd> for View {
             }
             action.merge(subaction.but_no_value());
         }
-        if !action.should_stop() && self.text_timer == 0 &&
-            !state.is_solved()
+        if !action.should_stop() && self.text_timer == 0 && !state.is_solved()
         {
             let subaction = self.input.handle_event(event, &mut ());
             if let Some(text) = subaction.value() {

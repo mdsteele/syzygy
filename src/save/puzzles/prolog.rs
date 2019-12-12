@@ -19,9 +19,9 @@
 
 use toml;
 
-use crate::save::{Access, Location};
-use crate::save::util::{ACCESS_KEY, Tomlable, to_table};
 use super::PuzzleState;
+use crate::save::util::{to_table, Tomlable, ACCESS_KEY};
+use crate::save::{Access, Location};
 
 // ========================================================================= //
 
@@ -30,17 +30,27 @@ pub struct PrologState {
 }
 
 impl PuzzleState for PrologState {
-    fn location() -> Location { Location::Prolog }
+    fn location() -> Location {
+        Location::Prolog
+    }
 
-    fn access(&self) -> Access { self.access }
+    fn access(&self) -> Access {
+        self.access
+    }
 
-    fn access_mut(&mut self) -> &mut Access { &mut self.access }
+    fn access_mut(&mut self) -> &mut Access {
+        &mut self.access
+    }
 
     // This is called when the intro scene finishes.  Instead of marking the
     // puzzle visited like normal, for the Prolog we just mark it solved.
-    fn visit(&mut self) { self.access = Access::Solved; }
+    fn visit(&mut self) {
+        self.access = Access::Solved;
+    }
 
-    fn can_reset(&self) -> bool { false }
+    fn can_reset(&self) -> bool {
+        false
+    }
 
     fn reset(&mut self) {}
 }
@@ -64,9 +74,9 @@ impl Tomlable for PrologState {
 mod tests {
     use toml;
 
-    use crate::save::Access;
-    use crate::save::util::{ACCESS_KEY, Tomlable};
     use super::PrologState;
+    use crate::save::util::{Tomlable, ACCESS_KEY};
+    use crate::save::Access;
 
     #[test]
     fn toml_round_trip() {

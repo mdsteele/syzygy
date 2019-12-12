@@ -20,9 +20,9 @@
 use std::cmp;
 use toml;
 
-use crate::save::{Access, Location};
-use crate::save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
 use super::PuzzleState;
+use crate::save::util::{pop_array, to_table, Tomlable, ACCESS_KEY};
+use crate::save::{Access, Location};
 
 // ========================================================================= //
 
@@ -110,15 +110,25 @@ impl NoReturnState {
 }
 
 impl PuzzleState for NoReturnState {
-    fn location() -> Location { Location::PointOfNoReturn }
+    fn location() -> Location {
+        Location::PointOfNoReturn
+    }
 
-    fn access(&self) -> Access { self.access }
+    fn access(&self) -> Access {
+        self.access
+    }
 
-    fn access_mut(&mut self) -> &mut Access { &mut self.access }
+    fn access_mut(&mut self) -> &mut Access {
+        &mut self.access
+    }
 
-    fn can_reset(&self) -> bool { self.order != INITIAL_ORDER }
+    fn can_reset(&self) -> bool {
+        self.order != INITIAL_ORDER
+    }
 
-    fn reset(&mut self) { self.order = INITIAL_ORDER; }
+    fn reset(&mut self) {
+        self.order = INITIAL_ORDER;
+    }
 }
 
 impl Tomlable for NoReturnState {
@@ -126,7 +136,8 @@ impl Tomlable for NoReturnState {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.is_solved() {
-            let order = self.order
+            let order = self
+                .order
                 .iter()
                 .map(|&idx| toml::Value::Integer(idx as i64))
                 .collect();
@@ -160,10 +171,7 @@ impl Tomlable for NoReturnState {
             }
             order
         };
-        NoReturnState {
-            access: access,
-            order: order,
-        }
+        NoReturnState { access, order }
     }
 }
 
@@ -173,9 +181,9 @@ impl Tomlable for NoReturnState {
 mod tests {
     use toml;
 
+    use super::{NoReturnState, INITIAL_ORDER, ORDER_KEY, SOLVED_ORDER};
+    use crate::save::util::{Tomlable, ACCESS_KEY};
     use crate::save::{Access, PuzzleState};
-    use crate::save::util::{ACCESS_KEY, Tomlable};
-    use super::{INITIAL_ORDER, NoReturnState, ORDER_KEY, SOLVED_ORDER};
 
     #[test]
     fn toml_round_trip() {

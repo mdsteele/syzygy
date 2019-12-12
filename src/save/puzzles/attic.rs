@@ -20,9 +20,9 @@
 use std::collections::HashSet;
 use toml;
 
-use crate::save::{Access, Location};
-use crate::save::util::{ACCESS_KEY, Tomlable, to_table};
 use super::PuzzleState;
+use crate::save::util::{to_table, Tomlable, ACCESS_KEY};
+use crate::save::{Access, Location};
 
 // ========================================================================= //
 
@@ -51,87 +51,100 @@ impl AtticState {
         match pos {
             (1, 0) => self.is_toggled((1, 1)) ^ self.is_toggled((2, 1)),
             (2, 0) => {
-                (self.is_toggled((1, 1)) ^ self.is_toggled((2, 1)) ^
-                     self.is_toggled((3, 1)))
+                (self.is_toggled((1, 1))
+                    ^ self.is_toggled((2, 1))
+                    ^ self.is_toggled((3, 1)))
             }
             (3, 0) => true,
             (4, 0) => self.is_toggled((3, 1)) ^ self.is_toggled((4, 1)),
             (0, 1) => self.is_toggled((1, 2)),
             (1, 1) => self.is_toggled((1, 1)) ^ self.is_toggled((2, 2)),
             (2, 1) => {
-                self.is_toggled((2, 1)) ^ self.is_toggled((3, 1)) ^
-                    self.is_toggled((1, 2)) ^
-                    self.is_toggled((3, 2))
+                self.is_toggled((2, 1))
+                    ^ self.is_toggled((3, 1))
+                    ^ self.is_toggled((1, 2))
+                    ^ self.is_toggled((3, 2))
             }
             (3, 1) => {
-                self.is_toggled((3, 1)) ^ self.is_toggled((4, 1)) ^
-                    self.is_toggled((2, 2))
+                self.is_toggled((3, 1))
+                    ^ self.is_toggled((4, 1))
+                    ^ self.is_toggled((2, 2))
             }
             (4, 1) => {
-                self.is_toggled((3, 1)) ^ self.is_toggled((4, 1)) ^
-                    self.is_toggled((3, 2)) ^
-                    self.is_toggled((4, 2))
+                self.is_toggled((3, 1))
+                    ^ self.is_toggled((4, 1))
+                    ^ self.is_toggled((3, 2))
+                    ^ self.is_toggled((4, 2))
             }
             (5, 1) => self.is_toggled((4, 1)) ^ self.is_toggled((4, 2)),
             (0, 2) => self.is_toggled((1, 2)),
             (1, 2) => {
-                self.is_toggled((1, 1)) ^ self.is_toggled((1, 2)) ^
-                    self.is_toggled((1, 3)) ^
-                    self.is_toggled((2, 3))
+                self.is_toggled((1, 1))
+                    ^ self.is_toggled((1, 2))
+                    ^ self.is_toggled((1, 3))
+                    ^ self.is_toggled((2, 3))
             }
             (2, 2) => {
-                self.is_toggled((1, 1)) ^ self.is_toggled((2, 1)) ^
-                    self.is_toggled((3, 1)) ^
-                    self.is_toggled((1, 2)) ^
-                    self.is_toggled((2, 2)) ^
-                    self.is_toggled((2, 3))
+                self.is_toggled((1, 1))
+                    ^ self.is_toggled((2, 1))
+                    ^ self.is_toggled((3, 1))
+                    ^ self.is_toggled((1, 2))
+                    ^ self.is_toggled((2, 2))
+                    ^ self.is_toggled((2, 3))
             }
             (3, 2) => {
-                self.is_toggled((2, 1)) ^ self.is_toggled((4, 1)) ^
-                    self.is_toggled((3, 2)) ^
-                    self.is_toggled((2, 3)) ^
-                    self.is_toggled((3, 3)) ^
-                    self.is_toggled((4, 3))
+                self.is_toggled((2, 1))
+                    ^ self.is_toggled((4, 1))
+                    ^ self.is_toggled((3, 2))
+                    ^ self.is_toggled((2, 3))
+                    ^ self.is_toggled((3, 3))
+                    ^ self.is_toggled((4, 3))
             }
             (4, 2) => !(self.is_toggled((3, 1)) ^ self.is_toggled((4, 2))),
             (5, 2) => self.is_toggled((4, 1)) ^ self.is_toggled((4, 3)),
             (0, 3) => !self.is_toggled((1, 4)),
             (1, 3) => self.is_toggled((1, 3)) ^ self.is_toggled((2, 4)),
             (2, 3) => {
-                !(self.is_toggled((3, 2)) ^ self.is_toggled((2, 3)) ^
-                      self.is_toggled((1, 4)) ^
-                      self.is_toggled((2, 4)))
+                !(self.is_toggled((3, 2))
+                    ^ self.is_toggled((2, 3))
+                    ^ self.is_toggled((1, 4))
+                    ^ self.is_toggled((2, 4)))
             }
             (3, 3) => {
-                !(self.is_toggled((4, 2)) ^ self.is_toggled((3, 3)) ^
-                      self.is_toggled((4, 3)) ^
-                      self.is_toggled((2, 4)) ^
-                      self.is_toggled((3, 4)))
+                !(self.is_toggled((4, 2))
+                    ^ self.is_toggled((3, 3))
+                    ^ self.is_toggled((4, 3))
+                    ^ self.is_toggled((2, 4))
+                    ^ self.is_toggled((3, 4)))
             }
             (4, 3) => {
-                !(self.is_toggled((3, 2)) ^ self.is_toggled((4, 2)) ^
-                      self.is_toggled((4, 3)))
+                !(self.is_toggled((3, 2))
+                    ^ self.is_toggled((4, 2))
+                    ^ self.is_toggled((4, 3)))
             }
             (5, 3) => self.is_toggled((4, 4)),
             (0, 4) => !self.is_toggled((1, 3)),
             (1, 4) => {
-                self.is_toggled((1, 3)) ^ self.is_toggled((1, 4)) ^
-                    self.is_toggled((2, 4))
+                self.is_toggled((1, 3))
+                    ^ self.is_toggled((1, 4))
+                    ^ self.is_toggled((2, 4))
             }
             (2, 4) => self.is_toggled((2, 3)),
             (3, 4) => {
-                self.is_toggled((3, 3)) ^ self.is_toggled((4, 3)) ^
-                    self.is_toggled((2, 4)) ^
-                    self.is_toggled((3, 4)) ^
-                    self.is_toggled((4, 4))
+                self.is_toggled((3, 3))
+                    ^ self.is_toggled((4, 3))
+                    ^ self.is_toggled((2, 4))
+                    ^ self.is_toggled((3, 4))
+                    ^ self.is_toggled((4, 4))
             }
             (4, 4) => self.is_toggled((4, 4)),
             (5, 4) => self.is_toggled((4, 3)) ^ self.is_toggled((4, 4)),
             (1, 5) => self.is_toggled((1, 4)) ^ self.is_toggled((2, 4)),
             (2, 5) => self.is_toggled((2, 4)),
             (3, 5) => {
-                !(self.is_toggled((2, 4)) ^ self.is_toggled((3, 4)) ^
-                      self.is_toggled((4, 4)))
+                !(self.is_toggled((2, 4))
+                    ^ self.is_toggled((3, 4))
+                    ^ self.is_toggled((4, 4)))
             }
             (4, 5) => !(self.is_toggled((3, 4))),
             _ => false,
@@ -140,8 +153,11 @@ impl AtticState {
 
     pub fn is_toggled(&self, pos: (i32, i32)) -> bool {
         let (col, row) = pos;
-        col >= 1 && col <= 4 && row >= 1 && row <= 4 &&
-            self.toggled.contains(&((row - 1) * 4 + (col - 1)))
+        col >= 1
+            && col <= 4
+            && row >= 1
+            && row <= 4
+            && self.toggled.contains(&((row - 1) * 4 + (col - 1)))
     }
 
     pub fn toggle(&mut self, pos: (i32, i32)) {
@@ -161,15 +177,25 @@ impl AtticState {
 }
 
 impl PuzzleState for AtticState {
-    fn location() -> Location { Location::ALightInTheAttic }
+    fn location() -> Location {
+        Location::ALightInTheAttic
+    }
 
-    fn access(&self) -> Access { self.access }
+    fn access(&self) -> Access {
+        self.access
+    }
 
-    fn access_mut(&mut self) -> &mut Access { &mut self.access }
+    fn access_mut(&mut self) -> &mut Access {
+        &mut self.access
+    }
 
-    fn can_reset(&self) -> bool { !self.toggled.is_empty() }
+    fn can_reset(&self) -> bool {
+        !self.toggled.is_empty()
+    }
 
-    fn reset(&mut self) { self.toggled.clear(); }
+    fn reset(&mut self) {
+        self.toggled.clear();
+    }
 }
 
 impl Tomlable for AtticState {
@@ -188,18 +214,15 @@ impl Tomlable for AtticState {
         let toggled = if access == Access::Solved {
             SOLVED_TOGGLED.iter().cloned().collect()
         } else {
-            let mut toggled = HashSet::<i32>::pop_from_table(&mut table,
-                                                             TOGGLED_KEY);
+            let mut toggled =
+                HashSet::<i32>::pop_from_table(&mut table, TOGGLED_KEY);
             toggled.retain(|&idx| 0 <= idx && idx < 16);
             toggled
         };
         if toggled == SOLVED_TOGGLED.iter().cloned().collect() {
             access = Access::Solved;
         }
-        AtticState {
-            access: access,
-            toggled: toggled,
-        }
+        AtticState { access, toggled }
     }
 }
 
@@ -209,9 +232,9 @@ impl Tomlable for AtticState {
 mod tests {
     use toml;
 
-    use crate::save::Access;
-    use crate::save::util::{ACCESS_KEY, Tomlable};
     use super::{AtticState, SOLVED_TOGGLED, TOGGLED_KEY};
+    use crate::save::util::{Tomlable, ACCESS_KEY};
+    use crate::save::Access;
 
     #[test]
     fn toml_round_trip() {
@@ -248,11 +271,12 @@ mod tests {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), Access::Unsolved.to_toml());
         let toggled = vec![-1, 0, 15, 16];
-        table.insert(TOGGLED_KEY.to_string(),
-                     toml::Value::Array(toggled
-                                            .into_iter()
-                                            .map(toml::Value::Integer)
-                                            .collect()));
+        table.insert(
+            TOGGLED_KEY.to_string(),
+            toml::Value::Array(
+                toggled.into_iter().map(toml::Value::Integer).collect(),
+            ),
+        );
 
         let state = AtticState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Unsolved);

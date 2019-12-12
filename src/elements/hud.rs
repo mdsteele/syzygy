@@ -21,8 +21,10 @@ use std::cmp;
 use std::rc::Rc;
 
 use crate::elements::Paragraph;
-use crate::gui::{Action, Align, Canvas, Element, Event, Font, KeyMod, Keycode,
-          Point, Rect, Resources, Sound, Sprite};
+use crate::gui::{
+    Action, Align, Canvas, Element, Event, Font, KeyMod, Keycode, Point, Rect,
+    Resources, Sound, Sprite,
+};
 use crate::save::{Access, Location};
 
 // ========================================================================= //
@@ -95,10 +97,15 @@ impl Hud {
         }
     }
 
-    pub fn flash_info_button(&mut self) { self.buttons[2].set_flashing(true); }
+    pub fn flash_info_button(&mut self) {
+        self.buttons[2].set_flashing(true);
+    }
 
-    fn namebox(resources: &mut Resources, center_x: i32, bottom: i32)
-               -> HudNamebox {
+    fn namebox(
+        resources: &mut Resources,
+        center_x: i32,
+        bottom: i32,
+    ) -> HudNamebox {
         let left = center_x - NAMEBOX_WIDTH as i32 / 2;
         let top = bottom - NAMEBOX_HEIGHT as i32;
         let rect = Rect::new(left, top, NAMEBOX_WIDTH, NAMEBOX_HEIGHT);
@@ -114,8 +121,11 @@ impl Element<HudInput, HudCmd> for Hud {
         self.skip.draw(input, canvas);
     }
 
-    fn handle_event(&mut self, event: &Event, input: &mut HudInput)
-                    -> Action<HudCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        input: &mut HudInput,
+    ) -> Action<HudCmd> {
         let mut action = self.skip.handle_event(event, input);
         if !action.should_stop() || event == &Event::ClockTick {
             action.merge(self.buttons.handle_event(event, input));
@@ -139,9 +149,13 @@ struct HudButton {
 }
 
 impl HudButton {
-    fn new(resources: &mut Resources, location: Location, value: HudCmd,
-           center_x: i32, bottom: i32)
-           -> HudButton {
+    fn new(
+        resources: &mut Resources,
+        location: Location,
+        value: HudCmd,
+        center_x: i32,
+        bottom: i32,
+    ) -> HudButton {
         let sprites = resources.get_sprites("hud/buttons");
         let (index, width) = match value {
             HudCmd::Back if location == Location::Map => (0, 48),
@@ -155,24 +169,30 @@ impl HudButton {
             HudCmd::Skip => panic!("HudButton HudCmd::Skip"),
         };
         let sprite = sprites[index].clone();
-        let rect = Rect::new(center_x - sprite.width() as i32 / 2,
-                             bottom - sprite.height() as i32,
-                             width,
-                             sprite.height());
+        let rect = Rect::new(
+            center_x - sprite.width() as i32 / 2,
+            bottom - sprite.height() as i32,
+            width,
+            sprite.height(),
+        );
         HudButton {
             base_sprite: sprite,
             blink_sprite: sprites[index + 1].clone(),
-            rect: rect,
-            value: value,
+            rect,
+            value,
             scroll: BUTTON_HEIGHT as i32,
             blink_frames: 0,
             flashing: false,
         }
     }
 
-    fn set_flashing(&mut self, flashing: bool) { self.flashing = flashing; }
+    fn set_flashing(&mut self, flashing: bool) {
+        self.flashing = flashing;
+    }
 
-    fn is_visible(&self) -> bool { self.scroll < BUTTON_HEIGHT as i32 }
+    fn is_visible(&self) -> bool {
+        self.scroll < BUTTON_HEIGHT as i32
+    }
 
     fn is_enabled(&self, input: &HudInput) -> bool {
         let active = input.active;
@@ -214,16 +234,19 @@ impl Element<HudInput, HudCmd> for HudButton {
         }
     }
 
-    fn handle_event(&mut self, event: &Event, input: &mut HudInput)
-                    -> Action<HudCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        input: &mut HudInput,
+    ) -> Action<HudCmd> {
         match event {
             &Event::ClockTick => {
                 let was_visible = self.is_visible();
                 let mut redraw = false;
                 if self.blink_frames > 0 {
                     self.blink_frames -= 1;
-                    if self.blink_frames == 0 ||
-                        self.blink_frames == BLINK_FRAMES
+                    if self.blink_frames == 0
+                        || self.blink_frames == BLINK_FRAMES
                     {
                         redraw = true;
                     }
@@ -235,23 +258,27 @@ impl Element<HudInput, HudCmd> for HudButton {
                     self.scroll = cmp::max(0, self.scroll - SCROLL_SPEED);
                     redraw = true;
                 } else if !enabled && self.scroll < BUTTON_HEIGHT as i32 {
-                    self.scroll = cmp::min(BUTTON_HEIGHT as i32,
-                                           self.scroll + SCROLL_SPEED);
+                    self.scroll = cmp::min(
+                        BUTTON_HEIGHT as i32,
+                        self.scroll + SCROLL_SPEED,
+                    );
                     redraw = true;
                 }
                 Action::redraw_if(redraw && (was_visible || self.is_visible()))
             }
             &Event::MouseDown(pt)
-                if self.scroll == 0 && self.is_enabled(input) &&
-                       self.rect.contains_point(pt) => {
+                if self.scroll == 0
+                    && self.is_enabled(input)
+                    && self.rect.contains_point(pt) =>
+            {
                 self.blink_frames = BLINK_FRAMES;
                 self.flashing = false;
                 self.click_action()
             }
             &Event::KeyDown(Keycode::Z, keymod) if self.is_enabled(input) => {
-                if keymod == KeyMod::command() && self.value == HudCmd::Undo ||
-                    keymod == (KeyMod::command() | KeyMod::shift()) &&
-                        self.value == HudCmd::Redo
+                if keymod == KeyMod::command() && self.value == HudCmd::Undo
+                    || keymod == (KeyMod::command() | KeyMod::shift())
+                        && self.value == HudCmd::Redo
                 {
                     self.click_action()
                 } else {
@@ -276,7 +303,7 @@ impl HudNamebox {
         HudNamebox {
             sprites: resources.get_sprites("hud/namebox"),
             font: resources.get_font("roman"),
-            rect: rect,
+            rect,
         }
     }
 
@@ -306,27 +333,25 @@ impl PauseIndicator {
         let outer_width = inner_width + 2 * PAUSE_TEXT_MARGIN_HORZ;
         let inner_height = paragraph.height();
         let outer_height = inner_height + 2 * PAUSE_TEXT_MARGIN_VERT as u32;
-        let outer_rect = Rect::new(visible.x() +
-                                       (visible.width() as i32 - outer_width) /
-                                           2,
-                                   visible.top(),
-                                   outer_width as u32,
-                                   outer_height);
-        let mid_rect = Rect::new(outer_rect.x() + 1,
-                                 outer_rect.y() - 1,
-                                 outer_rect.width() - 2,
-                                 outer_rect.height());
-        let inner_rect = Rect::new(outer_rect.x() + PAUSE_TEXT_MARGIN_HORZ,
-                                   outer_rect.y() + PAUSE_TEXT_MARGIN_VERT -
-                                       1,
-                                   inner_width as u32,
-                                   inner_height);
-        PauseIndicator {
-            paragraph: paragraph,
-            outer_rect: outer_rect,
-            mid_rect: mid_rect,
-            inner_rect: inner_rect,
-        }
+        let outer_rect = Rect::new(
+            visible.x() + (visible.width() as i32 - outer_width) / 2,
+            visible.top(),
+            outer_width as u32,
+            outer_height,
+        );
+        let mid_rect = Rect::new(
+            outer_rect.x() + 1,
+            outer_rect.y() - 1,
+            outer_rect.width() - 2,
+            outer_rect.height(),
+        );
+        let inner_rect = Rect::new(
+            outer_rect.x() + PAUSE_TEXT_MARGIN_HORZ,
+            outer_rect.y() + PAUSE_TEXT_MARGIN_VERT - 1,
+            inner_width as u32,
+            inner_height,
+        );
+        PauseIndicator { paragraph, outer_rect, mid_rect, inner_rect }
     }
 
     fn draw(&self, input: &HudInput, canvas: &mut Canvas) {
@@ -356,27 +381,25 @@ impl SkipIndicator {
         let outer_width = inner_width + 2 * SKIP_TEXT_MARGIN_HORZ;
         let inner_height = paragraph.height();
         let outer_height = inner_height + 2 * SKIP_TEXT_MARGIN_VERT as u32;
-        let outer_rect =
-            Rect::new(visible.x() +
-                          (visible.width() as i32 - outer_width) / 2,
-                      visible.top() +
-                          ((visible.height() - outer_height) as i32) / 3,
-                      outer_width as u32,
-                      outer_height);
-        let mid_rect = Rect::new(outer_rect.x() + 1,
-                                 outer_rect.y() + 1,
-                                 outer_rect.width() - 2,
-                                 outer_rect.height() - 2);
-        let inner_rect = Rect::new(outer_rect.x() + SKIP_TEXT_MARGIN_HORZ,
-                                   outer_rect.y() + SKIP_TEXT_MARGIN_VERT + 1,
-                                   inner_width as u32,
-                                   inner_height);
-        SkipIndicator {
-            paragraph: paragraph,
-            outer_rect: outer_rect,
-            mid_rect: mid_rect,
-            inner_rect: inner_rect,
-        }
+        let outer_rect = Rect::new(
+            visible.x() + (visible.width() as i32 - outer_width) / 2,
+            visible.top() + ((visible.height() - outer_height) as i32) / 3,
+            outer_width as u32,
+            outer_height,
+        );
+        let mid_rect = Rect::new(
+            outer_rect.x() + 1,
+            outer_rect.y() + 1,
+            outer_rect.width() - 2,
+            outer_rect.height() - 2,
+        );
+        let inner_rect = Rect::new(
+            outer_rect.x() + SKIP_TEXT_MARGIN_HORZ,
+            outer_rect.y() + SKIP_TEXT_MARGIN_VERT + 1,
+            inner_width as u32,
+            inner_height,
+        );
+        SkipIndicator { paragraph, outer_rect, mid_rect, inner_rect }
     }
 }
 
@@ -390,11 +413,15 @@ impl Element<HudInput, HudCmd> for SkipIndicator {
         }
     }
 
-    fn handle_event(&mut self, event: &Event, input: &mut HudInput)
-                    -> Action<HudCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        input: &mut HudInput,
+    ) -> Action<HudCmd> {
         match event {
             &Event::MouseDown(pt)
-                if input.show_skip && self.outer_rect.contains_point(pt) => {
+                if input.show_skip && self.outer_rect.contains_point(pt) =>
+            {
                 Action::redraw().and_return(HudCmd::Skip)
             }
             &Event::KeyDown(Keycode::Escape, _) if input.show_skip => {

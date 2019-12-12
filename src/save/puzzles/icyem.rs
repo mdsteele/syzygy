@@ -19,10 +19,10 @@
 
 use toml;
 
-use crate::save::{Access, Location};
-use crate::save::column::Columns;
-use crate::save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
 use super::PuzzleState;
+use crate::save::column::Columns;
+use crate::save::util::{pop_array, to_table, Tomlable, ACCESS_KEY};
+use crate::save::{Access, Location};
 
 // ========================================================================= //
 
@@ -61,9 +61,13 @@ impl IcyEmState {
         self.columns.solve();
     }
 
-    pub fn columns(&self) -> &Columns { &self.columns }
+    pub fn columns(&self) -> &Columns {
+        &self.columns
+    }
 
-    pub fn columns_mut(&mut self) -> &mut Columns { &mut self.columns }
+    pub fn columns_mut(&mut self) -> &mut Columns {
+        &mut self.columns
+    }
 
     pub fn rotate_column(&mut self, col: usize, by: i32) {
         self.columns.rotate_column(col, by);
@@ -74,15 +78,25 @@ impl IcyEmState {
 }
 
 impl PuzzleState for IcyEmState {
-    fn location() -> Location { Location::ColumnAsIcyEm }
+    fn location() -> Location {
+        Location::ColumnAsIcyEm
+    }
 
-    fn access(&self) -> Access { self.access }
+    fn access(&self) -> Access {
+        self.access
+    }
 
-    fn access_mut(&mut self) -> &mut Access { &mut self.access }
+    fn access_mut(&mut self) -> &mut Access {
+        &mut self.access
+    }
 
-    fn can_reset(&self) -> bool { self.columns.can_reset() }
+    fn can_reset(&self) -> bool {
+        self.columns.can_reset()
+    }
 
-    fn reset(&mut self) { self.columns.reset(); }
+    fn reset(&mut self) {
+        self.columns.reset();
+    }
 }
 
 impl Tomlable for IcyEmState {
@@ -98,16 +112,14 @@ impl Tomlable for IcyEmState {
     fn from_toml(value: toml::Value) -> IcyEmState {
         let mut table = to_table(value);
         let access = Access::pop_from_table(&mut table, ACCESS_KEY);
-        let mut columns = Columns::from_toml(COLUMNS_SPEC,
-                                             pop_array(&mut table,
-                                                       COLUMNS_KEY));
+        let mut columns = Columns::from_toml(
+            COLUMNS_SPEC,
+            pop_array(&mut table, COLUMNS_KEY),
+        );
         if access.is_solved() {
             columns.solve();
         }
-        IcyEmState {
-            access: access,
-            columns: columns,
-        }
+        IcyEmState { access, columns }
     }
 }
 
@@ -117,9 +129,9 @@ impl Tomlable for IcyEmState {
 mod tests {
     use toml;
 
+    use super::{IcyEmState, COLUMNS_SPEC};
+    use crate::save::util::{Tomlable, ACCESS_KEY};
     use crate::save::Access;
-    use crate::save::util::{ACCESS_KEY, Tomlable};
-    use super::{COLUMNS_SPEC, IcyEmState};
 
     #[test]
     fn toml_round_trip() {

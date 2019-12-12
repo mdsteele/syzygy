@@ -17,12 +17,14 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use crate::elements::{FadeStyle, ProgressBar, PuzzleCmd, PuzzleCore, PuzzleView};
-use crate::elements::memory::{FLIP_SLOWDOWN, MemoryGridView, NextShapeView};
+use super::scenes;
+use crate::elements::memory::{MemoryGridView, NextShapeView, FLIP_SLOWDOWN};
+use crate::elements::{
+    FadeStyle, ProgressBar, PuzzleCmd, PuzzleCore, PuzzleView,
+};
 use crate::gui::{Action, Canvas, Element, Event, Rect, Resources, Sound};
 use crate::modes::SOLVED_INFO_TEXT;
 use crate::save::{Direction, Game, PuzzleState, ServesState};
-use super::scenes;
 
 // ========================================================================= //
 
@@ -42,8 +44,11 @@ pub struct View {
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect, state: &ServesState)
-               -> View {
+    pub fn new(
+        resources: &mut Resources,
+        visible: Rect,
+        state: &ServesState,
+    ) -> View {
         let mut core = {
             let fade = (FadeStyle::LeftToRight, FadeStyle::LeftToRight);
             let intro = scenes::compile_intro_scene(resources);
@@ -53,16 +58,20 @@ impl View {
         core.add_extra_scene(scenes::compile_argony_midscene(resources));
         core.add_extra_scene(scenes::compile_mezure_midscene(resources));
         View {
-            core: core,
-            grid: MemoryGridView::new(resources,
-                                      "memory/serves",
-                                      (256, 176),
-                                      state.grid()),
+            core,
+            grid: MemoryGridView::new(
+                resources,
+                "memory/serves",
+                (256, 176),
+                state.grid(),
+            ),
             next: NextShapeView::new(resources, "memory/serves", (96, 208)),
-            progress: ProgressBar::new((104, 176),
-                                       Direction::East,
-                                       80,
-                                       (191, 191, 0)),
+            progress: ProgressBar::new(
+                (104, 176),
+                Direction::East,
+                80,
+                (191, 191, 0),
+            ),
             progress_adjust: 0,
             remove_countdown: 0,
             show_next: false,
@@ -87,8 +96,11 @@ impl Element<Game, PuzzleCmd> for View {
         self.core.draw_front_layer(canvas, state);
     }
 
-    fn handle_event(&mut self, event: &Event, game: &mut Game)
-                    -> Action<PuzzleCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        game: &mut Game,
+    ) -> Action<PuzzleCmd> {
         let state = &mut game.if_memory_serves;
         let mut action = self.core.handle_event(event, state);
         if event == &Event::ClockTick && self.remove_countdown > 0 {
@@ -114,11 +126,11 @@ impl Element<Game, PuzzleCmd> for View {
                 action.also_redraw();
             }
         }
-        if (!action.should_stop() && self.remove_countdown == 0) ||
-            event == &Event::ClockTick
+        if (!action.should_stop() && self.remove_countdown == 0)
+            || event == &Event::ClockTick
         {
-            let subaction = self.next
-                .handle_event(event, &mut state.next_shape());
+            let subaction =
+                self.next.handle_event(event, &mut state.next_shape());
             if let Some(&pt) = subaction.value() {
                 let (col, row) = self.grid.coords_for_point(pt);
                 if let Some(symbol) = state.try_place_shape(col, row) {
@@ -128,8 +140,8 @@ impl Element<Game, PuzzleCmd> for View {
             }
             action.merge(subaction.but_no_value());
         }
-        if (!action.should_stop() && self.remove_countdown == 0) ||
-            event == &Event::ClockTick
+        if (!action.should_stop() && self.remove_countdown == 0)
+            || event == &Event::ClockTick
         {
             let subaction = self.grid.handle_event(event, state.grid_mut());
             if let Some(&symbol) = subaction.value() {

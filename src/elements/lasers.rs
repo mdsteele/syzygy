@@ -21,10 +21,12 @@ use std::cmp;
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::rc::Rc;
 
-use crate::gui::{Action, Align, Canvas, Element, Event, FRAME_DELAY_MILLIS, Font,
-          Point, Rect, Resources, Sound, Sprite};
-use crate::save::{Direction, MixedColor};
+use crate::gui::{
+    Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
+    Sound, Sprite, FRAME_DELAY_MILLIS,
+};
 use crate::save::device::{Device, DeviceGrid};
+use crate::save::{Direction, MixedColor};
 
 // ========================================================================= //
 
@@ -71,15 +73,20 @@ pub struct LaserField {
 }
 
 impl LaserField {
-    pub fn new(resources: &mut Resources, left: i32, top: i32,
-               grid: &DeviceGrid)
-               -> LaserField {
+    pub fn new(
+        resources: &mut Resources,
+        left: i32,
+        top: i32,
+        grid: &DeviceGrid,
+    ) -> LaserField {
         let (num_cols, num_rows) = grid.size();
         let mut laser_field = LaserField {
-            rect: Rect::new(left,
-                            top,
-                            (num_cols * GRID_CELL_SIZE) as u32,
-                            (num_rows * GRID_CELL_SIZE) as u32),
+            rect: Rect::new(
+                left,
+                top,
+                (num_cols * GRID_CELL_SIZE) as u32,
+                (num_rows * GRID_CELL_SIZE) as u32,
+            ),
             gate_sprites: resources.get_sprites("devices/gates"),
             gem_sprites: resources.get_sprites("devices/gems"),
             sparks_sprites: resources.get_sprites("devices/sparks"),
@@ -99,8 +106,10 @@ impl LaserField {
         self.letters.insert(coords, letter);
     }
 
-    pub fn satisfied_detector_positions(&self, grid: &DeviceGrid)
-                                        -> HashSet<(i32, i32)> {
+    pub fn satisfied_detector_positions(
+        &self,
+        grid: &DeviceGrid,
+    ) -> HashSet<(i32, i32)> {
         let mut positions = HashSet::new();
         let (num_cols, num_rows) = grid.size();
         for row in 0..num_rows {
@@ -141,67 +150,93 @@ impl LaserField {
         true
     }
 
-    fn draw_device_bg(&self, canvas: &mut Canvas, center: Point,
-                      device: Device, dir: Direction) {
+    fn draw_device_bg(
+        &self,
+        canvas: &mut Canvas,
+        center: Point,
+        device: Device,
+        dir: Direction,
+    ) {
         match device {
             Device::Wall => {
                 canvas.draw_sprite_centered(&self.wall_sprites[0], center);
             }
             Device::Channel => {
-                canvas.draw_sprite_transformed(&self.wall_sprites[1],
-                                               center,
-                                               dir.degrees(),
-                                               dir.is_vertical(),
-                                               false);
+                canvas.draw_sprite_transformed(
+                    &self.wall_sprites[1],
+                    center,
+                    dir.degrees(),
+                    dir.is_vertical(),
+                    false,
+                );
             }
             Device::CrossChannel => {
                 canvas.draw_sprite_centered(&self.wall_sprites[2], center);
             }
             Device::Emitter(color) => {
-                canvas.draw_sprite_transformed(&self.wall_sprites[3],
-                                               center,
-                                               -dir.degrees(),
-                                               dir.is_vertical(),
-                                               false);
+                canvas.draw_sprite_transformed(
+                    &self.wall_sprites[3],
+                    center,
+                    -dir.degrees(),
+                    dir.is_vertical(),
+                    false,
+                );
                 let index = color_index(color);
                 canvas.draw_sprite_centered(&self.gem_sprites[index], center);
             }
             Device::Detector(color) => {
-                canvas.draw_sprite_transformed(&self.wall_sprites[3],
-                                               center,
-                                               -dir.degrees(),
-                                               dir.is_vertical(),
-                                               false);
+                canvas.draw_sprite_transformed(
+                    &self.wall_sprites[3],
+                    center,
+                    -dir.degrees(),
+                    dir.is_vertical(),
+                    false,
+                );
                 let index = color_index(color) + 8;
-                canvas.draw_sprite_rotated(&self.gem_sprites[index],
-                                           center,
-                                           dir.degrees());
+                canvas.draw_sprite_rotated(
+                    &self.gem_sprites[index],
+                    center,
+                    dir.degrees(),
+                );
             }
             Device::Mirror => {
-                canvas.draw_sprite_rotated(&self.gate_sprites[0],
-                                           center,
-                                           dir.degrees());
+                canvas.draw_sprite_rotated(
+                    &self.gate_sprites[0],
+                    center,
+                    dir.degrees(),
+                );
             }
             Device::Splitter => {
-                canvas.draw_sprite_rotated(&self.gate_sprites[2],
-                                           center,
-                                           dir.degrees());
+                canvas.draw_sprite_rotated(
+                    &self.gate_sprites[2],
+                    center,
+                    dir.degrees(),
+                );
             }
             Device::Mixer => {
-                canvas.draw_sprite_rotated(&self.gate_sprites[3],
-                                           center,
-                                           dir.degrees());
+                canvas.draw_sprite_rotated(
+                    &self.gate_sprites[3],
+                    center,
+                    dir.degrees(),
+                );
             }
         }
     }
 
-    fn draw_device_fg(&self, canvas: &mut Canvas, center: Point,
-                      device: Device, dir: Direction) {
+    fn draw_device_fg(
+        &self,
+        canvas: &mut Canvas,
+        center: Point,
+        device: Device,
+        dir: Direction,
+    ) {
         match device {
             Device::Mirror => {
-                canvas.draw_sprite_rotated(&self.gate_sprites[1],
-                                           center,
-                                           dir.degrees());
+                canvas.draw_sprite_rotated(
+                    &self.gate_sprites[1],
+                    center,
+                    dir.degrees(),
+                );
             }
             _ => {}
         }
@@ -242,17 +277,17 @@ impl LaserField {
                 continue;
             }
             match grid.get(next.x(), next.y()) {
-                Some((Device::Wall, _)) |
-                Some((Device::Emitter(_), _)) => {
+                Some((Device::Wall, _)) | Some((Device::Emitter(_), _)) => {
                     self.sparks.insert((coords, laser_dir), 0);
                 }
                 Some((Device::Channel, ch_dir))
-                    if !ch_dir.is_parallel_to(laser_dir) => {
+                    if !ch_dir.is_parallel_to(laser_dir) =>
+                {
                     self.sparks.insert((coords, laser_dir), 0);
                 }
-                Some((Device::Channel, _)) |
-                Some((Device::CrossChannel, _)) |
-                None => {
+                Some((Device::Channel, _))
+                | Some((Device::CrossChannel, _))
+                | None => {
                     let perp_dir = laser_dir.rotated_cw();
                     let mut dist = GRID_CELL_SIZE / 2;
                     if self.lasers.contains_key(&(next, perp_dir)) {
@@ -336,10 +371,10 @@ impl LaserField {
             for col in 0..num_cols {
                 if let Some((device, dir)) = grid.get(col, row) {
                     if !device.is_moveable() {
-                        let pt = Point::new(col * GRID_CELL_SIZE +
-                                                GRID_CELL_SIZE / 2,
-                                            row * GRID_CELL_SIZE +
-                                                GRID_CELL_SIZE / 2);
+                        let pt = Point::new(
+                            col * GRID_CELL_SIZE + GRID_CELL_SIZE / 2,
+                            row * GRID_CELL_SIZE + GRID_CELL_SIZE / 2,
+                        );
                         self.draw_device_bg(&mut canvas, pt, device, dir);
                     }
                 }
@@ -353,18 +388,19 @@ impl LaserField {
         for row in 0..num_rows {
             for col in 0..num_cols {
                 if let Some(ref drag) = self.drag {
-                    if drag.from_pt != drag.to_pt && row == drag.from_row &&
-                        col == drag.from_col
+                    if drag.from_pt != drag.to_pt
+                        && row == drag.from_row
+                        && col == drag.from_col
                     {
                         continue;
                     }
                 }
                 if let Some((device, dir)) = grid.get(col, row) {
                     if device.is_moveable() {
-                        let pt = Point::new(col * GRID_CELL_SIZE +
-                                                GRID_CELL_SIZE / 2,
-                                            row * GRID_CELL_SIZE +
-                                                GRID_CELL_SIZE / 2);
+                        let pt = Point::new(
+                            col * GRID_CELL_SIZE + GRID_CELL_SIZE / 2,
+                            row * GRID_CELL_SIZE + GRID_CELL_SIZE / 2,
+                        );
                         self.draw_device_bg(&mut canvas, pt, device, dir);
                     }
                 }
@@ -378,18 +414,19 @@ impl LaserField {
         for row in 0..num_rows {
             for col in 0..num_cols {
                 if let Some(ref drag) = self.drag {
-                    if drag.from_pt != drag.to_pt && row == drag.from_row &&
-                        col == drag.from_col
+                    if drag.from_pt != drag.to_pt
+                        && row == drag.from_row
+                        && col == drag.from_col
                     {
                         continue;
                     }
                 }
                 if let Some((device, dir)) = grid.get(col, row) {
                     if device.is_moveable() {
-                        let pt = Point::new(col * GRID_CELL_SIZE +
-                                                GRID_CELL_SIZE / 2,
-                                            row * GRID_CELL_SIZE +
-                                                GRID_CELL_SIZE / 2);
+                        let pt = Point::new(
+                            col * GRID_CELL_SIZE + GRID_CELL_SIZE / 2,
+                            row * GRID_CELL_SIZE + GRID_CELL_SIZE / 2,
+                        );
                         self.draw_device_fg(&mut canvas, pt, device, dir);
                     }
                 }
@@ -411,48 +448,54 @@ impl LaserField {
                 MixedColor::White => (255, 255, 255),
             };
             let mut fill_rect = match dir {
-                Direction::East => {
-                    Rect::new(GRID_CELL_SIZE - dist,
-                              (GRID_CELL_SIZE - LASER_THICKNESS) / 2,
-                              dist as u32,
-                              LASER_THICKNESS as u32)
-                }
-                Direction::South => {
-                    Rect::new((GRID_CELL_SIZE - LASER_THICKNESS) / 2,
-                              GRID_CELL_SIZE - dist,
-                              LASER_THICKNESS as u32,
-                              dist as u32)
-                }
-                Direction::West => {
-                    Rect::new(0,
-                              (GRID_CELL_SIZE - LASER_THICKNESS) / 2,
-                              dist as u32,
-                              LASER_THICKNESS as u32)
-                }
-                Direction::North => {
-                    Rect::new((GRID_CELL_SIZE - LASER_THICKNESS) / 2,
-                              0,
-                              LASER_THICKNESS as u32,
-                              dist as u32)
-                }
+                Direction::East => Rect::new(
+                    GRID_CELL_SIZE - dist,
+                    (GRID_CELL_SIZE - LASER_THICKNESS) / 2,
+                    dist as u32,
+                    LASER_THICKNESS as u32,
+                ),
+                Direction::South => Rect::new(
+                    (GRID_CELL_SIZE - LASER_THICKNESS) / 2,
+                    GRID_CELL_SIZE - dist,
+                    LASER_THICKNESS as u32,
+                    dist as u32,
+                ),
+                Direction::West => Rect::new(
+                    0,
+                    (GRID_CELL_SIZE - LASER_THICKNESS) / 2,
+                    dist as u32,
+                    LASER_THICKNESS as u32,
+                ),
+                Direction::North => Rect::new(
+                    (GRID_CELL_SIZE - LASER_THICKNESS) / 2,
+                    0,
+                    LASER_THICKNESS as u32,
+                    dist as u32,
+                ),
             };
-            fill_rect.offset(coords.x() * GRID_CELL_SIZE,
-                             coords.y() * GRID_CELL_SIZE);
+            fill_rect.offset(
+                coords.x() * GRID_CELL_SIZE,
+                coords.y() * GRID_CELL_SIZE,
+            );
             canvas.fill_rect(fill_color, fill_rect);
         }
     }
 
     pub fn draw_sparks(&self, canvas: &mut Canvas) {
         for (&(coords, dir), &dist) in self.sparks.iter() {
-            let center = self.rect.top_left() +
-                dir.delta() * (GRID_CELL_SIZE / 2 - dist) +
-                Point::new(coords.x() * GRID_CELL_SIZE + GRID_CELL_SIZE / 2,
-                           coords.y() * GRID_CELL_SIZE + GRID_CELL_SIZE / 2);
-            canvas.draw_sprite_transformed(&self.sparks_sprites[0],
-                                           center,
-                                           dir.degrees(),
-                                           self.anim_counter < ANIM_SLOWDOWN,
-                                           false);
+            let center = self.rect.top_left()
+                + dir.delta() * (GRID_CELL_SIZE / 2 - dist)
+                + Point::new(
+                    coords.x() * GRID_CELL_SIZE + GRID_CELL_SIZE / 2,
+                    coords.y() * GRID_CELL_SIZE + GRID_CELL_SIZE / 2,
+                );
+            canvas.draw_sprite_transformed(
+                &self.sparks_sprites[0],
+                center,
+                dir.degrees(),
+                self.anim_counter < ANIM_SLOWDOWN,
+                false,
+            );
         }
     }
 }
@@ -461,11 +504,13 @@ impl Element<DeviceGrid, LaserCmd> for LaserField {
     fn draw(&self, grid: &DeviceGrid, canvas: &mut Canvas) {
         self.draw_immovables(grid, canvas);
         for (&(col, row), &letter) in self.letters.iter() {
-            let pt = Point::new(self.rect.left() + col * GRID_CELL_SIZE +
-                                    GRID_CELL_SIZE / 2,
-                                self.rect.top() + row * GRID_CELL_SIZE +
-                                    GRID_CELL_SIZE / 2 +
-                                    9);
+            let pt = Point::new(
+                self.rect.left() + col * GRID_CELL_SIZE + GRID_CELL_SIZE / 2,
+                self.rect.top()
+                    + row * GRID_CELL_SIZE
+                    + GRID_CELL_SIZE / 2
+                    + 9,
+            );
             canvas.draw_char(&self.font, Align::Center, pt, letter);
         }
         self.draw_movables_bg(grid, canvas);
@@ -481,18 +526,23 @@ impl Element<DeviceGrid, LaserCmd> for LaserField {
         }
     }
 
-    fn handle_event(&mut self, event: &Event, grid: &mut DeviceGrid)
-                    -> Action<LaserCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        grid: &mut DeviceGrid,
+    ) -> Action<LaserCmd> {
         match event {
             &Event::ClockTick => {
                 if let Some(ref mut drag) = self.drag {
-                    drag.millis = cmp::min(drag.millis + FRAME_DELAY_MILLIS,
-                                           ROTATE_MAX_MILLIS + 1);
+                    drag.millis = cmp::min(
+                        drag.millis + FRAME_DELAY_MILLIS,
+                        ROTATE_MAX_MILLIS + 1,
+                    );
                 }
                 self.anim_counter += 1;
                 self.anim_counter %= 2 * ANIM_SLOWDOWN;
-                if self.anim_counter % ANIM_SLOWDOWN == 0 &&
-                    !self.sparks.is_empty()
+                if self.anim_counter % ANIM_SLOWDOWN == 0
+                    && !self.sparks.is_empty()
                 {
                     return Action::redraw();
                 }
@@ -505,15 +555,15 @@ impl Element<DeviceGrid, LaserCmd> for LaserField {
                     if let Some((device, dir)) = grid.get(col, row) {
                         if device.is_moveable() {
                             self.drag = Some(GridDrag {
-                                                 device: device,
-                                                 dir: dir,
-                                                 from_col: col,
-                                                 from_row: row,
-                                                 from_pt: pt,
-                                                 to_pt: pt,
-                                                 millis: 0,
-                                                 moved: false,
-                                             });
+                                device,
+                                dir,
+                                from_col: col,
+                                from_row: row,
+                                from_pt: pt,
+                                to_pt: pt,
+                                millis: 0,
+                                moved: false,
+                            });
                         }
                     }
                 }
@@ -535,33 +585,39 @@ impl Element<DeviceGrid, LaserCmd> for LaserField {
                 if let Some(drag) = self.drag.take() {
                     let to_col = drag.to_pt.x() / GRID_CELL_SIZE;
                     let to_row = drag.to_pt.y() / GRID_CELL_SIZE;
-                    return if to_col == drag.from_col &&
-                        to_row == drag.from_row
+                    return if to_col == drag.from_col
+                        && to_row == drag.from_row
                     {
                         if drag.millis <= ROTATE_MAX_MILLIS {
                             grid.rotate(drag.from_col, drag.from_row);
                             self.recalculate_lasers(grid);
                             Action::redraw()
                                 .and_play_sound(Sound::device_rotate())
-                                .and_return(LaserCmd::Rotated(drag.from_col,
-                                                              drag.from_row))
+                                .and_return(LaserCmd::Rotated(
+                                    drag.from_col,
+                                    drag.from_row,
+                                ))
                         } else {
                             self.recalculate_lasers(grid);
                             Action::redraw()
                         }
                     } else {
-                        let success = grid.move_to(drag.from_col,
-                                                   drag.from_row,
-                                                   to_col,
-                                                   to_row);
+                        let success = grid.move_to(
+                            drag.from_col,
+                            drag.from_row,
+                            to_col,
+                            to_row,
+                        );
                         self.recalculate_lasers(grid);
                         if success {
                             Action::redraw()
                                 .and_play_sound(Sound::device_drop())
-                                .and_return(LaserCmd::Moved(drag.from_col,
-                                                            drag.from_row,
-                                                            to_col,
-                                                            to_row))
+                                .and_return(LaserCmd::Moved(
+                                    drag.from_col,
+                                    drag.from_row,
+                                    to_col,
+                                    to_row,
+                                ))
                         } else {
                             Action::redraw()
                         }
@@ -585,9 +641,12 @@ pub struct DangerSign {
 }
 
 impl DangerSign {
-    pub fn new(resources: &mut Resources, (left, top): (i32, i32),
-               string1: &str, string2: &str)
-               -> DangerSign {
+    pub fn new(
+        resources: &mut Resources,
+        (left, top): (i32, i32),
+        string1: &str,
+        string2: &str,
+    ) -> DangerSign {
         DangerSign {
             font1: resources.get_font("danger"),
             font2: resources.get_font("tiny"),
@@ -599,14 +658,18 @@ impl DangerSign {
 
     pub fn draw(&self, canvas: &mut Canvas) {
         let mut canvas = canvas.subcanvas(self.rect);
-        canvas.draw_text(&self.font1,
-                         Align::Center,
-                         Point::new(40, 16),
-                         &self.string1);
-        canvas.draw_text(&self.font2,
-                         Align::Center,
-                         Point::new(40, 26),
-                         &self.string2);
+        canvas.draw_text(
+            &self.font1,
+            Align::Center,
+            Point::new(40, 16),
+            &self.string1,
+        );
+        canvas.draw_text(
+            &self.font2,
+            Align::Center,
+            Point::new(40, 26),
+            &self.string2,
+        );
     }
 }
 
@@ -626,15 +689,15 @@ fn color_index(color: MixedColor) -> usize {
 }
 
 fn mixer_output(color1: MixedColor, color2: MixedColor) -> MixedColor {
-    let red = (color1.has_red() && color2.has_red()) ||
-        (color1.has_green() && color2.has_blue()) ||
-        (color1.has_blue() && color2.has_green());
-    let green = (color1.has_green() && color2.has_green()) ||
-        (color1.has_red() && color2.has_blue()) ||
-        (color1.has_blue() && color2.has_red());
-    let blue = (color1.has_blue() && color2.has_blue()) ||
-        (color1.has_red() && color2.has_green()) ||
-        (color1.has_green() && color2.has_red());
+    let red = (color1.has_red() && color2.has_red())
+        || (color1.has_green() && color2.has_blue())
+        || (color1.has_blue() && color2.has_green());
+    let green = (color1.has_green() && color2.has_green())
+        || (color1.has_red() && color2.has_blue())
+        || (color1.has_blue() && color2.has_red());
+    let blue = (color1.has_blue() && color2.has_blue())
+        || (color1.has_red() && color2.has_green())
+        || (color1.has_green() && color2.has_red());
     MixedColor::from_rgb(red, green, blue)
 }
 

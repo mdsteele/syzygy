@@ -17,10 +17,10 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
+use super::coords::{coords_to_pt, PYRAMID_TILE_SIZE};
 use crate::elements::{Ast, Scene, TalkPos, TalkStyle};
 use crate::gui::{Resources, Sound};
 use crate::save::pyramid::Coords;
-use super::coords::{PYRAMID_TILE_SIZE, coords_to_pt};
 
 // ========================================================================= //
 
@@ -966,7 +966,9 @@ const PASSWORD_HINTS: &[(&[usize], &str)] = &[
       the first runs forward,\n   the second back."),
 ];
 
-pub fn num_hints() -> usize { PASSWORD_HINTS.len() }
+pub fn num_hints() -> usize {
+    PASSWORD_HINTS.len()
+}
 
 fn coords_to_actor_pos(coords: Coords) -> (i32, i32) {
     let pt = coords_to_pt(coords);
@@ -1018,9 +1020,11 @@ mod tests {
         let mut all_indices: HashSet<usize> = HashSet::new();
         for &(indices, _) in PASSWORD_HINTS.iter() {
             for &index in indices.iter() {
-                assert!(!all_indices.contains(&index),
-                        "Repeated index: {}",
-                        index);
+                assert!(
+                    !all_indices.contains(&index),
+                    "Repeated index: {}",
+                    index
+                );
                 all_indices.insert(index);
             }
         }

@@ -19,13 +19,19 @@
 
 use std::rc::Rc;
 
-use crate::elements::{CrosswordView, FadeStyle, MovingStars, PuzzleCmd, PuzzleCore,
-               PuzzleView, Scene};
-use crate::gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
-          Resources, Sound, Sprite};
-use crate::modes::syzygy::Atlatl;
-use crate::save::{CrosswordState, FinaleState, Game, PuzzleState, ValidChars};
 use super::scenes;
+use crate::elements::{
+    CrosswordView, FadeStyle, MovingStars, PuzzleCmd, PuzzleCore, PuzzleView,
+    Scene,
+};
+use crate::gui::{
+    Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
+    Sound, Sprite,
+};
+use crate::modes::syzygy::Atlatl;
+use crate::save::{
+    CrosswordState, FinaleState, Game, PuzzleState, ValidChars,
+};
 
 // ========================================================================= //
 
@@ -50,8 +56,11 @@ pub struct View {
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect, state: &FinaleState)
-               -> View {
+    pub fn new(
+        resources: &mut Resources,
+        visible: Rect,
+        state: &FinaleState,
+    ) -> View {
         let core = {
             let fade = (FadeStyle::BottomToTop, FadeStyle::TopToBottom);
             let intro = scenes::compile_scene(resources);
@@ -59,7 +68,7 @@ impl View {
             PuzzleCore::new(resources, visible, state, fade, intro, outro)
         };
         View {
-            core: core,
+            core,
             stars_space: MovingStars::new(0, 0, 576, 384),
             sun_sprites: resources.get_sprites("title/sun"),
             xanadu3_sprites: resources.get_sprites("title/xanadu3"),
@@ -69,13 +78,16 @@ impl View {
             atlatl_visible: false,
             atlatl_beam: AtlatlBeam::new(),
             title_credit: TitleCredit::new(resources),
-            crossword_state:
-                CrosswordState::new(ValidChars::LettersAndSymbols,
-                                    CROSSWORD_WORDS),
-            crossword_view: CrosswordView::new(resources,
-                                               (364, 56),
-                                               CROSSWORD_OFFSETS,
-                                               (364, 304)),
+            crossword_state: CrosswordState::new(
+                ValidChars::LettersAndSymbols,
+                CROSSWORD_WORDS,
+            ),
+            crossword_view: CrosswordView::new(
+                resources,
+                (364, 56),
+                CROSSWORD_OFFSETS,
+                (364, 304),
+            ),
             crossword_visible: false,
             letter_columns: LetterColumns::new(resources),
             letter_columns_visible: false,
@@ -95,10 +107,14 @@ impl Element<Game, PuzzleCmd> for View {
             canvas.draw_sprite(&self.sun_sprites[0], Point::new(64, 0));
             canvas.draw_sprite(&self.sun_sprites[1], Point::new(64, 64));
             canvas.draw_sprite(&self.sun_sprites[2], Point::new(0, 64));
-            canvas.draw_sprite_centered(&self.xanadu3_sprites[0],
-                                        Point::new(288, 225));
-            canvas.draw_sprite_centered(&self.xanadu4_sprites[0],
-                                        Point::new(421, 166));
+            canvas.draw_sprite_centered(
+                &self.xanadu3_sprites[0],
+                Point::new(288, 225),
+            );
+            canvas.draw_sprite_centered(
+                &self.xanadu4_sprites[0],
+                Point::new(421, 166),
+            );
         }
         self.title_credit.draw(canvas);
         if self.crossword_visible {
@@ -117,8 +133,11 @@ impl Element<Game, PuzzleCmd> for View {
         self.core.draw_front_layer(canvas, state);
     }
 
-    fn handle_event(&mut self, event: &Event, game: &mut Game)
-                    -> Action<PuzzleCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        game: &mut Game,
+    ) -> Action<PuzzleCmd> {
         let state = &mut game.finale;
         let mut action = self.core.handle_event(event, state);
         if event == &Event::ClockTick {
@@ -134,9 +153,9 @@ impl Element<Game, PuzzleCmd> for View {
             action.merge(subaction.but_no_value());
         }
         if event == &Event::ClockTick {
-            let subaction =
-                self.crossword_view
-                    .handle_event(event, &mut self.crossword_state);
+            let subaction = self
+                .crossword_view
+                .handle_event(event, &mut self.crossword_state);
             action.merge(subaction.but_no_value());
             let subaction = self.letter_columns.handle_event(event, &mut ());
             action.merge(subaction.but_no_value());
@@ -149,7 +168,9 @@ impl Element<Game, PuzzleCmd> for View {
 }
 
 impl PuzzleView for View {
-    fn info_text(&self, _game: &Game) -> &'static str { INFO_BOX_TEXT }
+    fn info_text(&self, _game: &Game) -> &'static str {
+        INFO_BOX_TEXT
+    }
 
     fn undo(&mut self, _game: &mut Game) {}
 
@@ -229,8 +250,13 @@ impl AtlatlBeam {
         }
     }
 
-    fn turn_on(&mut self, start: i32, max_length: u32, y_pos: i32,
-               drift: bool) {
+    fn turn_on(
+        &mut self,
+        start: i32,
+        max_length: u32,
+        y_pos: i32,
+        drift: bool,
+    ) {
         self.start = start;
         self.length = 0;
         self.max_length = max_length;
@@ -246,13 +272,17 @@ impl AtlatlBeam {
 
     fn draw(&self, canvas: &mut Canvas) {
         if self.length > 0 {
-            let color = (if self.anim != 0 { 255 } else { 128 },
-                         if self.anim != 1 { 255 } else { 128 },
-                         if self.anim != 2 { 255 } else { 128 });
-            let rect = Rect::new(self.start - (self.length as i32),
-                                 self.y_pos - (BEAM_THICKNESS / 2) as i32,
-                                 self.length,
-                                 BEAM_THICKNESS);
+            let color = (
+                if self.anim != 0 { 255 } else { 128 },
+                if self.anim != 1 { 255 } else { 128 },
+                if self.anim != 2 { 255 } else { 128 },
+            );
+            let rect = Rect::new(
+                self.start - (self.length as i32),
+                self.y_pos - (BEAM_THICKNESS / 2) as i32,
+                self.length,
+                BEAM_THICKNESS,
+            );
             canvas.fill_rect(color, rect);
         }
     }
@@ -293,22 +323,28 @@ impl TitleCredit {
 
     fn draw(&self, canvas: &mut Canvas) {
         if self.display >= 1 {
-            canvas.draw_text(&self.font1,
-                             Align::Center,
-                             Point::new(408, 150),
-                             "SYSTEM");
+            canvas.draw_text(
+                &self.font1,
+                Align::Center,
+                Point::new(408, 150),
+                "SYSTEM",
+            );
         }
         if self.display >= 2 {
-            canvas.draw_text(&self.font1,
-                             Align::Center,
-                             Point::new(408, 182),
-                             "SYZYGY");
+            canvas.draw_text(
+                &self.font1,
+                Align::Center,
+                Point::new(408, 182),
+                "SYZYGY",
+            );
         }
         if self.display >= 3 {
-            canvas.draw_text(&self.font2,
-                             Align::Center,
-                             Point::new(408, 240),
-                             "a game by mdsteele");
+            canvas.draw_text(
+                &self.font2,
+                Align::Center,
+                Point::new(408, 240),
+                "a game by mdsteele",
+            );
         }
     }
 }
@@ -337,9 +373,13 @@ impl LetterColumns {
         self.fall_anim[col as usize] = (row, length * BLOCK_HEIGHT, 0);
     }
 
-    fn stop_animation(&mut self) { self.fall_anim = [(0, 0, 0); 10]; }
+    fn stop_animation(&mut self) {
+        self.fall_anim = [(0, 0, 0); 10];
+    }
 
-    fn rect(&self) -> Rect { Rect::new(256, 56, 240, 240) }
+    fn rect(&self) -> Rect {
+        Rect::new(256, 56, 240, 240)
+    }
 }
 
 impl Element<(), ()> for LetterColumns {
@@ -351,9 +391,10 @@ impl Element<(), ()> for LetterColumns {
                 let row = row as i32;
                 let (gap_row, gap, _) = self.fall_anim[col];
                 let gap = if row >= gap_row { gap } else { 0 };
-                let pt = Point::new((col as i32) * BLOCK_WIDTH,
-                                    rect.height() as i32 - gap -
-                                        (1 + row) * BLOCK_HEIGHT);
+                let pt = Point::new(
+                    (col as i32) * BLOCK_WIDTH,
+                    rect.height() as i32 - gap - (1 + row) * BLOCK_HEIGHT,
+                );
                 canvas.draw_sprite(&self.sprites[0], pt);
                 let pt = pt + Point::new(BLOCK_WIDTH / 2, BLOCK_HEIGHT - 3);
                 canvas.draw_char(&self.font, Align::Center, pt, letter);
@@ -403,28 +444,36 @@ impl SpecialThanks {
 
     fn draw(&self, canvas: &mut Canvas) {
         if self.display >= 1 {
-            canvas.draw_text(&self.font1,
-                             Align::Center,
-                             Point::new(288, 140),
-                             "...and many thanks for extreme patience from:");
+            canvas.draw_text(
+                &self.font1,
+                Align::Center,
+                Point::new(288, 140),
+                "...and many thanks for extreme patience from:",
+            );
         }
         if self.display >= 3 {
-            canvas.draw_text(&self.font2,
-                             Align::Left,
-                             Point::new(133, 281),
-                             "HOLLY");
+            canvas.draw_text(
+                &self.font2,
+                Align::Left,
+                Point::new(133, 281),
+                "HOLLY",
+            );
         }
         if self.display >= 2 {
-            canvas.draw_text(&self.font2,
-                             Align::Center,
-                             Point::new(288, 281),
-                             "STEPH");
+            canvas.draw_text(
+                &self.font2,
+                Align::Center,
+                Point::new(288, 281),
+                "STEPH",
+            );
         }
         if self.display >= 4 {
-            canvas.draw_text(&self.font2,
-                             Align::Right,
-                             Point::new(443, 281),
-                             "EMILY");
+            canvas.draw_text(
+                &self.font2,
+                Align::Right,
+                Point::new(443, 281),
+                "EMILY",
+            );
         }
     }
 }
@@ -438,22 +487,23 @@ pub struct TheEnd {
 
 impl TheEnd {
     fn new(resources: &mut Resources) -> TheEnd {
-        TheEnd {
-            font: resources.get_font("system"),
-            display: 0,
-        }
+        TheEnd { font: resources.get_font("system"), display: 0 }
     }
 
     fn draw(&self, canvas: &mut Canvas) {
         if self.display >= 1 {
-            canvas.draw_text(&self.font,
-                             Align::Right,
-                             Point::new(248, 214),
-                             "T  H  E");
-            canvas.draw_text(&self.font,
-                             Align::Left,
-                             Point::new(328, 214),
-                             "E  N  D");
+            canvas.draw_text(
+                &self.font,
+                Align::Right,
+                Point::new(248, 214),
+                "T  H  E",
+            );
+            canvas.draw_text(
+                &self.font,
+                Align::Left,
+                Point::new(328, 214),
+                "E  N  D",
+            );
         }
     }
 }
@@ -504,6 +554,6 @@ const COLUMN_LETTERS: [&[char]; 10] = [
 ];
 
 pub const INFO_BOX_TEXT: &str = "\
-Return to the map to select another scene.";
+                                 Return to the map to select another scene.";
 
 // ========================================================================= //

@@ -23,13 +23,15 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time;
 
-use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
-use crate::gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
-          Resources, Sound, Sprite};
-use crate::save::{Access, FailureState, Game, Location, PuzzleState};
-use crate::save::pyramid::{Board, Coords, MAX_REMOVALS, Move, Team};
 use super::coords::{coords_to_pt, pt_to_coords};
 use super::scenes;
+use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
+use crate::gui::{
+    Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
+    Sound, Sprite,
+};
+use crate::save::pyramid::{Board, Coords, Move, Team, MAX_REMOVALS};
+use crate::save::{Access, FailureState, Game, Location, PuzzleState};
 
 // ========================================================================= //
 
@@ -135,12 +137,12 @@ impl View {
             }
         }
         View {
-            core: core,
+            core,
             dashboard: DASHBOARD_CHIPS
                 .iter()
                 .map(|&(x, y, chr, loc)| {
-                         DashChip::new(resources, x, y, loc, chr)
-                     })
+                    DashChip::new(resources, x, y, loc, chr)
+                })
                 .collect(),
             pyramid: PyramidView::new(resources, state),
             show_pyramid: false,
@@ -164,10 +166,13 @@ impl Element<Game, PuzzleCmd> for View {
         self.core.draw_front_layer(canvas, state);
     }
 
-    fn handle_event(&mut self, event: &Event, game: &mut Game)
-                    -> Action<PuzzleCmd> {
-        let mut action = self.core
-            .handle_event(event, &mut game.system_failure);
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        game: &mut Game,
+    ) -> Action<PuzzleCmd> {
+        let mut action =
+            self.core.handle_event(event, &mut game.system_failure);
         if self.should_mark_mid_scene_done {
             game.system_failure.set_mid_scene_is_done(true);
             self.should_mark_mid_scene_done = false;
@@ -180,9 +185,9 @@ impl Element<Game, PuzzleCmd> for View {
         }
         if !self.show_pyramid {
             if !action.should_stop() {
-                action.merge(self.dashboard
-                                 .handle_event(event, game)
-                                 .but_no_value());
+                action.merge(
+                    self.dashboard.handle_event(event, game).but_no_value(),
+                );
             }
         } else {
             let state = &mut game.system_failure;
@@ -204,7 +209,7 @@ impl Element<Game, PuzzleCmd> for View {
                     }
                     Some(&PyramidCmd::JumpFrom(from)) => {
                         self.pyramid.step = PyramidStep::YouJumping {
-                            from: from,
+                            from,
                             possible: state.board().possible_jump_dests(from),
                         };
                         action.also_play_sound(Sound::device_rotate());
@@ -213,11 +218,8 @@ impl Element<Game, PuzzleCmd> for View {
                     Some(&PyramidCmd::Jump(from, to)) => {
                         state.board_mut().remove_piece(from);
                         state.board_mut().set_piece_at(to, Team::You);
-                        self.pyramid.step = PyramidStep::YouAnimateJump {
-                            anim: 0,
-                            from: from,
-                            to: to,
-                        };
+                        self.pyramid.step =
+                            PyramidStep::YouAnimateJump { anim: 0, from, to };
                         action.also_play_sound(Sound::small_jump());
                         if state.board().formation_at(to).is_some() {
                             self.core.push_undo(UndoRedo::Jump(from, to));
@@ -236,15 +238,16 @@ impl Element<Game, PuzzleCmd> for View {
                             so_far: so_far.clone(),
                         };
                         action.also_play_sound(Sound::device_pickup());
-                        if (so_far.len() as i32) < MAX_REMOVALS &&
-                            !state
+                        if (so_far.len() as i32) < MAX_REMOVALS
+                            && !state
                                 .board()
                                 .possible_removals(Team::You)
                                 .is_empty()
                         {
-                            self.core
-                                .push_undo(UndoRedo::Remove(formation.clone(),
-                                                            so_far.clone()));
+                            self.core.push_undo(UndoRedo::Remove(
+                                formation.clone(),
+                                so_far.clone(),
+                            ));
                         } else {
                             self.core.clear_undo_redo();
                         }
@@ -259,7 +262,8 @@ impl Element<Game, PuzzleCmd> for View {
                     }
                     Some(&PyramidCmd::PasswordHint(coords)) => {
                         self.core.begin_extra_scene(
-                            scenes::hint_scene_for_coords(coords));
+                            scenes::hint_scene_for_coords(coords),
+                        );
                     }
                     None => {}
                 }
@@ -298,7 +302,7 @@ impl PuzzleView for View {
                 state.board_mut().remove_piece(to);
                 state.board_mut().set_piece_at(from, Team::You);
                 self.pyramid.step = PyramidStep::YouJumping {
-                    from: from,
+                    from,
                     possible: state.board().possible_jump_dests(from),
                 };
             }
@@ -307,8 +311,8 @@ impl PuzzleView for View {
                 let coords = so_far.pop().unwrap();
                 state.board_mut().set_piece_at(coords, Team::You);
                 self.pyramid.step = PyramidStep::YouRemoving {
-                    formation: formation,
-                    so_far: so_far,
+                    formation,
+                    so_far,
                     possible: state.board().possible_removals(Team::You),
                 };
             }
@@ -329,7 +333,7 @@ impl PuzzleView for View {
             }
             Some(UndoRedo::Jumping(from)) => {
                 self.pyramid.step = PyramidStep::YouJumping {
-                    from: from,
+                    from,
                     possible: state.board().possible_jump_dests(from),
                 };
             }
@@ -347,8 +351,8 @@ impl PuzzleView for View {
                 let &coords = so_far.last().unwrap();
                 state.board_mut().remove_piece(coords);
                 self.pyramid.step = PyramidStep::YouRemoving {
-                    formation: formation,
-                    so_far: so_far,
+                    formation,
+                    so_far,
                     possible: state.board().possible_removals(Team::You),
                 };
             }
@@ -377,11 +381,10 @@ impl PuzzleView for View {
                 let team = if kind == 1 { Team::You } else { Team::SRB };
                 if value < 0 {
                     self.pyramid.hilight_override.clear();
-                } else if let Some(coords) = Coords::from_index(value as
-                                                                    usize)
+                } else if let Some(coords) = Coords::from_index(value as usize)
                 {
-                    if self.pyramid.hilight_override.get(&coords) ==
-                        Some(&team)
+                    if self.pyramid.hilight_override.get(&coords)
+                        == Some(&team)
                     {
                         self.pyramid.hilight_override.remove(&coords);
                     } else {
@@ -454,19 +457,23 @@ struct DashChip {
 }
 
 impl DashChip {
-    fn new(resources: &mut Resources, left: i32, top: i32,
-           location: Location, letter: char)
-           -> DashChip {
+    fn new(
+        resources: &mut Resources,
+        left: i32,
+        top: i32,
+        location: Location,
+        letter: char,
+    ) -> DashChip {
         let topleft = Point::new(left, top);
         DashChip {
             sprites: resources.get_sprites("failure/chips"),
             font: resources.get_font("roman"),
-            topleft: topleft,
+            topleft,
             goal_topleft: topleft,
-            location: location,
-            letter: letter,
-            anim: (left + top) %
-                (DASH_ANIM_SLOWDOWN * DASH_ANIM_INDICES.len() as i32),
+            location,
+            letter,
+            anim: (left + top)
+                % (DASH_ANIM_SLOWDOWN * DASH_ANIM_INDICES.len() as i32),
             hide_letter: false,
             force_red: false,
         }
@@ -487,20 +494,20 @@ impl Element<Game, ()> for DashChip {
         };
         canvas.draw_sprite(&self.sprites[index], self.topleft);
         if solved && !self.hide_letter && self.letter != ' ' {
-            canvas.fill_rect((191, 191, 191),
-                             Rect::new(self.topleft.x() + 13,
-                                       self.topleft.y() + 11,
-                                       6,
-                                       10));
-            canvas.fill_rect((191, 191, 191),
-                             Rect::new(self.topleft.x() + 12,
-                                       self.topleft.y() + 12,
-                                       8,
-                                       8));
-            canvas.draw_char(&self.font,
-                             Align::Center,
-                             self.topleft + Point::new(16, 20),
-                             self.letter);
+            canvas.fill_rect(
+                (191, 191, 191),
+                Rect::new(self.topleft.x() + 13, self.topleft.y() + 11, 6, 10),
+            );
+            canvas.fill_rect(
+                (191, 191, 191),
+                Rect::new(self.topleft.x() + 12, self.topleft.y() + 12, 8, 8),
+            );
+            canvas.draw_char(
+                &self.font,
+                Align::Center,
+                self.topleft + Point::new(16, 20),
+                self.letter,
+            );
         }
     }
 
@@ -508,8 +515,8 @@ impl Element<Game, ()> for DashChip {
         match event {
             &Event::ClockTick => {
                 self.anim += 1;
-                if self.anim ==
-                    DASH_ANIM_INDICES.len() as i32 * DASH_ANIM_SLOWDOWN
+                if self.anim
+                    == DASH_ANIM_INDICES.len() as i32 * DASH_ANIM_SLOWDOWN
                 {
                     self.anim = 0;
                 }
@@ -521,9 +528,11 @@ impl Element<Game, ()> for DashChip {
                         self.topleft = self.goal_topleft;
                     } else {
                         let scale = DASH_SLIDE_SPEED / dist;
-                        self.topleft = self.topleft +
-                            Point::new((dx * scale).round() as i32,
-                                       (dy * scale).round() as i32);
+                        self.topleft = self.topleft
+                            + Point::new(
+                                (dx * scale).round() as i32,
+                                (dy * scale).round() as i32,
+                            );
                     }
                     return Action::redraw();
                 }
@@ -543,14 +552,26 @@ const ANIM_FORMATION_SLOWDOWN: i32 = 2;
 const ANIM_VICTORY_SLOWDOWN: i32 = 3;
 
 enum PyramidStep {
-    YouReady { possible: HashSet<Coords> },
+    YouReady {
+        possible: HashSet<Coords>,
+    },
     YouJumping {
         from: Coords,
         possible: HashSet<Coords>,
     },
-    YouAnimatePlace { anim: i32, at: Coords },
-    YouAnimateJump { anim: i32, from: Coords, to: Coords },
-    YouAnimateFormation { anim: i32, formation: Vec<Coords> },
+    YouAnimatePlace {
+        anim: i32,
+        at: Coords,
+    },
+    YouAnimateJump {
+        anim: i32,
+        from: Coords,
+        to: Coords,
+    },
+    YouAnimateFormation {
+        anim: i32,
+        formation: Vec<Coords>,
+    },
     YouRemoving {
         formation: Vec<Coords>,
         so_far: Vec<Coords>,
@@ -562,7 +583,9 @@ enum PyramidStep {
         formation: Vec<Coords>,
         so_far: Vec<Coords>,
     },
-    SrbThinking { result: Arc<Mutex<Option<Move>>> },
+    SrbThinking {
+        result: Arc<Mutex<Option<Move>>>,
+    },
     SrbAnimatePlace {
         anim: i32,
         at: Coords,
@@ -587,8 +610,13 @@ enum PyramidStep {
         from: Coords,
         remaining: Vec<Coords>,
     },
-    AnimateVictory { anim: i32, team: Team },
-    Victory { winner: Team },
+    AnimateVictory {
+        anim: i32,
+        team: Team,
+    },
+    Victory {
+        winner: Team,
+    },
     GameOver,
 }
 
@@ -600,20 +628,14 @@ impl PyramidStep {
                 possible: state.board().possible_move_starts(Team::You),
             }
         } else {
-            PyramidStep::AnimateVictory {
-                anim: 0,
-                team: Team::You,
-            }
+            PyramidStep::AnimateVictory { anim: 0, team: Team::You }
         }
     }
 
     fn srb_thinking(state: &mut FailureState) -> PyramidStep {
         if state.board().you_supply() == 0 {
             state.clear_committed_board();
-            return PyramidStep::AnimateVictory {
-                anim: 0,
-                team: Team::SRB,
-            };
+            return PyramidStep::AnimateVictory { anim: 0, team: Team::SRB };
         }
         let result = Arc::new(Mutex::new(None));
         let step = PyramidStep::SrbThinking { result: result.clone() };
@@ -626,8 +648,8 @@ impl PyramidStep {
                 if cfg!(debug_assertions) {
                     let end = time::Instant::now();
                     let duration = end.duration_since(start);
-                    let millis = duration.as_secs() * 1000 +
-                        (duration.subsec_nanos() / 1_000_000) as u64;
+                    let millis = duration.as_secs() * 1000
+                        + (duration.subsec_nanos() / 1_000_000) as u64;
                     println!("Found best move in {}ms", millis);
                 }
                 *result.lock().unwrap() = Some(best);
@@ -642,21 +664,17 @@ impl PyramidStep {
                 [from].iter().cloned().collect()
             }
             &PyramidStep::YouAnimateFormation {
-                anim,
-                ref formation,
-                ..
-            } |
-            &PyramidStep::SrbAnimateFormation {
-                anim,
-                ref formation,
-                ..
+                anim, ref formation, ..
+            }
+            | &PyramidStep::SrbAnimateFormation {
+                anim, ref formation, ..
             } => {
                 let num = (anim / ANIM_FORMATION_SLOWDOWN) as usize + 1;
                 formation.iter().take(num).cloned().collect()
             }
-            &PyramidStep::YouRemoving { ref formation, .. } |
-            &PyramidStep::YouAnimateRemove { ref formation, .. } |
-            &PyramidStep::SrbAnimateRemove { ref formation, .. } => {
+            &PyramidStep::YouRemoving { ref formation, .. }
+            | &PyramidStep::YouAnimateRemove { ref formation, .. }
+            | &PyramidStep::SrbAnimateRemove { ref formation, .. } => {
                 formation.iter().cloned().collect()
             }
             _ => HashSet::new(),
@@ -665,9 +683,11 @@ impl PyramidStep {
 
     fn possible_coords(&self) -> HashSet<Coords> {
         match self {
-            &PyramidStep::YouReady { ref possible, .. } |
-            &PyramidStep::YouJumping { ref possible, .. } |
-            &PyramidStep::YouRemoving { ref possible, .. } => possible.clone(),
+            &PyramidStep::YouReady { ref possible, .. }
+            | &PyramidStep::YouJumping { ref possible, .. }
+            | &PyramidStep::YouRemoving { ref possible, .. } => {
+                possible.clone()
+            }
             _ => HashSet::new(),
         }
     }
@@ -675,45 +695,57 @@ impl PyramidStep {
     fn animation(&self) -> Option<(Coords, Team, Point)> {
         match self {
             &PyramidStep::YouAnimatePlace { anim, at } => {
-                let pt = interpolate(you_supply_pt(),
-                                     coords_to_pt(at),
-                                     anim,
-                                     ANIM_PLACE_FRAMES);
+                let pt = interpolate(
+                    you_supply_pt(),
+                    coords_to_pt(at),
+                    anim,
+                    ANIM_PLACE_FRAMES,
+                );
                 Some((at, Team::You, pt))
             }
             &PyramidStep::YouAnimateJump { anim, from, to } => {
-                let pt = interpolate(coords_to_pt(from),
-                                     coords_to_pt(to),
-                                     anim,
-                                     ANIM_JUMP_FRAMES);
+                let pt = interpolate(
+                    coords_to_pt(from),
+                    coords_to_pt(to),
+                    anim,
+                    ANIM_JUMP_FRAMES,
+                );
                 Some((to, Team::You, pt))
             }
             &PyramidStep::YouAnimateRemove { anim, from, .. } => {
-                let pt = interpolate(coords_to_pt(from),
-                                     you_supply_pt(),
-                                     anim,
-                                     ANIM_REMOVE_FRAMES);
+                let pt = interpolate(
+                    coords_to_pt(from),
+                    you_supply_pt(),
+                    anim,
+                    ANIM_REMOVE_FRAMES,
+                );
                 Some((from, Team::You, pt))
             }
             &PyramidStep::SrbAnimatePlace { anim, at, .. } => {
-                let pt = interpolate(srb_supply_pt(),
-                                     coords_to_pt(at),
-                                     anim,
-                                     ANIM_PLACE_FRAMES);
+                let pt = interpolate(
+                    srb_supply_pt(),
+                    coords_to_pt(at),
+                    anim,
+                    ANIM_PLACE_FRAMES,
+                );
                 Some((at, Team::SRB, pt))
             }
             &PyramidStep::SrbAnimateJump { anim, from, to, .. } => {
-                let pt = interpolate(coords_to_pt(from),
-                                     coords_to_pt(to),
-                                     anim,
-                                     ANIM_JUMP_FRAMES);
+                let pt = interpolate(
+                    coords_to_pt(from),
+                    coords_to_pt(to),
+                    anim,
+                    ANIM_JUMP_FRAMES,
+                );
                 Some((to, Team::SRB, pt))
             }
             &PyramidStep::SrbAnimateRemove { anim, from, .. } => {
-                let pt = interpolate(coords_to_pt(from),
-                                     srb_supply_pt(),
-                                     anim,
-                                     ANIM_REMOVE_FRAMES);
+                let pt = interpolate(
+                    coords_to_pt(from),
+                    srb_supply_pt(),
+                    anim,
+                    ANIM_REMOVE_FRAMES,
+                );
                 Some((from, Team::SRB, pt))
             }
             _ => None,
@@ -724,17 +756,17 @@ impl PyramidStep {
         let mut next = None;
         let mut action = Action::ignore();
         match self {
-            &mut PyramidStep::YouReady { .. } |
-            &mut PyramidStep::YouJumping { .. } |
-            &mut PyramidStep::YouRemoving { .. } => {}
+            &mut PyramidStep::YouReady { .. }
+            | &mut PyramidStep::YouJumping { .. }
+            | &mut PyramidStep::YouRemoving { .. } => {}
             &mut PyramidStep::YouAnimatePlace { ref mut anim, at } => {
                 *anim += 1;
                 if *anim >= ANIM_PLACE_FRAMES {
                     if let Some(formation) = state.board().formation_at(at) {
                         next = Some(PyramidStep::YouAnimateFormation {
-                                        anim: 0,
-                                        formation: formation,
-                                    });
+                            anim: 0,
+                            formation,
+                        });
                     } else {
                         next = Some(PyramidStep::srb_thinking(state));
                     }
@@ -747,9 +779,9 @@ impl PyramidStep {
                 if *anim >= ANIM_JUMP_FRAMES {
                     if let Some(formation) = state.board().formation_at(to) {
                         next = Some(PyramidStep::YouAnimateFormation {
-                                        anim: 0,
-                                        formation: formation,
-                                    });
+                            anim: 0,
+                            formation,
+                        });
                     } else {
                         next = Some(PyramidStep::srb_thinking(state));
                     }
@@ -764,13 +796,10 @@ impl PyramidStep {
                 *anim += 1;
                 if *anim >= ANIM_FORMATION_SLOWDOWN * formation.len() as i32 {
                     next = Some(PyramidStep::YouRemoving {
-                                    formation: formation.clone(),
-                                    so_far: Vec::new(),
-                                    possible:
-                                        state
-                                            .board()
-                                            .possible_removals(Team::You),
-                                });
+                        formation: formation.clone(),
+                        so_far: Vec::new(),
+                        possible: state.board().possible_removals(Team::You),
+                    });
                 }
                 if *anim % ANIM_FORMATION_SLOWDOWN == 0 {
                     action.also_redraw();
@@ -790,10 +819,10 @@ impl PyramidStep {
                             state.board().possible_removals(Team::You);
                         if !possible.is_empty() {
                             next = Some(PyramidStep::YouRemoving {
-                                            formation: formation.clone(),
-                                            so_far: so_far.clone(),
-                                            possible: possible,
-                                        });
+                                formation: formation.clone(),
+                                so_far: so_far.clone(),
+                                possible,
+                            });
                         } else {
                             next = Some(PyramidStep::srb_thinking(state));
                         }
@@ -805,36 +834,27 @@ impl PyramidStep {
             }
             &mut PyramidStep::SrbThinking { ref result } => {
                 match result.lock().unwrap().take() {
-                    Some(Move::Place {
-                             at,
-                             formation,
-                             remove,
-                         }) => {
+                    Some(Move::Place { at, formation, remove }) => {
                         state.board_mut().set_piece_at(at, Team::SRB);
                         next = Some(PyramidStep::SrbAnimatePlace {
-                                        anim: 0,
-                                        at: at,
-                                        formation: formation,
-                                        to_remove: remove,
-                                    });
+                            anim: 0,
+                            at,
+                            formation,
+                            to_remove: remove,
+                        });
                         action.also_redraw();
                         action.also_play_sound(Sound::device_pickup())
                     }
-                    Some(Move::Jump {
-                             from,
-                             to,
-                             formation,
-                             remove,
-                         }) => {
+                    Some(Move::Jump { from, to, formation, remove }) => {
                         state.board_mut().remove_piece(from);
                         state.board_mut().set_piece_at(to, Team::SRB);
                         next = Some(PyramidStep::SrbAnimateJump {
-                                        anim: 0,
-                                        from: from,
-                                        to: to,
-                                        formation: formation,
-                                        to_remove: remove,
-                                    });
+                            anim: 0,
+                            from,
+                            to,
+                            formation,
+                            to_remove: remove,
+                        });
                         action.also_redraw();
                         action.also_play_sound(Sound::small_jump());
                     }
@@ -855,10 +875,10 @@ impl PyramidStep {
                     } else {
                         debug_assert!(!formation.is_empty());
                         next = Some(PyramidStep::SrbAnimateFormation {
-                                        anim: 0,
-                                        formation: formation.clone(),
-                                        to_remove: to_remove.clone(),
-                                    });
+                            anim: 0,
+                            formation: formation.clone(),
+                            to_remove: to_remove.clone(),
+                        });
                     }
                     action.also_play_sound(Sound::device_drop())
                 }
@@ -878,10 +898,10 @@ impl PyramidStep {
                     } else {
                         debug_assert!(!formation.is_empty());
                         next = Some(PyramidStep::SrbAnimateFormation {
-                                        anim: 0,
-                                        formation: formation.clone(),
-                                        to_remove: to_remove.clone(),
-                                    });
+                            anim: 0,
+                            formation: formation.clone(),
+                            to_remove: to_remove.clone(),
+                        });
                     }
                     action.also_play_sound(Sound::device_drop());
                 }
@@ -903,11 +923,11 @@ impl PyramidStep {
                     let from = remaining.pop().unwrap();
                     state.board_mut().remove_piece(from);
                     next = Some(PyramidStep::SrbAnimateRemove {
-                                    anim: 0,
-                                    formation: formation.clone(),
-                                    from: from,
-                                    remaining: remaining,
-                                });
+                        anim: 0,
+                        formation: formation.clone(),
+                        from,
+                        remaining,
+                    });
                     action.also_play_sound(Sound::device_pickup());
                 }
             }
@@ -927,11 +947,11 @@ impl PyramidStep {
                         let from = remaining.pop().unwrap();
                         state.board_mut().remove_piece(from);
                         next = Some(PyramidStep::SrbAnimateRemove {
-                                        anim: 0,
-                                        formation: formation.clone(),
-                                        from: from,
-                                        remaining: remaining,
-                                    });
+                            anim: 0,
+                            formation: formation.clone(),
+                            from,
+                            remaining,
+                        });
                         action.also_play_sound(Sound::device_pickup());
                     }
                 }
@@ -1029,9 +1049,8 @@ impl Element<FailureState, PyramidCmd> for PyramidView {
             }
             if let Some(team) = board.piece_at(coords) {
                 let hilight = self.hilight_override.get(&coords).cloned();
-                let team =
-                    hilight
-                        .unwrap_or_else(|| self.team_override.unwrap_or(team));
+                let team = hilight
+                    .unwrap_or_else(|| self.team_override.unwrap_or(team));
                 let mut sprite_index = match team {
                     Team::You => 1,
                     Team::SRB => 0,
@@ -1046,11 +1065,8 @@ impl Element<FailureState, PyramidCmd> for PyramidView {
         // Outline possible moves:
         for coords in self.step.possible_coords() {
             let pt = coords_to_pt(coords);
-            let index = if state.board().piece_at(coords).is_some() {
-                1
-            } else {
-                0
-            };
+            let index =
+                if state.board().piece_at(coords).is_some() { 1 } else { 0 };
             canvas.draw_sprite(&self.possible_sprites[index], pt);
         }
         // Draw animated piece (if any):
@@ -1065,8 +1081,11 @@ impl Element<FailureState, PyramidCmd> for PyramidView {
         self.draw_supply(Team::SRB, board, canvas);
     }
 
-    fn handle_event(&mut self, event: &Event, state: &mut FailureState)
-                    -> Action<PyramidCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        state: &mut FailureState,
+    ) -> Action<PyramidCmd> {
         match event {
             &Event::ClockTick => {
                 let mut action = self.step.clock_tick(state).but_no_value();
@@ -1115,9 +1134,10 @@ impl Element<FailureState, PyramidCmd> for PyramidView {
                             if possible.contains(&coords) {
                                 let mut so_far = so_far.clone();
                                 so_far.push(coords);
-                                let cmd = PyramidCmd::Remove(formation
-                                                                 .clone(),
-                                                             so_far);
+                                let cmd = PyramidCmd::Remove(
+                                    formation.clone(),
+                                    so_far,
+                                );
                                 return Action::redraw().and_return(cmd);
                             }
                         }
@@ -1133,14 +1153,19 @@ impl Element<FailureState, PyramidCmd> for PyramidView {
 
 // ========================================================================= //
 
-fn you_supply_pt() -> Point { Point::new(75, 48) }
+fn you_supply_pt() -> Point {
+    Point::new(75, 48)
+}
 
-fn srb_supply_pt() -> Point { Point::new(469, 48) }
+fn srb_supply_pt() -> Point {
+    Point::new(469, 48)
+}
 
 fn interpolate(from: Point, to: Point, anim: i32, max_anim: i32) -> Point {
     let x = from.x() + (to.x() - from.x()) * anim / max_anim;
-    let y = from.y() + (to.y() - from.y()) * anim / max_anim +
-        50 * 4 * anim * (anim - max_anim) / (max_anim * max_anim);
+    let y = from.y()
+        + (to.y() - from.y()) * anim / max_anim
+        + 50 * 4 * anim * (anim - max_anim) / (max_anim * max_anim);
     Point::new(x, y)
 }
 
@@ -1165,8 +1190,9 @@ back into your supply.
 
 $M{Tap}{Click} on a character in the scene to hear their words of wisdom.";
 
-const INFO_BOX_TEXT_3: &str = "\
-$M{Tap}{Click} on a tile to get a password hint.";
+const INFO_BOX_TEXT_3: &str =
+    "\
+     $M{Tap}{Click} on a tile to get a password hint.";
 
 // ========================================================================= //
 
@@ -1174,8 +1200,8 @@ $M{Tap}{Click} on a tile to get a password hint.";
 mod tests {
     use std::collections::HashSet;
 
-    use crate::save::Location;
     use super::DASHBOARD_CHIPS;
+    use crate::save::Location;
 
     #[test]
     fn all_puzzles_represented_on_dashboard() {
@@ -1190,9 +1216,11 @@ mod tests {
         for &(_, _, _, loc) in DASHBOARD_CHIPS {
             locations.remove(&loc);
         }
-        assert!(locations.is_empty(),
-                "Unrepresented puzzles: {:?}",
-                locations);
+        assert!(
+            locations.is_empty(),
+            "Unrepresented puzzles: {:?}",
+            locations
+        );
     }
 
     #[test]

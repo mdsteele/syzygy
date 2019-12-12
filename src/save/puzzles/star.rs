@@ -20,10 +20,10 @@
 use std::collections::HashSet;
 use toml;
 
-use crate::gui::Point;
-use crate::save::{Access, Location};
-use crate::save::util::{ACCESS_KEY, Tomlable, to_table};
 use super::PuzzleState;
+use crate::gui::Point;
+use crate::save::util::{to_table, Tomlable, ACCESS_KEY};
+use crate::save::{Access, Location};
 
 // ========================================================================= //
 
@@ -97,7 +97,9 @@ impl StarState {
         self.regenerate_columns();
     }
 
-    pub fn num_words(&self) -> i32 { WORDS.len() as i32 }
+    pub fn num_words(&self) -> i32 {
+        WORDS.len() as i32
+    }
 
     pub fn word(&self, index: i32) -> &str {
         debug_assert!(index >= 0 && index < WORDS.len() as i32);
@@ -108,23 +110,31 @@ impl StarState {
         self.found.contains(&index)
     }
 
-    pub fn num_columns(&self) -> i32 { self.columns.len() as i32 }
+    pub fn num_columns(&self) -> i32 {
+        self.columns.len() as i32
+    }
 
     pub fn column_letters(&self, index: i32) -> &[char] {
         debug_assert!(index >= 0 && index < self.columns.len() as i32);
         &self.columns[index as usize]
     }
 
-    pub fn try_remove_word(&mut self, col: i32, row: i32, dir: WordDir,
-                           length: i32)
-                           -> bool {
+    pub fn try_remove_word(
+        &mut self,
+        col: i32,
+        row: i32,
+        dir: WordDir,
+        length: i32,
+    ) -> bool {
         let mut pt = Point::new(col, row);
         let mut word = String::new();
         for _ in 0..length {
             let col = pt.x();
             let row = pt.y();
-            if col < 0 || row < 0 || col >= self.num_columns() ||
-                row >= self.column_letters(col).len() as i32
+            if col < 0
+                || row < 0
+                || col >= self.num_columns()
+                || row >= self.column_letters(col).len() as i32
             {
                 return false;
             }
@@ -164,9 +174,10 @@ impl StarState {
             let mut pt = Point::new(col, row);
             for chr in word.chars() {
                 let chr = chr.to_ascii_uppercase();
-                if pt.x() < 0 || (pt.x() as usize) >= self.columns.len() ||
-                    pt.y() < 0 ||
-                    (pt.y() as usize) > self.columns[pt.x() as usize].len()
+                if pt.x() < 0
+                    || (pt.x() as usize) >= self.columns.len()
+                    || pt.y() < 0
+                    || (pt.y() as usize) > self.columns[pt.x() as usize].len()
                 {
                     return false;
                 }
@@ -181,13 +192,21 @@ impl StarState {
 }
 
 impl PuzzleState for StarState {
-    fn location() -> Location { Location::StarCrossed }
+    fn location() -> Location {
+        Location::StarCrossed
+    }
 
-    fn access(&self) -> Access { self.access }
+    fn access(&self) -> Access {
+        self.access
+    }
 
-    fn access_mut(&mut self) -> &mut Access { &mut self.access }
+    fn access_mut(&mut self) -> &mut Access {
+        &mut self.access
+    }
 
-    fn can_reset(&self) -> bool { false }
+    fn can_reset(&self) -> bool {
+        false
+    }
 
     fn reset(&mut self) {
         self.found.clear();
@@ -218,11 +237,7 @@ impl Tomlable for StarState {
         if found.len() == WORDS.len() {
             access = Access::Solved;
         }
-        let mut state = StarState {
-            access: access,
-            found: found,
-            columns: Vec::new(),
-        };
+        let mut state = StarState { access, found, columns: Vec::new() };
         if !state.try_regenerate_columns() {
             state.reset();
         }
@@ -237,9 +252,9 @@ mod tests {
     use std::collections::{BTreeSet, HashSet};
     use toml;
 
+    use super::{StarState, WordDir, FINAL_WORD, FOUND_KEY, WORDS};
+    use crate::save::util::{Tomlable, ACCESS_KEY};
     use crate::save::{Access, PuzzleState};
-    use crate::save::util::{ACCESS_KEY, Tomlable};
-    use super::{FINAL_WORD, FOUND_KEY, StarState, WORDS, WordDir};
 
     #[test]
     fn toml_round_trip() {
@@ -271,11 +286,13 @@ mod tests {
         let state = StarState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Solved);
         assert_eq!(state.found.len(), WORDS.len());
-        assert_eq!(state.columns,
-                   FINAL_WORD
-                       .chars()
-                       .map(|chr| vec![chr])
-                       .collect::<Vec<Vec<char>>>());
+        assert_eq!(
+            state.columns,
+            FINAL_WORD
+                .chars()
+                .map(|chr| vec![chr])
+                .collect::<Vec<Vec<char>>>()
+        );
     }
 
     #[test]
@@ -299,11 +316,13 @@ mod tests {
         let state = StarState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Solved);
         assert_eq!(state.found, found);
-        assert_eq!(state.columns,
-                   FINAL_WORD
-                       .chars()
-                       .map(|chr| vec![chr])
-                       .collect::<Vec<Vec<char>>>());
+        assert_eq!(
+            state.columns,
+            FINAL_WORD
+                .chars()
+                .map(|chr| vec![chr])
+                .collect::<Vec<Vec<char>>>()
+        );
     }
 
     #[test]
@@ -336,11 +355,13 @@ mod tests {
                 row += word.len() as i32 - 1;
             }
             assert!(!state.is_solved());
-            assert!(state.try_remove_word(col, row, dir, word.len() as i32),
-                    "Could not remove {} from ({}, {})",
-                    word,
-                    col,
-                    row);
+            assert!(
+                state.try_remove_word(col, row, dir, word.len() as i32),
+                "Could not remove {} from ({}, {})",
+                word,
+                col,
+                row
+            );
         }
         assert!(state.is_solved());
     }
@@ -374,24 +395,33 @@ mod tests {
                             if (col, row, dir, length) == correct_tuple {
                                 continue;
                             }
-                            assert!(!state.try_remove_word(col, row, dir,
-                                                           length),
-                                    "Removed ({}, {}, {:?}, {}) on step {}",
-                                    col, row, dir, length, i);
+                            assert!(
+                                !state.try_remove_word(col, row, dir, length),
+                                "Removed ({}, {}, {:?}, {}) on step {}",
+                                col,
+                                row,
+                                dir,
+                                length,
+                                i
+                            );
                             assert!(!state.is_solved());
                         }
                     }
                 }
             }
             // Now remove the correct word.
-            assert!(state.try_remove_word(correct_col,
-                                          correct_row,
-                                          correct_dir,
-                                          correct_length),
-                    "Could not remove {} from ({}, {})",
-                    correct_word,
+            assert!(
+                state.try_remove_word(
                     correct_col,
-                    correct_row);
+                    correct_row,
+                    correct_dir,
+                    correct_length
+                ),
+                "Could not remove {} from ({}, {})",
+                correct_word,
+                correct_col,
+                correct_row
+            );
         }
         assert!(state.is_solved());
     }

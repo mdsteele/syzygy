@@ -17,12 +17,12 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
+use super::scenes;
 use crate::elements::lasers::{DangerSign, LaserCmd, LaserField};
+use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
 use crate::gui::{Action, Canvas, Element, Event, Rect, Resources};
 use crate::modes::SOLVED_INFO_TEXT;
 use crate::save::{DotsState, Game, PuzzleState};
-use super::scenes;
 
 // ========================================================================= //
 
@@ -34,8 +34,11 @@ pub struct View {
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect, state: &DotsState)
-               -> View {
+    pub fn new(
+        resources: &mut Resources,
+        visible: Rect,
+        state: &DotsState,
+    ) -> View {
         let mut core = {
             let fade = (FadeStyle::LeftToRight, FadeStyle::LeftToRight);
             let intro = scenes::compile_intro_scene(resources);
@@ -44,12 +47,14 @@ impl View {
         };
         core.add_extra_scene(scenes::compile_mezure_midscene(resources));
         View {
-            core: core,
+            core,
             laser_field: LaserField::new(resources, 168, 152, state.grid()),
-            danger_sign: DangerSign::new(resources,
-                                         (272, 208),
-                                         "WARNING",
-                                         "SERIOUS AMPERAGE"),
+            danger_sign: DangerSign::new(
+                resources,
+                (272, 208),
+                "WARNING",
+                "SERIOUS AMPERAGE",
+            ),
             box_open: false,
         }
     }
@@ -68,15 +73,19 @@ impl Element<Game, PuzzleCmd> for View {
         self.core.draw_front_layer(canvas, state);
     }
 
-    fn handle_event(&mut self, event: &Event, game: &mut Game)
-                    -> Action<PuzzleCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        game: &mut Game,
+    ) -> Action<PuzzleCmd> {
         let state = &mut game.connect_the_dots;
         let mut action = self.core.handle_event(event, state);
-        if !action.should_stop() && self.box_open &&
-            (event == &Event::ClockTick || !state.is_solved())
+        if !action.should_stop()
+            && self.box_open
+            && (event == &Event::ClockTick || !state.is_solved())
         {
-            let subaction = self.laser_field
-                .handle_event(event, state.grid_mut());
+            let subaction =
+                self.laser_field.handle_event(event, state.grid_mut());
             if let Some(&cmd) = subaction.value() {
                 if self.laser_field.all_detectors_satisfied(state.grid()) {
                     state.mark_solved();

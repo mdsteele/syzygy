@@ -29,8 +29,9 @@ const PYRAMID_BOTTOM_ROW_TOP: i32 = 288;
 const PYRAMID_BOTTOM: i32 = PYRAMID_BOTTOM_ROW_TOP + PYRAMID_TILE_SIZE;
 
 pub fn coords_to_pt(coords: Coords) -> Point {
-    let left = PYRAMID_BOTTOM_ROW_LEFT + PYRAMID_TILE_SIZE * coords.col() +
-        (PYRAMID_TILE_SIZE / 2) * coords.row();
+    let left = PYRAMID_BOTTOM_ROW_LEFT
+        + PYRAMID_TILE_SIZE * coords.col()
+        + (PYRAMID_TILE_SIZE / 2) * coords.row();
     let top = PYRAMID_BOTTOM_ROW_TOP - PYRAMID_TILE_SIZE * coords.row();
     Point::new(left, top)
 }

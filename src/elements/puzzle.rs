@@ -19,7 +19,9 @@
 
 use std::collections::HashMap;
 
-use crate::elements::{FadeStyle, Hud, HudCmd, HudInput, Scene, ScreenFade, Theater};
+use crate::elements::{
+    FadeStyle, Hud, HudCmd, HudInput, Scene, ScreenFade, Theater,
+};
 use crate::gui::{Action, Canvas, Element, Event, Rect, Resources};
 use crate::save::{Access, Game, Location, PuzzleState};
 
@@ -69,11 +71,14 @@ pub struct PuzzleCore<U> {
 }
 
 impl<U: Clone> PuzzleCore<U> {
-    pub fn new<S: PuzzleState>(resources: &mut Resources, visible: Rect,
-                               state: &S, fade: (FadeStyle, FadeStyle),
-                               mut intro_scene: Scene,
-                               mut outro_scene: Scene)
-                               -> PuzzleCore<U> {
+    pub fn new<S: PuzzleState>(
+        resources: &mut Resources,
+        visible: Rect,
+        state: &S,
+        fade: (FadeStyle, FadeStyle),
+        mut intro_scene: Scene,
+        mut outro_scene: Scene,
+    ) -> PuzzleCore<U> {
         let mut theater = Theater::new();
         if state.is_visited() {
             intro_scene.skip(&mut theater);
@@ -84,10 +89,10 @@ impl<U: Clone> PuzzleCore<U> {
             intro_scene.begin(&mut theater);
         }
         PuzzleCore {
-            theater: theater,
-            intro_scene: intro_scene,
+            theater,
+            intro_scene,
             middle_scene: None,
-            outro_scene: outro_scene,
+            outro_scene,
             extra_scenes: HashMap::new(),
             hud: Hud::new(resources, visible, S::location()),
             screen_fade: ScreenFade::new(resources, fade.0, fade.1),
@@ -97,11 +102,17 @@ impl<U: Clone> PuzzleCore<U> {
         }
     }
 
-    pub fn flash_info_button(&mut self) { self.hud.flash_info_button(); }
+    pub fn flash_info_button(&mut self) {
+        self.hud.flash_info_button();
+    }
 
-    pub fn theater(&self) -> &Theater { &self.theater }
+    pub fn theater(&self) -> &Theater {
+        &self.theater
+    }
 
-    pub fn theater_mut(&mut self) -> &mut Theater { &mut self.theater }
+    pub fn theater_mut(&mut self) -> &mut Theater {
+        &mut self.theater
+    }
 
     pub fn drain_queue(&mut self) -> Vec<(i32, i32)> {
         self.theater.drain_queue()
@@ -178,8 +189,8 @@ impl<U: Clone> PuzzleCore<U> {
         };
         let mut can_reset = state.can_reset();
         if !can_reset && state.allow_reset_for_undo_redo() {
-            can_reset = !self.undo_stack.is_empty() ||
-                !self.redo_stack.is_empty();
+            can_reset =
+                !self.undo_stack.is_empty() || !self.redo_stack.is_empty();
         }
         HudInput {
             name: S::location().name(),
@@ -189,7 +200,7 @@ impl<U: Clone> PuzzleCore<U> {
             active: self.screen_fade.is_transparent() && scene.is_finished(),
             can_undo: !self.undo_stack.is_empty(),
             can_redo: !self.redo_stack.is_empty(),
-            can_reset: can_reset,
+            can_reset,
         }
     }
 
@@ -210,16 +221,21 @@ impl<U: Clone> PuzzleCore<U> {
         self.theater.draw_foreground(canvas);
     }
 
-    pub fn draw_front_layer<S: PuzzleState>(&self, canvas: &mut Canvas,
-                                            state: &S) {
+    pub fn draw_front_layer<S: PuzzleState>(
+        &self,
+        canvas: &mut Canvas,
+        state: &S,
+    ) {
         self.theater.draw_speech_bubbles(canvas);
         self.hud.draw(&self.hud_input(state), canvas);
         self.screen_fade.draw(&(), canvas);
     }
 
-    pub fn handle_event<S: PuzzleState>(&mut self, event: &Event,
-                                        state: &mut S)
-                                        -> Action<PuzzleCmd> {
+    pub fn handle_event<S: PuzzleState>(
+        &mut self,
+        event: &Event,
+        state: &mut S,
+    ) -> Action<PuzzleCmd> {
         let mut action = self.screen_fade.handle_event(event, &mut ());
         if event == &Event::ClockTick {
             if self.theater.tick_animations() {
@@ -269,16 +285,18 @@ impl<U: Clone> PuzzleCore<U> {
             if self.intro_scene.is_finished() {
                 state.visit();
             }
-            if self.middle_scene
+            if self
+                .middle_scene
                 .as_ref()
                 .map(Scene::is_finished)
                 .unwrap_or(false)
             {
                 self.middle_scene = None;
             }
-            if !self.previously_solved && self.outro_scene.is_finished() &&
-                self.screen_fade.is_transparent() &&
-                S::location() != Location::Finale
+            if !self.previously_solved
+                && self.outro_scene.is_finished()
+                && self.screen_fade.is_transparent()
+                && S::location() != Location::Finale
             {
                 self.screen_fade.fade_out_and_return(PuzzleCmd::Next);
             }

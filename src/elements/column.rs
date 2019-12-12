@@ -22,7 +22,9 @@ use std::cmp;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use crate::gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources};
+use crate::gui::{
+    Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
+};
 use crate::save::column::Columns;
 
 // ========================================================================= //
@@ -42,14 +44,17 @@ pub struct ColumnsView {
 }
 
 impl ColumnsView {
-    pub fn new(resources: &mut Resources, left: i32, top: i32,
-               row_spacing: i32)
-               -> ColumnsView {
+    pub fn new(
+        resources: &mut Resources,
+        left: i32,
+        top: i32,
+        row_spacing: i32,
+    ) -> ColumnsView {
         ColumnsView {
             font: resources.get_font("block"),
-            left: left,
-            top: top,
-            row_spacing: row_spacing,
+            left,
+            top,
+            row_spacing,
             hilights: HashMap::new(),
             adjust: HashMap::new(),
             drag: None,
@@ -64,7 +69,9 @@ impl ColumnsView {
         self.hilights.remove(&col);
     }
 
-    pub fn clear_drag(&mut self) { self.drag = None; }
+    pub fn clear_drag(&mut self) {
+        self.drag = None;
+    }
 
     fn column_rect(&self, columns: &Columns, col: usize) -> Rect {
         let mut left = self.left + 32 * col as i32;
@@ -99,18 +106,16 @@ impl Element<Columns, (usize, i32)> for ColumnsView {
             canvas.clear((0, 0, 0));
             let hilight_color =
                 self.hilights.get(&col).cloned().unwrap_or((63, 31, 63));
-            let hilight_rect = Rect::new(0,
-                                         -BOX_SIZE *
-                                             columns.column_offset(col),
-                                         BOX_USIZE,
-                                         BOX_USIZE);
+            let hilight_rect = Rect::new(
+                0,
+                -BOX_SIZE * columns.column_offset(col),
+                BOX_USIZE,
+                BOX_USIZE,
+            );
             canvas.fill_rect(hilight_color, hilight_rect);
             let height = canvas.height() as i32;
             let offset = mod_floor(self.column_scroll(columns, col), height);
-            for (index, &chr) in columns
-                .column_letters(col)
-                .iter()
-                .enumerate()
+            for (index, &chr) in columns.column_letters(col).iter().enumerate()
             {
                 let top = BOX_SIZE * index as i32 + offset;
                 let pt = Point::new(BOX_SIZE / 2, top + BOX_SIZE - 3);
@@ -123,8 +128,11 @@ impl Element<Columns, (usize, i32)> for ColumnsView {
         }
     }
 
-    fn handle_event(&mut self, event: &Event, columns: &mut Columns)
-                    -> Action<(usize, i32)> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        columns: &mut Columns,
+    ) -> Action<(usize, i32)> {
         match event {
             &Event::ClockTick => {
                 let any_adjustments = !self.adjust.is_empty();
@@ -146,8 +154,8 @@ impl Element<Columns, (usize, i32)> for ColumnsView {
             }
             &Event::MouseDown(pt) => {
                 for col in 0..columns.num_columns() {
-                    if self.column_rect(columns, col).contains_point(pt) &&
-                        !columns.column_linkages(col).is_empty()
+                    if self.column_rect(columns, col).contains_point(pt)
+                        && !columns.column_linkages(col).is_empty()
                     {
                         self.drag = Some((col, pt.y(), pt.y()));
                         return Action::redraw();

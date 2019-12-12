@@ -49,9 +49,12 @@ pub struct Paragraph {
 }
 
 impl Paragraph {
-    pub fn new(resources: &mut Resources, init_font: &str,
-               init_align: Align, text: &str)
-               -> Paragraph {
+    pub fn new(
+        resources: &mut Resources,
+        init_font: &str,
+        init_align: Align,
+        text: &str,
+    ) -> Paragraph {
         let mut parser = Parser::new(resources, init_font, init_align);
         let mut chars = text.chars();
         while let Some(chr) = chars.next() {
@@ -67,8 +70,7 @@ impl Paragraph {
                     Some('M') => {
                         let mobile = parse_arg(&mut chars);
                         let desktop = parse_arg(&mut chars);
-                        if cfg!(any(target_os = "android",
-                                    target_os = "ios"))
+                        if cfg!(any(target_os = "android", target_os = "ios"))
                         {
                             parser.push_str(&mobile);
                         } else {
@@ -124,11 +126,7 @@ struct Line {
 
 impl Line {
     fn new() -> Line {
-        Line {
-            left: Vec::new(),
-            center: Vec::new(),
-            right: Vec::new(),
-        }
+        Line { left: Vec::new(), center: Vec::new(), right: Vec::new() }
     }
 
     fn is_empty(&self) -> bool {
@@ -164,9 +162,10 @@ impl Line {
             .chain(self.center.iter())
             .chain(self.right.iter())
         {
-            height = cmp::max(height,
-                              (baseline - piece.baseline()) as u32 +
-                                  piece.height());
+            height = cmp::max(
+                height,
+                (baseline - piece.baseline()) as u32 + piece.height(),
+            );
         }
         height
     }
@@ -209,17 +208,25 @@ struct Piece {
 }
 
 impl Piece {
-    fn baseline(&self) -> i32 { self.font.baseline() }
+    fn baseline(&self) -> i32 {
+        self.font.baseline()
+    }
 
-    fn width(&self) -> i32 { self.font.text_width(&self.text) }
+    fn width(&self) -> i32 {
+        self.font.text_width(&self.text)
+    }
 
-    fn height(&self) -> u32 { self.font.height() }
+    fn height(&self) -> u32 {
+        self.font.height()
+    }
 
     fn draw(&self, canvas: &mut Canvas, left: i32, baseline: i32) {
-        canvas.draw_text(&self.font,
-                         Align::Left,
-                         Point::new(left, baseline),
-                         &self.text);
+        canvas.draw_text(
+            &self.font,
+            Align::Left,
+            Point::new(left, baseline),
+            &self.text,
+        );
     }
 }
 
@@ -235,10 +242,13 @@ struct Parser<'a, 'b: 'a> {
 }
 
 impl<'a, 'b> Parser<'a, 'b> {
-    fn new(resources: &'a mut Resources<'b>, font: &str, align: Align)
-           -> Parser<'a, 'b> {
+    fn new(
+        resources: &'a mut Resources<'b>,
+        font: &str,
+        align: Align,
+    ) -> Parser<'a, 'b> {
         Parser {
-            resources: resources,
+            resources,
             current_font: font.to_string(),
             current_align: align,
             current_line: Line::new(),
@@ -247,7 +257,9 @@ impl<'a, 'b> Parser<'a, 'b> {
         }
     }
 
-    fn push(&mut self, chr: char) { self.current_piece.push(chr); }
+    fn push(&mut self, chr: char) {
+        self.current_piece.push(chr);
+    }
 
     fn push_str(&mut self, string: &str) {
         self.current_piece.push_str(string);
@@ -280,7 +292,7 @@ impl<'a, 'b> Parser<'a, 'b> {
             mem::swap(&mut text, &mut self.current_piece);
             let piece = Piece {
                 font: self.resources.get_font(&self.current_font),
-                text: text,
+                text,
             };
             let pieces = match self.current_align {
                 Align::Left => &mut self.current_line.left,

@@ -20,8 +20,8 @@
 use num_integer::mod_floor;
 use toml;
 
-use crate::save::Direction;
 use crate::save::util::Tomlable;
+use crate::save::Direction;
 
 // ========================================================================= //
 
@@ -33,13 +33,12 @@ pub struct Transform {
 
 impl Transform {
     fn new(rotated_cw: i32, mirrored: bool) -> Transform {
-        Transform {
-            rotated_cw: mod_floor(rotated_cw, 4),
-            mirrored: mirrored,
-        }
+        Transform { rotated_cw: mod_floor(rotated_cw, 4), mirrored }
     }
 
-    pub fn identity() -> Transform { Transform::new(0, false) }
+    pub fn identity() -> Transform {
+        Transform::new(0, false)
+    }
 
     pub fn rotated_cw(self) -> Transform {
         Transform::new(self.rotated_cw + 1, self.mirrored)
@@ -89,9 +88,13 @@ impl Transform {
         mirrored ^ self.mirrored
     }
 
-    pub fn degrees(self) -> i32 { self.rotated_cw * 90 }
+    pub fn degrees(self) -> i32 {
+        self.rotated_cw * 90
+    }
 
-    pub fn is_mirrored(self) -> bool { self.mirrored }
+    pub fn is_mirrored(self) -> bool {
+        self.mirrored
+    }
 
     #[cfg(test)]
     pub fn all() -> Vec<Transform> {
@@ -138,9 +141,9 @@ impl Tomlable for Transform {
 
 #[cfg(test)]
 mod tests {
-    use crate::save::Direction;
-    use crate::save::util::Tomlable;
     use super::Transform;
+    use crate::save::util::Tomlable;
+    use crate::save::Direction;
 
     #[test]
     fn toml_round_trip() {
@@ -172,16 +175,20 @@ mod tests {
     fn compose_with_inverse() {
         for transform in Transform::all() {
             let inverse = transform.inverse();
-            assert_eq!(transform.compose(inverse),
-                       Transform::identity(),
-                       "{:?} compose {:?}",
-                       transform,
-                       inverse);
-            assert_eq!(inverse.compose(transform),
-                       Transform::identity(),
-                       "{:?} compose {:?}",
-                       inverse,
-                       transform);
+            assert_eq!(
+                transform.compose(inverse),
+                Transform::identity(),
+                "{:?} compose {:?}",
+                transform,
+                inverse
+            );
+            assert_eq!(
+                inverse.compose(transform),
+                Transform::identity(),
+                "{:?} compose {:?}",
+                inverse,
+                transform
+            );
         }
     }
 
@@ -190,12 +197,14 @@ mod tests {
         for transform in Transform::all() {
             assert_eq!(transform.flipped_vert().flipped_vert(), transform);
             assert_eq!(transform.flipped_horz().flipped_horz(), transform);
-            assert_eq!(transform
-                           .flipped_vert()
-                           .rotated_cw()
-                           .rotated_cw()
-                           .flipped_horz(),
-                       transform);
+            assert_eq!(
+                transform
+                    .flipped_vert()
+                    .rotated_cw()
+                    .rotated_cw()
+                    .flipped_horz(),
+                transform
+            );
         }
     }
 }

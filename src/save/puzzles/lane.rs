@@ -20,10 +20,10 @@
 use std::cmp::min;
 use toml;
 
-use crate::save::{Access, Location};
-use crate::save::memory::{Grid, Shape};
-use crate::save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
 use super::PuzzleState;
+use crate::save::memory::{Grid, Shape};
+use crate::save::util::{pop_array, to_table, Tomlable, ACCESS_KEY};
+use crate::save::{Access, Location};
 
 // ========================================================================= //
 
@@ -80,13 +80,21 @@ impl LaneState {
         self.stage = STAGES.len();
     }
 
-    pub fn total_num_stages(&self) -> usize { STAGES.len() }
+    pub fn total_num_stages(&self) -> usize {
+        STAGES.len()
+    }
 
-    pub fn current_stage(&self) -> usize { self.stage }
+    pub fn current_stage(&self) -> usize {
+        self.stage
+    }
 
-    pub fn grid(&self) -> &Grid { &self.grid }
+    pub fn grid(&self) -> &Grid {
+        &self.grid
+    }
 
-    pub fn grid_mut(&mut self) -> &mut Grid { &mut self.grid }
+    pub fn grid_mut(&mut self) -> &mut Grid {
+        &mut self.grid
+    }
 
     pub fn next_shape(&self) -> Option<Shape> {
         if self.stage < STAGES.len() {
@@ -149,13 +157,21 @@ impl LaneState {
 }
 
 impl PuzzleState for LaneState {
-    fn location() -> Location { Location::MemoryLane }
+    fn location() -> Location {
+        Location::MemoryLane
+    }
 
-    fn access(&self) -> Access { self.access }
+    fn access(&self) -> Access {
+        self.access
+    }
 
-    fn access_mut(&mut self) -> &mut Access { &mut self.access }
+    fn access_mut(&mut self) -> &mut Access {
+        &mut self.access
+    }
 
-    fn can_reset(&self) -> bool { self.stage > 0 }
+    fn can_reset(&self) -> bool {
+        self.stage > 0
+    }
 
     fn reset(&mut self) {
         self.grid.clear();
@@ -168,8 +184,10 @@ impl Tomlable for LaneState {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.access.is_solved() {
-            table.insert(STAGE_KEY.to_string(),
-                         toml::Value::Integer(self.stage as i64));
+            table.insert(
+                STAGE_KEY.to_string(),
+                toml::Value::Integer(self.stage as i64),
+            );
             table.insert(GRID_KEY.to_string(), self.grid.to_toml());
         }
         toml::Value::Table(table)
@@ -181,17 +199,17 @@ impl Tomlable for LaneState {
         let stage = if access.is_solved() {
             STAGES.len()
         } else {
-            min(u32::pop_from_table(&mut table, STAGE_KEY) as usize,
-                STAGES.len() - 1)
+            min(
+                u32::pop_from_table(&mut table, STAGE_KEY) as usize,
+                STAGES.len() - 1,
+            )
         };
-        let grid = Grid::from_toml(NUM_COLS,
-                                   NUM_ROWS,
-                                   pop_array(&mut table, GRID_KEY));
-        LaneState {
-            access: access,
-            grid: grid,
-            stage: stage,
-        }
+        let grid = Grid::from_toml(
+            NUM_COLS,
+            NUM_ROWS,
+            pop_array(&mut table, GRID_KEY),
+        );
+        LaneState { access, grid, stage }
     }
 }
 
@@ -202,9 +220,9 @@ mod tests {
     use std::collections::HashSet;
     use toml;
 
+    use super::{LaneState, Stage, NUM_SYMBOLS, STAGES, STAGE_KEY};
+    use crate::save::util::{Tomlable, ACCESS_KEY};
     use crate::save::{Access, PuzzleState};
-    use crate::save::util::{ACCESS_KEY, Tomlable};
-    use super::{LaneState, NUM_SYMBOLS, STAGES, STAGE_KEY, Stage};
 
     #[test]
     fn stages_are_well_formed() {
@@ -222,17 +240,21 @@ mod tests {
                 }
                 &Stage::Remove(symbol) => {
                     assert!(symbol > 0 && symbol as i32 <= NUM_SYMBOLS);
-                    assert!(symbols_on_board.contains(&symbol),
-                            "Stage {} frees {}, but it's not on the board.",
-                            index,
-                            symbol);
+                    assert!(
+                        symbols_on_board.contains(&symbol),
+                        "Stage {} frees {}, but it's not on the board.",
+                        index,
+                        symbol
+                    );
                     symbols_on_board.remove(&symbol);
                 }
             }
         }
-        assert!(symbols_on_board.is_empty(),
-                "At the end of the puzzle, {:?} are still on the board.",
-                symbols_on_board);
+        assert!(
+            symbols_on_board.is_empty(),
+            "At the end of the puzzle, {:?} are still on the board.",
+            symbols_on_board
+        );
     }
 
     #[test]

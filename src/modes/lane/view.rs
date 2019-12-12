@@ -17,14 +17,17 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use crate::elements::{FadeStyle, Paragraph, ProgressBar, PuzzleCmd, PuzzleCore,
-               PuzzleView};
-use crate::elements::memory::{FLIP_SLOWDOWN, MemoryGridView, NextShapeView};
-use crate::gui::{Action, Align, Canvas, Element, Event, Point, Rect, Resources,
-          Sound, Sprite};
+use super::scenes;
+use crate::elements::memory::{MemoryGridView, NextShapeView, FLIP_SLOWDOWN};
+use crate::elements::{
+    FadeStyle, Paragraph, ProgressBar, PuzzleCmd, PuzzleCore, PuzzleView,
+};
+use crate::gui::{
+    Action, Align, Canvas, Element, Event, Point, Rect, Resources, Sound,
+    Sprite,
+};
 use crate::modes::SOLVED_INFO_TEXT;
 use crate::save::{Direction, Game, LaneState, PuzzleState};
-use super::scenes;
 
 // ========================================================================= //
 
@@ -46,8 +49,11 @@ pub struct View {
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect, state: &LaneState)
-               -> View {
+    pub fn new(
+        resources: &mut Resources,
+        visible: Rect,
+        state: &LaneState,
+    ) -> View {
         let mut core = {
             let fade = (FadeStyle::LeftToRight, FadeStyle::LeftToRight);
             let intro = scenes::compile_intro_scene(resources);
@@ -57,17 +63,21 @@ impl View {
         core.add_extra_scene(scenes::compile_argony_midscene(resources));
         core.add_extra_scene(scenes::compile_ugrent_midscene(resources));
         View {
-            core: core,
-            grid: MemoryGridView::new(resources,
-                                      "memory/lane",
-                                      (208, 64),
-                                      state.grid()),
+            core,
+            grid: MemoryGridView::new(
+                resources,
+                "memory/lane",
+                (208, 64),
+                state.grid(),
+            ),
             next: NextShapeView::new(resources, "memory/lane", (96, 64)),
             free: FreeSymbolView::new(resources, (448, 112)),
-            progress: ProgressBar::new((112, 176),
-                                       Direction::East,
-                                       80,
-                                       (191, 191, 0)),
+            progress: ProgressBar::new(
+                (112, 176),
+                Direction::East,
+                80,
+                (191, 191, 0),
+            ),
             progress_adjust: 0,
             prompt: PromptView::new(resources),
             remove_countdown: 0,
@@ -87,8 +97,9 @@ impl Element<Game, PuzzleCmd> for View {
         }
         self.free.draw(state, canvas);
         self.grid.draw(state.grid(), canvas);
-        if self.show_next && self.remove_countdown == 0 &&
-            !self.next.is_dragging()
+        if self.show_next
+            && self.remove_countdown == 0
+            && !self.next.is_dragging()
         {
             self.prompt.draw(state, canvas);
         }
@@ -99,8 +110,11 @@ impl Element<Game, PuzzleCmd> for View {
         self.core.draw_front_layer(canvas, state);
     }
 
-    fn handle_event(&mut self, event: &Event, game: &mut Game)
-                    -> Action<PuzzleCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        game: &mut Game,
+    ) -> Action<PuzzleCmd> {
         let state = &mut game.memory_lane;
         let mut action = self.core.handle_event(event, state);
         if event == &Event::ClockTick && self.remove_countdown > 0 {
@@ -127,8 +141,8 @@ impl Element<Game, PuzzleCmd> for View {
             }
         }
         if !action.should_stop() {
-            let subaction = self.next
-                .handle_event(event, &mut state.next_shape());
+            let subaction =
+                self.next.handle_event(event, &mut state.next_shape());
             if let Some(&pt) = subaction.value() {
                 let (col, row) = self.grid.coords_for_point(pt);
                 if let Some(symbol) = state.try_place_shape(col, row) {
@@ -138,8 +152,8 @@ impl Element<Game, PuzzleCmd> for View {
             }
             action.merge(subaction.but_no_value());
         }
-        if (!action.should_stop() && self.remove_countdown == 0) ||
-            event == &Event::ClockTick
+        if (!action.should_stop() && self.remove_countdown == 0)
+            || event == &Event::ClockTick
         {
             let subaction = self.grid.handle_event(event, state.grid_mut());
             if let Some(&symbol) = subaction.value() {
@@ -236,14 +250,18 @@ struct PromptView {
 impl PromptView {
     fn new(resources: &mut Resources) -> PromptView {
         PromptView {
-            place: Paragraph::new(resources,
-                                  "roman",
-                                  Align::Center,
-                                  PLACE_PROMPT),
-            remove: Paragraph::new(resources,
-                                   "roman",
-                                   Align::Center,
-                                   REMOVE_PROMPT),
+            place: Paragraph::new(
+                resources,
+                "roman",
+                Align::Center,
+                PLACE_PROMPT,
+            ),
+            remove: Paragraph::new(
+                resources,
+                "roman",
+                Align::Center,
+                REMOVE_PROMPT,
+            ),
         }
     }
 

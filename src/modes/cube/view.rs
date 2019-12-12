@@ -20,12 +20,14 @@
 use std::collections::HashMap;
 use std::rc::Rc;
 
+use super::scenes;
 use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
-use crate::gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
-          Resources, Sprite};
+use crate::gui::{
+    Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
+    Sprite,
+};
 use crate::modes::SOLVED_INFO_TEXT;
 use crate::save::{CubeState, Direction, Game, PuzzleState};
-use super::scenes;
 
 // ========================================================================= //
 
@@ -36,8 +38,11 @@ pub struct View {
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect, state: &CubeState)
-               -> View {
+    pub fn new(
+        resources: &mut Resources,
+        visible: Rect,
+        state: &CubeState,
+    ) -> View {
         let mut core = {
             let fade = (FadeStyle::BottomToTop, FadeStyle::LeftToRight);
             let intro = scenes::compile_intro_scene(resources);
@@ -46,7 +51,7 @@ impl View {
         };
         core.add_extra_scene(scenes::compile_elinsa_midscene(resources));
         View {
-            core: core,
+            core,
             grid: CubeGrid::new(resources, 232, 72),
             solution: SolutionDisplay::new(resources),
         }
@@ -63,8 +68,11 @@ impl Element<Game, PuzzleCmd> for View {
         self.core.draw_front_layer(canvas, state);
     }
 
-    fn handle_event(&mut self, event: &Event, game: &mut Game)
-                    -> Action<PuzzleCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        game: &mut Game,
+    ) -> Action<PuzzleCmd> {
         let state = &mut game.cube_tangle;
         let mut action = self.core.handle_event(event, state);
         if !action.should_stop() {
@@ -157,14 +165,12 @@ struct Drag {
 
 impl Drag {
     pub fn new(start: Point) -> Drag {
-        Drag {
-            from: start,
-            to: start,
-            accum: None,
-        }
+        Drag { from: start, to: start, accum: None }
     }
 
-    pub fn accum(self) -> Option<(Direction, i32, i32)> { self.accum }
+    pub fn accum(self) -> Option<(Direction, i32, i32)> {
+        self.accum
+    }
 
     pub fn set_to(&mut self, to: Point) -> Option<(Direction, i32, i32)> {
         self.to = to;
@@ -243,8 +249,8 @@ struct CubeGrid {
 impl CubeGrid {
     fn new(resources: &mut Resources, left: i32, top: i32) -> CubeGrid {
         CubeGrid {
-            left: left,
-            top: top,
+            left,
+            top,
             cubes: resources.get_sprites("tangle/cubes"),
             faces: resources.get_sprites("tangle/faces"),
             drag: None,
@@ -279,8 +285,10 @@ impl Element<CubeState, (Direction, i32, i32)> for CubeGrid {
     fn draw(&self, state: &CubeState, canvas: &mut Canvas) {
         for row in 0..4 {
             for col in 0..4 {
-                let pt = Point::new(self.left + col * CUBE_SIZE,
-                                    self.top + row * CUBE_SIZE);
+                let pt = Point::new(
+                    self.left + col * CUBE_SIZE,
+                    self.top + row * CUBE_SIZE,
+                );
                 let (fr, rt, bt) = state.faces_at(col, row);
                 if let Some(dir) = self.tilt_dir_for(col, row) {
                     if dir.is_vertical() {
@@ -310,10 +318,12 @@ impl Element<CubeState, (Direction, i32, i32)> for CubeGrid {
                 } else {
                     canvas.draw_sprite(&self.cubes[0], pt);
                     if let Some(&chr) = self.letters.get(&(col, row)) {
-                        canvas.draw_char(&self.font,
-                                         Align::Center,
-                                         pt + Point::new(14, 18),
-                                         chr);
+                        canvas.draw_char(
+                            &self.font,
+                            Align::Center,
+                            pt + Point::new(14, 18),
+                            chr,
+                        );
                     } else {
                         canvas.draw_sprite(&self.faces[fr], pt);
                     }
@@ -326,8 +336,11 @@ impl Element<CubeState, (Direction, i32, i32)> for CubeGrid {
         }
     }
 
-    fn handle_event(&mut self, event: &Event, state: &mut CubeState)
-                    -> Action<(Direction, i32, i32)> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        state: &mut CubeState,
+    ) -> Action<(Direction, i32, i32)> {
         let rect = self.rect();
         match event {
             &Event::MouseDown(pt) if !state.is_solved() => {
@@ -402,17 +415,19 @@ impl SolutionDisplay {
 
 impl Element<CubeState, PuzzleCmd> for SolutionDisplay {
     fn draw(&self, _state: &CubeState, canvas: &mut Canvas) {
-        let index = if self.anim > 0 {
-            ((self.anim / 2) % 3) + 3
-        } else {
-            self.index
-        };
-        canvas.draw_sprite(&self.sprites[index],
-                           Point::new(SOLUTION_LEFT, SOLUTION_TOP));
+        let index =
+            if self.anim > 0 { ((self.anim / 2) % 3) + 3 } else { self.index };
+        canvas.draw_sprite(
+            &self.sprites[index],
+            Point::new(SOLUTION_LEFT, SOLUTION_TOP),
+        );
     }
 
-    fn handle_event(&mut self, event: &Event, _state: &mut CubeState)
-                    -> Action<PuzzleCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        _state: &mut CubeState,
+    ) -> Action<PuzzleCmd> {
         match event {
             &Event::ClockTick => {
                 if self.anim > 0 {

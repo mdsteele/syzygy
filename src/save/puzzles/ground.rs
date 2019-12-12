@@ -20,9 +20,9 @@
 use std::cmp;
 use toml;
 
-use crate::save::{Access, Location};
-use crate::save::util::{ACCESS_KEY, Tomlable, to_table};
 use super::PuzzleState;
+use crate::save::util::{to_table, Tomlable, ACCESS_KEY};
+use crate::save::{Access, Location};
 
 // ========================================================================= //
 
@@ -53,9 +53,13 @@ impl GroundState {
         self.is_initial = false;
     }
 
-    pub fn num_rows() -> i32 { NUM_ROWS }
+    pub fn num_rows() -> i32 {
+        NUM_ROWS
+    }
 
-    pub fn max_position() -> i32 { MAX_POSITION }
+    pub fn max_position() -> i32 {
+        MAX_POSITION
+    }
 
     pub fn get_position(&self, row: i32) -> i32 {
         assert!(row >= 0 && row < NUM_ROWS);
@@ -66,17 +70,19 @@ impl GroundState {
         assert!(row >= 0 && row < NUM_ROWS);
         assert!(pos >= 0 && pos <= MAX_POSITION);
         self.positions[row as usize] = pos;
-        self.is_initial = self.elinsa_row == INITIAL_ELINSA_ROW &&
-            &self.positions as &[i32] == INITIAL_POSITIONS;
+        self.is_initial = self.elinsa_row == INITIAL_ELINSA_ROW
+            && &self.positions as &[i32] == INITIAL_POSITIONS;
     }
 
-    pub fn get_elinsa_row(&self) -> i32 { self.elinsa_row }
+    pub fn get_elinsa_row(&self) -> i32 {
+        self.elinsa_row
+    }
 
     pub fn set_elinsa_row(&mut self, row: i32) {
         assert!(row >= MIN_ELINSA_ROW && row <= MAX_ELINSA_ROW);
         self.elinsa_row = row;
-        self.is_initial = self.elinsa_row == INITIAL_ELINSA_ROW &&
-            &self.positions as &[i32] == INITIAL_POSITIONS;
+        self.is_initial = self.elinsa_row == INITIAL_ELINSA_ROW
+            && &self.positions as &[i32] == INITIAL_POSITIONS;
         if self.elinsa_row == MIN_ELINSA_ROW {
             self.access = Access::Solved;
         }
@@ -85,8 +91,8 @@ impl GroundState {
     pub fn fall_from(&self, mut row: i32, pos: i32) -> i32 {
         row += 1;
         while row < NUM_ROWS {
-            if self.get_position(row) == pos &&
-                self.get_position(row - 1) != pos
+            if self.get_position(row) == pos
+                && self.get_position(row - 1) != pos
             {
                 break;
             }
@@ -97,13 +103,21 @@ impl GroundState {
 }
 
 impl PuzzleState for GroundState {
-    fn location() -> Location { Location::ShiftingGround }
+    fn location() -> Location {
+        Location::ShiftingGround
+    }
 
-    fn access(&self) -> Access { self.access }
+    fn access(&self) -> Access {
+        self.access
+    }
 
-    fn access_mut(&mut self) -> &mut Access { &mut self.access }
+    fn access_mut(&mut self) -> &mut Access {
+        &mut self.access
+    }
 
-    fn can_reset(&self) -> bool { !self.is_initial }
+    fn can_reset(&self) -> bool {
+        !self.is_initial
+    }
 
     fn reset(&mut self) {
         self.positions = INITIAL_POSITIONS.to_vec();
@@ -117,14 +131,19 @@ impl Tomlable for GroundState {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.is_initial && !self.is_solved() {
-            let positions = self.positions
+            let positions = self
+                .positions
                 .iter()
                 .map(|&idx| toml::Value::Integer(idx as i64))
                 .collect();
-            table.insert(POSITIONS_KEY.to_string(),
-                         toml::Value::Array(positions));
-            table.insert(ELINSA_ROW_KEY.to_string(),
-                         toml::Value::Integer(self.elinsa_row as i64));
+            table.insert(
+                POSITIONS_KEY.to_string(),
+                toml::Value::Array(positions),
+            );
+            table.insert(
+                ELINSA_ROW_KEY.to_string(),
+                toml::Value::Integer(self.elinsa_row as i64),
+            );
         }
         toml::Value::Table(table)
     }
@@ -147,8 +166,8 @@ impl Tomlable for GroundState {
             }
             row
         };
-        let mut positions = Vec::<i32>::pop_from_table(&mut table,
-                                                       POSITIONS_KEY);
+        let mut positions =
+            Vec::<i32>::pop_from_table(&mut table, POSITIONS_KEY);
         if positions.len() != INITIAL_POSITIONS.len() {
             positions = INITIAL_POSITIONS.to_vec();
         } else {
@@ -156,14 +175,9 @@ impl Tomlable for GroundState {
                 *position = cmp::min(cmp::max(0, *position), MAX_POSITION);
             }
         }
-        let is_initial = &positions as &[i32] == INITIAL_POSITIONS &&
-            elinsa_row == INITIAL_ELINSA_ROW;
-        GroundState {
-            access: access,
-            positions: positions,
-            elinsa_row: elinsa_row,
-            is_initial: is_initial,
-        }
+        let is_initial = &positions as &[i32] == INITIAL_POSITIONS
+            && elinsa_row == INITIAL_ELINSA_ROW;
+        GroundState { access, positions, elinsa_row, is_initial }
     }
 }
 
@@ -173,10 +187,12 @@ impl Tomlable for GroundState {
 mod tests {
     use toml;
 
+    use super::{
+        GroundState, ELINSA_ROW_KEY, INITIAL_ELINSA_ROW, INITIAL_POSITIONS,
+        MIN_ELINSA_ROW, POSITIONS_KEY,
+    };
+    use crate::save::util::{Tomlable, ACCESS_KEY};
     use crate::save::{Access, PuzzleState};
-    use crate::save::util::{ACCESS_KEY, Tomlable};
-    use super::{ELINSA_ROW_KEY, GroundState, INITIAL_ELINSA_ROW,
-                INITIAL_POSITIONS, MIN_ELINSA_ROW, POSITIONS_KEY};
 
     #[test]
     fn toml_round_trip() {
@@ -219,8 +235,10 @@ mod tests {
     fn from_elinsa_already_at_top_toml() {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), Access::Unsolved.to_toml());
-        table.insert(ELINSA_ROW_KEY.to_string(),
-                     toml::Value::Integer(MIN_ELINSA_ROW as i64));
+        table.insert(
+            ELINSA_ROW_KEY.to_string(),
+            toml::Value::Integer(MIN_ELINSA_ROW as i64),
+        );
         let state = GroundState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Solved);
         assert_eq!(state.elinsa_row, MIN_ELINSA_ROW);
@@ -244,20 +262,28 @@ mod tests {
     #[test]
     fn from_invalid_positions_toml() {
         let mut table = toml::value::Table::new();
-        table.insert(POSITIONS_KEY.to_string(),
-                     toml::Value::Array(vec![1, 2, -3, 4, 55, 66, 77]
-                                            .into_iter()
-                                            .map(toml::Value::Integer)
-                                            .collect()));
+        table.insert(
+            POSITIONS_KEY.to_string(),
+            toml::Value::Array(
+                vec![1, 2, -3, 4, 55, 66, 77]
+                    .into_iter()
+                    .map(toml::Value::Integer)
+                    .collect(),
+            ),
+        );
         let state = GroundState::from_toml(toml::Value::Table(table));
         assert_eq!(state.positions, vec![1, 2, 0, 4, 9, 9, 9]);
 
         let mut table = toml::value::Table::new();
-        table.insert(POSITIONS_KEY.to_string(),
-                     toml::Value::Array(vec![1, 2, 3, 4, 5, 6]
-                                            .into_iter()
-                                            .map(toml::Value::Integer)
-                                            .collect()));
+        table.insert(
+            POSITIONS_KEY.to_string(),
+            toml::Value::Array(
+                vec![1, 2, 3, 4, 5, 6]
+                    .into_iter()
+                    .map(toml::Value::Integer)
+                    .collect(),
+            ),
+        );
         let state = GroundState::from_toml(toml::Value::Table(table));
         assert_eq!(&state.positions as &[i32], INITIAL_POSITIONS);
     }

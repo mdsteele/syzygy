@@ -21,9 +21,9 @@ use std::collections::HashMap;
 use toml;
 
 use crate::gui::Point;
-use crate::save::Direction;
 use crate::save::ice::{Symbol, Transform};
-use crate::save::util::{Tomlable, pop_array, to_table};
+use crate::save::util::{pop_array, to_table, Tomlable};
+use crate::save::Direction;
 
 // ========================================================================= //
 
@@ -46,9 +46,13 @@ pub struct BlockSlide {
 }
 
 impl BlockSlide {
-    pub fn direction(&self) -> Direction { self.direction }
+    pub fn direction(&self) -> Direction {
+        self.direction
+    }
 
-    pub fn to_coords(&self) -> Point { self.to }
+    pub fn to_coords(&self) -> Point {
+        self.to
+    }
 
     pub fn distance(&self) -> i32 {
         if self.to.y() == self.from.y() {
@@ -59,9 +63,13 @@ impl BlockSlide {
         }
     }
 
-    pub fn pushed(&self) -> Option<Point> { self.pushed }
+    pub fn pushed(&self) -> Option<Point> {
+        self.pushed
+    }
 
-    pub fn transform(&self) -> Transform { self.transform }
+    pub fn transform(&self) -> Transform {
+        self.transform
+    }
 }
 
 // ========================================================================= //
@@ -86,16 +94,18 @@ impl ObjectGrid {
         }
     }
 
-    pub fn from_toml(mut table: toml::value::Table, default: &ObjectGrid)
-                     -> ObjectGrid {
+    pub fn from_toml(
+        mut table: toml::value::Table,
+        default: &ObjectGrid,
+    ) -> ObjectGrid {
         let mut blocks = Vec::new();
         for block_toml in pop_array(&mut table, BLOCKS_KEY).into_iter() {
             let mut block_toml = to_table(block_toml);
             let col = i32::pop_from_table(&mut block_toml, COL_KEY);
             let row = i32::pop_from_table(&mut block_toml, ROW_KEY);
             let symbol = Symbol::pop_from_table(&mut block_toml, SYMBOL_KEY);
-            if (col < 0 || col >= default.num_cols) ||
-                (row < 0 || row >= default.num_rows)
+            if (col < 0 || col >= default.num_cols)
+                || (row < 0 || row >= default.num_rows)
             {
                 return default.clone();
             }
@@ -116,9 +126,9 @@ impl ObjectGrid {
 
         let mut grid = default.clone();
         grid.objects.retain(|_, obj| match obj {
-                                &mut Object::PushPop(_) => false,
-                                _ => true,
-                            });
+            &mut Object::PushPop(_) => false,
+            _ => true,
+        });
 
         for (col, row, dir) in push_pops.into_iter() {
             if grid.objects.contains_key(&Point::new(col, row)) {
@@ -134,8 +144,8 @@ impl ObjectGrid {
             }
             grid.add_ice_block(col, row, symbol);
         }
-        grid.is_modified = grid.ice_blocks != default.ice_blocks ||
-            grid.objects != default.objects;
+        grid.is_modified = grid.ice_blocks != default.ice_blocks
+            || grid.objects != default.objects;
         grid
     }
 
@@ -144,10 +154,14 @@ impl ObjectGrid {
         let mut blocks = toml::value::Array::new();
         for (&coords, &symbol) in self.ice_blocks.iter() {
             let mut block = toml::value::Table::new();
-            block.insert(COL_KEY.to_string(),
-                         toml::Value::Integer(coords.x() as i64));
-            block.insert(ROW_KEY.to_string(),
-                         toml::Value::Integer(coords.y() as i64));
+            block.insert(
+                COL_KEY.to_string(),
+                toml::Value::Integer(coords.x() as i64),
+            );
+            block.insert(
+                ROW_KEY.to_string(),
+                toml::Value::Integer(coords.y() as i64),
+            );
             block.insert(SYMBOL_KEY.to_string(), symbol.to_toml());
             blocks.push(toml::Value::Table(block));
         }
@@ -156,10 +170,14 @@ impl ObjectGrid {
         for (&coords, object) in self.objects.iter() {
             if let &Object::PushPop(direction) = object {
                 let mut push_pop = toml::value::Table::new();
-                push_pop.insert(COL_KEY.to_string(),
-                                toml::Value::Integer(coords.x() as i64));
-                push_pop.insert(ROW_KEY.to_string(),
-                                toml::Value::Integer(coords.y() as i64));
+                push_pop.insert(
+                    COL_KEY.to_string(),
+                    toml::Value::Integer(coords.x() as i64),
+                );
+                push_pop.insert(
+                    ROW_KEY.to_string(),
+                    toml::Value::Integer(coords.y() as i64),
+                );
                 push_pop
                     .insert(DIRECTION_KEY.to_string(), direction.to_toml());
                 push_pops.push(toml::Value::Table(push_pop));
@@ -169,9 +187,13 @@ impl ObjectGrid {
         toml::Value::Table(table)
     }
 
-    pub fn size(&self) -> (i32, i32) { (self.num_cols, self.num_rows) }
+    pub fn size(&self) -> (i32, i32) {
+        (self.num_cols, self.num_rows)
+    }
 
-    pub fn is_modified(&self) -> bool { self.is_modified }
+    pub fn is_modified(&self) -> bool {
+        self.is_modified
+    }
 
     pub fn add_object(&mut self, col: i32, row: i32, obj: Object) {
         debug_assert!(col >= 0 && col < self.num_cols);
@@ -181,7 +203,9 @@ impl ObjectGrid {
         self.objects.insert(coords, obj);
     }
 
-    pub fn objects(&self) -> &HashMap<Point, Object> { &self.objects }
+    pub fn objects(&self) -> &HashMap<Point, Object> {
+        &self.objects
+    }
 
     pub fn add_ice_block(&mut self, col: i32, row: i32, symbol: Symbol) {
         debug_assert!(col >= 0 && col < self.num_cols);
@@ -191,10 +215,15 @@ impl ObjectGrid {
         self.ice_blocks.insert(coords, symbol);
     }
 
-    pub fn ice_blocks(&self) -> &HashMap<Point, Symbol> { &self.ice_blocks }
+    pub fn ice_blocks(&self) -> &HashMap<Point, Symbol> {
+        &self.ice_blocks
+    }
 
-    pub fn slide_ice_block(&mut self, coords: Point, slide_dir: Direction)
-                           -> Option<BlockSlide> {
+    pub fn slide_ice_block(
+        &mut self,
+        coords: Point,
+        slide_dir: Direction,
+    ) -> Option<BlockSlide> {
         if let Some(symbol) = self.ice_blocks.remove(&coords) {
             let delta = slide_dir.delta();
             let mut new_coords = coords;
@@ -202,15 +231,14 @@ impl ObjectGrid {
             let mut transform = Transform::identity();
             loop {
                 let next = new_coords + delta;
-                if (next.x() < 0 || next.x() >= self.num_cols) ||
-                    (next.y() < 0 || next.y() >= self.num_rows) ||
-                    self.ice_blocks.contains_key(&next)
+                if (next.x() < 0 || next.x() >= self.num_cols)
+                    || (next.y() < 0 || next.y() >= self.num_rows)
+                    || self.ice_blocks.contains_key(&next)
                 {
                     break;
                 }
                 match self.objects.get(&next).cloned() {
-                    Some(Object::Gap) |
-                    Some(Object::Wall) => break,
+                    Some(Object::Gap) | Some(Object::Wall) => break,
                     Some(Object::PushPop(pp_dir)) => {
                         if pp_dir != slide_dir.opposite() {
                             break;
@@ -249,8 +277,8 @@ impl ObjectGrid {
                     from: coords,
                     direction: slide_dir,
                     to: new_coords,
-                    pushed: pushed,
-                    transform: transform,
+                    pushed,
+                    transform,
                 };
                 return Some(slide);
             }
@@ -272,8 +300,10 @@ impl ObjectGrid {
                         new_pp_coords = new_pp_coords + delta;
                     }
                     self.objects.remove(&pp_coords);
-                    self.objects.insert(new_pp_coords,
-                                        Object::PushPop(pp_dir.opposite()));
+                    self.objects.insert(
+                        new_pp_coords,
+                        Object::PushPop(pp_dir.opposite()),
+                    );
                 }
             }
         }

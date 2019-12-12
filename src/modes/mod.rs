@@ -82,7 +82,7 @@ pub use self::ground::run_shifting_ground;
 pub use self::headed::run_level_headed;
 pub use self::hex::run_hex_spangled;
 pub use self::icyem::run_column_as_icy_em;
-pub use self::info::{SOLVED_INFO_TEXT, run_info_box};
+pub use self::info::{run_info_box, SOLVED_INFO_TEXT};
 pub use self::jog::run_jog_your_memory;
 pub use self::lane::run_memory_lane;
 pub use self::levelup::run_level_up;

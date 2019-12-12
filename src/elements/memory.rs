@@ -47,14 +47,19 @@ pub struct MemoryGridView {
 }
 
 impl MemoryGridView {
-    pub fn new(resources: &mut Resources, symbols_name: &str,
-               (left, top): (i32, i32), grid: &Grid)
-               -> MemoryGridView {
+    pub fn new(
+        resources: &mut Resources,
+        symbols_name: &str,
+        (left, top): (i32, i32),
+        grid: &Grid,
+    ) -> MemoryGridView {
         MemoryGridView {
-            rect: Rect::new(left,
-                            top,
-                            32 * grid.num_cols() as u32,
-                            32 * grid.num_rows() as u32),
+            rect: Rect::new(
+                left,
+                top,
+                32 * grid.num_cols() as u32,
+                32 * grid.num_rows() as u32,
+            ),
             tile_sprites: resources.get_sprites("memory/tiles"),
             symbol_sprites: resources.get_sprites(symbols_name),
             tile_shifts: HashMap::new(),
@@ -69,7 +74,9 @@ impl MemoryGridView {
         self.letters.insert((col, row), letter);
     }
 
-    pub fn flip_symbol(&self) -> i8 { self.flip_symbol }
+    pub fn flip_symbol(&self) -> i8 {
+        self.flip_symbol
+    }
 
     pub fn coords_for_point(&self, pt: Point) -> (i32, i32) {
         let pt = pt - self.rect.top_left();
@@ -95,14 +102,16 @@ impl MemoryGridView {
 
     pub fn shift_tiles(&mut self, shifts: HashMap<(i32, i32), (i32, i32)>) {
         for ((to_col, to_row), (from_col, from_row)) in shifts.into_iter() {
-            self.tile_shifts.insert((to_col, to_row),
-                                    (((from_col - to_col) * 32,
-                                      (from_row - to_row) * 32),
-                                     0));
+            self.tile_shifts.insert(
+                (to_col, to_row),
+                (((from_col - to_col) * 32, (from_row - to_row) * 32), 0),
+            );
         }
     }
 
-    pub fn is_shifting(&self) -> bool { !self.tile_shifts.is_empty() }
+    pub fn is_shifting(&self) -> bool {
+        !self.tile_shifts.is_empty()
+    }
 
     fn flip_tile_offset(&self) -> i32 {
         self.flip_countdown.abs() / FLIP_SLOWDOWN
@@ -181,8 +190,8 @@ impl Element<Grid, i8> for MemoryGridView {
                 for coords in finished.iter() {
                     self.tile_shifts.remove(coords);
                 }
-                if self.flip_symbol != 0 &&
-                    self.flip_countdown > -FLIP_COUNTDOWN_MAX
+                if self.flip_symbol != 0
+                    && self.flip_countdown > -FLIP_COUNTDOWN_MAX
                 {
                     let old_offset = self.flip_tile_offset();
                     self.flip_countdown -= 1;
@@ -195,7 +204,8 @@ impl Element<Grid, i8> for MemoryGridView {
                 Action::redraw_if(redraw)
             }
             &Event::MouseDown(pt)
-                if self.rect.contains_point(pt) && self.flip_symbol == 0 => {
+                if self.rect.contains_point(pt) && self.flip_symbol == 0 =>
+            {
                 let pt = pt - self.rect.top_left();
                 let col = pt.x() / 32;
                 let row = pt.y() / 32;
@@ -220,9 +230,11 @@ pub struct NextShapeView {
 }
 
 impl NextShapeView {
-    pub fn new(resources: &mut Resources, symbols_name: &str,
-               top_left: (i32, i32))
-               -> NextShapeView {
+    pub fn new(
+        resources: &mut Resources,
+        symbols_name: &str,
+        top_left: (i32, i32),
+    ) -> NextShapeView {
         NextShapeView {
             top_left: Point::from(top_left),
             tile_sprite: resources.get_sprites("memory/tiles")[4].clone(),
@@ -231,7 +243,9 @@ impl NextShapeView {
         }
     }
 
-    pub fn is_dragging(&self) -> bool { self.drag.is_some() }
+    pub fn is_dragging(&self) -> bool {
+        self.drag.is_some()
+    }
 
     fn rect(&self) -> Rect {
         Rect::new(self.top_left.x(), self.top_left.y(), 96, 96)
@@ -258,8 +272,11 @@ impl Element<Option<Shape>, Point> for NextShapeView {
         }
     }
 
-    fn handle_event(&mut self, event: &Event, next_shape: &mut Option<Shape>)
-                    -> Action<Point> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        next_shape: &mut Option<Shape>,
+    ) -> Action<Point> {
         match event {
             &Event::MouseDown(pt) => {
                 if let &mut Some(ref shape) = next_shape {
@@ -301,10 +318,7 @@ struct ShapeDrag {
 
 impl ShapeDrag {
     fn new(from: Point) -> ShapeDrag {
-        ShapeDrag {
-            from: from,
-            to: from,
-        }
+        ShapeDrag { from, to: from }
     }
 }
 

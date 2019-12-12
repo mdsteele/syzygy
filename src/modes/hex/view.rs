@@ -22,12 +22,14 @@ use std::collections::HashMap;
 use std::f64::consts::{FRAC_1_PI, FRAC_PI_3};
 use std::rc::Rc;
 
+use super::scenes;
 use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
-use crate::gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
-          Resources, Sound, Sprite};
+use crate::gui::{
+    Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
+    Sound, Sprite,
+};
 use crate::modes::SOLVED_INFO_TEXT;
 use crate::save::{Game, HexState, PuzzleState};
-use super::scenes;
 
 // ========================================================================= //
 
@@ -38,8 +40,11 @@ pub struct View {
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect, state: &HexState)
-               -> View {
+    pub fn new(
+        resources: &mut Resources,
+        visible: Rect,
+        state: &HexState,
+    ) -> View {
         let mut core = {
             let fade = (FadeStyle::LeftToRight, FadeStyle::LeftToRight);
             let intro = scenes::compile_intro_scene(resources);
@@ -49,7 +54,7 @@ impl View {
         core.add_extra_scene(scenes::compile_mezure_midscene(resources));
         core.add_extra_scene(scenes::compile_yttris_midscene(resources));
         View {
-            core: core,
+            core,
             wheels: HexWheels::new(resources, 192, 144),
             solution: SolutionDisplay::new(resources, 440, 200),
         }
@@ -66,8 +71,11 @@ impl Element<Game, PuzzleCmd> for View {
         self.core.draw_front_layer(canvas, state);
     }
 
-    fn handle_event(&mut self, event: &Event, game: &mut Game)
-                    -> Action<PuzzleCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        game: &mut Game,
+    ) -> Action<PuzzleCmd> {
         let state = &mut game.hex_spangled;
         let mut action = self.core.handle_event(event, state);
         if !action.should_stop() {
@@ -231,8 +239,8 @@ impl Element<HexState, (usize, i32)> for HexWheels {
                 let rotation = self.wheels[wheel].sprite_rotation();
                 if rotation != 0 {
                     let base_theta = FRAC_PI_3 * (at as f64);
-                    let new_theta = base_theta +
-                        0.25 * FRAC_PI_3 * rotation as f64;
+                    let new_theta =
+                        base_theta + 0.25 * FRAC_PI_3 * rotation as f64;
                     let base_pt = point_from_polar(32, base_theta);
                     let new_pt = point_from_polar(32, new_theta);
                     center = center + new_pt - base_pt;
@@ -241,10 +249,12 @@ impl Element<HexState, (usize, i32)> for HexWheels {
             }
             if let Some(&chr) = self.letters.get(&index) {
                 canvas.draw_sprite_centered(&self.token_sprites[3], center);
-                canvas.draw_char(&self.font,
-                                 Align::Center,
-                                 center + Point::new(0, 4),
-                                 chr);
+                canvas.draw_char(
+                    &self.font,
+                    Align::Center,
+                    center + Point::new(0, 4),
+                    chr,
+                );
             } else {
                 let sprite = &self.token_sprites[tokens[index] as usize];
                 canvas.draw_sprite_centered(sprite, center);
@@ -252,8 +262,11 @@ impl Element<HexState, (usize, i32)> for HexWheels {
         }
     }
 
-    fn handle_event(&mut self, event: &Event, state: &mut HexState)
-                    -> Action<(usize, i32)> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        state: &mut HexState,
+    ) -> Action<(usize, i32)> {
         self.wheels.handle_event(event, state)
     }
 }
@@ -270,10 +283,14 @@ struct HexWheel {
 }
 
 impl HexWheel {
-    fn new(resources: &mut Resources, index: usize, cx: i32, cy: i32)
-           -> HexWheel {
+    fn new(
+        resources: &mut Resources,
+        index: usize,
+        cx: i32,
+        cy: i32,
+    ) -> HexWheel {
         HexWheel {
-            index: index,
+            index,
             center: Point::new(cx, cy),
             wheel_sprites: resources.get_sprites("hex/wheels"),
             hub_sprites: resources.get_sprites("hex/hub"),
@@ -299,8 +316,11 @@ impl Element<HexState, (usize, i32)> for HexWheel {
         canvas.draw_sprite_centered(&self.hub_sprites[0], self.center);
     }
 
-    fn handle_event(&mut self, event: &Event, state: &mut HexState)
-                    -> Action<(usize, i32)> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        state: &mut HexState,
+    ) -> Action<(usize, i32)> {
         match event {
             &Event::MouseDown(pt) => {
                 if !state.is_solved() {
@@ -356,10 +376,7 @@ struct WheelDrag {
 impl WheelDrag {
     fn new(start: Point) -> WheelDrag {
         let angle = (start.y() as f64).atan2(start.x() as f64);
-        WheelDrag {
-            start_angle: angle,
-            current_angle: angle,
-        }
+        WheelDrag { start_angle: angle, current_angle: angle }
     }
 
     fn set_current(&mut self, current: Point) {
@@ -409,16 +426,16 @@ impl SolutionDisplay {
 
 impl Element<HexState, PuzzleCmd> for SolutionDisplay {
     fn draw(&self, _state: &HexState, canvas: &mut Canvas) {
-        let index = if self.anim > 0 {
-            ((self.anim / 2) % 3) + 2
-        } else {
-            self.index
-        };
+        let index =
+            if self.anim > 0 { ((self.anim / 2) % 3) + 2 } else { self.index };
         canvas.draw_sprite(&self.sprites[index], self.topleft);
     }
 
-    fn handle_event(&mut self, event: &Event, _state: &mut HexState)
-                    -> Action<PuzzleCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        _state: &mut HexState,
+    ) -> Action<PuzzleCmd> {
         match event {
             &Event::ClockTick => {
                 if self.anim > 0 {
@@ -437,8 +454,10 @@ impl Element<HexState, PuzzleCmd> for SolutionDisplay {
 
 fn point_from_polar(r: i32, theta: f64) -> Point {
     let (sin, cos) = theta.sin_cos();
-    Point::new(((r as f64) * cos).round() as i32,
-               ((r as f64) * sin).round() as i32)
+    Point::new(
+        ((r as f64) * cos).round() as i32,
+        ((r as f64) * sin).round() as i32,
+    )
 }
 
 // ========================================================================= //

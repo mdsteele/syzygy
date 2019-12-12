@@ -20,8 +20,10 @@
 use std::cmp::{max, min};
 use std::rc::Rc;
 
-use crate::gui::{Action, Align, Canvas, Element, Event, FRAME_DELAY_MILLIS, Font,
-          Point, Rect, Resources, Sprite};
+use crate::gui::{
+    Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
+    Sprite, FRAME_DELAY_MILLIS,
+};
 
 // ========================================================================= //
 
@@ -40,15 +42,18 @@ pub struct ArrowPair {
 }
 
 impl ArrowPair {
-    pub fn new(resources: &mut Resources, topleft: (i32, i32), row: i32,
-               delta: i32)
-               -> ArrowPair {
+    pub fn new(
+        resources: &mut Resources,
+        topleft: (i32, i32),
+        row: i32,
+        delta: i32,
+    ) -> ArrowPair {
         ArrowPair {
             sprites: resources.get_sprites("shift/arrows"),
             font: resources.get_font("roman"),
             left: topleft.0,
             top: topleft.1,
-            row: row,
+            row,
             default_delta: delta,
             delta_override: None,
             blink_left: 0,
@@ -64,7 +69,9 @@ impl ArrowPair {
         self.delta_override.unwrap_or(self.default_delta)
     }
 
-    fn rect(&self) -> Rect { Rect::new(self.left, self.top, 48, 16) }
+    fn rect(&self) -> Rect {
+        Rect::new(self.left, self.top, 48, 16)
+    }
 }
 
 impl Element<(), (i32, i32)> for ArrowPair {
@@ -88,14 +95,19 @@ impl Element<(), (i32, i32)> for ArrowPair {
         canvas.draw_sprite(left_arrow, Point::new(3, 0));
         canvas.draw_sprite(right_arrow, Point::new(31, 0));
         canvas.draw_sprite(middle, Point::new(17, 0));
-        canvas.draw_text(&self.font,
-                         Align::Center,
-                         Point::new(24, 12),
-                         &format!("{}", self.delta()));
+        canvas.draw_text(
+            &self.font,
+            Align::Center,
+            Point::new(24, 12),
+            &format!("{}", self.delta()),
+        );
     }
 
-    fn handle_event(&mut self, event: &Event, _state: &mut ())
-                    -> Action<(i32, i32)> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        _state: &mut (),
+    ) -> Action<(i32, i32)> {
         match event {
             &Event::ClockTick => {
                 let mut redraw = false;
@@ -145,8 +157,11 @@ pub struct Platform {
 }
 
 impl Platform {
-    pub fn new(resources: &mut Resources, topleft: (i32, i32), position: i32)
-               -> Platform {
+    pub fn new(
+        resources: &mut Resources,
+        topleft: (i32, i32),
+        position: i32,
+    ) -> Platform {
         let mut platform = Platform {
             sprites: resources.get_sprites("shift/platforms"),
             track_left: topleft.0,
@@ -160,7 +175,9 @@ impl Platform {
         platform
     }
 
-    pub fn top(&self) -> i32 { self.top }
+    pub fn top(&self) -> i32 {
+        self.top
+    }
 
     pub fn top_point_for_pos(&self, pos: i32) -> Point {
         Point::new(self.pos_to_left(pos) + 16, self.top)
@@ -171,11 +188,17 @@ impl Platform {
         self.goal = self.left;
     }
 
-    pub fn set_goal(&mut self, pos: i32) { self.goal = self.pos_to_left(pos); }
+    pub fn set_goal(&mut self, pos: i32) {
+        self.goal = self.pos_to_left(pos);
+    }
 
-    pub fn move_to_goal(&mut self) { self.left = self.goal; }
+    pub fn move_to_goal(&mut self) {
+        self.left = self.goal;
+    }
 
-    pub fn pos_to_left(&self, pos: i32) -> i32 { self.track_left + 32 * pos }
+    pub fn pos_to_left(&self, pos: i32) -> i32 {
+        self.track_left + 32 * pos
+    }
 
     pub fn travel_time(from_pos: i32, to_pos: i32) -> f64 {
         let dist = 32 * (from_pos - to_pos).abs();
@@ -187,8 +210,10 @@ impl Platform {
 impl Element<(), ()> for Platform {
     fn draw(&self, _: &(), canvas: &mut Canvas) {
         let index = ((self.left % 24) / 12) as usize;
-        canvas.draw_sprite(&self.sprites[index],
-                           Point::new(self.left, self.top));
+        canvas.draw_sprite(
+            &self.sprites[index],
+            Point::new(self.left, self.top),
+        );
     }
 
     fn handle_event(&mut self, event: &Event, _: &mut ()) -> Action<()> {

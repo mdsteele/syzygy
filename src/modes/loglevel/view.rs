@@ -17,11 +17,13 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use crate::elements::{CrosswordView, FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
+use super::scenes;
+use crate::elements::{
+    CrosswordView, FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView,
+};
 use crate::gui::{Action, Canvas, Element, Event, Rect, Resources};
 use crate::modes::SOLVED_INFO_TEXT;
 use crate::save::{Game, LogLevelState, PuzzleState};
-use super::scenes;
 
 // ========================================================================= //
 
@@ -32,9 +34,11 @@ pub struct View {
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect,
-               state: &LogLevelState)
-               -> View {
+    pub fn new(
+        resources: &mut Resources,
+        visible: Rect,
+        state: &LogLevelState,
+    ) -> View {
         let mut core = {
             let fade = (FadeStyle::LeftToRight, FadeStyle::LeftToRight);
             let intro = scenes::compile_intro_scene(resources);
@@ -43,11 +47,13 @@ impl View {
         };
         core.add_extra_scene(scenes::compile_mezure_midscene(resources));
         View {
-            core: core,
-            crossword: CrosswordView::new(resources,
-                                          (364, 56),
-                                          OFFSETS_CLUES,
-                                          (364, 304)),
+            core,
+            crossword: CrosswordView::new(
+                resources,
+                (364, 56),
+                OFFSETS_CLUES,
+                (364, 304),
+            ),
             crossword_visible: false,
         }
     }
@@ -64,15 +70,19 @@ impl Element<Game, PuzzleCmd> for View {
         self.core.draw_front_layer(canvas, state);
     }
 
-    fn handle_event(&mut self, event: &Event, game: &mut Game)
-                    -> Action<PuzzleCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        game: &mut Game,
+    ) -> Action<PuzzleCmd> {
         let state = &mut game.log_level;
         let mut action = self.core.handle_event(event, state);
-        if !action.should_stop() && self.crossword_visible &&
-            (event == &Event::ClockTick || !state.is_solved())
+        if !action.should_stop()
+            && self.crossword_visible
+            && (event == &Event::ClockTick || !state.is_solved())
         {
-            let subaction = self.crossword
-                .handle_event(event, state.crossword_mut());
+            let subaction =
+                self.crossword.handle_event(event, state.crossword_mut());
             if let Some(&(row, index, chr)) = subaction.value() {
                 let old_chr = state.crossword().get_char(row, index);
                 state.crossword_mut().set_char(row, index, chr);

@@ -35,7 +35,7 @@ impl ResourceLoader {
         if cfg!(debug_assertions) {
             println!("resource_data_root_dir: {:?}", root_dir);
         }
-        ResourceLoader { root_dir: root_dir }
+        ResourceLoader { root_dir }
     }
 
     pub fn load(&self, path: &Path) -> io::Result<ResourceFile> {

@@ -22,10 +22,12 @@ use std::collections::HashMap;
 use std::mem;
 use std::rc::Rc;
 
-use crate::gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
-          Resources, Sprite};
-use crate::save::Direction;
+use crate::gui::{
+    Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
+    Sprite,
+};
 use crate::save::plane::{PlaneGrid, PlaneObj};
+use crate::save::Direction;
 
 // ========================================================================= //
 
@@ -51,11 +53,14 @@ pub struct PlaneGridView {
 }
 
 impl PlaneGridView {
-    pub fn new(resources: &mut Resources, left: i32, top: i32)
-               -> PlaneGridView {
+    pub fn new(
+        resources: &mut Resources,
+        left: i32,
+        top: i32,
+    ) -> PlaneGridView {
         PlaneGridView {
-            left: left,
-            top: top,
+            left,
+            top,
             obj_sprites: resources.get_sprites("plane/objects"),
             pipe_sprites: resources.get_sprites("plane/pipes"),
             drag_from: None,
@@ -83,10 +88,12 @@ impl PlaneGridView {
     }
 
     fn rect(&self, grid: &PlaneGrid) -> Rect {
-        Rect::new(self.left,
-                  self.top,
-                  grid.num_cols() * TILE_USIZE,
-                  grid.num_rows() * TILE_USIZE)
+        Rect::new(
+            self.left,
+            self.top,
+            grid.num_cols() * TILE_USIZE,
+            grid.num_rows() * TILE_USIZE,
+        )
     }
 
     fn pt_to_coords(&self, grid: &PlaneGrid, pt: Point) -> Option<Point> {
@@ -100,8 +107,13 @@ impl PlaneGridView {
         }
     }
 
-    fn draw_pipe_tip(&self, grid: &PlaneGrid, pos: Point, dir: Direction,
-                     canvas: &mut Canvas) {
+    fn draw_pipe_tip(
+        &self,
+        grid: &PlaneGrid,
+        pos: Point,
+        dir: Direction,
+        canvas: &mut Canvas,
+    ) {
         let obj = grid.objects().get(&pos).cloned();
         let sprite_index = match (dir, obj) {
             (Direction::West, Some(PlaneObj::Cross)) => 10,
@@ -141,10 +153,12 @@ impl Element<PlaneGrid, PlaneCmd> for PlaneGridView {
                     canvas.draw_sprite(sprite, coords * TILE_ISIZE);
                 } else {
                     let pt = coords * TILE_ISIZE;
-                    let rect = Rect::new(pt.x() + 1,
-                                         pt.y() + 1,
-                                         TILE_USIZE - 2,
-                                         TILE_USIZE - 2);
+                    let rect = Rect::new(
+                        pt.x() + 1,
+                        pt.y() + 1,
+                        TILE_USIZE - 2,
+                        TILE_USIZE - 2,
+                    );
                     canvas.draw_rect((72, 72, 72), rect);
                 }
             }
@@ -165,17 +179,19 @@ impl Element<PlaneGrid, PlaneCmd> for PlaneGridView {
                     (Direction::East, Direction::South) => 7,
                     (Direction::West, Direction::North) => 5,
                     (Direction::West, Direction::South) => 4,
-                    (Direction::East, _) |
-                    (Direction::West, _) => {
+                    (Direction::East, _) | (Direction::West, _) => {
                         let obj = grid.objects().get(&start).cloned();
-                        if obj == Some(PlaneObj::Cross) { 12 } else { 8 }
+                        if obj == Some(PlaneObj::Cross) {
+                            12
+                        } else {
+                            8
+                        }
                     }
                     (Direction::North, Direction::East) => 4,
                     (Direction::North, Direction::West) => 7,
                     (Direction::South, Direction::East) => 5,
                     (Direction::South, Direction::West) => 6,
-                    (Direction::North, _) |
-                    (Direction::South, _) => 9,
+                    (Direction::North, _) | (Direction::South, _) => 9,
                 };
                 let sprite = &self.pipe_sprites[sprite_index];
                 canvas.draw_sprite(sprite, start * TILE_ISIZE);
@@ -184,14 +200,19 @@ impl Element<PlaneGrid, PlaneCmd> for PlaneGridView {
             self.draw_pipe_tip(grid, next, dir, &mut canvas);
         }
         for (&coords, &letter) in self.letters.iter() {
-            let pt = Point::new(coords.x() * TILE_ISIZE + TILE_ISIZE / 2,
-                                coords.y() * TILE_ISIZE + TILE_ISIZE / 2 + 4);
+            let pt = Point::new(
+                coords.x() * TILE_ISIZE + TILE_ISIZE / 2,
+                coords.y() * TILE_ISIZE + TILE_ISIZE / 2 + 4,
+            );
             canvas.draw_char(&self.font, Align::Center, pt, letter);
         }
     }
 
-    fn handle_event(&mut self, event: &Event, grid: &mut PlaneGrid)
-                    -> Action<PlaneCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        grid: &mut PlaneGrid,
+    ) -> Action<PlaneCmd> {
         match event {
             &Event::MouseDown(pt) if self.rect(grid).contains_point(pt) => {
                 self.drag_from = self.pt_to_coords(grid, pt);

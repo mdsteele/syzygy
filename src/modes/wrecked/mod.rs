@@ -20,21 +20,25 @@
 mod scenes;
 mod view;
 
-use crate::gui::Window;
-use crate::modes::{Mode, run_puzzle};
-use crate::save::SaveData;
 use self::view::View;
 pub use self::view::{WreckedDisplay, WreckedGrid};
+use crate::gui::Window;
+use crate::modes::{run_puzzle, Mode};
+use crate::save::SaveData;
 
 // ========================================================================= //
 
-pub fn run_wrecked_angle(window: &mut Window, save_data: &mut SaveData)
-                         -> Mode {
+pub fn run_wrecked_angle(
+    window: &mut Window,
+    save_data: &mut SaveData,
+) -> Mode {
     let view = {
         let visible_rect = window.visible_rect();
-        View::new(&mut window.resources(),
-                  visible_rect,
-                  &save_data.game_mut().wrecked_angle)
+        View::new(
+            &mut window.resources(),
+            visible_rect,
+            &save_data.game_mut().wrecked_angle,
+        )
     };
     run_puzzle(window, save_data, view)
 }

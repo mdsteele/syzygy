@@ -49,18 +49,17 @@ fn main() {
         res.set_language(0x0409); // en_US
         res.compile().unwrap();
     } else {
-        println!("cargo:warning=System Syzygy doesn't currently support {}",
-                 target);
+        println!(
+            "cargo:warning=System Syzygy doesn't currently support {}",
+            target
+        );
     }
 }
 
 // ========================================================================= //
 
-const RSRC_GLOBS: &[&str] = &[
-    "data/backgrounds/*.bg",
-    "data/fonts/*.ahf",
-    "data/sprites/**/*.ahi",
-];
+const RSRC_GLOBS: &[&str] =
+    &["data/backgrounds/*.bg", "data/fonts/*.ahf", "data/sprites/**/*.ahi"];
 
 fn generate_rsrc_data_file() -> io::Result<()> {
     let out_dir = PathBuf::from(std::env::var("OUT_DIR").unwrap());
@@ -71,11 +70,12 @@ fn generate_rsrc_data_file() -> io::Result<()> {
         for path in glob::glob(rsrc_glob).unwrap() {
             let path: PathBuf = path.unwrap();
             let suffix = path.strip_prefix("data").unwrap();
-            writeln!(file,
-                     "({:?}, include_bytes!(concat!(env!(\
-                      \"CARGO_MANIFEST_DIR\"), '/', {:?}))),",
-                     suffix,
-                     path)?;
+            writeln!(
+                file,
+                "({:?}, include_bytes!(concat!(env!(\
+                 \"CARGO_MANIFEST_DIR\"), '/', {:?}))),",
+                suffix, path
+            )?;
         }
     }
     writeln!(file, "];")?;
@@ -84,10 +84,8 @@ fn generate_rsrc_data_file() -> io::Result<()> {
 
 // ========================================================================= //
 
-const ICON_PNG_PATHS: &[&str] = &[
-    "data/icon/32x32.png",
-    "data/icon/128x128.png",
-];
+const ICON_PNG_PATHS: &[&str] =
+    &["data/icon/32x32.png", "data/icon/128x128.png"];
 
 fn generate_ico_file() -> io::Result<PathBuf> {
     let out_dir = PathBuf::from(std::env::var("OUT_DIR").unwrap());

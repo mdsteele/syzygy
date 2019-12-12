@@ -71,7 +71,9 @@ pub enum Location {
 }
 
 impl Location {
-    pub fn all() -> &'static [Location] { ALL_LOCATIONS }
+    pub fn all() -> &'static [Location] {
+        ALL_LOCATIONS
+    }
 
     pub fn name(self) -> &'static str {
         match self {
@@ -185,13 +187,11 @@ impl Location {
             Location::CubeTangle => vec![Location::ShiftingGround],
             Location::Disconnected => vec![Location::Prolog],
             Location::DoubleCross => vec![Location::TreadLightly],
-            Location::FactOrFiction => {
-                vec![
-                    Location::CubeTangle,
-                    Location::HexSpangled,
-                    Location::WhatchaColumn,
-                ]
-            }
+            Location::FactOrFiction => vec![
+                Location::CubeTangle,
+                Location::HexSpangled,
+                Location::WhatchaColumn,
+            ],
             Location::HexSpangled => vec![Location::TheYFactor],
             Location::IceToMeetYou => vec![Location::IfMemoryServes],
             Location::IfMemoryServes => {
@@ -205,13 +205,11 @@ impl Location {
             Location::LightSyrup => vec![Location::ALightInTheAttic],
             Location::LogLevel => vec![Location::Disconnected],
             Location::MemoryLane => vec![Location::PlaneAndSimple],
-            Location::MissedConnections => {
-                vec![
-                    Location::ConnectTheDots,
-                    Location::CubeTangle,
-                    Location::MemoryLane,
-                ]
-            }
+            Location::MissedConnections => vec![
+                Location::ConnectTheDots,
+                Location::CubeTangle,
+                Location::MemoryLane,
+            ],
             Location::PasswordFile => vec![Location::SystemFailure],
             Location::PlaneAndSimple => vec![Location::CrossTheLine],
             Location::PlaneAsDay => vec![Location::StarCrossed],
@@ -302,7 +300,9 @@ impl Tomlable for Location {
 }
 
 impl Default for Location {
-    fn default() -> Location { Location::Map }
+    fn default() -> Location {
+        Location::Map
+    }
 }
 
 const ALL_LOCATIONS: &[Location] = &[
@@ -356,8 +356,8 @@ const ALL_LOCATIONS: &[Location] = &[
 mod tests {
     use std::collections::{HashMap, HashSet};
 
-    use crate::save::util::Tomlable;
     use super::Location;
+    use crate::save::util::Tomlable;
 
     #[test]
     fn toml_round_trip() {
@@ -373,12 +373,14 @@ mod tests {
             let to = from.next();
             if to != Location::Map {
                 let prereqs = to.prereqs();
-                assert!(prereqs.contains(&from),
-                        "{:?} leads to {:?}, but isn't one of its prereqs \
-                         ({:?})",
-                        from,
-                        to,
-                        prereqs);
+                assert!(
+                    prereqs.contains(&from),
+                    "{:?} leads to {:?}, but isn't one of its prereqs \
+                     ({:?})",
+                    from,
+                    to,
+                    prereqs
+                );
             }
         }
     }
@@ -397,19 +399,23 @@ mod tests {
         for (&location, direct_dependents) in dependents.iter() {
             let next = location.next();
             if direct_dependents.is_empty() {
-                assert_eq!(next,
-                           Location::Map,
-                           "{:?} leads to {:?}, but it should lead to {:?}",
-                           location,
-                           next,
-                           Location::Map);
+                assert_eq!(
+                    next,
+                    Location::Map,
+                    "{:?} leads to {:?}, but it should lead to {:?}",
+                    location,
+                    next,
+                    Location::Map
+                );
             } else {
-                assert!(direct_dependents.contains(&next),
-                        "{:?} leads to {:?}, but it should lead to one of \
-                         {:?}",
-                        location,
-                        next,
-                        direct_dependents);
+                assert!(
+                    direct_dependents.contains(&next),
+                    "{:?} leads to {:?}, but it should lead to one of \
+                     {:?}",
+                    location,
+                    next,
+                    direct_dependents
+                );
             }
         }
     }
@@ -454,8 +460,10 @@ mod tests {
         assert!(precedes(Location::WhatchaColumn, Location::ColumnAsIcyEm));
         // "Connect" puzzles:
         assert!(precedes(Location::Disconnected, Location::ConnectTheDots));
-        assert!(precedes(Location::ConnectTheDots,
-                         Location::MissedConnections));
+        assert!(precedes(
+            Location::ConnectTheDots,
+            Location::MissedConnections
+        ));
         // "Factor" puzzles:
         assert!(precedes(Location::TheYFactor, Location::AutofacTour));
         assert!(precedes(Location::TheYFactor, Location::FactOrFiction));

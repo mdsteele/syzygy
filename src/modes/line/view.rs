@@ -19,12 +19,13 @@
 
 use std::rc::Rc;
 
+use super::scenes;
 use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
-use crate::gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
-          Resources, Sound};
+use crate::gui::{
+    Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources, Sound,
+};
 use crate::modes::SOLVED_INFO_TEXT;
 use crate::save::{Game, LineState, PuzzleState};
-use super::scenes;
 
 // ========================================================================= //
 
@@ -37,8 +38,11 @@ pub struct View {
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect, state: &LineState)
-               -> View {
+    pub fn new(
+        resources: &mut Resources,
+        visible: Rect,
+        state: &LineState,
+    ) -> View {
         let mut core = {
             let fade = (FadeStyle::LeftToRight, FadeStyle::LeftToRight);
             let intro = scenes::compile_intro_scene(resources);
@@ -47,7 +51,7 @@ impl View {
         };
         core.add_extra_scene(scenes::compile_ugrent_midscene(resources));
         View {
-            core: core,
+            core,
             grid1: LetterGrid::new(resources, 80, 48, false),
             grid2: LetterGrid::new(resources, 320, 48, true),
             answers: AnswersDisplay::new(resources, 168, 272),
@@ -67,8 +71,11 @@ impl Element<Game, PuzzleCmd> for View {
         self.core.draw_front_layer(canvas, state);
     }
 
-    fn handle_event(&mut self, event: &Event, game: &mut Game)
-                    -> Action<PuzzleCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        game: &mut Game,
+    ) -> Action<PuzzleCmd> {
         let state = &mut game.cross_the_line;
         let mut action = self.core.handle_event(event, state);
         if !action.should_stop() && event == &Event::ClockTick {
@@ -202,12 +209,16 @@ struct LetterGrid {
 }
 
 impl LetterGrid {
-    fn new(resources: &mut Resources, left: i32, top: i32, is_grid_2: bool)
-           -> LetterGrid {
+    fn new(
+        resources: &mut Resources,
+        left: i32,
+        top: i32,
+        is_grid_2: bool,
+    ) -> LetterGrid {
         LetterGrid {
-            left: left,
-            top: top,
-            is_grid_2: is_grid_2,
+            left,
+            top,
+            is_grid_2,
             font: resources.get_font("block"),
             selected: None,
             override_grid: None,
@@ -253,15 +264,12 @@ impl Element<LineState, ()> for LetterGrid {
             let box_top = grid_rect.top() + row * BOX_SIZE;
             if self.selected == Some(index) {
                 let rect = Rect::new(box_left, box_top, BOX_USIZE, BOX_USIZE);
-                let color = if self.error {
-                    (128, 64, 64)
-                } else {
-                    (255, 255, 128)
-                };
+                let color =
+                    if self.error { (128, 64, 64) } else { (255, 255, 128) };
                 canvas.fill_rect(color, rect);
             }
-            let pt = Point::new(box_left + BOX_SIZE / 2,
-                                box_top + BOX_SIZE - 3);
+            let pt =
+                Point::new(box_left + BOX_SIZE / 2, box_top + BOX_SIZE - 3);
             canvas.draw_char(&self.font, Align::Center, pt, chr);
             col += 1;
             if col >= num_cols {
@@ -271,8 +279,11 @@ impl Element<LineState, ()> for LetterGrid {
         }
     }
 
-    fn handle_event(&mut self, event: &Event, state: &mut LineState)
-                    -> Action<()> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        state: &mut LineState,
+    ) -> Action<()> {
         match event {
             &Event::MouseDown(pt) => {
                 let num_cols = state.num_cols();
@@ -328,12 +339,11 @@ struct AnswersDisplay {
     filtered: bool,
 }
 
-
 impl AnswersDisplay {
     fn new(resources: &mut Resources, left: i32, top: i32) -> AnswersDisplay {
         AnswersDisplay {
-            left: left,
-            top: top,
+            left,
+            top,
             font: resources.get_font("block"),
             filtered: false,
         }
@@ -356,8 +366,11 @@ impl Element<LineState, ()> for AnswersDisplay {
         }
     }
 
-    fn handle_event(&mut self, event: &Event, _state: &mut LineState)
-                    -> Action<()> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        _state: &mut LineState,
+    ) -> Action<()> {
         match event {
             _ => Action::ignore(),
         }

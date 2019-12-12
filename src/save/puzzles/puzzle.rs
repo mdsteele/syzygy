@@ -19,8 +19,8 @@
 
 use toml;
 
-use crate::save::{Access, Location};
 use crate::save::util::Tomlable;
+use crate::save::{Access, Location};
 
 // ========================================================================= //
 
@@ -33,19 +33,33 @@ pub trait PuzzleState: Tomlable {
 
     fn access_mut(&mut self) -> &mut Access;
 
-    fn has_been_visited(&self) -> bool { self.access().has_been_visited() }
+    fn has_been_visited(&self) -> bool {
+        self.access().has_been_visited()
+    }
 
-    fn is_visited(&self) -> bool { self.access().is_visited() }
+    fn is_visited(&self) -> bool {
+        self.access().is_visited()
+    }
 
-    fn visit(&mut self) { self.access_mut().visit(); }
+    fn visit(&mut self) {
+        self.access_mut().visit();
+    }
 
-    fn revisit(&mut self) { self.access_mut().revisit(); }
+    fn revisit(&mut self) {
+        self.access_mut().revisit();
+    }
 
-    fn has_been_solved(&self) -> bool { self.access().has_been_solved() }
+    fn has_been_solved(&self) -> bool {
+        self.access().has_been_solved()
+    }
 
-    fn is_solved(&self) -> bool { self.access().is_solved() }
+    fn is_solved(&self) -> bool {
+        self.access().is_solved()
+    }
 
-    fn allow_reset_for_undo_redo(&self) -> bool { true }
+    fn allow_reset_for_undo_redo(&self) -> bool {
+        true
+    }
 
     fn can_reset(&self) -> bool;
 

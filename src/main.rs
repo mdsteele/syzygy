@@ -33,7 +33,7 @@ mod save;
 
 use std::path::PathBuf;
 
-use self::gui::{Event, FRAME_DELAY_MILLIS, Window};
+use self::gui::{Event, Window, FRAME_DELAY_MILLIS};
 use self::modes::Mode;
 use self::save::{Location, SaveData};
 
@@ -50,10 +50,12 @@ impl Flags {
         let args: Vec<String> = std::env::args().collect();
         let mut opts = getopts::Options::new();
         opts.optflag("h", "help", "print this help menu");
-        opts.optflagopt("",
-                        "fullscreen",
-                        "override fullscreen setting",
-                        "BOOL");
+        opts.optflagopt(
+            "",
+            "fullscreen",
+            "override fullscreen setting",
+            "BOOL",
+        );
         opts.optopt("", "save_file", "override save file path", "FILE");
         opts.optopt("", "window_size", "override window size", "WxH");
         let matches = opts.parse(&args[1..]).unwrap_or_else(|failure| {
@@ -70,9 +72,8 @@ impl Flags {
             .opt_default("fullscreen", "true")
             .and_then(|value| value.parse().ok());
         let save_file = matches.opt_str("save_file").map(PathBuf::from);
-        let window_size = matches
-            .opt_str("window_size")
-            .and_then(|value| match &value as &str {
+        let window_size = matches.opt_str("window_size").and_then(|value| {
+            match &value as &str {
                 "full" => Some((576, 384)),
                 "small" => Some((480, 320)),
                 "tall" => Some((480, 384)),
@@ -88,19 +89,18 @@ impl Flags {
                         })
                     })
                 }
-            });
-        Flags {
-            fullscreen: fullscreen,
-            save_file: save_file,
-            window_size: window_size,
-        }
+            }
+        });
+        Flags { fullscreen, save_file, window_size }
     }
 
     fn ideal_size(&self) -> (u32, u32) {
         self.window_size.unwrap_or((480, 320))
     }
 
-    fn force_ideal(&self) -> bool { self.window_size.is_some() }
+    fn force_ideal(&self) -> bool {
+        self.window_size.is_some()
+    }
 
     fn fullscreen(&self, prefs: &save::Prefs) -> bool {
         self.fullscreen.unwrap_or(prefs.fullscreen())
@@ -122,18 +122,20 @@ fn main() {
     let sdl_context = sdl2::init().unwrap();
     let event_subsystem = sdl_context.event().unwrap();
     let timer_subsystem = sdl_context.timer().unwrap();
-    let mut window = Window::new(&sdl_context,
-                                 "System Syzygy",
-                                 (576, 384),
-                                 flags.ideal_size(),
-                                 flags.force_ideal(),
-                                 flags.fullscreen(save_data.prefs()));
+    let mut window = Window::new(
+        &sdl_context,
+        "System Syzygy",
+        (576, 384),
+        flags.ideal_size(),
+        flags.force_ideal(),
+        flags.fullscreen(save_data.prefs()),
+    );
     let _timer = {
         Event::register_clock_ticks(&event_subsystem);
         let callback = Box::new(|| {
-                                    Event::push_clock_tick(&event_subsystem);
-                                    FRAME_DELAY_MILLIS
-                                });
+            Event::push_clock_tick(&event_subsystem);
+            FRAME_DELAY_MILLIS
+        });
         timer_subsystem.add_timer(FRAME_DELAY_MILLIS, callback)
     };
     let mut mode = Mode::Title;
@@ -152,8 +154,10 @@ fn main() {
                         modes::run_prolog(&mut window, &mut save_data)
                     }
                     Location::ALightInTheAttic => {
-                        modes::run_a_light_in_the_attic(&mut window,
-                                                        &mut save_data)
+                        modes::run_a_light_in_the_attic(
+                            &mut window,
+                            &mut save_data,
+                        )
                     }
                     Location::AutofacTour => {
                         modes::run_autofac_tour(&mut window, &mut save_data)
@@ -161,14 +165,14 @@ fn main() {
                     Location::BlackAndBlue => {
                         modes::run_black_and_blue(&mut window, &mut save_data)
                     }
-                    Location::ColumnAsIcyEm => {
-                        modes::run_column_as_icy_em(&mut window,
-                                                    &mut save_data)
-                    }
-                    Location::ConnectTheDots => {
-                        modes::run_connect_the_dots(&mut window,
-                                                    &mut save_data)
-                    }
+                    Location::ColumnAsIcyEm => modes::run_column_as_icy_em(
+                        &mut window,
+                        &mut save_data,
+                    ),
+                    Location::ConnectTheDots => modes::run_connect_the_dots(
+                        &mut window,
+                        &mut save_data,
+                    ),
                     Location::CrossSauce => {
                         modes::run_cross_sauce(&mut window, &mut save_data)
                     }
@@ -193,10 +197,10 @@ fn main() {
                     Location::IceToMeetYou => {
                         modes::run_ice_to_meet_you(&mut window, &mut save_data)
                     }
-                    Location::IfMemoryServes => {
-                        modes::run_if_memory_serves(&mut window,
-                                                    &mut save_data)
-                    }
+                    Location::IfMemoryServes => modes::run_if_memory_serves(
+                        &mut window,
+                        &mut save_data,
+                    ),
                     Location::JogYourMemory => {
                         modes::run_jog_your_memory(&mut window, &mut save_data)
                     }
@@ -216,22 +220,26 @@ fn main() {
                         modes::run_memory_lane(&mut window, &mut save_data)
                     }
                     Location::MissedConnections => {
-                        modes::run_missed_connections(&mut window,
-                                                      &mut save_data)
+                        modes::run_missed_connections(
+                            &mut window,
+                            &mut save_data,
+                        )
                     }
                     Location::PasswordFile => {
                         modes::run_password_file(&mut window, &mut save_data)
                     }
-                    Location::PlaneAndSimple => {
-                        modes::run_plane_and_simple(&mut window,
-                                                    &mut save_data)
-                    }
+                    Location::PlaneAndSimple => modes::run_plane_and_simple(
+                        &mut window,
+                        &mut save_data,
+                    ),
                     Location::PlaneAsDay => {
                         modes::run_plane_as_day(&mut window, &mut save_data)
                     }
                     Location::PointOfNoReturn => {
-                        modes::run_point_of_no_return(&mut window,
-                                                      &mut save_data)
+                        modes::run_point_of_no_return(
+                            &mut window,
+                            &mut save_data,
+                        )
                     }
                     Location::PointOfOrder => {
                         modes::run_point_of_order(&mut window, &mut save_data)
@@ -257,10 +265,10 @@ fn main() {
                     Location::SystemSyzygy => {
                         modes::run_system_syzygy(&mut window, &mut save_data)
                     }
-                    Location::TheIceIsRight => {
-                        modes::run_the_ice_is_right(&mut window,
-                                                    &mut save_data)
-                    }
+                    Location::TheIceIsRight => modes::run_the_ice_is_right(
+                        &mut window,
+                        &mut save_data,
+                    ),
                     Location::TheYFactor => {
                         modes::run_the_y_factor(&mut window, &mut save_data)
                     }

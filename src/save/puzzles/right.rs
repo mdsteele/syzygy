@@ -19,11 +19,11 @@
 
 use toml;
 
-use crate::gui::Point;
-use crate::save::{Access, Direction, Location};
-use crate::save::ice::{BlockSlide, Object, ObjectGrid, Symbol};
-use crate::save::util::{ACCESS_KEY, Tomlable, pop_table, to_table};
 use super::PuzzleState;
+use crate::gui::Point;
+use crate::save::ice::{BlockSlide, Object, ObjectGrid, Symbol};
+use crate::save::util::{pop_table, to_table, Tomlable, ACCESS_KEY};
+use crate::save::{Access, Direction, Location};
 
 // ========================================================================= //
 
@@ -42,12 +42,19 @@ impl RightState {
         self.grid = RightState::solved_grid();
     }
 
-    pub fn grid(&self) -> &ObjectGrid { &self.grid }
+    pub fn grid(&self) -> &ObjectGrid {
+        &self.grid
+    }
 
-    pub fn grid_mut(&mut self) -> &mut ObjectGrid { &mut self.grid }
+    pub fn grid_mut(&mut self) -> &mut ObjectGrid {
+        &mut self.grid
+    }
 
-    pub fn slide_ice_block(&mut self, coords: Point, slide_dir: Direction)
-                           -> Option<BlockSlide> {
+    pub fn slide_ice_block(
+        &mut self,
+        coords: Point,
+        slide_dir: Direction,
+    ) -> Option<BlockSlide> {
         let slide = self.grid.slide_ice_block(coords, slide_dir);
         if self.grid.all_blocks_on_goals() {
             self.access = Access::Solved;
@@ -88,19 +95,31 @@ impl RightState {
         grid
     }
 
-    fn solved_grid() -> ObjectGrid { RightState::base_grid().solved() }
+    fn solved_grid() -> ObjectGrid {
+        RightState::base_grid().solved()
+    }
 }
 
 impl PuzzleState for RightState {
-    fn location() -> Location { Location::TheIceIsRight }
+    fn location() -> Location {
+        Location::TheIceIsRight
+    }
 
-    fn access(&self) -> Access { self.access }
+    fn access(&self) -> Access {
+        self.access
+    }
 
-    fn access_mut(&mut self) -> &mut Access { &mut self.access }
+    fn access_mut(&mut self) -> &mut Access {
+        &mut self.access
+    }
 
-    fn can_reset(&self) -> bool { self.grid.is_modified() }
+    fn can_reset(&self) -> bool {
+        self.grid.is_modified()
+    }
 
-    fn reset(&mut self) { self.grid = RightState::initial_grid(); }
+    fn reset(&mut self) {
+        self.grid = RightState::initial_grid();
+    }
 }
 
 impl Tomlable for RightState {
@@ -122,10 +141,7 @@ impl Tomlable for RightState {
             let grid = pop_table(&mut table, GRID_KEY);
             ObjectGrid::from_toml(grid, &RightState::initial_grid())
         };
-        RightState {
-            access: access,
-            grid: grid,
-        }
+        RightState { access, grid }
     }
 }
 
@@ -135,10 +151,10 @@ impl Tomlable for RightState {
 mod tests {
     use toml;
 
-    use crate::gui::Point;
-    use crate::save::{Access, Direction};
-    use crate::save::util::{ACCESS_KEY, Tomlable};
     use super::RightState;
+    use crate::gui::Point;
+    use crate::save::util::{Tomlable, ACCESS_KEY};
+    use crate::save::{Access, Direction};
 
     #[test]
     fn toml_round_trip() {

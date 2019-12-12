@@ -20,8 +20,8 @@
 use std::collections::HashMap;
 use toml;
 
+use crate::save::util::{to_table, Tomlable};
 use crate::save::{Direction, MixedColor};
-use crate::save::util::{Tomlable, to_table};
 
 // ========================================================================= //
 
@@ -49,8 +49,10 @@ impl DeviceGrid {
         }
     }
 
-    pub fn from_toml(array: toml::value::Array, default: &DeviceGrid)
-                     -> DeviceGrid {
+    pub fn from_toml(
+        array: toml::value::Array,
+        default: &DeviceGrid,
+    ) -> DeviceGrid {
         let mut grid = default.clone();
         grid.is_modified = true;
         let mut default_device_counts: HashMap<Device, i32> = HashMap::new();
@@ -74,8 +76,8 @@ impl DeviceGrid {
             }
             let col = coords[0];
             let row = coords[1];
-            if (col < 0 || col >= grid.num_cols) ||
-                (row < 0 || row >= grid.num_rows)
+            if (col < 0 || col >= grid.num_cols)
+                || (row < 0 || row >= grid.num_rows)
             {
                 return default.clone();
             }
@@ -106,8 +108,10 @@ impl DeviceGrid {
                         let mut coords = toml::value::Array::new();
                         coords.push(toml::Value::Integer(col as i64));
                         coords.push(toml::Value::Integer(row as i64));
-                        table.insert(COORDS_KEY.to_string(),
-                                     toml::Value::Array(coords));
+                        table.insert(
+                            COORDS_KEY.to_string(),
+                            toml::Value::Array(coords),
+                        );
                         table.insert(DEVICE_KEY.to_string(), device.to_toml());
                         table.insert(DIRECTION_KEY.to_string(), dir.to_toml());
                         array.push(toml::Value::Table(table));
@@ -118,9 +122,13 @@ impl DeviceGrid {
         toml::Value::Array(array)
     }
 
-    pub fn size(&self) -> (i32, i32) { (self.num_cols, self.num_rows) }
+    pub fn size(&self) -> (i32, i32) {
+        (self.num_cols, self.num_rows)
+    }
 
-    pub fn is_modified(&self) -> bool { self.is_modified }
+    pub fn is_modified(&self) -> bool {
+        self.is_modified
+    }
 
     pub fn set_is_modified(&mut self, is_modified: bool) {
         self.is_modified = is_modified;
@@ -177,14 +185,18 @@ impl DeviceGrid {
         }
     }
 
-    pub fn move_to(&mut self, from_col: i32, from_row: i32, to_col: i32,
-                   to_row: i32)
-                   -> bool {
-        if (from_col >= 0 && from_col < self.num_cols) &&
-            (from_row >= 0 && from_row < self.num_rows) &&
-            (to_col >= 0 && to_col < self.num_cols) &&
-            (to_row >= 0 && to_row < self.num_rows) &&
-            (from_col != to_col || from_row != to_row)
+    pub fn move_to(
+        &mut self,
+        from_col: i32,
+        from_row: i32,
+        to_col: i32,
+        to_row: i32,
+    ) -> bool {
+        if (from_col >= 0 && from_col < self.num_cols)
+            && (from_row >= 0 && from_row < self.num_rows)
+            && (to_col >= 0 && to_col < self.num_cols)
+            && (to_row >= 0 && to_row < self.num_rows)
+            && (from_col != to_col || from_row != to_row)
         {
             let from = (from_row * self.num_cols + from_col) as usize;
             let to = (to_row * self.num_cols + to_col) as usize;
@@ -318,9 +330,9 @@ impl Tomlable for Device {
 
 #[cfg(test)]
 mod tests {
-    use crate::save::Direction;
-    use crate::save::util::{Tomlable, to_array};
     use super::{Device, DeviceGrid};
+    use crate::save::util::{to_array, Tomlable};
+    use crate::save::Direction;
 
     #[test]
     fn device_toml_round_trip() {

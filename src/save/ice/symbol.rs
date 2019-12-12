@@ -19,9 +19,9 @@
 
 use toml;
 
-use crate::save::Direction;
 use crate::save::ice::Transform;
-use crate::save::util::{Tomlable, to_table};
+use crate::save::util::{to_table, Tomlable};
+use crate::save::Direction;
 
 // ========================================================================= //
 
@@ -47,8 +47,10 @@ impl Symbol {
             Symbol::GreenSquare => Symbol::GreenSquare,
             Symbol::BlueCircle => Symbol::BlueCircle,
             Symbol::YellowRhombus(vertical, mirrored) => {
-                Symbol::YellowRhombus(transform.apply_to_vertical(vertical),
-                                      transform.apply_to_mirrored(mirrored))
+                Symbol::YellowRhombus(
+                    transform.apply_to_vertical(vertical),
+                    transform.apply_to_mirrored(mirrored),
+                )
             }
             Symbol::PurpleCheckmark(trans) => {
                 Symbol::PurpleCheckmark(trans.compose(transform))
@@ -84,10 +86,10 @@ impl Symbol {
             Symbol::BlueCircle => 0,
             Symbol::YellowRhombus(false, _) => 0,
             Symbol::YellowRhombus(true, _) => 90,
-            Symbol::PurpleCheckmark(transform) |
-            Symbol::CyanQ(transform) |
-            Symbol::CyanU(transform) |
-            Symbol::CyanA(transform) => transform.degrees(),
+            Symbol::PurpleCheckmark(transform)
+            | Symbol::CyanQ(transform)
+            | Symbol::CyanU(transform)
+            | Symbol::CyanA(transform) => transform.degrees(),
             Symbol::Mirror(_) => 0,
         }
     }
@@ -98,10 +100,10 @@ impl Symbol {
             Symbol::GreenSquare => false,
             Symbol::BlueCircle => false,
             Symbol::YellowRhombus(_, mirrored) => mirrored,
-            Symbol::PurpleCheckmark(transform) |
-            Symbol::CyanQ(transform) |
-            Symbol::CyanU(transform) |
-            Symbol::CyanA(transform) => transform.is_mirrored(),
+            Symbol::PurpleCheckmark(transform)
+            | Symbol::CyanQ(transform)
+            | Symbol::CyanU(transform)
+            | Symbol::CyanA(transform) => transform.is_mirrored(),
             Symbol::Mirror(mirrored) => mirrored,
         }
     }
@@ -141,10 +143,14 @@ impl Tomlable for Symbol {
             Symbol::GreenSquare => "GS",
             Symbol::BlueCircle => "BC",
             Symbol::YellowRhombus(vertical, mirrored) => {
-                table.insert("vertical".to_string(),
-                             toml::Value::Boolean(vertical));
-                table.insert("mirrored".to_string(),
-                             toml::Value::Boolean(mirrored));
+                table.insert(
+                    "vertical".to_string(),
+                    toml::Value::Boolean(vertical),
+                );
+                table.insert(
+                    "mirrored".to_string(),
+                    toml::Value::Boolean(mirrored),
+                );
                 "YR"
             }
             Symbol::PurpleCheckmark(transform) => {
@@ -164,13 +170,17 @@ impl Tomlable for Symbol {
                 "CA"
             }
             Symbol::Mirror(mirrored) => {
-                table.insert("mirrored".to_string(),
-                             toml::Value::Boolean(mirrored));
+                table.insert(
+                    "mirrored".to_string(),
+                    toml::Value::Boolean(mirrored),
+                );
                 "M"
             }
         };
-        table.insert("shape".to_string(),
-                     toml::Value::String(shape.to_string()));
+        table.insert(
+            "shape".to_string(),
+            toml::Value::String(shape.to_string()),
+        );
         toml::Value::Table(table)
     }
 
@@ -217,10 +227,10 @@ impl Tomlable for Symbol {
 
 #[cfg(test)]
 mod tests {
-    use crate::save::Direction;
+    use super::Symbol;
     use crate::save::ice::Transform;
     use crate::save::util::Tomlable;
-    use super::Symbol;
+    use crate::save::Direction;
 
     #[test]
     fn symbol_toml_round_trip() {
@@ -233,29 +243,45 @@ mod tests {
     #[test]
     fn symbol_rotated() {
         let trans = Transform::identity().rotated_cw();
-        assert_eq!(Symbol::RedTriangle(Direction::North).transformed(trans),
-                   Symbol::RedTriangle(Direction::East));
-        assert_eq!(Symbol::GreenSquare.transformed(trans),
-                   Symbol::GreenSquare);
+        assert_eq!(
+            Symbol::RedTriangle(Direction::North).transformed(trans),
+            Symbol::RedTriangle(Direction::East)
+        );
+        assert_eq!(
+            Symbol::GreenSquare.transformed(trans),
+            Symbol::GreenSquare
+        );
         assert_eq!(Symbol::BlueCircle.transformed(trans), Symbol::BlueCircle);
-        assert_eq!(Symbol::YellowRhombus(true, true).transformed(trans),
-                   Symbol::YellowRhombus(false, true));
-        assert_eq!(Symbol::Mirror(false).transformed(trans),
-                   Symbol::Mirror(true));
+        assert_eq!(
+            Symbol::YellowRhombus(true, true).transformed(trans),
+            Symbol::YellowRhombus(false, true)
+        );
+        assert_eq!(
+            Symbol::Mirror(false).transformed(trans),
+            Symbol::Mirror(true)
+        );
     }
 
     #[test]
     fn symbol_flipped() {
         let trans = Transform::identity().flipped_vert();
-        assert_eq!(Symbol::RedTriangle(Direction::North).transformed(trans),
-                   Symbol::RedTriangle(Direction::South));
-        assert_eq!(Symbol::GreenSquare.transformed(trans),
-                   Symbol::GreenSquare);
+        assert_eq!(
+            Symbol::RedTriangle(Direction::North).transformed(trans),
+            Symbol::RedTriangle(Direction::South)
+        );
+        assert_eq!(
+            Symbol::GreenSquare.transformed(trans),
+            Symbol::GreenSquare
+        );
         assert_eq!(Symbol::BlueCircle.transformed(trans), Symbol::BlueCircle);
-        assert_eq!(Symbol::YellowRhombus(true, false).transformed(trans),
-                   Symbol::YellowRhombus(true, true));
-        assert_eq!(Symbol::Mirror(false).transformed(trans),
-                   Symbol::Mirror(true));
+        assert_eq!(
+            Symbol::YellowRhombus(true, false).transformed(trans),
+            Symbol::YellowRhombus(true, true)
+        );
+        assert_eq!(
+            Symbol::Mirror(false).transformed(trans),
+            Symbol::Mirror(true)
+        );
     }
 }
 

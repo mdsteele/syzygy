@@ -20,9 +20,9 @@
 use std::cmp::{max, min};
 use toml;
 
-use crate::save::{Access, Location};
-use crate::save::util::{ACCESS_KEY, Tomlable, to_table};
 use super::PuzzleState;
+use crate::save::util::{to_table, Tomlable, ACCESS_KEY};
+use crate::save::{Access, Location};
 
 // ========================================================================= //
 
@@ -52,11 +52,17 @@ impl BlameState {
         self.is_initial = false;
     }
 
-    pub fn num_rows() -> i32 { NUM_ROWS }
+    pub fn num_rows() -> i32 {
+        NUM_ROWS
+    }
 
     pub fn max_position_for_row(row: i32) -> i32 {
         assert!(row >= 0 && row < NUM_ROWS);
-        if row >= 5 { 9 } else { 8 }
+        if row >= 5 {
+            9
+        } else {
+            8
+        }
     }
 
     pub fn get_position(&self, row: i32) -> i32 {
@@ -68,17 +74,19 @@ impl BlameState {
         assert!(row >= 0 && row < NUM_ROWS);
         assert!(pos >= 0 && pos <= BlameState::max_position_for_row(row));
         self.positions[row as usize] = pos;
-        self.is_initial = self.mezure_row == INITIAL_MEZURE_ROW &&
-            &self.positions as &[i32] == INITIAL_POSITIONS;
+        self.is_initial = self.mezure_row == INITIAL_MEZURE_ROW
+            && &self.positions as &[i32] == INITIAL_POSITIONS;
     }
 
-    pub fn get_mezure_row(&self) -> i32 { self.mezure_row }
+    pub fn get_mezure_row(&self) -> i32 {
+        self.mezure_row
+    }
 
     pub fn set_mezure_row(&mut self, row: i32) {
         assert!(row >= MIN_MEZURE_ROW && row <= MAX_MEZURE_ROW);
         self.mezure_row = row;
-        self.is_initial = self.mezure_row == INITIAL_MEZURE_ROW &&
-            &self.positions as &[i32] == INITIAL_POSITIONS;
+        self.is_initial = self.mezure_row == INITIAL_MEZURE_ROW
+            && &self.positions as &[i32] == INITIAL_POSITIONS;
         if self.mezure_row == MIN_MEZURE_ROW {
             self.access = Access::Solved;
         }
@@ -87,8 +95,8 @@ impl BlameState {
     pub fn fall_from(&self, mut row: i32, pos: i32) -> i32 {
         row += 1;
         while row < NUM_ROWS {
-            if self.get_position(row) == pos &&
-                self.get_position(row - 1) != pos
+            if self.get_position(row) == pos
+                && self.get_position(row - 1) != pos
             {
                 break;
             }
@@ -99,13 +107,21 @@ impl BlameState {
 }
 
 impl PuzzleState for BlameState {
-    fn location() -> Location { Location::ShiftTheBlame }
+    fn location() -> Location {
+        Location::ShiftTheBlame
+    }
 
-    fn access(&self) -> Access { self.access }
+    fn access(&self) -> Access {
+        self.access
+    }
 
-    fn access_mut(&mut self) -> &mut Access { &mut self.access }
+    fn access_mut(&mut self) -> &mut Access {
+        &mut self.access
+    }
 
-    fn can_reset(&self) -> bool { !self.is_initial }
+    fn can_reset(&self) -> bool {
+        !self.is_initial
+    }
 
     fn reset(&mut self) {
         self.positions = INITIAL_POSITIONS.to_vec();
@@ -119,14 +135,19 @@ impl Tomlable for BlameState {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.is_initial && !self.is_solved() {
-            let positions = self.positions
+            let positions = self
+                .positions
                 .iter()
                 .map(|&idx| toml::Value::Integer(idx as i64))
                 .collect();
-            table.insert(POSITIONS_KEY.to_string(),
-                         toml::Value::Array(positions));
-            table.insert(MEZURE_ROW_KEY.to_string(),
-                         toml::Value::Integer(self.mezure_row as i64));
+            table.insert(
+                POSITIONS_KEY.to_string(),
+                toml::Value::Array(positions),
+            );
+            table.insert(
+                MEZURE_ROW_KEY.to_string(),
+                toml::Value::Integer(self.mezure_row as i64),
+            );
         }
         toml::Value::Table(table)
     }
@@ -149,24 +170,21 @@ impl Tomlable for BlameState {
             }
             row
         };
-        let mut positions = Vec::<i32>::pop_from_table(&mut table,
-                                                       POSITIONS_KEY);
+        let mut positions =
+            Vec::<i32>::pop_from_table(&mut table, POSITIONS_KEY);
         if positions.len() != INITIAL_POSITIONS.len() {
             positions = INITIAL_POSITIONS.to_vec();
         } else {
             for (row, position) in positions.iter_mut().enumerate() {
-                *position = min(max(0, *position),
-                                BlameState::max_position_for_row(row as i32));
+                *position = min(
+                    max(0, *position),
+                    BlameState::max_position_for_row(row as i32),
+                );
             }
         }
-        let is_initial = &positions as &[i32] == INITIAL_POSITIONS &&
-            mezure_row == INITIAL_MEZURE_ROW;
-        BlameState {
-            access: access,
-            positions: positions,
-            mezure_row: mezure_row,
-            is_initial: is_initial,
-        }
+        let is_initial = &positions as &[i32] == INITIAL_POSITIONS
+            && mezure_row == INITIAL_MEZURE_ROW;
+        BlameState { access, positions, mezure_row, is_initial }
     }
 }
 
@@ -176,10 +194,12 @@ impl Tomlable for BlameState {
 mod tests {
     use toml;
 
+    use super::{
+        BlameState, INITIAL_MEZURE_ROW, INITIAL_POSITIONS, MEZURE_ROW_KEY,
+        MIN_MEZURE_ROW, POSITIONS_KEY,
+    };
+    use crate::save::util::{Tomlable, ACCESS_KEY};
     use crate::save::{Access, PuzzleState};
-    use crate::save::util::{ACCESS_KEY, Tomlable};
-    use super::{BlameState, INITIAL_MEZURE_ROW, INITIAL_POSITIONS,
-                MEZURE_ROW_KEY, MIN_MEZURE_ROW, POSITIONS_KEY};
 
     #[test]
     fn toml_round_trip() {
@@ -222,8 +242,10 @@ mod tests {
     fn from_mezure_already_at_top_toml() {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), Access::Unsolved.to_toml());
-        table.insert(MEZURE_ROW_KEY.to_string(),
-                     toml::Value::Integer(MIN_MEZURE_ROW as i64));
+        table.insert(
+            MEZURE_ROW_KEY.to_string(),
+            toml::Value::Integer(MIN_MEZURE_ROW as i64),
+        );
         let state = BlameState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Solved);
         assert_eq!(state.mezure_row, MIN_MEZURE_ROW);
@@ -247,20 +269,28 @@ mod tests {
     #[test]
     fn from_invalid_positions_toml() {
         let mut table = toml::value::Table::new();
-        table.insert(POSITIONS_KEY.to_string(),
-                     toml::Value::Array(vec![1, 2, -3, 4, 55, 66, 77]
-                                            .into_iter()
-                                            .map(toml::Value::Integer)
-                                            .collect()));
+        table.insert(
+            POSITIONS_KEY.to_string(),
+            toml::Value::Array(
+                vec![1, 2, -3, 4, 55, 66, 77]
+                    .into_iter()
+                    .map(toml::Value::Integer)
+                    .collect(),
+            ),
+        );
         let state = BlameState::from_toml(toml::Value::Table(table));
         assert_eq!(state.positions, vec![1, 2, 0, 4, 8, 9, 9]);
 
         let mut table = toml::value::Table::new();
-        table.insert(POSITIONS_KEY.to_string(),
-                     toml::Value::Array(vec![1, 2, 3, 4, 5, 6]
-                                            .into_iter()
-                                            .map(toml::Value::Integer)
-                                            .collect()));
+        table.insert(
+            POSITIONS_KEY.to_string(),
+            toml::Value::Array(
+                vec![1, 2, 3, 4, 5, 6]
+                    .into_iter()
+                    .map(toml::Value::Integer)
+                    .collect(),
+            ),
+        );
         let state = BlameState::from_toml(toml::Value::Table(table));
         assert_eq!(&state.positions as &[i32], INITIAL_POSITIONS);
     }

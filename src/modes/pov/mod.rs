@@ -20,20 +20,24 @@
 mod scenes;
 mod view;
 
-use crate::gui::Window;
-use crate::modes::{Mode, run_puzzle};
-use crate::save::SaveData;
 use self::view::View;
+use crate::gui::Window;
+use crate::modes::{run_puzzle, Mode};
+use crate::save::SaveData;
 
 // ========================================================================= //
 
-pub fn run_point_of_view(window: &mut Window, save_data: &mut SaveData)
-                         -> Mode {
+pub fn run_point_of_view(
+    window: &mut Window,
+    save_data: &mut SaveData,
+) -> Mode {
     let view = {
         let visible_rect = window.visible_rect();
-        View::new(&mut window.resources(),
-                  visible_rect,
-                  &save_data.game_mut().point_of_view)
+        View::new(
+            &mut window.resources(),
+            visible_rect,
+            &save_data.game_mut().point_of_view,
+        )
     };
     run_puzzle(window, save_data, view)
 }

@@ -20,14 +20,16 @@
 use std::collections::HashSet;
 use toml;
 
+use super::PuzzleState;
 use crate::gui::Point;
-use crate::save::{Access, Direction, Location, MixedColor};
 use crate::save::column::Columns;
 use crate::save::device::{Device, DeviceGrid};
 use crate::save::ice::{Object, ObjectGrid, Symbol, Transform};
 use crate::save::plane::{PlaneGrid, PlaneObj};
-use crate::save::util::{ACCESS_KEY, Tomlable, pop_array, pop_table, to_table};
-use super::PuzzleState;
+use crate::save::util::{
+    pop_array, pop_table, to_table, Tomlable, ACCESS_KEY,
+};
+use crate::save::{Access, Direction, Location, MixedColor};
 
 // ========================================================================= //
 
@@ -100,7 +102,9 @@ pub enum SyzygyStage {
 }
 
 impl SyzygyStage {
-    pub fn first() -> SyzygyStage { SyzygyStage::Yttris }
+    pub fn first() -> SyzygyStage {
+        SyzygyStage::Yttris
+    }
 
     pub fn next(self) -> SyzygyStage {
         match self {
@@ -349,33 +353,57 @@ impl SyzygyState {
         }
     }
 
-    pub fn stage(&self) -> SyzygyStage { self.stage }
+    pub fn stage(&self) -> SyzygyStage {
+        self.stage
+    }
 
-    pub fn advance_stage(&mut self) { self.stage = self.stage.next(); }
+    pub fn advance_stage(&mut self) {
+        self.stage = self.stage.next();
+    }
 
-    pub fn yttris_columns(&self) -> &Columns { &self.yttris }
+    pub fn yttris_columns(&self) -> &Columns {
+        &self.yttris
+    }
 
-    pub fn yttris_columns_mut(&mut self) -> &mut Columns { &mut self.yttris }
+    pub fn yttris_columns_mut(&mut self) -> &mut Columns {
+        &mut self.yttris
+    }
 
-    fn reset_yttris(&mut self) { self.yttris.reset() }
+    fn reset_yttris(&mut self) {
+        self.yttris.reset()
+    }
 
-    pub fn argony_grid(&self) -> &ObjectGrid { &self.argony }
+    pub fn argony_grid(&self) -> &ObjectGrid {
+        &self.argony
+    }
 
-    pub fn argony_grid_mut(&mut self) -> &mut ObjectGrid { &mut self.argony }
+    pub fn argony_grid_mut(&mut self) -> &mut ObjectGrid {
+        &mut self.argony
+    }
 
     fn reset_argony(&mut self) {
         self.argony = SyzygyState::argony_initial_grid();
     }
 
-    pub fn elinsa_grid(&self) -> &PlaneGrid { &self.elinsa }
+    pub fn elinsa_grid(&self) -> &PlaneGrid {
+        &self.elinsa
+    }
 
-    pub fn elinsa_grid_mut(&mut self) -> &mut PlaneGrid { &mut self.elinsa }
+    pub fn elinsa_grid_mut(&mut self) -> &mut PlaneGrid {
+        &mut self.elinsa
+    }
 
-    fn reset_elinsa(&mut self) { self.elinsa.remove_all_pipes() }
+    fn reset_elinsa(&mut self) {
+        self.elinsa.remove_all_pipes()
+    }
 
-    pub fn ugrent_grid(&self) -> &DeviceGrid { &self.ugrent }
+    pub fn ugrent_grid(&self) -> &DeviceGrid {
+        &self.ugrent
+    }
 
-    pub fn ugrent_grid_mut(&mut self) -> &mut DeviceGrid { &mut self.ugrent }
+    pub fn ugrent_grid_mut(&mut self) -> &mut DeviceGrid {
+        &mut self.ugrent
+    }
 
     fn reset_ugrent(&mut self) {
         self.ugrent = SyzygyState::ugrent_initial_grid();
@@ -388,11 +416,13 @@ impl SyzygyState {
     }
 
     pub fn relyng_is_done(&self) -> bool {
-        self.relyng_lights.len() ==
-            (RELYNG_NUM_COLS * RELYNG_NUM_ROWS) as usize
+        self.relyng_lights.len()
+            == (RELYNG_NUM_COLS * RELYNG_NUM_ROWS) as usize
     }
 
-    pub fn relyng_next_shape(&self) -> char { self.relyng_next }
+    pub fn relyng_next_shape(&self) -> char {
+        self.relyng_next
+    }
 
     pub fn relyng_toggle(&mut self, (col, row): (i32, i32)) {
         self.relyng_toggle_shape(col, row);
@@ -451,8 +481,8 @@ impl SyzygyState {
     }
 
     fn relyng_toggle_light(&mut self, col: i32, row: i32) {
-        if (col >= 0 && col < RELYNG_NUM_COLS) &&
-            (row >= 0 && row < RELYNG_NUM_ROWS)
+        if (col >= 0 && col < RELYNG_NUM_COLS)
+            && (row >= 0 && row < RELYNG_NUM_ROWS)
         {
             let index = row * RELYNG_NUM_COLS + col;
             if !self.relyng_lights.remove(&index) {
@@ -466,11 +496,17 @@ impl SyzygyState {
         self.relyng_next = RELYNG_INIT_NEXT;
     }
 
-    pub fn mezure_lights(&self) -> &[bool; 6] { &self.mezure_lights }
+    pub fn mezure_lights(&self) -> &[bool; 6] {
+        &self.mezure_lights
+    }
 
-    pub fn mezure_satisfied(&self) -> &[bool; 6] { &self.mezure_satisfied }
+    pub fn mezure_satisfied(&self) -> &[bool; 6] {
+        &self.mezure_satisfied
+    }
 
-    pub fn mezure_columns(&self) -> &Columns { &self.mezure_columns }
+    pub fn mezure_columns(&self) -> &Columns {
+        &self.mezure_columns
+    }
 
     pub fn mezure_columns_mut(&mut self) -> &mut Columns {
         &mut self.mezure_columns
@@ -483,19 +519,25 @@ impl SyzygyState {
         }
     }
 
-    pub fn mezure_ice_grid(&self) -> &ObjectGrid { &self.mezure_ice_grid }
+    pub fn mezure_ice_grid(&self) -> &ObjectGrid {
+        &self.mezure_ice_grid
+    }
 
     pub fn mezure_ice_grid_mut(&mut self) -> &mut ObjectGrid {
         &mut self.mezure_ice_grid
     }
 
-    pub fn mezure_laser_grid(&self) -> &DeviceGrid { &self.mezure_laser_grid }
+    pub fn mezure_laser_grid(&self) -> &DeviceGrid {
+        &self.mezure_laser_grid
+    }
 
     pub fn mezure_laser_grid_mut(&mut self) -> &mut DeviceGrid {
         &mut self.mezure_laser_grid
     }
 
-    pub fn mezure_pipe_grid(&self) -> &PlaneGrid { &self.mezure_pipe_grid }
+    pub fn mezure_pipe_grid(&self) -> &PlaneGrid {
+        &self.mezure_pipe_grid
+    }
 
     pub fn mezure_pipe_grid_mut(&mut self) -> &mut PlaneGrid {
         &mut self.mezure_pipe_grid
@@ -518,10 +560,12 @@ impl SyzygyState {
                     } else {
                         Direction::East
                     };
-                    self.mezure_laser_grid.set(coords.x(),
-                                               coords.y(),
-                                               Device::Mirror,
-                                               direction);
+                    self.mezure_laser_grid.set(
+                        coords.x(),
+                        coords.y(),
+                        Device::Mirror,
+                        direction,
+                    );
                 }
                 _ => {}
             }
@@ -533,18 +577,19 @@ impl SyzygyState {
         }
     }
 
-    pub fn set_mezure_satisfied_detectors(&mut self,
-                                          positions: HashSet<(i32, i32)>) {
+    pub fn set_mezure_satisfied_detectors(
+        &mut self,
+        positions: HashSet<(i32, i32)>,
+    ) {
         self.mezure_satisfied = [false; 6];
         for row in 0..6 {
-            self.mezure_satisfied[row as usize] = positions
-                .contains(&(3, row));
+            self.mezure_satisfied[row as usize] =
+                positions.contains(&(3, row));
         }
         for index in 0..6 {
-            self.mezure_lights[index] =
-                !(self.mezure_satisfied[index] ^
-                      self.mezure_satisfied[(index + 1) % 6] ^
-                      self.mezure_satisfied[(index + 5) % 6]);
+            self.mezure_lights[index] = !(self.mezure_satisfied[index]
+                ^ self.mezure_satisfied[(index + 1) % 6]
+                ^ self.mezure_satisfied[(index + 5) % 6]);
         }
         for index in 0..6 {
             let linkages = if self.mezure_lights[index] {
@@ -563,11 +608,17 @@ impl SyzygyState {
 }
 
 impl PuzzleState for SyzygyState {
-    fn location() -> Location { Location::SystemSyzygy }
+    fn location() -> Location {
+        Location::SystemSyzygy
+    }
 
-    fn access(&self) -> Access { self.access }
+    fn access(&self) -> Access {
+        self.access
+    }
 
-    fn access_mut(&mut self) -> &mut Access { &mut self.access }
+    fn access_mut(&mut self) -> &mut Access {
+        &mut self.access
+    }
 
     fn can_reset(&self) -> bool {
         match self.stage {
@@ -577,9 +628,9 @@ impl PuzzleState for SyzygyState {
             SyzygyStage::Ugrent => self.ugrent.is_modified(),
             SyzygyStage::Relyng => !self.relyng_lights.is_empty(),
             SyzygyStage::Mezure => {
-                self.mezure_columns.can_reset() ||
-                    self.mezure_ice_grid.is_modified() ||
-                    !self.mezure_pipe_grid.pipes().is_empty()
+                self.mezure_columns.can_reset()
+                    || self.mezure_ice_grid.is_modified()
+                    || !self.mezure_pipe_grid.pipes().is_empty()
             }
         }
     }
@@ -616,50 +667,69 @@ impl Tomlable for SyzygyState {
             match self.stage {
                 SyzygyStage::Yttris => {
                     if self.yttris.can_reset() {
-                        table.insert(YTTRIS_KEY.to_string(),
-                                     self.yttris.to_toml());
+                        table.insert(
+                            YTTRIS_KEY.to_string(),
+                            self.yttris.to_toml(),
+                        );
                     }
                 }
                 SyzygyStage::Argony => {
                     if self.argony.is_modified() {
-                        table.insert(ARGONY_KEY.to_string(),
-                                     self.argony.to_toml());
+                        table.insert(
+                            ARGONY_KEY.to_string(),
+                            self.argony.to_toml(),
+                        );
                     }
                 }
                 SyzygyStage::Elinsa => {
-                    table.insert(ELINSA_KEY.to_string(),
-                                 self.elinsa.pipes_to_toml());
+                    table.insert(
+                        ELINSA_KEY.to_string(),
+                        self.elinsa.pipes_to_toml(),
+                    );
                 }
                 SyzygyStage::Ugrent => {
                     if self.ugrent.is_modified() {
-                        table.insert(UGRENT_KEY.to_string(),
-                                     self.ugrent.to_toml());
+                        table.insert(
+                            UGRENT_KEY.to_string(),
+                            self.ugrent.to_toml(),
+                        );
                     }
                 }
                 SyzygyStage::Relyng => {
-                    let lights = self.relyng_lights
+                    let lights = self
+                        .relyng_lights
                         .iter()
                         .map(|&idx| toml::Value::Integer(idx as i64))
                         .collect();
-                    table.insert(RELYNG_LIGHTS_KEY.to_string(),
-                                 toml::Value::Array(lights));
+                    table.insert(
+                        RELYNG_LIGHTS_KEY.to_string(),
+                        toml::Value::Array(lights),
+                    );
                     let mut next = String::new();
                     next.push(self.relyng_next);
-                    table.insert(RELYNG_NEXT_KEY.to_string(),
-                                 toml::Value::String(next));
+                    table.insert(
+                        RELYNG_NEXT_KEY.to_string(),
+                        toml::Value::String(next),
+                    );
                 }
                 SyzygyStage::Mezure => {
                     if self.mezure_columns.can_reset() {
-                        table.insert(MEZURE_COLUMNS_KEY.to_string(),
-                                     self.mezure_columns.to_toml());
+                        table.insert(
+                            MEZURE_COLUMNS_KEY.to_string(),
+                            self.mezure_columns.to_toml(),
+                        );
                     }
                     if self.mezure_ice_grid.is_modified() {
-                        table.insert(MEZURE_ICE_GRID_KEY.to_string(),
-                                     self.mezure_ice_grid.to_toml());
+                        table.insert(
+                            MEZURE_ICE_GRID_KEY.to_string(),
+                            self.mezure_ice_grid.to_toml(),
+                        );
                     }
                     if !self.mezure_pipe_grid.pipes().is_empty() {
-                        table.insert(MEZURE_PIPES_KEY.to_string(),
-                                     self.mezure_pipe_grid.pipes_to_toml());
+                        table.insert(
+                            MEZURE_PIPES_KEY.to_string(),
+                            self.mezure_pipe_grid.pipes_to_toml(),
+                        );
                     }
                 }
             }
@@ -671,20 +741,25 @@ impl Tomlable for SyzygyState {
         let mut table = to_table(value);
         let access = Access::pop_from_table(&mut table, ACCESS_KEY);
         let stage = SyzygyStage::pop_from_table(&mut table, STAGE_KEY);
-        let yttris = Columns::from_toml(YTTRIS_COLUMNS_SPEC,
-                                        pop_array(&mut table, YTTRIS_KEY));
-        let argony =
-            ObjectGrid::from_toml(pop_table(&mut table, ARGONY_KEY),
-                                  &SyzygyState::argony_initial_grid());
+        let yttris = Columns::from_toml(
+            YTTRIS_COLUMNS_SPEC,
+            pop_array(&mut table, YTTRIS_KEY),
+        );
+        let argony = ObjectGrid::from_toml(
+            pop_table(&mut table, ARGONY_KEY),
+            &SyzygyState::argony_initial_grid(),
+        );
         let mut elinsa = SyzygyState::elinsa_initial_grid();
         elinsa.set_pipes_from_toml(pop_array(&mut table, ELINSA_KEY));
-        let ugrent =
-            DeviceGrid::from_toml(pop_array(&mut table, UGRENT_KEY),
-                                  &SyzygyState::ugrent_initial_grid());
+        let ugrent = DeviceGrid::from_toml(
+            pop_array(&mut table, UGRENT_KEY),
+            &SyzygyState::ugrent_initial_grid(),
+        );
         let relyng_next = match table
             .get(RELYNG_NEXT_KEY)
             .and_then(toml::Value::as_str)
-            .unwrap_or("") {
+            .unwrap_or("")
+        {
             "+" => '+',
             "N" => 'N',
             "X" => 'X',
@@ -696,30 +771,32 @@ impl Tomlable for SyzygyState {
             .map(i32::from_toml)
             .filter(|&idx| 0 <= idx && idx < RELYNG_NUM_COLS * RELYNG_NUM_ROWS)
             .collect();
-        let mezure_columns = Columns::from_toml(MEZURE_COLUMNS_SPEC,
-                                                pop_array(&mut table,
-                                                          MEZURE_COLUMNS_KEY));
-        let mezure_ice_grid =
-            ObjectGrid::from_toml(pop_table(&mut table, MEZURE_ICE_GRID_KEY),
-                                  &SyzygyState::mezure_initial_ice_grid());
+        let mezure_columns = Columns::from_toml(
+            MEZURE_COLUMNS_SPEC,
+            pop_array(&mut table, MEZURE_COLUMNS_KEY),
+        );
+        let mezure_ice_grid = ObjectGrid::from_toml(
+            pop_table(&mut table, MEZURE_ICE_GRID_KEY),
+            &SyzygyState::mezure_initial_ice_grid(),
+        );
         let mut mezure_pipe_grid = SyzygyState::mezure_initial_pipe_grid();
         mezure_pipe_grid
             .set_pipes_from_toml(pop_array(&mut table, MEZURE_PIPES_KEY));
         let mut state = SyzygyState {
-            access: access,
-            stage: stage,
-            yttris: yttris,
-            argony: argony,
-            elinsa: elinsa,
-            ugrent: ugrent,
-            relyng_next: relyng_next,
-            relyng_lights: relyng_lights,
-            mezure_columns: mezure_columns,
+            access,
+            stage,
+            yttris,
+            argony,
+            elinsa,
+            ugrent,
+            relyng_next,
+            relyng_lights,
+            mezure_columns,
             mezure_lights: [true; 6],
             mezure_satisfied: [false; 6],
-            mezure_ice_grid: mezure_ice_grid,
+            mezure_ice_grid,
             mezure_laser_grid: SyzygyState::mezure_initial_laser_grid(),
-            mezure_pipe_grid: mezure_pipe_grid,
+            mezure_pipe_grid,
         };
         state.mezure_regenerate_laser_grid();
         state
@@ -730,8 +807,8 @@ impl Tomlable for SyzygyState {
 
 #[cfg(test)]
 mod tests {
-    use crate::save::util::Tomlable;
     use super::SyzygyStage;
+    use crate::save::util::Tomlable;
 
     const ALL_STAGES: &[SyzygyStage] = &[
         SyzygyStage::Yttris,

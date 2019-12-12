@@ -21,9 +21,9 @@ use std::char;
 use std::collections::HashSet;
 use toml;
 
-use crate::save::{Access, Location};
-use crate::save::util::{ACCESS_KEY, Tomlable, to_table};
 use super::PuzzleState;
+use crate::save::util::{to_table, Tomlable, ACCESS_KEY};
+use crate::save::{Access, Location};
 
 // ========================================================================= //
 
@@ -49,14 +49,18 @@ impl FictionState {
         debug_assert_eq!(&self.letters as &[char], SOLVED_LETTERS);
     }
 
-    pub fn sequence(&self) -> &Vec<i8> { &self.sequence }
+    pub fn sequence(&self) -> &Vec<i8> {
+        &self.sequence
+    }
 
     pub fn set_sequence(&mut self, sequence: Vec<i8>) {
         self.sequence = sequence;
         self.regenerate_letters_from_sequence();
     }
 
-    pub fn letters(&self) -> &Vec<char> { &self.letters }
+    pub fn letters(&self) -> &Vec<char> {
+        &self.letters
+    }
 
     pub fn has_used(&self, index: i8) -> bool {
         self.sequence.contains(&index)
@@ -81,13 +85,21 @@ impl FictionState {
 }
 
 impl PuzzleState for FictionState {
-    fn location() -> Location { Location::FactOrFiction }
+    fn location() -> Location {
+        Location::FactOrFiction
+    }
 
-    fn access(&self) -> Access { self.access }
+    fn access(&self) -> Access {
+        self.access
+    }
 
-    fn access_mut(&mut self) -> &mut Access { &mut self.access }
+    fn access_mut(&mut self) -> &mut Access {
+        &mut self.access
+    }
 
-    fn can_reset(&self) -> bool { !self.sequence.is_empty() }
+    fn can_reset(&self) -> bool {
+        !self.sequence.is_empty()
+    }
 
     fn reset(&mut self) {
         self.sequence.clear();
@@ -100,7 +112,8 @@ impl Tomlable for FictionState {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.is_solved() && !self.sequence.is_empty() {
-            let seq = self.sequence
+            let seq = self
+                .sequence
                 .iter()
                 .map(|&idx| toml::Value::Integer(idx as i64))
                 .collect();
@@ -124,11 +137,7 @@ impl Tomlable for FictionState {
                 seq
             }
         };
-        let mut state = FictionState {
-            access: access,
-            sequence: sequence,
-            letters: Vec::new(),
-        };
+        let mut state = FictionState { access, sequence, letters: Vec::new() };
         state.regenerate_letters_from_sequence();
         state
     }
@@ -185,10 +194,12 @@ fn apply_transformation(letters: &mut Vec<char>, index: i8) {
 mod tests {
     use toml;
 
+    use super::{
+        apply_transformation, FictionState, INITIAL_LETTERS, SEQUENCE_KEY,
+        SOLVED_LETTERS, SOLVED_SEQUENCE,
+    };
+    use crate::save::util::{Tomlable, ACCESS_KEY};
     use crate::save::Access;
-    use crate::save::util::{ACCESS_KEY, Tomlable};
-    use super::{FictionState, INITIAL_LETTERS, SEQUENCE_KEY, SOLVED_LETTERS,
-                SOLVED_SEQUENCE, apply_transformation};
 
     #[test]
     fn transform_letters() {
@@ -265,8 +276,10 @@ mod tests {
     #[test]
     fn from_invalid_repeat_sequence_toml() {
         let mut table = toml::value::Table::new();
-        table.insert(SEQUENCE_KEY.to_string(),
-                     toml::Value::Array(vec![toml::Value::Integer(1); 2]));
+        table.insert(
+            SEQUENCE_KEY.to_string(),
+            toml::Value::Array(vec![toml::Value::Integer(1); 2]),
+        );
         let state = FictionState::from_toml(toml::Value::Table(table));
         assert_eq!(state.sequence, vec![]);
         assert_eq!(state.letters, INITIAL_LETTERS.to_vec());
@@ -275,8 +288,10 @@ mod tests {
     #[test]
     fn from_invalid_index_sequence_toml() {
         let mut table = toml::value::Table::new();
-        table.insert(SEQUENCE_KEY.to_string(),
-                     toml::Value::Array(vec![toml::Value::Integer(5)]));
+        table.insert(
+            SEQUENCE_KEY.to_string(),
+            toml::Value::Array(vec![toml::Value::Integer(5)]),
+        );
         let state = FictionState::from_toml(toml::Value::Table(table));
         assert_eq!(state.sequence, vec![]);
         assert_eq!(state.letters, INITIAL_LETTERS.to_vec());

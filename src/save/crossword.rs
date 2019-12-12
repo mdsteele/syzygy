@@ -55,16 +55,14 @@ impl CrosswordState {
     pub fn new(valid: ValidChars, words: &[&str]) -> CrosswordState {
         let words = words.iter().map(|word| word.chars().collect()).collect();
         let is_initial = all_spaces(&words);
-        CrosswordState {
-            words: words,
-            valid: valid,
-            is_initial: is_initial,
-        }
+        CrosswordState { words, valid, is_initial }
     }
 
-    pub fn from_toml(array: toml::value::Array, valid: ValidChars,
-                     solved: &[&str])
-                     -> CrosswordState {
+    pub fn from_toml(
+        array: toml::value::Array,
+        valid: ValidChars,
+        solved: &[&str],
+    ) -> CrosswordState {
         let mut words: Vec<Vec<char>> =
             Vec::<String>::from_toml(toml::Value::Array(array))
                 .into_iter()
@@ -80,15 +78,12 @@ impl CrosswordState {
             }
         }
         let is_initial = all_spaces(&words);
-        CrosswordState {
-            words: words,
-            valid: valid,
-            is_initial: is_initial,
-        }
+        CrosswordState { words, valid, is_initial }
     }
 
     pub fn to_toml(&self) -> toml::Value {
-        let words = self.words
+        let words = self
+            .words
             .iter()
             .map(|chars| chars.iter().cloned().collect())
             .map(toml::Value::String)
@@ -96,7 +91,9 @@ impl CrosswordState {
         toml::Value::Array(words)
     }
 
-    pub fn can_reset(&self) -> bool { !self.is_initial }
+    pub fn can_reset(&self) -> bool {
+        !self.is_initial
+    }
 
     pub fn reset(&mut self) {
         for word in self.words.iter_mut() {
@@ -107,9 +104,13 @@ impl CrosswordState {
         self.is_initial = true;
     }
 
-    pub fn valid_chars(&self) -> ValidChars { self.valid }
+    pub fn valid_chars(&self) -> ValidChars {
+        self.valid
+    }
 
-    pub fn words(&self) -> &Vec<Vec<char>> { &self.words }
+    pub fn words(&self) -> &Vec<Vec<char>> {
+        &self.words
+    }
 
     pub fn words_are(&self, words: &[&str]) -> bool {
         let words: Vec<Vec<char>> =

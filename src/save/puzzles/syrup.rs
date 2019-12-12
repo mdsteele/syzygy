@@ -20,9 +20,9 @@
 use std::collections::HashSet;
 use toml;
 
-use crate::save::{Access, Location, PrimaryColor};
-use crate::save::util::{ACCESS_KEY, Tomlable, to_table};
 use super::PuzzleState;
+use crate::save::util::{to_table, Tomlable, ACCESS_KEY};
+use crate::save::{Access, Location, PrimaryColor};
 
 // ========================================================================= //
 
@@ -83,7 +83,9 @@ impl SyrupState {
         self.rebuild_grids();
     }
 
-    pub fn next_color(&self) -> PrimaryColor { self.next_color }
+    pub fn next_color(&self) -> PrimaryColor {
+        self.next_color
+    }
 
     pub fn light_colors(&self, pos: (i32, i32)) -> (bool, bool, bool) {
         let index = pos_to_index(pos).unwrap() as usize;
@@ -124,38 +126,42 @@ impl SyrupState {
             }
         }
         match self.next_color {
-            PrimaryColor::Red => {
-                rebuild_grid(&mut self.red_grid,
-                             &self.red_toggled,
-                             INITIAL_RED_GRID)
-            }
-            PrimaryColor::Green => {
-                rebuild_grid(&mut self.green_grid,
-                             &self.green_toggled,
-                             INITIAL_GREEN_GRID)
-            }
-            PrimaryColor::Blue => {
-                rebuild_grid(&mut self.blue_grid,
-                             &self.blue_toggled,
-                             INITIAL_BLUE_GRID)
-            }
+            PrimaryColor::Red => rebuild_grid(
+                &mut self.red_grid,
+                &self.red_toggled,
+                INITIAL_RED_GRID,
+            ),
+            PrimaryColor::Green => rebuild_grid(
+                &mut self.green_grid,
+                &self.green_toggled,
+                INITIAL_GREEN_GRID,
+            ),
+            PrimaryColor::Blue => rebuild_grid(
+                &mut self.blue_grid,
+                &self.blue_toggled,
+                INITIAL_BLUE_GRID,
+            ),
         }
     }
 
     fn rebuild_grids(&mut self) {
         rebuild_grid(&mut self.red_grid, &self.red_toggled, INITIAL_RED_GRID);
-        rebuild_grid(&mut self.green_grid,
-                     &self.green_toggled,
-                     INITIAL_GREEN_GRID);
-        rebuild_grid(&mut self.blue_grid,
-                     &self.blue_toggled,
-                     INITIAL_BLUE_GRID);
+        rebuild_grid(
+            &mut self.green_grid,
+            &self.green_toggled,
+            INITIAL_GREEN_GRID,
+        );
+        rebuild_grid(
+            &mut self.blue_grid,
+            &self.blue_toggled,
+            INITIAL_BLUE_GRID,
+        );
     }
 
     fn check_if_solved(&mut self) {
-        if self.red_grid.iter().all(|&r| r) &&
-            self.green_grid.iter().all(|&g| g) &&
-            self.blue_grid.iter().all(|&b| b)
+        if self.red_grid.iter().all(|&r| r)
+            && self.green_grid.iter().all(|&g| g)
+            && self.blue_grid.iter().all(|&b| b)
         {
             self.access = Access::Solved;
         }
@@ -163,17 +169,23 @@ impl SyrupState {
 }
 
 impl PuzzleState for SyrupState {
-    fn location() -> Location { Location::LightSyrup }
+    fn location() -> Location {
+        Location::LightSyrup
+    }
 
-    fn access(&self) -> Access { self.access }
+    fn access(&self) -> Access {
+        self.access
+    }
 
-    fn access_mut(&mut self) -> &mut Access { &mut self.access }
+    fn access_mut(&mut self) -> &mut Access {
+        &mut self.access
+    }
 
     fn can_reset(&self) -> bool {
-        self.next_color != Default::default() ||
-            !self.red_toggled.is_empty() ||
-            !self.green_toggled.is_empty() ||
-            !self.blue_toggled.is_empty()
+        self.next_color != Default::default()
+            || !self.red_toggled.is_empty()
+            || !self.green_toggled.is_empty()
+            || !self.blue_toggled.is_empty()
     }
 
     fn reset(&mut self) {
@@ -204,8 +216,10 @@ impl Tomlable for SyrupState {
         let table_ref = &mut table;
         let mut state = SyrupState {
             access: Access::pop_from_table(table_ref, ACCESS_KEY),
-            next_color: PrimaryColor::pop_from_table(table_ref,
-                                                     NEXT_COLOR_KEY),
+            next_color: PrimaryColor::pop_from_table(
+                table_ref,
+                NEXT_COLOR_KEY,
+            ),
             red_toggled: pop_toggled(table_ref, RED_TOGGLED_KEY),
             green_toggled: pop_toggled(table_ref, GREEN_TOGGLED_KEY),
             blue_toggled: pop_toggled(table_ref, BLUE_TOGGLED_KEY),
@@ -255,8 +269,11 @@ fn pos_to_index((col, row): (i32, i32)) -> Option<i32> {
     }
 }
 
-fn rebuild_grid(grid: &mut Vec<bool>, toggled: &HashSet<i32>,
-                initial: &[bool]) {
+fn rebuild_grid(
+    grid: &mut Vec<bool>,
+    toggled: &HashSet<i32>,
+    initial: &[bool],
+) {
     *grid = initial.iter().cloned().collect();
     for &index in toggled {
         grid[index as usize] = !grid[index as usize];
@@ -276,8 +293,11 @@ fn rebuild_grid(grid: &mut Vec<bool>, toggled: &HashSet<i32>,
     }
 }
 
-fn insert_toggled(table: &mut toml::value::Table, key: &str,
-                  toggled: &HashSet<i32>) {
+fn insert_toggled(
+    table: &mut toml::value::Table,
+    key: &str,
+    toggled: &HashSet<i32>,
+) {
     if !toggled.is_empty() {
         table.insert(key.to_string(), toggled.to_toml());
     }
@@ -295,12 +315,14 @@ fn pop_toggled(mut table: &mut toml::value::Table, key: &str) -> HashSet<i32> {
 mod tests {
     use toml;
 
+    use super::{
+        index_to_pos, pos_to_index, SyrupState, BLUE_TOGGLED_KEY,
+        GREEN_TOGGLED_KEY, INITIAL_BLUE_GRID, INITIAL_GREEN_GRID,
+        INITIAL_RED_GRID, RED_TOGGLED_KEY, SOLVED_BLUE_TOGGLED,
+        SOLVED_GREEN_TOGGLED, SOLVED_RED_TOGGLED,
+    };
+    use crate::save::util::{Tomlable, ACCESS_KEY};
     use crate::save::{Access, PrimaryColor};
-    use crate::save::util::{ACCESS_KEY, Tomlable};
-    use super::{BLUE_TOGGLED_KEY, GREEN_TOGGLED_KEY, INITIAL_BLUE_GRID,
-                INITIAL_GREEN_GRID, INITIAL_RED_GRID, RED_TOGGLED_KEY,
-                SOLVED_BLUE_TOGGLED, SOLVED_GREEN_TOGGLED,
-                SOLVED_RED_TOGGLED, SyrupState, index_to_pos, pos_to_index};
 
     #[test]
     fn index_to_pos_to_index() {
@@ -329,10 +351,14 @@ mod tests {
                 .into_iter()
                 .collect()
         );
-        assert_eq!(state.green_toggled,
-                   vec![pos_to_index((2, 2)).unwrap()].into_iter().collect());
-        assert_eq!(state.blue_toggled,
-                   vec![pos_to_index((3, 3)).unwrap()].into_iter().collect());
+        assert_eq!(
+            state.green_toggled,
+            vec![pos_to_index((2, 2)).unwrap()].into_iter().collect()
+        );
+        assert_eq!(
+            state.blue_toggled,
+            vec![pos_to_index((3, 3)).unwrap()].into_iter().collect()
+        );
         assert_eq!(state.red_grid, red_grid);
         assert_eq!(state.green_grid, green_grid);
         assert_eq!(state.blue_grid, blue_grid);
@@ -359,12 +385,18 @@ mod tests {
         let state = SyrupState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Solved);
         assert_eq!(state.next_color, PrimaryColor::Red);
-        assert_eq!(state.red_toggled,
-                   SOLVED_RED_TOGGLED.iter().cloned().collect());
-        assert_eq!(state.green_toggled,
-                   SOLVED_GREEN_TOGGLED.iter().cloned().collect());
-        assert_eq!(state.blue_toggled,
-                   SOLVED_BLUE_TOGGLED.iter().cloned().collect());
+        assert_eq!(
+            state.red_toggled,
+            SOLVED_RED_TOGGLED.iter().cloned().collect()
+        );
+        assert_eq!(
+            state.green_toggled,
+            SOLVED_GREEN_TOGGLED.iter().cloned().collect()
+        );
+        assert_eq!(
+            state.blue_toggled,
+            SOLVED_BLUE_TOGGLED.iter().cloned().collect()
+        );
         assert!(state.red_grid.iter().all(|&lit| lit));
         assert!(state.green_grid.iter().all(|&lit| lit));
         assert!(state.blue_grid.iter().all(|&lit| lit));
@@ -374,10 +406,12 @@ mod tests {
     fn from_invalid_toggled_toml() {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), Access::Unsolved.to_toml());
-        let toggled = toml::Value::Array(vec![-1, 0, 20, 21]
-                                             .into_iter()
-                                             .map(toml::Value::Integer)
-                                             .collect());
+        let toggled = toml::Value::Array(
+            vec![-1, 0, 20, 21]
+                .into_iter()
+                .map(toml::Value::Integer)
+                .collect(),
+        );
         table.insert(RED_TOGGLED_KEY.to_string(), toggled.clone());
         table.insert(GREEN_TOGGLED_KEY.to_string(), toggled.clone());
         table.insert(BLUE_TOGGLED_KEY.to_string(), toggled.clone());

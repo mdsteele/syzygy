@@ -17,14 +17,15 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
+use super::scene::{
+    AnimNode, DarkNode, JumpNode, LightNode, LoopNode, ParallelNode,
+    PlaceNode, QueueNode, RemoveNode, Scene, SceneNode, SequenceNode,
+    SetBgNode, SetPosNode, SetSpriteNode, ShakeNode, SlideNode, SoundNode,
+    SwapNode, TalkNode, WaitNode,
+};
+use super::theater::TalkPos;
 use crate::elements::Paragraph;
 use crate::gui::{Align, Point, Resources, Sound};
-use super::scene::{AnimNode, DarkNode, JumpNode, LightNode, LoopNode,
-                   ParallelNode, PlaceNode, QueueNode, RemoveNode, Scene,
-                   SceneNode, SequenceNode, SetBgNode, SetPosNode,
-                   SetSpriteNode, ShakeNode, SlideNode, SoundNode, SwapNode,
-                   TalkNode, WaitNode};
-use super::theater::TalkPos;
 
 // ========================================================================= //
 
@@ -64,22 +65,26 @@ pub enum Ast {
 
 impl Ast {
     pub fn compile_scene(resources: &mut Resources, nodes: Vec<Ast>) -> Scene {
-        Scene::new(nodes
-                       .into_iter()
-                       .map(|ast| ast.to_scene_node(resources))
-                       .collect())
+        Scene::new(
+            nodes
+                .into_iter()
+                .map(|ast| ast.to_scene_node(resources))
+                .collect(),
+        )
     }
 
     fn to_scene_node(self, resources: &mut Resources) -> Box<dyn SceneNode> {
         match self {
             Ast::Seq(asts) => {
-                let nodes = asts.into_iter()
+                let nodes = asts
+                    .into_iter()
                     .map(|ast| ast.to_scene_node(resources))
                     .collect();
                 Box::new(SequenceNode::new(nodes))
             }
             Ast::Par(asts) => {
-                let nodes = asts.into_iter()
+                let nodes = asts
+                    .into_iter()
                     .map(|ast| ast.to_scene_node(resources))
                     .collect();
                 Box::new(ParallelNode::new(nodes))
@@ -125,37 +130,32 @@ impl Ast {
                 Box::new(SetSpriteNode::new(slot, sprite))
             }
             Ast::Shake(amount) => Box::new(ShakeNode::new(amount)),
-            Ast::Slide(slot, (x, y), accel, decel, duration) => {
-                Box::new(SlideNode::new(slot,
-                                        Point::new(x, y),
-                                        accel,
-                                        decel,
-                                        duration))
-            }
+            Ast::Slide(slot, (x, y), accel, decel, duration) => Box::new(
+                SlideNode::new(slot, Point::new(x, y), accel, decel, duration),
+            ),
             Ast::Sound(sound) => Box::new(SoundNode::new(sound)),
             Ast::Swap(slot1, slot2) => Box::new(SwapNode::new(slot1, slot2)),
             Ast::Talk(slot, style, pos, text) => {
-                let (bubble_name, color, init_font, init_align) =
-                    match style {
-                        TalkStyle::Comm => {
-                            ("speech/comm", WHITE, "italic", Align::Center)
-                        }
-                        TalkStyle::Good => {
-                            ("speech/good", BLACK, "good", Align::Center)
-                        }
-                        TalkStyle::Evil => {
-                            ("speech/evil", BLACK, "evil", Align::Center)
-                        }
-                        TalkStyle::Normal => {
-                            ("speech/normal", WHITE, "roman", Align::Center)
-                        }
-                        TalkStyle::System => {
-                            ("speech/system", BLACK, "system", Align::Left)
-                        }
-                        TalkStyle::Thought => {
-                            ("speech/thought", WHITE, "roman", Align::Center)
-                        }
-                    };
+                let (bubble_name, color, init_font, init_align) = match style {
+                    TalkStyle::Comm => {
+                        ("speech/comm", WHITE, "italic", Align::Center)
+                    }
+                    TalkStyle::Good => {
+                        ("speech/good", BLACK, "good", Align::Center)
+                    }
+                    TalkStyle::Evil => {
+                        ("speech/evil", BLACK, "evil", Align::Center)
+                    }
+                    TalkStyle::Normal => {
+                        ("speech/normal", WHITE, "roman", Align::Center)
+                    }
+                    TalkStyle::System => {
+                        ("speech/system", BLACK, "system", Align::Left)
+                    }
+                    TalkStyle::Thought => {
+                        ("speech/thought", WHITE, "roman", Align::Center)
+                    }
+                };
                 let sprites = resources.get_sprites(bubble_name);
                 let paragraph =
                     Paragraph::new(resources, init_font, init_align, text);

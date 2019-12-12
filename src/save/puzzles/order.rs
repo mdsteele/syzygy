@@ -20,9 +20,9 @@
 use std::cmp;
 use toml;
 
-use crate::save::{Access, Location};
-use crate::save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
 use super::PuzzleState;
+use crate::save::util::{pop_array, to_table, Tomlable, ACCESS_KEY};
+use crate::save::{Access, Location};
 
 // ========================================================================= //
 
@@ -53,7 +53,9 @@ impl OrderState {
         self.row = SOLVED_ORDERS.len();
     }
 
-    pub fn current_row(&self) -> usize { self.row }
+    pub fn current_row(&self) -> usize {
+        self.row
+    }
 
     pub fn row_order(&self, row: usize) -> &[usize] {
         debug_assert!(row < SOLVED_ORDERS.len());
@@ -90,15 +92,25 @@ impl OrderState {
 }
 
 impl PuzzleState for OrderState {
-    fn location() -> Location { Location::PointOfOrder }
+    fn location() -> Location {
+        Location::PointOfOrder
+    }
 
-    fn access(&self) -> Access { self.access }
+    fn access(&self) -> Access {
+        self.access
+    }
 
-    fn access_mut(&mut self) -> &mut Access { &mut self.access }
+    fn access_mut(&mut self) -> &mut Access {
+        &mut self.access
+    }
 
-    fn can_reset(&self) -> bool { self.order != *INITIAL_ORDER }
+    fn can_reset(&self) -> bool {
+        self.order != *INITIAL_ORDER
+    }
 
-    fn reset(&mut self) { self.order = *INITIAL_ORDER; }
+    fn reset(&mut self) {
+        self.order = *INITIAL_ORDER;
+    }
 
     fn replay(&mut self) {
         self.access = Access::BeginReplay;
@@ -112,9 +124,12 @@ impl Tomlable for OrderState {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.is_solved() {
-            table.insert(ROW_KEY.to_string(),
-                         toml::Value::Integer(self.row as i64));
-            let order = self.order
+            table.insert(
+                ROW_KEY.to_string(),
+                toml::Value::Integer(self.row as i64),
+            );
+            let order = self
+                .order
                 .iter()
                 .map(|&idx| toml::Value::Integer(idx as i64))
                 .collect();
@@ -133,9 +148,8 @@ impl Tomlable for OrderState {
             cmp::min(cmp::max(0, row) as usize, SOLVED_ORDERS.len() - 1)
         };
         let mut order = [0; 6];
-        for (index, value) in pop_array(&mut table, ORDER_KEY)
-            .into_iter()
-            .enumerate()
+        for (index, value) in
+            pop_array(&mut table, ORDER_KEY).into_iter().enumerate()
         {
             if index >= order.len() {
                 break;
@@ -150,11 +164,7 @@ impl Tomlable for OrderState {
                 break;
             }
         }
-        OrderState {
-            access: access,
-            row: row,
-            order: order,
-        }
+        OrderState { access, row, order }
     }
 }
 
@@ -164,9 +174,11 @@ impl Tomlable for OrderState {
 mod tests {
     use toml;
 
+    use super::{
+        OrderState, INITIAL_ORDER, ORDER_KEY, ROW_KEY, SOLVED_ORDERS,
+    };
+    use crate::save::util::{Tomlable, ACCESS_KEY};
     use crate::save::Access;
-    use crate::save::util::{ACCESS_KEY, Tomlable};
-    use super::{INITIAL_ORDER, ORDER_KEY, OrderState, ROW_KEY, SOLVED_ORDERS};
 
     #[test]
     fn toml_round_trip() {

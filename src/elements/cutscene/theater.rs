@@ -57,7 +57,9 @@ impl Theater {
         self.actors.insert(slot, Actor::new(sprite, position));
     }
 
-    pub fn remove_actor(&mut self, slot: i32) { self.actors.remove(&slot); }
+    pub fn remove_actor(&mut self, slot: i32) {
+        self.actors.remove(&slot);
+    }
 
     pub fn swap_actors(&mut self, slot1: i32, slot2: i32) {
         let actor1 = self.actors.remove(&slot1);
@@ -70,8 +72,12 @@ impl Theater {
         }
     }
 
-    pub fn set_actor_anim(&mut self, slot: i32, sprites: Vec<Sprite>,
-                          slowdown: i32) {
+    pub fn set_actor_anim(
+        &mut self,
+        slot: i32,
+        sprites: Vec<Sprite>,
+        slowdown: i32,
+    ) {
         if let Some(actor) = self.actors.get_mut(&slot) {
             actor.set_anim(sprites, slowdown);
         }
@@ -93,10 +99,14 @@ impl Theater {
         }
     }
 
-    pub fn set_actor_speech(&mut self, slot: i32,
-                            bubble_sprites: Vec<Sprite>,
-                            bg_color: (u8, u8, u8), talk_pos: TalkPos,
-                            paragraph: Rc<Paragraph>) {
+    pub fn set_actor_speech(
+        &mut self,
+        slot: i32,
+        bubble_sprites: Vec<Sprite>,
+        bg_color: (u8, u8, u8),
+        talk_pos: TalkPos,
+        paragraph: Rc<Paragraph>,
+    ) {
         if let Some(actor) = self.actors.get_mut(&slot) {
             actor.set_speech(bubble_sprites, bg_color, talk_pos, paragraph);
         }
@@ -123,13 +133,17 @@ impl Theater {
         None
     }
 
-    pub fn enqueue(&mut self, entry: (i32, i32)) { self.queue.push(entry); }
+    pub fn enqueue(&mut self, entry: (i32, i32)) {
+        self.queue.push(entry);
+    }
 
     pub fn drain_queue(&mut self) -> Vec<(i32, i32)> {
         mem::replace(&mut self.queue, Vec::new())
     }
 
-    pub fn add_sound(&mut self, sound: Sound) { self.sounds.push(sound); }
+    pub fn add_sound(&mut self, sound: Sound) {
+        self.sounds.push(sound);
+    }
 
     pub fn drain_sounds(&mut self) -> Vec<Sound> {
         mem::replace(&mut self.sounds, Vec::new())
@@ -153,7 +167,9 @@ impl Theater {
         self.shake = cmp::max(self.shake, amount);
     }
 
-    pub fn set_dark(&mut self, dark: bool) { self.dark = dark; }
+    pub fn set_dark(&mut self, dark: bool) {
+        self.dark = dark;
+    }
 
     pub fn clear_screen(&self, canvas: &mut Canvas) {
         let bg_color = if let Some(ref background) = self.background {
@@ -189,10 +205,12 @@ impl Theater {
             let mut rects = vec![canvas.rect()];
             for actor in self.actors.values() {
                 if let Some(ref sprite) = actor.light {
-                    let mut rect = Rect::new(0,
-                                             0,
-                                             sprite.width() - 2,
-                                             sprite.height() - 2);
+                    let mut rect = Rect::new(
+                        0,
+                        0,
+                        sprite.width() - 2,
+                        sprite.height() - 2,
+                    );
                     rect.center_on(actor.rect().center());
                     canvas.draw_sprite(&sprite, rect.top_left());
                     remove_rect(&mut rects, rect);
@@ -228,30 +246,36 @@ fn remove_rect(rects: &mut Vec<Rect>, remove: Rect) {
     for &rect in rects.iter() {
         if let Some(inter) = rect.intersection(remove) {
             if inter.top() > rect.top() {
-                new_rects.push(Rect::new(rect.left(),
-                                         rect.top(),
-                                         rect.width(),
-                                         (inter.top() - rect.top()) as u32));
+                new_rects.push(Rect::new(
+                    rect.left(),
+                    rect.top(),
+                    rect.width(),
+                    (inter.top() - rect.top()) as u32,
+                ));
             }
             if inter.bottom() < rect.bottom() {
-                new_rects.push(Rect::new(rect.left(),
-                                         inter.bottom(),
-                                         rect.width(),
-                                         (rect.bottom() - inter.bottom()) as
-                                             u32));
+                new_rects.push(Rect::new(
+                    rect.left(),
+                    inter.bottom(),
+                    rect.width(),
+                    (rect.bottom() - inter.bottom()) as u32,
+                ));
             }
             if inter.left() > rect.left() {
-                new_rects.push(Rect::new(rect.left(),
-                                         inter.top(),
-                                         (inter.left() - rect.left()) as u32,
-                                         inter.height()));
+                new_rects.push(Rect::new(
+                    rect.left(),
+                    inter.top(),
+                    (inter.left() - rect.left()) as u32,
+                    inter.height(),
+                ));
             }
             if inter.right() < rect.right() {
-                new_rects.push(Rect::new(inter.right(),
-                                         inter.top(),
-                                         (rect.right() - inter.right()) as
-                                             u32,
-                                         inter.height()));
+                new_rects.push(Rect::new(
+                    inter.right(),
+                    inter.top(),
+                    (rect.right() - inter.right()) as u32,
+                    inter.height(),
+                ));
             }
         } else {
             new_rects.push(rect);
@@ -277,7 +301,7 @@ impl Actor {
             sprites: vec![sprite],
             anim_slowdown: 0,
             anim_step: 0,
-            position: position,
+            position,
             light: None,
             speech: None,
         }
@@ -285,10 +309,12 @@ impl Actor {
 
     fn rect(&self) -> Rect {
         let sprite = &self.sprites[0];
-        Rect::new(self.position.x() - sprite.width() as i32 / 2,
-                  self.position.y() - sprite.height() as i32,
-                  sprite.width(),
-                  sprite.height())
+        Rect::new(
+            self.position.x() - sprite.width() as i32 / 2,
+            self.position.y() - sprite.height() as i32,
+            sprite.width(),
+            sprite.height(),
+        )
     }
 
     fn set_anim(&mut self, sprites: Vec<Sprite>, slowdown: i32) {
@@ -304,17 +330,25 @@ impl Actor {
         self.anim_step = 0;
     }
 
-    fn set_speech(&mut self, bubble_sprites: Vec<Sprite>,
-                  bg_color: (u8, u8, u8), talk_pos: TalkPos,
-                  paragraph: Rc<Paragraph>) {
-        self.speech = Some(SpeechBubble::new(bubble_sprites,
-                                             bg_color,
-                                             talk_pos,
-                                             paragraph,
-                                             self.rect()));
+    fn set_speech(
+        &mut self,
+        bubble_sprites: Vec<Sprite>,
+        bg_color: (u8, u8, u8),
+        talk_pos: TalkPos,
+        paragraph: Rc<Paragraph>,
+    ) {
+        self.speech = Some(SpeechBubble::new(
+            bubble_sprites,
+            bg_color,
+            talk_pos,
+            paragraph,
+            self.rect(),
+        ));
     }
 
-    fn clear_speech(&mut self) { self.speech = None; }
+    fn clear_speech(&mut self) {
+        self.speech = None;
+    }
 
     fn draw_actor(&self, canvas: &mut Canvas, offset: Point) {
         canvas.draw_sprite(&self.sprites[0], self.rect().top_left() + offset);
@@ -357,10 +391,13 @@ struct SpeechBubble {
 }
 
 impl SpeechBubble {
-    fn new(bubble_sprites: Vec<Sprite>, bg_color: (u8, u8, u8),
-           mut positioning: TalkPos, paragraph: Rc<Paragraph>,
-           actor_rect: Rect)
-           -> SpeechBubble {
+    fn new(
+        bubble_sprites: Vec<Sprite>,
+        bg_color: (u8, u8, u8),
+        mut positioning: TalkPos,
+        paragraph: Rc<Paragraph>,
+        actor_rect: Rect,
+    ) -> SpeechBubble {
         debug_assert_eq!(bubble_sprites.len(), 5);
         if positioning == TalkPos::Auto {
             let center = actor_rect.center();
@@ -378,12 +415,14 @@ impl SpeechBubble {
                 }
             };
         }
-        let width = round_up_to_16(cmp::max(48,
-                                            paragraph.min_width() +
-                                                2 * SPEECH_MARGIN));
-        let height = round_up_to_16(cmp::max(32,
-                                             paragraph.height() as i32 +
-                                                 2 * SPEECH_MARGIN));
+        let width = round_up_to_16(cmp::max(
+            48,
+            paragraph.min_width() + 2 * SPEECH_MARGIN,
+        ));
+        let height = round_up_to_16(cmp::max(
+            32,
+            paragraph.height() as i32 + 2 * SPEECH_MARGIN,
+        ));
         let tail_x = match positioning {
             TalkPos::NW | TalkPos::NE | TalkPos::SW | TalkPos::SE => {
                 actor_rect.left() + actor_rect.width() as i32 / 2
@@ -427,12 +466,12 @@ impl SpeechBubble {
         };
         SpeechBubble {
             sprites: bubble_sprites,
-            bg_color: bg_color,
-            paragraph: paragraph,
+            bg_color,
+            paragraph,
             rect: Rect::new(left, top, width as u32, height as u32),
             tail_pos: Point::new(tail_x, tail_y),
-            tail_dir: tail_dir,
-            tail_flip_vert: tail_flip_vert,
+            tail_dir,
+            tail_flip_vert,
         }
     }
 
@@ -444,64 +483,75 @@ impl SpeechBubble {
             let bottom = self.rect.height() as i32 - 16;
             canvas.draw_sprite(&self.sprites[0], Point::new(0, 0));
             canvas.draw_sprite(&self.sprites[1], Point::new(right, 0));
-            canvas.draw_sprite_flipped(&self.sprites[1],
-                                       Point::new(0, bottom),
-                                       true,
-                                       true);
-            canvas.draw_sprite_flipped(&self.sprites[0],
-                                       Point::new(right, bottom),
-                                       true,
-                                       true);
+            canvas.draw_sprite_flipped(
+                &self.sprites[1],
+                Point::new(0, bottom),
+                true,
+                true,
+            );
+            canvas.draw_sprite_flipped(
+                &self.sprites[0],
+                Point::new(right, bottom),
+                true,
+                true,
+            );
             for col in 1..(right / 16) {
                 let x = 16 * col + 8;
-                canvas.draw_sprite_transformed(&self.sprites[2],
-                                               Point::new(x, 8),
-                                               90,
-                                               false,
-                                               true);
-                canvas.draw_sprite_transformed(&self.sprites[2],
-                                               Point::new(x, bottom + 8),
-                                               -90,
-                                               false,
-                                               true);
+                canvas.draw_sprite_transformed(
+                    &self.sprites[2],
+                    Point::new(x, 8),
+                    90,
+                    false,
+                    true,
+                );
+                canvas.draw_sprite_transformed(
+                    &self.sprites[2],
+                    Point::new(x, bottom + 8),
+                    -90,
+                    false,
+                    true,
+                );
             }
             for row in 1..(bottom / 16) {
                 let y = 16 * row + 8;
                 canvas
                     .draw_sprite_centered(&self.sprites[2], Point::new(8, y));
-                canvas.draw_sprite_rotated(&self.sprites[2],
-                                           Point::new(right + 8, y),
-                                           180);
+                canvas.draw_sprite_rotated(
+                    &self.sprites[2],
+                    Point::new(right + 8, y),
+                    180,
+                );
             }
-            canvas.fill_rect(self.bg_color,
-                             Rect::new(15,
-                                       15,
-                                       (right - 14) as u32,
-                                       (bottom - 14) as u32));
+            canvas.fill_rect(
+                self.bg_color,
+                Rect::new(15, 15, (right - 14) as u32, (bottom - 14) as u32),
+            );
         }
         // Draw tail:
-        canvas.draw_sprite_transformed(&self.sprites[4],
-                                       self.tail_pos,
-                                       self.tail_dir.degrees(),
-                                       false,
-                                       self.tail_flip_vert);
-        canvas.draw_sprite_transformed(&self.sprites[3],
-                                       self.tail_pos +
-                                           self.tail_dir.delta() * 16,
-                                       self.tail_dir.degrees(),
-                                       false,
-                                       self.tail_flip_vert);
+        canvas.draw_sprite_transformed(
+            &self.sprites[4],
+            self.tail_pos,
+            self.tail_dir.degrees(),
+            false,
+            self.tail_flip_vert,
+        );
+        canvas.draw_sprite_transformed(
+            &self.sprites[3],
+            self.tail_pos + self.tail_dir.delta() * 16,
+            self.tail_dir.degrees(),
+            false,
+            self.tail_flip_vert,
+        );
         // Draw text:
         {
             let width = self.paragraph.min_width();
             let height = self.paragraph.height();
-            let subrect =
-                Rect::new(self.rect.x() +
-                              (self.rect.width() as i32 - width) / 2,
-                          self.rect.y() +
-                              (self.rect.height() - height) as i32 / 2,
-                          width as u32,
-                          height);
+            let subrect = Rect::new(
+                self.rect.x() + (self.rect.width() as i32 - width) / 2,
+                self.rect.y() + (self.rect.height() - height) as i32 / 2,
+                width as u32,
+                height,
+            );
             self.paragraph.draw(&mut canvas.subcanvas(subrect));
         }
     }

@@ -23,10 +23,12 @@ use crate::elements;
 use crate::elements::column::ColumnsView;
 use crate::elements::lasers::LaserField;
 use crate::elements::plane::{PlaneCmd, PlaneGridView};
-use crate::gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
-          Resources, Sound, Sprite};
-use crate::save::SyzygyState;
+use crate::gui::{
+    Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
+    Sound, Sprite,
+};
 use crate::save::ice::BlockSlide;
+use crate::save::SyzygyState;
 
 // ========================================================================= //
 
@@ -53,19 +55,25 @@ pub struct MezureView {
 }
 
 impl MezureView {
-    pub fn new(resources: &mut Resources, state: &mut SyzygyState)
-               -> MezureView {
+    pub fn new(
+        resources: &mut Resources,
+        state: &mut SyzygyState,
+    ) -> MezureView {
         let mut view = MezureView {
             toggle_sprites: resources.get_sprites("light/toggle"),
             columns: ColumnsView::new(resources, 324, 236, 0),
-            ice_grid: elements::ice::GridView::new(resources,
-                                                   176,
-                                                   104,
-                                                   state.mezure_ice_grid()),
-            laser_grid: LaserField::new(resources,
-                                        176,
-                                        104,
-                                        state.mezure_laser_grid()),
+            ice_grid: elements::ice::GridView::new(
+                resources,
+                176,
+                104,
+                state.mezure_ice_grid(),
+            ),
+            laser_grid: LaserField::new(
+                resources,
+                176,
+                104,
+                state.mezure_laser_grid(),
+            ),
             pipe_grid: PlaneGridView::new(resources, 60, 104),
             font: resources.get_font("block"),
             animating_slide: false,
@@ -113,12 +121,16 @@ impl MezureView {
             let pt = Point::new(left, 232);
             canvas
                 .fill_rect(RED_HILIGHT, Rect::new(left + 4, top + 4, 24, 24));
-            canvas.draw_rect((255, 255, 255),
-                             Rect::new(left + 4, top + 3, 24, 25));
-            canvas.draw_char(&self.font,
-                             Align::Center,
-                             Point::new(left + 16, top + 25),
-                             ['S', 'Y', 'S', 'T', 'E', 'M'][column]);
+            canvas.draw_rect(
+                (255, 255, 255),
+                Rect::new(left + 4, top + 3, 24, 25),
+            );
+            canvas.draw_char(
+                &self.font,
+                Align::Center,
+                Point::new(left + 16, top + 25),
+                ['S', 'Y', 'S', 'T', 'E', 'M'][column],
+            );
             canvas.draw_sprite(&self.toggle_sprites[0], pt);
         }
     }
@@ -134,18 +146,18 @@ impl Element<SyzygyState, MezureCmd> for MezureView {
         self.laser_grid.draw_sparks(canvas);
         self.pipe_grid.draw(state.mezure_pipe_grid(), canvas);
         for column in 0..6 {
-            let sprite_index = if state.mezure_satisfied()[column] {
-                1
-            } else {
-                0
-            };
+            let sprite_index =
+                if state.mezure_satisfied()[column] { 1 } else { 0 };
             let pt = Point::new(320 + 32 * (column as i32), 232);
             canvas.draw_sprite(&self.toggle_sprites[sprite_index], pt);
         }
     }
 
-    fn handle_event(&mut self, event: &Event, state: &mut SyzygyState)
-                    -> Action<MezureCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        state: &mut SyzygyState,
+    ) -> Action<MezureCmd> {
         let mut action = {
             let subaction = {
                 let columns = state.mezure_columns_mut();
@@ -162,9 +174,8 @@ impl Element<SyzygyState, MezureCmd> for MezureView {
                 self.ice_grid.handle_event(event, grid)
             };
             if let Some(&(coords, dir)) = subaction.value() {
-                if let Some(slide) = state
-                    .mezure_ice_grid_mut()
-                    .slide_ice_block(coords, dir)
+                if let Some(slide) =
+                    state.mezure_ice_grid_mut().slide_ice_block(coords, dir)
                 {
                     state.mezure_regenerate_laser_grid();
                     action.also_play_sound(Sound::device_slide());

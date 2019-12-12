@@ -17,12 +17,12 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
+use super::scenes;
 use crate::elements::column::ColumnsView;
+use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
 use crate::gui::{Action, Canvas, Element, Event, Rect, Resources};
 use crate::modes::SOLVED_INFO_TEXT;
 use crate::save::{Game, PuzzleState, WhatchaState};
-use super::scenes;
 
 // ========================================================================= //
 
@@ -33,9 +33,11 @@ pub struct View {
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect,
-               state: &WhatchaState)
-               -> View {
+    pub fn new(
+        resources: &mut Resources,
+        visible: Rect,
+        state: &WhatchaState,
+    ) -> View {
         let mut core = {
             let fade = (FadeStyle::LeftToRight, FadeStyle::TopToBottom);
             let intro = scenes::compile_intro_scene(resources);
@@ -44,7 +46,7 @@ impl View {
         };
         core.add_extra_scene(scenes::compile_mezure_midscene(resources));
         View {
-            core: core,
+            core,
             columns: ColumnsView::new(resources, 278, 108, 0),
             show_columns: false,
         }
@@ -62,15 +64,19 @@ impl Element<Game, PuzzleCmd> for View {
         self.core.draw_front_layer(canvas, state);
     }
 
-    fn handle_event(&mut self, event: &Event, game: &mut Game)
-                    -> Action<PuzzleCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        game: &mut Game,
+    ) -> Action<PuzzleCmd> {
         let state = &mut game.whatcha_column;
         let mut action = self.core.handle_event(event, state);
-        if !action.should_stop() && self.show_columns &&
-            (event == &Event::ClockTick || !state.is_solved())
+        if !action.should_stop()
+            && self.show_columns
+            && (event == &Event::ClockTick || !state.is_solved())
         {
-            let subaction = self.columns
-                .handle_event(event, state.columns_mut());
+            let subaction =
+                self.columns.handle_event(event, state.columns_mut());
             if let Some(&(col, by)) = subaction.value() {
                 state.rotate_column(col, by);
                 if state.is_solved() {

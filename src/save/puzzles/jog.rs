@@ -21,10 +21,10 @@ use std::cmp::min;
 use std::collections::HashMap;
 use toml;
 
-use crate::save::{Access, Direction, Location};
-use crate::save::memory::{Grid, Shape};
-use crate::save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
 use super::PuzzleState;
+use crate::save::memory::{Grid, Shape};
+use crate::save::util::{pop_array, to_table, Tomlable, ACCESS_KEY};
+use crate::save::{Access, Direction, Location};
 
 // ========================================================================= //
 
@@ -81,13 +81,21 @@ impl JogState {
         self.num_removed = REMOVALS.len();
     }
 
-    pub fn total_num_steps(&self) -> usize { SHAPES.len() + REMOVALS.len() }
+    pub fn total_num_steps(&self) -> usize {
+        SHAPES.len() + REMOVALS.len()
+    }
 
-    pub fn current_step(&self) -> usize { self.num_placed + self.num_removed }
+    pub fn current_step(&self) -> usize {
+        self.num_placed + self.num_removed
+    }
 
-    pub fn grid(&self) -> &Grid { &self.grid }
+    pub fn grid(&self) -> &Grid {
+        &self.grid
+    }
 
-    pub fn grid_mut(&mut self) -> &mut Grid { &mut self.grid }
+    pub fn grid_mut(&mut self) -> &mut Grid {
+        &mut self.grid
+    }
 
     pub fn next_shape(&self) -> Option<Shape> {
         if self.num_placed < SHAPES.len() {
@@ -98,8 +106,10 @@ impl JogState {
     }
 
     pub fn try_place_shape(
-        &mut self, col: i32, row: i32)
-        -> Option<(i8, HashMap<(i32, i32), (i32, i32)>)> {
+        &mut self,
+        col: i32,
+        row: i32,
+    ) -> Option<(i8, HashMap<(i32, i32), (i32, i32)>)> {
         if let Some(shape) = self.next_shape() {
             if self.grid.try_place_shape(&shape, col, row) {
                 for &(symbol, num) in SHAPES[self.num_placed].1 {
@@ -120,8 +130,10 @@ impl JogState {
         self.grid.can_remove_symbol(symbol)
     }
 
-    pub fn remove_symbol(&mut self, symbol: i8)
-                         -> HashMap<(i32, i32), (i32, i32)> {
+    pub fn remove_symbol(
+        &mut self,
+        symbol: i8,
+    ) -> HashMap<(i32, i32), (i32, i32)> {
         let mut shifts = HashMap::new();
         assert!(symbol > 0 && symbol as i32 <= NUM_SYMBOLS);
         if self.grid.can_remove_symbol(symbol) {
@@ -142,13 +154,21 @@ impl JogState {
 }
 
 impl PuzzleState for JogState {
-    fn location() -> Location { Location::JogYourMemory }
+    fn location() -> Location {
+        Location::JogYourMemory
+    }
 
-    fn access(&self) -> Access { self.access }
+    fn access(&self) -> Access {
+        self.access
+    }
 
-    fn access_mut(&mut self) -> &mut Access { &mut self.access }
+    fn access_mut(&mut self) -> &mut Access {
+        &mut self.access
+    }
 
-    fn can_reset(&self) -> bool { self.num_placed > 0 }
+    fn can_reset(&self) -> bool {
+        self.num_placed > 0
+    }
 
     fn reset(&mut self) {
         self.grid.clear();
@@ -162,8 +182,10 @@ impl Tomlable for JogState {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.access.is_solved() {
-            table.insert(NUM_PLACED_KEY.to_string(),
-                         toml::Value::Integer(self.num_placed as i64));
+            table.insert(
+                NUM_PLACED_KEY.to_string(),
+                toml::Value::Integer(self.num_placed as i64),
+            );
             table.insert(GRID_KEY.to_string(), self.grid.to_toml());
         }
         toml::Value::Table(table)
@@ -175,12 +197,15 @@ impl Tomlable for JogState {
         let (grid, num_placed, num_removed) = if access.is_solved() {
             (Grid::new(NUM_COLS, NUM_ROWS), SHAPES.len(), REMOVALS.len())
         } else {
-            let num_placed =
-                min(u32::pop_from_table(&mut table, NUM_PLACED_KEY) as usize,
-                    SHAPES.len() - 1);
-            let grid = Grid::from_toml(NUM_COLS,
-                                       NUM_ROWS,
-                                       pop_array(&mut table, GRID_KEY));
+            let num_placed = min(
+                u32::pop_from_table(&mut table, NUM_PLACED_KEY) as usize,
+                SHAPES.len() - 1,
+            );
+            let grid = Grid::from_toml(
+                NUM_COLS,
+                NUM_ROWS,
+                pop_array(&mut table, GRID_KEY),
+            );
             let distinct = grid.num_distinct_symbols();
             if distinct <= num_placed {
                 (grid, num_placed, num_placed - distinct)
@@ -193,13 +218,7 @@ impl Tomlable for JogState {
         } else {
             SHAPES[num_placed - 1].2
         };
-        JogState {
-            access: access,
-            grid: grid,
-            num_placed: num_placed,
-            num_removed: num_removed,
-            gravity: gravity,
-        }
+        JogState { access, grid, num_placed, num_removed, gravity }
     }
 }
 
@@ -211,9 +230,9 @@ mod tests {
     use std::iter::FromIterator;
     use toml;
 
-    use crate::save::{Access, Direction, PuzzleState};
-    use crate::save::util::{ACCESS_KEY, Tomlable};
     use super::{JogState, NUM_PLACED_KEY, NUM_SYMBOLS, REMOVALS, SHAPES};
+    use crate::save::util::{Tomlable, ACCESS_KEY};
+    use crate::save::{Access, Direction, PuzzleState};
 
     #[test]
     fn steps_are_well_formed() {
@@ -223,15 +242,16 @@ mod tests {
         for &(ref shape, decay, _) in SHAPES.iter() {
             let add_symbol = shape.symbol().unwrap();
             assert!((add_symbol as i32) <= NUM_SYMBOLS);
-            assert_eq!(num_symbols_in_use
-                           .get(&add_symbol)
-                           .cloned()
-                           .unwrap_or(0),
-                       0);
+            assert_eq!(
+                num_symbols_in_use.get(&add_symbol).cloned().unwrap_or(0),
+                0
+            );
             for &(symbol, _) in decay {
-                assert!(symbol != add_symbol,
-                        "Can't decay {} while adding it.",
-                        symbol);
+                assert!(
+                    symbol != add_symbol,
+                    "Can't decay {} while adding it.",
+                    symbol
+                );
             }
             num_symbols_in_use.insert(add_symbol, shape.tiles().count());
             let mut decay_queue = VecDeque::from_iter(decay);
@@ -239,11 +259,13 @@ mod tests {
                 assert!((symbol as i32) <= NUM_SYMBOLS);
                 let old_count =
                     num_symbols_in_use.get(&symbol).cloned().unwrap_or(0);
-                assert!(old_count >= num,
-                        "Can't decay {} by {} (only {} are in use).",
-                        symbol,
-                        num,
-                        old_count);
+                assert!(
+                    old_count >= num,
+                    "Can't decay {} by {} (only {} are in use).",
+                    symbol,
+                    num,
+                    old_count
+                );
                 let new_count = old_count - num;
                 num_symbols_in_use.insert(symbol, new_count);
                 if new_count == 0 {

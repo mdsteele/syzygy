@@ -22,10 +22,12 @@ use std::cmp;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use crate::gui::{Action, Align, Canvas, Element, Event, Font, Point, Rect,
-          Resources, Sound, Sprite};
-use crate::save::Direction;
+use crate::gui::{
+    Action, Align, Canvas, Element, Event, Font, Point, Rect, Resources,
+    Sound, Sprite,
+};
 use crate::save::ice::{BlockSlide, Object, ObjectGrid, Transform};
+use crate::save::Direction;
 
 // ========================================================================= //
 
@@ -52,10 +54,7 @@ struct GridDrag {
 
 impl GridDrag {
     fn new(coords: Point, mouse_pt: Point) -> GridDrag {
-        GridDrag {
-            coords: coords,
-            from_mouse_pt: mouse_pt,
-        }
+        GridDrag { coords, from_mouse_pt: mouse_pt }
     }
 
     fn swipe(&self, to: Point) -> GridSwipe {
@@ -118,15 +117,20 @@ pub struct GridView {
 }
 
 impl GridView {
-    pub fn new(resources: &mut Resources, left: i32, top: i32,
-               grid: &ObjectGrid)
-               -> GridView {
+    pub fn new(
+        resources: &mut Resources,
+        left: i32,
+        top: i32,
+        grid: &ObjectGrid,
+    ) -> GridView {
         let (num_cols, num_rows) = grid.size();
         GridView {
-            rect: Rect::new(left,
-                            top,
-                            (num_cols * GRID_CELL_SIZE) as u32,
-                            (num_rows * GRID_CELL_SIZE) as u32),
+            rect: Rect::new(
+                left,
+                top,
+                (num_cols * GRID_CELL_SIZE) as u32,
+                (num_rows * GRID_CELL_SIZE) as u32,
+            ),
             obj_sprites: resources.get_sprites("ice/objects"),
             symbol_sprites: resources.get_sprites("ice/symbols"),
             drag: None,
@@ -136,19 +140,20 @@ impl GridView {
         }
     }
 
-    pub fn is_animating(&self) -> bool { self.animation.is_some() }
+    pub fn is_animating(&self) -> bool {
+        self.animation.is_some()
+    }
 
     pub fn animate_slide(&mut self, slide: &BlockSlide) {
         self.drag = None;
         self.animation = Some(SlideAnimation {
-                                  slide_dir: slide.direction(),
-                                  to_coords: slide.to_coords(),
-                                  remaining_dist: GRID_CELL_SIZE *
-                                      slide.distance(),
-                                  speed: SLIDE_START_SPEED,
-                                  pushed: slide.pushed(),
-                                  transform: slide.transform().inverse(),
-                              });
+            slide_dir: slide.direction(),
+            to_coords: slide.to_coords(),
+            remaining_dist: GRID_CELL_SIZE * slide.distance(),
+            speed: SLIDE_START_SPEED,
+            pushed: slide.pushed(),
+            transform: slide.transform().inverse(),
+        });
     }
 
     pub fn reset_animation(&mut self) {
@@ -161,59 +166,74 @@ impl GridView {
     }
 
     fn cell_rect(&self, coords: Point) -> Rect {
-        Rect::new(coords.x() * GRID_CELL_SIZE,
-                  coords.y() * GRID_CELL_SIZE,
-                  GRID_CELL_SIZE as u32,
-                  GRID_CELL_SIZE as u32)
+        Rect::new(
+            coords.x() * GRID_CELL_SIZE,
+            coords.y() * GRID_CELL_SIZE,
+            GRID_CELL_SIZE as u32,
+            GRID_CELL_SIZE as u32,
+        )
     }
 
-    fn draw_push_pop(&self, coords: Point, direction: Direction,
-                     canvas: &mut Canvas) {
+    fn draw_push_pop(
+        &self,
+        coords: Point,
+        direction: Direction,
+        canvas: &mut Canvas,
+    ) {
         if let Some(ref anim) = self.animation {
             if let Some(pushed) = anim.pushed {
                 if pushed == coords {
                     {
                         let rect = self.cell_rect(coords);
                         let mut canvas = canvas.subcanvas(rect);
-                        let center = canvas.rect().center() -
-                            anim.slide_dir.delta() * anim.remaining_dist;
+                        let center = canvas.rect().center()
+                            - anim.slide_dir.delta() * anim.remaining_dist;
                         self.draw_push_pop_at(center, direction, &mut canvas);
                     }
                     {
                         let rect = self.cell_rect(anim.to_coords);
                         let mut canvas = canvas.subcanvas(rect);
-                        let center = canvas.rect().center() +
-                            anim.slide_dir.delta() *
-                                cmp::max(0,
-                                         GRID_CELL_SIZE - anim.remaining_dist);
-                        self.draw_push_pop_at(center,
-                                              direction.opposite(),
-                                              &mut canvas);
+                        let center = canvas.rect().center()
+                            + anim.slide_dir.delta()
+                                * cmp::max(
+                                    0,
+                                    GRID_CELL_SIZE - anim.remaining_dist,
+                                );
+                        self.draw_push_pop_at(
+                            center,
+                            direction.opposite(),
+                            &mut canvas,
+                        );
                     }
                     return;
                 }
             }
         }
-        let center = coords * GRID_CELL_SIZE +
-            Point::new(GRID_CELL_SIZE / 2, GRID_CELL_SIZE / 2);
+        let center = coords * GRID_CELL_SIZE
+            + Point::new(GRID_CELL_SIZE / 2, GRID_CELL_SIZE / 2);
         self.draw_push_pop_at(center, direction, canvas);
     }
 
-    fn draw_push_pop_at(&self, center: Point, direction: Direction,
-                        canvas: &mut Canvas) {
-        canvas.draw_sprite_transformed(&self.obj_sprites[2],
-                                       center,
-                                       direction.degrees(),
-                                       false,
-                                       direction == Direction::South ||
-                                           direction == Direction::West);
+    fn draw_push_pop_at(
+        &self,
+        center: Point,
+        direction: Direction,
+        canvas: &mut Canvas,
+    ) {
+        canvas.draw_sprite_transformed(
+            &self.obj_sprites[2],
+            center,
+            direction.degrees(),
+            false,
+            direction == Direction::South || direction == Direction::West,
+        );
     }
 
     pub fn draw_objects(&self, grid: &ObjectGrid, canvas: &mut Canvas) {
         let mut canvas = canvas.subcanvas(self.rect);
         for (&coords, &object) in grid.objects() {
-            let center = coords * GRID_CELL_SIZE +
-                Point::new(GRID_CELL_SIZE / 2, GRID_CELL_SIZE / 2);
+            let center = coords * GRID_CELL_SIZE
+                + Point::new(GRID_CELL_SIZE / 2, GRID_CELL_SIZE / 2);
             match object {
                 Object::Gap => {}
                 Object::Wall => {
@@ -226,9 +246,11 @@ impl GridView {
                     canvas.draw_sprite_centered(&self.obj_sprites[3], center);
                 }
                 Object::Reflector(vertical) => {
-                    canvas.draw_sprite_rotated(&self.obj_sprites[4],
-                                               center,
-                                               if vertical { 90 } else { 0 });
+                    canvas.draw_sprite_rotated(
+                        &self.obj_sprites[4],
+                        center,
+                        if vertical { 90 } else { 0 },
+                    );
                 }
                 Object::Goal(symbol) => {
                     canvas.draw_sprite_transformed(
@@ -236,7 +258,8 @@ impl GridView {
                         center,
                         symbol.sprite_degrees(),
                         false,
-                        symbol.sprite_mirrored());
+                        symbol.sprite_mirrored(),
+                    );
                 }
             }
         }
@@ -245,22 +268,24 @@ impl GridView {
     pub fn draw_ice_blocks(&self, grid: &ObjectGrid, canvas: &mut Canvas) {
         let mut canvas = canvas.subcanvas(self.rect);
         for (&coords, &symbol) in grid.ice_blocks() {
-            let mut center = coords * GRID_CELL_SIZE +
-                Point::new(GRID_CELL_SIZE / 2, GRID_CELL_SIZE / 2);
+            let mut center = coords * GRID_CELL_SIZE
+                + Point::new(GRID_CELL_SIZE / 2, GRID_CELL_SIZE / 2);
             let mut symbol = symbol;
             if let Some(ref anim) = self.animation {
                 if anim.to_coords == coords {
-                    center = center -
-                        anim.slide_dir.delta() * anim.remaining_dist;
+                    center =
+                        center - anim.slide_dir.delta() * anim.remaining_dist;
                     symbol = symbol.transformed(anim.transform);
                 }
             }
             let sprite = &self.symbol_sprites[symbol.sprite_index() * 2];
-            canvas.draw_sprite_transformed(sprite,
-                                           center,
-                                           symbol.sprite_degrees(),
-                                           false,
-                                           symbol.sprite_mirrored());
+            canvas.draw_sprite_transformed(
+                sprite,
+                center,
+                symbol.sprite_degrees(),
+                false,
+                symbol.sprite_mirrored(),
+            );
             canvas.draw_sprite_centered(&self.obj_sprites[0], center);
         }
     }
@@ -273,14 +298,14 @@ impl Element<ObjectGrid, (Point, Direction)> for GridView {
         for row in 0..rows {
             for col in 0..cols {
                 match objects.get(&Point::new(col, row)) {
-                    Some(&Object::Gap) |
-                    Some(&Object::Wall) => {}
+                    Some(&Object::Gap) | Some(&Object::Wall) => {}
                     _ => {
-                        let rect =
-                            Rect::new(self.rect.left() + col * GRID_CELL_SIZE,
-                                      self.rect.top() + row * GRID_CELL_SIZE,
-                                      GRID_CELL_SIZE as u32,
-                                      GRID_CELL_SIZE as u32);
+                        let rect = Rect::new(
+                            self.rect.left() + col * GRID_CELL_SIZE,
+                            self.rect.top() + row * GRID_CELL_SIZE,
+                            GRID_CELL_SIZE as u32,
+                            GRID_CELL_SIZE as u32,
+                        );
                         canvas.fill_rect((64, 64, 96), rect);
                     }
                 }
@@ -288,43 +313,48 @@ impl Element<ObjectGrid, (Point, Direction)> for GridView {
         }
         self.draw_objects(grid, canvas);
         for (&(col, row), &letter) in self.letters.iter() {
-            let pt = Point::new(self.rect.left() + col * GRID_CELL_SIZE +
-                                    GRID_CELL_SIZE / 2,
-                                self.rect.top() + row * GRID_CELL_SIZE +
-                                    GRID_CELL_SIZE / 2 +
-                                    9);
+            let pt = Point::new(
+                self.rect.left() + col * GRID_CELL_SIZE + GRID_CELL_SIZE / 2,
+                self.rect.top()
+                    + row * GRID_CELL_SIZE
+                    + GRID_CELL_SIZE / 2
+                    + 9,
+            );
             canvas.draw_char(&self.font, Align::Center, pt, letter);
         }
         self.draw_ice_blocks(grid, canvas);
     }
 
-    fn handle_event(&mut self, event: &Event, grid: &mut ObjectGrid)
-                    -> Action<(Point, Direction)> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        grid: &mut ObjectGrid,
+    ) -> Action<(Point, Direction)> {
         match event {
             &Event::ClockTick => {
                 if let Some(mut anim) = self.animation.take() {
                     let old_dist = anim.cell_dist();
                     anim.remaining_dist -= anim.speed;
-                    anim.speed = cmp::min(anim.speed + SLIDE_ACCEL,
-                                          SLIDE_MAX_SPEED);
+                    anim.speed =
+                        cmp::min(anim.speed + SLIDE_ACCEL, SLIDE_MAX_SPEED);
                     let mut action = Action::redraw();
                     if anim.remaining_dist > 0 {
                         let new_dist = anim.cell_dist();
                         if new_dist != old_dist {
-                            let coords = anim.to_coords -
-                                anim.slide_dir.delta() * new_dist;
+                            let coords = anim.to_coords
+                                - anim.slide_dir.delta() * new_dist;
                             match grid.objects().get(&coords) {
                                 Some(&Object::Rotator) => {
-                                    anim.transform = anim.transform
-                                        .rotated_cw()
+                                    anim.transform =
+                                        anim.transform.rotated_cw()
                                 }
                                 Some(&Object::Reflector(false)) => {
-                                    anim.transform = anim.transform
-                                        .flipped_horz()
+                                    anim.transform =
+                                        anim.transform.flipped_horz()
                                 }
                                 Some(&Object::Reflector(true)) => {
-                                    anim.transform = anim.transform
-                                        .flipped_vert()
+                                    anim.transform =
+                                        anim.transform.flipped_vert()
                                 }
                                 _ => {}
                             }

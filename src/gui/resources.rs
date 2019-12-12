@@ -38,9 +38,10 @@ pub struct Resources<'a> {
 }
 
 impl<'a> Resources<'a> {
-    pub fn new(renderer: &'a SdlCanvas<SdlWindow>,
-               cache: &'a mut ResourceCache)
-               -> Resources<'a> {
+    pub fn new(
+        renderer: &'a SdlCanvas<SdlWindow>,
+        cache: &'a mut ResourceCache,
+    ) -> Resources<'a> {
         Resources { renderer, cache }
     }
 
@@ -76,8 +77,11 @@ impl ResourceCache {
         }
     }
 
-    fn get_background(&mut self, renderer: &SdlCanvas<SdlWindow>, name: &str)
-                      -> Rc<Background> {
+    fn get_background(
+        &mut self,
+        renderer: &SdlCanvas<SdlWindow>,
+        name: &str,
+    ) -> Rc<Background> {
         if let Some(background) = self.backgrounds.get(name) {
             return background.clone();
         }
@@ -90,14 +94,18 @@ impl ResourceCache {
         let background = Rc::new(
             Background::load(&path, file, |name| {
                 self.get_sprites(renderer, &format!("tiles/{}", name))
-            }).expect(name),
+            })
+            .expect(name),
         );
         self.backgrounds.insert(name.to_string(), background.clone());
         background
     }
 
-    fn get_font(&mut self, renderer: &SdlCanvas<SdlWindow>, name: &str)
-                -> Rc<Font> {
+    fn get_font(
+        &mut self,
+        renderer: &SdlCanvas<SdlWindow>,
+        name: &str,
+    ) -> Rc<Font> {
         if let Some(font) = self.fonts.get(name) {
             return font.clone();
         }
@@ -111,8 +119,11 @@ impl ResourceCache {
         font
     }
 
-    fn get_sprites(&mut self, renderer: &SdlCanvas<SdlWindow>, name: &str)
-                   -> Vec<Sprite> {
+    fn get_sprites(
+        &mut self,
+        renderer: &SdlCanvas<SdlWindow>,
+        name: &str,
+    ) -> Vec<Sprite> {
         if let Some(vec) = self.sprites.get(name) {
             return vec.clone();
         }
@@ -130,14 +141,18 @@ impl ResourceCache {
 
 // ========================================================================= //
 
-fn load_ahf_from_file(loader: &ResourceLoader, path: &Path)
-                      -> io::Result<ahi::Font> {
+fn load_ahf_from_file(
+    loader: &ResourceLoader,
+    path: &Path,
+) -> io::Result<ahi::Font> {
     let mut file = loader.load(path)?;
     ahi::Font::read(&mut file)
 }
 
-fn load_ahi_from_file(loader: &ResourceLoader, path: &Path)
-                      -> io::Result<Vec<ahi::Image>> {
+fn load_ahi_from_file(
+    loader: &ResourceLoader,
+    path: &Path,
+) -> io::Result<Vec<ahi::Image>> {
     let mut file = loader.load(path)?;
     ahi::Image::read_all(&mut file)
 }

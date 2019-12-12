@@ -21,8 +21,8 @@ use rand;
 use std::collections::{HashMap, HashSet};
 use toml;
 
-use crate::save::Direction;
 use crate::save::util::Tomlable;
+use crate::save::Direction;
 
 // ========================================================================= //
 
@@ -36,11 +36,7 @@ impl Shape {
 
     pub fn tiles(&self) -> TilesIter {
         let &Shape(ref values) = self;
-        TilesIter {
-            values: values,
-            width: 3,
-            index: 0,
-        }
+        TilesIter { values, width: 3, index: 0 }
     }
 }
 
@@ -54,41 +50,38 @@ pub struct Grid {
 
 impl Grid {
     pub fn new(width: usize, height: usize) -> Grid {
-        Grid {
-            width: width,
-            height: height,
-            values: vec![0; width * height],
-        }
+        Grid { width, height, values: vec![0; width * height] }
     }
 
-    pub fn from_toml(width: usize, height: usize, array: toml::value::Array)
-                     -> Grid {
+    pub fn from_toml(
+        width: usize,
+        height: usize,
+        array: toml::value::Array,
+    ) -> Grid {
         let mut values = Vec::<i8>::from_toml(toml::Value::Array(array));
         values.resize(width * height, 0);
-        Grid {
-            width: width,
-            height: height,
-            values: values,
-        }
+        Grid { width, height, values }
     }
 
     pub fn to_toml(&self) -> toml::Value {
-        toml::Value::Array(self.values
-                               .iter()
-                               .map(|&val| toml::Value::Integer(val as i64))
-                               .collect())
+        toml::Value::Array(
+            self.values
+                .iter()
+                .map(|&val| toml::Value::Integer(val as i64))
+                .collect(),
+        )
     }
 
-    pub fn num_cols(&self) -> i32 { self.width as i32 }
+    pub fn num_cols(&self) -> i32 {
+        self.width as i32
+    }
 
-    pub fn num_rows(&self) -> i32 { self.height as i32 }
+    pub fn num_rows(&self) -> i32 {
+        self.height as i32
+    }
 
     pub fn tiles(&self) -> TilesIter {
-        TilesIter {
-            values: &self.values,
-            width: self.width,
-            index: 0,
-        }
+        TilesIter { values: &self.values, width: self.width, index: 0 }
     }
 
     pub fn num_distinct_symbols(&self) -> usize {
@@ -100,11 +93,15 @@ impl Grid {
     }
 
     pub fn symbol_at(&self, col: i32, row: i32) -> Option<i8> {
-        if (col >= 0 && col < self.num_cols()) &&
-            (row >= 0 && row < self.num_rows())
+        if (col >= 0 && col < self.num_cols())
+            && (row >= 0 && row < self.num_rows())
         {
             let value = self.values[row as usize * self.width + col as usize];
-            if value == 0 { None } else { Some(value.abs()) }
+            if value == 0 {
+                None
+            } else {
+                Some(value.abs())
+            }
         } else {
             None
         }
@@ -116,14 +113,18 @@ impl Grid {
         }
     }
 
-    pub fn try_place_shape(&mut self, shape: &Shape, col: i32, row: i32)
-                           -> bool {
+    pub fn try_place_shape(
+        &mut self,
+        shape: &Shape,
+        col: i32,
+        row: i32,
+    ) -> bool {
         let mut symbols: Vec<(i8, usize)> = Vec::new();
         for ((shape_col, shape_row), symbol) in shape.tiles() {
             let col = col + shape_col;
             let row = row + shape_row;
-            if (col < 0 || col >= self.num_cols()) ||
-                (row < 0 || row >= self.num_rows())
+            if (col < 0 || col >= self.num_cols())
+                || (row < 0 || row >= self.num_rows())
             {
                 return false;
             }
@@ -165,16 +166,20 @@ impl Grid {
                 indices.push(index);
             }
         }
-        let sample = rand::seq::sample_slice(&mut rand::thread_rng(),
-                                             &indices,
-                                             indices.len().min(num));
+        let sample = rand::seq::sample_slice(
+            &mut rand::thread_rng(),
+            &indices,
+            indices.len().min(num),
+        );
         for index in sample {
             self.values[index] = -self.values[index];
         }
     }
 
-    pub fn shift_tiles(&mut self, direction: Direction)
-                       -> HashMap<(i32, i32), (i32, i32)> {
+    pub fn shift_tiles(
+        &mut self,
+        direction: Direction,
+    ) -> HashMap<(i32, i32), (i32, i32)> {
         let mut shifts = HashMap::new();
         if direction.is_vertical() {
             let mut col_values = Vec::with_capacity(self.width);
@@ -201,8 +206,10 @@ impl Grid {
                 for &(value, old_row) in values.iter() {
                     self.values[row * self.width + col] = value;
                     if row != old_row {
-                        shifts.insert((col as i32, row as i32),
-                                      (col as i32, old_row as i32));
+                        shifts.insert(
+                            (col as i32, row as i32),
+                            (col as i32, old_row as i32),
+                        );
                     }
                     row += 1;
                 }
@@ -232,8 +239,10 @@ impl Grid {
                 for &(value, old_col) in values.iter() {
                     self.values[row * self.width + col] = value;
                     if col != old_col {
-                        shifts.insert((col as i32, row as i32),
-                                      (old_col as i32, row as i32));
+                        shifts.insert(
+                            (col as i32, row as i32),
+                            (old_col as i32, row as i32),
+                        );
                     }
                     col += 1;
                 }

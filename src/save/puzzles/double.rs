@@ -21,9 +21,9 @@ use std::cmp::{max, min};
 use std::collections::HashSet;
 use toml;
 
-use crate::save::{Access, Location};
-use crate::save::util::{ACCESS_KEY, Tomlable, to_table};
 use super::PuzzleState;
+use crate::save::util::{to_table, Tomlable, ACCESS_KEY};
+use crate::save::{Access, Location};
 
 // ========================================================================= //
 
@@ -79,13 +79,18 @@ impl DoubleState {
         self.current = 0;
     }
 
-    pub fn total_num_clues(&self) -> u32 { WORD_CLUES.len() as u32 }
+    pub fn total_num_clues(&self) -> u32 {
+        WORD_CLUES.len() as u32
+    }
 
-    pub fn num_clues_done(&self) -> u32 { self.done.len() as u32 }
+    pub fn num_clues_done(&self) -> u32 {
+        self.done.len() as u32
+    }
 
     pub fn current_clue(&self) -> &'static str {
-        debug_assert!(self.current >= 0 &&
-                          self.current < WORD_CLUES.len() as i32);
+        debug_assert!(
+            self.current >= 0 && self.current < WORD_CLUES.len() as i32
+        );
         WORD_CLUES[self.current as usize].1
     }
 
@@ -142,13 +147,21 @@ impl DoubleState {
 }
 
 impl PuzzleState for DoubleState {
-    fn location() -> Location { Location::DoubleCross }
+    fn location() -> Location {
+        Location::DoubleCross
+    }
 
-    fn access(&self) -> Access { self.access }
+    fn access(&self) -> Access {
+        self.access
+    }
 
-    fn access_mut(&mut self) -> &mut Access { &mut self.access }
+    fn access_mut(&mut self) -> &mut Access {
+        &mut self.access
+    }
 
-    fn can_reset(&self) -> bool { false }
+    fn can_reset(&self) -> bool {
+        false
+    }
 
     fn reset(&mut self) {
         self.done.clear();
@@ -161,11 +174,14 @@ impl Tomlable for DoubleState {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.access.is_solved() {
-            table.insert(CURRENT_KEY.to_string(),
-                         toml::Value::Integer(self.current as i64));
+            table.insert(
+                CURRENT_KEY.to_string(),
+                toml::Value::Integer(self.current as i64),
+            );
             let mut done: Vec<i32> = self.done.iter().cloned().collect();
             done.sort();
-            let done = done.into_iter()
+            let done = done
+                .into_iter()
                 .map(|idx| toml::Value::Integer(idx as i64))
                 .collect();
             table.insert(DONE_KEY.to_string(), toml::Value::Array(done));
@@ -190,14 +206,12 @@ impl Tomlable for DoubleState {
         let current = if access.is_solved() {
             0
         } else {
-            min(max(0, i32::pop_from_table(&mut table, CURRENT_KEY)),
-                num_clues - 1)
+            min(
+                max(0, i32::pop_from_table(&mut table, CURRENT_KEY)),
+                num_clues - 1,
+            )
         };
-        let mut state = DoubleState {
-            access: access,
-            done: done,
-            current: current,
-        };
+        let mut state = DoubleState { access, done, current };
         if !state.is_solved() && state.done.contains(&state.current) {
             state.go_next();
         }
@@ -211,9 +225,9 @@ impl Tomlable for DoubleState {
 mod tests {
     use toml;
 
+    use super::{DoubleState, CURRENT_KEY, DONE_KEY, WORD_CLUES};
+    use crate::save::util::{Tomlable, ACCESS_KEY};
     use crate::save::Access;
-    use crate::save::util::{ACCESS_KEY, Tomlable};
-    use super::{CURRENT_KEY, DONE_KEY, DoubleState, WORD_CLUES};
 
     #[test]
     fn toml_round_trip() {
@@ -253,8 +267,10 @@ mod tests {
     fn from_invalid_current_toml() {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), Access::Unsolved.to_toml());
-        table.insert(CURRENT_KEY.to_string(),
-                     toml::Value::Integer(WORD_CLUES.len() as i64));
+        table.insert(
+            CURRENT_KEY.to_string(),
+            toml::Value::Integer(WORD_CLUES.len() as i64),
+        );
 
         let state = DoubleState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Unsolved);
@@ -267,10 +283,12 @@ mod tests {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), Access::Unsolved.to_toml());
         let done = vec![-1, 0, 5, WORD_CLUES.len() as i64];
-        table.insert(DONE_KEY.to_string(),
-                     toml::Value::Array(done.into_iter()
-                                            .map(toml::Value::Integer)
-                                            .collect()));
+        table.insert(
+            DONE_KEY.to_string(),
+            toml::Value::Array(
+                done.into_iter().map(toml::Value::Integer).collect(),
+            ),
+        );
 
         let state = DoubleState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Unsolved);
@@ -302,10 +320,14 @@ mod tests {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), Access::Unsolved.to_toml());
         table.insert(CURRENT_KEY.to_string(), toml::Value::Integer(5));
-        table.insert(DONE_KEY.to_string(),
-                     toml::Value::Array((0..(WORD_CLUES.len() as i64))
-                                            .map(toml::Value::Integer)
-                                            .collect()));
+        table.insert(
+            DONE_KEY.to_string(),
+            toml::Value::Array(
+                (0..(WORD_CLUES.len() as i64))
+                    .map(toml::Value::Integer)
+                    .collect(),
+            ),
+        );
 
         let state = DoubleState::from_toml(toml::Value::Table(table));
         assert_eq!(state.access, Access::Solved);

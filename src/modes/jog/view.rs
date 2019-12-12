@@ -17,12 +17,14 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use crate::elements::{FadeStyle, ProgressBar, PuzzleCmd, PuzzleCore, PuzzleView};
-use crate::elements::memory::{FLIP_SLOWDOWN, MemoryGridView, NextShapeView};
+use super::scenes;
+use crate::elements::memory::{MemoryGridView, NextShapeView, FLIP_SLOWDOWN};
+use crate::elements::{
+    FadeStyle, ProgressBar, PuzzleCmd, PuzzleCore, PuzzleView,
+};
 use crate::gui::{Action, Canvas, Element, Event, Rect, Resources, Sound};
 use crate::modes::SOLVED_INFO_TEXT;
 use crate::save::{Direction, Game, JogState, PuzzleState};
-use super::scenes;
 
 // ========================================================================= //
 
@@ -42,8 +44,11 @@ pub struct View {
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect, state: &JogState)
-               -> View {
+    pub fn new(
+        resources: &mut Resources,
+        visible: Rect,
+        state: &JogState,
+    ) -> View {
         let mut core = {
             let fade = (FadeStyle::LeftToRight, FadeStyle::RightToLeft);
             let intro = scenes::compile_intro_scene(resources);
@@ -53,16 +58,20 @@ impl View {
         core.add_extra_scene(scenes::compile_argony_midscene(resources));
         core.add_extra_scene(scenes::compile_yttris_midscene(resources));
         View {
-            core: core,
-            grid: MemoryGridView::new(resources,
-                                      "memory/jog",
-                                      (352, 80),
-                                      state.grid()),
+            core,
+            grid: MemoryGridView::new(
+                resources,
+                "memory/jog",
+                (352, 80),
+                state.grid(),
+            ),
             next: NextShapeView::new(resources, "memory/jog", (192, 208)),
-            progress: ProgressBar::new((160, 224),
-                                       Direction::North,
-                                       64,
-                                       (191, 191, 0)),
+            progress: ProgressBar::new(
+                (160, 224),
+                Direction::North,
+                64,
+                (191, 191, 0),
+            ),
             progress_adjust: 0,
             remove_countdown: 0,
             show_next: false,
@@ -87,8 +96,11 @@ impl Element<Game, PuzzleCmd> for View {
         self.core.draw_front_layer(canvas, state);
     }
 
-    fn handle_event(&mut self, event: &Event, game: &mut Game)
-                    -> Action<PuzzleCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        game: &mut Game,
+    ) -> Action<PuzzleCmd> {
         let state = &mut game.jog_your_memory;
         let mut action = self.core.handle_event(event, state);
         if event == &Event::ClockTick && self.remove_countdown > 0 {
@@ -115,16 +127,16 @@ impl Element<Game, PuzzleCmd> for View {
                 action.also_redraw();
             }
         }
-        if (!action.should_stop() && self.remove_countdown == 0 &&
-                !self.grid.is_shifting()) ||
-            event == &Event::ClockTick
+        if (!action.should_stop()
+            && self.remove_countdown == 0
+            && !self.grid.is_shifting())
+            || event == &Event::ClockTick
         {
-            let subaction = self.next
-                .handle_event(event, &mut state.next_shape());
+            let subaction =
+                self.next.handle_event(event, &mut state.next_shape());
             if let Some(&pt) = subaction.value() {
                 let (col, row) = self.grid.coords_for_point(pt);
-                if let Some((symbol, shifts)) =
-                    state.try_place_shape(col, row)
+                if let Some((symbol, shifts)) = state.try_place_shape(col, row)
                 {
                     action.also_play_sound(Sound::device_drop());
                     self.grid.place_symbol(symbol);
@@ -133,9 +145,10 @@ impl Element<Game, PuzzleCmd> for View {
             }
             action.merge(subaction.but_no_value());
         }
-        if (!action.should_stop() && self.remove_countdown == 0 &&
-                !self.grid.is_shifting()) ||
-            event == &Event::ClockTick
+        if (!action.should_stop()
+            && self.remove_countdown == 0
+            && !self.grid.is_shifting())
+            || event == &Event::ClockTick
         {
             let subaction = self.grid.handle_event(event, state.grid_mut());
             if let Some(&symbol) = subaction.value() {

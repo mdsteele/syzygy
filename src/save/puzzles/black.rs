@@ -19,10 +19,10 @@
 
 use toml;
 
-use crate::save::{Access, Location};
-use crate::save::tree::{RedBlackTree, TreeOp};
-use crate::save::util::{ACCESS_KEY, Tomlable, to_table};
 use super::PuzzleState;
+use crate::save::tree::{RedBlackTree, TreeOp};
+use crate::save::util::{to_table, Tomlable, ACCESS_KEY};
+use crate::save::{Access, Location};
 
 // ========================================================================= //
 
@@ -71,7 +71,9 @@ impl BlackState {
         debug_assert!(self.is_solved());
     }
 
-    pub fn tree(&self) -> &RedBlackTree { &self.tree }
+    pub fn tree(&self) -> &RedBlackTree {
+        &self.tree
+    }
 
     pub fn signature(&self) -> [i8; 15] {
         let mut signature: [i8; 15] = [-128; 15];
@@ -148,13 +150,21 @@ impl BlackState {
 }
 
 impl PuzzleState for BlackState {
-    fn location() -> Location { Location::BlackAndBlue }
+    fn location() -> Location {
+        Location::BlackAndBlue
+    }
 
-    fn access(&self) -> Access { self.access }
+    fn access(&self) -> Access {
+        self.access
+    }
 
-    fn access_mut(&mut self) -> &mut Access { &mut self.access }
+    fn access_mut(&mut self) -> &mut Access {
+        &mut self.access
+    }
 
-    fn can_reset(&self) -> bool { !self.is_initial }
+    fn can_reset(&self) -> bool {
+        !self.is_initial
+    }
 
     fn reset(&mut self) {
         self.tree = BlackState::initial_tree();
@@ -179,18 +189,15 @@ impl Tomlable for BlackState {
         let num_keys = tree.len();
         if num_keys < MIN_KEYS_ON_TREE || num_keys > TOTAL_NUM_KEYS {
             tree = BlackState::initial_tree();
-        } else if tree.keys()
-                   .into_iter()
-                   .any(|key| key < MIN_KEY || key > MAX_KEY)
+        } else if tree
+            .keys()
+            .into_iter()
+            .any(|key| key < MIN_KEY || key > MAX_KEY)
         {
             tree = BlackState::initial_tree();
         }
         let is_initial = tree == BlackState::initial_tree();
-        let mut state = BlackState {
-            access: access,
-            tree: tree,
-            is_initial: is_initial,
-        };
+        let mut state = BlackState { access, tree, is_initial };
         if state.is_solved() {
             if !state.check_if_solved() {
                 state.solve();
@@ -208,9 +215,9 @@ impl Tomlable for BlackState {
 mod tests {
     use toml;
 
-    use crate::save::Access;
-    use crate::save::util::{ACCESS_KEY, Tomlable};
     use super::{BlackState, SOLVED_SIGNATURE};
+    use crate::save::util::{Tomlable, ACCESS_KEY};
+    use crate::save::Access;
 
     #[test]
     fn toml_round_trip() {

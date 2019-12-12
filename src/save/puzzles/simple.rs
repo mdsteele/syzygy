@@ -19,11 +19,11 @@
 
 use toml;
 
-use crate::gui::Point;
-use crate::save::{Access, Location};
-use crate::save::plane::{PlaneGrid, PlaneObj};
-use crate::save::util::{ACCESS_KEY, Tomlable, pop_array, to_table};
 use super::PuzzleState;
+use crate::gui::Point;
+use crate::save::plane::{PlaneGrid, PlaneObj};
+use crate::save::util::{pop_array, to_table, Tomlable, ACCESS_KEY};
+use crate::save::{Access, Location};
 
 // ========================================================================= //
 
@@ -99,9 +99,13 @@ impl SimpleState {
         debug_assert!(self.grid.all_nodes_are_connected());
     }
 
-    pub fn grid(&self) -> &PlaneGrid { &self.grid }
+    pub fn grid(&self) -> &PlaneGrid {
+        &self.grid
+    }
 
-    pub fn grid_mut(&mut self) -> &mut PlaneGrid { &mut self.grid }
+    pub fn grid_mut(&mut self) -> &mut PlaneGrid {
+        &mut self.grid
+    }
 
     pub fn advance_stage_if_done(&mut self) -> bool {
         if !self.grid.all_nodes_are_connected() {
@@ -171,15 +175,25 @@ impl SimpleState {
 }
 
 impl PuzzleState for SimpleState {
-    fn location() -> Location { Location::PlaneAndSimple }
+    fn location() -> Location {
+        Location::PlaneAndSimple
+    }
 
-    fn access(&self) -> Access { self.access }
+    fn access(&self) -> Access {
+        self.access
+    }
 
-    fn access_mut(&mut self) -> &mut Access { &mut self.access }
+    fn access_mut(&mut self) -> &mut Access {
+        &mut self.access
+    }
 
-    fn can_reset(&self) -> bool { !self.grid.pipes().is_empty() }
+    fn can_reset(&self) -> bool {
+        !self.grid.pipes().is_empty()
+    }
 
-    fn reset(&mut self) { self.grid.remove_all_pipes(); }
+    fn reset(&mut self) {
+        self.grid.remove_all_pipes();
+    }
 
     fn replay(&mut self) {
         self.grid = SimpleState::initial_grid();
@@ -193,8 +207,10 @@ impl Tomlable for SimpleState {
         let mut table = toml::value::Table::new();
         table.insert(ACCESS_KEY.to_string(), self.access.to_toml());
         if !self.is_solved() {
-            table.insert(STAGE_KEY.to_string(),
-                         toml::Value::Integer(self.stage as i64));
+            table.insert(
+                STAGE_KEY.to_string(),
+                toml::Value::Integer(self.stage as i64),
+            );
             table.insert(PIPES_KEY.to_string(), self.grid.pipes_to_toml());
         }
         toml::Value::Table(table)
@@ -204,7 +220,7 @@ impl Tomlable for SimpleState {
         let mut table = to_table(value);
         let access = Access::pop_from_table(&mut table, ACCESS_KEY);
         let mut state = SimpleState {
-            access: access,
+            access,
             grid: SimpleState::initial_grid(),
             stage: FIRST_STAGE,
         };
@@ -230,10 +246,10 @@ impl Tomlable for SimpleState {
 mod tests {
     use toml;
 
+    use super::{SimpleState, FIRST_STAGE, LAST_STAGE, STAGE_KEY};
     use crate::gui::Point;
+    use crate::save::util::{Tomlable, ACCESS_KEY};
     use crate::save::Access;
-    use crate::save::util::{ACCESS_KEY, Tomlable};
-    use super::{FIRST_STAGE, LAST_STAGE, STAGE_KEY, SimpleState};
 
     #[test]
     fn toml_round_trip() {
@@ -241,14 +257,16 @@ mod tests {
         state.access = Access::Replaying;
         state.stage = FIRST_STAGE + 1;
         assert!(state
-                    .grid_mut()
-                    .toggle_pipe(Point::new(3, 1), Point::new(4, 1)));
+            .grid_mut()
+            .toggle_pipe(Point::new(3, 1), Point::new(4, 1)));
 
         let state = SimpleState::from_toml(state.to_toml());
         assert_eq!(state.access, Access::Replaying);
         assert_eq!(state.stage, FIRST_STAGE + 1);
-        assert_eq!(state.grid.pipes(),
-                   &vec![vec![Point::new(3, 1), Point::new(4, 1)]]);
+        assert_eq!(
+            state.grid.pipes(),
+            &vec![vec![Point::new(3, 1), Point::new(4, 1)]]
+        );
     }
 
     #[test]
@@ -273,18 +291,21 @@ mod tests {
     #[test]
     fn from_invalid_stage_toml() {
         let mut table = toml::value::Table::new();
-        table.insert(STAGE_KEY.to_string(),
-                     toml::Value::Integer((FIRST_STAGE - 1) as i64));
+        table.insert(
+            STAGE_KEY.to_string(),
+            toml::Value::Integer((FIRST_STAGE - 1) as i64),
+        );
         let state = SimpleState::from_toml(toml::Value::Table(table));
         assert_eq!(state.stage, FIRST_STAGE);
 
         let mut table = toml::value::Table::new();
-        table.insert(STAGE_KEY.to_string(),
-                     toml::Value::Integer((LAST_STAGE + 1) as i64));
+        table.insert(
+            STAGE_KEY.to_string(),
+            toml::Value::Integer((LAST_STAGE + 1) as i64),
+        );
         let state = SimpleState::from_toml(toml::Value::Table(table));
         assert_eq!(state.stage, FIRST_STAGE);
     }
-
 }
 
 // ========================================================================= //

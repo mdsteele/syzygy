@@ -64,7 +64,9 @@ impl Team {
         }
     }
 
-    fn is_valid_value(value: i8) -> bool { value >= 0 && value <= 2 }
+    fn is_valid_value(value: i8) -> bool {
+        value >= 0 && value <= 2
+    }
 
     pub fn opponent(self) -> Team {
         match self {
@@ -86,7 +88,7 @@ impl Coords {
     pub fn new(row: i32, col: i32) -> Coords {
         debug_assert!(row >= 0 && row < 8);
         debug_assert!(col >= 0 && col < 8 - row);
-        Coords { row: row, col: col }
+        Coords { row, col }
     }
 
     pub fn from_index(mut index: usize) -> Option<Coords> {
@@ -101,23 +103,26 @@ impl Coords {
 
     /// Returns the row.  Row 0 is the bottom row of the pyramid; row 7 is the
     /// top cell.
-    pub fn row(&self) -> i32 { self.row }
+    pub fn row(&self) -> i32 {
+        self.row
+    }
 
     /// Returns the column.  Column 0 is the left cell of the row.
-    pub fn col(&self) -> i32 { self.col }
+    pub fn col(&self) -> i32 {
+        self.col
+    }
 
     fn index(&self) -> usize {
         let n = 7 - self.row;
         (self.col + n * (n + 1) / 2) as usize
     }
 
-    pub fn all() -> CoordsIter { CoordsIter { row: 0, col: 0 } }
+    pub fn all() -> CoordsIter {
+        CoordsIter { row: 0, col: 0 }
+    }
 
     fn all_above_row(row: i32) -> CoordsIter {
-        CoordsIter {
-            row: row + 1,
-            col: 0,
-        }
+        CoordsIter { row: row + 1, col: 0 }
     }
 }
 
@@ -188,22 +193,24 @@ impl Board {
         if you > STARTING_PIECES || srb > STARTING_PIECES {
             return Board::new();
         }
-        Board {
-            cells: cells,
-            you: STARTING_PIECES - you,
-            srb: STARTING_PIECES - srb,
-        }
+        Board { cells, you: STARTING_PIECES - you, srb: STARTING_PIECES - srb }
     }
 
     pub fn is_empty(&self) -> bool {
         self.you == STARTING_PIECES && self.srb == STARTING_PIECES
     }
 
-    pub fn you_supply(&self) -> i32 { self.you }
+    pub fn you_supply(&self) -> i32 {
+        self.you
+    }
 
-    pub fn srb_supply(&self) -> i32 { self.srb }
+    pub fn srb_supply(&self) -> i32 {
+        self.srb
+    }
 
-    fn get(&self, coords: Coords) -> i8 { self.cells[coords.index()] }
+    fn get(&self, coords: Coords) -> i8 {
+        self.cells[coords.index()]
+    }
 
     pub fn piece_at(&self, coords: Coords) -> Option<Team> {
         Team::from_value(self.get(coords))
@@ -249,18 +256,18 @@ impl Board {
     pub fn can_place_at(&self, coords: Coords) -> bool {
         let row = coords.row;
         let col = coords.col;
-        self.get(Coords::new(row, col)) == 0 &&
-            (row == 0 ||
-                 self.get(Coords::new(row - 1, col)) != 0 &&
-                     self.get(Coords::new(row - 1, col + 1)) != 0)
+        self.get(Coords::new(row, col)) == 0
+            && (row == 0
+                || self.get(Coords::new(row - 1, col)) != 0
+                    && self.get(Coords::new(row - 1, col + 1)) != 0)
     }
 
     pub fn can_remove_from(&self, coords: Coords) -> bool {
         let row = coords.row;
         let col = coords.col;
-        row == 7 ||
-            (col == 0 || self.get(Coords::new(row + 1, col - 1)) == 0) &&
-                (col == 7 - row || self.get(Coords::new(row + 1, col)) == 0)
+        row == 7
+            || (col == 0 || self.get(Coords::new(row + 1, col - 1)) == 0)
+                && (col == 7 - row || self.get(Coords::new(row + 1, col)) == 0)
     }
 
     pub fn possible_move_starts(&self, team: Team) -> HashSet<Coords> {
@@ -269,8 +276,7 @@ impl Board {
         for coords in Coords::all() {
             if self.can_place_at(coords) {
                 results.insert(coords);
-            } else if self.get(coords) == value &&
-                       self.can_remove_from(coords)
+            } else if self.get(coords) == value && self.can_remove_from(coords)
             {
                 let board = self.with_removed(coords);
                 for dest in Coords::all_above_row(coords.row()) {
@@ -389,9 +395,10 @@ impl Board {
         {
             let lower_row =
                 cmp::max(0, coords.row() + 1 - FORMATION_LINE_LENGTH as i32);
-            let upper_row = cmp::min(coords.row() + coords.col() + 1,
-                                     coords.row() +
-                                         FORMATION_LINE_LENGTH as i32);
+            let upper_row = cmp::min(
+                coords.row() + coords.col() + 1,
+                coords.row() + FORMATION_LINE_LENGTH as i32,
+            );
             if upper_row - lower_row >= FORMATION_LINE_LENGTH as i32 {
                 let mut formation = Vec::with_capacity(FORMATION_LINE_LENGTH);
                 for row in lower_row..upper_row {
@@ -423,8 +430,8 @@ impl Board {
         let mut best_score = 0.0;
         let mut best_moves = Vec::new();
         for (mov, board) in self.all_moves(Team::SRB) {
-            let score = 1.0 /
-                board.minimax(depth, 0.0, 1.0 / best_score, Team::You);
+            let score =
+                1.0 / board.minimax(depth, 0.0, 1.0 / best_score, Team::You);
             if score > best_score {
                 best_score = score;
                 best_moves = vec![mov];
@@ -434,10 +441,12 @@ impl Board {
         }
         if cfg!(debug_assertions) {
             if best_moves.len() > 1 {
-                println!("Choosing randomly between {} equally-good moves \
-                          (score = {})",
-                         best_moves.len(),
-                         best_score);
+                println!(
+                    "Choosing randomly between {} equally-good moves \
+                     (score = {})",
+                    best_moves.len(),
+                    best_score
+                );
             } else {
                 println!("Found single best move (score = {})", best_score);
             }
@@ -450,19 +459,26 @@ impl Board {
 
     /// Returns the best board score that the given team can guarantee getting
     /// if it gets to make the next move.
-    fn minimax(&self, depth: i32, mut alpha: f64, beta: f64, team: Team)
-               -> f64 {
+    fn minimax(
+        &self,
+        depth: i32,
+        mut alpha: f64,
+        beta: f64,
+        team: Team,
+    ) -> f64 {
         debug_assert!(depth >= 0);
         if depth == 0 || self.you == 0 || self.srb == 0 {
             return self.favoribility(team);
         }
         let mut best = 0.0;
         for (_, board) in self.all_moves(team) {
-            let score = 1.0 /
-                board.minimax(depth - 1,
-                              1.0 / beta,
-                              1.0 / alpha,
-                              team.opponent());
+            let score = 1.0
+                / board.minimax(
+                    depth - 1,
+                    1.0 / beta,
+                    1.0 / alpha,
+                    team.opponent(),
+                );
             if score > best {
                 best = score;
             }
@@ -483,23 +499,27 @@ impl Board {
                 let board2 = self.with_piece_at(coords, team);
                 if let Some(formation) = board2.formation_at(coords) {
                     for (remove, board3) in board2.all_removals(team) {
-                        moves.push((Move::Place {
-                                        at: coords,
-                                        formation: formation.clone(),
-                                        remove: remove,
-                                    },
-                                    board3));
+                        moves.push((
+                            Move::Place {
+                                at: coords,
+                                formation: formation.clone(),
+                                remove,
+                            },
+                            board3,
+                        ));
                     }
                 } else {
-                    moves.push((Move::Place {
-                                    at: coords,
-                                    formation: Vec::new(),
-                                    remove: Vec::new(),
-                                },
-                                board2));
+                    moves.push((
+                        Move::Place {
+                            at: coords,
+                            formation: Vec::new(),
+                            remove: Vec::new(),
+                        },
+                        board2,
+                    ));
                 }
-            } else if self.get(coords) == team.value() &&
-                       self.can_remove_from(coords)
+            } else if self.get(coords) == team.value()
+                && self.can_remove_from(coords)
             {
                 let board2 = self.with_removed(coords);
                 for coords2 in Coords::all_above_row(coords.row) {
@@ -507,22 +527,26 @@ impl Board {
                         let board3 = board2.with_piece_at(coords2, team);
                         if let Some(formation) = board3.formation_at(coords2) {
                             for (remove, board4) in board3.all_removals(team) {
-                                moves.push((Move::Jump {
-                                                from: coords,
-                                                to: coords2,
-                                                formation: formation.clone(),
-                                                remove: remove,
-                                            },
-                                            board4));
+                                moves.push((
+                                    Move::Jump {
+                                        from: coords,
+                                        to: coords2,
+                                        formation: formation.clone(),
+                                        remove,
+                                    },
+                                    board4,
+                                ));
                             }
                         } else {
-                            moves.push((Move::Jump {
-                                            from: coords,
-                                            to: coords2,
-                                            formation: Vec::new(),
-                                            remove: Vec::new(),
-                                        },
-                                        board3));
+                            moves.push((
+                                Move::Jump {
+                                    from: coords,
+                                    to: coords2,
+                                    formation: Vec::new(),
+                                    remove: Vec::new(),
+                                },
+                                board3,
+                            ));
                         }
                     }
                 }
@@ -553,12 +577,12 @@ impl Board {
 
 impl Tomlable for Board {
     fn to_toml(&self) -> toml::Value {
-        toml::Value::Array(self.cells
-                               .iter()
-                               .map(|&value| {
-                                        toml::Value::Integer(value as i64)
-                                    })
-                               .collect())
+        toml::Value::Array(
+            self.cells
+                .iter()
+                .map(|&value| toml::Value::Integer(value as i64))
+                .collect(),
+        )
     }
 
     fn from_toml(value: toml::Value) -> Board {
@@ -576,8 +600,8 @@ mod tests {
     use std::collections::HashSet;
     use std::f64;
 
+    use super::{Board, Coords, Move, Team, NUM_CELLS};
     use crate::save::util::Tomlable;
-    use super::{Board, Coords, Move, NUM_CELLS, Team};
 
     #[test]
     fn team_values() {

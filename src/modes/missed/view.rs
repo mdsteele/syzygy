@@ -17,12 +17,14 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
+use super::scenes;
 use crate::elements::lasers::{DangerSign, LaserCmd, LaserField};
-use crate::gui::{Action, Canvas, Element, Event, Point, Rect, Resources, Sprite};
+use crate::elements::{FadeStyle, PuzzleCmd, PuzzleCore, PuzzleView};
+use crate::gui::{
+    Action, Canvas, Element, Event, Point, Rect, Resources, Sprite,
+};
 use crate::modes::SOLVED_INFO_TEXT;
 use crate::save::{Game, MissedState, PuzzleState};
-use super::scenes;
 
 // ========================================================================= //
 
@@ -35,8 +37,11 @@ pub struct View {
 }
 
 impl View {
-    pub fn new(resources: &mut Resources, visible: Rect, state: &MissedState)
-               -> View {
+    pub fn new(
+        resources: &mut Resources,
+        visible: Rect,
+        state: &MissedState,
+    ) -> View {
         let mut core = {
             let fade = (FadeStyle::LeftToRight, FadeStyle::LeftToRight);
             let intro = scenes::compile_intro_scene(resources, visible);
@@ -47,12 +52,14 @@ impl View {
         core.add_extra_scene(scenes::compile_mezure_midscene(resources));
         core.add_extra_scene(scenes::compile_ugrent_midscene(resources));
         View {
-            core: core,
+            core,
             laser_field: LaserField::new(resources, 104, 72, state.grid()),
-            danger_sign: DangerSign::new(resources,
-                                         (224, 144),
-                                         "ACHTUNG!",
-                                         "DAS BLINKENLICHTEN"),
+            danger_sign: DangerSign::new(
+                resources,
+                (224, 144),
+                "ACHTUNG!",
+                "DAS BLINKENLICHTEN",
+            ),
             blinkenlights: vec![
                 Blinkenlight::new(resources, 176, 112, 0),
                 Blinkenlight::new(resources, 176, 144, 3),
@@ -82,15 +89,19 @@ impl Element<Game, PuzzleCmd> for View {
         self.core.draw_front_layer(canvas, state);
     }
 
-    fn handle_event(&mut self, event: &Event, game: &mut Game)
-                    -> Action<PuzzleCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        game: &mut Game,
+    ) -> Action<PuzzleCmd> {
         let state = &mut game.missed_connections;
         let mut action = self.core.handle_event(event, state);
-        if !action.should_stop() && self.box_open &&
-            (event == &Event::ClockTick || !state.is_solved())
+        if !action.should_stop()
+            && self.box_open
+            && (event == &Event::ClockTick || !state.is_solved())
         {
-            let subaction = self.laser_field
-                .handle_event(event, state.grid_mut());
+            let subaction =
+                self.laser_field.handle_event(event, state.grid_mut());
             if let Some(&cmd) = subaction.value() {
                 if self.laser_field.all_detectors_satisfied(state.grid()) {
                     state.mark_solved();
@@ -190,8 +201,12 @@ struct Blinkenlight {
 }
 
 impl Blinkenlight {
-    fn new(resources: &mut Resources, left: i32, top: i32, phase: i32)
-           -> Blinkenlight {
+    fn new(
+        resources: &mut Resources,
+        left: i32,
+        top: i32,
+        phase: i32,
+    ) -> Blinkenlight {
         Blinkenlight {
             topleft: Point::new(left, top),
             sprites: resources.get_sprites("blinkenlights"),
@@ -206,8 +221,11 @@ impl Element<(), PuzzleCmd> for Blinkenlight {
         canvas.draw_sprite(&self.sprites[index], self.topleft);
     }
 
-    fn handle_event(&mut self, event: &Event, _unused: &mut ())
-                    -> Action<PuzzleCmd> {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        _unused: &mut (),
+    ) -> Action<PuzzleCmd> {
         match event {
             &Event::ClockTick => {
                 self.anim += 1;

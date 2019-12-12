@@ -20,9 +20,9 @@
 use std::collections::VecDeque;
 use toml;
 
-use crate::save::{Access, Direction, Location};
-use crate::save::util::{ACCESS_KEY, Tomlable, rotate_deque, to_table};
 use super::PuzzleState;
+use crate::save::util::{rotate_deque, to_table, Tomlable, ACCESS_KEY};
+use crate::save::{Access, Direction, Location};
 
 // ========================================================================= //
 
@@ -135,13 +135,21 @@ impl WreckedState {
 }
 
 impl PuzzleState for WreckedState {
-    fn location() -> Location { Location::WreckedAngle }
+    fn location() -> Location {
+        Location::WreckedAngle
+    }
 
-    fn access(&self) -> Access { self.access }
+    fn access(&self) -> Access {
+        self.access
+    }
 
-    fn access_mut(&mut self) -> &mut Access { &mut self.access }
+    fn access_mut(&mut self) -> &mut Access {
+        &mut self.access
+    }
 
-    fn can_reset(&self) -> bool { !self.is_initial }
+    fn can_reset(&self) -> bool {
+        !self.is_initial
+    }
 
     fn reset(&mut self) {
         self.grid = INITIAL_GRID.to_vec();
@@ -187,11 +195,7 @@ impl Tomlable for WreckedState {
             grid
         };
         let is_initial = &grid as &[i8] == INITIAL_GRID;
-        WreckedState {
-            access: access,
-            grid: grid,
-            is_initial: is_initial,
-        }
+        WreckedState { access, grid, is_initial }
     }
 }
 
@@ -201,9 +205,9 @@ impl Tomlable for WreckedState {
 mod tests {
     use toml;
 
+    use super::{WreckedState, GRID_KEY, INITIAL_GRID, SOLVED_GRID};
+    use crate::save::util::{Tomlable, ACCESS_KEY};
     use crate::save::{Access, Direction};
-    use crate::save::util::{ACCESS_KEY, Tomlable};
-    use super::{GRID_KEY, INITIAL_GRID, SOLVED_GRID, WreckedState};
 
     #[test]
     fn toml_round_trip() {

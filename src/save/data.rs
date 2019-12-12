@@ -17,11 +17,11 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
+use super::game::Game;
+use super::prefs::Prefs;
 use std::fs;
 use std::io::{self, Read, Write};
 use std::path::PathBuf;
-use super::game::Game;
-use super::prefs::Prefs;
 use toml;
 
 use super::util::to_table;
@@ -41,18 +41,13 @@ pub struct SaveData {
 
 impl SaveData {
     pub fn new(path: PathBuf) -> SaveData {
-        SaveData {
-            path: path,
-            prefs: Prefs::with_defaults(),
-            game: None,
-        }
+        SaveData { path, prefs: Prefs::with_defaults(), game: None }
     }
 
     fn from_toml(path: PathBuf, mut table: toml::value::Table) -> SaveData {
         let mut data = SaveData::new(path);
-        if let Some(prefs) = table
-            .get(PREFS_KEY)
-            .and_then(toml::Value::as_table)
+        if let Some(prefs) =
+            table.get(PREFS_KEY).and_then(toml::Value::as_table)
         {
             data.prefs = Prefs::from_toml(prefs);
         }
@@ -88,10 +83,10 @@ impl SaveData {
         file.read_to_string(&mut string)?;
         match string.parse::<toml::Value>() {
             Ok(value) => Ok(SaveData::from_toml(path, to_table(value))),
-            Err(_) => {
-                Err(io::Error::new(io::ErrorKind::InvalidData,
-                                   "failed to parse toml"))
-            }
+            Err(_) => Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                "failed to parse toml",
+            )),
         }
     }
 
@@ -105,10 +100,14 @@ impl SaveData {
         }
     }
 
-    pub fn prefs(&self) -> &Prefs { &self.prefs }
+    pub fn prefs(&self) -> &Prefs {
+        &self.prefs
+    }
 
     #[allow(dead_code)]
-    pub fn prefs_mut(&mut self) -> &mut Prefs { &mut self.prefs }
+    pub fn prefs_mut(&mut self) -> &mut Prefs {
+        &mut self.prefs
+    }
 
     pub fn game(&self) -> Option<&Game> {
         match self.game {
@@ -130,7 +129,9 @@ impl SaveData {
         self.game.as_mut().unwrap()
     }
 
-    pub fn erase_game(&mut self) { self.game = None; }
+    pub fn erase_game(&mut self) {
+        self.game = None;
+    }
 }
 
 // ========================================================================= //

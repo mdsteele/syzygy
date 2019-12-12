@@ -17,13 +17,13 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
+use super::background::Background;
+use super::font::Font;
+use super::sprite::Sprite;
 use sdl2::pixels::Color;
 use sdl2::rect::{Point, Rect};
 use sdl2::render::Canvas as SdlCanvas;
 use sdl2::video::Window as SdlWindow;
-use super::background::Background;
-use super::font::Font;
-use super::sprite::Sprite;
 
 // ========================================================================= //
 
@@ -35,21 +35,29 @@ pub struct Canvas<'a> {
 }
 
 impl<'a> Canvas<'a> {
-    pub fn new(renderer: &'a mut SdlCanvas<SdlWindow>, rect: Rect)
-               -> Canvas<'a> {
+    pub fn new(
+        renderer: &'a mut SdlCanvas<SdlWindow>,
+        rect: Rect,
+    ) -> Canvas<'a> {
         Canvas {
-            renderer: renderer,
+            renderer,
             offset_rect: rect,
             clip_rect: None,
             prev_clip_rect: None,
         }
     }
 
-    pub fn width(&self) -> u32 { self.offset_rect.width() }
+    pub fn width(&self) -> u32 {
+        self.offset_rect.width()
+    }
 
-    pub fn height(&self) -> u32 { self.offset_rect.height() }
+    pub fn height(&self) -> u32 {
+        self.offset_rect.height()
+    }
 
-    pub fn rect(&self) -> Rect { Rect::new(0, 0, self.width(), self.height()) }
+    pub fn rect(&self) -> Rect {
+        Rect::new(0, 0, self.width(), self.height())
+    }
 
     pub fn subcanvas(&mut self, mut rect: Rect) -> Canvas {
         rect.offset(self.offset_rect.x(), self.offset_rect.y());
@@ -131,89 +139,133 @@ impl<'a> Canvas<'a> {
     pub fn draw_sprite(&mut self, sprite: &Sprite, mut top_left: Point) {
         top_left = top_left.offset(self.offset_rect.x(), self.offset_rect.y());
         self.renderer
-            .copy(&sprite.sdl2_texture(),
-                  None,
-                  Some(Rect::new(top_left.x(),
-                                 top_left.y(),
-                                 sprite.width(),
-                                 sprite.height())))
+            .copy(
+                &sprite.sdl2_texture(),
+                None,
+                Some(Rect::new(
+                    top_left.x(),
+                    top_left.y(),
+                    sprite.width(),
+                    sprite.height(),
+                )),
+            )
             .unwrap();
     }
 
-    pub fn draw_sprite_transposed(&mut self, sprite: &Sprite,
-                                  mut top_left: Point) {
+    pub fn draw_sprite_transposed(
+        &mut self,
+        sprite: &Sprite,
+        mut top_left: Point,
+    ) {
         top_left = top_left.offset(self.offset_rect.x(), self.offset_rect.y());
         self.renderer
-            .copy_ex(&sprite.sdl2_texture(),
-                     None,
-                     Some(Rect::new(top_left.x(),
-                                    top_left.y(),
-                                    sprite.width(),
-                                    sprite.height())),
-                     90.0,
-                     None,
-                     false,
-                     true)
+            .copy_ex(
+                &sprite.sdl2_texture(),
+                None,
+                Some(Rect::new(
+                    top_left.x(),
+                    top_left.y(),
+                    sprite.width(),
+                    sprite.height(),
+                )),
+                90.0,
+                None,
+                false,
+                true,
+            )
             .unwrap();
     }
 
-    pub fn draw_sprite_flipped(&mut self, sprite: &Sprite,
-                               mut top_left: Point, flip_horz: bool,
-                               flip_vert: bool) {
+    pub fn draw_sprite_flipped(
+        &mut self,
+        sprite: &Sprite,
+        mut top_left: Point,
+        flip_horz: bool,
+        flip_vert: bool,
+    ) {
         top_left = top_left.offset(self.offset_rect.x(), self.offset_rect.y());
         self.renderer
-            .copy_ex(&sprite.sdl2_texture(),
-                     None,
-                     Some(Rect::new(top_left.x(),
-                                    top_left.y(),
-                                    sprite.width(),
-                                    sprite.height())),
-                     0.0,
-                     None,
-                     flip_horz,
-                     flip_vert)
+            .copy_ex(
+                &sprite.sdl2_texture(),
+                None,
+                Some(Rect::new(
+                    top_left.x(),
+                    top_left.y(),
+                    sprite.width(),
+                    sprite.height(),
+                )),
+                0.0,
+                None,
+                flip_horz,
+                flip_vert,
+            )
             .unwrap();
     }
 
     pub fn draw_sprite_centered(&mut self, sprite: &Sprite, center: Point) {
-        let top_left = Point::new(center.x() - sprite.width() as i32 / 2,
-                                  center.y() - sprite.height() as i32 / 2);
+        let top_left = Point::new(
+            center.x() - sprite.width() as i32 / 2,
+            center.y() - sprite.height() as i32 / 2,
+        );
         self.draw_sprite(sprite, top_left);
     }
 
-    pub fn draw_sprite_rotated(&mut self, sprite: &Sprite, center: Point,
-                               degrees: i32) {
+    pub fn draw_sprite_rotated(
+        &mut self,
+        sprite: &Sprite,
+        center: Point,
+        degrees: i32,
+    ) {
         self.draw_sprite_transformed(sprite, center, degrees, false, false);
     }
 
-    pub fn draw_sprite_transformed(&mut self, sprite: &Sprite,
-                                   mut center: Point, degrees: i32,
-                                   flip_horz: bool, flip_vert: bool) {
+    pub fn draw_sprite_transformed(
+        &mut self,
+        sprite: &Sprite,
+        mut center: Point,
+        degrees: i32,
+        flip_horz: bool,
+        flip_vert: bool,
+    ) {
         center = center.offset(self.offset_rect.x(), self.offset_rect.y());
-        let dest = Rect::new(center.x() - sprite.width() as i32 / 2,
-                             center.y() - sprite.height() as i32 / 2,
-                             sprite.width(),
-                             sprite.height());
+        let dest = Rect::new(
+            center.x() - sprite.width() as i32 / 2,
+            center.y() - sprite.height() as i32 / 2,
+            sprite.width(),
+            sprite.height(),
+        );
         self.renderer
-            .copy_ex(&sprite.sdl2_texture(),
-                     None,
-                     Some(dest),
-                     degrees as f64,
-                     None,
-                     flip_horz,
-                     flip_vert)
+            .copy_ex(
+                &sprite.sdl2_texture(),
+                None,
+                Some(dest),
+                degrees as f64,
+                None,
+                flip_horz,
+                flip_vert,
+            )
             .unwrap();
     }
 
-    pub fn draw_char(&mut self, font: &Font, alignment: Align, start: Point,
-                     chr: char) {
+    pub fn draw_char(
+        &mut self,
+        font: &Font,
+        alignment: Align,
+        start: Point,
+        chr: char,
+    ) {
         let mut text = String::with_capacity(1);
         text.push(chr);
         self.draw_text(font, alignment, start, &text);
     }
 
-    pub fn draw_text(&mut self, font: &Font, alignment: Align, start: Point,
-                     text: &str) {
+    pub fn draw_text(
+        &mut self,
+        font: &Font,
+        alignment: Align,
+        start: Point,
+        text: &str,
+    ) {
         let top = start.y() - font.baseline();
         let mut left = match alignment {
             Align::Left => start.x(),
@@ -230,7 +282,9 @@ impl<'a> Canvas<'a> {
 }
 
 impl<'a> Drop for Canvas<'a> {
-    fn drop(&mut self) { self.renderer.set_clip_rect(self.prev_clip_rect); }
+    fn drop(&mut self) {
+        self.renderer.set_clip_rect(self.prev_clip_rect);
+    }
 }
 
 // ========================================================================= //

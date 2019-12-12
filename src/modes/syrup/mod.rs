@@ -20,19 +20,21 @@
 mod scenes;
 mod view;
 
-use crate::gui::Window;
-use crate::modes::{Mode, run_puzzle};
-use crate::save::SaveData;
 use self::view::View;
+use crate::gui::Window;
+use crate::modes::{run_puzzle, Mode};
+use crate::save::SaveData;
 
 // ========================================================================= //
 
 pub fn run_light_syrup(window: &mut Window, save_data: &mut SaveData) -> Mode {
     let view = {
         let visible_rect = window.visible_rect();
-        View::new(&mut window.resources(),
-                  visible_rect,
-                  &save_data.game_mut().light_syrup)
+        View::new(
+            &mut window.resources(),
+            visible_rect,
+            &save_data.game_mut().light_syrup,
+        )
     };
     run_puzzle(window, save_data, view)
 }

@@ -19,8 +19,8 @@
 
 use toml;
 
-use crate::save::util::Tomlable;
 use super::basic::{BasicTree, TreeOp};
+use crate::save::util::Tomlable;
 
 // ========================================================================= //
 
@@ -30,9 +30,13 @@ pub struct RedBlackTree {
 }
 
 impl RedBlackTree {
-    pub fn new() -> RedBlackTree { RedBlackTree { basic: BasicTree::new() } }
+    pub fn new() -> RedBlackTree {
+        RedBlackTree { basic: BasicTree::new() }
+    }
 
-    pub fn signature(&self) -> Vec<(i32, i32, bool)> { self.basic.signature() }
+    pub fn signature(&self) -> Vec<(i32, i32, bool)> {
+        self.basic.signature()
+    }
 
     pub fn from_signature(signature: Vec<(i32, i32, bool)>) -> RedBlackTree {
         RedBlackTree::from_basic(BasicTree::from_signature(signature))
@@ -49,8 +53,10 @@ impl RedBlackTree {
                 let is_red = basic.is_red(key);
                 if is_red {
                     if red_parent {
-                        return Some(format!("Red node ({}) has red parent.",
-                                            key));
+                        return Some(format!(
+                            "Red node ({}) has red parent.",
+                            key
+                        ));
                     }
                 } else {
                     black_depth += 1;
@@ -59,11 +65,11 @@ impl RedBlackTree {
                     stack.push((child_key, is_red, black_depth));
                 } else if let Some(height) = black_height {
                     if black_depth != height {
-                        return Some(format!("Leaf ({}) has black depth {} \
-                                             instead of {}.",
-                                            key,
-                                            black_depth,
-                                            height));
+                        return Some(format!(
+                            "Leaf ({}) has black depth {} \
+                             instead of {}.",
+                            key, black_depth, height
+                        ));
                     }
                 } else {
                     black_height = Some(black_depth);
@@ -72,11 +78,11 @@ impl RedBlackTree {
                     stack.push((child_key, is_red, black_depth));
                 } else if let Some(height) = black_height {
                     if black_depth != height {
-                        return Some(format!("Leaf ({}) has black depth {} \
-                                             instead of {}.",
-                                            key,
-                                            black_depth,
-                                            height));
+                        return Some(format!(
+                            "Leaf ({}) has black depth {} \
+                             instead of {}.",
+                            key, black_depth, height
+                        ));
                     }
                 } else {
                     black_height = Some(black_depth);
@@ -90,23 +96,37 @@ impl RedBlackTree {
         if RedBlackTree::red_black_violation(&basic).is_some() {
             RedBlackTree::new()
         } else {
-            RedBlackTree { basic: basic }
+            RedBlackTree { basic }
         }
     }
 
-    pub fn as_basic(&self) -> &BasicTree { &self.basic }
+    pub fn as_basic(&self) -> &BasicTree {
+        &self.basic
+    }
 
-    pub fn len(&self) -> usize { self.basic.len() }
+    pub fn len(&self) -> usize {
+        self.basic.len()
+    }
 
-    pub fn contains(&self, key: i32) -> bool { self.basic.contains(key) }
+    pub fn contains(&self, key: i32) -> bool {
+        self.basic.contains(key)
+    }
 
-    pub fn keys(&self) -> Vec<i32> { self.basic.keys() }
+    pub fn keys(&self) -> Vec<i32> {
+        self.basic.keys()
+    }
 
-    pub fn root(&self) -> Option<i32> { self.basic.root() }
+    pub fn root(&self) -> Option<i32> {
+        self.basic.root()
+    }
 
-    pub fn parent(&self, key: i32) -> Option<i32> { self.basic.parent(key) }
+    pub fn parent(&self, key: i32) -> Option<i32> {
+        self.basic.parent(key)
+    }
 
-    pub fn sibling(&self, key: i32) -> Option<i32> { self.basic.sibling(key) }
+    pub fn sibling(&self, key: i32) -> Option<i32> {
+        self.basic.sibling(key)
+    }
 
     pub fn left_child(&self, key: i32) -> Option<i32> {
         self.basic.left_child(key)
@@ -116,7 +136,9 @@ impl RedBlackTree {
         self.basic.right_child(key)
     }
 
-    pub fn is_red(&self, key: i32) -> bool { self.basic.is_red(key) }
+    pub fn is_red(&self, key: i32) -> bool {
+        self.basic.is_red(key)
+    }
 
     fn sibling_opt(&self, child: Option<i32>, parent_key: i32) -> Option<i32> {
         if let Some(child_key) = child {
@@ -136,8 +158,11 @@ impl RedBlackTree {
         }
     }
 
-    fn op_set_red(&mut self, ops: &mut Vec<TreeOp>,
-                  mut keycolors: Vec<(i32, bool)>) {
+    fn op_set_red(
+        &mut self,
+        ops: &mut Vec<TreeOp>,
+        mut keycolors: Vec<(i32, bool)>,
+    ) {
         keycolors.retain(|&(key, red)| red != self.is_red(key));
         if !keycolors.is_empty() {
             keycolors.sort();
@@ -231,9 +256,11 @@ impl RedBlackTree {
                     } else {
                         self.parent(predecessor_key)
                     };
-                    (self.left_child(predecessor_key),
-                     parent,
-                     self.is_red(predecessor_key))
+                    (
+                        self.left_child(predecessor_key),
+                        parent,
+                        self.is_red(predecessor_key),
+                    )
                 } else {
                     (Some(left_child_key), self.parent(key), self.is_red(key))
                 }
@@ -281,9 +308,10 @@ impl RedBlackTree {
                 }
             }
             if let Some(sibling_key) = sibling {
-                if !self.is_red(parent_key) && !self.is_red(sibling_key) &&
-                    !self.is_red_opt(self.left_child(sibling_key)) &&
-                    !self.is_red_opt(self.right_child(sibling_key))
+                if !self.is_red(parent_key)
+                    && !self.is_red(sibling_key)
+                    && !self.is_red_opt(self.left_child(sibling_key))
+                    && !self.is_red_opt(self.right_child(sibling_key))
                 {
                     self.op_set_red(&mut ops, vec![(sibling_key, true)]);
                     child = Some(parent_key);
@@ -294,14 +322,14 @@ impl RedBlackTree {
             break;
         }
         let parent_key = parent.unwrap();
-        if let Some(mut sibling_key) =
-            self.sibling_opt(child, parent.unwrap())
+        if let Some(mut sibling_key) = self.sibling_opt(child, parent.unwrap())
         {
             if !self.is_red(sibling_key) {
                 let left_niece = self.left_child(sibling_key);
                 let right_niece = self.right_child(sibling_key);
-                if self.is_red(parent_key) && !self.is_red_opt(left_niece) &&
-                    !self.is_red_opt(right_niece)
+                if self.is_red(parent_key)
+                    && !self.is_red_opt(left_niece)
+                    && !self.is_red_opt(right_niece)
                 {
                     self.op_set_red(
                         &mut ops,
@@ -310,8 +338,9 @@ impl RedBlackTree {
                     debug_assert!(self.is_valid(), "ops: {:?}", ops);
                     return ops;
                 }
-                if sibling_key > parent_key && self.is_red_opt(left_niece) &&
-                    !self.is_red_opt(right_niece)
+                if sibling_key > parent_key
+                    && self.is_red_opt(left_niece)
+                    && !self.is_red_opt(right_niece)
                 {
                     let left_niece_key = left_niece.unwrap();
                     self.op_set_red(
@@ -321,9 +350,9 @@ impl RedBlackTree {
                     self.basic.rotate_right(sibling_key);
                     ops.push(TreeOp::RotateRight(sibling_key));
                     sibling_key = left_niece_key;
-                } else if sibling_key < parent_key &&
-                           !self.is_red_opt(left_niece) &&
-                           self.is_red_opt(right_niece)
+                } else if sibling_key < parent_key
+                    && !self.is_red_opt(left_niece)
+                    && self.is_red_opt(right_niece)
                 {
                     let right_niece_key = right_niece.unwrap();
                     self.op_set_red(
@@ -372,7 +401,9 @@ impl RedBlackTree {
 }
 
 impl Tomlable for RedBlackTree {
-    fn to_toml(&self) -> toml::Value { self.basic.to_toml() }
+    fn to_toml(&self) -> toml::Value {
+        self.basic.to_toml()
+    }
 
     fn from_toml(value: toml::Value) -> RedBlackTree {
         RedBlackTree::from_basic(BasicTree::from_toml(value))
@@ -383,8 +414,8 @@ impl Tomlable for RedBlackTree {
 
 #[cfg(test)]
 mod tests {
-    use crate::save::util::Tomlable;
     use super::{RedBlackTree, TreeOp};
+    use crate::save::util::Tomlable;
 
     #[test]
     fn insertion() {
@@ -392,8 +423,10 @@ mod tests {
         assert_eq!(tree.root(), None);
 
         //   1
-        assert_eq!(tree.insert(1),
-                   vec![TreeOp::Insert(1), TreeOp::SetRed(vec![(1, false)])]);
+        assert_eq!(
+            tree.insert(1),
+            vec![TreeOp::Insert(1), TreeOp::SetRed(vec![(1, false)])]
+        );
         assert_eq!(tree.root(), Some(1));
         assert!(!tree.is_red(1));
 

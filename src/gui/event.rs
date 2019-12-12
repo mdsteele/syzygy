@@ -65,7 +65,8 @@ impl Event {
                 ..
             } => Some(Event::MouseDown(Point::new(x, y))),
             &sdl2::event::Event::MouseButtonUp {
-                mouse_btn: MouseButton::Left, ..
+                mouse_btn: MouseButton::Left,
+                ..
             } => Some(Event::MouseUp),
             &sdl2::event::Event::KeyDown {
                 keycode: Some(keycode),
@@ -76,7 +77,8 @@ impl Event {
                 Some(Event::TextInput(text.clone()))
             }
             &sdl2::event::Event::User { .. }
-                if event.as_user_event_type::<ClockTick>().is_some() => {
+                if event.as_user_event_type::<ClockTick>().is_some() =>
+            {
                 Some(Event::ClockTick)
             }
             _ => None,
@@ -100,13 +102,21 @@ pub struct KeyMod {
 }
 
 impl KeyMod {
-    pub fn none() -> KeyMod { KeyMod { bits: 0x0 } }
+    pub fn none() -> KeyMod {
+        KeyMod { bits: 0x0 }
+    }
 
-    pub fn shift() -> KeyMod { KeyMod { bits: 0x1 } }
+    pub fn shift() -> KeyMod {
+        KeyMod { bits: 0x1 }
+    }
 
-    pub fn alt() -> KeyMod { KeyMod { bits: 0x2 } }
+    pub fn alt() -> KeyMod {
+        KeyMod { bits: 0x2 }
+    }
 
-    pub fn command() -> KeyMod { KeyMod { bits: 0x4 } }
+    pub fn command() -> KeyMod {
+        KeyMod { bits: 0x4 }
+    }
 
     fn from_sdl2(kmod: sdl2::keyboard::Mod) -> KeyMod {
         let mut result = KeyMod::none();
@@ -121,12 +131,12 @@ impl KeyMod {
             result |= KeyMod::alt();
         }
 
-        let sdl2_command =
-            if cfg!(any(target_os = "ios", target_os = "macos")) {
-                sdl2::keyboard::LGUIMOD | sdl2::keyboard::RGUIMOD
-            } else {
-                sdl2::keyboard::LCTRLMOD | sdl2::keyboard::RCTRLMOD
-            };
+        let sdl2_command = if cfg!(any(target_os = "ios", target_os = "macos"))
+        {
+            sdl2::keyboard::LGUIMOD | sdl2::keyboard::RGUIMOD
+        } else {
+            sdl2::keyboard::LCTRLMOD | sdl2::keyboard::RCTRLMOD
+        };
         if kmod.intersects(sdl2_command) {
             result |= KeyMod::command();
         }
@@ -143,7 +153,9 @@ impl BitOr for KeyMod {
 }
 
 impl BitOrAssign for KeyMod {
-    fn bitor_assign(&mut self, rhs: KeyMod) { self.bits |= rhs.bits; }
+    fn bitor_assign(&mut self, rhs: KeyMod) {
+        self.bits |= rhs.bits;
+    }
 }
 
 // ========================================================================= //
@@ -152,22 +164,29 @@ impl BitOrAssign for KeyMod {
 mod tests {
     use sdl2;
 
-    use crate::gui::Point;
     use super::{Event, KeyMod};
+    use crate::gui::Point;
 
     #[test]
     fn keymod_from_sdl2() {
-        assert_eq!(KeyMod::from_sdl2(sdl2::keyboard::RSHIFTMOD),
-                   KeyMod::shift());
-        assert_eq!(KeyMod::from_sdl2(sdl2::keyboard::LSHIFTMOD |
-                                         sdl2::keyboard::RALTMOD),
-                   KeyMod::alt() | KeyMod::shift());
+        assert_eq!(
+            KeyMod::from_sdl2(sdl2::keyboard::RSHIFTMOD),
+            KeyMod::shift()
+        );
+        assert_eq!(
+            KeyMod::from_sdl2(
+                sdl2::keyboard::LSHIFTMOD | sdl2::keyboard::RALTMOD
+            ),
+            KeyMod::alt() | KeyMod::shift()
+        );
     }
 
     #[test]
     fn translate_event() {
-        assert_eq!(Event::MouseDown(Point::new(100, 200)).translate(30, 40),
-                   Event::MouseDown(Point::new(130, 240)));
+        assert_eq!(
+            Event::MouseDown(Point::new(100, 200)).translate(30, 40),
+            Event::MouseDown(Point::new(130, 240))
+        );
         assert_eq!(Event::ClockTick.translate(30, 40), Event::ClockTick);
     }
 }

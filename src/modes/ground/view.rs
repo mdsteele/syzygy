@@ -123,7 +123,7 @@ impl View {
         let num_rows = GroundState::num_rows() as i32;
         let original_position = state.get_position(row);
         let original_elinsa_row = state.get_elinsa_row();
-        let mut top_seq: Vec<Box<SceneNode>> = Vec::new();
+        let mut top_seq: Vec<Box<dyn SceneNode>> = Vec::new();
 
         // Move platform:
         let mut elinsa_row = state.get_elinsa_row();
@@ -133,8 +133,8 @@ impl View {
         }
         let mut pos = state.get_position(row);
         while delta != 0 {
-            let mut platform_seq: Vec<Box<SceneNode>> = Vec::new();
-            let mut elinsa_seq: Vec<Box<SceneNode>> = Vec::new();
+            let mut platform_seq: Vec<Box<dyn SceneNode>> = Vec::new();
+            let mut elinsa_seq: Vec<Box<dyn SceneNode>> = Vec::new();
             let old_pos = pos;
             pos += delta;
             if pos < 0 {

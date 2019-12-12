@@ -155,9 +155,9 @@ impl<'a> Iterator for Tiles<'a> {
 
 fn base62_index(byte: u8, max: usize) -> io::Result<usize> {
     let index = match byte {
-        b'A'...b'Z' => (byte - b'A') as usize,
-        b'a'...b'z' => (byte - b'a') as usize + 26,
-        b'0'...b'9' => (byte - b'0') as usize + 52,
+        b'A'..=b'Z' => (byte - b'A') as usize,
+        b'a'..=b'z' => (byte - b'a') as usize + 26,
+        b'0'..=b'9' => (byte - b'0') as usize + 52,
         _ => {
             let msg = format!("invalid index byte: {}", byte);
             return Err(io::Error::new(io::ErrorKind::InvalidData, msg));

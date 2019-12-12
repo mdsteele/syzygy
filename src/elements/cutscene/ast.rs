@@ -70,7 +70,7 @@ impl Ast {
                        .collect())
     }
 
-    fn to_scene_node(self, resources: &mut Resources) -> Box<SceneNode> {
+    fn to_scene_node(self, resources: &mut Resources) -> Box<dyn SceneNode> {
         match self {
             Ast::Seq(asts) => {
                 let nodes = asts.into_iter()

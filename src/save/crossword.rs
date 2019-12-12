@@ -33,9 +33,9 @@ pub enum ValidChars {
 impl ValidChars {
     pub fn contains(self, chr: char) -> bool {
         match chr {
-            'A'...'Z' | ' ' => true,
-            '0'...'9' => self == ValidChars::LettersAndNumbers,
-            '!'...'/' | ':'...'@' | '['...'`' | '{'...'~' => {
+            'A'..='Z' | ' ' => true,
+            '0'..='9' => self == ValidChars::LettersAndNumbers,
+            '!'..='/' | ':'..='@' | '['..='`' | '{'..='~' => {
                 self == ValidChars::LettersAndSymbols
             }
             _ => false,

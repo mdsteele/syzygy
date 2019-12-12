@@ -65,7 +65,7 @@ impl View {
         view
     }
 
-    fn yttris_land_on_floor(&self, seq: &mut Vec<Box<SceneNode>>) {
+    fn yttris_land_on_floor(&self, seq: &mut Vec<Box<dyn SceneNode>>) {
         let sound = Sound::character_collision();
         seq.push(Box::new(SoundNode::new(sound)));
         seq.push(Box::new(ShakeNode::new(4)));
@@ -81,7 +81,7 @@ impl View {
         let num_cols = values.len() as i32;
         let mut next_col: i32 = 0;
         let mut visited: HashSet<i32> = HashSet::new();
-        let mut seq: Vec<Box<SceneNode>> = Vec::new();
+        let mut seq: Vec<Box<dyn SceneNode>> = Vec::new();
         loop {
             seq.push(Box::new(SoundNode::new(Sound::small_jump())));
             if next_col == -1 {
@@ -99,7 +99,7 @@ impl View {
                 seq.push(Box::new(QueueNode::new((-1, 0))));
             } else if next_col == num_cols && visited.len() == values.len() {
                 let pt = self.bridge.tile_center_top(num_cols);
-                let mut par: Vec<Box<SceneNode>> = Vec::new();
+                let mut par: Vec<Box<dyn SceneNode>> = Vec::new();
                 par.push(Box::new(SlideNode::new(DOOR_UPPER,
                                                  Point::new(505, 144),
                                                  false,

@@ -35,7 +35,7 @@ const FRAMES_TO_HIDE_SKIP: i32 = 50;
 
 #[derive(Clone)]
 pub struct Scene {
-    nodes: Vec<Box<SceneNode>>,
+    nodes: Vec<Box<dyn SceneNode>>,
     index: usize,
     began: bool,
     skip_clicks: i32,
@@ -43,7 +43,7 @@ pub struct Scene {
 }
 
 impl Scene {
-    pub fn new(nodes: Vec<Box<SceneNode>>) -> Scene {
+    pub fn new(nodes: Vec<Box<dyn SceneNode>>) -> Scene {
         Scene {
             nodes: nodes,
             index: 0,
@@ -201,7 +201,7 @@ pub enum Status {
 // ========================================================================= //
 
 pub trait SceneNode {
-    fn box_clone(&self) -> Box<SceneNode>;
+    fn box_clone(&self) -> Box<dyn SceneNode>;
 
     fn status(&self) -> Status { Status::Done }
 
@@ -218,21 +218,21 @@ pub trait SceneNode {
     fn unpause(&mut self) {}
 }
 
-impl Clone for Box<SceneNode> {
-    fn clone(&self) -> Box<SceneNode> { self.box_clone() }
+impl Clone for Box<dyn SceneNode> {
+    fn clone(&self) -> Box<dyn SceneNode> { self.box_clone() }
 }
 
 // ========================================================================= //
 
 #[derive(Clone)]
 pub struct SequenceNode {
-    nodes: Vec<Box<SceneNode>>,
+    nodes: Vec<Box<dyn SceneNode>>,
     index: usize,
     terminated_by_pause: bool,
 }
 
 impl SequenceNode {
-    pub fn new(nodes: Vec<Box<SceneNode>>) -> SequenceNode {
+    pub fn new(nodes: Vec<Box<dyn SceneNode>>) -> SequenceNode {
         SequenceNode {
             nodes: nodes,
             index: 0,
@@ -244,7 +244,7 @@ impl SequenceNode {
 }
 
 impl SceneNode for SequenceNode {
-    fn box_clone(&self) -> Box<SceneNode> { Box::new(self.clone()) }
+    fn box_clone(&self) -> Box<dyn SceneNode> { Box::new(self.clone()) }
 
     fn status(&self) -> Status {
         if self.on_last_node() {
@@ -316,17 +316,17 @@ impl SceneNode for SequenceNode {
 
 #[derive(Clone)]
 pub struct ParallelNode {
-    nodes: Vec<Box<SceneNode>>,
+    nodes: Vec<Box<dyn SceneNode>>,
 }
 
 impl ParallelNode {
-    pub fn new(nodes: Vec<Box<SceneNode>>) -> ParallelNode {
+    pub fn new(nodes: Vec<Box<dyn SceneNode>>) -> ParallelNode {
         ParallelNode { nodes: nodes }
     }
 }
 
 impl SceneNode for ParallelNode {
-    fn box_clone(&self) -> Box<SceneNode> { Box::new(self.clone()) }
+    fn box_clone(&self) -> Box<dyn SceneNode> { Box::new(self.clone()) }
 
     fn status(&self) -> Status {
         let mut status = Status::Done;
@@ -382,14 +382,14 @@ impl SceneNode for ParallelNode {
 
 #[derive(Clone)]
 pub struct LoopNode {
-    node: Box<SceneNode>,
+    node: Box<dyn SceneNode>,
     min_iterations: i32,
     max_iterations: Option<i32>,
     iteration: i32,
 }
 
 impl LoopNode {
-    pub fn new(node: Box<SceneNode>, min_iterations: i32,
+    pub fn new(node: Box<dyn SceneNode>, min_iterations: i32,
                max_iterations: Option<i32>)
                -> LoopNode {
         LoopNode {
@@ -410,7 +410,7 @@ impl LoopNode {
 }
 
 impl SceneNode for LoopNode {
-    fn box_clone(&self) -> Box<SceneNode> { Box::new(self.clone()) }
+    fn box_clone(&self) -> Box<dyn SceneNode> { Box::new(self.clone()) }
 
     fn status(&self) -> Status {
         if self.iteration < self.min_iterations {
@@ -481,7 +481,7 @@ impl AnimNode {
 }
 
 impl SceneNode for AnimNode {
-    fn box_clone(&self) -> Box<SceneNode> { Box::new(self.clone()) }
+    fn box_clone(&self) -> Box<dyn SceneNode> { Box::new(self.clone()) }
 
     fn begin(&mut self, theater: &mut Theater, _: bool) { self.skip(theater); }
 
@@ -502,7 +502,7 @@ impl DarkNode {
 }
 
 impl SceneNode for DarkNode {
-    fn box_clone(&self) -> Box<SceneNode> { Box::new(self.clone()) }
+    fn box_clone(&self) -> Box<dyn SceneNode> { Box::new(self.clone()) }
 
     fn begin(&mut self, theater: &mut Theater, _: bool) { self.skip(theater); }
 
@@ -543,7 +543,7 @@ impl JumpNode {
 }
 
 impl SceneNode for JumpNode {
-    fn box_clone(&self) -> Box<SceneNode> { Box::new(self.clone()) }
+    fn box_clone(&self) -> Box<dyn SceneNode> { Box::new(self.clone()) }
 
     fn status(&self) -> Status {
         if self.progress < self.duration {
@@ -601,7 +601,7 @@ impl LightNode {
 }
 
 impl SceneNode for LightNode {
-    fn box_clone(&self) -> Box<SceneNode> { Box::new(self.clone()) }
+    fn box_clone(&self) -> Box<dyn SceneNode> { Box::new(self.clone()) }
 
     fn begin(&mut self, theater: &mut Theater, _: bool) { self.skip(theater); }
 
@@ -630,7 +630,7 @@ impl PlaceNode {
 }
 
 impl SceneNode for PlaceNode {
-    fn box_clone(&self) -> Box<SceneNode> { Box::new(self.clone()) }
+    fn box_clone(&self) -> Box<dyn SceneNode> { Box::new(self.clone()) }
 
     fn begin(&mut self, theater: &mut Theater, _: bool) { self.skip(theater); }
 
@@ -651,7 +651,7 @@ impl QueueNode {
 }
 
 impl SceneNode for QueueNode {
-    fn box_clone(&self) -> Box<SceneNode> { Box::new(self.clone()) }
+    fn box_clone(&self) -> Box<dyn SceneNode> { Box::new(self.clone()) }
 
     fn begin(&mut self, theater: &mut Theater, _: bool) { self.skip(theater); }
 
@@ -670,7 +670,7 @@ impl RemoveNode {
 }
 
 impl SceneNode for RemoveNode {
-    fn box_clone(&self) -> Box<SceneNode> { Box::new(self.clone()) }
+    fn box_clone(&self) -> Box<dyn SceneNode> { Box::new(self.clone()) }
 
     fn begin(&mut self, theater: &mut Theater, _: bool) { self.skip(theater); }
 
@@ -693,7 +693,7 @@ impl SetBgNode {
 }
 
 impl SceneNode for SetBgNode {
-    fn box_clone(&self) -> Box<SceneNode> { Box::new(self.clone()) }
+    fn box_clone(&self) -> Box<dyn SceneNode> { Box::new(self.clone()) }
 
     fn begin(&mut self, theater: &mut Theater, _: bool) { self.skip(theater); }
 
@@ -720,7 +720,7 @@ impl SetPosNode {
 }
 
 impl SceneNode for SetPosNode {
-    fn box_clone(&self) -> Box<SceneNode> { Box::new(self.clone()) }
+    fn box_clone(&self) -> Box<dyn SceneNode> { Box::new(self.clone()) }
 
     fn begin(&mut self, theater: &mut Theater, _: bool) { self.skip(theater); }
 
@@ -747,7 +747,7 @@ impl SetSpriteNode {
 }
 
 impl SceneNode for SetSpriteNode {
-    fn box_clone(&self) -> Box<SceneNode> { Box::new(self.clone()) }
+    fn box_clone(&self) -> Box<dyn SceneNode> { Box::new(self.clone()) }
 
     fn begin(&mut self, theater: &mut Theater, _: bool) { self.skip(theater); }
 
@@ -768,7 +768,7 @@ impl ShakeNode {
 }
 
 impl SceneNode for ShakeNode {
-    fn box_clone(&self) -> Box<SceneNode> { Box::new(self.clone()) }
+    fn box_clone(&self) -> Box<dyn SceneNode> { Box::new(self.clone()) }
 
     fn begin(&mut self, theater: &mut Theater, _: bool) {
         theater.add_shake(self.amount);
@@ -805,7 +805,7 @@ impl SlideNode {
 }
 
 impl SceneNode for SlideNode {
-    fn box_clone(&self) -> Box<SceneNode> { Box::new(self.clone()) }
+    fn box_clone(&self) -> Box<dyn SceneNode> { Box::new(self.clone()) }
 
     fn status(&self) -> Status {
         if self.progress < self.duration {
@@ -871,7 +871,7 @@ impl SoundNode {
 }
 
 impl SceneNode for SoundNode {
-    fn box_clone(&self) -> Box<SceneNode> { Box::new(self.clone()) }
+    fn box_clone(&self) -> Box<dyn SceneNode> { Box::new(self.clone()) }
 
     fn begin(&mut self, theater: &mut Theater, _: bool) {
         theater.add_sound(self.sound.clone());
@@ -896,7 +896,7 @@ impl SwapNode {
 }
 
 impl SceneNode for SwapNode {
-    fn box_clone(&self) -> Box<SceneNode> { Box::new(self.clone()) }
+    fn box_clone(&self) -> Box<dyn SceneNode> { Box::new(self.clone()) }
 
     fn begin(&mut self, theater: &mut Theater, _: bool) { self.skip(theater); }
 
@@ -936,7 +936,7 @@ impl TalkNode {
 }
 
 impl SceneNode for TalkNode {
-    fn box_clone(&self) -> Box<SceneNode> { Box::new(self.clone()) }
+    fn box_clone(&self) -> Box<dyn SceneNode> { Box::new(self.clone()) }
 
     fn status(&self) -> Status { self.status }
 
@@ -997,7 +997,7 @@ impl WaitNode {
 }
 
 impl SceneNode for WaitNode {
-    fn box_clone(&self) -> Box<SceneNode> { Box::new(self.clone()) }
+    fn box_clone(&self) -> Box<dyn SceneNode> { Box::new(self.clone()) }
 
     fn status(&self) -> Status {
         if self.progress < self.duration {

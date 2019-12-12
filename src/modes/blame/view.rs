@@ -126,7 +126,7 @@ impl View {
         let original_pos_1 = state.get_position(row_1);
         let original_pos_2 = state.get_position(row_2);
         let original_mezure_row = state.get_mezure_row();
-        let mut top_seq: Vec<Box<SceneNode>> = Vec::new();
+        let mut top_seq: Vec<Box<dyn SceneNode>> = Vec::new();
 
         // Move platforms:
         let mut mezure_row = state.get_mezure_row();
@@ -139,9 +139,9 @@ impl View {
         let mut pos_1 = state.get_position(row_1);
         let mut pos_2 = state.get_position(row_2);
         while delta_1 != 0 || delta_2 != 0 {
-            let mut platform_1_seq: Vec<Box<SceneNode>> = Vec::new();
-            let mut platform_2_seq: Vec<Box<SceneNode>> = Vec::new();
-            let mut mezure_seq: Vec<Box<SceneNode>> = Vec::new();
+            let mut platform_1_seq: Vec<Box<dyn SceneNode>> = Vec::new();
+            let mut platform_2_seq: Vec<Box<dyn SceneNode>> = Vec::new();
+            let mut mezure_seq: Vec<Box<dyn SceneNode>> = Vec::new();
             if delta_1 < 0 && pos_1 == 0 || delta_1 > 0 && pos_1 == max_pos_1 {
                 delta_1 = -delta_1;
             }

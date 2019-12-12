@@ -166,7 +166,7 @@ impl Game {
         self.puzzle_state(location).has_been_solved()
     }
 
-    pub fn puzzle_state(&self, loc: Location) -> &PuzzleState {
+    pub fn puzzle_state(&self, loc: Location) -> &dyn PuzzleState {
         match loc {
             Location::Map => panic!("no PuzzleState for Map"),
             Location::Prolog => &self.prolog,
@@ -213,7 +213,7 @@ impl Game {
         }
     }
 
-    pub fn puzzle_state_mut(&mut self, loc: Location) -> &mut PuzzleState {
+    pub fn puzzle_state_mut(&mut self, loc: Location) -> &mut dyn PuzzleState {
         match loc {
             Location::Map => panic!("no PuzzleState for Map"),
             Location::Prolog => &mut self.prolog,

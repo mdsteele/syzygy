@@ -138,7 +138,7 @@ impl View {
         let max_pos = GearsState::max_position_for_row(row);
         let original_position = state.get_position(row);
         let original_ugrent_row = state.get_ugrent_row();
-        let mut top_seq: Vec<Box<SceneNode>> = Vec::new();
+        let mut top_seq: Vec<Box<dyn SceneNode>> = Vec::new();
 
         // Move platform:
         let mut ugrent_row = state.get_ugrent_row();
@@ -148,8 +148,8 @@ impl View {
         }
         let mut pos = state.get_position(row);
         while delta != 0 {
-            let mut platform_seq: Vec<Box<SceneNode>> = Vec::new();
-            let mut ugrent_seq: Vec<Box<SceneNode>> = Vec::new();
+            let mut platform_seq: Vec<Box<dyn SceneNode>> = Vec::new();
+            let mut ugrent_seq: Vec<Box<dyn SceneNode>> = Vec::new();
             let old_pos = pos;
             pos += delta;
             if pos < min_pos {

@@ -185,8 +185,8 @@ const INFO_BOX_TEXT: &str = "\
 Your goal is to transform the starting word into a new word.
 There is only one possible new word that can be formed.
 
-$M{Tap}{Click} on one of the six buttons at the top to transform the word.
-Each button performs a different transformation.
+$M{Tap}{Click} on one of the five buttons on the sides to transform the
+word.  Each button performs a different transformation.
 
 $M{Tap}{Click} on a character in the scene to hear their words of wisdom.";
 

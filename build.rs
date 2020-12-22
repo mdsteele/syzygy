@@ -17,7 +17,7 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-extern crate gcc;
+extern crate cc;
 extern crate glob;
 extern crate ico;
 extern crate winres;
@@ -31,14 +31,14 @@ use std::path::PathBuf;
 fn main() {
     let target = std::env::var("TARGET").unwrap();
     if target.ends_with("-apple-darwin") {
-        gcc::Build::new()
+        cc::Build::new()
             .file("src/gui/loader/path_mac.m")
             .compile("syzygysys");
         println!("cargo:rustc-link-search=framework=/Library/Frameworks");
         println!("cargo:rustc-link-lib=framework=Foundation");
         println!("cargo:rustc-env=MACOSX_DEPLOYMENT_TARGET=10.11");
     } else if target.ends_with("-linux-gnu") {
-        gcc::Build::new()
+        cc::Build::new()
             .file("src/gui/loader/path_linux.c")
             .compile("syzygysys");
     } else if target.contains("-pc-windows-") {

@@ -332,7 +332,7 @@ impl AudioCallback for SoundMixer {
             new_sounds.push(sound);
         }
         debug_assert!(self.active_sounds.is_empty());
-        mem::replace(&mut self.active_sounds, new_sounds);
+        self.active_sounds = new_sounds;
     }
 }
 

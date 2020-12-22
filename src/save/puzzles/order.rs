@@ -158,7 +158,7 @@ impl Tomlable for OrderState {
             let value = cmp::min(cmp::max(0, value) as usize, order.len() - 1);
             order[index] = value;
         }
-        for (index, value) in order.clone().into_iter().enumerate() {
+        for (index, value) in order.clone().iter().enumerate() {
             if order[..index].contains(value) {
                 order = *INITIAL_ORDER;
                 break;

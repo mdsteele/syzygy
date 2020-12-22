@@ -52,6 +52,5 @@ rand = "0.4"
 toml = "0.4"
 
 [dependencies.sdl2]
-git = "https://github.com/mdsteele/rust-sdl2"
-branch = "hash"
+version = "0.34"
 features = ["unsafe_textures", "use_mac_framework"]

@@ -121,21 +121,23 @@ impl KeyMod {
     fn from_sdl2(kmod: sdl2::keyboard::Mod) -> KeyMod {
         let mut result = KeyMod::none();
 
-        let sdl2_shift = sdl2::keyboard::LSHIFTMOD | sdl2::keyboard::RSHIFTMOD;
+        let sdl2_shift =
+            sdl2::keyboard::Mod::LSHIFTMOD | sdl2::keyboard::Mod::RSHIFTMOD;
         if kmod.intersects(sdl2_shift) {
             result |= KeyMod::shift();
         }
 
-        let sdl2_alt = sdl2::keyboard::LALTMOD | sdl2::keyboard::RALTMOD;
+        let sdl2_alt =
+            sdl2::keyboard::Mod::LALTMOD | sdl2::keyboard::Mod::RALTMOD;
         if kmod.intersects(sdl2_alt) {
             result |= KeyMod::alt();
         }
 
         let sdl2_command = if cfg!(any(target_os = "ios", target_os = "macos"))
         {
-            sdl2::keyboard::LGUIMOD | sdl2::keyboard::RGUIMOD
+            sdl2::keyboard::Mod::LGUIMOD | sdl2::keyboard::Mod::RGUIMOD
         } else {
-            sdl2::keyboard::LCTRLMOD | sdl2::keyboard::RCTRLMOD
+            sdl2::keyboard::Mod::LCTRLMOD | sdl2::keyboard::Mod::RCTRLMOD
         };
         if kmod.intersects(sdl2_command) {
             result |= KeyMod::command();
@@ -170,12 +172,12 @@ mod tests {
     #[test]
     fn keymod_from_sdl2() {
         assert_eq!(
-            KeyMod::from_sdl2(sdl2::keyboard::RSHIFTMOD),
+            KeyMod::from_sdl2(sdl2::keyboard::Mod::RSHIFTMOD),
             KeyMod::shift()
         );
         assert_eq!(
             KeyMod::from_sdl2(
-                sdl2::keyboard::LSHIFTMOD | sdl2::keyboard::RALTMOD
+                sdl2::keyboard::Mod::LSHIFTMOD | sdl2::keyboard::Mod::RALTMOD
             ),
             KeyMod::alt() | KeyMod::shift()
         );

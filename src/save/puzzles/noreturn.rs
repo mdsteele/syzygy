@@ -163,7 +163,7 @@ impl Tomlable for NoReturnState {
                 let value = cmp::min(value, order.len() - 1);
                 order[index] = value;
             }
-            for (index, value) in order.clone().into_iter().enumerate() {
+            for (index, value) in order.clone().iter().enumerate() {
                 if order[..index].contains(value) {
                     order = INITIAL_ORDER;
                     break;

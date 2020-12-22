@@ -51,9 +51,9 @@ impl AtticState {
         match pos {
             (1, 0) => self.is_toggled((1, 1)) ^ self.is_toggled((2, 1)),
             (2, 0) => {
-                (self.is_toggled((1, 1))
+                self.is_toggled((1, 1))
                     ^ self.is_toggled((2, 1))
-                    ^ self.is_toggled((3, 1)))
+                    ^ self.is_toggled((3, 1))
             }
             (3, 0) => true,
             (4, 0) => self.is_toggled((3, 1)) ^ self.is_toggled((4, 1)),

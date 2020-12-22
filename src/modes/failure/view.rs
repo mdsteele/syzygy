@@ -1191,8 +1191,7 @@ back into your supply.
 $M{Tap}{Click} on a character in the scene to hear their words of wisdom.";
 
 const INFO_BOX_TEXT_3: &str =
-    "\
-     $M{Tap}{Click} on a tile to get a password hint.";
+    "$M{Tap}{Click} on a tile to get a password hint.";
 
 // ========================================================================= //
 

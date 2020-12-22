@@ -801,7 +801,6 @@ $M{Tap}{Click} on a character in the scene to hear their
 words of wisdom.";
 
 const MEZURE_INFO_BOX_TEXT: &str =
-    "\
-     Your goal is to form the final, missing word.";
+    "Your goal is to form the final, missing word.";
 
 // ========================================================================= //

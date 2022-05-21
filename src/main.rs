@@ -17,15 +17,6 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-extern crate ahi;
-extern crate app_dirs;
-extern crate getopts;
-extern crate itersynth;
-extern crate num_integer;
-extern crate rand;
-extern crate sdl2;
-extern crate toml;
-
 mod elements;
 mod gui;
 mod modes;

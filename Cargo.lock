@@ -106,11 +106,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "itersynth"
-version = "0.1.0"
-source = "git+https://github.com/mdsteele/itersynth?tag=v0.1.0#bc1e3ffe726c80e3a931bf9e58f4a98f213c2bf5"
-
-[[package]]
 name = "lazy_static"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -260,7 +255,6 @@ dependencies = [
  "getopts",
  "glob",
  "ico",
- "itersynth",
  "num-integer",
  "rand",
  "sdl2",

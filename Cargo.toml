@@ -46,7 +46,6 @@ winres = "0.1.12"
 ahi = { git = "https://github.com/mdsteele/ahi", tag = "v0.1.0" }
 app_dirs = "1.2"
 getopts = "0.2"
-itersynth = { git = "https://github.com/mdsteele/itersynth", tag = "v0.1.0" }
 num-integer = "0.1"
 rand = "0.4"
 toml = "0.5"

@@ -23,6 +23,7 @@ mod canvas;
 mod element;
 mod event;
 mod font;
+mod itersynth;
 mod loader;
 mod resources;
 mod sound;

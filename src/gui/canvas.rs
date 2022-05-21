@@ -59,17 +59,21 @@ impl<'a> Canvas<'a> {
         Rect::new(0, 0, self.width(), self.height())
     }
 
+    fn clip_rect(&self) -> Rect {
+        self.clip_rect.unwrap_or_else(|| self.renderer.viewport())
+    }
+
+    fn clip_intersection(&self, rect: Rect) -> Rect {
+        if let Some(intersection) = self.clip_rect().intersection(rect) {
+            intersection
+        } else {
+            Rect::new(0, 0, 0, 0)
+        }
+    }
+
     pub fn subcanvas(&mut self, mut rect: Rect) -> Canvas {
         rect.offset(self.offset_rect.x(), self.offset_rect.y());
-        let new_clip_rect = if let Some(clip) = self.clip_rect {
-            if let Some(intersection) = clip.intersection(rect) {
-                Some(intersection)
-            } else {
-                Some(Rect::new(0, 0, 0, 0))
-            }
-        } else {
-            Some(rect)
-        };
+        let new_clip_rect = Some(self.clip_intersection(rect));
         self.renderer.set_clip_rect(new_clip_rect);
         Canvas {
             renderer: self.renderer,
@@ -81,15 +85,7 @@ impl<'a> Canvas<'a> {
 
     pub fn clipped(&mut self, mut rect: Rect) -> Canvas {
         rect.offset(self.offset_rect.x(), self.offset_rect.y());
-        let new_clip_rect = if let Some(clip) = self.clip_rect {
-            if let Some(intersection) = clip.intersection(rect) {
-                Some(intersection)
-            } else {
-                Some(Rect::new(0, 0, 0, 0))
-            }
-        } else {
-            Some(rect)
-        };
+        let new_clip_rect = Some(self.clip_intersection(rect));
         self.renderer.set_clip_rect(new_clip_rect);
         Canvas {
             renderer: self.renderer,

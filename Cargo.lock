@@ -11,7 +11,6 @@ checksum = "aae1277d39aeec15cb388266ecc24b11c80469deae6067e17a1a7aa9e5c1f234"
 [[package]]
 name = "ahi"
 version = "0.1.0"
-source = "git+https://github.com/mdsteele/ahi?tag=v0.1.0#8dfd2b39ba35d77a3260d95d53369c149e875ecf"
 
 [[package]]
 name = "app_dirs"

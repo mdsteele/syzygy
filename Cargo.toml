@@ -43,7 +43,7 @@ ico = "0.1"
 winres = "0.1.12"
 
 [dependencies]
-ahi = { git = "https://github.com/mdsteele/ahi", tag = "v0.1.0" }
+ahi = { path = "ahi" }
 app_dirs = "1.2"
 getopts = "0.2"
 num-integer = "0.1"

@@ -296,29 +296,29 @@ impl Image {
 
     /// Reads a group of images from an AHI file.
     pub fn read_all<R: Read>(mut reader: R) -> io::Result<Vec<Image>> {
-        try!(read_exactly(reader.by_ref(), b"ahi"));
-        let version = try!(read_header_uint(reader.by_ref(), b' '));
+        read_exactly(reader.by_ref(), b"ahi")?;
+        let version = read_header_uint(reader.by_ref(), b' ')?;
         if version != 0 {
             let msg = format!("unsupported AHI version: {}", version);
             return Err(Error::new(ErrorKind::InvalidData, msg));
         }
-        try!(read_exactly(reader.by_ref(), b"w"));
-        let width = try!(read_header_uint(reader.by_ref(), b' '));
-        try!(read_exactly(reader.by_ref(), b"h"));
-        let height = try!(read_header_uint(reader.by_ref(), b' '));
-        try!(read_exactly(reader.by_ref(), b"n"));
-        let num_images = try!(read_header_uint(reader.by_ref(), b'\n'));
+        read_exactly(reader.by_ref(), b"w")?;
+        let width = read_header_uint(reader.by_ref(), b' ')?;
+        read_exactly(reader.by_ref(), b"h")?;
+        let height = read_header_uint(reader.by_ref(), b' ')?;
+        read_exactly(reader.by_ref(), b"n")?;
+        let num_images = read_header_uint(reader.by_ref(), b'\n')?;
         let mut images = Vec::with_capacity(num_images as usize);
         let mut row_buffer = vec![0u8; width as usize];
         for _ in 0..num_images {
-            try!(read_exactly(reader.by_ref(), b"\n"));
+            read_exactly(reader.by_ref(), b"\n")?;
             let mut pixels = Vec::with_capacity((width * height) as usize);
             for _ in 0..height {
-                try!(reader.read_exact(&mut row_buffer));
+                reader.read_exact(&mut row_buffer)?;
                 for &byte in &row_buffer {
-                    pixels.push(try!(Color::from_byte(byte)));
+                    pixels.push(Color::from_byte(byte)?);
                 }
-                try!(read_exactly(reader.by_ref(), b"\n"));
+                read_exactly(reader.by_ref(), b"\n")?;
             }
             images.push(Image {
                 width: width,
@@ -339,11 +339,7 @@ impl Image {
         } else {
             (images[0].width, images[0].height)
         };
-        try!(write!(writer,
-                    "ahi0 w{} h{} n{}\n",
-                    width,
-                    height,
-                    images.len()));
+        write!(writer, "ahi0 w{} h{} n{}\n", width, height, images.len())?;
         for image in images {
             if image.width != width || image.height != height {
                 let msg = format!("images must all have the same dimensions \
@@ -354,13 +350,13 @@ impl Image {
                                   height);
                 return Err(Error::new(ErrorKind::InvalidInput, msg));
             }
-            try!(write!(writer, "\n"));
+            write!(writer, "\n")?;
             for row in 0..height {
                 for col in 0..width {
                     let color = image.pixels[(row * width + col) as usize];
-                    try!(writer.write_all(&[color.to_byte()]));
+                    writer.write_all(&[color.to_byte()])?;
                 }
-                try!(write!(writer, "\n"));
+                write!(writer, "\n")?;
             }
         }
         Ok(())
@@ -668,28 +664,28 @@ impl Font {
 
     /// Reads a font from an AHF file.
     pub fn read<R: Read>(mut reader: R) -> io::Result<Font> {
-        try!(read_exactly(reader.by_ref(), b"ahf"));
-        let version = try!(read_header_uint(reader.by_ref(), b' '));
+        read_exactly(reader.by_ref(), b"ahf")?;
+        let version = read_header_uint(reader.by_ref(), b' ')?;
         if version != 0 {
             let msg = format!("unsupported AHF version: {}", version);
             return Err(Error::new(ErrorKind::InvalidData, msg));
         }
-        try!(read_exactly(reader.by_ref(), b"h"));
-        let height = try!(read_header_uint(reader.by_ref(), b' '));
-        try!(read_exactly(reader.by_ref(), b"b"));
-        let baseline = try!(read_header_int(reader.by_ref(), b' '));
-        try!(read_exactly(reader.by_ref(), b"n"));
-        let num_glyphs = try!(read_header_uint(reader.by_ref(), b'\n'));
+        read_exactly(reader.by_ref(), b"h")?;
+        let height = read_header_uint(reader.by_ref(), b' ')?;
+        read_exactly(reader.by_ref(), b"b")?;
+        let baseline = read_header_int(reader.by_ref(), b' ')?;
+        read_exactly(reader.by_ref(), b"n")?;
+        let num_glyphs = read_header_uint(reader.by_ref(), b'\n')?;
 
-        try!(read_exactly(reader.by_ref(), b"\ndef "));
-        let default_glyph = try!(Font::read_glyph(reader.by_ref(), height));
+        read_exactly(reader.by_ref(), b"\ndef ")?;
+        let default_glyph = Font::read_glyph(reader.by_ref(), height)?;
 
         let mut glyphs = BTreeMap::new();
         for _ in 0..num_glyphs {
-            try!(read_exactly(reader.by_ref(), b"\n'"));
-            let chr = try!(read_char_escape(reader.by_ref()));
-            try!(read_exactly(reader.by_ref(), b"' "));
-            let glyph = try!(Font::read_glyph(reader.by_ref(), height));
+            read_exactly(reader.by_ref(), b"\n'")?;
+            let chr = read_char_escape(reader.by_ref())?;
+            read_exactly(reader.by_ref(), b"' ")?;
+            let glyph = Font::read_glyph(reader.by_ref(), height)?;
             glyphs.insert(chr, Rc::new(glyph));
         }
         Ok(Font {
@@ -700,20 +696,20 @@ impl Font {
     }
 
     fn read_glyph<R: Read>(mut reader: R, height: u32) -> io::Result<Glyph> {
-        try!(read_exactly(reader.by_ref(), b"w"));
-        let width = try!(read_header_uint(reader.by_ref(), b' '));
-        try!(read_exactly(reader.by_ref(), b"l"));
-        let left = try!(read_header_int(reader.by_ref(), b' '));
-        try!(read_exactly(reader.by_ref(), b"r"));
-        let right = try!(read_header_int(reader.by_ref(), b'\n'));
+        read_exactly(reader.by_ref(), b"w")?;
+        let width = read_header_uint(reader.by_ref(), b' ')?;
+        read_exactly(reader.by_ref(), b"l")?;
+        let left = read_header_int(reader.by_ref(), b' ')?;
+        read_exactly(reader.by_ref(), b"r")?;
+        let right = read_header_int(reader.by_ref(), b'\n')?;
         let mut row_buffer = vec![0u8; width as usize];
         let mut pixels = Vec::with_capacity((width * height) as usize);
         for _ in 0..height {
-            try!(reader.read_exact(&mut row_buffer));
+            reader.read_exact(&mut row_buffer)?;
             for &byte in &row_buffer {
-                pixels.push(try!(Color::from_byte(byte)));
+                pixels.push(Color::from_byte(byte)?);
             }
-            try!(read_exactly(reader.by_ref(), b"\n"));
+            read_exactly(reader.by_ref(), b"\n")?;
         }
         let image = Image {
             width: width,
@@ -730,17 +726,17 @@ impl Font {
     /// Writes the font to an AHF file.
     pub fn write<W: Write>(&self, mut writer: W) -> io::Result<()> {
         let height = self.glyph_height();
-        try!(write!(writer,
-                    "ahf0 h{} b{} n{}\n",
-                    height,
-                    self.baseline(),
-                    self.glyphs.len()));
-        try!(write!(writer, "\ndef "));
-        try!(Font::write_glyph(writer.by_ref(), &self.default_glyph));
+        write!(writer,
+               "ahf0 h{} b{} n{}\n",
+               height,
+               self.baseline(),
+               self.glyphs.len())?;
+        write!(writer, "\ndef ")?;
+        Font::write_glyph(writer.by_ref(), &self.default_glyph)?;
         for (chr, glyph) in self.glyphs.iter() {
             let escaped: String = chr.escape_default().collect();
-            try!(write!(writer, "\n'{}' ", escaped));
-            try!(Font::write_glyph(writer.by_ref(), glyph));
+            write!(writer, "\n'{}' ", escaped)?;
+            Font::write_glyph(writer.by_ref(), glyph)?;
         }
         Ok(())
     }
@@ -749,17 +745,17 @@ impl Font {
         let image = glyph.image();
         let width = image.width();
         let height = image.height();
-        try!(write!(writer,
-                    "w{} l{} r{}\n",
-                    width,
-                    glyph.left_edge(),
-                    glyph.right_edge()));
+        write!(writer,
+               "w{} l{} r{}\n",
+               width,
+               glyph.left_edge(),
+               glyph.right_edge())?;
         for row in 0..height {
             for col in 0..width {
                 let color = image[(col, row)];
-                try!(writer.write_all(&[color.to_byte()]));
+                writer.write_all(&[color.to_byte()])?;
             }
-            try!(write!(writer, "\n"));
+            write!(writer, "\n")?;
         }
         Ok(())
     }
@@ -810,7 +806,7 @@ impl<'a> ExactSizeIterator for Chars<'a> {
 
 fn read_exactly<R: Read>(mut reader: R, expected: &[u8]) -> io::Result<()> {
     let mut actual = vec![0u8; expected.len()];
-    try!(reader.read_exact(&mut actual));
+    reader.read_exact(&mut actual)?;
     if &actual as &[u8] != expected {
         let msg = format!("expected '{}', found '{}'",
                           String::from_utf8_lossy(expected),
@@ -823,10 +819,10 @@ fn read_exactly<R: Read>(mut reader: R, expected: &[u8]) -> io::Result<()> {
 
 fn read_char_escape<R: Read>(mut reader: R) -> io::Result<char> {
     let mut buffer = vec![0u8];
-    try!(reader.read_exact(&mut buffer));
+    reader.read_exact(&mut buffer)?;
     let byte = buffer[0];
     if byte == b'\\' {
-        try!(reader.read_exact(&mut buffer));
+        reader.read_exact(&mut buffer)?;
         let esc = buffer[0];
         if esc == b'\\' {
             Ok('\\')
@@ -841,8 +837,8 @@ fn read_char_escape<R: Read>(mut reader: R) -> io::Result<char> {
         } else if esc == b't' {
             Ok('\t')
         } else if esc == b'u' {
-            try!(read_exactly(reader.by_ref(), b"{"));
-            let value = try!(read_hex_u32(reader.by_ref(), b'}'));
+            read_exactly(reader.by_ref(), b"{")?;
+            let value = read_hex_u32(reader.by_ref(), b'}')?;
             std::char::from_u32(value).ok_or_else(|| {
                 let msg = format!("invalid unicode value: {}", value);
                 Error::new(ErrorKind::InvalidData, msg)
@@ -866,7 +862,7 @@ fn read_header_int<R: Read>(reader: R, terminator: u8) -> io::Result<i32> {
     let mut any_digits = false;
     let mut value: i32 = 0;
     for next in reader.bytes() {
-        let byte = try!(next);
+        let byte = next?;
         if byte == terminator {
             if !any_digits {
                 let msg = "missing integer field in header";
@@ -899,7 +895,7 @@ fn read_header_int<R: Read>(reader: R, terminator: u8) -> io::Result<i32> {
 }
 
 fn read_header_uint<R: Read>(reader: R, terminator: u8) -> io::Result<u32> {
-    let value = try!(read_header_int(reader, terminator));
+    let value = read_header_int(reader, terminator)?;
     if value < 0 {
         let msg = format!("value must be nonnegative (was {})", value);
         return Err(Error::new(ErrorKind::InvalidData, msg));
@@ -911,7 +907,7 @@ fn read_hex_u32<R: Read>(reader: R, terminator: u8) -> io::Result<u32> {
     let mut any_digits = false;
     let mut value: u32 = 0;
     for next in reader.bytes() {
-        let byte = try!(next);
+        let byte = next?;
         if byte == terminator {
             if !any_digits {
                 let msg = "missing hex literal";

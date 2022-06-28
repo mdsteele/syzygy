@@ -17,16 +17,16 @@
 // | with System Syzygy.  If not, see <http://www.gnu.org/licenses/>.         |
 // +--------------------------------------------------------------------------+
 
-#[cfg(not(windows))]
+#[cfg(not(any(windows, feature = "embed_rsrc")))]
 mod directory;
-#[cfg(windows)]
+#[cfg(any(windows, feature = "embed_rsrc"))]
 mod embedded;
-#[cfg(not(windows))]
+#[cfg(not(any(windows, feature = "embed_rsrc")))]
 mod path;
 
-#[cfg(not(windows))]
+#[cfg(not(any(windows, feature = "embed_rsrc")))]
 pub use self::directory::{ResourceFile, ResourceLoader};
-#[cfg(windows)]
+#[cfg(any(windows, feature = "embed_rsrc"))]
 pub use self::embedded::{ResourceFile, ResourceLoader};
 
 // ========================================================================= //

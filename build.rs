@@ -54,6 +54,9 @@ fn main() {
             target
         );
     }
+    if std::env::var("CARGO_FEATURE_EMBED_RSRC").is_ok() {
+        generate_rsrc_data_file().unwrap();
+    }
 }
 
 // ========================================================================= //

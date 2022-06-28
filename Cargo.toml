@@ -53,3 +53,6 @@ toml = "0.5"
 [dependencies.sdl2]
 version = "0.35"
 features = ["unsafe_textures", "use_mac_framework"]
+
+[features]
+embed_rsrc = []  # If enabled, resource files are embedded in the binary.
